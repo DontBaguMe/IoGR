@@ -1,2 +1,5 @@
 
 *.smc
+bin/incamap.bin
+bin/incamapcomp.bin
+*.sfc
