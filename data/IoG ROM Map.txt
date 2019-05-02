@@ -1,0 +1,976 @@
+     0 to   1BFF = Uncompressed graphics (Items, Numbers)
+  1C00 to   1DFF = *** UNKNOWN - See C3/80D7 ***
+  1E00 to   237F = Uncompressed arrangement data for the dungeon pause screen
+  2380 to   2F39 = *** UNKNOWN - Compressed, whatever it is ***
+  2F3A to   4A32 = Compressed sprite graphics (South Cape)
+  4A33 to   6520 = Compressed map graphics (House Interior)
+  6521 to   7FFB = Compressed map graphics (Freejia)
+  7FFC to   7FFF = Unused
+
+********************************************************************************
+*
+*   8000 to   F48E = Event data
+*
+*             8585 = 
+*             8600 = SOMETHING IMPORTANT (diamond chest)
+*
+*             C66F = Event: Find Red Jewel
+*                  - Item code contained at #$00C68F
+*                  - Text code from #$00C6AC to #$00C6BD (18)
+*
+*   CAE1 to   CD49+= World map from-to scripts (27 data sets)
+
+*   F48F to   FFAF = Unused
+*
+********************************************************************************
+
+  FFB0 to   FFFF = Internal header
+ 10000 to  11AE9 = Compressed map graphics (World Map)
+ 11AEA to  13599 = Compressed map graphics (Seaside Palace Fountain)
+ 1359A to  1500D = Compressed map graphics (House Interior)
+ 1500E to  16A80 = Compressed map graphics
+ 16A81 to  17FBD = Compressed sprite graphics (enemies)
+ 17FBE to  17FFD = Map palettes (2 palettes) (Title Screen)
+ 17FFE to  17FFF = Unused
+
+ 18000 to  1805D = Screen setting table (47 data sets)
+ 1805E to  18233 = Screen settings data
+ 18234 to  18431 = Map exit pointers (1 pointer for each map)
+ 18432 to  1A95D = Map exits
+ 1A95E to  1A97D = *** UNKNOWN - Pointers to following data *** (16 data sets)
+ 1A97E to  1AADD = *** UNKNOWN - Data ***
+
+********************************************************************************
+*
+*  1AADE to  1ABDD = Room-clearing reward table
+*  1ABF0 to  1ADA7 = Enemy template data
+*
+********************************************************************************
+* 
+*  1ADA8 to  1AFA5 = Chest content index by map ID (255 maps)
+*                  - Read at C3/8283, C3/82A5, C3/82C1
+* 
+********************************************************************************
+*
+*  1AFA6 to  1B085 = Chest content data (36 data sets)
+*
+********************************************************************************
+
+ 1B086 to  1B12F = Move pattern pointer table (85 data sets) (Move patterns)
+ 1B130 to  ????? = Move patterns
+
+ 1C455 to  1C594 = 8-bit trigonometry table
+ 1C595 to  1CA94 = *** UNKNOWN - A mathematical table? 16-bit trigonometry, maybe? ***
+
+ 1CA95 to  1CAC0 = Text profile pointers ** read at C3/E348 ***
+ 1CAC1 to  1CBA5 = Text profiles
+
+ 1CBA6 to  1CBFF = *** UNKNOWN - Long pointers to music. Used for/by what? ***
+
+ 1CC00 to  1CC49 = Pointers to following data
+ 1CC4A to  1D3CE = Screen setting ID1, used by School, etc.
+
+ 1CCB9 to  1CD0B = Item menu background cloud speed
+
+ 1D3CF to  1DABE = *** UNKNOWN ***
+
+********************************************************************************
+* 
+*  1DA4C to  1DABE = Title screen text data
+*  1DABF to  1DB3E = Two-line item name pointers
+*  1DB3F to  1DE1D = Two-line item names (status screen)
+*  1DE1E to  1DE9D = One-line item name pointers
+*  1DE9E to  1E129 = One-line item names (inventory screen)
+*  1E12A to  1E131 = Item removal restriction flags
+*  1E132 to  1E183 = Item description pointers
+*  1E184 to  1E5EB = Item descriptions
+*  1E5EC to  1E5ED = *** UNKNOWN ***
+*  1E5EE to  1E603 = One-line move name pointers
+*  1E604 to  1E65C = One-line move names
+*  1E65D to  1E65E = *** UNKNOWN ***
+*  1E65F to  1E674 = Two-line move name pointers
+*  1E675 to  1E6DB = Two-line move names
+*  1E6DC to  1E6DD = *** UNKNOWN ***
+*  1E6DE to  1E6F5 = Move description pointers
+*  1E6F6 to  1E7CD = Move descriptions
+*  1E7CE to  1E7D5 = Body style pointers
+*  1E7D6 to  1E7F5 = Body styles
+*  1E7F6 to  1EB0E = *** UNKNOWN ***
+* 
+********************************************************************************
+* 
+*  1EACB to  1EAD5 = Pause screen text (max 10 character length)
+*  1EB0F to  1EB2C = [10 ##] text compression dictionary (for inventory text) pointers
+*  1EB2D to  1EBA7 = [10 ##] text compression dictionary (for inventory text)
+*  1EBA8 to  1EDA7 = [D6 ##] text compression dictionary (for dialogue) pointers
+*  1EDA8 to  1F54C = [D6 ##] text compression dictionary (for dialogue)
+*  1F54D to  1F6DC = [D7 ##] text compression dictionary (for dialogue) pointers
+*  1F6DD to  1FD23 = [D7 ##] text compression dictionary (for dialogue)
+*  1FD24 to  1FDA3 = Item acquisition message pointers
+*  1FDA4 to  1FF01 = Item acquisition messages
+*  1FF02 to  1FF6B = *** UNKNOWN ***
+*  1FF6C to  1FFFF = Unused
+* 
+********************************************************************************
+
+ 20000 to  21A1F = Compressed map graphics (Dao)
+ 21A20 to  233BB = Compressed map graphics (House interior)
+ 233BC to  24D22 = Compressed map graphics (Inca Ruins)
+ 24D23 to  26685 = Compressed map graphics (Inca Ruins)
+ 26686 to  27FB0 = Compressed map graphics (Dark Space)
+ 27FB1 to  27FF9 = Compressed map arrangement data
+ 27FFA to  27FFF = Unused
+
+ 28000 to  282F5 = *** UNKNOWN - Assembly ***
+ 28000 to  282F5 = General multiplication routine
+ 2830D to  2920F = *** UNKNOWN - Assembly ***
+ 29210 to  29DE1 = SPC700 program
+
+ 2C38C           = Player event
+ 2C449 to  2C47E = Address table
+ 2C47F           = Set hero graphics (Will) - wind or no wind
+
+ 2F08C to  2FFFF = Unused
+ 30000 to  31909 = Compressed map graphics (Neil's Cottage)
+ 3190A to  331E0 = Compressed map graphics (Inca Ruins)
+ 331E1 to  34AB7 = Compressed sprite data (Mummy Queen)
+ 34AB8 to  3638A = Compressed sprite graphics (Euro NPCs)
+ 3638B to  37C5C = Compressed sprite graphics (Will/Kara ending sequence)
+ 37C5D to  37FF0 = Compressed map arrangement data
+ 37FF1 to  37FFF = Unused
+
+********************************************************************************
+* 
+*  3843F to  38490 = Item Events Address Table (38 data sets)
+*  38491 to  384BE = ??
+*  384BF to  39FB1 = Item Events
+* 
+********************************************************************************
+* 
+*  3AD77 to  3ACD2 = Overworld movement script pointers (37 data sets)
+*  3ADC3 to  3B1D3 = Overworld movement scripts
+*  3B1D5 to  3B243 = World map display names address table (37 data sets)
+*  3B244 to  3B400 = World map display names data
+*  3B401 to  3B44E = World map events address table (39 Data Sets)
+*  3B44F to  3F201 = World map events
+*  3F202 to  3FFFF = Unused
+* 
+*  3B955 to  3BAE0 = Overworld movement data
+* 
+********************************************************************************
+
+
+ 40000 to  418CB = Compressed map graphics (House interior)
+ 418CC to  43190 = Compressed map graphics (Intro - World Map)
+ 43191 to  44A38 = Compressed sprite graphics
+ 44A39 to  46282 = Compressed sprite graphics (Dao NPCs)
+ 46283 to  47AC6 = Compressed map graphics
+ 47AC7 to  47FF6 = Compressed map arrangement data
+ 47FF7 to  47FFF = Unused
+
+********************************************************************************
+* 
+*  48000 to  49FFF = Event data section (valid data until 0x4FB3E, rest is unused)
+* 
+*  4836F to  48493 = Event: Get fisherman red jewel
+*            4846A - Item Code
+*  4847F to  48492 - Text(20) "You've Found a Red Jewel!"
+* 
+* 
+*  48531 to  48653?= Guard release from South Cape
+*            48540 - Checks for this item
+*            48586 - Checks for this item
+*            48592 - Checks for this item
+* 
+*  4D0D3           = Event: Get Meat cutscene
+* 
+********************************************************************************
+
+ 50000 to  5065E = Sound sample 00 (16-bit length value and BRR data)
+ 5065F to  506C3 = Sound sample 01 (16-bit length value and BRR data)
+ 506C4 to  510A6 = Sound sample 02 (16-bit length value and BRR data)
+ 510A7 to  510F9 = Sound sample 03 (16-bit length value and BRR data)
+ 510FA to  51449 = Sound sample 04 (16-bit length value and BRR data)
+ 5144A to  51679 = Sound sample 05 (16-bit length value and BRR data)
+ 5167A to  51B0D = Sound sample 06 (16-bit length value and BRR data)
+ 51B0E to  51B72 = Sound sample 07 (16-bit length value and BRR data)
+ 51B73 to  520F9 = Sound sample 08 (16-bit length value and BRR data)
+ 520FA to  52680 = Sound sample 09 (16-bit length value and BRR data)
+ 52681 to  53453 = Sound sample 0A (16-bit length value and BRR data)
+ 53454 to  53470 = Sound sample 0B (16-bit length value and BRR data)
+ 53471 to  53577 = Sound sample 0C (16-bit length value and BRR data)
+ 53578 to  53AFE = Sound sample 0D (16-bit length value and BRR data)
+ 53AFF to  54DEA = Sound sample 0E (16-bit length value and BRR data)
+ 54DEB to  567A8 = Sound sample 0F (16-bit length value and BRR data)
+ 567A9 to  56D53 = Sound sample 10 (16-bit length value and BRR data)
+ 56D54 to  57013 = Sound sample 11 (16-bit length value and BRR data)
+ 57014 to  573F3 = Sound sample 12 (16-bit length value and BRR data)
+ 573F4 to  57FFF = Sound sample 13 (16-bit length value and BRR data) (Split sample: latter half at 60000)
+
+********************************************************************************
+* 
+*  58000 to  5FFFF = Event data section (valid data until 0x5FED1, rest is unused)
+* 
+********************************************************************************
+
+ 60000 to  607C0 = Sound sample 13 (16-bit length value and BRR data) (Split sample: former half at 573F4)
+ 607C1 to  60FC6 = Sound sample 14 (16-bit length value and BRR data)
+ 60FC7 to  61AFF = Sound sample 15 (16-bit length value and BRR data)
+ 61B00 to  622B4 = Sound sample 16 (16-bit length value and BRR data)
+ 622B5 to  62A69 = Sound sample 17 (16-bit length value and BRR data)
+ 62A6A to  631B2 = Sound sample 18 (16-bit length value and BRR data)
+ 631B3 to  638FB = Sound sample 19 (16-bit length value and BRR data)
+ 638FC to  64D19 = Sound sample 1A (16-bit length value and BRR data)
+ 64D1A to  65189 = Sound sample 1B (16-bit length value and BRR data)
+ 6518A to  6622C = Sound sample 1C (16-bit length value and BRR data)
+ 6622D to  67827 = Sound sample 1D (16-bit length value and BRR data)
+ 67828 to  67FAF = Sound sample 1E (16-bit length value and BRR data)
+ 67FB0 to  67FFF = Sound sample 1F (16-bit length value and BRR data) (Split sample: latter half at 70000)
+
+********************************************************************************
+* 
+*  68000 to  6FFFF = Event data section (valid data until 0x6DCD7, rest is unused)
+* 
+********************************************************************************
+
+ 70000 to  705C6 = Sound sample 1F (16-bit length value and BRR data) (Split sample: former half at 67FB0)
+ 705C7 to  7245E = Sound sample 20 (16-bit length value and BRR data)
+ 7245F to  728AA = Sound sample 21 (16-bit length value and BRR data)
+ 728AB to  72D8F = Sound sample 22 (16-bit length value and BRR data)
+ 72D90 to  731C0 = Sound sample 23 (16-bit length value and BRR data)
+ 731C1 to  73ED6 = Sound sample 24 (16-bit length value and BRR data)
+ 73ED7 to  742E3 = Sound sample 25 (16-bit length value and BRR data)
+ 742E4 to  74DE6 = Sound sample 26 (16-bit length value and BRR data)
+ 74DE7 to  77CA1 = Sound sample 27 (16-bit length value and BRR data)
+ 77CA2 to  77FFF = Sound sample 28 (16-bit length value and BRR data) (Split sample: latter half at 80000)
+
+********************************************************************************
+* 
+*  78000 to  7FFFF = Event data section (valid data until 0x7E926, rest is unused)
+* 
+********************************************************************************
+
+ 80000 to  805FD = Sound sample 28 (16-bit length value and BRR data) (Split sample: former half at 77CA2)
+ 805FE to  80A64 = Sound sample 29 (16-bit length value and BRR data)
+ 80A65 to  81837 = Sound sample 2A (16-bit length value and BRR data)
+ 81838 to  81CD4 = Sound sample 2B (16-bit length value and BRR data)
+ 81CD5 to  82AE6 = Sound sample 2C (16-bit length value and BRR data)
+ 82AE7 to  84BE2 = Sound sample 2D (16-bit length value and BRR data)
+ 84BE3 to  85C85 = Sound sample 2E (16-bit length value and BRR data)
+ 85C86 to  87280 = Sound sample 2F (16-bit length value and BRR data)
+ 87281 to  87FFF = Sound sample 30 (16-bit length value and BRR data) (Split sample: latter half at 90000)
+
+********************************************************************************
+* 
+*  88000 to  8FFFF = Event data section (valid data until 0x8FD15, rest is unused)
+* 
+*  8DDED = dark space text "Record..."
+* 
+********************************************************************************
+
+ 90000 to  9137C = Sound sample 30 (16-bit length value and BRR data) (Split sample: former half at 87281)
+ 9137D to  9175C = Sound sample 31 (16-bit length value and BRR data)
+ 9175D to  91D73 = Sound sample 32 (16-bit length value and BRR data)
+ 91D74 to  924FB = Sound sample 33 (16-bit length value and BRR data)
+ 924FC to  9292C = Sound sample 34 (16-bit length value and BRR data)
+ 9292D to  947C4 = Sound sample 35 (16-bit length value and BRR data)
+ 947C5 to  94C34 = Sound sample 36 (16-bit length value and BRR data)
+ 94C35 to  951DF = Sound sample 37 (16-bit length value and BRR data)
+ 951E0 to  9656D = Sound sample 38 (16-bit length value and BRR data)
+ 9656E to  967DC = Sound sample 39 (16-bit length value and BRR data)
+ 967DD to  96D63 = Sound sample 3A (16-bit length value and BRR data)
+ 96D64 to  9774F = Sound sample 3B (16-bit length value and BRR data)
+ 97750 to  97FFE = Compressed map arrangement data
+           97FFF = Unused
+
+********************************************************************************
+* 
+*  98000 to  9FFFF = Event data section (valid data until 0x9F6A5, rest is unused)
+* 
+********************************************************************************
+
+ A0000 to  A1835 = Compressed map graphics
+ A1836 to  A3061 = Compressed sprite graphics (Angel Village)
+ A3062 to  A4876 = Compressed graphics (Intro)
+ A4877 to  A608A = Compressed map graphics (South Cape)
+ A608B to  A789E = Compressed sprite graphics (Watermia)
+ A789F to  A7FFE = Compressed map arrangement data
+           A7FFF = Unused
+
+********************************************************************************
+* 
+*  A8000 to  AFFFF = Event data section (event data until AFD86, rest is unused)
+* 
+********************************************************************************
+
+ AFD87 to  AFFFF = Unused
+ B0000 to  B180C = Compressed sprite graphics (Jackal)
+ B180D to  B2FBD = Compressed sprite graphics (Enemies)
+ B2FBE to  B472A = Compressed sprite data (Diamond Mine)
+ B472B to  B5E8D = Compressed map graphics (Itory background)
+ B5E8E to  B75D8 = Compressed sprite data (Solid Arm)
+ B75D9 to  B7FF3 = Compressed sprite data (Neil's Cottage/Main Characters)
+ B7FF4 to  B7FFF = Unused
+
+********************************************************************************
+* 
+*  B8000 to  BFFFF = Event data section (valid data until 0xBFA73, rest is unused)
+* 
+********************************************************************************
+
+ BFA74 to  BFFFF = Unused
+ C0000 to  C1733 = Music - Threat of Dark Gaia
+ C1734 to  C2E2C = Compressed sprite graphics (Enemies - Castoth)
+ C2E2D to  C4523 = Compressed sprite graphics (Enemies)
+ C4524 to  C5C15 = Compressed sprite data (Inca Ruins)
+ C5C16 to  C7307 = Compressed sprite graphics (Enemies)
+ C7308 to  C7FFF = Compressed sprite data (Ankor Wat)
+
+********************************************************************************
+* 
+*  C8000 to  C81FF = Event Data Set Table
+*  C8200 to  CE5E4 = Event Data Sets, format is: 7*n bytes + [FF] + map name string + [CA]
+*  CE5E5 to  CE7E4 = Map Graphic Effects Table (1 Pointer for each Map)
+*  CE7E5 to  C---- = Map Graphic Effect Data
+* 
+********************************************************************************
+
+
+
+********************************************************************************
+* END OF USEFUL STUFF
+********************************************************************************
+
+
+
+ D0000 to  D16E6 = Compressed sprite graphics (Various NPCs)
+ D16E7 to  D2D77 = Compressed cutscene graphics (?)
+ D2D78 to  D43C3 = Compressed sprite graphics (Dark Gaia)
+ D43C4 to  D59EB = Compressed map graphics (Raft)
+ D59EC to  D7006 = Compressed sprite graphics (Enemies - Edward's Prison)
+ D7007 to  D7D6A = Music - Unexplored Temple
+ D7D6B to  D7FEC = Compressed map arrangement data
+ D7FED to  D7FFF = Unused
+ D8000 to  DAFFE = Map data set table
+ DAFFF to  DF000 = Uncompressed sprite graphics (Items)
+ DF001 to  DFF8A = Compressed map graphics (School in ending sequence)
+ DFF8B to  DFFFF = Compressed map arrangement data
+ E0000 to  E15E9 = Compressed sprite graphics
+ E15EA to  E2B79 = Compressed sprite  graphics (Ankor Wat enemies)
+ E2B7A to  E4105 = Compressed map graphics
+ E4106 to  E5686 = Compressed sprite graphics
+ E5687 to  E6BAA = Compressed sprite graphics
+ E6BAB to  E7FFB = Compressed map graphics (Future City)
+ E7FFC to  E7FFF = Unused
+ E8000 to  E8097 = Sprite Pointer Table (Freedan)
+ E8098           = Sprite Frame Pointers (Freedan)
+                 = Sprite Frame Data (Freedan)
+ ECADB to  ED9A5 = Compressed sprite data (Viper)
+ ED9A6 to  ED9FF = Compressed map arrangement data
+ EDA00 to  EDA15 = Sprite Pointer Table (?)
+ EDA16           = Sprite Frame Pointers (?)
+                 = Sprite Frame Data (?)
+ EDD40 to  EDFFB = Compressed map arrangement data
+ EDFFC to  EDFFF = Unused
+ EE000 to  EE07D = Sprite Pointer Table (?) SP2
+ EE07E           = Sprite Frame Pointers (?) SP2
+                 = Sprite Frame Data (?)
+ EFDCF to  EFFF8 = Compressed map arrangement data
+ EFFF9 to  EFFFF = Unused
+ F0000 to  F14D0 = Compressed sprite graphics (Viper)
+ F14D1 to  F2936 = Compressed sprite graphics (Skepeton enemies)
+ F2937 to  F3D61 = Compressed map graphics (Title screen)
+ F3D62 to  F517B = Compressed sprite graphics (Knight enemies)
+ F517C to  F658D = Compressed sprite graphics (Mummy Queen)
+ F658E to  F797E = Compressed sprite graphics (Vampires)
+ F797F to  F7FFF = Compressed map tileset data
+ F8000 to  F804D = Sprite Pointer Table (Will) (72 Sprites) SP3
+ F804E           = Sprite Frame Pointers (Will) SP3
+                 = Sprite Frame Data (Will)
+ F90E5 to  FBD25 = Compressed map graphics (Sky Garden)
+ FBD26 to  FBFF8 = Compressed map arrangement data
+ FBFF9 to  FBFFF = Unused
+ FC000 to  FC025 = Sprite Pointer Table (Character Transformations) (19 Sprites) SP4
+ FC026           = Sprite Frame Pointers (Character Transformations) SP4
+                 = Sprite Frame Data (Character Transformations)
+ FED85 to  FFFBC = Compressed map graphics
+ FFFBD to  FFFFF = Compressed map arrangement data
+100000 to 10136C = Compressed sprite graphics (Mt Temple Enemies)
+10136D to 1026CD = Compressed sprite graphics (Great Wall Enemies)
+1026CE to 1039F7 = Compressed map graphics
+1039F8 to 104C8E = Compressed map graphics (Intro Skeleton)
+104C8F to 105F23 = Compressed map graphics (Future City)
+105F24 to 10719F = Compressed sprite data (Castoth)
+1071A0 to 107E3A = Music - Great Pyramid
+107E3B to 107FFC = Compressed map arrangement data
+107FFD to 107FFF = Unused
+108000 to 108099 = Sprite Pointer Table (Items & Character Moves) SP5
+10809A to 10838B = Sprite Frame Pointers (Items & Character Moves) SP5
+10838C to 108F06 = Sprite Frame Data (Items & Character Moves)
+108F07 to 10C560 = Compressed map graphics
+10C561 to 10FB8A = Compressed map graphics
+10FB8B to 10FFFB = Compressed map arrangement data
+10FFFC to 10FFFF = Unused
+110000 to 111232 = Compressed map graphics
+111233 to 112443 = Music - Illusion of Gaia
+112444 to 113640 = Compressed map graphics
+113641 to 1146A7 = Compressed sprite data (Seaside Palace/Mu)
+1146A8 to 1156FD = Compressed font graphics (2BPP GameBoy format)
+1156FE to 11670D = Compressed map graphics
+11670E to 117324 = Compressed sprite data (Pyramid)
+117325 to 117F03 = Compressed map graphics (Enix & Nintendo Logos)
+117F04 to 117FFB = Compressed map arrangement data
+117FFC to 117FFF = Unused
+118000 to 11B51B = Compressed map graphics (Mu)
+11B51C to 11E73E = Compressed map graphics (Gold Ship)
+11E73F to 11FFF6 = Compressed sprite graphics (Euro NPCs)
+11FFF7 to 11FFFF = Unused
+120000 to 120BCC = Music - Legendary Sunken Continent
+120BCD to 121792 = Compressed sprite data (Vampires)
+121793 to 122335 = Music - Bittersweet Victory
+122336 to 122ECF = Compressed sprite data (Watermia)
+122ED0 to 123A67 = Compressed map arrangement data
+123A68 to 1245ED = Compressed map graphics
+1245EE to 125171 = Compressed map arrangement data
+125172 to 125CE3 = Compressed map arrangement data
+125CE4 to 126853 = Compressed map arrangement data
+126854 to 1273AD = Compressed map arrangement data
+1273AE to 127EBF = Music - Guardians
+127EC0 to 127FFB = Compressed map arrangement data
+127FFC to 127FFF = Unused
+128000 to 12B179 = Compressed map graphics (Mt Temple)
+12B17A to 12E2D6 = Compressed map graphics (Great Wall)
+12E2D7 to 12FFF9 = Compressed map graphics (Itory, Inca Ruins)
+12FFFA to 12FFFF = Unused
+130000 to 130B03 = Compressed map arrangement data
+130B04 to 1315E7 = Compressed sprite data (Edward's Castle)
+1315E8 to 132096 = Compressed sprite data (Credits?)
+132097 to 132B1B = Compressed map arrangement data
+132B1C to 13357B = Compressed map arrangement data (Freejia Layer 1)
+13357C to 133FCF = Compressed map arrangement data
+133FD0 to 134A0A = Compressed map arrangement data
+134A0B to 13541C = Compressed map arrangement data
+13541D to 135E18 = Compressed sprite data (main characters)
+135E19 to 136807 = Compressed map arrangement data
+136808 to 1371D9 = Compressed sprite data (Itory Village)
+1371DA to 137B93 = Music - The Secret of Nazca
+137B94 to 137FEC = Compressed map arrangement data
+137FED to 137FFF = Unused
+138000 to 13B038 = Compressed map graphics (Gold Ship)
+13B039 to 13E069 = Compressed map graphics (Euro)
+13E06A to 13FE0E = Compressed sprite graphics (main characters)
+13FE0F to 13FFFD = Compressed map arrangement data
+13FFFE to 13FFFF = Unused
+140000 to 1409AC = Compressed map arrangement data
+1409AD to 141359 = Compressed map arrangement data
+14135A to 141CFB = Compressed map arrangement data (Edward's Castle layer 1)
+141CFC to 14269C = Music - Blessing of Nature
+14269D to 143016 = Compressed map arrangement data
+143017 to 14395E = Music - Golden Road
+14395F to 14428F = Compressed sprite data (Ankor Wat)
+144290 to 144BB8 = Music - Descent into Darkness
+144BB9 to 1454E0 = Compressed sprite data (World Map)
+1454E1 to 145DF8 = Compressed sprite data
+145DF9 to 14670E = Compressed sprite data (Will's House)
+14670F to 147023 = Music - Awakening the Wind
+147024 to 147932 = Compressed map arrangement data
+147933 to 147FF9 = Compressed map tileset data
+147FFA to 147FFF = Unused
+148000 to 148097 = Sprite Pointer Table (Shadow) (76 Sprites)
+148098 to 148543 = Sprite Frame Pointers (Shadow)
+148544 to 14B09A = Sprite Frame Data (Shadow)
+14B09B to 14BEC8 = Compressed map arrangement data
+14BEC9 to 14BFFF = Compressed map arrangement data
+14C000 to 14C003 = Sprite Pointer Table (?) (2 Sprites)
+14C004 to 14C027 = Sprite Frame Pointers (?)
+14C028 to 14C0C7 = Sprite Frame Data (?)
+14C0C8 to 14C0C9 = Sprite Pointer Table (?) (1 Sprite)
+14C0CA to 14C0DB = Sprite Frame Pointers (?)
+14C0DC to 14C12B = Sprite Frame Data
+14C12C to 14C12D = Sprite Pointer Table (?) (1 Sprite)
+14C12E to 14C147 = Sprite Frame Pointers (?)
+14C148 to 14C197 = Sprite Frame Data (?)
+14C198 to 14F198 = Compressed map graphics (Edward's Castle)
+14F199 to 14FF3E = Compressed map arrangement data
+14FF3F to 14FFFF = Compressed map arrangement data
+150000 to 1508E5 = Compressed map arrangement data
+1508E6 to 15118D = Compressed sprite data (Inca Ruins)
+15118E to 151A32 = Compressed map arrangement data
+151A33 to 1522BE = Compressed map arrangement data
+1522BF to 152B2B = Compressed map graphics (text)
+152B2C to 15338C = Compressed sprite data (Angel Village Underground)
+15338D to 153BB0 = Music - Royal Anthem
+153BB1 to 1543CF = Compressed cutscene graphics (Intro)
+1543D0 to 154BE4 = Compressed map arrangement data
+154BE5 to 1553D3 = Compressed cutscene graphics
+1553D4 to 155BBD = Compressed map arrangement data
+155BBE to 156395 = Compressed sprite data (Sand Fanger)
+156396 to 156B66 = Compressed sprite data (Natives' Village)
+156B67 to 157328 = Compressed map arrangement data
+157329 to 157ADB = Music - Beautiful World
+157ADC to 157FE6 = Compressed map tileset data
+157FE7 to 157FFF = Unused
+158000 to 15808F = Sprite Pointer Table (Will)
+158090 to 158757 = Sprite Frame Pointers (Will)
+158758 to 15C420 = Sprite Frame Data (Will)
+15C421 to 15F39B = Compressed map graphics (Babel Tower)
+15F39C to 15FFF4 = Music - Lively City by the Sea
+15FFF5 to 15FFFF = Unused
+160000 to 1607AF = Compressed map tileset data
+1607B0 to 160F5A = Compressed sprite data (Dark Gaia)
+160F5B to 161704 = Compressed map arrangement data
+161705 to 161EA6 = Compressed map tileset data
+161EA7 to 16263F = Compressed map arrangement data
+162640 to 162DCA = Compressed map tileset data
+162DCB to 163552 = Compressed map arrangement data
+163553 to 163CD2 = Music - Space Beyond Time
+163CD3 to 16444E = Compressed map tileset data
+16444F to 164BCA = Compressed map tileset data
+164BCB to 165343 = Compressed map arrangement data
+165344 to 165ABB = Compressed map tileset data
+165ABC to 166232 = Compressed map arrangement data
+166233 to 166985 = Compressed map tileset data
+166986 to 1670D7 = Compressed map tileset data
+1670D8 to 167826 = Compressed map tileset data
+167827 to 167F6B = Compressed map arrangement data
+167F6C to 167FFD = Compressed map arrangement data
+167FFE to 167FFF = Unused
+168000 to 1680FF = *** UNKNOWN - Pointers to following data ***
+168100 to 16D82B = *** UNKNOWN - Data ***
+16D82C to 16FA0E = Compressed cutscene graphics (Ending - Continents)
+16FA0F to 16FFF9 = Compressed map arrangement data
+16FFFA to 16FFFF = Unused
+170000 to 170743 = Compressed map tileset data
+170744 to 170E6C = Compressed map arrangement data
+170E6D to 171592 = Compressed sprite data (Pyramid Hieroglyph room)
+171593 to 171CAB = Compressed map tileset data
+171CAC to 1723C1 = Music - (restart)
+1723C2 to 172AB8 = Compressed map arrangement data
+172AB9 to 1731AD = Compressed map tileset data
+1731AE to 173897 = Compressed map arrangement data
+173898 to 173F7B = Compressed map arrangement data
+173F7C to 17465A = Compressed sprite data (Modern school)
+17465B to 174D2C = Compressed map arrangement data
+174D2D to 1753FC = Compressed map tileset data
+1753FD to 175ACA = Compressed sprite data (Dao)
+175ACB to 176190 = Compressed map tileset data
+176191 to 176851 = Compressed map tileset data (South Cape)
+176852 to 176EFE = Compressed map tileset data
+176EFF to 1775A3 = Compressed map tileset data
+1775A4 to 177C45 = Compressed map tileset data
+177C46 to 177FFC = Compressed map arrangement data
+177FFD to 177FFF = Unused
+178000 to 17800D = *** UNKNOWN - Pointers to following data ***
+17800E to 178097 = *** UNKNOWN - Data (containing pointers to following data) ***
+178098 to 17814C = *** UNKNOWN - Data ***
+17841D to 178FFF = Compressed sprite graphics (Gaia)
+179000 to 179005 = *** UNKNOWN - Pointers to following data ***
+179006 to 17903B = *** UNKNOWN - Data (containing pointers to following data) ***
+17903C to 1791A9 = *** UNKNOWN - Data ***
+1791AA to 179F11 = Compressed map arrangement data
+179F12 to 179FFE = Compressed map arrangement data
+          179FFF = Unused
+17A000 to 17A007 = *** UNKNOWN - Pointers to following data ***
+17A008 to 17A043 = *** UNKNOWN - Data (containing pointers to following data) ***
+17A044 to 17A4F1 = *** UNKNOWN - Data ***
+17A4F2 to 17AFF8 = Compressed map arrangement data
+17AFF9 to 17AFFF = Unused
+17B000 to 17B01B = Sprite Pointer Table (Shadow)
+17B01C to 17B097 = Sprite Frame Pointers (Shadow)
+17B098 to 17B3A5 = Sprite Frame Data (Shadow)
+17B3A6 to 17BFD9 = Compressed sprite data (South Cape)
+17BFDA to 17BFF9 = Map palettes (1 palette)
+17BFFA to 17BFFF = Unused
+17C000 to 17C005 = Sprite Pointer Table (Shadow Liquify Move) (3 Sprites)
+17C006 to 17C0E7 = Sprite Frame Pointers (Shadow Liquify Move)
+17C0E8 to 17C442 = Sprite Frame Data (Shadow Liquify Move)
+17C443 to 17CFFB = Music - Lively City
+17CFFC to 17CFFF = Unused
+17D000 to 17D00F = *** UNKNOWN - Pointers to following data ***
+17D010 to 17D05F = *** UNKNOWN - Data (containing pointers to following data) ***
+17D060 to 17D3EF = *** UNKNOWN - Data ***
+17D3F0 to 17FF9D = Compressed map graphics
+17FF9E to 17FFF8 = Compressed map arrangement data
+17FFF9 to 17FFFF = Unused
+180000 to 180697 = Compressed map arrangement data
+180698 to 180D20 = Compressed map tileset data
+180D21 to 1813A7 = Compressed map tileset data
+1813A8 to 181A23 = Compressed map tileset data
+181A24 to 18209F = Compressed map arrangement data
+1820A0 to 182714 = Compressed map arrangement data
+182715 to 182D82 = Compressed map arrangement data
+182D83 to 1833E6 = Compressed map arrangement data
+1833E7 to 183A49 = Compressed map tileset data
+183A4A to 1840A8 = Compressed map tileset data
+1840A9 to 184703 = Compressed map arrangement data
+184704 to 184D5B = Compressed map tileset data
+184D5C to 1853AB = Compressed sprite data (metadata [10])
+1853AC to 1859F4 = Compressed map tileset data
+1859F5 to 186036 = Compressed sprite data (metadata [10])
+186037 to 186676 = Music - Longing for the Past
+186677 to 186CA9 = Compressed map tileset data
+186CAA to 1872DC = Compressed map tileset data
+1872DD to 18790D = Compressed map arrangement data
+18790E to 187F3B = Compressed map arrangement data
+187F3C to 187FFB = Map palettes
+187FFC to 187FFF = Unused
+188000 to 18AB6C = Compressed map graphics
+18AB6D to 18D51D = Compressed map graphics
+18D51E to 18FE9B = Compressed map graphics
+18FE9C to 18FFFF = Compressed map arrangement data
+190000 to 19062C = Compressed map tileset data
+19062D to 190C52 = Compressed map arrangement data
+190C53 to 191277 = Compressed map tileset data
+191278 to 19189A = Compressed map arrangement data
+19189B to 191EBC = Compressed map tileset data
+191EBD to 1924D7 = Compressed map tileset data
+1924D8 to 192AEF = Compressed map tileset data
+192AF0 to 193103 = Compressed map arrangement data
+193104 to 193716 = Compressed map tileset data
+193717 to 193D24 = Compressed map arrangement data
+193D25 to 19431F = Compressed map arrangement data
+194320 to 194916 = Compressed map arrangement data
+194917 to 194EF7 = Compressed map tileset data
+194EF8 to 1954CF = Compressed map tileset data
+1954D0 to 195A94 = Compressed map arrangement data
+195A95 to 196058 = Compressed map tileset data
+196059 to 19661B = Compressed map tileset data
+19661C to 196BD7 = Compressed map arrangement data
+196BD8 to 19717C = Compressed map graphics
+19717D to 19771A = Compressed map arrangement data
+19771B to 197CB7 = Compressed map tileset data
+197CB8 to 197FE9 = Compressed map tileset data
+197FEA to 197FFF = Unused
+198000 to 1980A1 = *** UNKNOWN - Partly palettes? See C3/DFE4 ***
+1980A2 to 19A9BB = Compressed map graphics
+19A9BC to 19D265 = Compressed map graphics
+19D266 to 19F3F6 = Music - Rebirth
+19F3F7 to 19FFDA = Compressed sprite data (metadata [10])
+19FFDB to 19FFFF = Unused
+1A0000 to 1A059C = Compressed sprite data (metadata [10])
+1A059D to 1A0B32 = Compressed map arrangement data
+1A0B33 to 1A10C6 = Compressed map arrangement data
+1A10C7 to 1A163F = Compressed map arrangement data
+1A1640 to 1A1BB6 = Compressed map tileset data
+1A1BB7 to 1A212C = Compressed map tileset data
+1A212D to 1A26A0 = Compressed map arrangement data
+1A26A1 to 1A2C0D = Compressed map arrangement data
+1A2C0E to 1A3171 = Compressed sprite data (metadata [10])
+1A3172 to 1A36D4 = Compressed map arrangement data
+1A36D5 to 1A3C22 = Compressed map arrangement data
+1A3C23 to 1A4167 = Compressed map arrangement data
+1A4168 to 1A466D = Compressed map arrangement data
+1A466E to 1A4B71 = Compressed map tileset data
+1A4B72 to 1A505F = Music - Deep Sadness
+1A5060 to 1A554B = Compressed map arrangement data
+1A554C to 1A5A36 = Compressed sprite data (metadata [10])
+1A5A37 to 1A5F1F = Compressed map arrangement data
+1A5F20 to 1A6406 = Compressed map arrangement data
+1A6407 to 1A68E5 = Compressed map tileset data
+1A68E6 to 1A6DBE = Compressed map tileset data
+1A6DBF to 1A7294 = Compressed sprite data (metadata [10])
+1A7295 to 1A7761 = Compressed map arrangement data
+1A7762 to 1A7C20 = Compressed map arrangement data
+1A7C21 to 1A7FFC = Compressed map arrangement data
+1A7FFD to 1A7FFF = Unused
+1A8000 to 1AFFFF = Uncompressed graphics
+1B0000 to 1B04BB = Compressed map arrangement data
+1B04BC to 1B0962 = Compressed map arrangement data
+1B0963 to 1B0E01 = Compressed map arrangement data
+1B0E02 to 1B129C = Compressed map arrangement data
+1B129D to 1B1732 = Compressed map arrangement data
+1B1733 to 1B1BB9 = Compressed map tileset data
+1B1BBA to 1B200E = Compressed map tileset data
+1B200F to 1B2455 = Compressed map tileset data
+1B2456 to 1B289B = Compressed map arrangement data
+1B289C to 1B2CE1 = Compressed sprite data (metadata [10])
+1B2CE2 to 1B3127 = Compressed map tileset data
+1B3128 to 1B356A = Compressed map arrangement data
+1B356B to 1B399F = Compressed map tileset data
+1B39A0 to 1B3DBD = Compressed map arrangement data
+1B3DBE to 1B41CC = Compressed map tileset data
+1B41CD to 1B45C1 = Compressed map arrangement data
+1B45C2 to 1B49B6 = Compressed map arrangement data
+1B49B7 to 1B4D9A = Music - Ominous Whispers
+1B4D9B to 1B5174 = Compressed map arrangement data
+1B5175 to 1B553F = Compressed map tileset data
+1B5540 to 1B5907 = Compressed map tileset data
+1B5908 to 1B5CCF = Compressed map arrangement data
+1B5CD0 to 1B607E = Compressed map arrangement data
+1B607F to 1B640E = Compressed map arrangement data
+1B640F to 1B6799 = Compressed map tileset data
+1B679A to 1B6B23 = Compressed map arrangement data
+1B6B24 to 1B6EA3 = Compressed map tileset data
+1B6EA4 to 1B7221 = Compressed map tileset data
+1B7222 to 1B759F = Compressed map arrangement data
+1B75A0 to 1B791A = Compressed map arrangement data
+1B791B to 1B7C8F = Compressed map arrangement data
+1B7C90 to 1B7FFF = Compressed map arrangement data
+1B8000 to 1BFFFF = Uncompressed graphics
+1C0000 to 1C0370 = Compressed map arrangement data
+1C0371 to 1C06DF = Compressed map arrangement data
+1C06E0 to 1C0A4E = Compressed map tileset data
+1C0A4F to 1C0DB4 = Compressed map tileset data
+1C0DB5 to 1C1118 = Compressed map arrangement data
+1C1119 to 1C147B = Compressed sprite data (metadata [10])
+1C147C to 1C17DD = Compressed map tileset data
+1C17DE to 1C1B3E = Compressed map arrangement data
+1C1B3F to 1C1E96 = Compressed map arrangement data
+1C1E97 to 1C21EC = Compressed map arrangement data
+1C21ED to 1C253F = Compressed map arrangement data
+1C2540 to 1C288F = Compressed map arrangement data
+1C2890 to 1C2BDD = Compressed map arrangement data
+1C2BDE to 1C2F0C = Compressed map arrangement data
+1C2F0D to 1C323B = Compressed map tileset data
+1C323C to 1C3569 = Compressed map arrangement data
+1C356A to 1C388F = Compressed map tileset data
+1C3890 to 1C3BAE = Compressed map tileset data
+1C3BAF to 1C3EC7 = Compressed map arrangement data
+1C3EC8 to 1C41D8 = Compressed map arrangement data
+1C41D9 to 1C44E3 = Compressed map arrangement data
+1C44E4 to 1C47EB = Compressed map arrangement data
+1C47EC to 1C4AF0 = Compressed map arrangement data
+1C4AF1 to 1C4DF3 = Compressed map arrangement data
+1C4DF4 to 1C50F6 = Compressed map arrangement data
+1C50F7 to 1C53E1 = Compressed map arrangement data
+1C53E2 to 1C56CA = Compressed map arrangement data
+1C56CB to 1C59AB = Compressed map arrangement data
+1C59AC to 1C5C8C = Compressed map arrangement data
+1C5C8D to 1C5F6C = Music - Drifting Endlessly
+1C5F6D to 1C624B = Compressed map arrangement data
+1C624C to 1C6529 = Compressed map tileset data
+1C652A to 1C6806 = Compressed map tileset data
+1C6807 to 1C6AD5 = Compressed map arrangement data
+1C6AD6 to 1C6DA4 = Compressed map arrangement data
+1C6DA5 to 1C7068 = Compressed map arrangement data
+1C7069 to 1C7329 = Compressed map arrangement data
+1C732A to 1C75D5 = Compressed map arrangement data
+1C75D6 to 1C787C = Compressed map arrangement data
+1C787D to 1C7B20 = Compressed map arrangement data
+1C7B21 to 1C7DBB = Compressed map tileset data
+1C7DBC to 1C7FFF = Compressed map arrangement data
+1C8000 to 1CDD7F = Uncompressed graphics
+1CDD80 to 1CFD95 = Compressed map graphics
+1CFD96 to 1CFFFD = Compressed map tileset data
+1CFFFE to 1CFFFF = Unused
+1D0000 to 1D027F = Compressed map arrangement data
+1D0280 to 1D04F4 = Compressed map arrangement data
+1D04F5 to 1D0766 = Compressed map arrangement data
+1D0767 to 1D09D6 = Compressed map tileset data
+1D09D7 to 1D0C46 = Compressed map arrangement data
+1D0C47 to 1D0EB6 = Compressed map arrangement data
+1D0EB7 to 1D111A = Compressed map arrangement data
+1D111B to 1D137B = Compressed map arrangement data
+1D137C to 1D15D8 = Compressed map arrangement data
+1D15D9 to 1D1833 = Compressed map arrangement data
+1D1834 to 1D1A81 = Compressed map tileset data
+1D1A82 to 1D1CCB = Compressed map arrangement data
+1D1CCC to 1D1F0F = Compressed map tileset data
+1D1F10 to 1D214C = Compressed map arrangement data
+1D214D to 1D2388 = Compressed map arrangement data
+1D2389 to 1D25C0 = Compressed map tileset data
+1D25C1 to 1D27F7 = Compressed sprite data (metadata [10])
+1D27F8 to 1D2A2E = Compressed map arrangement data
+1D2A2F to 1D2C60 = Compressed map arrangement data
+1D2C61 to 1D2E86 = Compressed map arrangement data
+1D2E87 to 1D309F = Compressed map arrangement data
+1D30A0 to 1D32B6 = Compressed map arrangement data
+1D32B7 to 1D34C8 = Compressed map arrangement data
+1D34C9 to 1D36D9 = Compressed map arrangement data
+1D36DA to 1D38D8 = Compressed map arrangement data
+1D38D9 to 1D3AD3 = Compressed map arrangement data
+1D3AD4 to 1D3CCD = Compressed map arrangement data
+1D3CCE to 1D3EC3 = Compressed map arrangement data
+1D3EC4 to 1D40B9 = Compressed map arrangement data
+1D40BA to 1D42A1 = Compressed map tileset data
+1D42A2 to 1D4482 = Compressed map arrangement data
+1D4483 to 1D465F = Compressed map arrangement data
+1D4660 to 1D483C = Compressed map tileset data
+1D483D to 1D4A0E = Compressed map arrangement data
+1D4A0F to 1D4BD9 = Compressed map tileset data
+1D4BDA to 1D4DA4 = Compressed map arrangement data
+1D4DA5 to 1D4F6A = Compressed map tileset data
+1D4F6B to 1D5130 = Music - ???
+1D5131 to 1D52ED = Compressed map tileset data
+1D52EE to 1D54A1 = Compressed map arrangement data
+1D54A2 to 1D5650 = Compressed map arrangement data
+1D5651 to 1D57FB = Compressed map arrangement data
+1D57FC to 1D59A2 = Music - Important Item
+1D59A3 to 1D5B44 = Compressed map arrangement data
+1D5B45 to 1D5CE5 = Compressed map arrangement data
+1D5CE6 to 1D5E81 = Compressed map arrangement data
+1D5E82 to 1D601B = Compressed map arrangement data
+1D601C to 1D61AD = Compressed map arrangement data
+1D61AE to 1D633E = Compressed map arrangement data
+1D633F to 1D64CE = Compressed map arrangement data
+1D64CF to 1D665B = Compressed map arrangement data
+1D665C to 1D67E2 = Compressed map arrangement data
+1D67E3 to 1D6969 = Compressed map arrangement data
+1D696A to 1D6AEE = Compressed map arrangement data
+1D6AEF to 1D6C6A = Compressed sprite data (metadata [10])
+1D6C6B to 1D6DD8 = Compressed map arrangement data
+1D6DD9 to 1D6F42 = Compressed map arrangement data
+1D6F43 to 1D70AB = Compressed map arrangement data
+1D70AC to 1D7210 = Compressed map arrangement data
+1D7211 to 1D736B = Compressed map arrangement data
+1D736C to 1D74C5 = Compressed map arrangement data
+1D74C6 to 1D761D = Compressed map arrangement data
+1D761E to 1D7772 = Compressed map arrangement data
+1D7773 to 1D78C5 = Compressed sprite data (metadata [10])
+1D78C6 to 1D7A12 = Compressed map tileset data
+1D7A13 to 1D7B5A = Compressed map arrangement data
+1D7B5B to 1D7CA2 = Compressed map arrangement data
+1D7CA3 to 1D7DE6 = Compressed map arrangement data
+1D7DE7 to 1D7F22 = Compressed map tileset data
+1D7F23 to 1D7FFD = Compressed map arrangement data
+1D7FFE to 1D7FFF = Unused
+1D8000 to 1DA001 = Uncompressed map graphics
+1DA002 to 1DBD9E = Compressed map graphics
+1DBD9F to 1DDB08 = Compressed map graphics
+1DDB09 to 1DF768 = Compressed map graphics
+1DF769 to 1DFFF9 = Compressed sprite data (metadata [10])
+1DFFFA to 1DFFFF = Unused
+1E0000 to 1E0139 = Compressed map arrangement data
+1E013A to 1E026E = Compressed map arrangement data
+1E026F to 1E039B = Compressed map arrangement data
+1E039C to 1E04C1 = Compressed map arrangement data
+1E04C2 to 1E05E6 = Compressed map arrangement data
+1E05E7 to 1E0709 = Compressed map arrangement data
+1E070A to 1E082B = Compressed map arrangement data
+1E082C to 1E0CAB = Map palettes
+1E0CAC to 1E0DC8 = Compressed map arrangement data
+1E0DC9 to 1E0EDD = Compressed sprite data (metadata [10])
+1E0EDE to 1E0FF1 = Compressed map arrangement data
+1E0FF2 to 1E1104 = Compressed map arrangement data
+1E1105 to 1E1212 = Compressed map arrangement data
+1E1213 to 1E131F = Compressed map arrangement data
+1E1320 to 1E1428 = Compressed map arrangement data
+1E1429 to 1E1530 = Compressed map arrangement data
+1E1531 to 1E1634 = Compressed map arrangement data
+1E1635 to 1E2034 = Map palettes
+1E2035 to 1E212C = Compressed map arrangement data
+1E212D to 1E2220 = Compressed map arrangement data
+1E2221 to 1E2314 = Compressed map arrangement data
+1E2315 to 1E2408 = Compressed map arrangement data
+1E2409 to 1E24FB = Compressed map arrangement data
+1E24FC to 1E25EE = Compressed map arrangement data
+1E25EF to 1E26D6 = Compressed map arrangement data
+1E26D7 to 1E27BD = Compressed map arrangement data
+1E27BE to 1E28A4 = Compressed map arrangement data
+1E28A5 to 1E298A = Compressed map arrangement data
+1E298B to 1E2A6D = Compressed map tileset data
+1E2A6E to 1E2B50 = Music - Melody of Memories
+1E2B51 to 1E2C32 = Compressed map arrangement data
+1E2C33 to 1E6B32 = Map palettes
+1E6B33 to 1E6C11 = Music - Lost Incan Melody
+1E6C12 to 1E6CEF = Music - Lola's Melody
+1E6CF0 to 1E6DC5 = Compressed map arrangement data
+1E6DC6 to 1E6E95 = Compressed map arrangement data
+1E6E96 to 1E6F60 = Compressed map arrangement data
+1E6F61 to 1E702A = Compressed map arrangement data
+1E702B to 1E70F3 = Compressed map arrangement data
+1E70F4 to 1E71BB = Compressed map arrangement data
+1E71BC to 1E7283 = Compressed map arrangement data
+1E7284 to 1E734B = Compressed map arrangement data
+1E734C to 1E74CB = Map palettes
+1E74CC to 1E758B = Compressed map arrangement data
+1E758C to 1E7F4B = Map palettes
+1E7F4C to 1E7FFF = Compressed map arrangement data
+1E8000 to 1E9BFA = Compressed map graphics
+1E9BFB to 1EB7C8 = Compressed map graphics
+1EB7C9 to 1ED35B = Compressed map graphics
+1ED35C to 1EEEEE = Compressed map graphics
+1EEEEF to 1EFFAD = Compressed sprite data (metadata [10])
+1EFFAE to 1EFFFB = Compressed map arrangement data
+1EFFFC to 1EFFFF = Unused
+1F0000 to 1F047F = Map palettes
+1F0480 to 1F053F = Compressed map arrangement data
+1F0540 to 1F12BF = Map palettes
+1F12C0 to 1F137D = Compressed map arrangement data
+1F137E to 1F143B = Compressed map arrangement data
+1F143C to 1F14F8 = Compressed map arrangement data
+1F14F9 to 1F15B5 = Compressed map arrangement data
+1F15B6 to 1F1671 = Compressed map arrangement data
+1F1672 to 1F172C = Compressed map arrangement data
+1F172D to 1F17E7 = Compressed map arrangement data
+1F17E8 to 1F18A0 = Compressed map arrangement data
+1F18A1 to 1F1957 = Compressed map arrangement data
+1F1958 to 1F1A0C = Compressed map arrangement data
+1F1A0D to 1F1ABF = Compressed map arrangement data
+1F1AC0 to 1F1B71 = Compressed map arrangement data
+1F1B72 to 1F1C21 = Compressed map arrangement data
+1F1C22 to 1F1CD0 = Compressed map arrangement data
+1F1CD1 to 1F1D7F = Compressed map arrangement data
+1F1D80 to 1F1E2E = Compressed map arrangement data
+1F1E2F to 1F1EDD = Compressed map arrangement data
+1F1EDE to 1F1F8A = Compressed map arrangement data
+1F1F8B to 1F2037 = Compressed map arrangement data
+1F2038 to 1F20E3 = Compressed map arrangement data
+1F20E4 to 1F218D = Compressed map arrangement data
+1F218E to 1F2231 = Compressed map arrangement data
+1F2232 to 1F22D4 = Compressed map arrangement data
+1F22D5 to 1F2375 = Compressed map arrangement data
+1F2376 to 1F2415 = Map palettes
+1F2416 to 1F24B4 = Compressed map arrangement data
+1F24B5 to 1F2553 = Compressed map arrangement data
+1F2554 to 1F25F1 = Compressed map arrangement data
+1F25F2 to 1F268C = Compressed map arrangement data
+1F268D to 1F2727 = Compressed map arrangement data
+1F2728 to 1F27C2 = Compressed map arrangement data
+1F27C3 to 1F285A = Compressed map arrangement data
+1F285B to 1F28F2 = Compressed map arrangement data
+1F28F3 to 1F298A = Compressed map arrangement data
+1F298B to 1F2A1C = Compressed map arrangement data
+1F2A1D to 1F2AAD = Music - (no music)
+1F2AAE to 1F2B3C = Compressed map arrangement data
+1F2B3D to 1F2BCA = Compressed map arrangement data
+1F2BCB to 1F2C58 = Music - ???
+1F2C59 to 1F2CE5 = Compressed map arrangement data
+1F2CE6 to 1F2D72 = Compressed map arrangement data
+1F2D73 to 1F2DFD = Compressed map arrangement data
+1F2DFE to 1F2E87 = Compressed map arrangement data
+1F2E88 to 1F2F10 = Compressed map arrangement data
+1F2F11 to 1F2F99 = Compressed map arrangement data
+1F2F9A to 1F3020 = Compressed map arrangement data
+1F3021 to 1F30A7 = Compressed map arrangement data
+1F30A8 to 1F312D = Compressed map arrangement data
+1F312E to 1F31AF = Compressed map arrangement data
+1F31B0 to 1F3230 = Compressed map arrangement data
+1F3231 to 1F32B1 = Compressed map arrangement data
+1F32B2 to 1F3332 = Compressed sprite data (metadata [10])
+1F3333 to 1F33B2 = Map palettes
+1F33B3 to 1F342F = Compressed map arrangement data
+1F3430 to 1F34AB = Compressed map arrangement data
+1F34AC to 1F3527 = Compressed map arrangement data
+1F3528 to 1F35A3 = Compressed map arrangement data
+1F35A4 to 1F361F = Compressed map arrangement data
+1F3620 to 1F3699 = Compressed map arrangement data
+1F369A to 1F3712 = Compressed map arrangement data
+1F3713 to 1F378A = Compressed map arrangement data
+1F378B to 1F37FB = Compressed map arrangement data
+1F37FC to 1F386A = Compressed map arrangement data
+1F386B to 1F38D8 = Compressed map arrangement data
+1F38D9 to 1F3945 = Compressed map arrangement data
+1F3946 to 1F39B1 = Compressed map arrangement data
+1F39B2 to 1F3A1D = Compressed map arrangement data
+1F3A1E to 1F3A88 = Compressed map arrangement data
+1F3A89 to 1F3AF2 = Compressed map arrangement data
+1F3AF3 to 1F3B5C = Compressed map arrangement data
+1F3B5D to 1F3BC6 = Compressed map arrangement data
+1F3BC7 to 1F3C2E = Compressed map arrangement data
+1F3C2F to 1F3C94 = Compressed map arrangement data
+1F3C95 to 1F3CF9 = Compressed map arrangement data
+1F3CFA to 1F3D5D = Compressed map arrangement data
+1F3D5E to 1F3D9C = Compressed map arrangement data
+1F3D9D to 1F3DD7 = Compressed map arrangement data
+1F3DD8 to 1F3E10 = Compressed map arrangement data
+1F3E11 to 1F3E47 = Compressed map arrangement data
+1F3E48 to 1F3E73 = Compressed map arrangement data
+1F3E74 to 1F3E9F = Compressed map arrangement data
+1F3EA0 to 1F7FFF = Unused
+1F8000 to 1F9B84 = Compressed map graphics
+1F9B85 to 1FB6D7 = Compressed map graphics
+1FB6D8 to 1FD227 = Compressed map graphics
+1FD228 to 1FED46 = Compressed map graphics
+1FED47 to 1FFFEE = Compressed sprite data (metadata [10])
+1FFFEF to 1FFFFF = Unused

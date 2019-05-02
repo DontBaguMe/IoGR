@@ -1,0 +1,118 @@
+IOGR FEATURES AND WALKTHROUGH
+VERSION 0.1
+UPDATED 3/22/2019
+########################
+0. NOTES ON VERSION 0.1
+########################
+This version of the game is exclusively available to those who have been invited to help play-test the game. It is almost certain that you will encounter bugs and/or logic holes that could make a seed unbeatable. I appreciate your patience and help with this process.
+
+For this version, you have maximum STR and DEF at the start of the game. If upgrades cause your stats to cycle around and seem to negatively affect gameplay, talk to the NPC standing in front of the school in South Cape. Doing so will reset your DEF and STR stats to full.
+
+########################
+1. OBJECT OF THE GAME:
+########################
+
+Each seed is randomly generated to require four of the six Mystic Statues. Talking to the schoolteacher in South Cape at the start of the game will indicate which statues are required. The statues are acquired by completing the following bosses/locations:
+
+- Statue 1: Castoth (Inca Ruins)
+- Statue 2: Viper (Sky Garden)
+- Statue 3: Vampires (Mu)
+- Statue 4: Sang Fanger (Great Wall)
+- Statue 5: Mummy Queen (Pyramid)
+- Statue 6: Boss Rush (Babel Tower)
+
+Once you earn the indicated Statues, you may talk to Gaia at any Dark Space, who will grant you the option to face Dark Gaia and win the game.
+
+########################
+2. INTRA-CONTINENTAL MOVEMENT
+########################
+
+The world is broken up into continents. The locations in a continent are all accessible to one another through the world map screen. The following locations are accessible to one another via the overworld:
+
+- SW Continent (South Cape, Edward's Castle, Itory Village, Moon Tribe Camp, Inca Ruins)
+- SE Continent (Diamond Coast, Freejia, Diamond Mine, Neil's Cottage, Nazca Plain)
+- NE Continent (Angel Village, Watermia, Great Wall)
+- N Continent (Euro, Mt. Kress, Natives' Village, Ankor Wat)
+- NW Continent (Dao, Pyramid)
+
+########################
+3. INTER-CONTINENTAL MOVEMENT
+########################
+
+Movement between continents (and to locations not specified above) becomes possible as items are acquired, or as quest events are completed:
+
+- Defeating Castoth in Inca Ruins grants you access to the Gold Ship, which takes you to the Diamond Coast.
+
+- Acquiring the Teapot allows you to use it on the plateau in the Moon Tribe camp. This grants you access to the Sky Garden. (After using the Teapot, you can use the Sky Garden to travel to the Moon Tribe Camp, the Nacza Plain, the Angel Village, or the Natives' Village.)
+
+- Acquiring Lola's Letter allows you to learn Morse Code. After reading the letter, talk to Erik in the Seaside Cave in South Cape. Together you can communicate with Seth (who is in Riverson form), who can transport you to a number of sea-accessible locations: Diamond Coast, Seaside Palace, Watermia, or Babel Tower.
+
+- Upon acquiring the Memory Melody, you can visit Neil in his cottage, who has forgotten how to pilot his airplane. Playing this melody for him restores his memory. From then on, he is happy to take you to Euro, Dao, or Babel Tower. He can be found either in his home, in his mansion in Euro, or in his room in Dao.
+
+- Acquiring the Will allows you to use Kruks to travel between Watermia and Euro. When the Will is in your inventory, speak to the man tending his Kruks in Watermia just east of the town entrance, or to the man standing by the east entrance to the city of Euro.
+
+- Upon acquiring the Large Roast, go to the Natives' Village and talk to the young boy. If you give him the roast, he will gratefully guide you across the treacherous expanse from the village to Dao.
+
+- In the Nazca Plain, if you go to the location of the tile buried in the sand, you can warp to the Sky Garden. However, the Moon Tribe will only appear there if you have healed them with the Teapot.
+
+- Mu and the Seaside Palace are accessible directly from Angel Village. What is originally the guest room in the original game takes you to the Passage to Mu inside the Seaside Palace. Mu is freely accessible this way, but the Seaside Palace Key is required to enter the Seaside Palace via this route.
+
+########################
+4. MISC FEATURES
+########################
+
+- Upon acquiring the Aura, equip it and use it to unlock Shadow's form. From then on, you can fight as Shadow in any dungeon.
+
+- If you bring the Necklace back to Lilly in Itory Village, she will accompany you and can access the item locked in the coffin in the Seaside Palace.
+
+- A number of new items have been added to the game to simulate ability upgrades. These jewels appear as circles of flame in your inventory and, when used, upgrade the appropriate ability -- either your HP, STR, DEF, Psycho Dash, or Dark Friar abilities.
+
+- Any barrier that can be removed with the Psycho Dash can also be destroyed with either the Psycho Slider or the Spin Dash.
+
+- The Dark Spaces in both Edward's Prison and Babel Tower have been relocated to prevent softlocks.
+
+########################
+5. KNOWN BUGS AND QUIRKS
+########################
+
+- Upon acquiring and turning in the appropriate number of Red Jewels to learn the Jeweler's secrets, you will be taken to the Jeweler's Mansion. You will be softlocked if you don't have the Psycho Slider ability to advance in this area.
+
+- Logic assumes Lola's Melody is required to access Itory Village -- however, this restriction has not yet been implemented. We're on the honor system, folks.
+
+- If you rescue the trapped laborer in the Diamond Mine with Psycho Slide or Spin Dash, it's possible to softlock yourself behind the laborer sprite. Stick to the right side to avoid this.
+
+- Sometimes, reading Lola's Letter will cause strange characters to appear on the screen.
+
+- Entrance to Rolek Mansion Guest Room in Euro is disabled (intentional).
+
+- Beating the same boss a second time, if this is possible, might hardlock the game.
+
+- Babel Tower entrance might let you through without Crystal Ring equipped. Again, honor system.
+
+- Using Neil to fly to Euro messes up the display. This does not affect gameplay.
+
+- Many Euro house interior maps look strange. This does not affect gameplay.
+
+- There is no overworld exit in Neil's cottage. Click on one of his inventions to be sent to the overworld.
+
+- There is no overworld exit at Diamond Coast. Talk to Turbo the dog to be sent to the overworld.
+
+- Dying in the Underground Tunnel after entering from the back wrong-warps you to Great Wall and hardlocks the game.
+
+- Hieroglyphs that are placed in the pyramid look different than they do in inventory. The way they look in the inventory should match the order in Father's Journal -- ignore how they appear after being placed.
+
+- Gaia does not heal you before sending you to fight Dark Gaia. I hope to fix this in future releases.
+
+########################
+6. FUTURE RELEASES
+########################
+
+Below are some of the features I hope to implement in future versions of the randomizer:
+
+- It is my hope that future versions of the game will also include a quest to save Kara from the painting in which she is trapped. The painting will show up deep in one of the five minor dungeons in the game (i.e. Edward's Underground Tunnel, Diamond Mine, Angel Village Dungeon, Mt. Kress, or Ankor Wat). This feature has not yet been implemented, which for the time being renders useless the Magic Dust (the item required to save Kara) and Lance's Letter (which spoils the location of Kara's painting).
+
+- I am working on an enemizer that would allow for the shuffling of enemies and/or enemy stats. This would also allow for the player to specify the difficulty of the seed.
+
+- I am investigating whether boss shuffle is feasible and/or desirable.
+
+- Eventually I wish to reduce the number of room-clearing rewards in the game and shuffle which rooms grant HP, DEF or STR rewards.

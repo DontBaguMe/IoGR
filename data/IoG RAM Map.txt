@@ -1,0 +1,176 @@
+$7E0078         - GRAPHIC DATA DECOMPRESSION: Number of decompressed Data Bytes to transfer, LOW BYTE
+$7E0079         - GRAPHIC DATA DECOMPRESSION: Number of decompressed Data Bytes to transfer, HIGH BYTE
+$7E007A         - GRAPHIC DATA DECOMPRESSION: Where to write the next byte to buffer, LOW BYTE
+$7E007B         - GRAPHIC DATA DECOMPRESSION: Where to write the next byte to buffer, HIGH BYTE
+
+$7E0100-$7E01FF - STACK
+
+$70020A         - ??
+$7002D6         - ??
+
+$7E0422-$7E0621 - OAM Low Table buffer
+$7E0622-$7E0641 - OAM High Table buffer
+
+$7E0642         - Index for Next Map to Load
+$7E0644         - Current Map
+
+$7E068A-$7E068B - Little-Endian BG2 H-scroll (at least in the item menu)
+$7E068C-$7E068D - Little-Endian BG1 H-scroll (at least in the item menu)
+$7E068E-$7E068F - Little-Endian BG2 V-scroll (at least in the item menu)
+$7E0690-$7E0691 - Little-Endian BG1 V-scroll (at least in the item menu)
+
+$7E06B2-$7E06?? - Used as address storage for decompressed tile map chunks
+
+$7E06C7         - In relation with BG2 scroll registers
+$7E06C9         - In relation with BG1 scroll registers
+
+$7E09A6         - Player's X position
+$7E09A8         - Player's Y position
+
+$7E09AE         - Player fight enable
+                - 0x00: Fight enabled
+                - 0x08: Fight disabled
+
+$7E09CC-$7E09CD - Will's sprite configuration?
+
+$7E09EC-$7E09ED - Text box configuration?
+
+$7E0A00-$7E0A1F - Event switches (bit by bit, 0-255)
+$7E0A20-$7E0A?? - Map configuration switches (bit by bit, 0-???)
+$7E0A40-$7E0A4F - Chest open switches (bit by bit, 0-127)
+$7E0A50-$7E0A5F?- Item acquisition switches (bit by bit, 0-127)
+$7E0A60-$7E0A7F - Room reward switches (bit by bit, 0-255)
+$7E0A80-$7E0A?? - Defeated enemy ID switches (bit by bit, 0-???)
+
+$7E0A1D         - Rewards collected from Gem:
+                - Bit 0: Not Used
+                - Bit 1: 3 gem reward claimed
+                - Bit 2: 5 gem reward claimed
+                - Bit 3: 8 gem reward claimed
+                - Bit 4: 12 gem reward claimed
+                - Bit 5: 20 gem reward claimed
+                - Bit 6: 30 gem reward claimed
+
+$7E0A60-$7E0AC3 - Item Menu Slots
+
+$7E0AA2         - Ability Flag register
+                - Bit 0: Psycho Dash
+                - Bit 1: Psycho Slide
+                - Bit 2: Spin Dash
+                - Bit 4: Dark Friar
+                - Bit 5: Aura Barrier
+                - Bit 6: Earth Quaker
+
+$7E0AAC         - Snake's Hit Modifier (?)
+
+$7E0AB0         - Number of Collected Red Jewels (BCD-FORMAT!)
+
+$7E0AB4-$7E0AC3 - Item Menu Slots
+                - #$00: Nothing
+                - #$01: Red Jewel
+                - #$02: Edward Castle Prison Key
+                - #$03: Inca Statue A
+                - #$04: Inca Statue B
+                - #$05: Inca Melody
+                - #$06: Herb
+                - #$07: Diamond: Shaped Block
+                - #$08: Wind Melody
+                - #$09: Lola's Melody
+                - #$0A: Large Roast
+                - #$0B: Mine Key A
+                - #$0C: Mine Key B
+                - #$0D: Memory Melody
+                - #$0E: Crystal Ball
+                - #$0F: Elevator Key
+                - #$10: Mu Palace Key
+                - #$11: Purification Stone
+                - #$12: Statue of Hope
+                - #$13: Rama Statue
+                - #$14: Magic Dust
+                - #$15: Blue Journal
+                - #$16: Lance's Letter
+                - #$17: Necklace Stones
+                - #$18: Will
+                - #$19: Teapot
+                - #$1A: Mushroom Drops
+                - #$1B: Bag of Gold
+                - #$1C: Black glasses
+                - #$1D: Gorgon Flower
+                - #$1E: Hieroglyph Plate 1
+                - #$1F: Hieroglyph Plate 2
+                - #$20: Hieroglyph Plate 3
+                - #$21: Hieroglyph Plate 4
+                - #$22: Hieroglyph Plate 5
+                - #$23: Hieroglyph Plate 6
+                - #$24: Aura
+                - #$25: Lola's Letter
+                - #$26: Father's Journal
+                - #$27: Crystal Ring
+                - #$28: Apple
+                - #$29: HP Jewel      -NEW-
+                - #$2A: DEF Jewel     -NEW-
+                - #$2B: STR Jewel     -NEW-
+                - #$2C: Light Jewel   -NEW-
+                - #$2D: Dark Jewel    -NEW-
+                - #$2E: 2 Red Jewels  -NEW-
+                - #$2F: 3 Red Jewels  -NEW-
+                - #$30: Jeweler Reward 1   -NEW-
+                - #$31: Jeweler Reward 2   -NEW-
+                - #$32: Jeweler Reward 3   -NEW-
+                - #$33: Jeweler Reward 4   -NEW-
+                - #$34: Jeweler Reward 5   -NEW-
+                - #$35: Jeweler Reward 6   -NEW-
+                - #$36: Jeweler Reward 7   -NEW-
+                - #$37: Rescue Kara   -NEW-
+                - #$38: Mystic Statue 1
+                - #$39: Mystic Statue 2
+                - #$3a: Mystic Statue 3
+                - #$3b: Mystic Statue 4
+                - #$3c: Mystic Statue 5
+                - #$3d: Mystic Statue 6
+                - #$3e: Psycho Dash
+                - #$3f: Psycho Slide
+                - #$40: Spin Dash
+                - #$41: Dark Friar
+                - #$42: Aura Barrier
+                - #$43: Earthquaker
+
+
+$7E0AC4         - Number of the active Item Slot (valid values: #$00 to #$0F)
+
+$7E0ACA         - Total Life Energy
+$7E0ACE         - Current Life Energy
+$7E0AD0         - Something with Life Energy (?)
+
+$7E0AD4         - Player's Current Form
+                - #$00: Will
+                - #$01: Freedan
+                - #$02: Shade
+
+$7E0AD6-$7E0AD7 - Number of DP (max. 0x3E7 = 999)
+
+$7E0ADC         - Will's Defense value (max. #$63, 0xFF = OHKO)
+
+$7E0ADE         - Will's Attack value (max. #$63)
+
+$7E0AEC-$7E0AED - Number of enemies on current map (hex)
+$7E0AEE-$7E0AEF - Number of enemies on current map (dec)
+
+$7E0AF8         - ? (used by player event)
+
+$7E0B16         - Psycho Dash status:
+                - #$00: No improvement
+                - #$01: Power increase
+
+$7E0B1C         - Dark Friar status:
+                - #$00: No improvement
+                - #$01: Explodes on impact
+                - #$02: Explodes when attack button pressed
+
+$7E0B22         - ???? Set when you get Jeweler's 2nd reward
+
+$7E7000-$7EA??? - GRAPHIC DATA DECOMPRESSION: Buffer for decompressed graphic data
+$7E8200-$7E82?? - HDMA table for cloud scrolling (in item menu)
+
+$7F0A00-$7F0BFF - CGRAM buffer
+$7F0C00-$7F0C02 - Color Math values
