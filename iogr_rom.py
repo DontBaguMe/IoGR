@@ -1100,9 +1100,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xe0\x6b")
 
     ##########################################################################
-    #                       Balance Enemies and Rewards
+    #                       Assign Room/Boss Rewards
     ##########################################################################
-    # Remove STR/DEF upgrades, add back in HP upgrades for bosses
+    # Remove existing rewards
     f_roomrewards = open(folder + "01aade_roomrewards.bin","r+b")
     f.seek(int("1aade",16)+rom_offset)
     f.write(f_roomrewards.read())
@@ -1114,9 +1114,19 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Make boss rewards also grant +3 HP per unclaimed reward
     f.seek(int("c381",16)+rom_offset)
-    f.write("\x4c\x90\xf4")
+    f.write("\x20\x90\xf4")
     f.seek(int("f490",16)+rom_offset)
     f.write("\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
+
+    # Change boss room ranges
+    f.seek(int("c31a",16)+rom_offset)
+    f.write("\x67\x5A\x73\x00\x8A\x82\x8A\x00\xDD\xCC\xDD\x00\xEA\xB0\xBF\x00\xF6\xB0\xBF\x00")
+
+    # Add boss reward events to Babel and Jeweler Mansion
+    f.seek(int("ce3cb",16)+rom_offset)  # Solid Arm
+    f.write("\x00\x01\x01\xDF\xA5\x8B\x00\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
+    f.seek(int("ce536",16)+rom_offset)  # Mummy Queen (Babel)
+    f.write("\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
 
     # Collect map numbers for valid room-clearing rewards
     maps_castoth = [12,13,14,15,18]                                                 # Underground
@@ -1173,6 +1183,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
                 f.write("\x03")
             i += 1
 
+    ##########################################################################
+    #                        Balance Enemy Stats
+    ##########################################################################
     # Determine enemy stats, by difficulty
     if mode == 0:
         f_enemies = open(folder + "01abf0_enemieseasy.bin","r+b")

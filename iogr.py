@@ -5,7 +5,7 @@ import random
 import classes
 import iogr_rom
 
-VERSION = "0.6.0"
+VERSION = "0.6.1"
 
 def find_ROM():
     ROM.delete(0,END)
