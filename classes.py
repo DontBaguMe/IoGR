@@ -1093,8 +1093,8 @@ class World:
 
             # SE Continent
             70: [22,23,[[48,1]]],        # Diamond Mine Progression w/ Psycho Dash
-            71: [22,23,[[49,1]]],        # Diamond Mine Progression w/ Psycho Slide
-            72: [22,23,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
+            #71: [22,23,[[49,1]]],        # Diamond Mine Progression w/ Psycho Slide  -- UNTIL SOFTLOCK IS FIXED
+            #72: [22,23,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash  -- UNTIL SOFTLOCK IS FIXED
             73: [22,24,[[51,1]]],        # Diamond Mine Progression w/ Dark Friar
             74: [22,24,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
             75: [22,25,[[15,1]]],        # Diamond Mine Progression w/ Elevator Key
