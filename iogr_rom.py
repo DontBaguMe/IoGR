@@ -1100,7 +1100,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xe0\x6b")
 
     ##########################################################################
-    #                              Balance Enemies
+    #                       Balance Enemies and Rewards
     ##########################################################################
     # Remove STR/DEF upgrades, add back in HP upgrades for bosses
     f_roomrewards = open(folder + "01aade_roomrewards.bin","r+b")
@@ -1108,34 +1108,65 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_roomrewards.read())
     f_roomrewards.close
 
+    # Make room-clearing HP rewards grant +3 HP each
+    f.seek(int("e041",16)+rom_offset)
+    f.write("\x03")
+
+    # Make boss rewards also grant +3 HP per unclaimed reward (???????)
+
     # Collect map numbers for valid room-clearing rewards
-    maps_castoth = [12,13,14,15,18,29,32,33,34,35,37,38,39,40]
-    maps_viper = [61,62,63,64,65,69,70,77,78,79,80,81,82,83,84]
-    maps_vampires = [95,96,97,98,100,101]
-    maps_sandfanger = [109,110,111,112,113,114,130,131,132,133,134,135,136]
-    maps_mummyqueen1 = [160,161,162,163,164,165,166,167,168,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]
-    maps_mummyqueen2 = [204,205,206,207,208,209,210,211,212,213,214,215,216,217,219]
+    maps_castoth = [12,13,14,15,18]                                                 # Underground
+    maps_castoth += [29,32,33,34,35,37,38,39,40]                                    # Inca
+    maps_viper = [61,62,63,64,65,69,70]                                             # Mine
+    maps_viper += [77,78,79,80,81,82,83,84]                                         # Sky Garden
+    maps_vampires = [95,96,97,98,100,101]                                           # Mu
+    maps_vampires += [109,110,111,112,113,114]                                      # Angel
+    maps_sandfanger = [130,131,132,133,134,135,136]                                 # Wall
+    maps_sandfanger += [160,161,162,163,164,165,166,167,168]                        # Kress
+    maps_babel = [176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]      # Ankor Wat
+    maps_mummyqueen = [204,205,206,207,208,209,210,211,212,213,214,215,216,217,219] # Pyramid
 
     random.shuffle(maps_castoth)
     random.shuffle(maps_viper)
     random.shuffle(maps_vampires)
     random.shuffle(maps_sandfanger)
-    random.shuffle(maps_mummyqueen1)
-    random.shuffle(maps_mummyqueen2)
+    random.shuffle(maps_babel)
+    random.shuffle(maps_mummyqueen)
 
-    boss_areas = [maps_castoth,maps_viper,maps_vampires,maps_sandfanger,maps_mummyqueen1,maps_mummyqueen2]
+    boss_areas = [maps_castoth,maps_viper,maps_vampires,maps_sandfanger,maps_babel,maps_mummyqueen]
+    boss_rewards = 4 - mode
 
-    # Add in STR/DEF rewards, where applicable, by difficulty
+    rewards = []              # Total rewards by mode (HP/STR/DEF)
+    if mode == 0:             # Easy: 10/7/7
+        rewards += [1] * 10
+        rewards += [2] * 7
+        rewards += [3] * 7
+    elif mode == 1:           # Normal: 10/4/4
+        rewards += [1] * 10
+        rewards += [2] * 4
+        rewards += [3] * 4
+    elif mode == 2:           # Hard: 8/2/2
+        rewards += [1] * 8
+        rewards += [2] * 2
+        rewards += [3] * 2
+    elif mode == 3:           # Extreme: 6/0/0
+        rewards += [1] * 6
+
+    random.shuffle(rewards)
+
+    # Add in rewards, where applicable, by difficulty
     for area in boss_areas:
-        if mode <= 1:    # STR upgrades only available for Easy and Normal
-            map_str = area[1]
-            f.seek(int("1aade",16) + map_str + rom_offset)
-            f.write("\x02")
-
-        if mode <= 2:    # DEF upgrades only available for Easy, Normal and Hard
-            map_def = area[0]
-            f.seek(int("1aade",16) + map_def + rom_offset)
-            f.write("\x03")
+        i = 0
+        while i < boss_rewards:
+            map_num = area[i]
+            reward = rewards.pop(0)
+            f.seek(int("1aade",16) + map_num + rom_offset)
+            if reward == 1:
+                f.write("\x01")
+            elif reward == 2:
+                f.write("\x02")
+            elif reward == 3:
+                f.write("\x03")
 
     # Determine enemy stats, by difficulty
     if mode == 0:
