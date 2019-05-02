@@ -1112,7 +1112,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("e041",16)+rom_offset)
     f.write("\x03")
 
-    # Make boss rewards also grant +3 HP per unclaimed reward (???????)
+    # Make boss rewards also grant +3 HP per unclaimed reward
+    f.seek(int("c381",16)+rom_offset)
+    f.write("\x4c\x90\xf4")
+    f.seek(int("f490",16)+rom_offset)
+    f.write("\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
 
     # Collect map numbers for valid room-clearing rewards
     maps_castoth = [12,13,14,15,18]                                                 # Underground
@@ -1167,6 +1171,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
                 f.write("\x02")
             elif reward == 3:
                 f.write("\x03")
+            i += 1
 
     # Determine enemy stats, by difficulty
     if mode == 0:
