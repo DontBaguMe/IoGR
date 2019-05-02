@@ -212,10 +212,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Update HP jewel HP fill based on difficulty
     f.seek(int("39f7a",16)+rom_offset)
-    if mode == 2:         # Hard mode = fill 4 HP
-        f.write("\x08")
-    elif mode == 3:         # Extreme mode = fill 2 HP
-        f.write("\x04")
+    if mode == 0:         # Easy mode = full HP
+        f.write("\x28")
 
     # Update sprites for new items - first new item starts @108052, 7 new items
     # Points all items to unused sprite for item 4c ("76 83" in address table)
