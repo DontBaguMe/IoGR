@@ -71,15 +71,15 @@ Label(mainframe,text="Goal").grid(row=3,column=0,sticky=W)
 Label(mainframe,text="Statues").grid(row=4,column=0,sticky=W)
 
 difficulty = StringVar(root)
-diff_choices = {"Easy", "Normal", "Hard", "Extreme"}
+diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
 difficulty.set("Normal")
 
 goal = StringVar(root)
-goal_choices = {"Dark Gaia"}
+goal_choices = ["Dark Gaia"]
 goal.set("Dark Gaia")
 
 statues = StringVar(root)
-statue_choices = {"0","1","2","3","4","5","6","Random"}
+statue_choices = ["0","1","2","3","4","5","6","Random"]
 statues.set("Random")
 
 ROM = Entry(mainframe,width="40")
