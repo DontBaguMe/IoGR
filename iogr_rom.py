@@ -954,10 +954,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xa4\x26\xa9\x00\x00\x99\x24\x00\x02\x04\x16")
     f.write("\x02\xda\x01\xa9\xf0\xff\x1c\x5a\x06\x02\xe0")
 
-    # Fix Earthquaker/Dark Friar bug (does this work?????)
-    #f.seek(int("2b86d",16)+rom_offset)
-    #f.write("\x30")
-
     # Remove abilities from all Dark Spaces
     f.seek(int("c8b34",16)+rom_offset)        # Itory Village (Psycho Dash)
     f.write("\x01")
@@ -971,6 +967,24 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x03")
     f.seek(int("cd0a2",16)+rom_offset)        # Ankor Wat (Earthquaker)
     f.write("\x03")
+
+    ##########################################################################
+    #                          Fix special attacks
+    ##########################################################################
+    # Earthquaker no longer charges; Aura Barrier can be used w/o Friar
+    f.seek(int("2b871",16)+rom_offset)
+    f.write("\x30")
+
+    # Insert new code to explicitly check for Psycho Dash and Friar
+    f.seek(int("2f090",16)+rom_offset)
+    f.write("\xAD\xA2\x0A\x89\x01\x00\xF0\x06\xA9\xA0\xBE\x20\x26\xB9\x4C\x01\xB9")  # Psycho Dash @2f090
+    f.write("\xAD\xA2\x0A\x89\x10\x00\xF0\x06\xA9\x3B\xBB\x20\x26\xB9\x4C\x01\xB9")  # Dark Friar @2f0a1
+
+    # Insert jumps to new code
+    f.seek(int("2b858",16)+rom_offset)  # Psycho Dash
+    f.write("\x4c\x90\xf0")
+    f.seek(int("2b8df",16)+rom_offset)  # Dark Friar
+    f.write("\x4c\xa1\xf0")
 
     ##########################################################################
     #                      Disable NPCs in various maps
