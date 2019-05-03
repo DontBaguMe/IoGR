@@ -1,0 +1,123 @@
+INVENTORY: 
+$7E0AB4-$7E0AC3
+Quantity of each item in item pool is 1 unless specified.
+                - #$01: Red Jewel
+                        (qty: 45)
+                - #$02: Edward Castle Prison Key
+                - #$03: Inca Statue A
+                - #$04: Inca Statue B
+                - #$06: Herb
+                        (qty: 12)
+                - #$07: Diamond-Shaped Block
+                - #$08: Wind Melody
+                - #$09: Lola's Melody
+                - #$0A: Large Roast
+                - #$0B: Mine Key A
+                - #$0C: Mine Key B
+                - #$0D: Memory Melody
+                - #$0E: Crystal Ball
+                        (qty: 4)
+                - #$0F: Elevator Key
+                - #$10: Mu Palace Key
+                - #$11: Purification Stone
+                - #$12: Statue of Hope
+                        (qty: 2)
+                - #$13: Rama Statue
+                        (qty: 2)
+                - #$14: Magic Dust
+                - #$16: Lance's Letter
+                - #$17: Necklace Stones
+                - #$18: Will
+                - #$19: Teapot
+                - #$1A: Mushroom Drops
+                        (qty: 3)
+                - #$1C: Black glasses
+                - #$1D: Gorgon Flower
+                - #$1E: Hieroglyph Plate 1
+                - #$1F: Hieroglyph Plate 2
+                - #$20: Hieroglyph Plate 3
+                - #$21: Hieroglyph Plate 4
+                - #$22: Hieroglyph Plate 5
+                - #$23: Hieroglyph Plate 6
+                - #$24: Aura
+                - #$25: Lola's Letter
+                - #$26: Father's Journal
+                - #$27: Crystal Ring
+                - #$28: Apple
+                - #$29: HP Upgrade
+                        (qty: 3)
+                - #$2A: DEF Upgrade
+                        (qty: 1)
+                - #$2B: STR Upgrade
+                        (qty: 2)
+                - #$2C: Psycho Dash Upgrade
+                - #$2D: Dark Friar Upgrade
+                        (qty: 2)
+                - #$2E: 2 Red Jewels
+                - #$2F: 3 Red Jewels
+
+SPECIAL ABILITIES:
+		- $7E0AA2: Ability switches
+	                - Bit 0: Psycho Dash
+	                - Bit 1: Psycho Slide
+	                - Bit 2: Spin Dash
+	                - Bit 4: Dark Friar
+	                - Bit 5: Aura Barrier
+	                - Bit 6: Earth Quaker
+
+		- $7E0B16: Psycho Dash upgrade status:
+                	- #$00: No upgrade
+                	- #$01: Upgraded
+
+		- $7E0B1C: Dark Friar upgrade status:
+                	- #$00: No upgrade
+                	- #$01: First upgrade
+                	- #$02: Second upgrade
+
+JEWELER REWARDS:
+                - $7E0AB0: Number of Red Jewels turned into Jeweler (BCD format)
+
+                - $7E0A1D, Bit 1: Jeweler Reward 1 has been redeemed
+                - $7E0A1D, Bit 2: Jeweler Reward 2 has been redeemed
+                - $7E0A1D, Bit 3: Jeweler Reward 3 has been redeemed
+                - $7E0A1D, Bit 4: Jeweler Reward 4 has been redeemed
+                - $7E0A1D, Bit 5: Jeweler Reward 5 has been redeemed
+                - $7E0A1D, Bit 6: Jeweler Reward 6 has been redeemed
+
+PLAYER STATS:
+                - $7E0ACA: Max Hit Points
+                - $7E0ADC: Defense
+                - $7E0ADE: Strength
+
+PROGRESSION SWITCHES:
+Bit numbers are zero-based (i.e. one byte has bit 0 thru bit 7)
+                - $7E0A02, Bit 1: Can travel by sea (know Morse Code)
+                - $7E0A02, Bit 4: Can travel by plane (restored Neil's memory)
+                - $7E0A03, Bit 7: Can travel by Kruk (Will redeemed)
+                - $7E0A05, Bit 2: Can travel by Sky Garden (Moon Tribe awakened)
+                - $7E0A08, Bit 1: Can travel by guide (Large Roast redeemed)
+
+                - $7E0A07, Bit 6: Hero is wearing the Crystal Ring
+                - $7E0A09, Bit 7: Hero is wearing the Black Glasses
+
+                - $7E0A0C, Bit 0: Crystal Ball NE has been placed
+                - $7E0A0C, Bit 1: Crystal Ball SE has been placed
+                - $7E0A0C, Bit 2: Crystal Ball NW has been placed
+                - $7E0A0C, Bit 3: Crystal Ball SW has been placed
+
+                - $7E0A0D, Bit 7: Lilly is in your pocket (Necklace has been used)
+
+                - $7E0A0F, Bit 3: Hope Statue 1 has been placed
+                - $7E0A0F, Bit 6: Hope Statue 2 has been placed
+                - $7E0A10, Bit 0: Rama Statue 1 has been placed
+                - $7E0A10, Bit 1: Rama Statue 2 has been placed
+
+                - $7E0A11, Bit 2: Kara has been rescued (Magic Dust has been used)
+                - $7E0A16, Bit 4: Shadow's form has been unlocked (Aura has been used)
+
+                - $7E0A1F, Bit 0: Mystic Statue 1 has been acquired
+                - $7E0A1F, Bit 1: Mystic Statue 2 has been acquired
+                - $7E0A1F, Bit 2: Mystic Statue 3 has been acquired
+                - $7E0A1F, Bit 3: Mystic Statue 4 has been acquired
+                - $7E0A1F, Bit 4: Mystic Statue 5 has been acquired
+                - $7E0A1F, Bit 5: Mystic Statue 6 has been acquired
