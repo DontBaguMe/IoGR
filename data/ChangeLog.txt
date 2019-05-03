@@ -1,5 +1,9 @@
+v0.7
+CHANGES:
+
 v0.6
 CHANGES:
+- The randomizer is now run as a stand-alone executable with a GUI so users can generate their own seeds.
 - The game now have four difficulty modes: Easy, Normal, Hard, and Extreme. The difficulty affects enemy stats, upgrades available, and how many HP are recovered from eating herbs.
 - Room rewards are guaranteed to drop either a STR or DEF upgrade.  HP upgrades are available from beating bosses.  See the tutorial for more detailed information.
 - The Dark Space in SW Sky Garden can now contain Dark Friar. (You can stand below the switch and reach it with Fredan's sword, so Dark Friar is not required to reach this Dark Space as was originally assumed.)
