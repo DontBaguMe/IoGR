@@ -212,10 +212,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Update HP jewel HP fill based on difficulty
     f.seek(int("39f7a",16)+rom_offset)
-    if mode == 2:         # Hard mode = fill 4 HP
-        f.write("\x08")
-    elif mode == 3:         # Extreme mode = fill 2 HP
-        f.write("\x04")
+    if mode == 0:         # Easy mode = full HP
+        f.write("\x28")
 
     # Update sprites for new items - first new item starts @108052, 7 new items
     # Points all items to unused sprite for item 4c ("76 83" in address table)
@@ -956,10 +954,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xa4\x26\xa9\x00\x00\x99\x24\x00\x02\x04\x16")
     f.write("\x02\xda\x01\xa9\xf0\xff\x1c\x5a\x06\x02\xe0")
 
-    # Fix Earthquaker/Dark Friar bug (does this work?????)
-    #f.seek(int("2b86d",16)+rom_offset)
-    #f.write("\x30")
-
     # Remove abilities from all Dark Spaces
     f.seek(int("c8b34",16)+rom_offset)        # Itory Village (Psycho Dash)
     f.write("\x01")
@@ -973,6 +967,24 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x03")
     f.seek(int("cd0a2",16)+rom_offset)        # Ankor Wat (Earthquaker)
     f.write("\x03")
+
+    ##########################################################################
+    #                          Fix special attacks
+    ##########################################################################
+    # Earthquaker no longer charges; Aura Barrier can be used w/o Friar
+    f.seek(int("2b871",16)+rom_offset)
+    f.write("\x30")
+
+    # Insert new code to explicitly check for Psycho Dash and Friar
+    f.seek(int("2f090",16)+rom_offset)
+    f.write("\xAD\xA2\x0A\x89\x01\x00\xF0\x06\xA9\xA0\xBE\x20\x26\xB9\x4C\x01\xB9")  # Psycho Dash @2f090
+    f.write("\xAD\xA2\x0A\x89\x10\x00\xF0\x06\xA9\x3B\xBB\x20\x26\xB9\x4C\x01\xB9")  # Dark Friar @2f0a1
+
+    # Insert jumps to new code
+    f.seek(int("2b858",16)+rom_offset)  # Psycho Dash
+    f.write("\x4c\x90\xf0")
+    f.seek(int("2b8df",16)+rom_offset)  # Dark Friar
+    f.write("\x4c\xa1\xf0")
 
     ##########################################################################
     #                      Disable NPCs in various maps
@@ -1102,43 +1114,92 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xe0\x6b")
 
     ##########################################################################
-    #                              Balance Enemies
+    #                       Assign Room/Boss Rewards
     ##########################################################################
-    # Remove STR/DEF upgrades, add back in HP upgrades for bosses
+    # Remove existing rewards
     f_roomrewards = open(folder + "01aade_roomrewards.bin","r+b")
     f.seek(int("1aade",16)+rom_offset)
     f.write(f_roomrewards.read())
     f_roomrewards.close
 
+    # Make room-clearing HP rewards grant +3 HP each
+    f.seek(int("e041",16)+rom_offset)
+    f.write("\x03")
+
+    # Make boss rewards also grant +3 HP per unclaimed reward
+    f.seek(int("c381",16)+rom_offset)
+    f.write("\x20\x90\xf4")
+    f.seek(int("f490",16)+rom_offset)
+    f.write("\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
+
+    # Change boss room ranges
+    f.seek(int("c31a",16)+rom_offset)
+    f.write("\x67\x5A\x73\x00\x8A\x82\x8A\x00\xDD\xCC\xDD\x00\xEA\xB0\xBF\x00\xF6\xB0\xBF\x00")
+
+    # Add boss reward events to Babel and Jeweler Mansion
+    f.seek(int("ce3cb",16)+rom_offset)  # Solid Arm
+    f.write("\x00\x01\x01\xDF\xA5\x8B\x00\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
+    f.seek(int("ce536",16)+rom_offset)  # Mummy Queen (Babel)
+    f.write("\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
+
     # Collect map numbers for valid room-clearing rewards
-    maps_castoth = [12,13,14,15,18,29,32,33,34,35,37,38,39,40]
-    maps_viper = [61,62,63,64,65,69,70,77,78,79,80,81,82,83,84]
-    maps_vampires = [95,96,97,98,100,101]
-    maps_sandfanger = [109,110,111,112,113,114,130,131,132,133,134,135,136]
-    maps_mummyqueen1 = [160,161,162,163,164,165,166,167,168,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]
-    maps_mummyqueen2 = [204,205,206,207,208,209,210,211,212,213,214,215,216,217,219]
+    maps_castoth = [12,13,14,15,18]                                                 # Underground
+    maps_castoth += [29,32,33,34,35,37,38,39,40]                                    # Inca
+    maps_viper = [61,62,63,64,65,69,70]                                             # Mine
+    maps_viper += [77,78,79,80,81,82,83,84]                                         # Sky Garden
+    maps_vampires = [95,96,97,98,100,101]                                           # Mu
+    maps_vampires += [109,110,111,112,113,114]                                      # Angel
+    maps_sandfanger = [130,131,132,133,134,135,136]                                 # Wall
+    maps_sandfanger += [160,161,162,163,164,165,166,167,168]                        # Kress
+    maps_babel = [176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]      # Ankor Wat
+    maps_mummyqueen = [204,205,206,207,208,209,210,211,212,213,214,215,216,217,219] # Pyramid
 
     random.shuffle(maps_castoth)
     random.shuffle(maps_viper)
     random.shuffle(maps_vampires)
     random.shuffle(maps_sandfanger)
-    random.shuffle(maps_mummyqueen1)
-    random.shuffle(maps_mummyqueen2)
+    random.shuffle(maps_babel)
+    random.shuffle(maps_mummyqueen)
 
-    boss_areas = [maps_castoth,maps_viper,maps_vampires,maps_sandfanger,maps_mummyqueen1,maps_mummyqueen2]
+    boss_areas = [maps_castoth,maps_viper,maps_vampires,maps_sandfanger,maps_babel,maps_mummyqueen]
+    boss_rewards = 4 - mode
 
-    # Add in STR/DEF rewards, where applicable, by difficulty
+    rewards = []              # Total rewards by mode (HP/STR/DEF)
+    if mode == 0:             # Easy: 10/7/7
+        rewards += [1] * 10
+        rewards += [2] * 7
+        rewards += [3] * 7
+    elif mode == 1:           # Normal: 10/4/4
+        rewards += [1] * 10
+        rewards += [2] * 4
+        rewards += [3] * 4
+    elif mode == 2:           # Hard: 8/2/2
+        rewards += [1] * 8
+        rewards += [2] * 2
+        rewards += [3] * 2
+    elif mode == 3:           # Extreme: 6/0/0
+        rewards += [1] * 6
+
+    random.shuffle(rewards)
+
+    # Add in rewards, where applicable, by difficulty
     for area in boss_areas:
-        if mode <= 1:    # STR upgrades only available for Easy and Normal
-            map_str = area[1]
-            f.seek(int("1aade",16) + map_str + rom_offset)
-            f.write("\x02")
+        i = 0
+        while i < boss_rewards:
+            map_num = area[i]
+            reward = rewards.pop(0)
+            f.seek(int("1aade",16) + map_num + rom_offset)
+            if reward == 1:
+                f.write("\x01")
+            elif reward == 2:
+                f.write("\x02")
+            elif reward == 3:
+                f.write("\x03")
+            i += 1
 
-        if mode <= 2:    # DEF upgrades only available for Easy, Normal and Hard
-            map_def = area[0]
-            f.seek(int("1aade",16) + map_def + rom_offset)
-            f.write("\x03")
-
+    ##########################################################################
+    #                        Balance Enemy Stats
+    ##########################################################################
     # Determine enemy stats, by difficulty
     if mode == 0:
         f_enemies = open(folder + "01abf0_enemieseasy.bin","r+b")

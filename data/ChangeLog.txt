@@ -1,0 +1,130 @@
+v0.7
+CHANGES:
+
+v0.6
+CHANGES:
+- The randomizer is now run as a stand-alone executable with a GUI so users can generate their own seeds.
+- The game now have four difficulty modes: Easy, Normal, Hard, and Extreme. The difficulty affects enemy stats, upgrades available, and how many HP are recovered from eating herbs.
+- Room rewards are guaranteed to drop either a STR or DEF upgrade.  HP upgrades are available from beating bosses.  See the tutorial for more detailed information.
+- The Dark Space in SW Sky Garden can now contain Dark Friar. (You can stand below the switch and reach it with Fredan's sword, so Dark Friar is not required to reach this Dark Space as was originally assumed.)
+- Crystal Ring and Aura are now both required to enter Babel Tower.
+- Dark Friar is now considered as required for progression through Mu.  This means the first Dark Space will always be open for transformation, and the other Dark Space will never contain Dark Friar.
+
+KNOWN BUGS NOT YET ADDRESSED:
+- Kara's portrait quest is complete when the Magic Dust is successfully used.  Kara's portrait will remain on the screen even after she is freed with the Magic Dust.  Leaving and reentering the room will provide visual confirmation that she has been freed -- however, this is unnecessary to complete the quest.
+- When Kara's "portrait" appears in the Diamond Mine, she will look like her normal sprite instead of like the portrait itself. I hope to find a solution for this issue in future versions.
+- Leaving the Jeweler's Mansion and immediately reentering via Dao causes the top layer to look strange.
+- Acquiring Earthquaker still grants you Dark Friar
+- Aura Barrier will not work unless you have Dark Friar
+
+
+v0.5
+CHANGES:
+- Will now starts with standard health, defense, and strength.
+- The number of total room-clearing status upgrades have been adjusted and shuffled throughout the maps in the game.  The number of health upgrades has remained the same from vanilla; the number of STR and DEF upgrades have been roughly halved.  This means that some rooms that normally give rewards will not give rewards; you can check the start screen to see if a room has a "force" or not.
+- The enemies in the game have been rebalanced to reflect the loss in available upgrades and make the game more balanced. (NOTE: I do not guarantee that I found every enemy in the game, so if you find an enemy that seems wildly over-powered for its area, please make note of it if you can.)
+
+KNOWN BUGS NOT YET ADDRESSED:
+- Kara's portrait quest is complete when the Magic Dust is successfully used.  Kara's portrait will remain on the screen even after she is freed with the Magic Dust.  Leaving and reentering the room will provide visual confirmation that she has been freed -- however, this is unnecessary to complete the quest.
+- When Kara's "portrait" appears in the Diamond Mine, she will look like her normal sprite instead of like the portrait itself. I hope to find a solution for this issue in future versions.
+- Leaving the Jeweler's Mansion and immediately reentering via Dao causes the top layer to look strange.
+- High STR might still destroy snakes in snake game (talk to NPC in front of the school to reset your STR/DEF)
+- Acquiring Earthquaker still grants you Dark Friar
+- Aura Barrier will not work unless you have Dark Friar
+
+
+
+v0.4
+CHANGES:
+- The Kara Portrait quest is now functional (see below).
+- The back of the Underground Tunnel is no longer accessible from Edward's Castle.  This means that the last two items in this area (the third chest and the Red Jewel pot behind the barrels) are only accessible by escaping Edward's Prison and progressing through the dungeon normally.
+- Having Lilly with you after giving her the necklace is required to progress through the Underground Tunnel.
+- Of the two Dark Spaces accessible in the Sky Garden (i.e. the save room in Area 2, or the bottom-side Dark Space in Area 4), one will always be available for switching.  (In other words, the Dark Space in the small save room might have an ability.)
+- The man at the entrance of Dao now tells you which two items he gives you.
+- The laborer in Freejia no longer gives a spoiler.
+- The man at Diamond Coast now gives a spoiler.
+
+KARA PORTRAIT QUEST:
+Finding Kara's portrait and rescuing her with the Magic Dust is now necessary to complete the game.  The portrait will be randomized to appear at the end of one of the five minor dungeons.  Finding and reading Lance's Letter will spoil the location of Kara's portrait.  The portrait will appear in one of these locations:
+- Underground Tunnel (north of where the Red Jewel is found behind the barrels)
+- Diamond Mine (in the same room where Sam gives you an item)
+- Angel Village (vanilla location)
+- Mt. Kress (in the last room near the final chest)
+- Ankor Wat (in the last room, on the wall to the right)
+
+KNOWN BUGS NOT YET ADDRESSED:
+- Kara's portrait quest is complete when the Magic Dust is successfully used.  Kara's portrait will remain on the screen even after she is freed with the Magic Dust.  Leaving and reentering the room will provide visual confirmation that she has been freed -- however, this is unnecessary to complete the quest.
+- When Kara's "portrait" appears in the Diamond Mine, she will look like her normal sprite instead of like the portrait itself. I hope to find a solution for this issue in future versions.
+- Leaving the Jeweler's Mansion and immediately reentering via Dao causes the top layer to look strange.
+- High STR might still destroy snakes in snake game (talk to NPC in front of the school to reset your STR/DEF)
+- Acquiring Earthquaker still grants you Dark Friar
+- Aura Barrier will not work unless you have Dark Friar
+
+
+
+v0.3
+CHANGES:
+- Inventory size constraints have been implemented in logic
+- Logic bug that over-counted the number of Red Jewels acquired has been fixed
+- Defeating the Vampires is now required to obtain Statue 3
+- You can now access Castoth and Viper boss rooms after defeating them; this allows perpetual access to Gold Ship and Seaside Palace, respectively
+- When entering Itory Village for the first time, you can move around a little before being sent back to the overworld
+- Jeweler's Mansion logic has changed: 
+  a) Exiting the mansion immediately sends you to Dao; 
+  b) Defeating Solid Arm sends you to the top of Babel Tower and causes the spirit in Dao to appear as well
+- Going to sleep on the Gold Ship (if you can manage to do it) sends you to the Diamond Coast
+- Talking to Ishtar resets the puzzle in Angel Village
+- Jackal should no longer soft lock you in Pyramid
+- Euro guest room and Dao SE house are now able to be entered without hard-locking
+- The bug that made the interior of Euro houses look strange has been fixed
+- The issue that caused various NPCs to misbehave or disappear in late game (e.g. Erik, Lilly, etc.) has been fixed
+- Wind Melody is now removed when Inca door is opened
+- Opening sequence can be played fully without hard-locking
+- In-game spoilers have been implemented (see below)
+
+IN-GAME SPOILERS:
+The following NPCs will each give the general location of one item in the game:
+- Kara's Guard in Edward's Castle
+- The elder in Itory
+- The queen on the Gold Ship
+- The laborer for auction in Freejia
+- The empty coffin in Seaside Palace
+- Ishtar's apprentice in Angel Village
+- Kara's journal in Watermia
+- Erasquez in Euro
+- The spirit in Ankor Wat
+- Girl with Jackal's note in Dao
+- The first spirit in Babel Tower
+
+KNOWN BUGS NOT YET ADDRESSED:
+- Kara quest has not yet been implemented (i.e. Magic Dust and Lance's Letter are useless)
+- High STR might still destroy snakes in snake game (talk to NPC in front of the school to reset your STR/DEF)
+- Dying in the Underground Tunnel before visiting Edward's Prison might still hard lock you
+- Acquiring Earthquaker still grants you Dark Friar
+- Aura Barrier will not work unless you have Dark Friar
+
+
+
+
+v.0.2
+Changes:
+- Can no longer be soft-locked by entering house in Dao
+- Travel options unlocked by Lola's Letter and the Teapot have been changed
+- Lola's Melody now required to access Itory Village
+- Overworld exits have been added to Neil's Cottage and Diamond Coast
+- Items are removed from inventory once used, where appropriate
+- Black Glasses and Crystal Ring can be used once and are considered worn from then on
+- Non-essential items can be removed from inventory at will
+- The glitch that made hieroglyphs appear not to match once placed has been fixed
+- Bugs from Babel force field event have been fixed
+- Bugs that restricted ability acquisition from certain Dark Spaces has been fixed
+- The first Dark Space in Inca Ruins will always allow form change.
+
+
+Known bugs not yet addressed:
+- Logic algorithm may still be faulty
+- Inventory space has not yet been incorprated into logic
+- Failing to collect the items in Ishtar's puzzle might still soft lock you
+- High STR might still destroy snakes in snake game (talk to NPC in front of the school to reset your STR/DEF)
+- Mu still allows you to get the Mystic Statue before defeating Vampires
+- Acquiring Earthquaker still grants you Dark Friar

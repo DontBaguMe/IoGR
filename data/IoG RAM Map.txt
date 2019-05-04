@@ -36,7 +36,7 @@ $7E09CC-$7E09CD - Will's sprite configuration?
 $7E09EC-$7E09ED - Text box configuration?
 
 $7E0A00-$7E0A1F - Event switches (bit by bit, 0-255)
-$7E0A20-$7E0A?? - Map configuration switches (bit by bit, 0-???)
+$7E0A20-$7E0A?? - Map arrangement switches (bit by bit, 0-???)
 $7E0A40-$7E0A4F - Chest open switches (bit by bit, 0-127)
 $7E0A50-$7E0A5F?- Item acquisition switches (bit by bit, 0-127)
 $7E0A60-$7E0A7F - Room reward switches (bit by bit, 0-255)
