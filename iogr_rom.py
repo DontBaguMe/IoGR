@@ -1,11 +1,14 @@
+# Python libraries
 from shutil import copyfile
 import classes
 import csv
 import binascii
 import datetime
 import os
-import quintet_comp
 import random
+
+# Local libraries
+import quintet_comp
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -15,6 +18,7 @@ KARA_ANKORWAT = 5
 
 INV_FULL = "\x5c\x8e\xc9\x80"
 
+# Generate new ROM and prepare it for randomization
 def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized", mode_str="Normal", goal="Dark Gaia", statues_reqstr="4"):
 
     # Initiate random seed
@@ -174,7 +178,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Modify Black Glasses, now permanently worn and removed from inventory when used
     f.seek(int("39981",16)+rom_offset)
-    f.write("\x8a\x99\x02\xcc\x4f\x02\xd5\x1c\x60\xd3\x42\x8e\x8e\x8b\x8d\x84")
+    f.write("\x8a\x99\x02\xcc\xf3\x02\xd5\x1c\x60\xd3\x42\x8e\x8e\x8b\x8d\x84")
     f.write("\xa3\xa3\xac\x88\x8d\xa4\x84\x8d\xa3\x88\x85\x88\x84\xa3\x4f\xc0")
 
     # Modify Aura, now unlocks Shadow's form when used
@@ -433,6 +437,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x02\xbf\xf9\xfa\x6b")
 
     ##########################################################################
+    #                          Modify Inca events
+    ##########################################################################
+    # Put Gold Ship captain at Inca entrance
+    f.seek(int("c8c9c",16)+rom_offset)
+    f.write("\x19\x1a\x00\x24\x84\x85\x00")
+
+    # Load Gold Ship spriteset into Inca Entrance
+    f.seek(int("c8c9c",16)+rom_offset)
+    f.write("\x19\x1a\x00\x24\x84\x85\x00")
+
+    ##########################################################################
     #                          Modify Gold Ship events
     ##########################################################################
     # Move Seth from deserted ship to gold ship, allows player to acquire item
@@ -463,6 +478,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x10")
 
     # Have crow's nest NPC warp directly to Diamond Coast
+    # Also checks for Castoth being defeated
     f_goldship = open(folder + "0584a9_goldship.bin","r+b")
     f.seek(int("584a9",16)+rom_offset)
     f.write(f_goldship.read())
@@ -834,8 +850,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xd3\x69\x8e\xa5\xac\x86\x8e\xa4\xac\x22\xac\x88\xa4\x84\x8c\xa3\x4f\xc0")
 
     # Spirit appears only after you get the Mystic Statue
-    f.seek(int("980cd",16)+rom_offset)
-    f.write("\xfd")
+    f.seek(int("980cb",16)+rom_offset)
+    f.write("\x4c\xb0\xf6")
+    f.seek(int("9f6b0",16)+rom_offset)
+    f.write("\x02\xd0\xf2\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0")
 
     ##########################################################################
     #                           Modify Pyramid events
@@ -910,6 +928,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     # Set exit warp to Dao
     f.seek(int("8fcb2",16)+rom_offset)
     f.write("\x02\x26\xc3\x40\x01\x88\x00\x00\x00\x23")
+
+    # Set flag when Solid Arm is killed
+    f.seek(int("8fa25",16)+rom_offset)
+    f.write("\x4c\x20\xfd")
+    f.seek(int("8fd20",16)+rom_offset)
+    f.write("\x02\xcc\xf2\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0")
 
     ##########################################################################
     #                           Modify Ending cutscene
