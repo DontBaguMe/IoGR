@@ -4,6 +4,7 @@ import random
 import quintet_text
 
 MAX_INVENTORY = 15
+PROGRESS_ADJ = [1.5, 1.25, 1, 1]   # Required items are more likely to be placed in easier modes
 
 class World:
     # Assigns item to location
@@ -343,6 +344,8 @@ class World:
                     elif self.item_pool[item][1] == 2:
                         probability *= float(self.item_pool[item][0]) / float((sum_abilities - j))
                         j += 1
+                    if item in self.required_items:
+                        probability *= PROGRESS_ADJ[self.mode]
             probabilities.append([probability,current_prereq])
             sum_prob += probability
             sum_edges += 1
@@ -465,30 +468,12 @@ class World:
 
     # Prepares dataset to give in-game spoilers
     def in_game_spoilers(self,placement_log=[]):
-        # Determine required items
-        important_items = [10,13,20,24,25,36,49,50,51]
-        if 1 in self.statues:
-            important_items += [3,4,7,8]
-        if 2 in self.statues:
-            important_items += [14]
-        if 3 in self.statues:
-            important_items += [18,19]
-        if 4 in self.statues:
-            important_items += []
-        if 5 in self.statues:
-            important_items += [38]
-        if 6 in self.statues:
-            important_items += [39]
-
-        trolly_locations = [32,43,44,45,64,65,70,102,107,108,121,128,147]
-        free_locations = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,24]
-
         for x in placement_log:
             item = x[0]
             location = x[1]
 
-            if location not in free_locations:
-                if item in important_items or location in trolly_locations:
+            if location not in self.free_locations:
+                if item in self.required_items or item in self.good_items or location in self.trolly_locations:
                     spoiler_str = "\xd3" + self.location_text[location] + "\xac\x87\x80\xa3\xcb"
                     spoiler_str += self.item_text_short[item] + "\xc0"
                     # No in-game spoilers in Extreme mode
@@ -691,6 +676,34 @@ class World:
         self.placement_log = []
         self.spoilers = []
         self.dark_space_sets = [[58,60]]
+        self.required_items = [20,36]
+        self.good_items = [10,13,24,25,49,50,51]
+        self.trolly_locations = [32,43,44,45,64,65,70,102,107,108,121,128,147]
+        self.free_locations = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,24]
+
+        if 1 in self.statues:
+            self.required_items += [3,4,7,8]
+        if 2 in self.statues:
+            self.required_items += [14]
+        if 3 in self.statues:
+            self.required_items += [18,19]
+        if 4 in self.statues:
+            self.required_items += [50,51]
+        if 5 in self.statues:
+            self.required_items += [38,30,31,32,33,34,35]
+        if 6 in self.statues:
+            self.required_items += [39]
+
+        if self.kara == 1:
+            self.required_items += [2,9,23]
+        elif self.kara == 2:
+            self.required_items += [11,12,15]
+        elif self.kara == 3:
+            self.required_items += [49]
+        elif self.kara == 4:
+            self.required_items += [26,50]
+        elif self.kara == 5:
+            self.required_items += [28,50,53]
 
         # Initialize item pool, considers special attacks as "items"
         # Format = { ID:  [Quantity,
@@ -746,7 +759,7 @@ class World:
             46: [1,1,"\x2e","2 Red Jewels",False],
             47: [1,1,"\x2f","3 Red Jewels",False],
             48: [1,2,"","Psycho Dash",False],
-            49: [1,2,"","Psycho Slide",False],
+            49: [1,2,"","Psycho Slider",False],
             50: [1,2,"","Spin Dash",False],
             51: [1,2,"","Dark Friar",False],
             52: [1,2,"","Aura Barrier",False],
