@@ -4,6 +4,7 @@ from tkFileDialog import askopenfilename
 import random
 import classes
 import iogr_rom
+import quintet_text
 
 VERSION = "0.6.2"
 

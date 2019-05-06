@@ -1,6 +1,7 @@
 from datetime import datetime
 import binascii
 import random
+import quintet_text
 
 MAX_INVENTORY = 15
 

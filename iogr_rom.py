@@ -6,6 +6,7 @@ import binascii
 import datetime
 import os
 import random
+import quintet_text
 
 # Local libraries
 import quintet_comp
@@ -45,6 +46,34 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     copyfile(rom_path,rom_path_new)
 
     f = open(rom_path_new,"r+b")
+
+    ##########################################################################
+    #                                Sandbox
+    ##########################################################################
+    # Test text encoding on South Cape NPC
+    #f.seek(int("4923d",16)+rom_offset)  # Switch 17 - Enter Seth's house
+    #f.write(quintet_text.encode("This is a test with some very long text. Do you like it?", True))
+
+    # Get all text boxes in the game
+#    f.seek(0)
+#    rom = f.read()
+#    addr_text = rom.find("\x02\xBF")
+#    text_call_addresses = []
+#    while addr_text >= 0:
+#        text_call_addresses.append(addr_text)
+#        addr_text = rom.find("\x02\xBF",addr_text+1)
+#
+#    #print text_call_addresses
+#    for addr in text_call_addresses:
+#        bank = int(addr / 65536)
+#        f.seek(addr)
+#        text_call = binascii.hexlify(rom[addr+2:addr+4])
+#        addr_tuple = text_call[2]+text_call[3]+text_call[0]+text_call[1]
+#        text_addr = bank*65536 + int(addr_tuple,16)
+#        if rom[text_addr] in ["\xd3","\xc1","\xce"]:
+#            #print text_call, addr_tuple, bank, text_addr
+#            print hex(text_addr), quintet_text.get_text(text_addr,f)
+
 
     ##########################################################################
     #                            Modify ROM Header
