@@ -947,7 +947,7 @@ class World:
             142: [63,2,True,0,[],"cd570","","","\xcc",           "Pyramid: Dark Space Bottom          "],   # Always open
 
             143: [66,1,False,0,[],"FC9D","FCAD","FCC3","",       "Babel: Pillow                       "],
-            144: [66,1,False,0,[],"99a61","99ae4","99afe","",    "Babel: Force Field                  "], #text1 was 99a91
+            144: [66,1,False,0,[],"9f712","99ae4","99afe","",    "Babel: Force Field                  "], #item was  99a61
             145: [66,2,False,0,[51,52,53],"ce09b","","","\xdf",  "Babel: Dark Space Bottom            "],
             146: [67,2,False,0,[51,52,53],"ce160","","","\xe3",  "Babel: Dark Space Top               "],
 
@@ -1173,7 +1173,7 @@ class World:
         # Define addresses for in-game spoiler text
         self.spoiler_addresses = {
             0: "4caf5",   # Edward's Castle guard, top floor (4c947)
-            1: "4ed19",   # Itory elder (4e929)
+            1: "4e9ff",   # Itory elder (4e929)
             2: "58ac0",   # Gold Ship queen (589ff)
             3: "5ad6b",   # Man at Diamond Coast (5ab5c)
             #4: "5bfde",   # Freejia laborer (5bfaa)

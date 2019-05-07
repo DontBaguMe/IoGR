@@ -423,7 +423,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #                            Modify Itory events
     ##########################################################################
     # Lilly event becomes Lola's Melody handler
-    # WORKS OKAY, COULD SOFT LOCK IF PLAYER MOVES AROUND TOO MUCH
     f_itory = open(folder + "04e2a3_itory.bin","r+b")
     f.seek(int("4e2a3",16)+rom_offset)
     f.write(f_itory.read())
@@ -444,8 +443,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x02\xbf\x8d\xf3\x6b")
 
     # For elder to always give spoiler
-    f.seek(int("4e988",16)+rom_offset)
-    f.write("\x8a\xe9")
+    f.seek(int("4e933",16)+rom_offset)
+    f.write("\x10\x01")
+    f.seek(int("4e97a",16)+rom_offset)
+    f.write("\x02\xbf\xff\xe9\x6b")
+#    f.seek(int("4e988",16)+rom_offset)
+#    f.write("\x8a\xe9")
 
     ##########################################################################
     #                          Modify Moon Tribe events
@@ -924,13 +927,23 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_babel2.close
 
     # Change switch conditions for Crystal Ring item
-    f_babel3 = open(folder + "09999b_babel.bin","r+b")
     f.seek(int("9999b",16)+rom_offset)
-    f.write(f_babel3.read())
-    f_babel3.close
+    f.write("\x4c\xd0\xf6")
+    f.seek(int("9f6d0",16)+rom_offset)
+    f.write("\x02\xd0\xdc\x00\xa0\x99\x02\xd0\x3e\x00\xa0\x99\x02\xd0\xb4\x01\x9a\x99\x4c\xa0\x99")
+    f.seek(int("999aa",16)+rom_offset)
+    f.write("\x4c\xf0\xf6")
+    f.seek(int("9f6f0",16)+rom_offset)
+    f.write("\x02\xd0\xdc\x01\x9a\x99\x4c\xaf\x99")
+    f.seek(int("99a57",16)+rom_offset)
+    f.write("\x4c\x10\xf7")
+    f.seek(int("9f710",16)+rom_offset)
+    f.write("\x02\xd4\x27\x6b\x9a\x02\xcc\xdc\x4c\x5c\x9a")
     # Change text
+    f.seek(int("99a70",16)+rom_offset)
+    f.write(quintet_text.encode("Hey! Listen!", True))
     f.seek(int("99a91",16)+rom_offset)
-    f.write("\xd3\xd6\x63\x8b\x8e\x8e\x8a\x88\x84\xac\x87\x84\xa2\x84\x2a\xc0")
+    f.write(quintet_text.encode("Well, lookie here.", True))
 
     # Olman event no longer warps you out of the room
     f.seek(int("98891",16)+rom_offset)
@@ -940,12 +953,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("9884c",16)+rom_offset)
     f.write("\x01\x00")
     f.seek(int("98903",16)+rom_offset)
-    f.write("\xd3\x87\x84\xa9\x80\x2a\xc0")
+    f.write(quintet_text.encode("heya.", True))
     f.seek(int("989a2",16)+rom_offset)
-    f.write("\xd3\xa9\x8e\xa5\x0e\xa6\x84\xac\xd6\x70\x81")
-    f.write("\xa5\xa3\xa9\x2b\xac\x87\xa5\x87\x0d\xc0")
-    #f.seek(int("98caa",16)+rom_offset)
-    #f.write("\xd3\xa7\x84\x8b\xa0\x2a\xc0")
+    f.write(quintet_text.encode("you've been busy, huh?", True))
 
     # Speed up roof sequence
     f.seek(int("98fad",16)+rom_offset)
@@ -1187,11 +1197,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Change boss room ranges
     f.seek(int("c31a",16)+rom_offset)
-    f.write("\x67\x5A\x73\x00\x8A\x82\x8A\x00\xDD\xCC\xDD\x00\xEA\xB0\xBF\x00\xF6\xB0\xBF\x00")
+    f.write("\x67\x5A\x73\x00\x8A\x82\xA8\x00\xDD\xCC\xDD\x00\xEA\xB0\xBF\x00")
+    #f.write("\xF6\xB0\xBF\x00")   # If Solid Arm ever grants Babel rewards
 
     # Add boss reward events to Babel and Jeweler Mansion
-    f.seek(int("ce3cb",16)+rom_offset)  # Solid Arm
-    f.write("\x00\x01\x01\xDF\xA5\x8B\x00\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
+    #f.seek(int("ce3cb",16)+rom_offset)  # Solid Arm
+    #f.write("\x00\x01\x01\xDF\xA5\x8B\x00\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
     f.seek(int("ce536",16)+rom_offset)  # Mummy Queen (Babel)
     f.write("\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
 
