@@ -1,5 +1,8 @@
 v0.7
 CHANGES:
+- Itory elder has been fixed to always provide a spoiler.
+- Stat reward system is new **EXPLAIN**
+- Spirits in Babel have been distributed to different floors, to allow warps if you cannot defeat bosses.
 
 v0.6
 CHANGES:

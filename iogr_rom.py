@@ -6,7 +6,7 @@ import binascii
 import datetime
 import os
 import random
-import quintet_text
+import quintet_text as qt
 
 # Local libraries
 import quintet_comp
@@ -52,7 +52,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     # Test text encoding on South Cape NPC
     #f.seek(int("4923d",16)+rom_offset)  # Switch 17 - Enter Seth's house
-    #f.write(quintet_text.encode("This is a test with some very long text. Do you like it?", True))
+    #f.write(qt.encode("This is a test with some very long text. Do you like it?", True))
 
     # Get all text boxes in the game
 #    f.seek(0)
@@ -72,7 +72,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 #        text_addr = bank*65536 + int(addr_tuple,16)
 #        if rom[text_addr] in ["\xd3","\xc1","\xce"]:
 #            #print text_call, addr_tuple, bank, text_addr
-#            print hex(text_addr), quintet_text.get_text(text_addr,f)
+#            print hex(text_addr), qt.get_text(text_addr,f)
 
 
     ##########################################################################
@@ -909,7 +909,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     # Move Dark Space in Babel Tower from map 224 to map 223
     # Allows player to exit Babel without crystal ring
-    # Modify address pointer for Map 224 exit table
+    # Modify address pointer for Maps 224 in exit table
     f.seek(int("183f4",16)+rom_offset)
     f.write("\xea")
     # Move Dark Space exit data to Map 223
@@ -917,14 +917,28 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("1a7c2",16)+rom_offset)
     f.write(f_babel1.read())
     f_babel1.close
-    # Modify address pointer for Map 224 event table
+    # Modify address pointer for Maps 224-227 in event table
     f.seek(int("c81c0",16)+rom_offset)
-    f.write("\xa2")
+    f.write("\xa2\xe0\xe3\xe0\x0f\xe1\x2d\xe1")
     # Move Dark Space event data to Map 223
+    # Also move spirits for entrance warp
     f_babel2 = open(folder + "0ce099_babel.bin","r+b")
     f.seek(int("ce099",16)+rom_offset)
     f.write(f_babel2.read())
     f_babel2.close
+
+    # Spirits can warp you back to start
+    f.seek(int("99b69",16)+rom_offset)
+    f.write("\x76\x9B\x76\x9B\x76\x9B\x76\x9B")
+    f.seek(int("99b7a",16)+rom_offset)
+    f.write("\x02\xBE\x02\x01\x80\x9B\x86\x9B\x86\x9B\x16\x9D\x02\xBF\x95\x9C\x6B")
+    f.seek(int("99c1e",16)+rom_offset)
+    f.write("\xd3" + qt.encode("What'd you like to do?") + "\xcb\xac")
+    f.write(qt.encode("Git gud") + "\xcb\xac" + qt.encode("Run away!") + "\xca")
+    f.seek(int("99c95",16)+rom_offset)
+    f.write("\xce" + qt.encode("Darn straight.") + "\xc0")
+    f.seek(int("99d16",16)+rom_offset)
+    f.write("\x02\x26\xDE\x78\x00\xC0\x00\x00\x00\x11\x02\xC5")
 
     # Change switch conditions for Crystal Ring item
     f.seek(int("9999b",16)+rom_offset)
@@ -941,9 +955,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x02\xd4\x27\x6b\x9a\x02\xcc\xdc\x4c\x5c\x9a")
     # Change text
     f.seek(int("99a70",16)+rom_offset)
-    f.write(quintet_text.encode("Hey! Listen!", True))
+    f.write(qt.encode("Hey! Listen!", True))
     f.seek(int("99a91",16)+rom_offset)
-    f.write(quintet_text.encode("Well, lookie here.", True))
+    f.write(qt.encode("Well, lookie here.", True))
 
     # Olman event no longer warps you out of the room
     f.seek(int("98891",16)+rom_offset)
@@ -953,9 +967,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("9884c",16)+rom_offset)
     f.write("\x01\x00")
     f.seek(int("98903",16)+rom_offset)
-    f.write(quintet_text.encode("heya.", True))
+    f.write(qt.encode("heya.", True))
     f.seek(int("989a2",16)+rom_offset)
-    f.write(quintet_text.encode("you've been busy, huh?", True))
+    f.write(qt.encode("you've been busy, huh?", True))
 
     # Speed up roof sequence
     f.seek(int("98fad",16)+rom_offset)
@@ -1756,7 +1770,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     death_list.append("\x2d\x48\xac\x80\x8b\xa7\x80\xa9\xa3\xac\xa3\x80\xa9\x2b\xac\x82\x8e\x8c\xa0\x8b\x80\x82\x84\x8d\x82\xa9\xcb\x88\xa3\xac\xa4\x87\x84\xac\x8a\x88\xa3\xa3\xac\x8e\x85\xac\x83\x84\x80\xa4\x87\x2a\x2e\xcb\xac\xac\x6d\x63\x87\x80\xa2\x88\xac\x62\x84\x83\xa3\xa4\x8e\x8d\x84\xc0")
     death_list.append("\x2d\x48\x8d\xac\xa4\x87\x84\xac\x8b\x8e\x8d\x86\xac\xa2\xa5\x8d\xac\xa7\x84\xac\x80\xa2\x84\xcb\x80\x8b\x8b\xac\x83\x84\x80\x83\x2a\x2e\xcb\xac\xac\x6d\x49\x8e\x87\x8d\xac\x4C\x80\xa9\x8d\x80\xa2\x83\xac\x4A\x84\xa9\x8d\x84\xa3\xc0")
     death_list.append("\x2d\x48\x0e\x8c\xac\x8d\x8e\xa4\xac\x80\x85\xa2\x80\x88\x83\xac\x8e\x85\xac\x83\x84\x80\xa4\x87\x2b\xcb\x81\xa5\xa4\xac\x48\x0e\x8c\xac\x88\x8d\xac\x8d\x8e\xac\x87\xa5\xa2\xa2\xa9\xac\xa4\x8e\xcb\x83\x88\x84\x2a\xac\x48\xac\x87\x80\xa6\x84\xac\xa3\x8e\xac\x8c\xa5\x82\x87\xac\x48\xac\xa7\x80\x8d\xa4\xcb\xa4\x8e\xac\x83\x8e\xac\x85\x88\xa2\xa3\xa4\x2a\x2e\xac\x6d\x63\x2a\xac\x47\x80\xa7\x8a\x88\x8d\x86\xc0")
-    death_list.append("\x2d\x45\x8e\xa2\xac\xa4\x88\xa3\xac\x8d\x8e\xa4\xac\x88\x8d\xac\x8c\x84\xa2\x84\xac\x83\x84\x80\xa4\x87\xcb\xa4\x87\x80\xa4\xac\x8c\x84\x8d\xac\x83\x88\x84\xac\x8c\x8e\xa3\xa4\x2a\x2e\xcb\xac\xac\x6d\x44\x8b\x88\xaa\x80\x81\x84\xa4\x87\xac\x41\x80\xa2\xa2\x84\xa4\xa4\xac\x41\xa2\x8e\xa7\x8d\x88\x8d\x86\xc0")
+    death_list.append("\x2d\x45\x8e\xa2\xac\xa4\x88\xa3\xac\x8d\x8e\xa4\xac\x88\x8d\xac\x8c\x84\xa2\x84\xac\x83\x84\x80\xa4\x87\xcb\xa4\x87\x80\xa4\xac\x8c\x84\x8d\xac\x83\x88\x84\xac\x8c\x8e\xa3\xa4\x2a\x2e\xcb\xac\xac\x6d\x44\x8b\x88\xaa\x80\x81\x84\xa4\x87\xac\x41\x80\xa2\xa2\x84\xa4\xa4\xcb\xac\xac\xac\xac\xac\x41\xa2\x8e\xa7\x8d\x88\x8d\x86\xc0")
     death_list.append("\x2d\x43\x8e\xac\x8d\x8e\xa4\xac\x85\x84\x80\xa2\xac\x83\x84\x80\xa4\x87\xac\xa3\x8e\xac\x8c\xa5\x82\x87\xcb\x81\xa5\xa4\xac\xa2\x80\xa4\x87\x84\xa2\xac\xa4\x87\x84\xac\x88\x8d\x80\x83\x84\xa1\xa5\x80\xa4\x84\xcb\x8b\x88\x85\x84\x2a\x2e\xcb\xac\xac\x6d\x41\x84\xa2\xa4\x8e\x8b\xa4\xac\x41\xa2\x84\x82\x87\xa4\xc0")
     death_list.append("\x2d\x4D\x8e\xa4\x87\x88\x8d\x86\xac\x88\x8d\xac\x8b\x88\x85\x84\xac\x88\xa3\xcb\xa0\xa2\x8e\x8c\x88\xa3\x84\x83\xac\x84\xa8\x82\x84\xa0\xa4\xac\x83\x84\x80\xa4\x87\x2a\x2e\xcb\xac\xac\x6d\x4A\x80\x8d\xa9\x84\xac\x67\x84\xa3\xa4\xc0")
     death_list.append("\x2d\x4C\xa9\xac\x85\x84\x80\xa2\xac\xa7\x80\xa3\xac\x8d\x8e\xa4\xac\x8e\x85\xac\x83\x84\x80\xa4\x87\xcb\x88\xa4\xa3\x84\x8b\x85\x2b\xac\x81\xa5\xa4\xac\x80\xac\x83\x84\x80\xa4\x87\xac\xa7\x88\xa4\x87\x6d\xcb\x8e\xa5\xa4\xac\x8c\x84\x80\x8d\x88\x8d\x86\x2a\x2e\xcb\xac\xac\x6d\x47\xa5\x84\xa9\xac\x4D\x84\xa7\xa4\x8e\x8d\xc0")
