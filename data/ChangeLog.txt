@@ -21,12 +21,14 @@ BUG FIXES:
 - The bug that allowed you to remain as Freedan/Shadow out of Underground Tunnel has been fixed.
 - The text box associated with the two items you get from the man in Dao now display the correct items.
 
+- The bug where Vampires would not gather all their upgrades has been fixed.
 - Spirits in Babel have been distributed to different floors, to allow warps if you cannot defeat bosses.
 - Kara's portrait will now disappear when you use the Magic Dust on it.
 - The Euro map glitch has been fixed.
 - Itory elder has been fixed to always provide a spoiler.
 - Dying to the Vampires in Mu sends you back one screen, instead of back to the beginning of the dungeon.
 - When approaching the guard blocking the way from the Underground Tunnel, you no longer have to be against the top wall.
+- Various NPC dialogue has been fixed.
 
 v0.6
 CHANGES:
