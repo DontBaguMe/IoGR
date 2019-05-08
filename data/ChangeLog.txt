@@ -1,8 +1,32 @@
 v0.7
 CHANGES:
-- Itory elder has been fixed to always provide a spoiler.
-- Stat reward system is new **EXPLAIN**
+1) All rewards (HP, DEF and STR) are available through clearing rooms.
+2) HP rewards grant you +3 HP each
+3) The rewards are shuffled at random throughout the entire game, map by map.  The total rewards available by difficulty (HP/STR/DEF) are:
+- Easy: 10/7/7
+- Normal: 10/4/4
+- Hard: 8/2/2 (max HP 35)
+- Extreme: 6/0/0 (max HP 29)
+4) You will now gain a reward for defeating Mummy Queen at the top of Babel Tower.  The rewards gathered by each boss are now as follows:
+- Castoth: Underground Tunnel and Inca (no change)
+- Viper: Diamond Mine and Sky Garden (no change)
+- Vampires: Mu and Angel Dungeon
+- Sand Fanger: Great Wall and Mt. Kress
+- Mummy Queen: Pyramid
+- Babel Tower: Ankor Wat
+
+BUG FIXES:
+- The special abilities for Will and Freedan now work correctly and independently.
+- You might still get softlocked in Diamond Mine by attempting to rescue the trapped laborer with Slider or Spin -- however, logic has been updated such that Psycho Dash is required to acquire this item. Sequence break at your own risk.
+- The bug that allowed you to remain as Freedan/Shadow out of Underground Tunnel has been fixed.
+- The text box associated with the two items you get from the man in Dao now display the correct items.
+
 - Spirits in Babel have been distributed to different floors, to allow warps if you cannot defeat bosses.
+- Kara's portrait will now disappear when you use the Magic Dust on it.
+- The Euro map glitch has been fixed.
+- Itory elder has been fixed to always provide a spoiler.
+- Dying to the Vampires in Mu sends you back one screen, instead of back to the beginning of the dungeon.
+- When approaching the guard blocking the way from the Underground Tunnel, you no longer have to be against the top wall.
 
 v0.6
 CHANGES:
