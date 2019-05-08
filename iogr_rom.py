@@ -128,6 +128,13 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("7d7b1",16)+rom_offset)  # Switch 159 - Mt. Kress on map
     f.write("\x10")
 
+    ##########################################################################
+    #                           Update map headers
+    ##########################################################################
+    f_mapdata = open(folder + "0d8000_mapdata.bin","r+b")
+    f.seek(int("d8000",16)+rom_offset)
+    f.write(f_mapdata.read())
+    f_mapdata.close
 
     ##########################################################################
     #                        Update treasure chest data
@@ -705,8 +712,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_angelsign.close
 
     # Kara's portrait room doesn't lock you in
-    f.seek(int("6d16b",16)+rom_offset)
-    f.write("\x6b")
+    #f.seek(int("6d16b",16)+rom_offset)
+    #f.write("\x6b")
 
     # Ishtar's game never closes
     f.seek(int("6d9fc",16)+rom_offset)
@@ -785,6 +792,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("7c4d0",16)+rom_offset)
     f.write(f_euro2.read())
     f_euro2.close
+    f.seek(int("7c482",16)+rom_offset)
+    f.write(qt.encode("A moose once bit my sister.",True))
 
     # Neil in Euro
     f_euroneil = open(folder + "07e398_euroneil.bin","r+b")
@@ -1634,16 +1643,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #ANGEL_PALETTE = "\x04\x00\x60\xa0\x80\x01\xdf"
     #ANGEL_SPRTESET = "\x10\x43\x0a\x00\x00\x00\xda"
 
-    # Write Angel sprite information to a label in Memory - NOW INCLUDES ENTIRE DATASET
-    # Occupies map data for Raft
-    f_mapdata = open(folder + "0d8000_mapdata.bin","r+b")
-    f.seek(int("d8000",16)+rom_offset)
-    f.write(f_mapdata.read())
-    f_mapdata.close
-
     # Modify Kara Portrait event
     f.seek(int("6d153",16)+rom_offset)
     f.write("\x8a")
+    f.seek(int("6d169",16)+rom_offset)
+    f.write("\x02\xd2\x8a\x01\x02\xe0")
+    f.seek(int("6d25c",16)+rom_offset)
+    f.write("\x8a")
+    f.seek(int("6d27e",16)+rom_offset)
+    f.write(qt.encode("Hurry boy, she's waiting there for you!") + "\xc0")
+    f.seek(int("6d305",16)+rom_offset)
+    f.write(qt.encode("Kara's portrait. If only you had Magic Dust...") + "\xc0")
 
     if kara_location == KARA_ANGEL:
         # Set spoiler for Kara's location in Lance's Letter
