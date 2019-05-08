@@ -70,7 +70,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 #        text_call = binascii.hexlify(rom[addr+2:addr+4])
 #        addr_tuple = text_call[2]+text_call[3]+text_call[0]+text_call[1]
 #        text_addr = bank*65536 + int(addr_tuple,16)
-#        if rom[text_addr] in ["\xd3","\xc1","\xce"]:
+#        if rom[text_addr] in ["\xd3","\xc1","\xc2","\xce"]:
 #            #print text_call, addr_tuple, bank, text_addr
 #            print hex(text_addr), qt.get_text(text_addr,f)
 
@@ -688,9 +688,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("193f8",16)+rom_offset)
     f.write("\x65\xb8\x00\x80\x02\x03\x00\x44")
     f.seek(int("69c62",16)+rom_offset)
-    f.write("\x67\x78\x01\xd0\x01\x00\x01\x22")
+    f.write("\x67\x78\x01\xd0\x01\x80\x01\x22")
     f.seek(int("6a4c9",16)+rom_offset)
-    f.write("\x02\x26\x66\xf8\x00\xd8\x01\x80\x00\x22\x02\xc1\x6b")
+    f.write("\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b")
 
     ##########################################################################
     #                       Modify Angel Village events
@@ -825,6 +825,28 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("7cdf7",16)+rom_offset)         # Dark Friar upgrade
     f.write("\x02\xd4\x2d\x05\xce\x02\xcc\xf1\x02\xbf\x28\xce\x02\xe0")
     f.write("\x02\xbf\x3e\xce\x6b")
+
+    # Various NPC dialogue
+    f.seek(int("7d6db",16)+rom_offset)
+    f.write("\x2A\xD0\xC8\xC9\x1E\xC2\x0B\xC2\x03" + qt.encode("It could be carried by an African swallow!"))
+    f.write("\xCF\xC2\x03\xC2\x04" + qt.encode("Oh yeah, an African swallow maybe, but not a European swallow, that's my point!") + "\xc0")
+    f.seek(int("7d622",16)+rom_offset)
+    f.write(qt.encode("Rofsky: Wait a minute, supposing two swallows carried it together?...") + "\xc0")
+    f.seek(int("7c860",16)+rom_offset)
+    f.write("\xce" + qt.encode("Nobody expects the Spanish Inquisition!") + "\xc0")
+    f.seek(int("7c142",16)+rom_offset)
+    f.write(qt.encode("I am no longer infected.",True))
+    f.seek(int("7c160",16)+rom_offset)
+    f.write(qt.encode("My hovercraft is full of eels.",True))
+    f.seek(int("7c182",16)+rom_offset)
+    f.write(qt.encode("... w-i-i-i-i-ith... a herring!!",True))
+    f.seek(int("7c1b6",16)+rom_offset)
+    f.write(qt.encode("It's only a wafer-thin mint, sir...",True))
+    f.seek(int("7c1dc",16)+rom_offset)
+    f.write("\xd3" + qt.encode("The mill's closed. There's no more work. We're destitute.|"))
+    f.write(qt.encode("I've got no option but to sell you all for scientific experiments.") + "\xc0")
+    f.seek(int("7c3d4",16)+rom_offset)
+    f.write(qt.encode("You're a looney.",True))
 
     ##########################################################################
     #                        Modify Native Village events
