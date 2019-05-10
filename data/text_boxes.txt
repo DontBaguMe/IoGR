@@ -425,12 +425,13 @@
 0x7beda ["??????We crossed the desert?and finally arrived in?the village of Euro.???Euro was a bustling?city? larger than?I had imagined.???Neil's parents lived ?there? and ran a ?company called Rolek.???Neil hadn't been there ?for three years.?His parents welcomed?him home.???They set off fireworks. ?There were dancers. ?It looked like a ?festival had started.?????", 311]
 0x7c0f3 ["I see that you want?it. I'll give you one.|Will got the apple!", 55]
 0x7c0dd ['How about a sweet apple?', 22]
-0x7c12a ['This is a green apple.', 24]
-0x7c142 ['Our fruit is soft?and tasty.', 30]
-0x7c160 ["Heh heh.?You're probably too?young for this.", 34]
-0x7c182 ['This is the fish shop.?We can buy fresh?fish from Watermia.', 52]
-0x7c1b6 ['This is corn meal??for making bread.', 38]
-0x7c1dc ['This is a teapot.?We call it a ?Tear Pot?.|Once we were caught?up in a war.|After the women sent?their husbands to war??they saved their tears?in these pots.', 138]
+0x7c12a ['This is a green apple.', 24]                         ""
+0x7c142 ['Our fruit is soft?and tasty.', 30]                   "I am no longer infected."
+0x7c160 ["Heh heh.?You're probably too?young for this.", 34]   "My hovercraft is full of eels."
+0x7c182 ['This is the fish shop.?We can buy fresh?fish from Watermia.', 52] "... w-i-i-i-i-ith... a herring!!"
+0x7c1b6 ['This is corn meal??for making bread.', 38]           "It’s only a wafer-thin mint, sir..."
+0x7c1dc ['This is a teapot.?We call it a ?Tear Pot?.|Once we were caught?up in a war.|After the women sent?their husbands to war??they saved their tears?in these pots.', 138]              
+"The mill’s closed. There’s no more work. We’re destitute.|I’ve got no option but to sell you all for scientific experiments."
 0x7c337 ["Hey! Don't ever go?over there.?Cross over to?the other side!", 42]
 0x7c361 ['', 2]
 0x7c363 ['', 2]
@@ -443,7 +444,7 @@
 0x7c371 ['', 2]
 0x7c373 ['', 2]
 0x7c38f ["Hey! Don't ever go?over there.?Cross over to?the other side!", 42]
-0x7c3d4 ['Thanks to customers like ?this? we can survive.', 46]
+0x7c3d4 ['Thanks to customers like ?this? we can survive.', 46] - "You're a looney."
 0x7c480 ["This is Euro. It's a?crowded merchant town.", 42]
 0x7c4aa ["Villagers live here.?Outsiders can't enter.", 38]
 0x7c4d0 ['This is the marketplace.?You can find anything?you want here.', 57]

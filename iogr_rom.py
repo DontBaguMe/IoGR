@@ -70,7 +70,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 #        text_call = binascii.hexlify(rom[addr+2:addr+4])
 #        addr_tuple = text_call[2]+text_call[3]+text_call[0]+text_call[1]
 #        text_addr = bank*65536 + int(addr_tuple,16)
-#        if rom[text_addr] in ["\xd3","\xc1","\xce"]:
+#        if rom[text_addr] in ["\xd3","\xc1","\xc2","\xce"]:
 #            #print text_call, addr_tuple, bank, text_addr
 #            print hex(text_addr), qt.get_text(text_addr,f)
 
@@ -128,6 +128,13 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("7d7b1",16)+rom_offset)  # Switch 159 - Mt. Kress on map
     f.write("\x10")
 
+    ##########################################################################
+    #                           Update map headers
+    ##########################################################################
+    f_mapdata = open(folder + "0d8000_mapdata.bin","r+b")
+    f.seek(int("d8000",16)+rom_offset)
+    f.write(f_mapdata.read())
+    f_mapdata.close
 
     ##########################################################################
     #                        Update treasure chest data
@@ -552,9 +559,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x42\xa2\x80\xa0\x2b\xac\x48\xac\xd6\xae\xa4\x87\x84\xac\xd7\x58\xcb\xa5")
     f.write("\x8d\x8b\x8e\x82\x8a\x84\x83\xac\x80\x86\x80\x88\x8d\x2a\x2a\x2a\xc0")
 
-    # Rearrange Creepy Guy event
-    f.seek(int("5b6e5",16)+rom_offset)
-    f.write("\xfe\xb6")
+    # Add inventory full option to Creepy Guy event
     f.seek(int("5b6df",16)+rom_offset)
     f.write(INV_FULL)
 
@@ -688,9 +693,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("193f8",16)+rom_offset)
     f.write("\x65\xb8\x00\x80\x02\x03\x00\x44")
     f.seek(int("69c62",16)+rom_offset)
-    f.write("\x67\x78\x01\xd0\x01\x00\x01\x22")
+    f.write("\x67\x78\x01\xd0\x01\x80\x01\x22")
     f.seek(int("6a4c9",16)+rom_offset)
-    f.write("\x02\x26\x66\xf8\x00\xd8\x01\x80\x00\x22\x02\xc1\x6b")
+    f.write("\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b")
 
     ##########################################################################
     #                       Modify Angel Village events
@@ -707,8 +712,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_angelsign.close
 
     # Kara's portrait room doesn't lock you in
-    f.seek(int("6d16b",16)+rom_offset)
-    f.write("\x6b")
+    #f.seek(int("6d16b",16)+rom_offset)
+    #f.write("\x6b")
 
     # Ishtar's game never closes
     f.seek(int("6d9fc",16)+rom_offset)
@@ -787,6 +792,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("7c4d0",16)+rom_offset)
     f.write(f_euro2.read())
     f_euro2.close
+    f.seek(int("7c482",16)+rom_offset)
+    f.write(qt.encode("A moose once bit my sister.",True))
 
     # Neil in Euro
     f_euroneil = open(folder + "07e398_euroneil.bin","r+b")
@@ -825,6 +832,28 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("7cdf7",16)+rom_offset)         # Dark Friar upgrade
     f.write("\x02\xd4\x2d\x05\xce\x02\xcc\xf1\x02\xbf\x28\xce\x02\xe0")
     f.write("\x02\xbf\x3e\xce\x6b")
+
+    # Various NPC dialogue
+    f.seek(int("7d6db",16)+rom_offset)
+    f.write("\x2A\xD0\xC8\xC9\x1E\xC2\x0B\xC2\x03" + qt.encode("It could be carried by an African swallow!"))
+    f.write("\xCF\xC2\x03\xC2\x04" + qt.encode("Oh yeah, an African swallow maybe, but not a European swallow, that's my point!") + "\xc0")
+    f.seek(int("7d622",16)+rom_offset)
+    f.write(qt.encode("Rofsky: Wait a minute, supposing two swallows carried it together?...") + "\xc0")
+    f.seek(int("7c860",16)+rom_offset)
+    f.write("\xce" + qt.encode("Nobody expects the Spanish Inquisition!") + "\xc0")
+    f.seek(int("7c142",16)+rom_offset)
+    f.write(qt.encode("I am no longer infected.",True))
+    f.seek(int("7c160",16)+rom_offset)
+    f.write(qt.encode("My hovercraft is full of eels.",True))
+    f.seek(int("7c182",16)+rom_offset)
+    f.write(qt.encode("... w-i-i-i-i-ith... a herring!!",True))
+    f.seek(int("7c1b6",16)+rom_offset)
+    f.write(qt.encode("It's only a wafer-thin mint, sir...",True))
+    f.seek(int("7c1dc",16)+rom_offset)
+    f.write("\xd3" + qt.encode("The mill's closed. There's no more work. We're destitute.|"))
+    f.write(qt.encode("I've got no option but to sell you all for scientific experiments.") + "\xc0")
+    f.seek(int("7c3d4",16)+rom_offset)
+    f.write(qt.encode("You're a looney.",True))
 
     ##########################################################################
     #                        Modify Native Village events
@@ -1345,9 +1374,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_incamapcomp.read())
     f_incamapcomp.close
 
-    # Direct map arrangement pointer to new data
-    f.seek(int("d8703",16)+rom_offset)
-    f.write("\xa0\x3e")
+    # Direct map arrangement pointer to new data - NO LONGER NECESSARY
+    #f.seek(int("d8703",16)+rom_offset)
+    #f.write("\xa0\x3e")
 
     ##########################################################################
     #                       Randomize heiroglyph order
@@ -1610,20 +1639,21 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     # Determine random location ID
     kara_location = random.randint(1,5)
-    ANGEL_TILESET = "\x03\x00\x10\x10\x36\x18\xca\x01"
-    ANGEL_PALETTE = "\x04\x00\x60\xa0\x80\x01\xdf"
-    ANGEL_SPRTESET = "\x10\x43\x0a\x00\x00\x00\xda"
-
-    # Write Angel sprite information to a label in Memory
-    # Occupies map data for Raft
-    f_mapdata = open(folder + "0d8818_mapdata.bin","r+b")
-    f.seek(int("d8818",16)+rom_offset)
-    f.write(f_mapdata.read())
-    f_mapdata.close
+    #ANGEL_TILESET = "\x03\x00\x10\x10\x36\x18\xca\x01"
+    #ANGEL_PALETTE = "\x04\x00\x60\xa0\x80\x01\xdf"
+    #ANGEL_SPRTESET = "\x10\x43\x0a\x00\x00\x00\xda"
 
     # Modify Kara Portrait event
     f.seek(int("6d153",16)+rom_offset)
     f.write("\x8a")
+    f.seek(int("6d169",16)+rom_offset)
+    f.write("\x02\xd2\x8a\x01\x02\xe0")
+    f.seek(int("6d25c",16)+rom_offset)
+    f.write("\x8a")
+    f.seek(int("6d27e",16)+rom_offset)
+    f.write(qt.encode("Hurry boy, she's waiting there for you!") + "\xc0")
+    f.seek(int("6d305",16)+rom_offset)
+    f.write(qt.encode("Kara's portrait. If only you had Magic Dust...") + "\xc0")
 
     if kara_location == KARA_ANGEL:
         # Set spoiler for Kara's location in Lance's Letter
@@ -1645,11 +1675,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write("\x13\x00\xD0\x08\x02\x45\x0b\x0b\x0d\x0d")
 
             # Assign Kara painting spriteset to appropriate Map
-            f.seek(int("d83a4",16)+rom_offset)
-            f.write(ANGEL_TILESET)
-            f.write(ANGEL_PALETTE)
-            f.write(ANGEL_SPRTESET)
-            f.write("\x00\x14\x00")
+            #f.seek(int("d83a4",16)+rom_offset)
+            #f.write(ANGEL_TILESET)
+            #f.write(ANGEL_PALETTE)
+            #f.write(ANGEL_SPRTESET)
+            #f.write("\x00\x14\x00")
 
             # Set Kara painting event in appropriate map
             f.seek(int("c8ac5",16)+rom_offset)
@@ -1701,8 +1731,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write("\xa9\x00\xD0\x08\x02\x45\x12\x06\x14\x08")
 
             # Assign Kara painting spriteset to appropriate Map
-            f.seek(int("da0da",16)+rom_offset)
-            f.write("\x25")
+            #f.seek(int("da0da",16)+rom_offset)
+            #f.write("\x25")
 
             # Set Kara painting event in appropriate map
             # Map #169, written into unused Map #104 (Seaside Tunnel)
@@ -1726,8 +1756,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write("\xbf\x00\xD0\x08\x02\x45\x1a\x10\x1c\x12")
 
             # Assign Kara painting spriteset to appropriate Map
-            f.seek(int("da468",16)+rom_offset)
-            f.write("\x25")
+            #f.seek(int("da468",16)+rom_offset)
+            #f.write("\x25")
 
             # Set Kara painting event in appropriate map (Map #191)
             # Map #191, written into unused Map #104 (Seaside Tunnel)
