@@ -720,6 +720,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_angelsign.read())
     f_angelsign.close
 
+    # Entering this area clears your enemy defeat count
+    f.seek(int("6bff7",16)+rom_offset)
+    f.write("\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b")
+    f.write("\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x02\xE0")
+
     # Kara's portrait room doesn't lock you in
     #f.seek(int("6d16b",16)+rom_offset)
     #f.write("\x6b")
