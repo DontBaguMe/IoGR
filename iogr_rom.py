@@ -588,6 +588,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #                        Modify Diamond Mine events
     ##########################################################################
     # Trapped laborer gives you an item instead of sending Jewels to Jeweler
+    f.seek(int("5d739",16)+rom_offset)
+    f.write("\x4c\x5d\xd8\x85")
     f_trappedlaborer = open(folder + "05d7e2_trappedlaborer.bin","r+b")
     f.seek(int("5d7e2",16)+rom_offset)
     f.write(f_trappedlaborer.read())
@@ -725,9 +727,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b")
     f.write("\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x02\xE0")
 
-    # Kara's portrait room doesn't lock you in
-    #f.seek(int("6d16b",16)+rom_offset)
-    #f.write("\x6b")
+    # Insert new arrangement for map 109, takes out rock to prevent spin dash softlock
+    f_angelmap = open(folder + "1a5a37_angelmap.bin","r+b")
+    f.seek(int("1a5a37",16)+rom_offset)
+    f.write(f_angelmap.read())
+    f_angelmap.close
 
     # Ishtar's game never closes
     f.seek(int("6d9fc",16)+rom_offset)
