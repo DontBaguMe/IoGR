@@ -1,3 +1,38 @@
+:: ISHTAR PUZZLE SHUFFLE
+: ROOM 1:
+1) Change right-most vase to light (vanilla):
+  - 17b "7b"
+  - 18b "84"
+  - (27,7) (27,8)
+
+2) Change middle vase to light:
+  - 175 "7b"
+  - 185 "84"
+  - (21,7) (21,8)
+
+3) Change left vase to dark:
+  - 174 "83"
+  - 184 "87"
+  - (20,7) (20,8)
+
+4) Change left windowsill to blank (74)
+- 165 "74"
+- (21,6)
+
+5) Change left windowsill to books (76)
+- 165 "76"
+- (21,6)
+
+6) Change right windowsill to jar (75)
+- 166 "75"
+- (22,6)
+
+7) Change right windowsill to blank (74)
+- 166 "74"
+- (22,6)
+
+: ROOM 2:
+
 :: ENEMY SPRITE PALETTES FOR ENEMIZER (all addr offset $d8000)
 
 Ed's Prison (#$0c): $2a2

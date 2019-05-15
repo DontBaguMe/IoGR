@@ -61,6 +61,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         f.seek(int("2ce84",16)+rom_offset)
         f.write("\xad\xd4\x0a\xc9\x02\x00")
 
+    # Turns house in South Cape into tutorial map
+    #f.seek(int("18480",16)+rom_offset)
+    #f.write("\xfe\x78\x00\xC0\x00\x00\x00\x44")
+    #f.seek(int("ce5a9",16)+rom_offset)
+    #f.write("\x05\x0A\x00\x8C\xC3\x82\x00\x00\x00\x00\xED\xEA\x80\x00\xFF\xCA")
+
     # Test text encoding on South Cape NPC
     #f.seek(int("4923d",16)+rom_offset)  # Switch 17 - Enter Seth's house
     #f.write(qt.encode("This is a test with some very long text. Do you like it?", True))
