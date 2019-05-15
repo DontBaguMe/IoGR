@@ -14,13 +14,13 @@ CHANGES:
 - Sand Fanger: Great Wall and Mt. Kress
 - Mummy Queen: Pyramid
 - Babel Tower: Ankor Wat
+5) The captain of the Gold Ship can be found at the entrance to Inca Ruins.  If you have defeated Castoth, you can talk to him for instant passage to the Diamond Coast.
 
 BUG FIXES:
 - The special abilities for Will and Freedan now work correctly and independently.
 - You might still get softlocked in Diamond Mine by attempting to rescue the trapped laborer with Slider or Spin -- however, logic has been updated such that Psycho Dash is required to acquire this item. Sequence break at your own risk.
 - The bug that allowed you to remain as Freedan/Shadow out of Underground Tunnel has been fixed.
 - The text box associated with the two items you get from the man in Dao now display the correct items.
-
 - The bug where Vampires would not gather all their upgrades has been fixed.
 - Spirits in Babel have been distributed to different floors, to allow warps if you cannot defeat bosses.
 - Kara's portrait will now disappear when you use the Magic Dust on it.

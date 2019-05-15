@@ -20,7 +20,7 @@ KARA_ANKORWAT = 5
 INV_FULL = "\x5c\x8e\xc9\x80"
 
 # Generate new ROM and prepare it for randomization
-def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized", mode_str="Normal", goal="Dark Gaia", statues_reqstr="4"):
+def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized", mode_str="Normal", goal="Dark Gaia", statues_reqstr="4",firebird=False):
 
     # Initiate random seed
     random.seed(rng_seed)
@@ -50,6 +50,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                                Sandbox
     ##########################################################################
+    # Unleash Firebird!
+    if firebird:
+        f.seek(int("2cd07",16)+rom_offset)
+        f.write("\xad\xd4\x0a\xc9\x02\x00")
+        f.seek(int("2cd88",16)+rom_offset)
+        f.write("\xad\xd4\x0a\xc9\x02\x00")
+        f.seek(int("2ce06",16)+rom_offset)
+        f.write("\xad\xd4\x0a\xc9\x02\x00")
+        f.seek(int("2ce84",16)+rom_offset)
+        f.write("\xad\xd4\x0a\xc9\x02\x00")
+
     # Test text encoding on South Cape NPC
     #f.seek(int("4923d",16)+rom_offset)  # Switch 17 - Enter Seth's house
     #f.write(qt.encode("This is a test with some very long text. Do you like it?", True))
@@ -480,19 +491,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     # Put Gold Ship captain at Inca entrance
     f.seek(int("c8c9c",16)+rom_offset)
-    f.write("\x19\x1a\x00\x24\x84\x85\x00")
-
-    # Load Gold Ship spriteset into Inca Entrance
-    f.seek(int("c8c9c",16)+rom_offset)
-    f.write("\x19\x1a\x00\x24\x84\x85\x00")
+    f.write("\x19\x1c\x00\x4e\x85\x85\x00")
 
     ##########################################################################
     #                          Modify Gold Ship events
     ##########################################################################
     # Move Seth from deserted ship to gold ship, allows player to acquire item
     # Write pointer to Seth event in new map
-    f.seek(int("c9440",16)+rom_offset)
-    f.write("\x0b\x24\x00\x3e\x96\x85")
+    f.seek(int("c945c",16)+rom_offset)
+    f.write("\x0b\x24\x00\x3e\x96\x85\x00\xff\xca")
+    f.seek(int("c805a",16)+rom_offset)
+    f.write("\x65")
     # Modify Seth event to ignore switch conditions
     f.seek(int("59643",16)+rom_offset)
     f.write("\x10\x00")
@@ -710,6 +719,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("6ba36",16)+rom_offset)
     f.write(f_angelsign.read())
     f_angelsign.close
+
+    # Entering this area clears your enemy defeat count
+    f.seek(int("6bff7",16)+rom_offset)
+    f.write("\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b")
+    f.write("\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x02\xE0")
 
     # Kara's portrait room doesn't lock you in
     #f.seek(int("6d16b",16)+rom_offset)

@@ -1,3 +1,15 @@
+South Cape - Tutorial
+Edward's - Narnia?
+Itory - Village People?
+Freejia - Zelda quotes?
+Seaside Palace - Young Frakenstein? Dracula?
+Angel Village - Tolkien?
+Watermia - Water World? Jaws?
+Euro - Monty Python
+Natives' - mime jokes
+Dao - Star Wars/Space Balls
+
+
 0xc6a6 ['??????You found a Red Jewel!', 25]
 0xc6bf ['??????You found a Jewel but?your inventory is full.', 37]
 0xc993 ["???Your inventory is full.?You can't carry more.??", 37]
