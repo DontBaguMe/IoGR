@@ -1403,6 +1403,74 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #f.write("\xa0\x3e")
 
     ##########################################################################
+    #                        Randomize Ishtar puzzle
+    ##########################################################################
+    # Prepare file for uncompressed map data
+    path_ishtarmapblank = folder + "ishtarmapblank.bin"
+    path_ishtarmapnew = folder + "ishtarmap.bin"
+    copyfile(path_ishtarmapblank,path_ishtarmapnew)
+
+    f_ishtarmap = open(folder + "ishtarmap.bin","r+b")
+
+    # Set change for Room 1
+    change1 = random.randint(1,7)
+    change1 = 0 ########################################### DELETE
+    if change1 == 1:                        # Change right vase to light (vanilla)
+        f_ishtarmap.seek(int("17b",16))
+        f_ishtarmap.write("\x7b")
+        f_ishtarmap.seek(int("18b",16))
+        f_ishtarmap.write("\x84")
+    elif change1 == 2:                      # Change middle vase to light
+        f_ishtarmap.seek(int("175",16))
+        f_ishtarmap.write("\x7b")
+        f_ishtarmap.seek(int("185",16))
+        f_ishtarmap.write("\x84")
+    elif change1 == 3:                      # Change left vase to dark
+        f_ishtarmap.seek(int("174",16))
+        f_ishtarmap.write("\x83")
+        f_ishtarmap.seek(int("184",16))
+        f_ishtarmap.write("\x87")
+    elif change1 == 4:                      # Change left shelf to empty
+        f_ishtarmap.seek(int("165",16))
+        f_ishtarmap.write("\x74")
+    elif change1 == 5:                      # Change left shelf to books
+        f_ishtarmap.seek(int("165",16))
+        f_ishtarmap.write("\x76")
+    elif change1 == 6:                      # Change right shelf to jar
+        f_ishtarmap.seek(int("166",16))
+        f_ishtarmap.write("\x75")
+    elif change1 == 7:                      # Change right shelf to empty
+        f_ishtarmap.seek(int("166",16))
+        f_ishtarmap.write("\x74")
+
+    # Set change for Room 2
+    change2 = random.randint(1,5)
+
+    # Set change for Room 3
+    change3 = random.randint(1,4)
+
+    # Set change for Room 4
+    change4 = random.randint(1,6)
+
+    # Compress map data and write to file
+    f_ishtarmapcomp = open(folder + "ishtarmapcomp.bin","r+b")
+    f_ishtarmapcomp.seek(0)
+    f_ishtarmapcomp.write(quintet_comp.compress(f_ishtarmap.read()))
+    f_ishtarmapcomp.seek(0)
+    f_ishtarmap.close
+
+    # Insert new compressed map data
+    #f.seek(int("193d25",16)+rom_offset)
+    f.seek(int("1f4100",16)+rom_offset)
+    f.write("\x08\x02")
+    f.write(f_ishtarmapcomp.read())
+    f_ishtarmapcomp.close
+
+    # Direct map arrangement pointer to new data - NO LONGER NECESSARY
+    #f.seek(int("d977e",16)+rom_offset)
+    #f.write("\x00\x41")
+
+    ##########################################################################
     #                       Randomize heiroglyph order
     ##########################################################################
     # Determine random order

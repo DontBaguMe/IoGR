@@ -31,7 +31,77 @@
 - 166 "74"
 - (22,6)
 
+8) Will's hair?
+
 : ROOM 2:
+1) Change both pots dark (vanilla)
+- 3a3 "7c 7c"
+- 3b3 "84 84"
+- (51,10) (52,11)
+
+2) Remove rock
+- 3bd "73"
+- (61,11)
+
+3) Change to round table
+- 395 "7d 7e"
+- 3a5 "85 86"
+- (53,9) (54,10)
+
+4) Add a sconce
+- 347 "88 89"
+- 357 "90 91"
+- (55,5) (56,6)
+
+5) Add a rock
+- 3b2 "77"
+- (50,11)
+
+6) Will's hair?
+
+: ROOM 3
+1) Chests are different (vanilla)
+
+2) Remove rock
+- 5bd "73"
+- (93,11)
+
+3) Add rock
+- 5b2 "77"
+- (82,11)
+
+4) Add a sconce
+- 557 "88 89"
+- 567 "90 91"
+- (87,5) (88,6)
+
+5) Will's hair?
+
+: ROOM 4
+1) Will's hair (vanilla)
+
+2) Remove rock
+- 7bd "73"
+- (125,11)
+
+3) Add rock
+- 7b2 "77"
+- (98,11)
+
+4) Add vase L
+- 7a3 "7b"
+- 7b3 "84"
+- (115,10) (115,11)
+
+5) Add vase R
+- 7ac "7b"
+- 7bc "84"
+- (124,10) (124,11)
+
+6) Crease in floor
+- 7b4 "69 6a"
+- (116,11) (117,11)
+
 
 :: ENEMY SPRITE PALETTES FOR ENEMIZER (all addr offset $d8000)
 
