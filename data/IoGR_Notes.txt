@@ -1,76 +1,95 @@
 :: ISHTAR PUZZLE SHUFFLE
-: ROOM 1:
+: ROOM 1:offset=6d95e
+xmin=d6961 (+3)
+xmax=6d966 (+8)
+ymin=6d96d (+15)
+ymax=6d972 (+20)
+-- CHECKS $11c4
 1) Change right-most vase to light (vanilla):
   - 17b "7b"
   - 18b "84"
   - (27,7) (27,8)
+  - B001,C001,7000,9000
 
 2) Change middle vase to light:
   - 175 "7b"
   - 185 "84"
   - (21,7) (21,8)
+  - 5001,6001,7000,9000
 
 3) Change left vase to dark:
   - 174 "83"
   - 184 "87"
   - (20,7) (20,8)
+  - 4001,5001,7000,9000
 
 4) Change left windowsill to blank (74)
 - 165 "74"
 - (21,6)
+- 5001,6001,5800,7000
 
 5) Change left windowsill to books (76)
 - 165 "76"
 - (21,6)
+- 5001,6001,5800,7000
 
 6) Change right windowsill to jar (75)
 - 166 "75"
 - (22,6)
+- 6001,7001,5800,7000
 
 7) Change right windowsill to blank (74)
 - 166 "74"
 - (22,6)
+- 6001,7001,5800,7000
 
 8) Will's hair?
 
-: ROOM 2:
+: ROOM 2:offset=6d98a
 1) Change both pots dark (vanilla)
 - 3a3 "7c 7c"
 - 3b3 "84 84"
 - (51,10) (52,11)
+- 3003,5003,a000,c000
 
 2) Remove rock
 - 3bd "73"
 - (61,11)
+- d003,e003,b000,c000
 
 3) Change to round table
 - 395 "7d 7e"
 - 3a5 "85 86"
 - (53,9) (54,10)
+- 5003,7003,9000,b000
 
 4) Add a sconce
 - 347 "88 89"
 - 357 "90 91"
 - (55,5) (56,6)
+- 7003,9003,5000,7000
 
 5) Add a rock
 - 3b2 "77"
 - (50,11)
+- 2003,3003,b000,c000
 
 6) Will's hair?
 
 : ROOM 3
-1) Chests are different (vanilla)
+0) Chests are different (vanilla)
 
-2) Remove rock
+1) Remove rock
 - 5bd "73"
 - (93,11)
+- d005,e005,b000,c000
 
-3) Add rock
+2) Add rock
 - 5b2 "77"
 - (82,11)
+- 2005,3005,b000,c000
 
-4) Add a sconce
+3) Add a sconce
 - 557 "88 89"
 - 567 "90 91"
 - (87,5) (88,6)
