@@ -1411,50 +1411,70 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     copyfile(path_ishtarmapblank,path_ishtarmapnew)
 
     f_ishtarmap = open(folder + "ishtarmap.bin","r+b")
+    room_offsets = ["6d95e","6d98a","6d9b4","6d9de"]  # ROM addrs for cursor capture, by room
+    coord_offsets = [3,8,15,20]              # Offsets for xmin, xmax, ymin, ymax
+    changes = [random.randint(1,7), random.randint(1,5), random.randint(1,4), random.randint(1,6)]
 
     # Set change for Room 1
-    change1 = random.randint(1,7)
-    change1 = 0 ########################################### DELETE
-    if change1 == 1:                        # Change right vase to light (vanilla)
+    if changes[0] == 1:                        # Change right vase to light (vanilla)
         f_ishtarmap.seek(int("17b",16))
         f_ishtarmap.write("\x7b")
         f_ishtarmap.seek(int("18b",16))
         f_ishtarmap.write("\x84")
-    elif change1 == 2:                      # Change middle vase to light
+        coords = ["\xB0\x01","\xC0\x01","\x70\x00","\x90\x00"]
+
+    elif changes[0] == 2:                      # Change middle vase to light
         f_ishtarmap.seek(int("175",16))
         f_ishtarmap.write("\x7b")
         f_ishtarmap.seek(int("185",16))
         f_ishtarmap.write("\x84")
-    elif change1 == 3:                      # Change left vase to dark
+        coords = ["\x50\x01","\x60\x01","\x70\x00","\x90\x00"]
+
+    elif changes[0] == 3:                      # Change left vase to dark
         f_ishtarmap.seek(int("174",16))
         f_ishtarmap.write("\x83")
         f_ishtarmap.seek(int("184",16))
         f_ishtarmap.write("\x87")
-    elif change1 == 4:                      # Change left shelf to empty
+        coords = ["\x40\x01","\x50\x01","\x70\x00","\x90\x00"]
+
+    elif changes[0] == 4:                      # Change left shelf to empty
         f_ishtarmap.seek(int("165",16))
         f_ishtarmap.write("\x74")
-    elif change1 == 5:                      # Change left shelf to books
+        coords = ["\x50\x01","\x60\x01","\x58\x00","\x70\x00"]
+
+    elif changes[0] == 5:                      # Change left shelf to books
         f_ishtarmap.seek(int("165",16))
         f_ishtarmap.write("\x76")
-    elif change1 == 6:                      # Change right shelf to jar
+        coords = ["\x50\x01","\x60\x01","\x58\x00","\x70\x00"]
+
+    elif changes[0] == 6:                      # Change right shelf to jar
         f_ishtarmap.seek(int("166",16))
         f_ishtarmap.write("\x75")
-    elif change1 == 7:                      # Change right shelf to empty
+        coords = ["\x60\x01","\x70\x01","\x58\x00","\x70\x00"]
+
+    elif changes[0] == 7:                      # Change right shelf to empty
         f_ishtarmap.seek(int("166",16))
         f_ishtarmap.write("\x74")
+        coords = ["\x60\x01","\x70\x01","\x58\x00","\x70\x00"]
+
+    # Update cursor check ranges for Room 1
+    for i in range(4):
+        f.seek(int(room_offsets[0],16) + coord_offsets[i] + rom_offset)
+        f.write(coords[i])
 
     # Set change for Room 2
-    change2 = random.randint(1,5)
+
 
     # Set change for Room 3
-    change3 = random.randint(1,4)
+
 
     # Set change for Room 4
-    change4 = random.randint(1,6)
+
 
     # Compress map data and write to file
     f_ishtarmapcomp = open(folder + "ishtarmapcomp.bin","r+b")
     f_ishtarmapcomp.seek(0)
+    f_ishtarmap.seek(0)
     f_ishtarmapcomp.write(quintet_comp.compress(f_ishtarmap.read()))
     f_ishtarmapcomp.seek(0)
     f_ishtarmap.close
