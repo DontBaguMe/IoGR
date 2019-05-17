@@ -61,15 +61,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         f.seek(int("2ce84",16)+rom_offset)
         f.write("\xad\xd4\x0a\xc9\x02\x00")
 
+    # Sprite for Inca statue?
+    #f.seek(int("4fac5",16)+rom_offset)
+    #f.write("\x00\x00\x10\x4c\x50\xfb\x84")
+    #f.seek(int("4fb50",16)+rom_offset)
+    #f.write("\x02\x88\x00\x80\x8e\x02\x8d\x01\x02\x0b\x02\xc0\xdf\xfa\x02\xc1\x02\xBC\x08\x00\x4c\xd0\xfa\x84")  # \x02\x88\x00\x80\x90
+
     # Turns house in South Cape into tutorial map
     #f.seek(int("18480",16)+rom_offset)
     #f.write("\xfe\x78\x00\xC0\x00\x00\x00\x44")
     #f.seek(int("ce5a9",16)+rom_offset)
     #f.write("\x05\x0A\x00\x8C\xC3\x82\x00\x00\x00\x00\xED\xEA\x80\x00\xFF\xCA")
-
-    # Test text encoding on South Cape NPC
-    #f.seek(int("4923d",16)+rom_offset)  # Switch 17 - Enter Seth's house
-    #f.write(qt.encode("This is a test with some very long text. Do you like it?", True))
 
     # Get all text boxes in the game
 #    f.seek(0)
@@ -1403,154 +1405,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #f.write("\xa0\x3e")
 
     ##########################################################################
-    #                        Randomize Ishtar puzzle
-    ##########################################################################
-    # Prepare file for uncompressed map data
-    path_ishtarmapblank = folder + "ishtarmapblank.bin"
-    path_ishtarmapnew = folder + "ishtarmap.bin"
-    copyfile(path_ishtarmapblank,path_ishtarmapnew)
-
-    f_ishtarmap = open(folder + "ishtarmap.bin","r+b")
-    room_offsets = ["6d95e","6d98a","6d9b4","6d9de"]  # ROM addrs for cursor capture, by room
-    coord_offsets = [3,8,15,20]              # Offsets for xmin, xmax, ymin, ymax
-    changes = [random.randint(1,7), random.randint(1,5), random.randint(1,3), random.randint(1,6)]
-    changes = [6,1,2,2]
-
-    # Set change for Room 1
-    if changes[0] == 1:                        # Change right vase to light (vanilla)
-        f_ishtarmap.seek(int("17b",16))
-        f_ishtarmap.write("\x7b")
-        f_ishtarmap.seek(int("18b",16))
-        f_ishtarmap.write("\x84")
-        coords = ["\xB0\x01","\xC0\x01","\x70\x00","\x90\x00"]
-
-    elif changes[0] == 2:                      # Change middle vase to light
-        f_ishtarmap.seek(int("175",16))
-        f_ishtarmap.write("\x7b")
-        f_ishtarmap.seek(int("185",16))
-        f_ishtarmap.write("\x84")
-        coords = ["\x50\x01","\x60\x01","\x70\x00","\x90\x00"]
-
-    elif changes[0] == 3:                      # Change left vase to dark
-        f_ishtarmap.seek(int("174",16))
-        f_ishtarmap.write("\x83")
-        f_ishtarmap.seek(int("184",16))
-        f_ishtarmap.write("\x87")
-        coords = ["\x40\x01","\x50\x01","\x70\x00","\x90\x00"]
-
-    elif changes[0] == 4:                      # Change left shelf to empty
-        f_ishtarmap.seek(int("165",16))
-        f_ishtarmap.write("\x74")
-        coords = ["\x50\x01","\x60\x01","\x58\x00","\x70\x00"]
-
-    elif changes[0] == 5:                      # Change left shelf to books
-        f_ishtarmap.seek(int("165",16))
-        f_ishtarmap.write("\x76")
-        coords = ["\x50\x01","\x60\x01","\x58\x00","\x70\x00"]
-
-    elif changes[0] == 6:                      # Change right shelf to jar
-        f_ishtarmap.seek(int("166",16))
-        f_ishtarmap.write("\x75")
-        coords = ["\x60\x01","\x70\x01","\x58\x00","\x70\x00"]
-
-    elif changes[0] == 7:                      # Change right shelf to empty
-        f_ishtarmap.seek(int("166",16))
-        f_ishtarmap.write("\x74")
-        coords = ["\x60\x01","\x70\x01","\x58\x00","\x70\x00"]
-
-    # Update cursor check ranges for Room 1
-    for i in range(4):
-        f.seek(int(room_offsets[0],16) + coord_offsets[i] + rom_offset)
-        f.write(coords[i])
-
-    # Set change for Room 2
-    if changes[1] == 1:                        # Change both pots to dark (vanilla)
-        f_ishtarmap.seek(int("3a3",16))
-        f_ishtarmap.write("\x7c\x7c")
-        f_ishtarmap.seek(int("3b3",16))
-        f_ishtarmap.write("\x84\x84")
-        coords = ["\x30\x03","\x50\x03","\xa0\x00","\xc0\x00"]
-
-    elif changes[1] == 2:                      # Remove rock
-        f_ishtarmap.seek(int("3bd",16))
-        f_ishtarmap.write("\x73")
-        coords = ["\xd0\x03","\xe0\x03","\xb0\x00","\xc0\x00"]
-
-    elif changes[1] == 3:                      # Add round table
-        f_ishtarmap.seek(int("395",16))
-        f_ishtarmap.write("\x7d\x7e")
-        f_ishtarmap.seek(int("3a5",16))
-        f_ishtarmap.write("\x85\x86")
-        f_ishtarmap.seek(int("3b5",16))
-        f_ishtarmap.write("\x8d\x8e")
-        coords = ["\x50\x03","\x70\x03","\x90\x00","\xb0\x00"]
-
-    elif changes[1] == 4:                      # Add sconce
-        f_ishtarmap.seek(int("357",16))
-        f_ishtarmap.write("\x88\x89")
-        f_ishtarmap.seek(int("367",16))
-        f_ishtarmap.write("\x90\x91")
-        coords = ["\x70\x03","\x90\x03","\x50\x00","\x70\x00"]
-
-    elif changes[1] == 5:                      # Add rock
-        f_ishtarmap.seek(int("3b2",16))
-        f_ishtarmap.write("\x77")
-        coords = ["\x20\x03","\x30\x03","\xb0\x00","\xc0\x00"]
-
-    # Update cursor check ranges for Room 2
-    for i in range(4):
-        f.seek(int(room_offsets[1],16) + coord_offsets[i] + rom_offset)
-        f.write(coords[i])
-
-
-    # Set change for Room 3
-    # CHECK FOR CHEST CONTENTS, ONLY CHANGE IF DIFFERENT
-    if True:
-        if changes[2] == 1:                        # Remove rock
-            f_ishtarmap.seek(int("5bd",16))
-            f_ishtarmap.write("\x73")
-            coords = ["\xd0\x05","\xe0\x05","\xb0\x00","\xc0\x00"]
-
-        elif changes[2] == 2:                      # Add rock
-            f_ishtarmap.seek(int("5b2",16))
-            f_ishtarmap.write("\x77")
-            coords = ["\x20\x05","\x30\x05","\xb0\x00","\xc0\x00"]
-
-        elif changes[2] == 3:                      # Add sconce
-            f_ishtarmap.seek(int("557",16))
-            f_ishtarmap.write("\x88\x89")
-            f_ishtarmap.seek(int("567",16))
-            f_ishtarmap.write("\x90\x91")
-            coords = ["\x70\x05","\x90\x05","\x50\x00","\x70\x00"]
-
-        # Update cursor check ranges for Room 3
-        for i in range(4):
-            f.seek(int(room_offsets[2],16) + coord_offsets[i] + rom_offset)
-            f.write(coords[i])
-
-    # Set change for Room 4
-
-
-    # Compress map data and write to file
-    f_ishtarmapcomp = open(folder + "ishtarmapcomp.bin","r+b")
-    f_ishtarmapcomp.seek(0)
-    f_ishtarmap.seek(0)
-    f_ishtarmapcomp.write(quintet_comp.compress(f_ishtarmap.read()))
-    f_ishtarmapcomp.seek(0)
-    f_ishtarmap.close
-
-    # Insert new compressed map data
-    #f.seek(int("193d25",16)+rom_offset)
-    f.seek(int("1f4100",16)+rom_offset)
-    f.write("\x08\x02")
-    f.write(f_ishtarmapcomp.read())
-    f_ishtarmapcomp.close
-
-    # Direct map arrangement pointer to new data - NO LONGER NECESSARY
-    #f.seek(int("d977e",16)+rom_offset)
-    #f.write("\x00\x41")
-
-    ##########################################################################
     #                       Randomize heiroglyph order
     ##########################################################################
     # Determine random order
@@ -2017,6 +1871,235 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     w.generate_spoiler(folder_dest, version, filename)
     w.write_to_rom(f)
 
+    ##########################################################################
+    #                        Randomize Ishtar puzzle
+    ##########################################################################
+    # Prepare file for uncompressed map data
+    path_ishtarmapblank = folder + "ishtarmapblank.bin"
+    path_ishtarmapnew = folder + "ishtarmap.bin"
+    copyfile(path_ishtarmapblank,path_ishtarmapnew)
+
+    # Add checks for Will's hair in each room
+    f.seek(int("6dc53",16)+rom_offset)
+    f.write("\x4c\x00\xdd\x86")
+    f.seek(int("6dd00",16)+rom_offset)
+    f.write("\x02\x45\x10\x00\x20\x10\x66\xdc\x02\x45\x30\x00\x40\x10\x66\xDC")
+    f.write("\x02\x45\x50\x00\x60\x10\x66\xdc\x02\x45\x70\x00\x80\x10\x66\xDC")
+    f.write("\x4c\x66\xdc\x86")
+
+    # Generalize success text boxes
+    # Make Rooms 1 and 3 equal to Room 2 text (which is already general)
+    f.seek(int("6d978",16)+rom_offset)    # Room 1
+    f.write("\x2c\xdb")
+    f.seek(int("6d9ce",16)+rom_offset)    # Room 3
+    f.write("\x2c\xdb")
+    # Generalize Room 4 text
+    f.seek(int("6d9f8",16)+rom_offset)
+    f.write("\xc6\xdb")
+    f.seek(int("6dbc6",16)+rom_offset)
+    f.write("\xc2\x0a")
+
+    f_ishtarmap = open(folder + "ishtarmap.bin","r+b")
+    room_offsets = ["6d95e","6d98a","6d9b4","6d9de"]  # ROM addrs for cursor capture, by room
+    coord_offsets = [3,8,15,20]                       # Offsets for xmin, xmax, ymin, ymax
+    changes = [random.randint(1,8), random.randint(1,6), random.randint(1,4), random.randint(1,6)]
+
+    # Set change for Room 1
+    if changes[0] == 1:                        # Change right vase to light (vanilla)
+        f_ishtarmap.seek(int("17b",16))
+        f_ishtarmap.write("\x7b")
+        f_ishtarmap.seek(int("18b",16))
+        f_ishtarmap.write("\x84")
+        coords = ["\xB0\x01","\xC0\x01","\x70\x00","\x90\x00"]
+
+    elif changes[0] == 2:                      # Change middle vase to light
+        f_ishtarmap.seek(int("175",16))
+        f_ishtarmap.write("\x7b")
+        f_ishtarmap.seek(int("185",16))
+        f_ishtarmap.write("\x84")
+        coords = ["\x50\x01","\x60\x01","\x70\x00","\x90\x00"]
+
+    elif changes[0] == 3:                      # Change left vase to dark
+        f_ishtarmap.seek(int("174",16))
+        f_ishtarmap.write("\x83")
+        f_ishtarmap.seek(int("184",16))
+        f_ishtarmap.write("\x87")
+        coords = ["\x40\x01","\x50\x01","\x70\x00","\x90\x00"]
+
+    elif changes[0] == 4:                      # Change left shelf to empty
+        f_ishtarmap.seek(int("165",16))
+        f_ishtarmap.write("\x74")
+        coords = ["\x50\x01","\x60\x01","\x58\x00","\x70\x00"]
+
+    elif changes[0] == 5:                      # Change left shelf to books
+        f_ishtarmap.seek(int("165",16))
+        f_ishtarmap.write("\x76")
+        coords = ["\x50\x01","\x60\x01","\x58\x00","\x70\x00"]
+
+    elif changes[0] == 6:                      # Change right shelf to jar
+        f_ishtarmap.seek(int("166",16))
+        f_ishtarmap.write("\x75")
+        coords = ["\x60\x01","\x70\x01","\x58\x00","\x70\x00"]
+
+    elif changes[0] == 7:                      # Change right shelf to empty
+        f_ishtarmap.seek(int("166",16))
+        f_ishtarmap.write("\x74")
+        coords = ["\x60\x01","\x70\x01","\x58\x00","\x70\x00"]
+
+    elif changes[0] == 8:                      # Will's hair
+        f.seek(int("6dd06",16)+rom_offset)
+        f.write("\x5d")
+        coords = ["\xa0\x01","\xc0\x01","\xb0\x00","\xd0\x00"]
+
+    # Update cursor check ranges for Room 1
+    for i in range(4):
+        f.seek(int(room_offsets[0],16) + coord_offsets[i] + rom_offset)
+        f.write(coords[i])
+
+
+
+    # Set change for Room 2
+    if changes[1] == 1:                        # Change both pots to dark (vanilla)
+        f_ishtarmap.seek(int("3a3",16))
+        f_ishtarmap.write("\x7c\x7c")
+        f_ishtarmap.seek(int("3b3",16))
+        f_ishtarmap.write("\x84\x84")
+        coords = ["\x30\x03","\x50\x03","\xa0\x00","\xc0\x00"]
+
+    elif changes[1] == 2:                      # Remove rock
+        f_ishtarmap.seek(int("3bd",16))
+        f_ishtarmap.write("\x73")
+        coords = ["\xd0\x03","\xe0\x03","\xb0\x00","\xc0\x00"]
+
+    elif changes[1] == 3:                      # Add round table
+        f_ishtarmap.seek(int("395",16))
+        f_ishtarmap.write("\x7d\x7e")
+        f_ishtarmap.seek(int("3a5",16))
+        f_ishtarmap.write("\x85\x86")
+        f_ishtarmap.seek(int("3b5",16))
+        f_ishtarmap.write("\x8d\x8e")
+        coords = ["\x50\x03","\x70\x03","\x90\x00","\xb0\x00"]
+
+    elif changes[1] == 4:                      # Add sconce
+        f_ishtarmap.seek(int("357",16))
+        f_ishtarmap.write("\x88\x89")
+        f_ishtarmap.seek(int("367",16))
+        f_ishtarmap.write("\x90\x91")
+        coords = ["\x70\x03","\x90\x03","\x50\x00","\x70\x00"]
+
+    elif changes[1] == 5:                      # Add rock
+        f_ishtarmap.seek(int("3b2",16))
+        f_ishtarmap.write("\x77")
+        coords = ["\x20\x03","\x30\x03","\xb0\x00","\xc0\x00"]
+
+    elif changes[1] == 6:                      # Will's hair
+        f.seek(int("6dd0e",16)+rom_offset)
+        f.write("\x5d")
+        coords = ["\x90\x03","\xb0\x03","\xa0\x00","\xc0\x00"]
+
+    # Update cursor check ranges for Room 2
+    for i in range(4):
+        f.seek(int(room_offsets[1],16) + coord_offsets[i] + rom_offset)
+        f.write(coords[i])
+
+
+
+    # Set change for Room 3
+    # Check for chest contents, only change map if contents are the same
+    if w.item_locations[80][3] == w.item_locations[81][3]:
+        if changes[2] == 1:                        # Remove rock
+            f_ishtarmap.seek(int("5bd",16))
+            f_ishtarmap.write("\x73")
+            coords = ["\xd0\x05","\xe0\x05","\xb0\x00","\xc0\x00"]
+
+        elif changes[2] == 2:                      # Add rock
+            f_ishtarmap.seek(int("5b2",16))
+            f_ishtarmap.write("\x77")
+            coords = ["\x20\x05","\x30\x05","\xb0\x00","\xc0\x00"]
+
+        elif changes[2] == 3:                      # Add sconce
+            f_ishtarmap.seek(int("557",16))
+            f_ishtarmap.write("\x88\x89")
+            f_ishtarmap.seek(int("567",16))
+            f_ishtarmap.write("\x90\x91")
+            coords = ["\x70\x05","\x90\x05","\x50\x00","\x70\x00"]
+
+        elif changes[2] == 4:                      # Will's hair
+            f.seek(int("6dd16",16)+rom_offset)
+            f.write("\x5d")
+            coords = ["\x90\x05","\xb0\x05","\xa0\x00","\xc0\x00"]
+
+        # Update cursor check ranges for Room 3 (only if chest contents different)
+        for i in range(4):
+            f.seek(int(room_offsets[2],16) + coord_offsets[i] + rom_offset)
+            f.write(coords[i])
+
+
+
+    # Set change for Room 4
+    if changes[3] == 1:                      # Will's hair (vanilla)
+        f.seek(int("6dd1e",16)+rom_offset)
+        f.write("\x5d")
+
+    else:
+        if changes[3] == 2:                        # Remove rock
+            f_ishtarmap.seek(int("7bd",16))
+            f_ishtarmap.write("\x73")
+            coords = ["\xd0\x07","\xe0\x07","\xb0\x00","\xc0\x00"]
+
+        elif changes[3] == 3:                      # Add rock
+            f_ishtarmap.seek(int("7b2",16))
+            f_ishtarmap.write("\x77")
+            coords = ["\x20\x07","\x30\x07","\xb0\x00","\xc0\x00"]
+
+        elif changes[3] == 4:                      # Add vase L
+            f_ishtarmap.seek(int("7a3",16))
+            f_ishtarmap.write("\x7c")
+            f_ishtarmap.seek(int("7b3",16))
+            f_ishtarmap.write("\x84")
+            coords = ["\x30\x07","\x40\x07","\xa0\x00","\xc0\x00"]
+
+        elif changes[3] == 5:                      # Add vase R
+            f_ishtarmap.seek(int("7ac",16))
+            f_ishtarmap.write("\x7c")
+            f_ishtarmap.seek(int("7bc",16))
+            f_ishtarmap.write("\x84")
+            coords = ["\xc0\x07","\xd0\x07","\xa0\x00","\xc0\x00"]
+
+        elif changes[3] == 6:                      # Crease in floor
+            f_ishtarmap.seek(int("7b4",16))
+            f_ishtarmap.write("\x69\x6a")
+            coords = ["\x40\x07","\x60\x07","\xb0\x00","\xc8\x00"]
+
+        # Update cursor check ranges for Room 3 (only if not hair)
+        for i in range(4):
+            f.seek(int(room_offsets[3],16) + coord_offsets[i] + rom_offset)
+            f.write(coords[i])
+
+
+
+    # Compress map data and write to file
+    f_ishtarmapcomp = open(folder + "ishtarmapcomp.bin","r+b")
+    f_ishtarmapcomp.seek(0)
+    f_ishtarmap.seek(0)
+    f_ishtarmapcomp.write(quintet_comp.compress(f_ishtarmap.read()))
+    f_ishtarmapcomp.seek(0)
+    f_ishtarmap.close
+
+    # Insert new compressed map data
+    #f.seek(int("193d25",16)+rom_offset)
+    f.seek(int("1f4100",16)+rom_offset)
+    f.write("\x08\x02")
+    f.write(f_ishtarmapcomp.read())
+    f_ishtarmapcomp.close
+
+    # Direct map arrangement pointer to new data - NO LONGER NECESSARY
+    #f.seek(int("d977e",16)+rom_offset)
+    #f.write("\x00\x41")
+
+    ##########################################################################
+    #                        Close file and return
+    ##########################################################################
     f.close
 
     return True
