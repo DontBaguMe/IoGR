@@ -635,6 +635,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_nazca.close
 
     # Allow exit to world map
+    #f.seek(int("5e647",16))
+    #f.write("\x32\x00\x10\x02\x0b\x02\xc0\xad\xe6\x02\xc1\x6b")
     f.seek(int("5e80c",16))
     f.write("\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
 
@@ -858,6 +860,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("7cdf7",16)+rom_offset)         # Dark Friar upgrade
     f.write("\x02\xd4\x2d\x05\xce\x02\xcc\xf1\x02\xbf\x28\xce\x02\xe0")
     f.write("\x02\xbf\x3e\xce\x6b")
+
+    # Old men text no longer checks for Teapot
+    f.seek(int("7d610",16)+rom_offset)
+    f.write("\xd0\x10\x00")
+    f.seek(int("7d7ab",16)+rom_offset)
+    f.write("\xd0\x10\x00")
 
     # Various NPC dialogue
     f.seek(int("7d6db",16)+rom_offset)

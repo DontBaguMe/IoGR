@@ -6,7 +6,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "0.6.8"
+VERSION = "0.6.9"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -57,6 +57,7 @@ def generate_ROM():
 
 root = Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
+root.wm_iconbitmap('iogr.ico')
 
 # Add a grid
 mainframe = Frame(root)
