@@ -1,3 +1,77 @@
+:: IN-GAME TUTORIAL
+|------------------------|
+        Welcome to       -
+   Bagu's Super-Helpful  - 
+   In-Game Tutorial!(TM) -
+|------------------------|
+Whadaya wanna know about?
+ Beating the Game
+ Exploring the World
+ What If I'm Stuck?
+|------------------------|
+BEATING THE GAME:       You must do the following two things to beat the game:|
+
+1. RESCUE KARA          Kara is trapped in a painting! You need Magic Dust to free her.|
+
+She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|
+
+You can search for her yourself, or find Lance's Letter to learn where she can be found.|
+
+Once you find Kara, use the Magic Dust on her portrait to free her.|
+
+2. GATHER MYSTIC STATUES Each time you play the game, you may be required to gather Mystic Statues.|
+
+Talk to the teacher in the South Cape classroom to find out which Statues you need.|
+
+Statue 1 is in the Inca Ruins. You need the Wind Melody, Diamond Block, and both Incan Statues.
+
+Statue 2 is in the Sky Garden. You'll need all four Crystal Balls to fight the boss Viper.|
+
+Statue 3 is in Mu. You need both Statues of Hope and both Rama Statues to fight the Vampires.|
+
+Statue 4 is in the Great Wall. You need Spin Dash and Dark Friar to face the boss Sand Fanger.|
+
+Statue 5 is in the Pyramid. You'll need all six Hieroglyphs as well as your father's journal.|
+
+Statue 6 is at the top of Babel Tower. You'll need the Aura and the Crystal Ring to get to the top.|
+
+Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|
+
+Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|
+
+She will give you the option to face Dark Gaia and beat the game. Good luck, and have fun!|
+
+|------------------------|
+EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|
+
+As you gain more items, you will be able to visit other continents and access more locations.|
+
+Here are some of the helpful travel items you can find in the game:|
+
+- Lola's Letter         If you find this letter, read it and go see Erik in South Cape.|
+
+- The Teapot            If you use the Teapot in the Moon Tribe camp, you can travel by Sky Garden.|
+
+- Memory Melody         Play this melody in Neil's Cottage, and he'll fly you in his airplane.|
+
+- The Will              Show this document to the stable masters in either Watermia or Euro.|
+
+- Large Roast           Give this to the hungry child in the Natives' Village.|
+
+If you're ever stuck in a location, find a Dark Space. Gaia can always return you to South Cape.
+
+|------------------------|
+WHAT IF I'M STUCK?       There are a lot of item locations in this game! It's easy to get stuck.|
+
+Here are some resources that might help you:|
+
+- Video Tutorial         Search YouTube for a video guide of this randomizer.|
+
+- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|
+
+- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.
+
+
 :: ISHTAR PUZZLE SHUFFLE
 : ROOM 1:offset=6d95e
 xmin=d6961 (+3)
@@ -3047,3 +3121,32 @@ That's pretty. =  a0 a2 84 a4 a4 a9 (49d31)
 |------------------------| |------------------------| |------------------------| |------------------------|
 "Death will be a great    /relief. No more           /interviews."              /  -Katharine Hepburn
 |------------------------| |------------------------| |------------------------| |------------------------|
+"Every man dies. Not      /every man really lives.   /  -William Wallace
+|------------------------| |------------------------| |------------------------| |------------------------|
+"Be calm. God awaits you at the door.”                  -Gabriel Garcia Marquez
+|------------------------| |------------------------| |------------------------| |------------------------|
+Death twitches my ear: 'Live,' he says... 'I'm coming.' -Virgil
+|------------------------| |------------------------| |------------------------| |------------------------|
+"We feel most alive when we are closest to death.” -Nenia Campbell
+|------------------------| |------------------------| |------------------------| |------------------------|
+"Grief, no matter how you try to cater to its wail, has a way of fading away.”  -V.C. Andrews
+|------------------------| |------------------------| |------------------------| |------------------------|
+Heaven is a place where all the dogs you've ever loved come to greet you. -Oliver Gaspirtz
+|------------------------| |------------------------| |------------------------| |------------------------|
+
+
+
+“Et tu Brute?” -Julius Caesar
+“To the wizard death is merely a belief.” -Deepak Chopra
+“Every time you die, it hurts.” -Josh Henderson
+“If I have to die, let me die fighting.” -Gabriel Garcia Marquez
+“Each death is as unique as each life.” -Nicholas Wolterstorff
+“No one gets out of this world alive... except astronauts.” -Stewart Stafford
+“Follow your dreams and know that death is nothing, life is everything.” -Stefan Karl Stefansson
+“In life you can't move forward looking back” -Mark Marsland
+“Death is perhaps an ordeal, but it is not an expiation” -Alexandre Dumas
+“What really mattered in life, what gave it weight, was death.” -Jeffrey Eugenides
+“I can feel the daisies growing over me.” -John Keats
+“All deaths are sudden, no matter how gradual the dying may be.” -Michael McDowell
+“A person's destiny often ends before his death.” -Milan Kundera
+“Death is the destroyer and giver of sense.” -Andy Harglesis

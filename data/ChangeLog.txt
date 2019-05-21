@@ -15,8 +15,10 @@ CHANGES:
 - Mummy Queen: Pyramid
 - Babel Tower: Ankor Wat
 5) The captain of the Gold Ship can be found at the entrance to Inca Ruins.  If you have defeated Castoth, you can talk to him for instant passage to the Diamond Coast.
+6) There is now an in-game tutorial that you can get from the NPC in front of the school in South Cape.
 
 BUG FIXES:
+- Weird characters that show up when you read Lola's Letter have been removed.
 - The special abilities for Will and Freedan now work correctly and independently.
 - You might still get softlocked in Diamond Mine by attempting to rescue the trapped laborer with Slider or Spin -- however, logic has been updated such that Psycho Dash is required to acquire this item. Sequence break at your own risk.
 - The bug that allowed you to remain as Freedan/Shadow out of Underground Tunnel has been fixed.
