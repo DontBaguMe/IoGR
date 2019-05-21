@@ -217,7 +217,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("393c3",16)+rom_offset)
     f.write("\x8a")
 
-    # Modify Blue Journal, functions as an in-game tutorial
+    # Modify Blue Journal, functions as an in-game tutorial0
+    f.seek(int("3943b",16)+rom_offset)
+    f.write("\xf0\x94")
     f.seek(int("39440",16)+rom_offset)
     f.write("\x10\xf2")
     f.seek(int("39445",16)+rom_offset)
@@ -230,6 +232,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xcb" + qt.encode("  In-Game Tutorial!(TM)|"))
     f.write(qt.encode("Whadaya wanna know about?") + "\xcb" + qt.encode(" Beating the Game") + "\xcb")
     f.write(qt.encode(" Exploring the World") + "\xcb" + qt.encode(" What If I'm Stuck?") + "\xca")
+
+    f.seek(int("394f0",16)+rom_offset)
+    f.write("\xce" + qt.encode("He closed the journal.") + "\xc0")
 
     f.seek(int("3f210",16)+rom_offset)
     f.write("\xce" + qt.encode("BEATING THE GAME:       You must do the following two things to beat the game:|"))
