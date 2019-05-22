@@ -17,10 +17,15 @@ KARA_ANGEL = 3
 KARA_KRESS = 4
 KARA_ANKORWAT = 5
 
+GEMS_EASY = 35
+GEMS_NORMAL = 40
+GEMS_HARD = 50
+
 INV_FULL = "\x5c\x8e\xc9\x80"
 
 # Generate new ROM and prepare it for randomization
-def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized", mode_str="Normal", goal="Dark Gaia", statues_reqstr="4",firebird=False):
+def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized",
+    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",firebird=False):
 
     # Initiate random seed
     random.seed(rng_seed)
@@ -34,7 +39,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     else:
         mode = 1
 
-    if statues_reqstr == "Random":
+    if goal == "Red Jewel Hunt":
+        statues_required = 0
+    elif statues_reqstr == "Random":
         statues_required = random.randint(0,6)
     else:
         statues_required = int(statues_reqstr)
@@ -1145,6 +1152,13 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8cea5",16)+rom_offset)
     f.write("\x10\x00")
 
+    # Jeweler warps you to credits for Red Jewel hunts
+    if goal == "Red Jewel Hunt":
+        f.seek(int("8d089",16)+rom_offset)
+        f.write("\xE5\x00\x00\x00\x00\x00\x00\x11")
+        f.seek(int("8d2d8",16)+rom_offset)
+        f.write(qt.encode("Beat the game"))
+
     ##########################################################################
     #                          Update dark space code
     ##########################################################################
@@ -1569,6 +1583,14 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     gem.append(random.randint(26,34))
     gem.append(random.randint(36,50))
 
+    if goal == "Red Jewel Hunt":
+        if mode == 0:
+            gem[6] = GEMS_EASY
+        elif mode == 1:
+            gem[6] = GEMS_NORMAL
+        else:
+            gem[6] = GEMS_HARD
+
     gem_str=[]
 
     # Write new values into reward check code (BCD format)
@@ -1949,7 +1971,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #                   Randomize item and ability placement
     ##########################################################################
 
-    w=classes.World(rng_seed,mode,statues,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
+    w=classes.World(rng_seed,mode,goal,logic_mode,statues,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
     w.randomize()
     #w.print_spoiler()
     w.generate_spoiler(folder_dest, version, filename)

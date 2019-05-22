@@ -430,8 +430,13 @@ class World:
             #self.traverse()
             progression_list = self.monte_carlo()
             #print "To progress: ",progression_list
-            if not progression_list:
+            if self.logic_mode == "Completable" and not progression_list:
                 done = True
+            elif self.logic_mode == "Beatable":
+                if self.goal == "Dark Gaia" and self.graph[70][0]:
+                    done = True
+                elif self.goal == "Red Jewel Hunt" and self.graph[68][0]:
+                    done = True
             else:
 
             # Determine next progression items to add to accessible locations
@@ -453,9 +458,9 @@ class World:
                         #print self.graph
 
         #print "Unaccessible: ",self.unaccessible_locations(item_locations)
-        for node in self.graph:
-            if not self.graph[node][0]:
-                print "Can't reach ",self.graph[node][2]
+#        for node in self.graph:
+#            if not self.graph[node][0]:
+#                print "Can't reach ",self.graph[node][2]
 
         junk_items = self.list_item_pool()
         self.random_fill(junk_items,item_locations)
@@ -690,9 +695,13 @@ class World:
                     #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
 
     # Build world
-    def __init__(self, seed, mode, statues=[1,2,3,4,5,6],kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
+    def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",
+        statues=[1,2,3,4,5,6],kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
+
         self.seed = seed
         self.statues = statues
+        self.goal = goal
+        self.logic_mode = logic_mode
         self.kara = kara
         self.gem = gem
         self.incatile = incatile

@@ -6,7 +6,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "0.6.10"
+VERSION = "0.7.0"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -45,12 +45,19 @@ def generate_ROM():
             return
 
     statues_str = statues.get()
+    goal_str = goal.get()
+    logic_str = logic.get()
     diff_str = difficulty.get()
 
-    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + statues_str[0] + "st_" + seed_str
+    if goal_str == "Dark Gaia":
+        goal_cd = "DG" + statues_str[0]
+    elif goal.get() == "Red Jewel Hunt":
+        goal_cd = "RJ"
+
+    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_str[0] + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"
 
-    if iogr_rom.generate_rom(VERSION, rom_offset, int(seed_str), rompath, filename, diff_str, goal.get(), statues_str):
+    if iogr_rom.generate_rom(VERSION, rom_offset, int(seed_str), rompath, filename, diff_str, goal_str, logic_str, statues_str):
         showinfo("Success!", filename + " has been successfully created!")
     else:
         showinfo("ERROR", "Operation failed")
@@ -61,7 +68,7 @@ root.wm_iconbitmap('iogr.ico')
 
 # Add a grid
 mainframe = Frame(root)
-mainframe.grid(column=2,row=4, sticky=(N,W,E,S) )
+mainframe.grid(column=2,row=5, sticky=(N,W,E,S) )
 mainframe.columnconfigure(0, weight = 1)
 mainframe.rowconfigure(0, weight = 1)
 mainframe.pack(pady = 20, padx = 20)
@@ -70,15 +77,20 @@ Label(mainframe,text="ROM File").grid(row=0,column=0,sticky=W)
 Label(mainframe,text="Seed").grid(row=1,column=0,sticky=W)
 Label(mainframe,text="Difficulty").grid(row=2,column=0,sticky=W)
 Label(mainframe,text="Goal").grid(row=3,column=0,sticky=W)
-Label(mainframe,text="Statues").grid(row=4,column=0,sticky=W)
+Label(mainframe,text="Logic").grid(row=4,column=0,sticky=W)
+Label(mainframe,text="Statues").grid(row=5,column=0,sticky=W)
 
 difficulty = StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
 difficulty.set("Normal")
 
 goal = StringVar(root)
-goal_choices = ["Dark Gaia"]
+goal_choices = ["Dark Gaia", "Red Jewel Hunt"]
 goal.set("Dark Gaia")
+
+logic = StringVar(root)
+logic_choices = ["Completable", "Beatable"]
+logic.set("Completable")
 
 statues = StringVar(root)
 statue_choices = ["0","1","2","3","4","5","6","Random"]
@@ -93,11 +105,12 @@ seed.insert(10,random.randint(0,999999))
 
 diff_menu = OptionMenu(mainframe,difficulty,*diff_choices).grid(row=2,column=1)
 goal_menu = OptionMenu(mainframe,goal,*goal_choices).grid(row=3,column=1)
-statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=4,column=1)
+logic_menu = OptionMenu(mainframe,logic,*logic_choices).grid(row=4,column=1)
+statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=5,column=1)
 
 Button(mainframe,text='Browse...', command=find_ROM).grid(row=0,column=2)
 Button(mainframe,text='Generate Seed', command=generate_seed).grid(row=1,column=2)
-Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=4,column=2)
+Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=5,column=2)
 
 #top_frame = Frame(window)
 #top_frame.pack()

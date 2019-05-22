@@ -1,5 +1,8 @@
 v0.7
 CHANGES:
+1) New modes available upon seed generation:
+- Goal: Can now be "Dark Gaia" or "Red Jewel Hunt". In the latter, you beat the game by collecting a number of Red Jewels (35 for Easy, 40 for Normal, and 50 for Hard/Extreme) and talking to the Jeweler.
+- Logic: "Completable" means it is possible to access every item in the game. "Beatable" means some items may be inacessible, but you are guaranteed to be able to fulfill the objectives of the seed.
 1) All rewards (HP, DEF and STR) are available through clearing rooms.
 2) HP rewards grant you +3 HP each
 3) The rewards are shuffled at random throughout the entire game, map by map.  The total rewards available by difficulty (HP/STR/DEF) are:
