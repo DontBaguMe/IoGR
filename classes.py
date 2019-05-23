@@ -430,15 +430,16 @@ class World:
             #self.traverse()
             progression_list = self.monte_carlo()
             #print "To progress: ",progression_list
-            if self.logic_mode == "Completable" and not progression_list:
+            if not progression_list:
                 done = True
             elif self.logic_mode == "Beatable":
+                #print self.graph[68][0], self.graph[70][0]
                 if self.goal == "Dark Gaia" and self.graph[70][0]:
                     done = True
                 elif self.goal == "Red Jewel Hunt" and self.graph[68][0]:
                     done = True
-            else:
 
+            if not done:
             # Determine next progression items to add to accessible locations
                 progress = False
                 while not progress:
@@ -673,9 +674,9 @@ class World:
     # Shuffle enemies in ROM
     def enemize(self,f,rom_offset=0):
         # Make all spritesets equal to Underground Tunnel
-        #for set in self.spritesets:
-        #    f.seek(int(self.spritesets[set][0],16)+rom_offset)
-        #    f.write(self.spritesets[0][1])
+        for set in self.spritesets:
+            f.seek(int(self.spritesets[set][0],16)+rom_offset)
+            f.write(self.spritesets[0][1])
 
         # Turn all enemies into bats
         f.seek(0)
@@ -685,7 +686,7 @@ class World:
             done = False
             addr = int("c8200",16) + rom_offset
             while not done:
-                addr = rom.find(self.enemies[enemy][1],addr+1)
+                addr = rom.find(self.enemies[enemy][1] + self.enemies[enemy][2],addr+1)
                 if addr < 0 or addr > int("ce5e4",16)+rom_offset:
                     done = True
                 else:

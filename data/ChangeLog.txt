@@ -1,24 +1,28 @@
+v0.8
+CHANGES:
+1) The in-game tutorial now changes depending on the game goal.
+
 v0.7
 CHANGES:
 1) New modes available upon seed generation:
 - Goal: Can now be "Dark Gaia" or "Red Jewel Hunt". In the latter, you beat the game by collecting a number of Red Jewels (35 for Easy, 40 for Normal, and 50 for Hard/Extreme) and talking to the Jeweler.
 - Logic: "Completable" means it is possible to access every item in the game. "Beatable" means some items may be inacessible, but you are guaranteed to be able to fulfill the objectives of the seed.
-1) All rewards (HP, DEF and STR) are available through clearing rooms.
-2) HP rewards grant you +3 HP each
-3) The rewards are shuffled at random throughout the entire game, map by map.  The total rewards available by difficulty (HP/STR/DEF) are:
+2) All rewards (HP, DEF and STR) are available through clearing rooms.
+3) HP rewards grant you +3 HP each
+4) The rewards are shuffled at random throughout the entire game, map by map.  The total rewards available by difficulty (HP/STR/DEF) are:
 - Easy: 10/7/7
 - Normal: 10/4/4
 - Hard: 8/2/2 (max HP 35)
 - Extreme: 6/0/0 (max HP 29)
-4) You will now gain a reward for defeating Mummy Queen at the top of Babel Tower.  The rewards gathered by each boss are now as follows:
+5) You will now gain a reward for defeating Mummy Queen at the top of Babel Tower.  The rewards gathered by each boss are now as follows:
 - Castoth: Underground Tunnel and Inca (no change)
 - Viper: Diamond Mine and Sky Garden (no change)
 - Vampires: Mu and Angel Dungeon
 - Sand Fanger: Great Wall and Mt. Kress
 - Mummy Queen: Pyramid
 - Babel Tower: Ankor Wat
-5) The captain of the Gold Ship can be found at the entrance to Inca Ruins.  If you have defeated Castoth, you can talk to him for instant passage to the Diamond Coast.
-6) There is now an in-game tutorial that you can get from the NPC in front of the school in South Cape.
+6) The captain of the Gold Ship can be found at the entrance to Inca Ruins.  If you have defeated Castoth, you can talk to him for instant passage to the Diamond Coast.
+7) There is now an in-game tutorial that you can get from the NPC in front of the school in South Cape.
 
 BUG FIXES:
 - Weird characters that show up when you read Lola's Letter have been removed.

@@ -244,22 +244,28 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xce" + qt.encode("He closed the journal.") + "\xc0")
 
     f.seek(int("3f210",16)+rom_offset)
-    f.write("\xce" + qt.encode("BEATING THE GAME:       You must do the following two things to beat the game:|"))
-    f.write(qt.encode("1. RESCUE KARA          Kara is trapped in a painting! You need Magic Dust to free her.|"))
-    f.write(qt.encode("She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|"))
-    f.write(qt.encode("You can search for her yourself, or find Lance's Letter to learn where she can be found.|"))
-    f.write(qt.encode("Once you find Kara, use the Magic Dust on her portrait to free her.|"))
-    f.write(qt.encode("2. GATHER MYSTIC STATUES Each time you play the game, you may be required to gather Mystic Statues.|"))
-    f.write(qt.encode("Talk to the teacher in the South Cape classroom to find out which Statues you need.|"))
-    f.write(qt.encode("Statue 1 is in the Inca Ruins. You need the Wind Melody, Diamond Block, and both Incan Statues.|"))
-    f.write(qt.encode("Statue 2 is in the Sky Garden. You'll need all four Crystal Balls to fight the boss Viper.|"))
-    f.write(qt.encode("Statue 3 is in Mu. You need both Statues of Hope and both Rama Statues to fight the Vampires.|"))
-    f.write(qt.encode("Statue 4 is in the Great Wall. You need Spin Dash and Dark Friar to face the boss Sand Fanger.|"))
-    f.write(qt.encode("Statue 5 is in the Pyramid. You'll need all six Hieroglyphs as well as your father's journal.|"))
-    f.write(qt.encode("Statue 6 is at the top of Babel Tower. You'll need the Aura and the Crystal Ring to get to the top.|"))
-    f.write(qt.encode("Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|"))
-    f.write(qt.encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
-    f.write(qt.encode("She will give you the option to face Dark Gaia and beat the game. Good luck, and have fun!") + "\xc0")
+    if goal == "Dark Gaia":
+        f.write("\xce" + qt.encode("BEATING THE GAME:       You must do the following two things to beat the game:|"))
+        f.write(qt.encode("1. RESCUE KARA          Kara is trapped in a painting! You need Magic Dust to free her.|"))
+        f.write(qt.encode("She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|"))
+        f.write(qt.encode("You can search for her yourself, or find Lance's Letter to learn where she can be found.|"))
+        f.write(qt.encode("Once you find Kara, use the Magic Dust on her portrait to free her.|"))
+        f.write(qt.encode("2. GATHER MYSTIC STATUES Each time you play the game, you may be required to gather Mystic Statues.|"))
+        f.write(qt.encode("Talk to the teacher in the South Cape classroom to find out which Statues you need.|"))
+        f.write(qt.encode("Statue 1 is in the Inca Ruins. You need the Wind Melody, Diamond Block, and both Incan Statues.|"))
+        f.write(qt.encode("Statue 2 is in the Sky Garden. You'll need all four Crystal Balls to fight the boss Viper.|"))
+        f.write(qt.encode("Statue 3 is in Mu. You need both Statues of Hope and both Rama Statues to fight the Vampires.|"))
+        f.write(qt.encode("Statue 4 is in the Great Wall. You need Spin Dash and Dark Friar to face the boss Sand Fanger.|"))
+        f.write(qt.encode("Statue 5 is in the Pyramid. You'll need all six Hieroglyphs as well as your father's journal.|"))
+        f.write(qt.encode("Statue 6 is at the top of Babel Tower. You'll need the Aura and the Crystal Ring to get to the top.|"))
+        f.write(qt.encode("Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|"))
+        f.write(qt.encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
+        f.write(qt.encode("She will give you the option to face Dark Gaia and beat the game. Good luck, and have fun!") + "\xc0")
+    elif goal == "Red Jewel Hunt":
+        f.write("\xce" + qt.encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
+        f.write(qt.encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
+        f.write(qt.encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
+        f.write(qt.encode("Happy hunting!") + "\xc0")
 
     f.seek(int("3f800",16)+rom_offset)
     f.write("\xce" + qt.encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
@@ -1724,6 +1730,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write("\xfd")
 
         i += 1
+
+    # Can't face Dark Gaia in Red Jewel hunts
+    if goal != "Dark Gaia":
+        f.seek(int("8dd0d",16)+rom_offset)
+        f.write("\x10\x01")
 
     statues.sort()
     statues_hex.sort()
