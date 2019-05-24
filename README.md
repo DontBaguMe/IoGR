@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v0.7.1)
+## The Illusion of Gaia Randomizer (v0.7.2) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v0.7.2-beta">Download</a>
 This randomizer is compatable with most US versions of the Illusion of Gaia ROM.  The executable has been verified to work on both Windows and Wine operating systems.
 
 ### Creating a Randomized ROM
