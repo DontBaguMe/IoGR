@@ -103,5 +103,7 @@ There is a simple item tracker included with this game.  Official trackers for t
 ### Future Releases
 - Enemizer
 - Entrance randomizer
+- Boss shuffle
+- More text edits
 
 ### Known Bugs and Quirks
