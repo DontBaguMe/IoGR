@@ -1,6 +1,10 @@
 ## The Illusion of Gaia Randomizer (v0.7.2-beta) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v0.7.2-beta">Download</a>
 This randomizer is compatable with most US versions of the Illusion of Gaia ROM.  The executable has been verified to work on both Windows and Wine operating systems.
 
+<a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
+
+<a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
+
 ### Creating a Randomized ROM
 For the randomizer to function, you must ensure that "iogr.exe" is run from the same directory that also contains "iogr.ico" as well as the "bin" directory.  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format, and both .smc and .sfc file formats are accepted.
 
