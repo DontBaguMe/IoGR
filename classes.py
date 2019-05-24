@@ -384,6 +384,8 @@ class World:
         elif self.kara == 2:
             self.logic[151][2][0][1] = 1
             self.graph[26][3].append(20)
+            # Change "Sam" to "Samlet"
+            self.location_text[45] = "\x63\x80\x8c\x8b\x84\xa4"
         elif self.kara == 3:
             self.logic[152][2][0][1] = 1
             self.graph[43][3].append(20)

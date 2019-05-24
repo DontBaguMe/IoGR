@@ -1811,13 +1811,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.seek(int("393a9",16)+rom_offset)
             f.write("\x13\x00\xD0\x08\x02\x45\x0b\x0b\x0d\x0d")
 
-            # Assign Kara painting spriteset to appropriate Map
-            #f.seek(int("d83a4",16)+rom_offset)
-            #f.write(ANGEL_TILESET)
-            #f.write(ANGEL_PALETTE)
-            #f.write(ANGEL_SPRTESET)
-            #f.write("\x00\x14\x00")
-
             # Set Kara painting event in appropriate map
             f.seek(int("c8ac5",16)+rom_offset)
             f.write("\x0b\x0b\x00\x4e\xd1\x86\xff\xca") # this is correct
@@ -1835,25 +1828,31 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.seek(int("393a9",16)+rom_offset)
             f.write("\x47\x00\xD0\x08\x02\x45\x0b\x24\x0d\x26")
 
+            # Change "Sam" to "Samlet"
+            f.seek(int("5fee0",16)+rom_offset)
+            f.write("\x1a\x00\x10\x02\xc0\x9e\xd2\x02\x0b\x02\xc1\x6b")
+            f.seek(int("5d2bd",16)+rom_offset)
+            f.write("\xf0\xd2")
+            f.seek(int("5d2f0",16)+rom_offset)
+            f.write("\xd3\xc2\x05" + qt.encode("Samlet: I'll never forget you!") + "\xc0")
+            f.seek(int("c9c78",16)+rom_offset)
+            f.write("\x03\x2a\x00\xe0\xfe\x85")
+
+            # Disable Remus
+            f.seek(int("5d15e",16)+rom_offset)
+            f.write("\xe0")
+
             # Assign Kara painting spriteset to appropriate Map
-            #f.seek(int("d8d5f",16)+rom_offset)
-            #f.seek(int("d8d76",16)+rom_offset)
-            #f.seek(int("d8d83",16)+rom_offset)
-            #f.write("\x15\x25\x00")
-            #f.seek(int("d8d67",16)+rom_offset)
-            #f.write(ANGEL_TILESET)
-            #f.write(ANGEL_PALETTE)
-            #f.write(ANGEL_SPRTESET)
-            #f.write("\x00")
-            #f.write("\x06\x01\xc9\xbe\x94\x15\x0c\x00")
+            f.seek(int("d8d55",16)+rom_offset)
+            f.write("\x0a")
 
             # Set Kara painting event in appropriate map
             f.seek(int("c9c6a",16)+rom_offset)
             f.write("\x0b\x24\x00\x4e\xd1\x86")
 
             # Adjust sprite
-            f.seek(int("6d14e",16)+rom_offset)
-            f.write("\x2a")
+            #f.seek(int("6d14e",16)+rom_offset)
+            #f.write("\x2a")
             f.seek(int("6d15b",16)+rom_offset)
             f.write("\x02\xb6\x30")
 
@@ -1866,10 +1865,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             # Set map check ID for Magic Dust item event
             f.seek(int("393a9",16)+rom_offset)
             f.write("\xa9\x00\xD0\x08\x02\x45\x12\x06\x14\x08")
-
-            # Assign Kara painting spriteset to appropriate Map
-            #f.seek(int("da0da",16)+rom_offset)
-            #f.write("\x25")
 
             # Set Kara painting event in appropriate map
             # Map #169, written into unused Map #104 (Seaside Tunnel)
@@ -1891,10 +1886,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             # Set map check ID for Magic Dust item event
             f.seek(int("393a9",16)+rom_offset)
             f.write("\xbf\x00\xD0\x08\x02\x45\x1a\x10\x1c\x12")
-
-            # Assign Kara painting spriteset to appropriate Map
-            #f.seek(int("da468",16)+rom_offset)
-            #f.write("\x25")
 
             # Set Kara painting event in appropriate map (Map #191)
             # Map #191, written into unused Map #104 (Seaside Tunnel)
