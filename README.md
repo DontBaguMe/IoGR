@@ -79,6 +79,20 @@ Upgrades can be accessed by clearing rooms that have a "Force" in them on the st
 - Babel Tower: Ankor Wat
 
 Each boss (and, by extension, the dungeons under each boss) is guaranteed to grant a total number of upgrades based on difficulty: 4 for Easy, 3 for Normal, 2 for Hard, and 1 for Extreme.
+#### In-Game Hints
+
+You may speak to a number of NPCs throughout the game to receive hints as to the location of certain key items in the game, as well as the contents of certain hard-to-reach locations.  The following NPCs will give you a hint (hints have been removed in Extreme difficulty):
+- Kara's Guard in Edward's Castle
+- The Elder at Itory Village
+- The Queen on the Gold Ship
+- The man at Diamond Coast
+- The empty coffin at the Seaside Palace
+- Ishtar's Apprentice in Angel Village
+- Kara's Journal in Watermia
+- Erasquez the Explorer in Euro
+- The spirit at the end of Ankor Wat
+- The girl with Jackal's note in Dao
+- The first spirit in Babel Tower
 #### Other Features
 - The location of the glowing Gold Tile in Inca Ruins has been randomized, making the Wind Melody a requirement to progress to the end of that dungeon.
 - The differences between the puzzle rooms in Ishtar's Studio in Angel Village are also random and could differ from the vanilla game.
@@ -90,6 +104,7 @@ Each boss (and, by extension, the dungeons under each boss) is guaranteed to gra
 - A number of new items have been added to the game to simulate ability upgrades. These jewels appear as circles of flame in your inventory and, when used, upgrade the appropriate ability -- either your HP, STR, DEF, Psycho Dash, or Dark Friar abilities.
 - Any barrier that can be removed with the Psycho Dash can also be destroyed with either the Psycho Slider or the Spin Dash.
 - The Dark Spaces in both Edward's Prison and Babel Tower have been relocated to prevent softlocks.
+- The spirits in Babel Tower can warp you back to the bottom of the tower, allowing you to escape if you cannot defeat one of the bosses.
 - You can talk to the NPC in front of the school in South Cape for an in-game tutorial.
 
 #### Misc. Notes and Strategies
