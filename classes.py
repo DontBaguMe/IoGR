@@ -32,16 +32,39 @@ class World:
         self.item_pool[item][0] += 1
         return item
 
+    # Find and clear non-progression item to make room for progression item
+    def make_room(self,item_locations,inv=False,count=1):
+        unfilled = []
+        while count > 0:
+            i = 0
+            done = False
+            while not done:
+                loc = item_locations[i]
+                region = self.item_locations[loc][0]
+                type = self.item_locations[loc][1]
+
+                if type == 1 and self.graph[region][0] and self.item_locations[loc][2]:
+                    item = self.item_locations[loc][3]
+                    if self.item_pool[item][5] == 3 and (not inv or self.item_pool[item][4]):
+                        self.unfill_item(loc)
+                        unfilled.append(loc)
+                        done = True
+                i += 1
+            count -= 1
+
+        return unfilled
+
     # Converts item pool into list of unique items, returns list
-    def list_item_pool(self,type=0,items=[]):
+    def list_item_pool(self,type=0,items=[],progress_type=0):
         item_list = []
         for x in self.item_pool:
             if not items or x in items:
                 if type == 0 or type == self.item_pool[x][1]:
-                    i = 0
-                    while i < self.item_pool[x][0]:
-                        item_list.append(x)
-                        i += 1
+                    if progress_type == 0 or progress_type == self.item_pool[x][5]:
+                        i = 0
+                        while i < self.item_pool[x][0]:
+                            item_list.append(x)
+                            i += 1
         return item_list
 
     # Returns a list of unfilled item locations
@@ -409,40 +432,54 @@ class World:
 
         random.seed(self.seed)
 
-        # Initialize and shuffle item list
-        item_list = self.list_item_pool()
-        random.shuffle(item_list)
-
+        # Initialize and shuffle location list
         item_locations = self.list_item_locations()
         random.shuffle(item_locations)
 
+        # Fill the Mustic Statues
         self.fill_statues()
         if not self.lock_dark_spaces(item_locations):
             print "ERROR: Couldn't lock dark spaces"
             return False
+
+        # Randomly place non-progression items
+        non_prog_items = self.list_item_pool(0,[],2)
+        non_prog_items += self.list_item_pool(0,[],3)
+        random.shuffle(non_prog_items)
+
+        self.random_fill(non_prog_items,item_locations)
+
+        # List and shuffle remaining key items
+        item_list = self.list_item_pool()
+        random.shuffle(item_list)
 
         inventory = []
 
         # Forward fill progression items with Monte Carlo simulation method
         # Continue to place progression items until all locations are accessible
         done = False
+        goal = False
 
         #while self.unaccessible_locations(item_locations):
         while not done:
-            #self.traverse()
+            # Get list of new progression options
             progression_list = self.monte_carlo()
             #print "To progress: ",progression_list
-            if not progression_list:
-                done = True
-            elif self.logic_mode == "Beatable":
-                #print self.graph[68][0], self.graph[70][0]
-                if self.goal == "Dark Gaia" and self.graph[70][0]:
-                    done = True
-                elif self.goal == "Red Jewel Hunt" and self.graph[68][0]:
-                    done = True
 
-            if not done:
-            # Determine next progression items to add to accessible locations
+            # Check for finished state, or dead-end state
+            goal = ((self.goal == "Dark Gaia" and self.graph[70][0]) or
+                (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
+
+            done = goal and (self.logic_mode == "Beatable" or not progression_list)
+            #print done, progression_list
+
+            if not done and not progression_list:
+                #print "Gotta make room..."
+                removed = self.make_room(item_locations)
+                #print "Cleared this location: ", removed
+
+            if not done and progression_list:
+                # Determine next progression items to add to accessible locations
                 progress = False
                 while not progress:
                     key = random.uniform(0,100)
@@ -459,6 +496,8 @@ class World:
                         progress = True
                         #print "We made progress!",items
                         #print self.graph
+
+            #print goal, done
 
         #print "Unaccessible: ",self.unaccessible_locations(item_locations)
 #        for node in self.graph:
@@ -636,19 +675,15 @@ class World:
                 if ability == 49:                     # Psycho Slide
                     f.seek(int("8eb5c",16)+rom_offset)
                     f.write(map)
-
                 if ability == 50:                     # Spin Dash
                     f.seek(int("8eb5e",16)+rom_offset)
                     f.write(map)
-
                 if ability == 51:                     # Dark Friar
                     f.seek(int("8eb60",16)+rom_offset)
                     f.write(map)
-
                 if ability == 52:                     # Aura Barrier
                     f.seek(int("8eb62",16)+rom_offset)
                     f.write(map)
-
                 if ability == 53:                     # Earthquaker
                     f.seek(int("8eb64",16)+rom_offset)
                     f.write(map)
@@ -807,7 +842,7 @@ class World:
             57: [1,3,"","Mystic Statue 4",False,2],
             58: [1,3,"","Mystic Statue 5",False,2],
             59: [1,3,"","Mystic Statue 6",False,2],
-            60: [32,2,"","Nothing",False,3]
+            60: [0,2,"","Nothing",False,3]
         }
 
         # Define Item/Ability/Statue locations
