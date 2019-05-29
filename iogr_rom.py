@@ -946,9 +946,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Old men text no longer checks for Teapot
     f.seek(int("7d610",16)+rom_offset)
-    f.write("\xd0\x10\x00")
+    f.write("\xc1\x02\xcc\x10")
     f.seek(int("7d7ab",16)+rom_offset)
-    f.write("\xd0\x10\x00")
+    f.write("\xc1\x02\xcc\x10")
 
     # Various NPC dialogue
     f.seek(int("7d6db",16)+rom_offset)
