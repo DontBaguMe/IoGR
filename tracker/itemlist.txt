@@ -18,7 +18,7 @@
 :Elevator Key,{11,77},false,false,false;
 :Mu Key,{12,78},false,false,false;
 :Purity Stone,{13,79},false,false,false;
-:Hope Statue 1,{14,64},false,false,false;
+:Hope Statue 1,{14},false,false,true;
 :Hope Statue 2,{14,64},false,false,false;
 :Rama Statue,{15},false,false,true;
 :Magic Dust,{16,65},false,false,false;
