@@ -1,3 +1,154 @@
+:: MAP ITEM CHECK TUTORIAL
+|------------------------|
+You have collected XX
+of the XX total items
+in this area.
+
+6dd30:
+F8 AD 48 0A 18 69 01 00 8D 48 0A D8 6B 
+
+6dd3d:
+D3 69 8E A5 AC D6 98 82 8E 8B 8B 84 82 A4 84 83 AC C6 02 00 48 0A CB 8E 85 AC A4 87 84 AC C6 02 00 4C 0A AC A4 8E A4 80 8B AC 88 A4 84 8C A3 CB 88 8D AC D6 D6 80 A2 84 80 2A C0
+
+6DE00:
+00 00 30 
+6DE03:
+02 45 0C 39 0E 3B B7 DE
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 45 AA AA BB BB CC CC
+02 CE 01 6B 
+
+: Load X with area index, then jump
+6DEB7:
+A2 01 80 52
+A2 02 80 4E
+A2 03 80 4A
+A2 04 80 46
+A2 05 80 42
+A2 06 80 3E
+A2 07 80 3A
+A2 08 80 36
+A2 09 80 32
+A2 0A 80 2E
+A2 0B 80 2A
+A2 0C 80 26
+A2 0D 80 22
+A2 0E 80 1E
+A2 0F 80 1A
+A2 10 80 16
+A2 11 80 12
+A2 12 80 0e
+A2 13 80 0a
+A2 14 80 06
+A2 15 80 02
+A2 16 
+
+: Load into A the number of total items, indexed by X (map area), write to $0a48
+6DF0D
+F8
+BF [30 DF 86]
+8D 48 0A
+D8
+
+: Clear Y, jump to subroutine (indirect) to each map's logic
+A0 00
+FC [50 DF]
+
+: Go to text box subroutine
+20 [80 DF]
+02 c1
+6b
+
+: Total item count, indexed by area (BCD)
+6DF30:
+00 04 07 02 01 06 01 05 06 00 08 05 07 06 04 04 07 05 02 07 04 12 02 
+
+: Map check subroutine pointers
+6DF50:
+00 00 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+
+: Text box subroutine
+6DF80:
+02 40 01 0F FF FF 6B 02 D0 01 01 FF FF 02 CC 01 20 30 DD 02 BF 3D DD 60
+
+: South Cape Checks
+6DFA0:
+02 D0 13 00 FF FF 8A C8 D8 << School RJ
+02 D0 18 00 FF FF 8A C8 D8 << Lance RJ
+02 D0 35 00 FF FF 8A C8 D8 << Lola's Melody
+02 D0 d7 00 FF FF 8A C8 D8 << Fisherman
+8C 4C 0A 60
+
+
+
+
+: FFC0
+: Store collected values, starting @$FFE0
+
+: Text box subroutine
+02 40 01 0F FF FF 6B 02 D0 01 01 FF FF 02 CC 01 20 30 DD 02 BF 3D DD 60
+
+
+
+02 45: (22 locations)
+South Cape:      >> 12,57,13,58 >> 0c,39,0d,3a
+Edward's:        >> 15,50,16,51 >> 
+Itory:           >> 11,42,12,43 >> 
+Moon Tribe:      >> 08,38,10,39 >> 
+Inca:            >> 18,39,19,40 >> 
+Diamond Coast:   >> 
+Freejia          >> 
+Diamond Mine:    >> 
+Niel's:          >> 
+Nazca:           >> 
+Sea Palace:      >> 
+Mu:              >> 
+Angel:           >> 
+Watermia:        >> 
+Great Wall:      >> 
+Euro:            >> 
+Mt. Kress:       >> 
+Natives':        >> 
+Ankor Wat:       >> 
+Dao:             >> 
+Pyramid:         >> 
+Babel:           >> 
+
+: Clear Y
+A0 00
+
+: If XX is set, BCD-increment Y
+02 D0 [XX] 00 FF FF 8A C8 D8 
+
+: South Cape Checks
+A0 00
+02 D0 13 00 FF FF 8A C8 D8 << School RJ
+02 D0 18 00 FF FF 8A C8 D8 << Lance RJ
+02 D0 35 00 FF FF 8A C8 D8 << Lola's Melody
+02 D0 d7 00 FF FF 8A C8 D8 << Fisherman
+8C 4C 0A 60
+
+
+
 :: IN-GAME TUTORIAL
 |------------------------|
         Welcome to       -

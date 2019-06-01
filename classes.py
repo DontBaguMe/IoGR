@@ -32,16 +32,39 @@ class World:
         self.item_pool[item][0] += 1
         return item
 
+    # Find and clear non-progression item to make room for progression item
+    def make_room(self,item_locations,inv=False,count=1):
+        unfilled = []
+        while count > 0:
+            i = 0
+            done = False
+            while not done:
+                loc = item_locations[i]
+                region = self.item_locations[loc][0]
+                type = self.item_locations[loc][1]
+
+                if type == 1 and self.graph[region][0] and self.item_locations[loc][2]:
+                    item = self.item_locations[loc][3]
+                    if self.item_pool[item][5] == 3 and (not inv or self.item_pool[item][4]):
+                        self.unfill_item(loc)
+                        unfilled.append(loc)
+                        done = True
+                i += 1
+            count -= 1
+
+        return unfilled
+
     # Converts item pool into list of unique items, returns list
-    def list_item_pool(self,type=0,items=[]):
+    def list_item_pool(self,type=0,items=[],progress_type=0):
         item_list = []
         for x in self.item_pool:
             if not items or x in items:
                 if type == 0 or type == self.item_pool[x][1]:
-                    i = 0
-                    while i < self.item_pool[x][0]:
-                        item_list.append(x)
-                        i += 1
+                    if progress_type == 0 or progress_type == self.item_pool[x][5]:
+                        i = 0
+                        while i < self.item_pool[x][0]:
+                            item_list.append(x)
+                            i += 1
         return item_list
 
     # Returns a list of unfilled item locations
@@ -409,40 +432,54 @@ class World:
 
         random.seed(self.seed)
 
-        # Initialize and shuffle item list
-        item_list = self.list_item_pool()
-        random.shuffle(item_list)
-
+        # Initialize and shuffle location list
         item_locations = self.list_item_locations()
         random.shuffle(item_locations)
 
+        # Fill the Mustic Statues
         self.fill_statues()
         if not self.lock_dark_spaces(item_locations):
             print "ERROR: Couldn't lock dark spaces"
             return False
+
+        # Randomly place non-progression items
+        non_prog_items = self.list_item_pool(0,[],2)
+        non_prog_items += self.list_item_pool(0,[],3)
+        random.shuffle(non_prog_items)
+
+        self.random_fill(non_prog_items,item_locations)
+
+        # List and shuffle remaining key items
+        item_list = self.list_item_pool()
+        random.shuffle(item_list)
 
         inventory = []
 
         # Forward fill progression items with Monte Carlo simulation method
         # Continue to place progression items until all locations are accessible
         done = False
+        goal = False
 
         #while self.unaccessible_locations(item_locations):
         while not done:
-            #self.traverse()
+            # Get list of new progression options
             progression_list = self.monte_carlo()
             #print "To progress: ",progression_list
-            if not progression_list:
-                done = True
-            elif self.logic_mode == "Beatable":
-                #print self.graph[68][0], self.graph[70][0]
-                if self.goal == "Dark Gaia" and self.graph[70][0]:
-                    done = True
-                elif self.goal == "Red Jewel Hunt" and self.graph[68][0]:
-                    done = True
 
-            if not done:
-            # Determine next progression items to add to accessible locations
+            # Check for finished state, or dead-end state
+            goal = ((self.goal == "Dark Gaia" and self.graph[70][0]) or
+                (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
+
+            done = goal and (self.logic_mode == "Beatable" or not progression_list)
+            #print done, progression_list
+
+            if not done and not progression_list:
+                #print "Gotta make room..."
+                removed = self.make_room(item_locations)
+                #print "Cleared this location: ", removed
+
+            if not done and progression_list:
+                # Determine next progression items to add to accessible locations
                 progress = False
                 while not progress:
                     key = random.uniform(0,100)
@@ -459,6 +496,8 @@ class World:
                         progress = True
                         #print "We made progress!",items
                         #print self.graph
+
+            #print goal, done
 
         #print "Unaccessible: ",self.unaccessible_locations(item_locations)
 #        for node in self.graph:
@@ -636,19 +675,15 @@ class World:
                 if ability == 49:                     # Psycho Slide
                     f.seek(int("8eb5c",16)+rom_offset)
                     f.write(map)
-
                 if ability == 50:                     # Spin Dash
                     f.seek(int("8eb5e",16)+rom_offset)
                     f.write(map)
-
                 if ability == 51:                     # Dark Friar
                     f.seek(int("8eb60",16)+rom_offset)
                     f.write(map)
-
                 if ability == 52:                     # Aura Barrier
                     f.seek(int("8eb62",16)+rom_offset)
                     f.write(map)
-
                 if ability == 53:                     # Earthquaker
                     f.seek(int("8eb64",16)+rom_offset)
                     f.write(map)
@@ -743,71 +778,71 @@ class World:
             self.required_items += [28,50,53]
 
         # Initialize item pool, considers special attacks as "items"
-        # Format = { ID:  [Quantity,
-        #                  Type code (1=item, 2=ability, 3=statue),
-        #                  ROM Code, Name, TakesInventorySpace] }
+        # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue),
+        #                  ROM Code, Name, TakesInventorySpace,
+        #                  ProgressionType (1=unlocks new locations,2=quest item,3=no progression)] }
         self.item_pool = {
-            0: [2,1,"\x00","Nothing",False],
-            1: [45,1,"\x01","Red Jewel",False],
-            2: [1,1,"\x02","Prison Key",True],
-            3: [1,1,"\x03","Inca Statue A",True],
-            4: [1,1,"\x04","Inca Statue B",True],
-            5: [0,1,"\x05","Inca Melody",True],
-            6: [12,1,"\x06","Herb",False],
-            7: [1,1,"\x07","Diamond Block",True],
-            8: [1,1,"\x08","Wind Melody",True],
-            9: [1,1,"\x09","Lola's Melody",True],
-            10: [1,1,"\x0a","Large Roast",True],
-            11: [1,1,"\x0b","Mine Key A",True],
-            12: [1,1,"\x0c","Mine Key B",True],
-            13: [1,1,"\x0d","Memory Melody",True],
-            14: [4,1,"\x0e","Crystal Ball",True],
-            15: [1,1,"\x0f","Elevator Key",True],
-            16: [1,1,"\x10","Mu Palace Key",True],
-            17: [1,1,"\x11","Purification Stone",True],
-            18: [2,1,"\x12","Statue of Hope",True],
-            19: [2,1,"\x13","Rama Statue",False],
-            20: [1,1,"\x14","Magic Dust",True],
-            21: [0,1,"\x15","Blue Journal",True],
-            22: [1,1,"\x16","Lance's Letter",False],
-            23: [1,1,"\x17","Necklace Stones",True],
-            24: [1,1,"\x18","Will",True],
-            25: [1,1,"\x19","Teapot",True],
-            26: [3,1,"\x1a","Mushroom Drops",True],
-            27: [0,1,"\x1b","Bag of Gold",True],
-            28: [1,1,"\x1c","Black Glasses",False],
-            29: [1,1,"\x1d","Gorgon Flower",True],
-            30: [1,1,"\x1e","Hieroglyph",False],
-            31: [1,1,"\x1f","Hieroglyph",False],
-            32: [1,1,"\x20","Hieroglyph",False],
-            33: [1,1,"\x21","Hieroglyph",False],
-            34: [1,1,"\x22","Hieroglyph",False],
-            35: [1,1,"\x23","Hieroglyph",False],
-            36: [1,1,"\x24","Aura",True],
-            37: [1,1,"\x25","Lola's Letter",False],
-            38: [1,1,"\x26","Father's Journal",True],
-            39: [1,1,"\x27","Crystal Ring",False],
-            40: [1,1,"\x28","Apple",True],
-            41: [3,1,"\x29","HP Jewel",False],
-            42: [1,1,"\x2a","DEF Jewel",False],
-            43: [2,1,"\x2b","STR Jewel",False],
-            44: [1,1,"\x2c","Light Jewel",False],
-            45: [2,1,"\x2d","Dark Jewel",False],
-            46: [1,1,"\x2e","2 Red Jewels",False],
-            47: [1,1,"\x2f","3 Red Jewels",False],
-            48: [1,2,"","Psycho Dash",False],
-            49: [1,2,"","Psycho Slider",False],
-            50: [1,2,"","Spin Dash",False],
-            51: [1,2,"","Dark Friar",False],
-            52: [1,2,"","Aura Barrier",False],
-            53: [1,2,"","Earthquaker",False],
-            54: [1,3,"","Mystic Statue 1",False],
-            55: [1,3,"","Mystic Statue 2",False],
-            56: [1,3,"","Mystic Statue 3",False],
-            57: [1,3,"","Mystic Statue 4",False],
-            58: [1,3,"","Mystic Statue 5",False],
-            59: [1,3,"","Mystic Statue 6",False],
-            60: [32,2,"","Nothing",False]
+            0: [2,1,"\x00","Nothing",False,3],
+            1: [45,1,"\x01","Red Jewel",False,1],
+            2: [1,1,"\x02","Prison Key",True,1],
+            3: [1,1,"\x03","Inca Statue A",True,1],
+            4: [1,1,"\x04","Inca Statue B",True,1],
+            5: [0,1,"\x05","Inca Melody",True,3],
+            6: [12,1,"\x06","Herb",False,3],
+            7: [1,1,"\x07","Diamond Block",True,1],
+            8: [1,1,"\x08","Wind Melody",True,1],
+            9: [1,1,"\x09","Lola's Melody",True,1],
+            10: [1,1,"\x0a","Large Roast",True,1],
+            11: [1,1,"\x0b","Mine Key A",True,1],
+            12: [1,1,"\x0c","Mine Key B",True,1],
+            13: [1,1,"\x0d","Memory Melody",True,1],
+            14: [4,1,"\x0e","Crystal Ball",True,2],
+            15: [1,1,"\x0f","Elevator Key",True,1],
+            16: [1,1,"\x10","Mu Palace Key",True,1],
+            17: [1,1,"\x11","Purification Stone",True,1],
+            18: [2,1,"\x12","Statue of Hope",True,1],
+            19: [2,1,"\x13","Rama Statue",False,2],
+            20: [1,1,"\x14","Magic Dust",True,2],
+            21: [0,1,"\x15","Blue Journal",True,3],
+            22: [1,1,"\x16","Lance's Letter",False,3],
+            23: [1,1,"\x17","Necklace Stones",True,1],
+            24: [1,1,"\x18","Will",True,1],
+            25: [1,1,"\x19","Teapot",True,1],
+            26: [3,1,"\x1a","Mushroom Drops",True,1],
+            27: [0,1,"\x1b","Bag of Gold",True,3],
+            28: [1,1,"\x1c","Black Glasses",False,1],
+            29: [1,1,"\x1d","Gorgon Flower",True,1],
+            30: [1,1,"\x1e","Hieroglyph",False,2],
+            31: [1,1,"\x1f","Hieroglyph",False,2],
+            32: [1,1,"\x20","Hieroglyph",False,2],
+            33: [1,1,"\x21","Hieroglyph",False,2],
+            34: [1,1,"\x22","Hieroglyph",False,2],
+            35: [1,1,"\x23","Hieroglyph",False,2],
+            36: [1,1,"\x24","Aura",True,1],
+            37: [1,1,"\x25","Lola's Letter",False,1],
+            38: [1,1,"\x26","Father's Journal",True,2],
+            39: [1,1,"\x27","Crystal Ring",False,1],
+            40: [1,1,"\x28","Apple",True,1],
+            41: [3,1,"\x29","HP Jewel",False,3],
+            42: [1,1,"\x2a","DEF Jewel",False,3],
+            43: [2,1,"\x2b","STR Jewel",False,3],
+            44: [1,1,"\x2c","Light Jewel",False,3],
+            45: [2,1,"\x2d","Dark Jewel",False,3],
+            46: [1,1,"\x2e","2 Red Jewels",False,3],
+            47: [1,1,"\x2f","3 Red Jewels",False,3],
+            48: [1,2,"","Psycho Dash",False,1],
+            49: [1,2,"","Psycho Slider",False,1],
+            50: [1,2,"","Spin Dash",False,1],
+            51: [1,2,"","Dark Friar",False,1],
+            52: [1,2,"","Aura Barrier",False,3],
+            53: [1,2,"","Earthquaker",False,1],
+            54: [1,3,"","Mystic Statue 1",False,2],
+            55: [1,3,"","Mystic Statue 2",False,2],
+            56: [1,3,"","Mystic Statue 3",False,2],
+            57: [1,3,"","Mystic Statue 4",False,2],
+            58: [1,3,"","Mystic Statue 5",False,2],
+            59: [1,3,"","Mystic Statue 6",False,2],
+            60: [0,2,"","Nothing",False,3]
         }
 
         # Define Item/Ability/Statue locations

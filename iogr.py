@@ -6,7 +6,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "1.0.0"
+VERSION = "0.8.0"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -14,7 +14,7 @@ def find_ROM():
 
 def generate_seed():
     seed.delete(0,END)
-    seed.insert(10,random.randint(0,999999))
+    seed.insert(10,random.randint(0,99999999))
 
 def generate_ROM():
     rompath = ROM.get()

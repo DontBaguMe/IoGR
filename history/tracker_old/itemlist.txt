@@ -1,0 +1,70 @@
+//Please note the first 45 items (45 is Agahnim) 
+//order should not be changed if you use auto-update
+//<- commentary not readed by the program 
+//Also do not use , in item name :p
+
+//Name, {Icons Order},Loop,isBottle,haveCount
+:Red Jewel,{0},false,false,true;
+:Herb,{1},false,false,true;
+:Prison Key,{2,55},false,false,false;
+:Inca Statue,{3},false,false,true;
+:Diamond Block,{4,56},false,false,false;
+:Wind Melody,{5,57},false,false,false;
+:Lola Melody,{6,58},false,false,false;
+:Large Roast,{7,59},false,false,false;
+:Mine Key,{8},false,false,true;
+:Memory Melody,{9,60},false,false,false;
+:Crystal Ball,{10},false,false,true;
+:Elevator Key,{11,77},false,false,false;
+:Mu Key,{12,78},false,false,false;
+:Purity Stone,{13,79},false,false,false;
+:Hope Statue 1,{14,64},false,false,false;
+:Hope Statue 2,{14,64},false,false,false;
+:Rama Statue,{15},false,false,true;
+:Magic Dust,{16,65},false,false,false;
+:Lance Letter,{17},false,false,true;
+:Necklace,{18,66},false,false,false;
+:Will,{19,67},false,false,false;
+:Teapot,{20,68},false,false,false;
+:Mushroom Drops,{21},false,false,true;
+:Black Glasses,{22},false,false,false;
+:Gorgon Flower,{23,69},false,false,false;
+:Hieroglyph Count,{24},false,false,true;
+:Hieroglyph 1,{48,49,50,51,52,53},true,false,false;
+:Hieroglyph 2,{48,49,50,51,52,53},true,false,false;
+:Hieroglyph 3,{48,49,50,51,52,53},true,false,false;
+:Hieroglyph 4,{48,49,50,51,52,53},true,false,false;
+:Hieroglyph 5,{48,49,50,51,52,53},true,false,false;
+:Hieroglyph 6,{48,49,50,51,52,53},true,false,false;
+:H1 Placed,{47,54},false,false,false;
+:H2 Placed,{47,54},false,false,false;
+:H3 Placed,{47,54},false,false,false;
+:H4 Placed,{47,54},false,false,false;
+:H5 Placed,{47,54},false,false,false;
+:H6 Placed,{47,54},false,false,false;
+:Aura,{30},false,false,false;
+:Lola Letter,{31},false,false,false;
+:Journal,{32},false,false,false;
+:Crystal Ring,{33},false,false,false;
+:Apple,{34,70},false,false,false;
+:Mystic Statue 1,{35,71},false,false,false;
+:Mystic Statue 2,{36,72},false,false,false;
+:Mystic Statue 3,{37,73},false,false,false;
+:Mystic Statue 4,{38,74},false,false,false;
+:Mystic Statue 5,{39,75},false,false,false;
+:Mystic Statue 6,{40,76},false,false,false;
+:Psycho Dash,{41},false,false,false;
+:Psycho Slider,{42},false,false,false;
+:Spin Dash,{43},false,false,false;
+:Dark Friar,{44},false,false,false;
+:Aura Barrier,{45},false,false,false;
+:Earthquaker,{46},false,false,false;
+:Timer,{61},false,false,false; //show a timer that start when pressing Timer_Start
+:Timer_Start,{62},false,false,false; //start the timer
+:Timer_Done,{63},false,false,false; //end the timer
+:Timer_StartDone,{62,63},false,false,false; //start and end the timer
+:Nothing,{53},false,false,false; //can be changed in something else - do not remove
+:Nothing,{54},false,false,false; //can be changed in something else - do not remove
+:Nothing,{55},false,false,false; 
+:Chest,{58,59},false,false,false; //Do not remove anything above here
+:Sanc Heart,{60},false,false,false;
