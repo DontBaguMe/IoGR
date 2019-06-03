@@ -39,38 +39,37 @@ D3 69 8E A5 AC D6 98 82 8E 8B 8B 84 82 A4 84 83 AC C6 02 00 48 0A CB 8E 85 AC A4
 
 : Load X with area index, then jump
 6DEB7:
-A2 01 80 52
-A2 02 80 4E
-A2 03 80 4A
-A2 04 80 46
-A2 05 80 42
-A2 06 80 3E
-A2 07 80 3A
-A2 08 80 36
-A2 09 80 32
-A2 0A 80 2E
-A2 0B 80 2A
-A2 0C 80 26
-A2 0D 80 22
-A2 0E 80 1E
-A2 0F 80 1A
-A2 10 80 16
-A2 11 80 12
-A2 12 80 0e
-A2 13 80 0a
-A2 14 80 06
-A2 15 80 02
+A2 01 00 80 65
+A2 02 00 80 60
+A2 03 00 80 5b
+A2 04 00 80 56
+A2 05 00 80 51
+A2 06 00 80 4c
+A2 07 00 80 47
+A2 08 00 80 42
+A2 09 00 80 3d
+A2 0A 00 80 38
+A2 0B 00 80 33
+A2 0C 00 80 2e
+A2 0D 00 80 29
+A2 0E 00 80 24
+A2 0F 00 80 1f
+A2 10 00 80 1a
+A2 11 00 80 16
+A2 12 00 80 11
+A2 13 00 80 0c
+A2 14 00 80 07
+A2 15 00 80 02
 A2 16 
 
 : Load into A the number of total items, indexed by X (map area), write to $0a48
-6DF0D
-F8
-BF [30 DF 86]
+6DF0D:
+F8 BF [FF FF 86]
 8D 48 0A
 D8
 
 : Clear Y, jump to subroutine (indirect) to each map's logic
-A0 00
+A0 00 00
 FC [50 DF]
 
 : Go to text box subroutine

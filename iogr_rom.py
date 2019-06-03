@@ -76,7 +76,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Turns house in South Cape into tutorial map - THIS ACTUALLY WORKS!
     f.seek(int("18480",16)+rom_offset)
-    f.write("\x07\x90\x00\xa0\x03\x00\x00\x44")
+    f.write("\x07\x90\x00\xd0\x03\x00\x00\x44")
+    f.seek(int("1854e",16)+rom_offset)
+    f.write("\x00\x3e\x40\x02")
     f.seek(int("c846c",16)+rom_offset)
     f.write("\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
     # Item count text box
