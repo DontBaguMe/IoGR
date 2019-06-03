@@ -805,6 +805,21 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("69f26",16)+rom_offset)
     f.write("\x00")
 
+    # Spirits in Rama statue room can't lock you
+    f.seek(int("6a07a",16)+rom_offset)
+    f.write("\x6b")
+    f.seek(int("6a082",16)+rom_offset)
+    f.write("\x6b")
+    f.seek(int("6a08a",16)+rom_offset)
+    f.write("\x6b")
+    f.seek(int("6a092",16)+rom_offset)
+    f.write("\x6b")
+    f.seek(int("6a09a",16)+rom_offset)
+    f.write("\x6b")
+    f.seek(int("6a0a2",16)+rom_offset)
+    f.write("\x6b")
+
+
     # Move exits around to make Vampires required for Statue
     f.seek(int("193ea",16)+rom_offset)
     f.write("\x5f\x80\x00\x50\x00\x03\x00\x44")
