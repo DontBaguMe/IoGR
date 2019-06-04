@@ -4,122 +4,32 @@ You have collected XX
 of the XX total items
 in this area.
 
-6dd30:
-F8 AD 48 0A 18 69 01 00 8D 48 0A D8 6B 
-
-6dd3d:
-D3 69 8E A5 AC D6 98 82 8E 8B 8B 84 82 A4 84 83 AC C6 02 00 48 0A CB 8E 85 AC A4 87 84 AC C6 02 00 4C 0A AC A4 8E A4 80 8B AC 88 A4 84 8C A3 CB 88 8D AC D6 D6 80 A2 84 80 2A C0
-
-6DE00:
-00 00 30 
-6DE03:
-02 45 0C 39 0E 3B B7 DE
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 45 AA AA BB BB CC CC
-02 CE 01 6B 
-
-: Load X with area index, then jump
-6DEB7:
-A2 01 00 80 65
-A2 02 00 80 60
-A2 03 00 80 5b
-A2 04 00 80 56
-A2 05 00 80 51
-A2 06 00 80 4c
-A2 07 00 80 47
-A2 08 00 80 42
-A2 09 00 80 3d
-A2 0A 00 80 38
-A2 0B 00 80 33
-A2 0C 00 80 2e
-A2 0D 00 80 29
-A2 0E 00 80 24
-A2 0F 00 80 1f
-A2 10 00 80 1a
-A2 11 00 80 16
-A2 12 00 80 11
-A2 13 00 80 0c
-A2 14 00 80 07
-A2 15 00 80 02
-A2 16 
-
-: Load into A the number of total items, indexed by X (map area), write to $0a48
-6DF0D:
-F8 BF [FF FF 86]
-8D 48 0A
-D8
-
-: Clear Y, jump to subroutine (indirect) to each map's logic
-A0 00 00
-FC [50 DF]
-
-: Go to text box subroutine
-20 [80 DF]
-02 c1
-6b
-
-: Total item count, indexed by area (BCD)
-6DF30:
-00 04 07 02 01 06 01 05 06 00 08 05 07 06 04 04 07 05 02 07 04 12 02 
-
-: Map check subroutine pointers
-6DF50:
-00 00 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
-
-: Text box subroutine
-6DF80:
-02 40 01 0F FF FF 6B 02 D0 01 01 FF FF 02 CC 01 20 30 DD 02 BF 3D DD 60
-
-: South Cape Checks
-6DFA0:
-02 D0 13 00 FF FF 8A C8 D8 << School RJ
-02 D0 18 00 FF FF 8A C8 D8 << Lance RJ
-02 D0 35 00 FF FF 8A C8 D8 << Lola's Melody
-02 D0 d7 00 FF FF 8A C8 D8 << Fisherman
-8C 4C 0A 60
-
-
-
-
-: FFC0
-: Store collected values, starting @$FFE0
-
-: Text box subroutine
-02 40 01 0F FF FF 6B 02 D0 01 01 FF FF 02 CC 01 20 30 DD 02 BF 3D DD 60
-
 
 
 02 45: (22 locations)
-South Cape:      >> 12,57,13,58 >> 0c,39,0d,3a
-Edward's:        >> 15,50,16,51 >> 
-Itory:           >> 11,42,12,43 >> 
-Moon Tribe:      >> 08,38,10,39 >> 
-Inca:            >> 18,39,19,40 >> 
-Diamond Coast:   >> 
-Freejia          >> 
-Diamond Mine:    >> 
-Niel's:          >> 
-Nazca:           >> 
-Sea Palace:      >> 
+South Cape:      >> 12,57 >> 0c,39,0e,3b
+Edward's:        >> 15,50 >> 0f,32,11,34
+  switches 23,33,46,d8   chests 1,2,3
+Itory:           >> 11,42 >> 0b,2a,0d,2c
+  switches 34, 2d
+Moon Tribe:      >> 08,38 >> 08,26,0b,28
+  switch 48
+Inca:            >> 18,39 >> 12,27,14,29
+  switch 32, e0   chests 4,5,6,7
+
+Diamond Coast:   >> 36,52 >> 24,34,26,36
+  switch 36
+Freejia          >> 36,44 >> 24,2c,26,2e
+  switches 3a,53,54,5a,e1
+Diamond Mine:    >> 50,50 >> 32,32,34,34
+  switches 5d,5e,a2,a3,d9  chest 9
+Niel's:          >> 38,37 >> 26,25,28,27
+Nazca:           >> 47,40 >> 2f,28,31,2a
+  chests a,b,c,d,e,f,10,11
+Sea Palace:      >> 55,8 >> 37,08,39,0a
+  switches 85,3B01  chests 12,13,14
+
+
 Mu:              >> 
 Angel:           >> 
 Watermia:        >> 
@@ -131,6 +41,68 @@ Ankor Wat:       >>
 Dao:             >> 
 Pyramid:         >> 
 Babel:           >> 
+
+1afa6
+Chest Opening Subroutine (Xpos, Ypos, Item#, OpenRoutine[Bit3]/Chest#) - 0xFF denotes new map
+FF 04 1A 06 01 = Map  14 (0x0E) - Herb
+FF 07 08 01 02 = Map  16 (0x10) - Red jewel
+FF 11 1E 01 03 = Map  18 (0x12) - Red Jewel
+FF 06 06 07 84 = Map  29 (0x1D) - Diamond block
+FF 02 17 06 05 = Map  33 (0x21) - Herb
+FF
+ 10 1B 06 06 = Map  38 (0x26) - Herb
+   08 1F 01 07 = Map  38 (0x26) - Red jewel
+FF 25 19 38 88 = Map  46 (0x2E) - Mystic Statue
+FF 38 27 
+06 09 = Map  63 (0x3F) - Herb
+FF 39 31 0E 8A = Map  77 (0x4D) - Crystal Ball
+   09 33 06 0B = Map  77 (0x4D) - Herb
+   34 05 01 0C = Map  77 (0x4D) - Red jewel
+FF 
+37 06 0E 8D = Map  80 (0x50) - Crystal Ball
+FF 03 2F 0E 8E = Map  81 (0x51) - Crystal Ball
+FF 07 08 01 0F = Map  82 (0x52) - Red jewel
+FF 35 
+32 06 10 = Map  83 (0x53) - Herb
+   31 36 0E 91 = Map  83 (0x53) - Crystal Ball
+
+FF 37 1A 01 12 = Map  90 (0x5A) - Red jewel
+FF 07 07 01 
+13 = Map  91 (0x5B) - Red jewel
+FF 09 17 01 14 = Map  92 (0x5C) - Red jewel
+
+FF 20 19 13 95 = Map  95 (0x5F) - Rama Statue
+   2F 27 01 16 = Map  95 (0x5F) - Red jewel
+FF
+ 1E 18 00 2E = Map  96 (0x60) - Nothing
+   2D 1C 13 97 = Map  96 (0x60) - Rama Statue
+FF 0A 33 00 18 = Map  97 (0x61) - Nothing
+FF 07 28 
+01 19 = Map 112 (0x70) - Red jewel
+FF 27 08 14 9A = Map 116 (0x74) - Magic Dust
+FF 47 08 06 1B = Map 117 (0x75) - Herb
+   57 08 01 1C = Map 117 (0x75) - Red jewel
+FF 1A 59 01 1D = Map 131 (0x83) - Red jewel
+FF 05 1A 06 1E = Map 133 (0x85) - Herb
+FF 18 36 01 1F = Map 162 (0xA2) - Red jewel
+FF 
+12 0B 1A A0 = Map 164 (0xA4) - Mushroom Drops
+FF 05 08 1A A1 = Map 166 (0xA6) - Mushroom Drops
+FF 22 10 1A A2 = Map 167 (0xA7) - Mushroom Drops
+FF 0E 
+05 19 A3 = Map 169 (0xA9) - Teapot
+FF 67 05 01 24 = Map 177 (0xB1) - Red jewel
+FF 07 4E 06 25 = Map 181 (0xB5) - Herb
+FF 07 06 
+01 26 = Map 185 (0xB9) - Red jewel
+FF 11 20 01 27 = Map 187 (0xBB) - Red jewel
+FF 05 16 01 28 = Map 190 (0xBE) - Red jewel
+FF 37 59 01 
+29 = Map 209 (0xD1) - Red jewel
+FF 46 49 01 2A = Map 212 (0xD4) - Red jewel
+FF 47 09 01 2B = Map 214 (0xD6) - Red jewel
+FF 75 29 01 2C = Map 217 (0xD9) - Red jewel
+FF 37 16 06 2D = Map 233 (0xE9) - Herb
 
 : Clear Y
 A0 00
@@ -3055,65 +3027,7 @@ E2 20 85 2A C2 20 80 0E C2 20 20 36 B1 90 05 A5
 FF041A0601FF07080102FF111E0103FF06060704FF02170605FF101B0606081F0107FF25193808FF38270609FF39310E0A0933060B3405010CFF37060E0DFF032F0E0EFF0708010FFF3532061031360E11FF371A0112FF07070113FF09170114FF201913152F270116FF1E18002E2D1C1317FF0A330018FF07280119FF2708141AFF4708061B5708011CFF1A59011DFF051A061EFF1836011FFF120B1A20FF05081A21FF22101A22FF0E051923FF67050124FF074E0625FF07060126FF11200127FF05160128FF37590129FF4649012AFF4709012BFF7529012CFF 
 
 
-1afa6
-Chest Opening Subroutine (Xpos, Ypos, Item#, OpenRoutine[Bit3]/Chest#) - 0xFF denotes new map
-FF 04 1A 06 01 = Map  14 (0x0E) - Herb
-FF 07 08 01 02 = Map  16 (0x10) - Red jewel
-FF 11 1E 01 03 = Map  18 (0x12) - Red Jewel
-FF 06 06 07 84 = Map  29 (0x1D) - Diamond block
-FF 02 17 06 05 = Map  33 (0x21) - Herb
-FF
- 10 1B 06 06 = Map  38 (0x26) - Herb
-   08 1F 01 07 = Map  38 (0x26) - Red jewel
-FF 25 19 38 88 = Map  46 (0x2E) - Mystic Statue
-FF 38 27 
-06 09 = Map  63 (0x3F) - Herb
-FF 39 31 0E 8A = Map  77 (0x4D) - Crystal Ball
-   09 33 06 0B = Map  77 (0x4D) - Herb
-   34 05 01 0C = Map  77 (0x4D) - Red jewel
-FF 
-37 06 0E 8D = Map  80 (0x50) - Crystal Ball
-FF 03 2F 0E 8E = Map  81 (0x51) - Crystal Ball
-FF 07 08 01 0F = Map  82 (0x52) - Red jewel
-FF 35 
-32 06 10 = Map  83 (0x53) - Herb
-   31 36 0E 91 = Map  83 (0x53) - Crystal Ball
-FF 37 1A 01 12 = Map  90 (0x5A) - Red jewel
-FF 07 07 01 
-13 = Map  91 (0x5B) - Red jewel
-FF 09 17 01 14 = Map  92 (0x5C) - Red jewel
-FF 20 19 13 95 = Map  95 (0x5F) - Rama Statue
-   2F 27 01 16 = Map  95 (0x5F) - Red jewel
-FF
- 1E 18 00 2E = Map  96 (0x60) - Nothing
-   2D 1C 13 97 = Map  96 (0x60) - Rama Statue
-FF 0A 33 00 18 = Map  97 (0x61) - Nothing
-FF 07 28 
-01 19 = Map 112 (0x70) - Red jewel
-FF 27 08 14 9A = Map 116 (0x74) - Magic Dust
-FF 47 08 06 1B = Map 117 (0x75) - Herb
-   57 08 01 1C = Map 117 (0x75) - Red jewel
-FF 1A 59 01 1D = Map 131 (0x83) - Red jewel
-FF 05 1A 06 1E = Map 133 (0x85) - Herb
-FF 18 36 01 1F = Map 162 (0xA2) - Red jewel
-FF 
-12 0B 1A A0 = Map 164 (0xA4) - Mushroom Drops
-FF 05 08 1A A1 = Map 166 (0xA6) - Mushroom Drops
-FF 22 10 1A A2 = Map 167 (0xA7) - Mushroom Drops
-FF 0E 
-05 19 A3 = Map 169 (0xA9) - Teapot
-FF 67 05 01 24 = Map 177 (0xB1) - Red jewel
-FF 07 4E 06 25 = Map 181 (0xB5) - Herb
-FF 07 06 
-01 26 = Map 185 (0xB9) - Red jewel
-FF 11 20 01 27 = Map 187 (0xBB) - Red jewel
-FF 05 16 01 28 = Map 190 (0xBE) - Red jewel
-FF 37 59 01 
-29 = Map 209 (0xD1) - Red jewel
-FF 46 49 01 2A = Map 212 (0xD4) - Red jewel
-FF 47 09 01 2B = Map 214 (0xD6) - Red jewel
-FF 75 29 01 2C = Map 217 (0xD9) - Red jewel
-FF 37 16 06 2D = Map 233 (0xE9) - Herb
+
 FF
 
 

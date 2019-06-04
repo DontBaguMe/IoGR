@@ -74,28 +74,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #f.seek(int("4fb50",16)+rom_offset)
     #f.write("\x02\x88\x00\x80\x8e\x02\x8d\x01\x02\x0b\x02\xc0\xdf\xfa\x02\xc1\x02\xBC\x08\x00\x4c\xd0\xfa\x84")  # \x02\x88\x00\x80\x90
 
-    # Turns house in South Cape into tutorial map - THIS ACTUALLY WORKS!
-    f.seek(int("18480",16)+rom_offset)
-    f.write("\x07\x90\x00\xd0\x03\x00\x00\x44")
-    f.seek(int("1854e",16)+rom_offset)
-    f.write("\x00\x3e\x40\x02")
-    f.seek(int("c846c",16)+rom_offset)
-    f.write("\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
-    # Item count text box
-    # Put current count in $a48, total in $a4c
-    f.seek(int("6dd30",16)+rom_offset)
-    f.write("\xF8\xAD\x48\x0A\x18\x69\x01\x00\x8D\x48\x0A\xD8\x60")
-    f.write("\xd3" + qt.encode("You have collected ") + "\xc6\x02\x00\x48\x0a\xcb")
-    f.write(qt.encode("of the ") + "\xc6\x02\x00\x4c\x0a\xac" + qt.encode("total items"))
-    f.write("\xcb" + qt.encode("in this area.") + "\xc9\x18\xc0")
-
-    f_collectioncheck = open(folder + "06de00_collectioncheck.bin","r+b")
-    f.seek(int("6de00",16)+rom_offset)
-    f.write(f_collectioncheck.read())
-    f_collectioncheck.close
-
-
-
     # Get all text boxes in the game
 #    f.seek(0)
 #    rom = f.read()
@@ -299,6 +277,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("Here are some resources that might help you:|"))
     f.write(qt.encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
     f.write(qt.encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
+    f.write(qt.encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
     f.write(qt.encode("- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.") + "\xc0")
 
     # Modify Lance's Letter
@@ -475,9 +454,29 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("4fb50",16)+rom_offset)
     f.write(f_tutorial.read())
     f_tutorial.close
-
     f.seek(int("49231",16)+rom_offset)   # NPC in front of school
     f.write("\x50\xfb")
+
+    # Turns house in South Cape into item-tracking overworld map
+    f.seek(int("18480",16)+rom_offset)
+    f.write("\x07\x90\x00\xd0\x03\x00\x00\x44")
+    f.seek(int("1854e",16)+rom_offset)
+    f.write("\x00\x3e\x40\x02")
+    f.seek(int("c846c",16)+rom_offset)
+    f.write("\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
+    # Item count text box
+    # Put current count in $a48, total in $a4c
+    f.seek(int("6dd30",16)+rom_offset)
+    f.write("\xF8\xAD\x48\x0A\x18\x69\x01\x00\x8D\x48\x0A\xD8\x60")
+    f.seek(int("6dd40",16)+rom_offset)
+    f.write("\xd3" + qt.encode("You have collected ") + "\xc6\x02\x00\x48\x0a\xcb")
+    f.write(qt.encode("of the ") + "\xc6\x02\x00\x4c\x0a\xac" + qt.encode("total items"))
+    f.write("\xcb" + qt.encode("in this area.") + "\xc9\x18\xc0")
+
+    f_collectioncheck = open(folder + "06de00_collectioncheck.bin","r+b")
+    f.seek(int("6de00",16)+rom_offset)
+    f.write(f_collectioncheck.read())
+    f_collectioncheck.close
 
     ##########################################################################
     #                       Modify Edward's Castle events
