@@ -351,7 +351,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Update item removal restriction flags
     f.seek(int("1e12a",16)+rom_offset)
-    f.write("\x9c\xff\x97\x27\xb0\x01")
+    f.write("\x9f\xff\x97\x27\xb0\x01")
 
     ##########################################################################
     #                  Update overworld map movement scripts
@@ -1731,7 +1731,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
             # Restrict removal of Rama Statues from inventory
             f.seek(int("1e12c",16)+rom_offset)
-            f.write("\x8f")
+            f.write("\x9f")
 
         if statueOrder[i] == 4:
             statues.append(4)
