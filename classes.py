@@ -50,6 +50,8 @@ class World:
                         unfilled.append(loc)
                         done = True
                 i += 1
+                if i >= len(item_locations):
+                    return []
             count -= 1
 
         return unfilled
@@ -476,6 +478,9 @@ class World:
             if not done and not progression_list:
                 #print "Gotta make room..."
                 removed = self.make_room(item_locations)
+                if not removed:
+                    print "ERROR: Could not remove non-progression item"
+                    return False
                 #print "Cleared this location: ", removed
 
             if not done and progression_list:

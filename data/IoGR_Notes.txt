@@ -47,8 +47,11 @@ Ankor Wat:       >> 18,20 >> 12,14,14,16
 Dao:             >> 8,16 >> 08,10,0a,12
   switches b8*,cd,e7    * counts for 2 items
 
-Pyramid:         >> 
-Babel:           >> 
+Pyramid:         >> 6,10 >> 06,0a,08,0c
+  switches bd,d5,c2,c3,c4,c5,c6,c7    chests 29,2a,2b,2c
+
+Babel:           >> 31,31 >> 1f,1f,21,21
+  switches da,dc
 
 1afa6
 Chest Opening Subroutine (Xpos, Ypos, Item#, OpenRoutine[Bit3]/Chest#) - 0xFF denotes new map
@@ -109,6 +112,7 @@ FF 37 59 01
 FF 46 49 01 2A = Map 212 (0xD4) - Red jewel
 FF 47 09 01 2B = Map 214 (0xD6) - Red jewel
 FF 75 29 01 2C = Map 217 (0xD9) - Red jewel
+
 FF 37 16 06 2D = Map 233 (0xE9) - Herb
 
 : Clear Y
@@ -763,22 +767,22 @@ ac ac ac ac ac ac ac a0 87 80 a9 a4 84 a3 a4 84 a2 a3 2f ac ac ac ac ac ac ac
 
 
 - Item removal @1e12a
-1011 B
+1111 F
+1001 9
+
+1111 F
+1111 F
+
+0111 7        >> If Statue 3, "9F" (1e12c)
 1001 9
 
 0111 7
-1111 F
+0010 2        >> If Statue 5, "E7" (1e12d)
 
-1110 E        >> If Statue 3, "F1" (1e12c)
+0000 0        >> If Statue 5, "BF" (1e12e)
+1011 b
+
 0001 1
-
-1110 E        >> If Statue 5, "E7" (1e12d)
-0100 4
-
-0000 0        >> If Statue 5, "FD" (1e12e)
-1101 D
-
-1000 8
 0000 0
 
 : FIX SWITCHES @START (48a8c) - next @48d21 -DONE
