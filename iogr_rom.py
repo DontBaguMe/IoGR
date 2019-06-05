@@ -218,7 +218,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("393c3",16)+rom_offset)
     f.write("\x8a")
 
-    # Modify Blue Journal, functions as an in-game tutorial0
+    # Modify Blue Journal, functions as an in-game tutorial
     f.seek(int("3943b",16)+rom_offset)
     f.write("\xf0\x94")
     f.seek(int("39440",16)+rom_offset)
@@ -277,7 +277,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("Here are some resources that might help you:|"))
     f.write(qt.encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
     f.write(qt.encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-    f.write(qt.encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
+    if mode == 0:
+        f.write(qt.encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
     f.write(qt.encode("- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.") + "\xc0")
 
     # Modify Lance's Letter
@@ -296,7 +297,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Modify Black Glasses, now permanently worn and removed from inventory when used
     f.seek(int("39981",16)+rom_offset)
-    f.write("\x8a\x99\x02\xcc\xf3\x02\xd5\x1c\x60\xd3\x42\x8e\x8e\x8b\x8d\x84")
+    f.write("\x8a\x99\x02\xcc\xf5\x02\xd5\x1c\x60\xd3\x42\x8e\x8e\x8b\x8d\x84")
     f.write("\xa3\xa3\xac\x88\x8d\xa4\x84\x8d\xa3\x88\x85\x88\x84\xa3\x4f\xc0")
 
     # Modify Aura, now unlocks Shadow's form when used
@@ -457,26 +458,27 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("49231",16)+rom_offset)   # NPC in front of school
     f.write("\x50\xfb")
 
-    # Turns house in South Cape into item-tracking overworld map
-    f.seek(int("18480",16)+rom_offset)
-    f.write("\x07\x90\x00\xd0\x03\x00\x00\x44")
-    f.seek(int("1854e",16)+rom_offset)
-    f.write("\x00\x3e\x40\x02")
-    f.seek(int("c846c",16)+rom_offset)
-    f.write("\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
-    # Item count text box
-    # Put current count in $a48, total in $a4c
-    f.seek(int("6dd30",16)+rom_offset)
-    f.write("\xF8\xAD\x48\x0A\x18\x69\x01\x00\x8D\x48\x0A\xD8\x60")
-    f.seek(int("6dd40",16)+rom_offset)
-    f.write("\xd3" + qt.encode("You have collected ") + "\xc6\x02\x00\x48\x0a\xcb")
-    f.write(qt.encode("of the ") + "\xc6\x02\x00\x4c\x0a\xac" + qt.encode("total items"))
-    f.write("\xcb" + qt.encode("in this area.") + "\xc9\x18\xc0")
+    # Turns house in South Cape into item-tracking overworld map (Easy only)
+    if mode == 0:
+        f.seek(int("18480",16)+rom_offset)
+        f.write("\x07\x90\x00\xd0\x03\x00\x00\x44")
+        f.seek(int("1854e",16)+rom_offset)
+        f.write("\x00\x3e\x40\x02")
+        f.seek(int("c846c",16)+rom_offset)
+        f.write("\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
+        # Item count text box
+        # Put current count in $a48, total in $a4c
+        f.seek(int("6dd30",16)+rom_offset)
+        f.write("\xF8\xAD\x48\x0A\x18\x69\x01\x00\x8D\x48\x0A\xD8\x60")
+        f.seek(int("6dd40",16)+rom_offset)
+        f.write("\xd3" + qt.encode("You have collected ") + "\xc6\x02\x00\x48\x0a\xcb")
+        f.write(qt.encode("of the ") + "\xc6\x02\x00\x4c\x0a\xac" + qt.encode("total items"))
+        f.write("\xcb" + qt.encode("in this area.") + "\xc9\x18\xc0")
 
-    f_collectioncheck = open(folder + "06de00_collectioncheck.bin","r+b")
-    f.seek(int("6de00",16)+rom_offset)
-    f.write(f_collectioncheck.read())
-    f_collectioncheck.close
+        f_collectioncheck = open(folder + "06de00_collectioncheck.bin","r+b")
+        f.seek(int("6de00",16)+rom_offset)
+        f.write(f_collectioncheck.read())
+        f_collectioncheck.close
 
     ##########################################################################
     #                       Modify Edward's Castle events
@@ -1061,7 +1063,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("980cb",16)+rom_offset)
     f.write("\x4c\xb0\xf6")
     f.seek(int("9f6b0",16)+rom_offset)
-    f.write("\x02\xd0\xf2\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0")
+    f.write("\x02\xd0\xf4\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0")
 
     ##########################################################################
     #                           Modify Pyramid events
@@ -1162,7 +1164,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8fa25",16)+rom_offset)
     f.write("\x4c\x20\xfd")
     f.seek(int("8fd20",16)+rom_offset)
-    f.write("\x02\xcc\xf2\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0")
+    f.write("\x02\xcc\xf4\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0")
 
     ##########################################################################
     #                           Modify Ending cutscene

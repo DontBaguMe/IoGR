@@ -28,17 +28,25 @@ Nazca:           >> 47,40 >> 2f,28,31,2a
   chests a,b,c,d,e,f,10,11
 Sea Palace:      >> 55,8 >> 37,08,39,0a
   switches 85,3B01  chests 12,13,14
+Mu:              >> 50,7 >> 32,07,34,09
+  switches 79,7f  chests 15,16,17,18,2e
+Angel:           >> 55,21 >> 37,15,39,17
+  switches 9b,9c   chests 19,1a,1b,1c
+Watermia:        >> 44,25 >> 2c,19,2e,1b
+  switches 4e,bc,e2,95
+Great Wall:      >> 41,17 >> 29,11,2b,13
+  switches 98,99  chests 1d,1e
+Euro:            >> 28,18 >> 1c,12,1e,14
+  switches 9a,a6,c9,cb,e5,f0,f1
+Mt. Kress:       >> 32,12 >> 20,0c,22,0e
+  chests 1f,20,21,22,23
+Natives':        >> 17,25 >> 11,19,13,1b
+  switches cc,e6
+Ankor Wat:       >> 18,20 >> 12,14,14,16
+  switches ba,be   chests 24,25,26,27,28
+Dao:             >> 8,16 >> 08,10,0a,12
+  switches b8*,cd,e7    * counts for 2 items
 
-
-Mu:              >> 
-Angel:           >> 
-Watermia:        >> 
-Great Wall:      >> 
-Euro:            >> 
-Mt. Kress:       >> 
-Natives':        >> 
-Ankor Wat:       >> 
-Dao:             >> 
 Pyramid:         >> 
 Babel:           >> 
 
@@ -65,12 +73,10 @@ FF 07 08 01 0F = Map  82 (0x52) - Red jewel
 FF 35 
 32 06 10 = Map  83 (0x53) - Herb
    31 36 0E 91 = Map  83 (0x53) - Crystal Ball
-
 FF 37 1A 01 12 = Map  90 (0x5A) - Red jewel
 FF 07 07 01 
 13 = Map  91 (0x5B) - Red jewel
 FF 09 17 01 14 = Map  92 (0x5C) - Red jewel
-
 FF 20 19 13 95 = Map  95 (0x5F) - Rama Statue
    2F 27 01 16 = Map  95 (0x5F) - Red jewel
 FF
@@ -97,6 +103,7 @@ FF 07 06
 01 26 = Map 185 (0xB9) - Red jewel
 FF 11 20 01 27 = Map 187 (0xBB) - Red jewel
 FF 05 16 01 28 = Map 190 (0xBE) - Red jewel
+
 FF 37 59 01 
 29 = Map 209 (0xD1) - Red jewel
 FF 46 49 01 2A = Map 212 (0xD4) - Red jewel
