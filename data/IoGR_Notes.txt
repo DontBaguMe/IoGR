@@ -3216,20 +3216,25 @@ Death twitches my ear: 'Live,' he says... 'I'm coming.' -Virgil
 |------------------------| |------------------------| |------------------------| |------------------------|
 Heaven is a place where all the dogs you've ever loved come to greet you. -Oliver Gaspirtz
 |------------------------| |------------------------| |------------------------| |------------------------|
-
-
-
+“Follow your dreams... death is nothing, life is everything.” -Stefan Karl Stefansson
 “Et tu Brute?” -Julius Caesar
 “To the wizard death is merely a belief.” -Deepak Chopra
 “Every time you die, it hurts.” -Josh Henderson
 “If I have to die, let me die fighting.” -Gabriel Garcia Marquez
-“Each death is as unique as each life.” -Nicholas Wolterstorff
+“Each death is as unique as each life.”  -Nicholas Wolterstorff
 “No one gets out of this world alive... except astronauts.” -Stewart Stafford
-“Follow your dreams and know that death is nothing, life is everything.” -Stefan Karl Stefansson
-“In life you can't move forward looking back” -Mark Marsland
-“Death is perhaps an ordeal, but it is not an expiation” -Alexandre Dumas
+“In life you can't move forward looking back.” -Mark Marsland
+“Death is perhaps an ordeal, but it is not an expiation.” -Alexandre Dumas
 “What really mattered in life, what gave it weight, was death.” -Jeffrey Eugenides
 “I can feel the daisies growing over me.” -John Keats
 “All deaths are sudden, no matter how gradual the dying may be.” -Michael McDowell
 “A person's destiny often ends before his death.” -Milan Kundera
 “Death is the destroyer and giver of sense.” -Andy Harglesis
+|------------------------| |------------------------| |------------------------| |------------------------|
+
+
+\x2d
+...
+\x2e\xcb\xac\xac\x6d
+...
+\xc0
