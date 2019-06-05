@@ -469,10 +469,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         # Item count text box
         # Put current count in $a48, total in $a4c
         f.seek(int("6dd30",16)+rom_offset)
-        f.write("\xF8\xAD\x48\x0A\x18\x69\x01\x00\x8D\x48\x0A\xD8\x60")
+        f.write("\xF8\xAD\x58\x0A\x18\x69\x01\x00\x8D\x58\x0A\xD8\x60")
         f.seek(int("6dd40",16)+rom_offset)
-        f.write("\xd3" + qt.encode("You have collected ") + "\xc6\x02\x00\x48\x0a\xcb")
-        f.write(qt.encode("of the ") + "\xc6\x02\x00\x4c\x0a\xac" + qt.encode("total items"))
+        f.write("\xd3" + qt.encode("You have collected ") + "\xc6\x02\x00\x58\x0a\xcb")
+        f.write(qt.encode("of the ") + "\xc6\x02\x00\x5c\x0a\xac" + qt.encode("total items"))
         f.write("\xcb" + qt.encode("in this area.") + "\xc9\x18\xc0")
 
         f_collectioncheck = open(folder + "06de00_collectioncheck.bin","r+b")
