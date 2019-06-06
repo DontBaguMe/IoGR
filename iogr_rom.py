@@ -1207,26 +1207,27 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x80\xfa")
     f.seek(int("bfa80",16)+rom_offset)
     f.write("\xD3\xD2\x00\xD5\x00" + qt.encode("Contributors and Testers:") + "\xCB")
-    f.write(qt.encode("-Alchemic      -Atlas") + "\xCB")
-    f.write(qt.encode("-Austin21300   -Bonzaibier") + "\xCB")
-    f.write(qt.encode("-BOWIEtheHERO  -Lassic") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Alchemic    -Bonzaibier") + "\xCB")
+    f.write(qt.encode("-Atlas       -BOWIEtheHERO") + "\xCB")
+    f.write(qt.encode("-Austin21300 -djtifaheart") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Keypaladin    -Le Hulk") + "\xCB")
-    f.write(qt.encode("-manafreak     -Mr Freet") + "\xCB")
-    f.write(qt.encode("-Pozzum Senpai -Plan") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Keypaladin  -Mr Freet") + "\xCB")
+    f.write(qt.encode("-Lassic      -Plan") + "\xCB")
+    f.write(qt.encode("-Le Hulk     -Pozzum ") + "\xCB")
+    f.write(qt.encode("-manafreak     Senpai") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Raeven0       -roeya") + "\xCB")
-    f.write(qt.encode("-Scheris       -SDiezal") + "\xCB")
-    f.write(qt.encode("-SmashManiac   -Skarsnik   ") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Raeven0     -Skarsnik") + "\xCB")
+    f.write(qt.encode("-roeya       -Skipsy") + "\xCB")
+    f.write(qt.encode("-Scheris     -SmashManiac") + "\xCB")
+    f.write(qt.encode("-SDiezal     -solarcell007") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-steve hacks   -Skipsy") + "\xCB")
-    f.write(qt.encode("-solarcell007  -Sye990") + "\xCB")
-    f.write(qt.encode("-Tymekeeper    -Veetorp") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-steve hacks -Veetorp") + "\xCB")
+    f.write(qt.encode("-Sye990      -Verallix") + "\xCB")
+    f.write(qt.encode("-Tymekeeper  -Voranthe") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Verallix      -Voranthe") + "\xCB")
-    f.write(qt.encode("-wormsofcan    -Wilddin") + "\xCB")
-    f.write(qt.encode("-Xyrcord       -Z4t0x") + "\xCB")
-    f.write(qt.encode("-ZockerStu") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Wilddin     -Z4t0x") + "\xCB")
+    f.write(qt.encode("-wormsofcan  -ZockerStu") + "\xCB")
+    f.write(qt.encode("-Xyrcord") + "\xC9\xB4\xCE")
 
     f.write("\xCB" + qt.encode("  Thank you all so much!"))
     f.write("\xCB" + qt.encode("     This was so fun!"))
@@ -2112,7 +2113,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_ishtarmap = open(folder + "ishtarmap.bin","r+b")
     room_offsets = ["6d95e","6d98a","6d9b4","6d9de"]  # ROM addrs for cursor capture, by room
     coord_offsets = [3,8,15,20]                       # Offsets for xmin, xmax, ymin, ymax
-    changes = [random.randint(1,8), random.randint(1,6), random.randint(1,4), random.randint(1,6)]
+    changes = [random.randint(1,8), random.randint(1,7), random.randint(1,5), random.randint(1,7)]
 
     # Set change for Room 1
     if changes[0] == 1:                        # Change right vase to light (vanilla)
@@ -2207,6 +2208,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         f.write("\x5d")
         coords = ["\x90\x03","\xb0\x03","\xa0\x00","\xc0\x00"]
 
+    elif changes[1] == 7:                      # Put moss on rock
+        f_ishtarmap.seek(int("3bd",16))
+        f_ishtarmap.write("\x8f")
+        coords = ["\xd0\x03","\xe0\x03","\xb0\x00","\xc0\x00"]
+
     # Update cursor check ranges for Room 2
     for i in range(4):
         f.seek(int(room_offsets[1],16) + coord_offsets[i] + rom_offset)
@@ -2238,6 +2244,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.seek(int("6dd16",16)+rom_offset)
             f.write("\x5d")
             coords = ["\x90\x05","\xb0\x05","\xa0\x00","\xc0\x00"]
+
+        if changes[2] == 5:                        # Moss rock
+            f_ishtarmap.seek(int("5bd",16))
+            f_ishtarmap.write("\x8f")
+            coords = ["\xd0\x05","\xe0\x05","\xb0\x00","\xc0\x00"]
 
         # Update cursor check ranges for Room 3 (only if chest contents different)
         for i in range(4):
@@ -2280,6 +2291,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f_ishtarmap.seek(int("7b4",16))
             f_ishtarmap.write("\x69\x6a")
             coords = ["\x40\x07","\x60\x07","\xb0\x00","\xc8\x00"]
+
+        if changes[3] == 7:                        # Moss rock
+            f_ishtarmap.seek(int("7bd",16))
+            f_ishtarmap.write("\x8f")
+            coords = ["\xd0\x07","\xe0\x07","\xb0\x00","\xc0\x00"]
 
         # Update cursor check ranges for Room 3 (only if not hair)
         for i in range(4):
