@@ -1933,7 +1933,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write("\xe0")
 
             # Assign Kara painting spriteset to appropriate Map
-            f.seek(int("d8d55",16)+rom_offset)
+            if mode == 0:
+                f.seek(int("d8d6b",16)+rom_offset)
+            else:
+                f.seek(int("d8d55",16)+rom_offset)
             f.write("\x0a")
 
             # Set Kara painting event in appropriate map
