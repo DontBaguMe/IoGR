@@ -151,6 +151,33 @@ be075 (be07a)
 0x9dd10 
 ['????????         Class is over.???       Please be careful      crossing the street.???      We have had a lot of    traffic accidents lately.?X?', 151]
 
+|------------|-----------|
+-Alchemic    -Bonzaibier
+-Atlas       -BOWIEtheHERO
+-Austin21300 -djtifaheart
+|------------|-----------|
+-Keypaladin  -Mr Freet
+-Lassic      -Plan
+-Le Hulk     -Pozzum 
+-manafreak     Senpai
+|------------|-----------|
+-Raeven0     -Skarsnik
+-roeya       -Skipsy
+-Scheris     -SmashManiac
+-SDiezal     -solarcell007
+|------------|-----------|
+-steve hacks -Veetorp
+-Sye990      -Verallix
+-Tymekeeper  -Voranthe
+|------------|-----------|
+-Wilddin     -Z4t0x
+-wormsofcan  -ZockerStu
+-Xyrcord
+
+ ./pyinstaller --onefile --windowed --icon=iogr.ico "C:\Users\sscott\Documents\Misc\NES\Illusion of Gaia Randomizer\IoGR\IoGR\iogr.py"
+
+
+
 |-------------|----------|
 -Alchemic      -Atlas
 -Austin21300   -Bonzaibier
