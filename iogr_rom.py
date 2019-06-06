@@ -1176,12 +1176,63 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #                           Modify Ending cutscene
     ##########################################################################
     # Custom credits
-    f_ending = open(folder + "0bd558_ending.bin","r+b")
-    f.seek(int("bd558",16)+rom_offset)
-    f.write(f_ending.read())
-    f_ending.close
+    str_endpause = "\xC9\xB4\xC8\xCA"
+    f.seek(int("bd566",16)+rom_offset)
+    f.write("\xCB" + qt.encode("    Thanks a million.") + str_endpause)
+    f.seek(int("bd5ac",16)+rom_offset)
+    f.write("\xCB" + qt.encode(" Extra special thanks to") + "\xCB" + qt.encode("       manafreak"))
+    f.write("\xC9\x78\xCE\xCB" + qt.encode(" This project would not") + "\xCB" + qt.encode("  exist without his work."))
+    f.write("\xC9\x78\xCE\xCB" + qt.encode("     gaiathecreator") + "\xCB" + qt.encode("      .blogspot.com") + str_endpause)
+    f.seek(int("bd71c",16)+rom_offset)
+    f.write(qt.encode("    Created by") + "\xCB" + qt.encode("       DontBaguMe") + str_endpause)
+    f.seek(int("bd74f",16)+rom_offset)
+    f.write("\xCB" + qt.encode("   Thanks to all the") + "\xCB" + qt.encode("  amazing playtesters!"))
+    f.write("\xC9\x78\xCE\xCB" + qt.encode("   Also, many thanks to") + "\xCB" + qt.encode(" Raeven0 for ASM support.") + str_endpause)
     f.seek(int("bdee2",16)+rom_offset)
-    f.write("\xcb\xac\xac\xd6\x53\x88\xa4\x2b\xac\xa3\x87\x8e\xa7\x0e\xa3\xac\xd6\xbe\xc9\xb4\xc8\xca")
+    f.write("\xCB" + qt.encode("  Thanks RPGLimitBreak!") + str_endpause)
+    #f.write("\xCB" + qt.encode(" That's it, show's over.") + str_endpause)
+    f.seek(int("bda09",16)+rom_offset)
+    f.write("\xCB" + qt.encode("   Thanks for playing!") + str_endpause)
+    f.seek(int("bdca5",16)+rom_offset)
+    f.write(qt.encode("Wait a minute...") + "\xCB" + qt.encode("what happened to Hamlet?") + str_endpause)
+    f.seek(int("bdd48",16)+rom_offset)
+    f.write(qt.encode("Um...") + "\xCB" + qt.encode("I wouldn't worry about") + "\xCB" + qt.encode("that too much...") + str_endpause)
+    f.seek(int("bddf6",16)+rom_offset)
+    f.write(qt.encode("Well, but...") + str_endpause)
+    f.seek(int("bde16",16)+rom_offset)
+    f.write(qt.encode("Shh... here,") + "\xCB" + qt.encode("have some bacon.") + str_endpause)
+
+    # Thank the playtesters
+    f.seek(int("be056",16)+rom_offset)
+    f.write("\x80\xfa")
+    f.seek(int("bfa80",16)+rom_offset)
+    f.write("\xD3\xD2\x00\xD5\x00" + qt.encode("Contributors and Testers:") + "\xCB")
+    f.write(qt.encode("-Alchemic      -Atlas") + "\xCB")
+    f.write(qt.encode("-Austin21300   -Bonzaibier") + "\xCB")
+    f.write(qt.encode("-BOWIEtheHERO  -Lassic") + "\xC9\xB4\xCE")
+
+    f.write(qt.encode("-Keypaladin    -Le Hulk") + "\xCB")
+    f.write(qt.encode("-manafreak     -Mr Freet") + "\xCB")
+    f.write(qt.encode("-Pozzum Senpai -Plan") + "\xC9\xB4\xCE")
+
+    f.write(qt.encode("-Raeven0       -roeya") + "\xCB")
+    f.write(qt.encode("-Scheris       -SDiezal") + "\xCB")
+    f.write(qt.encode("-SmashManiac   -Skarsnik   ") + "\xC9\xB4\xCE")
+
+    f.write(qt.encode("-steve hacks   -Skipsy") + "\xCB")
+    f.write(qt.encode("-solarcell007  -Sye990") + "\xCB")
+    f.write(qt.encode("-Tymekeeper    -Veetorp") + "\xC9\xB4\xCE")
+
+    f.write(qt.encode("-Verallix      -Voranthe") + "\xCB")
+    f.write(qt.encode("-wormsofcan    -Wilddin") + "\xCB")
+    f.write(qt.encode("-Xyrcord       -Z4t0x") + "\xCB")
+    f.write(qt.encode("-ZockerStu") + "\xC9\xB4\xCE")
+
+    f.write("\xCB" + qt.encode("  Thank you all so much!"))
+    f.write("\xCB" + qt.encode("     This was so fun!"))
+
+    f.write("\xC9\xF0\xC8\xCA")
+
 
     ##########################################################################
     #                           Modify Jeweler event

@@ -115,19 +115,56 @@ FF 75 29 01 2C = Map 217 (0xD9) - Red jewel
 
 FF 37 16 06 2D = Map 233 (0xE9) - Herb
 
-: Clear Y
-A0 00
 
-: If XX is set, BCD-increment Y
-02 D0 [XX] 00 FF FF 8A C8 D8 
 
-: South Cape Checks
-A0 00
-02 D0 13 00 FF FF 8A C8 D8 << School RJ
-02 D0 18 00 FF FF 8A C8 D8 << Lance RJ
-02 D0 35 00 FF FF 8A C8 D8 << Lola's Melody
-02 D0 d7 00 FF FF 8A C8 D8 << Fisherman
-8C 4C 0A 60
+::END CREDITS
+
+str_endpause = "\xC9\xB4\xC8\xCA"
+bd558 (bd566)  "\xCB" + "    Thanks a million." + str_endpause 
+bd5a0 (bd5ac)  "\xCB" + " Extra special thanks to/       manafreak" + "\xC9\x78\xCE\xCB"  
+               " This project would not/  exist without his work." + "\xC9\x78\xCE\xCB"
+               "     gaiathecreator/      .blogspot.com" + str_endpause
+bd70e (bd71c)  "    Created by/       DontBaguMe" + str_endpause
+bd740 (bd74f)  "\xCB" + "    Thanks to all the/ amazing playtesters!"  + "\xC9\x78\xCE\xCB
+       bdee2   "   Also, many thanks to/ Raeven0 for ASM support." + str_endpause
+
+      (bdee2)  "\xCB" + " That's it, show's over."
+bd9fa (bda09)  "Is this the end?"
+
+
+bdc95 (bdca5)  " Wait a minute... what happened to Hamlet?"
+bdd34 (bdd48)  " Um... I wouldn't worry about that too much..."
+bdde5 (bddf6)  "Well, but..."
+bde02 (bde16)  "Shh... here, have some bacon."
+bded4**
+be075 (be07a)
+
+
+0x9dd10 
+['????????         Class is over.???       Please be careful      crossing the street.???      We have had a lot of    traffic accidents lately.?X?', 151]
+
+|-------------|----------|
+-Alchemic      -Atlas
+-Austin21300   -Bonzaibier
+-BOWIEtheHERO  -Lassic
+|-------------|----------|
+-Keypaladin    -Le Hulk
+-manafreak     -Mr Freet
+-Pozzum Senpai -Plan
+|-------------|----------|
+-Raeven0       -roeya
+-Scheris       -SDiezal
+-SmashManiac   -Skarsnik   
+|-------------|----------|
+-steve hacks   -Skipsy              
+-solarcell007  -Sye990
+-Tymekeeper    -Veetorp
+|-------------|----------|
+-Verallix      -Voranthe
+-wormsofcan    -Wilddin       
+-Xyrcord       -Z4t0x
+-ZockerStu
+
 
 
 
