@@ -187,6 +187,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("1dabf",16)+rom_offset)
     f.write(f_startmenu.read())
     f_startmenu.close
+    f_itemdesc = open(folder + "01e132_itemdesc.bin","r+b")
+    f.seek(int("1e132",16)+rom_offset)
+    f.write(f_itemdesc.read())
+    f_itemdesc.close
 
     # Write STR, Psycho Dash, and Dark Friar upgrade items
     # Replaces code for item 05 - Inca Melody @3881d
@@ -282,6 +286,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
     if mode == 0:
         f.write(qt.encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
+    else:
+        f.write(qt.encode("- In-Game Tracker       (Easy mode only)|"))
     f.write(qt.encode("- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.") + "\xc0")
 
     # Modify Lance's Letter
