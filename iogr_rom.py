@@ -22,6 +22,7 @@ GEMS_NORMAL = 40
 GEMS_HARD = 50
 
 INV_FULL = "\x5c\x8e\xc9\x80"
+FORCE_CHANGE = "\x22\x30\xfd\x88"
 
 # Generate new ROM and prepare it for randomization
 def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized",
@@ -851,10 +852,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_angelsign.read())
     f_angelsign.close
 
-    # Entering this area clears your enemy defeat count
+    # Entering this area clears your enemy defeat count and forces change to Will
     f.seek(int("6bff7",16)+rom_offset)
     f.write("\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b")
-    f.write("\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x02\xE0")
+    f.write("\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6")
+    f.write(FORCE_CHANGE + "\x02\xE0")
 
     # Insert new arrangement for map 109, takes out rock to prevent spin dash softlock
     f_angelmap = open(folder + "1a5a37_angelmap.bin","r+b")
@@ -1285,6 +1287,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x03")
     f.seek(int("cd0a2",16)+rom_offset)        # Ankor Wat (Earthquaker)
     f.write("\x03")
+
+    # Insert subroutine that can force change back to Will
+    f_forcechange = open(folder + "08fd30_forcechange.bin","r+b")
+    f.seek(int("8fd30",16)+rom_offset)
+    f.write(f_forcechange.read())
+    f_forcechange.close
 
     ##########################################################################
     #                          Fix special attacks
