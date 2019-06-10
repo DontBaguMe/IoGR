@@ -6,10 +6,10 @@ import binascii
 import datetime
 import os
 import random
-import quintet_text as qt
 
 # Local libraries
 import quintet_comp
+import quintet_text as qt
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
