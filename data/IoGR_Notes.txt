@@ -12,6 +12,44 @@ You have collected XX
 of the XX total items
 in this area.
 
+1) Check for Switch 3, if set skip to 3)
+2) Fill collection array, set Switch 3
+3) If in a map area:
+   a) if Switch 1 is not set, set 1 and populate RAM with current map
+   b) if Switch 2 is not set, set 2 and display text box
+4) If not in area and Switch 1 set: clear Switch 1, clear Switch 2, clear current map
+
+MapID (x2): 60 1F
+Collected:  70 1F
+ITEM TOTAL: A0 1F
+DARK SPACE: D0 1F
+
+Items Collected: XX
+    Total Items: XX
+    Dark Spaces: XX
+
+48a4848ca3ac428e8b8b8482a484832facC60200701F
+cbacacacac648ea4808bac48a4848ca32facC60200a01F
+cbacacacacd60c63a0808284a32facC60200d01F
+c0
+
+1.
+02 d0 03 01 AA AA
+2.
+A2 02 00         LDX
+BF [XX XX XX]    LDA(,X)    # Load total items
+8D [A0 1F]       STA
+BF [XX XX XX]    LDA(,X)    # Load total Dark Spaces
+8D [D0 1F]
+FC 80 DF         JSR(,X)
+E8
+E8
+E0 2E 00
+D0 [XX]
+02 CC 03
+3. 
+
+
 
 
 02 45: (22 locations)
