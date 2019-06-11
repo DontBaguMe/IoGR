@@ -863,13 +863,13 @@ class World:
             5: [6,1,False,0,[],"8d069","8d2ea","","8d2c4",      "Jeweler Reward 6                    "],
 
             6: [0,1,False,0,[],"F51D","F52D","F543","",         "South Cape: Bell Tower              "],
-            7: [0,1,False,0,[],"4846a","48479","","",           "South Cape: Fisherman               "], #text2 was 0c6a1
+            7: [0,1,False,0,[],"4846e","48479","","",           "South Cape: Fisherman               "], #text2 was 0c6a1
             8: [0,1,False,0,[],"F59D","F5AD","F5C3","",         "South Cape: Lance's House           "],
             9: [0,1,False,0,[],"499e4","49be5","","",           "South Cape: Lola                    "],
             10: [0,2,False,0,[51,52,53],"c830a","","","\x01",   "South Cape: Dark Space              "],
 
-            11: [7,1,False,0,[],"4c210","4c299","","",          "Edward's Castle: Hidden Guard       "],
-            12: [7,1,False,0,[],"4d0eb","4d141","","",          "Edward's Castle: Basement           "],
+            11: [7,1,False,0,[],"4c214","4c299","","",          "Edward's Castle: Hidden Guard       "],
+            12: [7,1,False,0,[],"4d0ef","4d141","","",          "Edward's Castle: Basement           "],
 
             13: [8,1,False,0,[],"4d32f","4d4b1","","",          "Edward's Prison: Hamlet             "], #text 4d5f4?
             14: [8,2,False,0,[51,52,53],"c8637","","","\x0b",   "Edward's Prison: Dark Space         "],
@@ -902,7 +902,7 @@ class World:
             34: [21,1,False,0,[],"F79D","F7AD","F7C3","",       "Freejia: Hotel                      "],
             35: [21,1,False,0,[],"5b6d8","5b6e8","","",         "Freejia: Creepy Guy                 "],
             36: [21,1,False,0,[],"5cf9e","5cfae","5cfc4","",    "Freejia: Trash Can 1                "],
-            37: [21,1,False,0,[],"5cf39","5cf49","","",         "Freejia: Trash Can 2                "], #text2 was 5cf5b
+            37: [21,1,False,0,[],"5cf3d","5cf49","","",         "Freejia: Trash Can 2                "], #text2 was 5cf5b
             38: [21,1,False,0,[],"5b8b7","5b962","5b9ee","",    "Freejia: Snitch                     "], #text1 was @5b94d
             39: [21,2,False,0,[51,52,53],"c96ce","","","\x34",  "Freejia: Dark Space                 "],
 
@@ -938,8 +938,8 @@ class World:
 
             67: [37,1,False,0,[],"1B012","","","",              "Mu: Empty Chest 1                   "],
             68: [37,1,False,0,[],"1B01B","","","",              "Mu: Empty Chest 2                   "],
-            69: [37,1,False,0,[],"698ba","698d2","","",         "Mu: Hope Statue 1                   "],
-            70: [39,1,False,0,[],"69962","69975","","",         "Mu: Hope Statue 2                   "],
+            69: [37,1,False,0,[],"698be","698d2","","",         "Mu: Hope Statue 1                   "],
+            70: [39,1,False,0,[],"69966","69975","","",         "Mu: Hope Statue 2                   "],
             71: [40,1,False,0,[18],"1B00D","","","",            "Mu: Chest s/o Hope Room 2           "],
             72: [40,1,False,0,[18],"1B009","","","",            "Mu: Rama Chest N                    "],
             73: [40,1,False,0,[18],"1B016","","","",            "Mu: Rama Chest E                    "],
@@ -971,7 +971,7 @@ class World:
             95: [46,2,True,0,[51],"","","","\x88",              "Great Wall: Appearing Dark Space    "],   # Always open
 
             96: [48,1,False,0,[],"FA1D","FA2D","FA43","",       "Euro: Alley                         "],
-            97: [48,1,False,0,[],"7c0af","7c0f3","","",         "Euro: Apple Vendor                  "],
+            97: [48,1,False,0,[],"7c0b3","7c0f3","","",         "Euro: Apple Vendor                  "],
             98: [48,1,False,0,[],"7e51f","7e534","7e54a","",    "Euro: Hidden House                  "],
             99: [48,1,False,0,[],"7cd12","7cd39","7cd9b","",    "Euro: Store Item 1                  "],
             100: [48,1,False,0,[],"7cdf9","7ce28","7ce3e","",   "Euro: Store Item 2                  "], #text2 was 7cedd

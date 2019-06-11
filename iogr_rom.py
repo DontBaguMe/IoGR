@@ -4,6 +4,7 @@ import classes
 import csv
 import binascii
 import datetime
+import hmac
 import os
 import random
 
@@ -99,8 +100,36 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                            Modify ROM Header
     ##########################################################################
+    # New game title
     f.seek(int("ffd1",16)+rom_offset)
     f.write("\x52\x41\x4E\x44\x4F")
+
+    # Put randomizer hash code on start screen
+    f.seek(int("1da4c",16)+rom_offset)
+    f.write("\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
+
+    hash_str = version + mode_str + goal + logic_mode + statues_reqstr + str(firebird)
+    h = hmac.new(str(rng_seed),hash_str)
+    hash = h.digest()
+
+    hash_dict = ["\x20","\x21","\x28","\x29","\x2a","\x2b","\x2c","\x2d","\x2e","\x2f","\x30","\x31","\x32","\x33"]
+    hash_dict += ["\x34","\x35","\x36","\x37","\x38","\x39","\x3a","\x3b","\x3c","\x3d","\x3e","\x3f","\x42","\x43"]
+    hash_dict += ["\x44","\x46","\x47","\x48","\x4a","\x4b","\x4c","\x4d","\x4e","\x50","\x51","\x52","\x53","\x54"]
+    hash_dict += ["\x56","\x57","\x58","\x59","\x5a","\x5b","\x5c","\x5d","\x5e","\x5f","\x7c","\x80","\x81"]
+
+    hash_len = len(hash_dict)
+
+    i = 0
+    hash_final = ""
+    while i < 6:
+        key = int(binascii.hexlify(hash[i]),16)
+        key = key % hash_len
+        hash_final += hash_dict[key]
+        i += 1
+
+    #print binascii.hexlify(hash_final)
+    f.seek(int("1da57",16)+rom_offset)
+    f.write(hash_final)
 
     ##########################################################################
     #                           Negate useless switches
@@ -437,8 +466,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     # Force fisherman to always appear on E side of docks, and fix inventory full
     f.seek(int("48377",16)+rom_offset)
     f.write("\x02\xd0\x10\x01\xaa\x83")
-    f.seek(int("48475",16)+rom_offset)
-    f.write(INV_FULL)
+    f.seek(int("48468",16)+rom_offset)
+    f.write("\x02\xBF\x79\x84\x02\xD4\x01\x75\x84\x02\xCC\xD7\x6B" + INV_FULL)
 
     # Disable Lola Melody cutscene
     f.seek(int("49985",16)+rom_offset)
@@ -513,15 +542,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     #  Update Large Roast event
     f.seek(int("4d0da",16)+rom_offset)
-    f.write("\x02\xc0\xe1\xd0\x02\xc1\x6b\x02\xd0\x46\x00\xe9\xd0\x02\xe0\x02")
-    f.write("\xd4\x0a\xf6\xd0\x02\xcc\x46\x02\xbf\x41\xd1\x6b")
+    f.write("\x02\xc0\xe1\xd0\x02\xc1\x6b\x02\xd0\x46\x00\xe9\xd0\x02\xe0")
+    f.write("\x02\xbf\x41\xd1\x02\xd4\x0a\xf6\xd0\x02\xcc\x46\x6b")
     f.write(INV_FULL)
 
     # Fix hidden guard text box
     f.seek(int("4c297",16)+rom_offset)
     f.write("\xc0")
-    f.seek(int("4c21b",16)+rom_offset)
-    f.write(INV_FULL)
+    f.seek(int("4c20e",16)+rom_offset)
+    f.write("\x02\xBF\x99\xC2\x02\xD4\x00\x1B\xC2\x02\xCC\xD8\x6B" + INV_FULL)
 
     ##########################################################################
     #                   Modify Edward's Prison/Tunnel events
@@ -549,6 +578,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x02")
     f.seek(int("9be74",16)+rom_offset)
     f.write("\xd7\x18")
+
+    # Fix forced form change
+    f.seek(int("9c037",16)+rom_offset)
+    f.write(FORCE_CHANGE + "\x02\xe0")
 
     ##########################################################################
     #                            Modify Itory events
@@ -602,6 +635,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                          Modify Inca events
     ##########################################################################
+    # Fix forced form change
+    f.seek(int("9cfaa",16)+rom_offset)
+    f.write(FORCE_CHANGE + "\x02\xe0")
+
     # Put Gold Ship captain at Inca entrance
     f.seek(int("c8c9c",16)+rom_offset)
     f.write("\x19\x1c\x00\x4e\x85\x85\x00")
@@ -668,8 +705,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_freejia.close
 
     # Give full inventory text to trash can 2
-    f.seek(int("5cf44",16)+rom_offset)
-    f.write(INV_FULL)
+    f.seek(int("5cf37",16)+rom_offset)
+    f.write("\x02\xBF\x49\xCF\x02\xD4\x12\x44\xCF\x02\xCC\x53\x6B" + INV_FULL)
 
     # Redirect event table to bypass deleted event
     # Changes locked door to a normal door
@@ -707,6 +744,16 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("5d7e2",16)+rom_offset)
     f.write(f_trappedlaborer.read())
     f_trappedlaborer.close
+
+    # Shorten laborer items
+    f.seek(int("aa753",16)+rom_offset)
+    f.write("\xef\xa7")
+    f.seek(int("aa75a",16)+rom_offset)
+    f.write("\x6b")
+    f.seek(int("aa773",16)+rom_offset)
+    f.write("\x5c\xa8")
+    f.seek(int("aa77a",16)+rom_offset)
+    f.write("\x6b")
 
     # Shorten morgue item get
     f.seek(int("5d4d8",16)+rom_offset)
@@ -754,9 +801,16 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_skygarden.read())
     f_skygarden.close
 
-    # Instant warp to Seaside Palace if Viper is defeated
+    # Instant form change & warp to Seaside Palace if Viper is defeated
+    f.seek(int("ace9b",16)+rom_offset)
+    f.write("\x4c\x90\xfd")
     f.seek(int("acecb",16)+rom_offset)
     f.write("\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
+
+    f_viperchange = open(folder + "0afd90_viperchange.bin","r+b")
+    f.seek(int("afd90",16)+rom_offset)
+    f.write(f_viperchange.read())
+    f_viperchange.close
 
     ##########################################################################
     #                       Modify Seaside Palace events
@@ -802,16 +856,20 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(INV_FULL)
 
     # Shorten Statue of Hope get
-    f.seek(int("698c0",16)+rom_offset)
-    f.write("\x02\xbf\xd2\x98\x6b")
-    f.seek(int("69968",16)+rom_offset)
-    f.write("\x02\xbf\x75\x99\x6b")
+    f.seek(int("698b8",16)+rom_offset)
+    f.write("\x02\xBF\xD2\x98\x02\xD4\x28\xCD\x98\x02\xCC\x79\x6B")
+    f.seek(int("69960",16)+rom_offset)
+    f.write("\x02\xBF\x75\x99\x02\xD4\x1E\xCD\x98\x02\xCC\x7F\x6B")
 
     # Shorten Rama statue event
     f.seek(int("69e50",16)+rom_offset)
     f.write("\x10")
     f.seek(int("69f26",16)+rom_offset)
     f.write("\x00")
+
+    # Text in Hope Room
+    f.seek(int("69baa",16)+rom_offset)
+    f.write(qt.encode("Hey.",True))
 
     # Spirits in Rama statue room can't lock you
     f.seek(int("6a07a",16)+rom_offset)
@@ -827,7 +885,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("6a0a2",16)+rom_offset)
     f.write("\x6b")
 
-
     # Move exits around to make Vampires required for Statue
     f.seek(int("193ea",16)+rom_offset)
     f.write("\x5f\x80\x00\x50\x00\x03\x00\x44")
@@ -837,6 +894,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x67\x78\x01\xd0\x01\x80\x01\x22")
     f.seek(int("6a4c9",16)+rom_offset)
     f.write("\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b")
+
+    # Instant form change after Vamps are defeated
+    f.seek(int("6a43b",16)+rom_offset)
+    f.write("\x4c\x00\xe5")
+
+    f_vampchange = open(folder + "06e500_vampchange.bin","r+b")
+    f.seek(int("6e500",16)+rom_offset)
+    f.write(f_vampchange.read())
+    f_vampchange.close
 
     ##########################################################################
     #                       Modify Angel Village events
@@ -967,8 +1033,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     # Change vendor event, allows for only one item acquisition
     # Note: this cannibalizes the following event
     f.seek(int("7c0a7",16)+rom_offset)
-    f.write("\x02\xd0\x9a\x01\xba\xc0\x02\xd4\x28\xbf\xc0\x02\xcc\x9a")
-    f.write("\x02\xbf\xf3\xc0\x6b\x02\xbf\xdd\xc0\x6b")
+    f.write("\x02\xd0\x9a\x01\xba\xc0\x02\xbf\xf3\xc0\x02\xd4\x28\xbf\xc0")
+    f.write("\x02\xcc\x9a\x6b\x02\xbf\xdd\xc0\x6b")
     f.write(INV_FULL)
     # Change pointer for cannibalized event
     f.seek(int("7c09b",16)+rom_offset)
@@ -1104,12 +1170,16 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     # Modify address pointer for Maps 224-227 in event table
     f.seek(int("c81c0",16)+rom_offset)
     f.write("\xa2\xe0\xe3\xe0\x0f\xe1\x2d\xe1")
+    # Assign new Dark Space correct overworld name
+    f.seek(int("bf8c4",16)+rom_offset)
+    f.write("\x47\xfa")
     # Move Dark Space event data to Map 223
     # Also move spirits for entrance warp
     f_babel2 = open(folder + "0ce099_babel.bin","r+b")
     f.seek(int("ce099",16)+rom_offset)
     f.write(f_babel2.read())
     f_babel2.close
+
 
     # Spirits can warp you back to start
     f.seek(int("99b69",16)+rom_offset)
@@ -1133,15 +1203,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x4c\xf0\xf6")
     f.seek(int("9f6f0",16)+rom_offset)
     f.write("\x02\xd0\xdc\x01\x9a\x99\x4c\xaf\x99")
-    f.seek(int("99a57",16)+rom_offset)
-    f.write("\x4c\x10\xf7")
-    f.seek(int("9f710",16)+rom_offset)
-    f.write("\x02\xd4\x27\x6b\x9a\x02\xcc\xdc\x4c\x5c\x9a")
+    f.seek(int("99a49",16)+rom_offset)
+    f.write("\x02\xbf\xe4\x9a\x02\xd4\x27\x57\x9a\x02\xcc\xdc\x02\xe0" + INV_FULL)
     # Change text
     f.seek(int("99a70",16)+rom_offset)
-    f.write(qt.encode("Hey! Listen!", True))
-    f.seek(int("99a91",16)+rom_offset)
-    f.write(qt.encode("Well, lookie here.", True))
+    f.write(qt.encode("Well, lookie there.", True))
 
     # Olman event no longer warps you out of the room
     f.seek(int("98891",16)+rom_offset)
@@ -1171,6 +1237,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x4c\x20\xfd")
     f.seek(int("8fd20",16)+rom_offset)
     f.write("\x02\xcc\xf4\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0")
+
+    # Solid Arm text
+    f.seek(int("8fa32",16)+rom_offset)
+    f.write(qt.encode("Weave a circle round him") + "\xcb" + qt.encode("  thrice,"))
+    f.write("\xcb" + qt.encode("And close your eyes with") + "\xcb" + qt.encode("  holy dread,"))
+    f.write("\xcf" + qt.encode("For he on honey-dew hath") + "\xcb" + qt.encode("  fed,"))
+    f.write("\xcb" + qt.encode("And drunk the milk of ") + "\xcb" + qt.encode("  Paradise.") + "\xc0")
+
+    f.seek(int("8fbc9",16)+rom_offset)
+    f.write("\xd5\x02" + qt.encode("Ed, what an ugly thing to say... does this mean we're not friends anymore?|"))
+    f.write(qt.encode("You know, Ed, if I thought you weren't my friend, I just don't think I could bear it.") + "\xc0")
 
     ##########################################################################
     #                           Modify Ending cutscene
