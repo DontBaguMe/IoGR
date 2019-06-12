@@ -1024,7 +1024,7 @@ class World:
             142: [63,2,True,0,[],"cd570","","","\xcc",           "Pyramid: Dark Space Bottom          "],   # Always open
 
             143: [66,1,False,0,[],"FC9D","FCAD","FCC3","",       "Babel: Pillow                       "],
-            144: [66,1,False,0,[],"9f712","99ae4","99afe","",    "Babel: Force Field                  "], #item was  99a61
+            144: [66,1,False,0,[],"99a4f","99ae4","99afe","",    "Babel: Force Field                  "], #item was  99a61
             145: [66,2,False,0,[51,52,53],"ce09b","","","\xdf",  "Babel: Dark Space Bottom            "],
             146: [67,2,False,0,[51,52,53],"ce160","","","\xe3",  "Babel: Dark Space Top               "],
 
