@@ -637,7 +637,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     # Fix forced form change
     f.seek(int("9cfaa",16)+rom_offset)
-    f.write(FORCE_CHANGE + "\x02\xe0")
+    f.write(FORCE_CHANGE + "\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
 
     # Put Gold Ship captain at Inca entrance
     f.seek(int("c8c9c",16)+rom_offset)

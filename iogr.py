@@ -6,7 +6,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "0.8.9"
+VERSION = "0.8.10"
 
 def find_ROM():
     ROM.delete(0,END)
