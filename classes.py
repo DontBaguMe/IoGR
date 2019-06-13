@@ -912,7 +912,7 @@ class World:
             43: [25,1,False,0,[15],"5d4d2","5d4eb","5d506","",  "Diamond Mine: Morgue                "],
             44: [25,1,False,0,[15],"aa757","aa7ef","","",       "Diamond Mine: Laborer w/Mine Key    "], #text1 was aa7b4
             45: [26,1,False,0,[11,12,15],"5d2b0","5d2da","","", "Diamond Mine: Sam                   "],
-            46: [22,2,True,0,[],"","","","\x40",                "Diamond Mine: Appearing Dark Space  "], # Always open
+            46: [22,2,False,0,[],"c9a87","","","\x40",                "Diamond Mine: Appearing Dark Space  "], # Always open
             47: [22,2,False,0,[],"c98b0","","","\x3d",          "Diamond Mine: Dark Space at Wall    "],
             48: [23,2,False,0,[],"c9b49","","","\x42",          "Diamond Mine: Dark Space behind Wall"],
 

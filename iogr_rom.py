@@ -763,6 +763,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("5d24f",16)+rom_offset)
     f.write("\x6b")
 
+    # Give appearing Dark Space the option of handling an ability
+    f.seek(int("5d62f",16)+rom_offset)
+    f.write("\xAC\xD6\x88\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
+
     ##########################################################################
     #                       Modify Neil's Cottage events
     ##########################################################################
