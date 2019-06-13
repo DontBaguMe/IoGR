@@ -48,9 +48,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     else:
         statues_required = int(statues_reqstr)
 
-    folder_dest = os.path.dirname(rom_path) + "\\"
+    folder_dest = os.path.dirname(rom_path) + os.path.sep
     folder_root = os.getcwd()
-    folder = folder_root + "\\bin\\"
+    folder = folder_root + os.path.sep + "bin" + os.path.sep
     rom_path_new = folder_dest + filename + ".sfc"
     copyfile(rom_path,rom_path_new)
 

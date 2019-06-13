@@ -1,12 +1,13 @@
 from Tkinter import *
 from tkMessageBox import *
 from tkFileDialog import askopenfilename
+import os
 import random
 import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -20,10 +21,10 @@ def generate_ROM():
     rompath = ROM.get()
     rompath = rompath.lower()
     seed_str = seed.get()
-    if not (rompath.endswith(".sfc") or rompath.endswith(".smc")):
-        showinfo("ERROR", "Please enter a valid ROM file")
-        return
-    elif not seed_str.isdigit():
+#    if not (rompath.endswith(".sfc") or rompath.endswith(".smc")):
+#        showinfo("ERROR", "Please enter a valid ROM file")
+#        return
+    if not seed_str.isdigit():
         showinfo("ERROR", "Please enter or generate a valid seed")
         return
 
@@ -64,7 +65,10 @@ def generate_ROM():
 
 root = Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
-root.wm_iconbitmap('iogr.ico')
+if os.name == 'nt':
+    root.wm_iconbitmap('iogr.ico')
+else:
+    root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file=os.path.join(".",'iogr.png')))
 
 # Add a grid
 mainframe = Frame(root)
