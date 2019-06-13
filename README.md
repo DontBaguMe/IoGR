@@ -1,14 +1,20 @@
 ## The Illusion of Gaia Randomizer (v0.7.2-beta) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.0.0">Download</a>
-This randomizer is compatable with most US versions of the Illusion of Gaia ROM.  The executable has been verified to work on both Windows and Wine operating systems.
+This randomizer is compatable with most US versions of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
 <a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
 
-### Creating a Randomized ROM
-For the randomizer to function, you must ensure that "iogr.exe" is run from the same directory that also contains "iogr.ico" as well as the "bin" directory.  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format, and both .smc and .sfc file formats are accepted.
+#### The .exe package
+The executable has been verified to work on both Windows and Wine operating systems.
 
-Running "iogr.exe", inputting the desired settings, and hitting "Generate ROM" will create a randomized ROM (as well as a spoiler log) in the same directory as your original ROM file.  The original file will remain intact.
+#### the .py package
+For non-Windows user with Python 2.7 installed, use the "py" package and run the "iogr.py" script to execute the randomizer interface.
+
+### Creating a Randomized ROM
+For the randomizer to function, you must ensure that "iogr.exe" or "iogr.py" is run from the same directory that also contains the "bin" directory (as well as "iogr.ico" for the .exe).  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format, and both .smc and .sfc file formats are accepted.
+
+Running "iogr.exe" or "iogr.py", inputting the desired settings, and hitting "Generate ROM" will create a randomized ROM (as well as a spoiler log) in the same directory as your original ROM file.  The original file will remain intact.
 
 (Note: There is a US version of the ROM that contains an offset that makes it incompatable with the randomizer.  Attempting to use this version of the ROM will result in an error.  Sorry for the inconvenience.)
 
@@ -40,9 +46,9 @@ For this mode, the sole objective is to collect the required number of Red Jewel
 
 ### Features
 #### Item Shuffle
-The items in the game will be shuffled across the game.  If the randomizer is created with "Completable" logic, every item will be accessible; if it is "Beatable", certain items not required to fulfill the game's objectives may be inaccessible.
+The items in the game will be shuffled across the game.  If the randomizer is created with "Completable" logic, every item location will be accessible; if it is "Beatable", certain items not required to fulfill the game's objectives may be inaccessible.
 #### Ability Shuffle
-The special attacks are shuffled throughout the Dark Spaces in the game.  Dark Spaces in peaceful locations can only contain Will abilities, whereas Dark Spaces in battle areas can contain either Will or Freedan abilities.  Some Dark Spaces are reserved for form changes and will never contain abilities -- such as the Dark Space in the Underground Tunnel, for example.
+The special attacks are shuffled throughout the Dark Spaces in the game.  Dark Spaces in peaceful locations can only contain Will abilities, whereas Dark Spaces in battle areas can contain either Will or Freedan abilities.  In "Completable" mode, some Dark Spaces are reserved for form changes and will never contain abilities -- such as the Dark Space in the Underground Tunnel, for example.
 #### Overworld Movement
 The world is broken up into continents. The locations in a continent are all accessible to one another through the world map screen. The following locations are accessible to one another via the overworld:
 - South-West Continent (South Cape, Edward's Castle, Itory Village, Moon Tribe Camp, Inca Ruins)
@@ -79,6 +85,10 @@ Upgrades can be accessed by clearing rooms that have a "Force" in them on the st
 - Babel Tower: Ankor Wat
 
 Each boss (and, by extension, the dungeons under each boss) is guaranteed to grant a total number of upgrades based on difficulty: 4 for Easy, 3 for Normal, 2 for Hard, and 1 for Extreme.
+#### In-Game Tutorial
+You can speak to the NPC standing in front of the school in South Cape for an in-game tutorial.  This guide will be tailored to the seed settings.
+
+Additionally, for Easy Mode, enter right-most house in South Cape for an interactive overworld map that allows you to explore how many items and Dark Spaces are available in each location, as well as the number of items you've gathered for each location.
 #### In-Game Hints
 
 You may speak to a number of NPCs throughout the game to receive hints as to the location of certain key items in the game, as well as the contents of certain hard-to-reach locations.  The following NPCs will give you a hint (hints have been removed in Extreme difficulty):
@@ -108,16 +118,16 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - You can talk to the NPC in front of the school in South Cape for an in-game tutorial.
 
 #### Misc. Notes and Strategies
-- Great Wall: The Dark Space where Spin Dash is normally found, as it's the only Dark Space in that area that can be accessed without any abilities, will actually never have an ability and will always be open for changing forms.  The Dark Space in the previous room might have an ability, and you reach it by turning into Freedan or Shadow, walking back, and using the longer reach of one of these characters to hit the switch that allows entrance into that map.
+- Great Wall: The Dark Space where Spin Dash is normally found, as it's the only Dark Space in that area that can be accessed without any abilities, will actually never have an ability and will always be open for changing forms.  The Dark Space in the previous room might have an ability, and you can reach it without Spin Dash by turning into Freedan or Shadow, walking back, and using the longer reach of one of these characters to hit the switch that allows entrance into that map.
 
 - Ankor Wat: The Gorgon that blocks the way (for which you are intended to use the Earthquaker) can be easily defeated if you have Dark Friar, 2nd upgrade, by standing on the platform and spamming him with fireballs before he blocks the passage.
 
 - Ankor Wat: To get to the Dark Space with vanilla Earthquaker, you are intended to have Dark Friar to defeat the Frenzy that moves along the wall across the gap.  However, if you have Shadow unlocked, his attack has enough reach to defeat this enemy, so this may be the intended way to access that Dark Space in a randomized seed.
 
-- Pyramid: Room 3 (the "killer 6" room) can be done with Fredan if you have Dark Friar.  Some might find this form to be helpful to survive in this area, especially if you have upgraded Dark Friar and/or Aura Barrier.
+- Pyramid: Room 3 (the "killer 6" room) can be done with Fredan if you have Dark Friar.  Some might find this form to be helpful to survive in this area, especially if you have upgraded Dark Friar and/or Aura Barrier.  Similarly, Room 5 can be completed with Freedan if you have the Earthquaker ability by using that ability from the various platforms in this area.  (Tiles will fall from the ceiling, allowing you to progress.)
 
 ### Item Tracker
-There is a simple item tracker included with this game.  Official trackers for the game are in development
+There is a simple item tracker included with this release.  Official trackers for the game are in development.
 
 ### Future Releases
 - Enemizer
