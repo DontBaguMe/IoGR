@@ -70,33 +70,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         f.seek(int("2ce84",16)+rom_offset)
         f.write("\xad\xd4\x0a\xc9\x02\x00")
 
-    # Sprite for Inca statue?
-    #f.seek(int("4fac5",16)+rom_offset)
-    #f.write("\x00\x00\x10\x4c\x50\xfb\x84")
-    #f.seek(int("4fb50",16)+rom_offset)
-    #f.write("\x02\x88\x00\x80\x8e\x02\x8d\x01\x02\x0b\x02\xc0\xdf\xfa\x02\xc1\x02\xBC\x08\x00\x4c\xd0\xfa\x84")  # \x02\x88\x00\x80\x90
-
-    # Get all text boxes in the game
-#    f.seek(0)
-#    rom = f.read()
-#    addr_text = rom.find("\x02\xBF")
-#    text_call_addresses = []
-#    while addr_text >= 0:
-#        text_call_addresses.append(addr_text)
-#        addr_text = rom.find("\x02\xBF",addr_text+1)
-#
-#    #print text_call_addresses
-#    for addr in text_call_addresses:
-#        bank = int(addr / 65536)
-#        f.seek(addr)
-#        text_call = binascii.hexlify(rom[addr+2:addr+4])
-#        addr_tuple = text_call[2]+text_call[3]+text_call[0]+text_call[1]
-#        text_addr = bank*65536 + int(addr_tuple,16)
-#        if rom[text_addr] in ["\xd3","\xc1","\xc2","\xce"]:
-#            #print text_call, addr_tuple, bank, text_addr
-#            print hex(text_addr), qt.get_text(text_addr,f)
-
-
     ##########################################################################
     #                            Modify ROM Header
     ##########################################################################
@@ -1131,11 +1104,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8b21a",16)+rom_offset)
     f.write("\xd3\x69\x8e\xa5\xac\x86\x8e\xa4\xac\x22\xac\x88\xa4\x84\x8c\xa3\x4f\xc0")
 
-    # Spirit appears only after you get the Mystic Statue
+    # Spirit appears only after you defeat Mummy Queen or Solid Arm
     f.seek(int("980cb",16)+rom_offset)
     f.write("\x4c\xb0\xf6")
     f.seek(int("9f6b0",16)+rom_offset)
-    f.write("\x02\xd0\xf4\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0")
+    f.write("\x02\xd0\xf6\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0")
 
     ##########################################################################
     #                           Modify Pyramid events
@@ -1236,7 +1209,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8fa25",16)+rom_offset)
     f.write("\x4c\x20\xfd")
     f.seek(int("8fd20",16)+rom_offset)
-    f.write("\x02\xcc\xf4\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0")
+    f.write("\x02\xcc\xf6\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0")
 
     # Solid Arm text
     f.seek(int("8fa32",16)+rom_offset)
@@ -1266,8 +1239,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xCB" + qt.encode("   Thanks to all the") + "\xCB" + qt.encode("  amazing playtesters!"))
     f.write("\xC9\x78\xCE\xCB" + qt.encode("   Also, many thanks to") + "\xCB" + qt.encode(" Raeven0 for ASM support.") + str_endpause)
     f.seek(int("bdee2",16)+rom_offset)
-    #f.write("\xCB" + qt.encode("  Thanks RPGLimitBreak!") + str_endpause)
-    f.write("\xCB" + qt.encode(" That's it, show's over.") + str_endpause)
+    f.write("\xCB" + qt.encode("  Thanks RPGLimitBreak!") + str_endpause)
+    #f.write("\xCB" + qt.encode(" That's it, show's over.") + str_endpause)
     f.seek(int("bda09",16)+rom_offset)
     f.write("\xCB" + qt.encode("   Thanks for playing!") + str_endpause)
     f.seek(int("bdca5",16)+rom_offset)
