@@ -2122,7 +2122,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Will death text
     f.seek(int("d7c3",16)+rom_offset)
-    f.write(death_list[random.randint(0,len(death_list))])
+    f.write(death_list[random.randint(0,len(death_list)-1)])
     #f.write(death_list[0])
 
     # Change Fredan and Shadow death pointers
