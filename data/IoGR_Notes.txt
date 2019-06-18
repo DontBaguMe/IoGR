@@ -891,9 +891,9 @@ ac ac ac ac ac ac ac a0 87 80 a9 a4 84 a3 a4 84 a2 a3 2f ac ac ac ac ac ac ac
 1001 9
 
 0111 7
-0010 2        >> If Statue 5, "E7" (1e12d)
+0011 3        >> If Statue 5, "F7" (1e12d)
 
-0000 0        >> If Statue 5, "BF" (1e12e)
+0000 0        >> If Statue 5, "FF" (1e12e)
 1011 b
 
 0001 1

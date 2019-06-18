@@ -43,9 +43,13 @@ class World:
                 region = self.item_locations[loc][0]
                 type = self.item_locations[loc][1]
 
-                if type == 1 and self.graph[region][0] and self.item_locations[loc][2]:
+                if type == 1 and self.item_locations[loc][2]:
                     item = self.item_locations[loc][3]
-                    if self.item_pool[item][5] == 3 and (not inv or self.item_pool[item][4]):
+                    if inv and not self.graph[region][0] and self.item_pool[item][4]:
+                        self.unfill_item(loc)
+                        unfilled.append(loc)
+                        done = True
+                    elif not inv and self.graph[region][0] and self.item_pool[item][5] != 1:
                         self.unfill_item(loc)
                         unfilled.append(loc)
                         done = True
@@ -257,30 +261,7 @@ class World:
         return prereq_new
 
     # Returns list of item combinations that grant progression
-    def progression_list(self):
-        start_items = self.traverse()
-        #print "We found these: ",start_items
-
-        # Simulate inventory
-        inventory = []
-        for item in start_items:
-            if self.item_pool[item][4]:
-                inventory.append(item)
-
-        negative_inventory = []
-        for node in self.graph:
-            if self.graph[node][0]:
-                negative_inventory += self.graph[node][3]
-
-        for item in inventory:
-            if item in negative_inventory:
-                inventory.remove(item)
-                negative_inventory.remove(item)
-
-        inv_size = len(inventory)
-        if inv_size > MAX_INVENTORY:
-            print "ERROR: Inventory capacity exceeded"
-
+    def progression_list(self,start_items=[]):
         open_locations = self.open_locations()
         open_items = len(open_locations[0])
         open_abilities = len(open_locations[1])
@@ -314,25 +295,36 @@ class World:
 
                 if prereq and self.is_sublist(all_items,prereq) and prereq not in prereq_list:
                     if item_prereqs <= open_items and ability_prereqs <= open_abilities:
-                        inv_temp = inventory[:]
-                        neg_inv_temp = negative_inventory[:]
-                        for req in prereq:
-                            if self.item_pool[req][4]:
-                                inv_temp.append(req)
-                        for item in inv_temp:
-                            if item in neg_inv_temp:
-                                inv_temp.remove(item)
-                                neg_inv_temp.remove(item)
+                        self.graph[dest][0] = True
+                        start_items_temp = start_items[:] + prereq
+                        #for req in prereq:
+                        #    if self.item_pool[req][4]:
+                        #        start_items_temp.append(req)
+                        inv_temp = self.get_inventory(start_items_temp)
+                        #neg_inv_temp = negative_inventory[:]
+
+                        #for item in inv_temp:
+                        #    if item in neg_inv_temp:
+                        #        inv_temp.remove(item)
+                        #        neg_inv_temp.remove(item)
                         if len(inv_temp) <= MAX_INVENTORY:
                             prereq_list.append(prereq)
+                        else:
+                            prereq_list.append(-1)
+                        self.graph[dest][0] = False
 
-        return prereq_list
+        if not prereq_list:
+            return -1
+        else:
+            while -1 in prereq_list:
+                prereq_list.remove(-1)
+            if not prereq_list:
+                return -2
+            else:
+                return prereq_list
 
     # Converts a progression list into a normalized Monte Carlo distribution
-    def monte_carlo(self):
-        #self.traverse()
-        progression = self.progression_list()
-
+    def monte_carlo(self,progression=[],start_items=[]):
         if not progression:
             return []
 
@@ -425,6 +417,28 @@ class World:
         for x in self.statues:
             self.logic[155][2][x][1] = 1
 
+    # Simulate inventory
+    def get_inventory(self,start_items=[]):
+        inventory = []
+        for item in start_items:
+            if self.item_pool[item][4]:
+                inventory.append(item)
+
+        negative_inventory = []
+        for node in self.graph:
+            if self.graph[node][0]:
+                negative_inventory += self.graph[node][3]
+
+        i = 0
+        while i < len(inventory):
+            item = inventory[i]
+            if inventory[i] in negative_inventory:
+                inventory.remove(item)
+                negative_inventory.remove(item)
+            else:
+                i += 1
+
+        return inventory
 
     # Takes a random seed and builds out a randomized world
     def randomize(self):
@@ -464,33 +478,55 @@ class World:
 
         #while self.unaccessible_locations(item_locations):
         while not done:
+            start_items = self.traverse()
+            #print "We found these: ",start_items
+
+            inv_size = len(self.get_inventory(start_items))
+            if inv_size > MAX_INVENTORY:
+                print "ERROR: Inventory capacity exceeded"
+
             # Get list of new progression options
-            progression_list = self.monte_carlo()
+            progression_list = self.progression_list(start_items)
+
+            if progression_list == -1:       # No empty locations available
+                removed = self.make_room(item_locations)
+                if not removed:
+                    print "ERROR: Could not remove non-progression item"
+                    return False
+                progression_list = []
+            elif progression_list == -2:     # All new locations have too many inventory items
+                removed = self.make_room(item_locations,True)
+                if not removed:
+                    print "ERROR: Could not remove inventory item"
+                    return False
+                progression_list = []
+
             #print "To progress: ",progression_list
 
             # Check for finished state, or dead-end state
             goal = ((self.goal == "Dark Gaia" and self.graph[70][0]) or
                 (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
 
-            done = goal and (self.logic_mode == "Beatable" or not progression_list)
+            done = goal and (self.logic_mode != "Completable" or not progression_list)
             #print done, progression_list
 
-            if not done and not progression_list:
-                #print "Gotta make room..."
-                removed = self.make_room(item_locations)
-                if not removed:
-                    print "ERROR: Could not remove non-progression item"
-                    return False
-                #print "Cleared this location: ", removed
+#            if not done and not progression_list:
+#                #print "Gotta make room..."
+#                removed = self.make_room(item_locations,inv_full)
+#                if not removed:
+#                    print "ERROR: Could not remove non-progression item"
+#                    return False
+#                #print "Cleared this location: ", removed
 
             if not done and progression_list:
                 # Determine next progression items to add to accessible locations
+                progression_mc = self.monte_carlo(progression_list)
                 progress = False
                 while not progress:
                     key = random.uniform(0,100)
                     #print key
                     items = []
-                    for x in progression_list:
+                    for x in progression_mc:
                         if key <= x[0] and not items:
                             items = x[1]
 
@@ -755,7 +791,7 @@ class World:
         self.dark_space_sets = [[58,60]]
         self.required_items = [20,36]
         self.good_items = [10,13,24,25,49,50,51]
-        self.trolly_locations = [32,43,44,45,64,65,70,102,107,108,121,128,147]
+        self.trolly_locations = [32,45,64,65,102,108,121,128,136,147]
         self.free_locations = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,24]
 
         if 1 in self.statues:
@@ -808,13 +844,13 @@ class World:
             18: [2,1,"\x12","Statue of Hope",True,1],
             19: [2,1,"\x13","Rama Statue",False,2],
             20: [1,1,"\x14","Magic Dust",True,2],
-            21: [0,1,"\x15","Blue Journal",True,3],
+            21: [0,1,"\x15","Blue Journal",False,3],
             22: [1,1,"\x16","Lance's Letter",False,3],
             23: [1,1,"\x17","Necklace Stones",True,1],
             24: [1,1,"\x18","Will",True,1],
             25: [1,1,"\x19","Teapot",True,1],
             26: [3,1,"\x1a","Mushroom Drops",True,1],
-            27: [0,1,"\x1b","Bag of Gold",True,3],
+            27: [0,1,"\x1b","Bag of Gold",False,3],
             28: [1,1,"\x1c","Black Glasses",False,1],
             29: [1,1,"\x1d","Gorgon Flower",True,1],
             30: [1,1,"\x1e","Hieroglyph",False,2],
@@ -825,7 +861,7 @@ class World:
             35: [1,1,"\x23","Hieroglyph",False,2],
             36: [1,1,"\x24","Aura",True,1],
             37: [1,1,"\x25","Lola's Letter",False,1],
-            38: [1,1,"\x26","Father's Journal",True,2],
+            38: [1,1,"\x26","Father's Journal",False,2],
             39: [1,1,"\x27","Crystal Ring",False,1],
             40: [1,1,"\x28","Apple",True,1],
             41: [3,1,"\x29","HP Jewel",False,3],
@@ -849,6 +885,25 @@ class World:
             59: [1,3,"","Mystic Statue 6",False,2],
             60: [0,2,"","Nothing",False,3]
         }
+
+        if 3 in self.statues:
+            self.item_pool[19][4] = True
+#            self.item_pool[19][5] = 1
+        if 5 in self.statues:
+            self.item_pool[30][4] = True
+            self.item_pool[31][4] = True
+            self.item_pool[32][4] = True
+            self.item_pool[33][4] = True
+            self.item_pool[34][4] = True
+            self.item_pool[35][4] = True
+            self.item_pool[38][4] = True
+#            self.item_pool[30][5] = 1
+#            self.item_pool[31][5] = 1
+#            self.item_pool[32][5] = 1
+#            self.item_pool[33][5] = 1
+#            self.item_pool[34][5] = 1
+#            self.item_pool[35][5] = 1
+#            self.item_pool[38][5] = 1
 
         # Define Item/Ability/Statue locations
         # Format: { ID: [Region, Type (1=item,2=ability,3=statue), Filled Flag,
@@ -1110,7 +1165,7 @@ class World:
             60: [False,[],"Ankor Wat - Behind Black Glasses",[]],
 
             61: [False,[],"Dao",[]],
-            62: [False,[61],"Pyramid",[30,31,32,33,34,35]],
+            62: [False,[61],"Pyramid",[30,31,32,33,34,35,38]],
             63: [False,[],"Pyramid - Behind Aura",[]],
             64: [False,[],"Pyramid - Behind Spin Dash",[]],
             65: [False,[],"Pyramid - Mummy Queen",[38]],
@@ -1426,7 +1481,7 @@ class World:
             133: "\xd6\x3f",   # "Pyramid"
             134: "\xd6\x3f",   # "Pyramid"
             135: "\xd6\x3f",   # "Pyramid"
-            136: "\xd6\x3f",   # "Pyramid"
+            136: "\x4a\x88\x8b\x8b\x84\xa2\xac\x26",   # "Killer 6"
             137: "\xd6\x3f",   # "Pyramid"
             138: "\xd6\x3f",   # "Pyramid"
             139: "\xd6\x3f",   # "Pyramid"

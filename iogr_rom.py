@@ -195,6 +195,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_itemdesc.read())
     f_itemdesc.close
 
+    # Update sprites for new items - first new item starts @108052, 7 new items
+    # Points all items to unused sprite for item 4c ("76 83" in address table)
+    f.seek(int("108052",16)+rom_offset)
+    f.write("\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83")
+
+    # Update item removal restriction flags
+    f.seek(int("1e12a",16)+rom_offset)
+    f.write("\x9f\xff\x97\x37\xb0\x01")
+
     # Write STR, Psycho Dash, and Dark Friar upgrade items
     # Replaces code for item 05 - Inca Melody @3881d
     f_item05 = open(folder + "03881d_item05.bin","r+b")
@@ -355,15 +364,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("39f7a",16)+rom_offset)
     if mode == 0:         # Easy mode = full HP
         f.write("\x28")
-
-    # Update sprites for new items - first new item starts @108052, 7 new items
-    # Points all items to unused sprite for item 4c ("76 83" in address table)
-    f.seek(int("108052",16)+rom_offset)
-    f.write("\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83")
-
-    # Update item removal restriction flags
-    f.seek(int("1e12a",16)+rom_offset)
-    f.write("\x9f\xff\x97\x27\xb0\x01")
 
     ##########################################################################
     #                  Update overworld map movement scripts
@@ -821,6 +821,23 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_mudoor.read())
     f_mudoor.close
 
+    # Remove fanfare from coffin item get
+    f.seek(int("69232",16)+rom_offset)
+    f.write("\x9e\x93\x4c\x61\x92")
+    f.seek(int("69267",16)+rom_offset)
+    f.write("\x80\x04")
+
+    # Make coffin spoiler re-readable
+    f.seek(int("68ff3",16)+rom_offset)
+    f.write("\xf5\x8f")
+    f.seek(int("68ffb",16)+rom_offset)
+    f.write("\x40\xdd")
+    f.seek(int("69092",16)+rom_offset)
+    f.write("\x02\xce\x01\x02\x25\x2F\x0A\x4c\xfd\x8f")
+    f.seek(int("6dd40",16)+rom_offset)
+    f.write("\x02\xD1\x3A\x01\x01\x5A\xDD\x02\xD0\x6F\x01\x52\xDD\x02\xBF\xA7\x90\x6B")
+    f.write("\x02\xBF\xCF\x90\x02\xCC\x01\x6B\x02\xBF\x67\x91\x6B")
+
     ##########################################################################
     #                             Modify Mu events
     ##########################################################################
@@ -1113,6 +1130,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                           Modify Pyramid events
     ##########################################################################
+    # Can give journal to the guide in hieroglyph room
+    f.seek(int("8c207",16)+rom_offset)
+    f.write("\x0E\xC2\x02\x0B\x02\xC1\x6B\x02\xD0\xEF\x01\x1E\xC2\x02\xD6\x26\x22\xC2")
+    f.write("\x02\xBF\x2D\xC2\x6B\x5C\x30\xF2\x83\x02\xCC\xEF\x02\xD5\x26\x02\xBF\x7F\xC2\x6B")
+    f.write(qt.encode("If you have any information about the pyramid, I'd be happy to hold onto it for you.",True))
+    f.write(qt.encode("I'll hold onto that journal for you. Come back anytime if you want to read it.",True))
+    f.seek(int("3f230",16)+rom_offset)
+    f.write("\x02\xbf\x1a\x9e\x6b")
+
     # Shorten hieroglyph get
     f.seek(int("8c7b8",16)+rom_offset)
     f.write("\x6b")
@@ -1239,8 +1265,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xCB" + qt.encode("   Thanks to all the") + "\xCB" + qt.encode("  amazing playtesters!"))
     f.write("\xC9\x78\xCE\xCB" + qt.encode("   Also, many thanks to") + "\xCB" + qt.encode(" Raeven0 for ASM support.") + str_endpause)
     f.seek(int("bdee2",16)+rom_offset)
-    f.write("\xCB" + qt.encode("  Thanks RPGLimitBreak!") + str_endpause)
-    #f.write("\xCB" + qt.encode(" That's it, show's over.") + str_endpause)
+    #f.write("\xCB" + qt.encode("  Thanks RPGLimitBreak!") + str_endpause)
+    f.write("\xCB" + qt.encode(" That's it, show's over.") + str_endpause)
     f.seek(int("bda09",16)+rom_offset)
     f.write("\xCB" + qt.encode("   Thanks for playing!") + str_endpause)
     f.seek(int("bdca5",16)+rom_offset)
@@ -1865,7 +1891,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
             # Restrict removal of Hieroglyphs from inventory
             f.seek(int("1e12d",16)+rom_offset)
-            f.write("\xe7\xbf")
+            f.write("\xf7\xff")
 
         if statueOrder[i] == 6:
             statues.append(6)
