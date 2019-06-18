@@ -983,6 +983,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("19a4c",16)+rom_offset)
     f.write("\x84")
 
+    # Entering wrong door in 2nd map area doesn't softlock you
+    f.seek(int("7be0b",16)+rom_offset)
+    f.write("\xAC\xD6\x88\xC8\x01\x80\x02\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
+    f.seek(int("cbc60",16)+rom_offset)
+    f.write("\x03")
+
     # Exit after Sand Fanger takes you back to start
     f.seek(int("19c84",16)+rom_offset)
     f.write("\x82\x10\x00\x90\x00\x07\x00\x18")

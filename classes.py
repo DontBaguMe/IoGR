@@ -458,9 +458,10 @@ class World:
             print "ERROR: Couldn't lock dark spaces"
             return False
 
-        # Randomly place non-progression items
+        # Randomly place non-progression items and abilities
         non_prog_items = self.list_item_pool(0,[],2)
         non_prog_items += self.list_item_pool(0,[],3)
+        non_prog_items += self.list_item_pool(2)
         random.shuffle(non_prog_items)
 
         self.random_fill(non_prog_items,item_locations)
@@ -788,7 +789,7 @@ class World:
         self.mode = mode
         self.placement_log = []
         self.spoilers = []
-        self.dark_space_sets = [[58,60]]
+        self.dark_space_sets = [[46,47],[58,60]]
         self.required_items = [20,36]
         self.good_items = [10,13,24,25,49,50,51]
         self.trolly_locations = [32,45,64,65,102,108,121,128,136,147]
@@ -875,7 +876,7 @@ class World:
             49: [1,2,"","Psycho Slider",False,1],
             50: [1,2,"","Spin Dash",False,1],
             51: [1,2,"","Dark Friar",False,1],
-            52: [1,2,"","Aura Barrier",False,3],
+            52: [1,2,"","Aura Barrier",False,1],
             53: [1,2,"","Earthquaker",False,1],
             54: [1,3,"","Mystic Statue 1",False,2],
             55: [1,3,"","Mystic Statue 2",False,2],
@@ -967,7 +968,7 @@ class World:
             43: [25,1,False,0,[15],"5d4d2","5d4eb","5d506","",  "Diamond Mine: Morgue                "],
             44: [25,1,False,0,[15],"aa757","aa7ef","","",       "Diamond Mine: Laborer w/Mine Key    "], #text1 was aa7b4
             45: [26,1,False,0,[11,12,15],"5d2b0","5d2da","","", "Diamond Mine: Sam                   "],
-            46: [22,2,False,0,[],"c9a87","","","\x40",                "Diamond Mine: Appearing Dark Space  "], # Always open
+            46: [22,2,False,0,[],"c9a87","","","\x40",          "Diamond Mine: Appearing Dark Space  "], # Always open
             47: [22,2,False,0,[],"c98b0","","","\x3d",          "Diamond Mine: Dark Space at Wall    "],
             48: [23,2,False,0,[],"c9b49","","","\x42",          "Diamond Mine: Dark Space behind Wall"],
 
@@ -1023,7 +1024,7 @@ class World:
             92: [45,1,False,0,[],"1B038","","","",              "Great Wall: Chest 2                 "],
             93: [45,2,False,0,[],"cbb11","","","\x85",          "Great Wall: Archer Dark Space       "],
             94: [45,2,True,0,[],"cbb80","","","\x86",           "Great Wall: Platform Dark Space     "],   # Always open
-            95: [46,2,True,0,[51],"","","","\x88",              "Great Wall: Appearing Dark Space    "],   # Always open
+            95: [46,2,False,0,[51],"cbc60","","","\x88",        "Great Wall: Appearing Dark Space    "],
 
             96: [48,1,False,0,[],"FA1D","FA2D","FA43","",       "Euro: Alley                         "],
             97: [48,1,False,0,[],"7c0b3","7c0f3","","",         "Euro: Apple Vendor                  "],
