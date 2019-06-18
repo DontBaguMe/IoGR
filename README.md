@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v1.0.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.0.0">Download</a>
+## The Illusion of Gaia Randomizer (v1.0.1) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.0.1">Download</a>
 This randomizer is compatable with most US versions of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
@@ -12,7 +12,7 @@ The executable has been verified to work on both Windows and Wine operating syst
 For non-Windows user with Python 2.7 installed, use the "py" package and run the "iogr.py" script to execute the randomizer interface.
 
 ### Creating a Randomized ROM
-For the randomizer to function, you must ensure that "iogr.exe" or "iogr.py" is run from the same directory that also contains the "bin" directory (as well as "iogr.ico" for the .exe).  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format, and both .smc and .sfc file formats are accepted.
+For the randomizer to function, you must ensure that "iogr.exe" or "iogr.py" is run from the same directory that also contains the "bin" directory (as well as "iogr.ico" for the .exe).  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format.
 
 Running "iogr.exe" or "iogr.py", inputting the desired settings, and hitting "Generate ROM" will create a randomized ROM (as well as a spoiler log) in the same directory as your original ROM file.  The original file will remain intact.
 
