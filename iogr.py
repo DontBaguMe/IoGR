@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "1.1-beta"
+VERSION = "1.1-beta2"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -41,9 +41,9 @@ def generate_ROM():
         return
     else:
         rom_offset = h_addr - int("ffc0",16)
-        if rom_offset != 0:
-            showinfo("ERROR", "Sorry, this version of the ROM includes an offset that makes it incompatible with the randomizer. Please use another ROM.")
-            return
+#        if rom_offset != 0:
+#            showinfo("ERROR", "Sorry, this version of the ROM includes an offset that makes it incompatible with the randomizer. Please use another ROM.")
+#            return
 
     statues_str = statues.get()
     goal_str = goal.get()

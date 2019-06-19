@@ -461,7 +461,15 @@ class World:
         # Randomly place non-progression items and abilities
         non_prog_items = self.list_item_pool(0,[],2)
         non_prog_items += self.list_item_pool(0,[],3)
-        non_prog_items += self.list_item_pool(2)
+
+        # For Easy mode
+        if self.mode == 1:
+            non_prog_items += [52]
+        elif self.mode == 2:
+            non_prog_items += [49,50,52,53]
+        else:
+            non_prog_items += self.list_item_pool(2)
+
         random.shuffle(non_prog_items)
 
         self.random_fill(non_prog_items,item_locations)

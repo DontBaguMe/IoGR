@@ -2175,7 +2175,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     w.randomize()
     #w.print_spoiler()
     w.generate_spoiler(folder_dest, version, filename)
-    w.write_to_rom(f)
+    w.write_to_rom(f,rom_offset)
 
     ##########################################################################
     #                        Randomize Ishtar puzzle
