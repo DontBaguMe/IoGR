@@ -394,6 +394,68 @@ class World:
 
     # Initialize World parameters
     def initialize(self):
+        # Manage required items
+        if 1 in self.statues:
+            self.required_items += [3,4,7,8]
+        if 2 in self.statues:
+            self.required_items += [14]
+        if 3 in self.statues:
+            self.required_items += [18,19]
+        if 4 in self.statues:
+            self.required_items += [50,51]
+        if 5 in self.statues:
+            self.required_items += [38,30,31,32,33,34,35]
+        if 6 in self.statues:
+            self.required_items += [39]
+
+        if self.kara == 1:
+            self.required_items += [2,9,23]
+        elif self.kara == 2:
+            self.required_items += [11,12,15]
+        elif self.kara == 3:
+            self.required_items += [49]
+        elif self.kara == 4:
+            self.required_items += [26,50]
+        elif self.kara == 5:
+            self.required_items += [28,50,53]
+
+        # Update inventory space logic
+        if 3 in self.statues:
+            self.item_pool[19][4] = True
+        if 5 in self.statues:
+            self.item_pool[30][4] = True
+            self.item_pool[31][4] = True
+            self.item_pool[32][4] = True
+            self.item_pool[33][4] = True
+            self.item_pool[34][4] = True
+            self.item_pool[35][4] = True
+            self.item_pool[38][4] = True
+
+        # Chaos mode
+        if self.logic_mode == "Chaos":
+            # Add "Inaccessible" node to graph
+            self.graph[71] = [False,[],"Inaccessible",[]]
+
+            # Towns can have Freedan abilities
+            for x in [10,14,22,39,57,66,77,88,103,114,129,145,146]:
+                for y in [51,52,53]:
+                    self.item_locations[x][4].remove(y)
+
+            # Several locked Dark Spaces can have abilities
+            ds_unlock = [74,94,124,142]
+
+            if 1 not in self.statues:   # First DS in Inca
+                ds_unlock.append(29)
+            if 4 in self.statues:
+                self.dark_space_sets.append([93,94])
+            if self.kara != 1:          # DS in Underground Tunnel
+                ds_unlock.append(19)
+            if self.kara != 5:          # DS in Ankor Wat garden
+                ds_unlock.append(122)
+
+            for x in ds_unlock:
+                self.item_locations[x][2] = False
+
         # Change graph logic depending on Kara's location
         if self.kara == 1:
             self.logic[150][2][0][1] = 1
@@ -416,6 +478,40 @@ class World:
         # Change logic based on which statues are required
         for x in self.statues:
             self.logic[155][2][x][1] = 1
+
+    # Update item placement logic after abilities are placed
+    def check_logic(self):
+        abilities = [48,49,50,51,52,53]
+        inaccessible = []
+
+        # Check for abilities in critical Dark Spaces
+        if self.item_locations[19][3] in abilities:         # Underground Tunnel
+            inaccessible += [17,18]
+        if self.item_locations[29][3] in abilities:         # Inca Ruins
+            inaccessible += [26,27,30,31,32]
+            self.graph[18][1].remove(19)
+        if (self.item_locations[46][3] in abilities and     # Diamond Mine
+            self.item_locations[47][3] in abilities and
+            self.item_locations[48][3] in abilities):
+            del logic[73]
+        if (self.item_locations[58][3] in abilities and     # Sky Garden
+            self.item_locations[59][3] in abilities and
+            self.item_locations[60][3] in abilities):
+            del logic[77]
+        if self.item_locations[93][3] in abilities:         # Great Wall
+            self.graph[100] = [False,[],"Great Wall - Behind Spin",[]]
+            self.logic[200] = [45,100,[[50,1]]]
+            self.item_locations[94][0] = 100
+            if self.item_locations[94][3] in abilities:
+                inaccessible += [95]
+        if self.item_locations[122][3] in abilities:        # Ankor Wat
+            inaccessible += [117,118,119,120,121]
+        if self.item_locations[142][3] in abilities:        # Pyramid
+            inaccessible += [133,134,136,139,140]
+
+        # Change graph node for inaccessible locations
+        for x in inaccessible:
+            self.item_locations[x][0] = 71
 
     # Simulate inventory
     def get_inventory(self,start_items=[]):
@@ -471,8 +567,10 @@ class World:
             non_prog_items += self.list_item_pool(2)
 
         random.shuffle(non_prog_items)
-
         self.random_fill(non_prog_items,item_locations)
+
+        # Check if ability placement affects logic
+        self.check_logic()
 
         # List and shuffle remaining key items
         item_list = self.list_item_pool()
@@ -803,30 +901,6 @@ class World:
         self.trolly_locations = [32,45,64,65,102,108,121,128,136,147]
         self.free_locations = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,24]
 
-        if 1 in self.statues:
-            self.required_items += [3,4,7,8]
-        if 2 in self.statues:
-            self.required_items += [14]
-        if 3 in self.statues:
-            self.required_items += [18,19]
-        if 4 in self.statues:
-            self.required_items += [50,51]
-        if 5 in self.statues:
-            self.required_items += [38,30,31,32,33,34,35]
-        if 6 in self.statues:
-            self.required_items += [39]
-
-        if self.kara == 1:
-            self.required_items += [2,9,23]
-        elif self.kara == 2:
-            self.required_items += [11,12,15]
-        elif self.kara == 3:
-            self.required_items += [49]
-        elif self.kara == 4:
-            self.required_items += [26,50]
-        elif self.kara == 5:
-            self.required_items += [28,50,53]
-
         # Initialize item pool, considers special attacks as "items"
         # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue),
         #                  ROM Code, Name, TakesInventorySpace,
@@ -895,25 +969,6 @@ class World:
             60: [0,2,"","Nothing",False,3]
         }
 
-        if 3 in self.statues:
-            self.item_pool[19][4] = True
-#            self.item_pool[19][5] = 1
-        if 5 in self.statues:
-            self.item_pool[30][4] = True
-            self.item_pool[31][4] = True
-            self.item_pool[32][4] = True
-            self.item_pool[33][4] = True
-            self.item_pool[34][4] = True
-            self.item_pool[35][4] = True
-            self.item_pool[38][4] = True
-#            self.item_pool[30][5] = 1
-#            self.item_pool[31][5] = 1
-#            self.item_pool[32][5] = 1
-#            self.item_pool[33][5] = 1
-#            self.item_pool[34][5] = 1
-#            self.item_pool[35][5] = 1
-#            self.item_pool[38][5] = 1
-
         # Define Item/Ability/Statue locations
         # Format: { ID: [Region, Type (1=item,2=ability,3=statue), Filled Flag,
         #                Filled Item, Restricted Items, Item Addr, Text Addr, Text2 Addr,
@@ -942,7 +997,7 @@ class World:
             16: [9,1,False,0,[2],"1AFAE","","","",              "Underground Tunnel: Small Room Chest"],
             17: [10,1,False,0,[2],"1AFB3","","","",             "Underground Tunnel: Ribber's Chest  "],
             18: [10,1,False,0,[],"F61D","F62D","F643","",       "Underground Tunnel: Barrels         "],
-            19: [10,2,True,0,[],"","","","\x12",                "Underground Tunnel: Dark Space      "],   # Always open
+            19: [10,2,True,0,[],"c8aa2","","","\x12",           "Underground Tunnel: Dark Space      "],   # Always open
 
             20: [12,1,False,0,[9],"F69D","F6AD","F6C3","",      "Itory Village: Logs                 "],
             21: [13,1,False,0,[9],"4f375","4f38d","4f3a8","",   "Itory Village: Cave                 "],
@@ -1020,7 +1075,7 @@ class World:
             82: [43,1,False,0,[],"1B025","","","",              "Angel Dungeon: Ishtar's Chest       "],
 
             83: [44,1,False,0,[],"F91D","F92D","F943","",       "Watermia: West Jar                  "],
-            #84: [44,1,False,0,[],"7a5a8","","","","Watermia: Lance's Letter"],
+            #84: [44,1,False,0,[],"7a5a8","","","",             "Watermia: Lance's Letter"],
             85: [44,1,False,0,[],"7ad21","7aede","","",         "Watermia: Lance                     "], #text2 was 7afa7
             86: [44,1,False,0,[],"F99D","F9AD","F9C3","",       "Watermia: Gambling House            "],
             87: [44,1,False,0,[],"79248","79288","792a1","",    "Watermia: Russian Glass             "],

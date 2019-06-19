@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "1.1-beta2"
+VERSION = "1.1-beta3"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -93,7 +93,7 @@ goal_choices = ["Dark Gaia", "Red Jewel Hunt"]
 goal.set("Dark Gaia")
 
 logic = StringVar(root)
-logic_choices = ["Completable", "Beatable"]
+logic_choices = ["Completable", "Beatable", "Chaos"]
 logic.set("Completable")
 
 statues = StringVar(root)

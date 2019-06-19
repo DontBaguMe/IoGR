@@ -552,6 +552,14 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("9be74",16)+rom_offset)
     f.write("\xd7\x18")
 
+    # Give appearing Dark Space the option of handling an ability
+    f.seek(int("9bf7f",16)+rom_offset)
+    f.write("\xAC\xD6\x88\xA8\x00\xC0\x04\x00\x0B\x4c\x10\xf7")
+    f.seek(int("9f710",16)+rom_offset)
+    f.write("\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
+    f.seek(int("c8aa2",16)+rom_offset)
+    f.write("\x03")
+
     # Fix forced form change
     f.seek(int("9c037",16)+rom_offset)
     f.write(FORCE_CHANGE + "\x02\xe0")
@@ -983,7 +991,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("19a4c",16)+rom_offset)
     f.write("\x84")
 
-    # Entering wrong door in 2nd map area doesn't softlock you
+    # Give appearing Dark Space the option of handling an ability
     f.seek(int("7be0b",16)+rom_offset)
     f.write("\xAC\xD6\x88\xC8\x01\x80\x02\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
     f.seek(int("cbc60",16)+rom_offset)
