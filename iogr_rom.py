@@ -843,11 +843,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("68ff3",16)+rom_offset)
     f.write("\xf5\x8f")
     f.seek(int("68ffb",16)+rom_offset)
-    f.write("\x40\xdd")
+    f.write("\x70\xe5")
     f.seek(int("69092",16)+rom_offset)
     f.write("\x02\xce\x01\x02\x25\x2F\x0A\x4c\xfd\x8f")
-    f.seek(int("6dd40",16)+rom_offset)
-    f.write("\x02\xD1\x3A\x01\x01\x5A\xDD\x02\xD0\x6F\x01\x52\xDD\x02\xBF\xA7\x90\x6B")
+    f.seek(int("6e570",16)+rom_offset)
+    f.write("\x02\xD1\x3A\x01\x01\x8A\xE5\x02\xD0\x6F\x01\x82\xE5\x02\xBF\xA7\x90\x6B")
     f.write("\x02\xBF\xCF\x90\x02\xCC\x01\x6B\x02\xBF\x67\x91\x6B")
 
     ##########################################################################
