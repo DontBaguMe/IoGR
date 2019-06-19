@@ -55,7 +55,12 @@ def generate_ROM():
     elif goal.get() == "Red Jewel Hunt":
         goal_cd = "RJ"
 
-    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_str[0] + "_" + seed_str
+    if logic_str == "Chaos":
+        logic_chr = "X"
+    else:
+        logic_chr = logic_str[0]
+
+    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"
 
     if iogr_rom.generate_rom(VERSION, rom_offset, int(seed_str), rompath, filename, diff_str, goal_str, logic_str, statues_str):
