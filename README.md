@@ -1,5 +1,5 @@
 ## The Illusion of Gaia Randomizer (v1.1.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.1.0">Download</a>
-This randomizer is compatable with the US version of the Illusion of Gaia ROM.
+This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
