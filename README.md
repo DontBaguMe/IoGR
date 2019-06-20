@@ -1,22 +1,44 @@
-## The Illusion of Gaia Randomizer (v1.0.1) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.0.1">Download</a>
-This randomizer is compatable with most US versions of the Illusion of Gaia ROM.
+## The Illusion of Gaia Randomizer (v1.1.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.1.0">Download</a>
+This randomizer is compatable with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
 <a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
 
+
+<a href="https://github.com/Apokalysme/iogr_emotracker_apokalysme/releases">IoGR EmoTracker (in development)</a>
+
 #### The .exe package
-The executable has been verified to work on both Windows and Wine operating systems.
+The executable has been verified to work on Windows, Linux and Wine.
 
 #### the .py package
 For non-Windows user with Python 2.7 installed, use the "py" package and run the "iogr.py" script to execute the randomizer interface.
 
 ### Creating a Randomized ROM
-For the randomizer to function, you must ensure that "iogr.exe" or "iogr.py" is run from the same directory that also contains the "bin" directory (as well as "iogr.ico" for the .exe).  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format.
+For the randomizer to function, you must ensure that "iogr.exe" or "iogr.py" is run from the same directory that also contains the "bin" directory (as well as "iogr.ico" or "iogr.png" for the .exe).  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format.
 
 Running "iogr.exe" or "iogr.py", inputting the desired settings, and hitting "Generate ROM" will create a randomized ROM (as well as a spoiler log) in the same directory as your original ROM file.  The original file will remain intact.
 
-(Note: There is a US version of the ROM that contains an offset that makes it incompatable with the randomizer.  Attempting to use this version of the ROM will result in an error.  Sorry for the inconvenience.)
+### Randomizer Settings
+Below are explanations of the various settings of the randomizer.
+#### Difficulty
+There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficulty chosen affects the following game mechanics:
+- Enemies: Enemies scale in strength with each difficulty mode.
+- Room Rewards: The number of room-clearing rewards available to the player is affected by difficulty (see below).
+- Item and Ability Placement: Easy and Normal modes both include a slight bias toward making required items and abilities available to the player earlier on.
+- In-Game Spoilers: Hints have been removed in Extreme mode.
+
+#### Goal
+This allows you to choose a game mode, whether Dark Gaia or Red Jewel Hunt (see below).
+
+#### Logic
+There are three logic modes available to the player.
+- Completable: This logic ensures that every item and ability location is reachable, allowing every seed to be completed 100%. This tends to yield slightly longer gameplay experiences.
+- Beatable: In Beatable seeds, you are guaranteed to have access to every item and ability you need to complete your goal, though you may not have access to every item location in the game. This tends to yield slightly more streamlined seeds -- however, it could also make helpful items like status upgrades unattainable, making this mode slightly more dangerous.
+- Chaos: Ability placement restrictions have been drastically loosened in this mode -- for instance, Freedan abilities can show up in towns, and Dark Spaces that are typically reserved for form changes might contain abilities, preventing the player from completing dungeons and accessing certain item locations.  As in Beatable, Chaos mode still ensures that the player has access to all the items and locations necessary to beat the game.
+
+#### Statues
+You can choose the number of Mystic Statues required to complete Dark Gaia seeds, or make the number random. This parameter is ignored for Red Jewel Hunts.
 
 ### Beating the Game
 There are currently two modes (goals) for completing the game:
@@ -106,12 +128,12 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 #### Other Features
 - The location of the glowing Gold Tile in Inca Ruins has been randomized, making the Wind Melody a requirement to progress to the end of that dungeon.
 - The differences between the puzzle rooms in Ishtar's Studio in Angel Village are also random and could differ from the vanilla game.
-- The order of the hieroglyphs in the Pyramid has been shuffled, making the Father's Journal a required item to face the Mummy Queen.
+- The order of the hieroglyphs in the Pyramid has been shuffled, making the Father's Journal a required item to face the Mummy Queen. (You can give the Father's Journal to the guide in the hieroglyph room of the Pyramid for safe keeping.)
 - Herbs restore HP at rates that depend on the difficulty setting, either full restore (Easy), 8 HP (Normal), 4 HP (Hard), or 2 HP (Extreme).  An HP Jewel will restore your HP to full when used in Easy mode only.
 - Upon acquiring the Aura, equip it and use it to unlock Shadow's form. From then on, you can fight as Shadow in any dungeon.
 - Shadow's form must be unlocked to enter Babel Tower, as well as face Dark Gaia.
 - If you bring the Necklace back to Lilly in Itory Village, she will accompany you.  This will allow you to progress to the end of Edward's Underground Tunnel, as well as access the item locked in the coffin in the Seaside Palace.
-- A number of new items have been added to the game to simulate ability upgrades. These jewels appear as circles of flame in your inventory and, when used, upgrade the appropriate ability -- either your HP, STR, DEF, Psycho Dash, or Dark Friar abilities.
+- A number of new items have been added to the game to simulate ability upgrades. These jewels appear as circles of flame in your inventory and, when used, upgrade the appropriate ability -- either your HP, STR, DEF, Psycho Dash, or Dark Friar abilities. Items representing multiple Red Jewels are handled similarly and must be used -- talking to the Jeweler will not remove these items from your inventory.
 - Any barrier that can be removed with the Psycho Dash can also be destroyed with either the Psycho Slider or the Spin Dash.
 - The Dark Spaces in both Edward's Prison and Babel Tower have been relocated to prevent softlocks.
 - The spirits in Babel Tower can warp you back to the bottom of the tower, allowing you to escape if you cannot defeat one of the bosses.
@@ -136,3 +158,5 @@ There is a simple item tracker included with this release.  Official trackers fo
 - More text edits
 
 ### Known Bugs and Quirks
+If you have an issue with the randomizer, please join our 
+<a href="https://discord.gg/KfZ4VeD">Discord</a> and report your issue in the #bugs channel.
