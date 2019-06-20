@@ -683,6 +683,15 @@ class World:
             print "ERROR: No Folder Specified"
             return
 
+        if self.mode == 0:
+            mode_txt = "Easy"
+        elif self.mode == 1:
+            mode_txt = "Normal"
+        elif self.mode == 2:
+            mode_txt = "Hard"
+        elif self.mode == 3:
+            mode_txt = "Extreme"
+
         if self.kara == 1:
             kara_txt = "Edward's Castle"
         elif self.kara == 2:
@@ -701,6 +710,11 @@ class World:
 
         f.write("\r\n")
         f.write("Seed                                  >  " + str(self.seed) + "\r\n")
+        f.write("Goal                                  >  " + str(self.goal) + "\r\n")
+        f.write("Logic                                 >  " + str(self.logic_mode) + "\r\n")
+        f.write("Difficulty                            >  " + mode_txt + "\r\n")
+        f.write("\r\n")
+
         f.write("Statues Required                      >  " + str(self.statues) + "\r\n")
         f.write("Kara Location                         >  " + kara_txt + "\r\n")
         f.write("Jeweler Reward Amounts                >  " + str(self.gem) + "\r\n")

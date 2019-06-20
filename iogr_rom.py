@@ -130,8 +130,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x10")
     f.seek(int("4e933",16)+rom_offset)  # Switch 65 - Hear Elder's voice
     f.write("\x10")
-    #f.seek(int("581f2",16)+rom_offset)  # Switch 76 - Enter Gold Ship
-    #f.write("\x10")
     f.seek(int("58a29",16)+rom_offset)  # Switch 78 - Talk to Gold Ship queen
     f.write("\x10")
     f.seek(int("4b067",16)+rom_offset)
@@ -140,8 +138,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x10\x00")
     f.seek(int("4b8b6",16)+rom_offset)
     f.write("\x10\x00")
-    #f.seek(int("5817e",16)+rom_offset)
-    #f.write("\x10\x00")
     f.seek(int("686fa",16)+rom_offset)  # Switch 111 - meet Lilly at Seaside Palace
     f.write("\x10")
     f.seek(int("78d76",16)+rom_offset)
@@ -592,8 +588,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x10\x01")
     f.seek(int("4e97a",16)+rom_offset)
     f.write("\x02\xbf\xff\xe9\x6b")
-#    f.seek(int("4e988",16)+rom_offset)
-#    f.write("\x8a\xe9")
 
     ##########################################################################
     #                          Modify Moon Tribe events
@@ -772,8 +766,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_nazca.close
 
     # Allow exit to world map
-    #f.seek(int("5e647",16))
-    #f.write("\x32\x00\x10\x02\x0b\x02\xc0\xad\xe6\x02\xc1\x6b")
     f.seek(int("5e80c",16))
     f.write("\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
 
@@ -1197,7 +1189,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_babel2.read())
     f_babel2.close
 
-
     # Spirits can warp you back to start
     f.seek(int("99b69",16)+rom_offset)
     f.write("\x76\x9B\x76\x9B\x76\x9B\x76\x9B")
@@ -1486,12 +1477,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     # Mu
     f.seek(int("6a2cc",16)+rom_offset)   # Erik
     f.write("\xe0\x6b")
-
-    # Angel Village
-    #f.seek(int("6dc54",16)+rom_offset)   # Ishtar's apprentice
-    #f.write("\xe0\x6b")
-    #f.seek(int("6d8bf",16)+rom_offset)   # Ishtar's puzzle doors
-    #f.write("\x02\xe0\x6b")
 
     # Watermia
     f.seek(int("7a871",16)+rom_offset)   # Lilly
