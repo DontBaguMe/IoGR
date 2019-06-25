@@ -435,7 +435,7 @@ class World:
         # Chaos mode
         if self.logic_mode == "Chaos":
             # Add "Inaccessible" node to graph
-            self.graph[71] = [False,[],"Inaccessible",[]]
+            self.graph[100] = [False,[],"Inaccessible",[]]
 
             # Towns can have Freedan abilities
             for x in [10,14,22,39,57,66,77,88,103,114,129,145,146]:
@@ -500,19 +500,19 @@ class World:
             self.item_locations[60][3] in abilities):
             del logic[77]
         if self.item_locations[93][3] in abilities:         # Great Wall
-            self.graph[100] = [False,[],"Great Wall - Behind Spin",[]]
-            self.logic[200] = [45,100,[[50,1]]]
-            self.item_locations[94][0] = 100
+            self.graph[200] = [False,[],"Great Wall - Behind Spin",[]]
+            self.logic[200] = [45,200,[[50,1]]]
+            self.item_locations[94][0] = 200
             if self.item_locations[94][3] in abilities:
                 inaccessible += [95]
         if self.item_locations[122][3] in abilities:        # Ankor Wat
             inaccessible += [117,118,119,120,121]
-        if self.item_locations[142][3] in abilities:        # Pyramid
-            inaccessible += [133,134,136,139,140]
+#        if self.item_locations[142][3] in abilities:        # Pyramid
+#            inaccessible += [133,134,136,139,140]
 
         # Change graph node for inaccessible locations
         for x in inaccessible:
-            self.item_locations[x][0] = 71
+            self.item_locations[x][0] = 100
 
     # Simulate inventory
     def get_inventory(self,start_items=[]):
@@ -666,7 +666,7 @@ class World:
         random.shuffle(placement_log)
         self.in_game_spoilers(placement_log)
 
-        print cycle
+        #print cycle
 
         return True
 
@@ -1064,8 +1064,8 @@ class World:
             52: [30,1,False,0,[],"1AFE2","","","",              "Sky Garden: (SE) Dark Side Chest    "],
             53: [31,1,False,0,[],"1AFE7","","","",              "Sky Garden: (SW) Ramp Chest         "],
             54: [29,1,False,0,[],"1AFEC","","","",              "Sky Garden: (SW) Dark Side Chest    "],
-            55: [30,1,False,0,[],"1AFF1","","","",              "Sky Garden: (NW) Top Chest          "],
-            56: [30,1,False,0,[],"1AFF5","","","",              "Sky Garden: (NW) Bottom Chest       "],
+            55: [72,1,False,0,[],"1AFF1","","","",              "Sky Garden: (NW) Top Chest          "],
+            56: [72,1,False,0,[],"1AFF5","","","",              "Sky Garden: (NW) Bottom Chest       "],
             57: [29,2,False,0,[51,52,53],"c9d63","","","\x4c",  "Sky Garden: Dark Space (Foyer)      "],
             58: [29,2,False,0,[],"ca505","","","\x56",          "Sky Garden: Dark Space (SE)         "], #in the room
             59: [29,2,False,0,[],"ca173","","","\x51",          "Sky Garden: Dark Space (SW)         "],
@@ -1216,7 +1216,8 @@ class World:
             27: [False,[20,21,22,28],"Neil's Cottage",[13]],
             28: [False,[20,21,22,27,29],"Nazca Plain",[]],
             29: [False,[],"Sky Garden",[14,14,14,14]],
-            30: [False,[],"Sky Garden - Behind Dark Friar",[]],
+            30: [False,[72],"Sky Garden - Behind Dark Friar",[]],
+            72: [False,[],"Sky Garden - Behind Friar or Barrier",[]],
             31: [False,[],"Sky Garden - Behind Psycho Dash",[]],
             32: [False,[33],"Sky Garden - Viper",[]],
 
@@ -1325,33 +1326,34 @@ class World:
             61: [17,18,[[3,1],[4,1]]],   # Inca Ruins w/ Inca Statues
 
             # SE Continent
-            70: [22,23,[[48,1]]],        # Diamond Mine Progression w/ Psycho Dash
-            71: [22,23,[[49,1]]],        # Diamond Mine Progression w/ Psycho Slide
-            72: [22,23,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
-            73: [22,24,[[51,1]]],        # Diamond Mine Progression w/ Dark Friar
-            74: [22,24,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
-            75: [22,25,[[15,1]]],        # Diamond Mine Progression w/ Elevator Key
-            76: [25,26,[[11,1],[12,1]]], # Diamond Mine Progression w/ Mine Keys
-            77: [29,30,[[51,1]]],        # Sky Garden Progression w/ Dark Friar
-            78: [29,32,[[14,4]]],        # Sky Garden Progression w/ Crystal Balls
-            79: [29,31,[[48,1]]],        # Sky Garden Progression w/ Psycho Dash
-            80: [29,31,[[49,1]]],        # Sky Garden Progression w/ Psycho Slide
-            81: [29,31,[[50,1]]],        # Sky Garden Progression w/ Spin Dash
+            70:  [22,23,[[48,1]]],        # Diamond Mine Progression w/ Psycho Dash
+            71:  [22,23,[[49,1]]],        # Diamond Mine Progression w/ Psycho Slide
+            72:  [22,23,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
+            73:  [22,24,[[51,1]]],        # Diamond Mine Progression w/ Dark Friar
+            74:  [22,24,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
+            75:  [22,25,[[15,1]]],        # Diamond Mine Progression w/ Elevator Key
+            76:  [25,26,[[11,1],[12,1]]], # Diamond Mine Progression w/ Mine Keys
+            77:  [29,30,[[51,1]]],        # Sky Garden Progression w/ Dark Friar
+            156: [29,72,[[52,1]]],        # Sky Garden Progression w/ Aura Barrier
+            78:  [29,32,[[14,4]]],        # Sky Garden Progression w/ Crystal Balls
+            79:  [29,31,[[48,1]]],        # Sky Garden Progression w/ Psycho Dash
+            80:  [29,31,[[49,1]]],        # Sky Garden Progression w/ Psycho Slide
+            81:  [29,31,[[50,1]]],        # Sky Garden Progression w/ Spin Dash
 
             # NE Continent
-            90: [33,34,[[17,1]]],         # Seaside Progression w/ Purity Stone
-            91: [33,35,[[9,1],[23,1]]],   # Seaside Progression w/ Lilly
-            92: [33,36,[[16,1]]],         # Seaside to Mu w/ Mu Key
-            93: [36,33,[[16,1]]],         # Mu to Seaside w/ Mu Key
-            94: [37,38,[[18,1]]],         # Mu Progression w/ Statue of Hope 1
-            95: [38,71,[[51,1]]],         # Mu Progression w/ Dark Friar
-            96: [38,71,[[49,1]]],         # Mu Progression w/ Psycho Slide
-            97: [38,39,[[49,1]]],         # Mu Progression w/ Psycho Slide
-            98: [71,40,[[18,2]]],         # Mu Progression w/ Statue of Hope 2
-            99: [40,41,[[19,2]]],         # Mu Progression w/ Rama Statues
-            100: [42,43,[[49,1]]],        # Angel Village to Dungeon w/ Slide
-            101: [45,46,[[51,1]]],        # Great Wall Progression w/ Dark Friar
-            102: [46,47,[[50,1]]],        # Great Wall Progression w/ Spin Dash
+            90:  [33,34,[[17,1]]],         # Seaside Progression w/ Purity Stone
+            91:  [33,35,[[9,1],[23,1]]],   # Seaside Progression w/ Lilly
+            92:  [33,36,[[16,1]]],         # Seaside to Mu w/ Mu Key
+            93:  [36,33,[[16,1]]],         # Mu to Seaside w/ Mu Key
+            94:  [37,38,[[18,1]]],         # Mu Progression w/ Statue of Hope 1
+            95:  [38,71,[[51,1]]],         # Mu Progression w/ Dark Friar
+            96:  [38,71,[[49,1]]],         # Mu Progression w/ Psycho Slide
+            97:  [38,39,[[49,1]]],         # Mu Progression w/ Psycho Slide
+            98:  [71,40,[[18,2]]],         # Mu Progression w/ Statue of Hope 2
+            99:  [40,41,[[19,2]]],         # Mu Progression w/ Rama Statues
+            100: [42,43,[[49,1]]],         # Angel Village to Dungeon w/ Slide
+            101: [45,46,[[51,1]]],         # Great Wall Progression w/ Dark Friar
+            102: [46,47,[[50,1]]],         # Great Wall Progression w/ Spin Dash
 
             # N Continent
             110: [48,49,[[40,1]]],        # Ann item w/ Apple
