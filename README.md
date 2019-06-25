@@ -1,12 +1,11 @@
-## The Illusion of Gaia Randomizer (v1.1.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.1.0">Download</a>
+## The Illusion of Gaia Randomizer (v1.2.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.2.0">Download</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
 <a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
 
-
-<a href="https://github.com/Apokalysme/iogr_emotracker_apokalysme/releases">IoGR EmoTracker (in development)</a>
+The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 
 #### The .exe package
 The executable has been verified to work on Windows, Linux and Wine.
@@ -140,6 +139,8 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - You can talk to the NPC in front of the school in South Cape for an in-game tutorial.
 
 #### Misc. Notes and Strategies
+- Sky Garden: The Dark Space in the SW room does not in fact require Dark Friar to access. You can stand below the switch as Freedan and reach it easily with his sword. Also, you can use Aura Barrier to complete the NW room instead of Dark Friar.
+
 - Great Wall: The Dark Space where Spin Dash is normally found, as it's the only Dark Space in that area that can be accessed without any abilities, will actually never have an ability and will always be open for changing forms.  The Dark Space in the previous room might have an ability, and you can reach it without Spin Dash by turning into Freedan or Shadow, walking back, and using the longer reach of one of these characters to hit the switch that allows entrance into that map.
 
 - Ankor Wat: The Gorgon that blocks the way (for which you are intended to use the Earthquaker) can be easily defeated if you have Dark Friar, 2nd upgrade, by standing on the platform and spamming him with fireballs before he blocks the passage.
