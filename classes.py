@@ -537,12 +537,12 @@ class World:
         return inventory
 
     # Takes a random seed and builds out a randomized world
-    def randomize(self):
+    def randomize(self,seed_adj=0):
         self.initialize()
 
         solved = False
 
-        random.seed(self.seed)
+        random.seed(self.seed+seed_adj)
 
         # Initialize and shuffle location list
         item_locations = self.list_item_locations()

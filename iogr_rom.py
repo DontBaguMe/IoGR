@@ -2165,7 +2165,13 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
 
     w=classes.World(rng_seed,mode,goal,logic_mode,statues,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
-    w.randomize()
+    done = False
+    seed_adj = 0
+    while not done:
+        done = w.randomize(seed_adj)
+        seed_adj += 1
+        if seed_adj > 10:
+            return False
     #w.print_spoiler()
     w.generate_spoiler(folder_dest, version, filename)
     w.write_to_rom(f,rom_offset)

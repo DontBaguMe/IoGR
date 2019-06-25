@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -60,7 +60,7 @@ def generate_ROM():
     if iogr_rom.generate_rom(VERSION, rom_offset, int(seed_str), rompath, filename, diff_str, goal_str, logic_str, statues_str):
         showinfo("Success!", filename + " has been successfully created!")
     else:
-        showinfo("ERROR", "Operation failed")
+        showinfo("ERROR", "Operation failed (unspecified error)")
 
 root = Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
