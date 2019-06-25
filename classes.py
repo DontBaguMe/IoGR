@@ -542,7 +542,7 @@ class World:
 
         solved = False
 
-        random.seed(self.seed+seed_adj)
+        random.seed(self.seed + seed_adj)
 
         # Initialize and shuffle location list
         item_locations = self.list_item_locations()
@@ -590,10 +590,17 @@ class World:
 
             inv_size = len(self.get_inventory(start_items))
             if inv_size > MAX_INVENTORY:
+                goal = False
                 print "ERROR: Inventory capacity exceeded"
+            else:
+                goal = ((self.goal == "Dark Gaia" and self.graph[70][0]) or
+                    (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
 
             # Get list of new progression options
             progression_list = self.progression_list(start_items)
+
+            done = goal and (self.logic_mode != "Completable" or progression_list == -1)
+            #print done, progression_list
 
             if progression_list == -1:       # No empty locations available
                 removed = self.make_room(item_locations)
@@ -609,13 +616,6 @@ class World:
                 progression_list = []
 
             #print "To progress: ",progression_list
-
-            # Check for finished state, or dead-end state
-            goal = ((self.goal == "Dark Gaia" and self.graph[70][0]) or
-                (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
-
-            done = goal and (self.logic_mode != "Completable" or not progression_list)
-            #print done, progression_list
 
 #            if not done and not progression_list:
 #                #print "Gotta make room..."
