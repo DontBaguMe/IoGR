@@ -1,6 +1,5 @@
 # Python libraries
 from shutil import copyfile
-import classes
 import csv
 import binascii
 import datetime
@@ -9,6 +8,7 @@ import os
 import random
 
 # Local libraries
+import classes
 import quintet_comp
 import quintet_text as qt
 
@@ -1294,12 +1294,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xD3\xD2\x00\xD5\x00" + qt.encode("Contributors and Testers:") + "\xCB")
     f.write(qt.encode("-Alchemic    -Bonzaibier") + "\xCB")
     f.write(qt.encode("-Atlas       -BOWIEtheHERO") + "\xCB")
-    f.write(qt.encode("-Austin21300 -djtifaheart") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Austin21300 -Crazyhaze") + "\xC9\xB4\xCE")
 
+    f.write(qt.encode("-djtifaheart -manafreak") + "\xCB")
     f.write(qt.encode("-Keypaladin  -Mr Freet") + "\xCB")
     f.write(qt.encode("-Lassic      -Plan") + "\xCB")
-    f.write(qt.encode("-Le Hulk     -Pozzum ") + "\xCB")
-    f.write(qt.encode("-manafreak     Senpai") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Le Hulk     -PozzumSenpai") + "\xC9\xB4\xCE")
 
     f.write(qt.encode("-Raeven0     -Skarsnik") + "\xCB")
     f.write(qt.encode("-roeya       -Skipsy") + "\xCB")
@@ -1308,11 +1308,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     f.write(qt.encode("-steve hacks -Veetorp") + "\xCB")
     f.write(qt.encode("-Sye990      -Verallix") + "\xCB")
-    f.write(qt.encode("-Tymekeeper  -Voranthe") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Tymekeeper  -Volor") + "\xC9\xB4\xCE")
 
+    f.write(qt.encode("-Voranthe    -Xyrcord") + "\xCB")
     f.write(qt.encode("-Wilddin     -Z4t0x") + "\xCB")
-    f.write(qt.encode("-wormsofcan  -ZockerStu") + "\xCB")
-    f.write(qt.encode("-Xyrcord") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-wormsofcan  -ZockerStu") + "\xC9\xB4\xCE")
 
     f.write("\xCB" + qt.encode("  Thank you all so much!"))
     f.write("\xCB" + qt.encode("     This was so fun!"))
