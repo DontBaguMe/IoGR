@@ -876,7 +876,7 @@ class World:
                 f.write(self.spoilers[i])
                 i += 1
 
-        #self.enemize(f,rom_offset)
+        self.enemize(f,rom_offset)
         #print "ROM successfully created"
 
     # Shuffle enemies in ROM
@@ -1847,7 +1847,7 @@ class World:
             21: [2,"\xf5\xaf\x8a","\x1a","Diamond Mine: Grundit"],
             22: [2,"\x03\xb1\x8a","\x19","Diamond Mine: Eye Stalker"],
             23: [2,"\x8a\xaa\x8a","\x18","Diamond Mine: Flayzer (master)"],
-            24: [2,"\xf5\xa4\x8a","\x1a","Diamond Mine: Grundit (stationary)"],
+#            24: [2,"\xf5\xa4\x8a","\x1a","Diamond Mine: Grundit (stationary)"],
             25: [2,"\xb3\xb0\x8a","\x19","Diamond Mine: Eye Stalker (stone)"],
             26: [2,"\xd8\xb0\x8a","\x62","Diamond Mine: Eye Stalker (stone)"],
 
@@ -1944,4 +1944,40 @@ class World:
             9: ["da18b","\x03\x00\x10\x10\xEA\x15\xCE\x01\x04\x00\x70\x90\x53\x55\xDE\x10\xD5\x14\x00\x08\x73\xCC","Ankor Wat"],
             10: ["da618","\x03\x00\x10\x10\x0D\x18\xCB\x01\x04\x00\x60\x90\x80\x0A\xDF\x10\xFB\x13\x00\x0E\x67\xD1","Pyramid"],
             11: ["dabfc","\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xC0\x0C\xDF\x10\x30\x29\x00\xBE\x2F\xCB","Jeweler's Mansion"]
+        }
+
+        # Enemy map database
+        # FORMAT: { ID: [EnemySet, SpriteHeaderLocation]}
+        self.maps = {
+            # Underground Tunnel
+            12: [0,""],
+            13: [0,""],
+            14: [0,""],
+            15: [0,""],
+            16: [0,""],
+            17: [0,""],
+            18: [0,""],
+
+            # Inca Ruins
+            29: [1,""],
+            29: [1,""],
+            32: [1,""],  # Broken statue
+            33: [1,""],
+            34: [1,""],  # Floor switch
+            35: [1,""],
+            37: [1,""],  # Diamond block
+            38: [1,""],  # Broken statues
+            39: [1,""],
+            40: [1,""],  # Falling blocks
+            41: [11,""],  # Castoth room
+
+
+
+
+
+
+
+
+
+
         }
