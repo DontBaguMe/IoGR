@@ -5,6 +5,7 @@ import quintet_text
 
 MAX_INVENTORY = 15
 PROGRESS_ADJ = [1.5, 1.25, 1, 1]   # Required items are more likely to be placed in easier modes
+MAX_CYCLES = 100
 
 class World:
     # Assigns item to location
@@ -582,9 +583,15 @@ class World:
         # Continue to place progression items until all locations are accessible
         done = False
         goal = False
+        cycle = 0
 
         #while self.unaccessible_locations(item_locations):
         while not done:
+            cycle += 1
+            if cycle > MAX_CYCLES:
+                print "ERROR: Max cycles exceeded"
+                return False
+
             start_items = self.traverse()
             #print "We found these: ",start_items
 
@@ -658,6 +665,8 @@ class World:
         placement_log = self.placement_log[:]
         random.shuffle(placement_log)
         self.in_game_spoilers(placement_log)
+
+        print cycle
 
         return True
 
