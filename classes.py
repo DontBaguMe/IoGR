@@ -609,13 +609,13 @@ class World:
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
             #print done, progression_list
 
-            if progression_list == -1:       # No empty locations available
+            if not done and progression_list == -1:       # No empty locations available
                 removed = self.make_room(item_locations)
                 if not removed:
                     print "ERROR: Could not remove non-progression item"
                     return False
                 progression_list = []
-            elif progression_list == -2:     # All new locations have too many inventory items
+            elif not done and progression_list == -2:     # All new locations have too many inventory items
                 removed = self.make_room(item_locations,True)
                 if not removed:
                     print "ERROR: Could not remove inventory item"
