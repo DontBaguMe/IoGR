@@ -10,6 +10,8 @@ The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 #### The .exe package
 The executable has been verified to work on Windows, Linux and Wine.
 
+NOTE: It is common for the randomizer program to be flagged as a virus in Windows Defender.  This is a known issue for many programs that have been compiled in Pyinstaller, and a ticket has been submitted for this program in particular.  In the meantime, you can <a href="https://support.microsoft.com/en-us/help/4028485/windows-10-add-an-exclusion-to-windows-security">create an exclusion</a> for the folder to which you extract the IoGR program files.
+
 #### the .py package
 For non-Windows user with Python 2.7 installed, use the "py" package and run the "iogr.py" script to execute the randomizer interface.
 
