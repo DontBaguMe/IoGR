@@ -1,0 +1,167 @@
+Illusion of Gaia Randomizer - 2.0.0
+Seed generated 2019-06-27 15:36:05.895000
+
+Seed                                  >  0
+Goal                                  >  Dark Gaia
+Logic                                 >  Completable
+Difficulty                            >  Normal
+
+Statues Required                      >  [1, 2, 3, 5, 6]
+Kara Location                         >  Mt. Kress
+Jeweler Reward Amounts                >  [3, 4, 9, 10, 17, 32, 36]
+Inca Tile (column, row)               >  [6, 4]
+Hieroglyph Order                      >  [5, 4, 1, 3, 2, 6]
+
+Jeweler Reward 1                      >  Red Jewel
+Jeweler Reward 2                      >  Diamond Block
+Jeweler Reward 3                      >  Herb
+Jeweler Reward 4                      >  Herb
+Jeweler Reward 5                      >  Mushroom Drops
+Jeweler Reward 6                      >  Nothing
+South Cape: Bell Tower                >  Magic Dust
+South Cape: Fisherman                 >  Red Jewel
+South Cape: Lance's House             >  Red Jewel
+South Cape: Lola                      >  Herb
+South Cape: Dark Space                >  Psycho Dash
+Edward's Castle: Hidden Guard         >  STR Jewel
+Edward's Castle: Basement             >  Lola's Letter
+Edward's Prison: Hamlet               >  Herb
+Edward's Prison: Dark Space           >  Psycho Slider
+Underground Tunnel: Spike's Chest     >  Red Jewel
+Underground Tunnel: Small Room Chest  >  Father's Journal
+Underground Tunnel: Ribber's Chest    >  HP Jewel
+Underground Tunnel: Barrels           >  Inca Statue A
+Underground Tunnel: Dark Space        >  Nothing
+Itory Village: Logs                   >  Aura
+Itory Village: Cave                   >  Herb
+Itory Village: Dark Space             >  Nothing
+Moon Tribe: Cave                      >  Herb
+Inca Ruins: Diamond-Block Chest       >  Red Jewel
+Inca Ruins: Broken Statues Chest      >  Red Jewel
+Inca Ruins: Stone Lord Chest          >  Red Jewel
+Inca Ruins: Slugger Chest             >  Red Jewel
+Inca Ruins: Singing Statue            >  3 Red Jewels
+Inca Ruins: Dark Space 1              >  Nothing
+Inca Ruins: Dark Space 2              >  Earthquaker
+Inca Ruins: Final Dark Space          >  Nothing
+Gold Ship: Seth                       >  Mine Key A
+Diamond Coast: Jar                    >  Red Jewel
+Freejia: Hotel                        >  Purification Stone
+Freejia: Creepy Guy                   >  Red Jewel
+Freejia: Trash Can 1                  >  Light Jewel
+Freejia: Trash Can 2                  >  Red Jewel
+Freejia: Snitch                       >  Large Roast
+Freejia: Dark Space                   >  Nothing
+Diamond Mine: Chest                   >  Crystal Ball
+Diamond Mine: Trapped Laborer         >  Red Jewel
+Diamond Mine: Laborer w/Elevator Key  >  Rama Statue
+Diamond Mine: Morgue                  >  Crystal Ball
+Diamond Mine: Laborer w/Mine Key      >  Red Jewel
+Diamond Mine: Sam                     >  Red Jewel
+Diamond Mine: Appearing Dark Space    >  Nothing
+Diamond Mine: Dark Space at Wall      >  Aura Barrier
+Diamond Mine: Dark Space behind Wall  >  Nothing
+Sky Garden: (NE) Platform Chest       >  Red Jewel
+Sky Garden: (NE) Blue Cyber Chest     >  Red Jewel
+Sky Garden: (NE) Statue Chest         >  Red Jewel
+Sky Garden: (SE) Dark Side Chest      >  Red Jewel
+Sky Garden: (SW) Ramp Chest           >  Statue of Hope
+Sky Garden: (SW) Dark Side Chest      >  Prison Key
+Sky Garden: (NW) Top Chest            >  Teapot
+Sky Garden: (NW) Bottom Chest         >  Statue of Hope
+Sky Garden: Dark Space (Foyer)        >  Nothing
+Sky Garden: Dark Space (SE)           >  Nothing
+Sky Garden: Dark Space (SW)           >  Nothing
+Sky Garden: Dark Space (NW)           >  Nothing
+Seaside Palace: Side Room Chest       >  Herb
+Seaside Palace: First Area Chest      >  Apple
+Seaside Palace: Second Area Chest     >  Mu Palace Key
+Seaside Palace: Buffy                 >  Mushroom Drops
+Seaside Palace: Coffin                >  Mine Key B
+Seaside Palace: Dark Space            >  Nothing
+Mu: Empty Chest 1                     >  Red Jewel
+Mu: Empty Chest 2                     >  Lance's Letter
+Mu: Hope Statue 1                     >  Red Jewel
+Mu: Hope Statue 2                     >  Dark Jewel
+Mu: Chest s/o Hope Room 2             >  Red Jewel
+Mu: Rama Chest N                      >  Crystal Ball
+Mu: Rama Chest E                      >  Hieroglyph
+Mu: Open Dark Space                   >  Nothing
+Mu: Slider Dark Space                 >  Nothing
+Angel Village: Dance Hall             >  Red Jewel
+Angel Village: Dark Space             >  Spin Dash
+Angel Dungeon: Slider Chest           >  Wind Melody
+Angel Dungeon: Ishtar's Room          >  Herb
+Angel Dungeon: Puzzle Chest 1         >  Herb
+Angel Dungeon: Puzzle Chest 2         >  Hieroglyph
+Angel Dungeon: Ishtar's Chest         >  Red Jewel
+Watermia: West Jar                    >  HP Jewel
+Watermia: Lance                       >  Red Jewel
+Watermia: Gambling House              >  Lola's Melody
+Watermia: Russian Glass               >  Rama Statue
+Watermia: Dark Space                  >  Nothing
+Great Wall: Necklace 1                >  Red Jewel
+Great Wall: Necklace 2                >  Red Jewel
+Great Wall: Chest 1                   >  Memory Melody
+Great Wall: Chest 2                   >  Red Jewel
+Great Wall: Archer Dark Space         >  Dark Friar
+Great Wall: Platform Dark Space       >  Nothing
+Great Wall: Appearing Dark Space      >  Nothing
+Euro: Alley                           >  Red Jewel
+Euro: Apple Vendor                    >  Red Jewel
+Euro: Hidden House                    >  Red Jewel
+Euro: Store Item 1                    >  Crystal Ball
+Euro: Store Item 2                    >  STR Jewel
+Euro: Laborer Room                    >  Red Jewel
+Euro: Ann                             >  Red Jewel
+Euro: Dark Space                      >  Nothing
+Mt. Temple: Red Jewel Chest           >  DEF Jewel
+Mt. Temple: Drops Chest 1             >  Hieroglyph
+Mt. Temple: Drops Chest 2             >  Red Jewel
+Mt. Temple: Drops Chest 3             >  Hieroglyph
+Mt. Temple: Final Chest               >  Herb
+Mt. Temple: Dark Space 1              >  Nothing
+Mt. Temple: Dark Space 2              >  Nothing
+Mt. Temple: Dark Space 3              >  Nothing
+Natives' Village: Statue Room         >  Herb
+Natives' Village: Statue              >  Herb
+Natives' Village: Dark Space          >  Nothing
+Ankor Wat: Ramp Chest                 >  Red Jewel
+Ankor Wat: Flyover Chest              >  Will
+Ankor Wat: U-Turn Chest               >  Red Jewel
+Ankor Wat: Drop Down Chest            >  Red Jewel
+Ankor Wat: Forgotten Chest            >  Gorgon Flower
+Ankor Wat: Glasses Location           >  Red Jewel
+Ankor Wat: Spirit                     >  Red Jewel
+Ankor Wat: Garden Dark Space          >  Nothing
+Ankor Wat: Earthquaker Dark Space     >  Nothing
+Ankor Wat: Drop Down Dark Space       >  Nothing
+Dao: Entrance Item 1                  >  Mushroom Drops
+Dao: Entrance Item 2                  >  Red Jewel
+Dao: East Grass                       >  Red Jewel
+Dao: Snake Game                       >  HP Jewel
+Dao: Dark Space                       >  Nothing
+Pyramid: Dark Space Top               >  Crystal Ring
+Pyramid: Under Stairs                 >  Dark Jewel
+Pyramid: Hieroglyph 1                 >  Red Jewel
+Pyramid: Room 2 Chest                 >  Hieroglyph
+Pyramid: Hieroglyph 2                 >  Red Jewel
+Pyramid: Room 3 Chest                 >  Elevator Key
+Pyramid: Hieroglyph 3                 >  Hieroglyph
+Pyramid: Room 4 Chest                 >  Inca Statue B
+Pyramid: Hieroglyph 4                 >  2 Red Jewels
+Pyramid: Room 5 Chest                 >  Black Glasses
+Pyramid: Hieroglyph 5                 >  Red Jewel
+Pyramid: Hieroglyph 6                 >  Necklace Stones
+Pyramid: Dark Space Bottom            >  Nothing
+Babel: Pillow                         >  Red Jewel
+Babel: Force Field                    >  Red Jewel
+Babel: Dark Space Bottom              >  Nothing
+Babel: Dark Space Top                 >  Nothing
+Jeweler's Mansion: Chest              >  Nothing
+Castoth Prize                         >  Mystic Statue 1
+Viper Prize                           >  Mystic Statue 2
+Vampires Prize                        >  Mystic Statue 3
+Sand Fanger Prize                     >  Mystic Statue 4
+Mummy Queen Prize                     >  Mystic Statue 5
+Babel Prize                           >  Mystic Statue 6

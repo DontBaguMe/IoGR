@@ -55,6 +55,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     copyfile(rom_path,rom_path_new)
 
     f = open(rom_path_new,"r+b")
+    rom = f.read()
 
     ##########################################################################
     #                                Sandbox
@@ -150,14 +151,16 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                           Update map headers
     ##########################################################################
-    if mode == 0:
-        f_mapdata = open(folder + "0d8000_mapdataeasy.bin","r+b")
-    else:
-        f_mapdata = open(folder + "0d8000_mapdata.bin","r+b")
+    f_mapdata = open(folder + "0d8000_mapdata.bin","r+b")
     f.seek(int("d8000",16)+rom_offset)
     f.write(f_mapdata.read())
     f_mapdata.close
 
+    # Turn South Cape house into map tracker for Easy mode
+    if mode == 0:
+        addr = rom.find("\x15\x41\x00\x08\x00", int("d8000",16) + offset)
+        f.seek(addr)
+        f.write("\x15\x40")
     ##########################################################################
     #                        Update treasure chest data
     ##########################################################################
@@ -2018,11 +2021,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write("\xe0")
 
             # Assign Kara painting spriteset to appropriate Map
-            if mode == 0:
-                f.seek(int("d8d6b",16)+rom_offset)
-            else:
-                f.seek(int("d8d55",16)+rom_offset)
-            f.write("\x0a")
+            addr = rom.find("\x15\x0c\x00\x49\x00", int("d8000",16) + offset)
+            f.seek(addr)
+            f.write("\x15\x0a")
 
             # Set Kara painting event in appropriate map
             f.seek(int("c9c6a",16)+rom_offset)
