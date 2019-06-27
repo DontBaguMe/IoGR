@@ -561,9 +561,9 @@ class World:
         non_prog_items += self.list_item_pool(0,[],3)
 
         # For Easy mode
-        if self.mode == 1:
+        if self.mode == 0:
             non_prog_items += [52]
-        elif self.mode == 2:
+        elif self.mode == 1:
             non_prog_items += [49,50,52,53]
         else:
             non_prog_items += self.list_item_pool(2)
