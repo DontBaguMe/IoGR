@@ -499,11 +499,12 @@ class World:
             self.item_locations[59][3] in abilities and
             self.item_locations[60][3] in abilities):
             del logic[77]
-        if self.item_locations[93][3] in abilities:         # Great Wall
-            self.graph[200] = [False,[],"Great Wall - Behind Spin",[]]
-            self.logic[200] = [45,200,[[50,1]]]
-            self.item_locations[94][0] = 200
-            if self.item_locations[94][3] in abilities:
+        if self.item_locations[94][3] in abilities:         # Great Wall
+            self.graph[200] = [False,[],"Great Wall - Behind Slider or Spin",[]]
+            self.logic[200] = [45,200,[[49,1]]]
+            self.logic[201] = [45,200,[[50,1]]]
+            self.item_locations[93][0] = 200
+            if self.item_locations[93][3] in abilities:
                 inaccessible += [95]
         if self.item_locations[122][3] in abilities:        # Ankor Wat
             inaccessible += [117,118,119,120,121]
