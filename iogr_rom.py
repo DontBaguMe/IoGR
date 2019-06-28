@@ -1299,19 +1299,20 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-Atlas       -BOWIEtheHERO") + "\xCB")
     f.write(qt.encode("-Austin21300 -Crazyhaze") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-djtifaheart -manafreak") + "\xCB")
+    f.write(qt.encode("-djtifaheart -Le Hulk") + "\xCB")
+    f.write(qt.encode("-Eppy37      -manafreak") + "\xCB")
     f.write(qt.encode("-Keypaladin  -Mr Freet") + "\xCB")
-    f.write(qt.encode("-Lassic      -Plan") + "\xCB")
-    f.write(qt.encode("-Le Hulk     -PozzumSenpai") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Lassic      -PozzumSenpai") + "\xC9\xB4\xCE")
 
+    f.write(qt.encode("-Plan        -SDiezal") + "\xCB")
     f.write(qt.encode("-Raeven0     -Skarsnik") + "\xCB")
     f.write(qt.encode("-roeya       -Skipsy") + "\xCB")
-    f.write(qt.encode("-Scheris     -SmashManiac") + "\xCB")
-    f.write(qt.encode("-SDiezal     -solarcell007") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Scheris     -solarcell007") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-steve hacks -Veetorp") + "\xCB")
-    f.write(qt.encode("-Sye990      -Verallix") + "\xCB")
-    f.write(qt.encode("-Tymekeeper  -Volor") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-SmashManiac -Veetorp") + "\xCB")
+    f.write(qt.encode("-steve hacks -Verallix") + "\xCB")
+    f.write(qt.encode("-Sye990      -Volor") + "\xCB")
+    f.write(qt.encode("-Tymekeeper") + "\xC9\xB4\xCE")
 
     f.write(qt.encode("-Voranthe    -Xyrcord") + "\xCB")
     f.write(qt.encode("-Wilddin     -Z4t0x") + "\xCB")
@@ -1338,7 +1339,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Jeweler warps you to credits for Red Jewel hunts
     if goal == "Red Jewel Hunt":
-        f.seek(int("8d089",16)+rom_offset)
+        f.seek(int("8d32a",16)+rom_offset)
         f.write("\xE5\x00\x00\x00\x00\x00\x00\x11")
         f.seek(int("8d2d8",16)+rom_offset)
         f.write(qt.encode("Beat the game"))

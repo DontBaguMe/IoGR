@@ -6,6 +6,7 @@ import quintet_text
 MAX_INVENTORY = 15
 PROGRESS_ADJ = [1.5, 1.25, 1, 1]   # Required items are more likely to be placed in easier modes
 MAX_CYCLES = 100
+INACCESSIBLE = 100
 
 class World:
     # Assigns item to location
@@ -184,7 +185,7 @@ class World:
         return unaccessible
 
     # Fill a list of items randomly in a list of locations
-    def random_fill(self,items=[],item_locations=[]):
+    def random_fill(self,items=[],item_locations=[],accessible=True):
         if not items:
             return True
         elif not item_locations:
@@ -201,13 +202,15 @@ class World:
             i = 0
             for dest in to_fill:
                 if not placed:
+                    region = self.item_locations[dest][0]
                     location_type = self.item_locations[dest][1]
                     filled = self.item_locations[dest][2]
                     restrictions = self.item_locations[dest][4]
                     if not filled and item_type == location_type and item not in restrictions:
-                        if self.fill_item(item,dest):
-                            to_fill.remove(dest)
-                            placed = True
+                        if not accessible or region != INACCESSIBLE:
+                            if self.fill_item(item,dest):
+                                to_fill.remove(dest)
+                                placed = True
 
         return True
 
@@ -435,7 +438,7 @@ class World:
         # Chaos mode
         if self.logic_mode == "Chaos":
             # Add "Inaccessible" node to graph
-            self.graph[100] = [False,[],"Inaccessible",[]]
+            self.graph[INACCESSIBLE] = [False,[],"Inaccessible",[]]
 
             # Towns can have Freedan abilities
             for x in [10,14,22,39,57,66,77,88,103,114,129,145,146]:
@@ -513,7 +516,7 @@ class World:
 
         # Change graph node for inaccessible locations
         for x in inaccessible:
-            self.item_locations[x][0] = 100
+            self.item_locations[x][0] = INACCESSIBLE
 
     # Simulate inventory
     def get_inventory(self,start_items=[]):
@@ -561,12 +564,12 @@ class World:
         non_prog_items += self.list_item_pool(0,[],3)
 
         # For Easy mode
-        if self.mode == 0:
+        if self.logic_mode == "Chaos" or self.mode > 2:
+            non_prog_items += self.list_item_pool(2)
+        elif self.mode == 0:
             non_prog_items += [52]
         elif self.mode == 1:
             non_prog_items += [49,50,52,53]
-        else:
-            non_prog_items += self.list_item_pool(2)
 
         random.shuffle(non_prog_items)
         self.random_fill(non_prog_items,item_locations)
@@ -661,7 +664,7 @@ class World:
 #                print "Can't reach ",self.graph[node][2]
 
         junk_items = self.list_item_pool()
-        self.random_fill(junk_items,item_locations)
+        self.random_fill(junk_items,item_locations,False)
 
         placement_log = self.placement_log[:]
         random.shuffle(placement_log)
