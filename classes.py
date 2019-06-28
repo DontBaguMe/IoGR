@@ -380,6 +380,52 @@ class World:
         #print probabilities
         return probabilities
 
+    # Returns a list of map lists, by boss
+    def get_maps(self):
+        maps = [[],[],[],[],[],[],[]]
+        for map in self.maps:
+            boss = self.maps[map][1]
+            maps[boss].append(map)
+
+        maps.pop(0)
+        return maps
+
+    # Randomize map-clearing rewards
+    def map_rewards(self):
+        maps = self.get_maps()
+
+        for area in maps:
+            random.shuffle(area)
+
+        boss_rewards = 4 - self.mode
+
+        rewards = []              # Total rewards by mode (HP/STR/DEF)
+        if self.mode == 0:             # Easy: 10/7/7
+            rewards += [1] * 10
+            rewards += [2] * 7
+            rewards += [3] * 7
+        elif self.mode == 1:           # Normal: 10/4/4
+            rewards += [1] * 10
+            rewards += [2] * 4
+            rewards += [3] * 4
+        elif self.mode == 2:           # Hard: 8/2/2
+            rewards += [1] * 8
+            rewards += [2] * 2
+            rewards += [3] * 2
+        elif self.mode == 3:           # Extreme: 6/0/0
+            rewards += [1] * 6
+
+        random.shuffle(rewards)
+
+        # Add in rewards, where applicable, by difficulty
+        for area in maps:
+            i = 0
+            while i < boss_rewards:
+                map = area[i]
+                reward = rewards.pop(0)
+                self.maps[map][2] = reward
+                i += 1
+
     # Place Mystic Statues in World
     def fill_statues(self,locations=[148,149,150,151,152,153]):
         return self.random_fill([54,55,56,57,58,59],locations)
@@ -548,6 +594,9 @@ class World:
         solved = False
 
         random.seed(self.seed + seed_adj)
+
+        # Assign map rewards
+        self.map_rewards()
 
         # Initialize and shuffle location list
         item_locations = self.list_item_locations()
@@ -789,6 +838,19 @@ class World:
 
     # Modifies game ROM to reflect the current state of the World
     def write_to_rom(self,f,rom_offset=0):
+        # Room-clearing rewards
+        for map in self.maps:
+            reward = self.maps[map][2]
+            if reward > 0:
+                f.seek(int("1aade",16) + map + rom_offset)
+                if reward == 1:
+                    f.write("\x01")
+                elif reward == 2:
+                    f.write("\x02")
+                elif reward == 3:
+                    f.write("\x03")
+
+        # Items and abilities
         for x in self.item_locations:
             type = self.item_locations[x][1]
 
@@ -808,7 +870,6 @@ class World:
                 if item_code:
                     f.seek(int(item_addr,16)+rom_offset)
                     f.write(item_code)
-
 
                 # Write item text, if appropriate
                 if text1_addr:
@@ -885,10 +946,19 @@ class World:
 
     # Shuffle enemies in ROM
     def enemize(self,f,rom_offset=0):
+        f.seek(0)
+        rom = f.read()
+
         # Make all spritesets equal to Underground Tunnel
-        for set in self.spritesets:
-            f.seek(int(self.spritesets[set][0],16)+rom_offset)
-            f.write(self.spritesets[0][1])
+        for map in self.maps:
+            set = self.maps[map][0]
+            header_search = "\x15" + self.enemysets[set][0] + "\x00" + self.maps[map][3] + "\x00\x02"
+            addr = rom.find(header_search, int("d8000",16) + rom_offset)
+            if addr < 0:
+                print "ERROR: Couldn't find header for map ", map
+            else:
+                f.seek(addr)
+                f.write("\x15" + self.enemysets[0][0])
 
         # Turn all enemies into bats
         f.seek(0)
@@ -1729,146 +1799,159 @@ class World:
             59: "",
             60: ""
         }
-        # Database of room clearing rewards
-        # FORMAT: ID: [Map#, VanillaRewardCode (1=HP,2=STR,3=DEF), AreaName]
-        # ROM address is mapID + 1aade
-        self.room_rewards = {
-            0: [12, 1, "Underground Tunnel"],
-            1: [13, 2, "Underground Tunnel"],
-            2: [14, 3, "Underground Tunnel"],
-            3: [15, 1, "Underground Tunnel"],
-            4: [18, 3, "Underground Tunnel"],
-            5: [29, 2, "Inca Ruins"],
-            6: [32, 2, "Inca Ruins"],
-            7: [33, 3, "Inca Ruins"],
-            8: [34, 1, "Inca Ruins"],
-            9: [35, 1, "Inca Ruins"],
-            10: [37, 3, "Inca Ruins"],
-            11: [38, 2, "Inca Ruins"],
-            12: [39, 1, "Inca Ruins"],
-            13: [40, 3, "Inca Ruins"],
-            14: [61, 1, "Diamond Mine"],
-            15: [62, 1, "Diamond Mine"],
-            16: [63, 2, "Diamond Mine"],
-            17: [64, 3, "Diamond Mine"],
-            18: [65, 3, "Diamond Mine"],
-            19: [69, 2, "Diamond Mine"],
-            20: [70, 1, "Diamond Mine"],
-            21: [77, 1, "Sky Garden"],
-            22: [78, 3, "Sky Garden"],
-            23: [79, 2, "Sky Garden"],
-            24: [80, 1, "Sky Garden"],
-            25: [81, 3, "Sky Garden"],
-            26: [82, 2, "Sky Garden"],
-            27: [83, 1, "Sky Garden"],
-            28: [84, 3, "Sky Garden"],
-            29: [95, 1, "Mu"],
-            30: [96, 2, "Mu"],
-            31: [97, 3, "Mu"],
-            32: [98, 1, "Mu"],
-            33: [100, 3, "Mu"],
-            34: [101, 2, "Mu"],
-            35: [109, 2, "Angel Dungeon"],
-            36: [110, 1, "Angel Dungeon"],
-            37: [111, 2, "Angel Dungeon"],
-            38: [112, 3, "Angel Dungeon"],
-            39: [113, 1, "Angel Dungeon"],
-            40: [114, 3, "Angel Dungeon"],
-            41: [130, 3, "Great Wall"],
-            42: [131, 1, "Great Wall"],
-            43: [132, 2, "Great Wall"],
-            44: [133, 1, "Great Wall"],
-            45: [134, 3, "Great Wall"],
-            46: [135, 2, "Great Wall"],
-            47: [136, 1, "Great Wall"],
-            48: [160, 2, "Mt. Temple"],
-            49: [161, 3, "Mt. Temple"],
-            50: [162, 1, "Mt. Temple"],
-            51: [163, 2, "Mt. Temple"],
-            52: [164, 1, "Mt. Temple"],
-            53: [165, 3, "Mt. Temple"],
-            54: [166, 1, "Mt. Temple"],
-            55: [167, 3, "Mt. Temple"],
-            56: [168, 2, "Mt. Temple"],
-            57: [176, 1, "Ankor Wat"],
-            58: [177, 2, "Ankor Wat"],
-            59: [178, 3, "Ankor Wat"],
-            60: [179, 1, "Ankor Wat"],
-            61: [180, 3, "Ankor Wat"],
-            62: [181, 2, "Ankor Wat"],
-            63: [182, 1, "Ankor Wat"],
-            64: [183, 2, "Ankor Wat"],
-            65: [184, 3, "Ankor Wat"],
-            66: [185, 1, "Ankor Wat"],
-            67: [186, 3, "Ankor Wat"],
-            68: [187, 2, "Ankor Wat"],
-            69: [188, 1, "Ankor Wat"],
-            70: [189, 3, "Ankor Wat"],
-            71: [190, 1, "Ankor Wat"],
-            72: [204, 3, "Pyramid"],
-            73: [205, 2, "Pyramid"],
-            74: [206, 3, "Pyramid"],
-            75: [207, 3, "Pyramid"],
-            76: [208, 3, "Pyramid"],
-            77: [209, 2, "Pyramid"],
-            78: [210, 1, "Pyramid"],
-            79: [211, 3, "Pyramid"],
-            80: [212, 1, "Pyramid"],
-            81: [213, 2, "Pyramid"],
-            82: [214, 3, "Pyramid"],
-            83: [215, 2, "Pyramid"],
-            84: [216, 3, "Pyramid"],
-            85: [217, 2, "Pyramid"],
-            86: [219, 2, "Pyramid"]
-
-        }
 
         # Database of enemy groups and spritesets
-        # FORMAT: { ID: [ROM_Loction, HeaderData, HeaderCode, Name]}
-        self.enemy_groups = {
-            0: ["d82a2","\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","\x02","Underground Tunnel"],
-            1: ["d85ac","\x03\x00\x10\x10\xBC\x33\xC2\x01\x04\x00\x60\xA0\x0C\x77\xDE\x10\x2A\x0F\x00\xE6\x08\xD5","\x05","Inca Ruins"],
-            2: ["d8c37","\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xCC\x7A\xDE\x10\x30\x29\x00\xBE\x2F\xCB","\x0e","Diamond Mine"],
-            3: ["d8e0e","\x03\x00\x10\x10\x62\x3D\xCF\x01\x04\x00\x60\xA0\x4C\x7C\xDE\x10\x54\x1D\x00\xEF\xEE\x9E","\x0d","Sky Garden"],
-            #4: ["d9123","\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","","Seaside Palace"],
-            5: ["d9275","\x03\x00\x10\x10\x2D\x2E\xCC\x01\x04\x00\x60\xA0\x00\x00\xDF\x10\x16\x1C\x00\x41\x36\xD1","\x18","Mu"],
-            6: ["d95b2","\x03\x00\x10\x10\xD1\x14\xCF\x01\x04\x00\x60\xA0\x40\x02\xDF\x10\x7F\x0F\x00\x2C\x2B\xD5","\x1f","Angel Dungeon"],
-            7: ["d9968","\x03\x00\x10\x10\x6D\x13\xD0\x01\x04\x00\x60\xA0\x40\x05\xDF\x10\xFF\x16\x00\xF7\xF3\x99","\x27","Great Wall"],
-            8: ["d9eae","\x03\x00\x10\x10\x00\x00\xD0\x01\x04\x00\x60\xA0\x40\x08\xDF\x10\x70\x0E\x00\x5C\x4D\xD8","\x29","Mt. Kress"],
-            9: ["da18b","\x03\x00\x10\x10\xEA\x15\xCE\x01\x04\x00\x70\x90\x53\x55\xDE\x10\xD5\x14\x00\x08\x73\xCC","\x2e","Ankor Wat"],
-            10: ["da618","\x03\x00\x10\x10\x0D\x18\xCB\x01\x04\x00\x60\x90\x80\x0A\xDF\x10\xFB\x13\x00\x0E\x67\xD1","\x31","Pyramid"],
-            11: ["dabfc","\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xC0\x0C\xDF\x10\x30\x29\x00\xBE\x2F\xCB","\x34","Jeweler's Mansion"]
+        # FORMAT: { ID: [ROM_Loction, HeaderCode, HeaderData, Name]}
+        self.enemysets = {
+            0: ["\x02","11 06 00 90 42 D4","Underground Tunnel"],
+            1: ["\x05","11 04 00 90 42 D4 03 00 10 10 BC 33 C2 01 04 00 60 A0 0C 77 DE 10 2A 0F 00 E6 08 D5","Inca Ruins (Mud Monster and Larva)"],
+            2: ["\x06","11 07 00 0F 67 D4 03 00 10 10 23 4D C2 01 04 00 60 A0 CC 77 DE 10 36 23 00 24 45 CC","Inca Ruins (Statues)"],
+            3: ["\x0e","","Diamond Mine"],
+            4: ["\x0d","","Sky Garden (top)"],
+            5: ["\x0f","","Sky Garden (bottom)"],
+#            ?: ["",,"""Seaside Palace"],
+            6: ["\x18","","Mu"],
+            7: ["\x1f","","Angel Dungeon"],
+            8: ["\x27","","Great Wall"],
+            9: ["\x29","","Mt. Kress"],
+            10: ["\x2e","","Ankor Wat (outside)"],
+            11: ["\x2c","","Ankor Wat (inside)"],
+            12: ["\x31","","Pyramid"],
+            13: ["\x34","","Jeweler's Mansion"]
         }
 
-        # Enemy map database
-        # FORMAT: { ID: [EnemySet, NextMap(hex)]}
+        # Mapset database
+        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, NextMap(hex), HeaderData]}
         # Search string: "\x15" + self.enemy_groups[x][2] + "\x00" + self.maps[y][1] + "\x00\x02"
+        # ROM address for room reward table is mapID + $1aade
+        self.mapsets = {
+            12: [0,1,0,"\x0d","02 05 06 01 E8 17 DF"],
+            13: [0,1,0,"\x0e","02 03 06 01 94 7B D3 06 02 A3 7C DD"],
+            14: [0,1,0,"\x0f","02 03 06 01 20 5F DA 06 02 AC 0C DE"],
+            15: [0,1,0,"\x10","02 03 06 01 DE 17 DC 06 02 F4 70 DE"],
+            18: [0,1,0,"\x13","02 03 06 01 A7 1E D6 06 02 7D 78 DC"],
+        }
+
+        
+        # Enemy map database
+        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, NextMap(hex), HeaderData]}
+        # Search string: "\x15" + self.enemy_groups[x][2] + "\x00" + self.maps[y][1] + "\x00\x02"
+        # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # Underground Tunnel
-            12: [0,"\x0d"],
-            13: [0,"\x0e"],
-            14: [0,"\x0f"],
-            15: [0,"\x10"],
-            18: [0,"\x13"],
+            12: [0,1,0,"\x0d","02 05 06 01 E8 17 DF"],
+            13: [0,1,0,"\x0e","02 03 06 01 94 7B D3 06 02 A3 7C DD"],
+            14: [0,1,0,"\x0f","02 03 06 01 20 5F DA 06 02 AC 0C DE"],
+            15: [0,1,0,"\x10","02 03 06 01 DE 17 DC 06 02 F4 70 DE"],
+            18: [0,1,0,"\x13","02 03 06 01 A7 1E D6 06 02 7D 78 DC"],
 
             # Inca Ruins
-            27: [1,"\x1c"],  # Monn Tribe cave
-            29: [1,"\x1e"],
-            32: [1,"\x21"],  # Broken statue
-            33: [1,"\x22"],  # Floor switch
-            34: [1,"\x23"],  # Floor switch
-            35: [1,"\x24"],
-            37: [1,"\x26"],  # Diamond block
-            38: [1,"\x27"],  # Broken statues
-            39: [1,"\x28"],
-            40: [1,"\x29"],  # Falling blocks
-            #41: [11,"",""]  # Castoth room
+#            27: [1,0,0,"\x1c",""],  # Moon Tribe cave
+            29: [1,1,0,"\x1e","02 0F 03 00 20 00 BC A9 99 00 04 00 70 10 D3 35 DE 05 00 20 00 01 59 60 D9 06 01 00 00 D4 05 00 20 00 02 BA 40 DD 06 02 EC 47 DC"],
+            32: [1,1,0,"\x21","02 08 06 01 10 1F DD 03 00 10 00 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 "],  # Broken statue
+            33: [2,1,0,"\x22","02 08 06 01 C2 23 D7 03 00 10 00 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 "],  # Floor switch
+            34: [2,1,0,"\x23","02 08 06 01 15 27 D8 03 00 10 00 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 "],  # Floor switch
+            35: [2,1,0,"\x24",""],
+            37: [1,1,0,"\x26",""],  # Diamond block
+            38: [1,1,0,"\x27",""],  # Broken statues
+            39: [1,1,0,"\x28",""],
+            40: [1,1,0,"\x29",""],  # Falling blocks
 
+            # Diamond Mine
+            61: [3,2,0,"\x3e"],
+            62: [3,2,0,"\x3f"],
+            63: [3,2,0,"\x40"],
+            64: [3,2,0,"\x41"],  # Trapped laborer (??)
+            65: [3,2,0,"\x42"],  # Stationary Grundit
+            69: [3,2,0,"\x46"],  # Stationary Grundit
+            70: [3,2,0,"\x47"],  # Stationary Grundit
+
+            # Sky Garden
+            77: [4,2,0,"\x4e"],
+            78: [5,2,0,"\x4f"],
+            79: [4,2,0,"\x50"],
+            80: [5,2,0,"\x51"],
+            81: [4,2,0,"\x52"],
+            82: [5,2,0,"\x53"],
+            83: [4,2,0,"\x54"],
+            84: [5,2,0,"\x55"],
+
+            # Mu
+#            92: [4,0,"\x5d"],  # Seaside Palace
+            95: [6,3,0,"\x60"],
+            96: [6,3,0,"\x61"],
+            97: [6,3,0,"\x62"],
+            98: [6,3,0,"\x63"],
+            100: [6,3,0,"\x65"],
+            101: [6,3,0,"\x66"],
+
+            # Angel Dungeon
+            109: [7,3,0,"\x6e"],
+            110: [7,3,0,"\x6f"],
+            111: [7,3,0,"\x70"],
+            112: [7,3,0,"\x71"],
+            113: [7,3,0,"\x72"],
+            114: [7,3,0,"\x73"],
+
+            # Great Wall
+            130: [8,4,0,"\x83"],
+            131: [8,4,0,"\x85"],
+            133: [8,4,0,"\x86"],
+            134: [8,4,0,"\x87"],
+            135: [8,4,0,"\x88"],
+            136: [8,4,0,"\x8a"],  # We removed "future city" map \x89
+
+            # Mt Temple
+            160: [9,4,0,"\xa1"],
+            161: [9,4,0,"\xa2"],
+            162: [9,4,0,"\xa3"],
+            163: [9,4,0,"\xa4"],
+            164: [9,4,0,"\xa5"],
+            165: [9,4,0,"\xa6"],
+            166: [9,4,0,"\xa7"],
+            167: [9,4,0,"\xa8"],
+            168: [9,4,0,"\xa9"],
+
+            # Ankor Wat
+            176: [10,6,0,"\xb1"],
+            177: [11,6,0,"\xb2"],
+            178: [11,6,0,"\xb3"],
+            179: [11,6,0,"\xb4"],
+            180: [11,6,0,"\xb5"],
+            181: [11,6,0,"\xb6"],
+            182: [10,6,0,"\xb7"],
+            183: [11,6,0,"\xb8"],  # Earthquaker Golem
+            184: [11,6,0,"\xb9"],
+            185: [11,6,0,"\xba"],
+            186: [10,6,0,"\xbb"],
+            187: [11,6,0,"\xbc"],
+            188: [11,6,0,"\xbd"],
+            189: [11,6,0,"\xbe"],
+            190: [11,6,0,"\xbf"],
+
+            # Pyramid
+            204: [12,5,0,"\xcd"],
+            206: [12,5,0,"\xcf"],
+            207: [12,5,0,"\xd0"],
+            208: [12,5,0,"\xd1"],
+            209: [12,5,0,"\xd2"],
+            210: [12,5,0,"\xd3"],
+            211: [12,5,0,"\xd4"],
+            212: [12,5,0,"\xd5"],
+            213: [12,5,0,"\xd6"],
+            214: [12,5,0,"\xd7"],
+            215: [12,5,0,"\xd8"],
+            216: [12,5,0,"\xd9"],
+            217: [12,5,0,"\xda"],
+            219: [12,5,0,"\xdd"], # We cut parachute cutscene \xdc
+
+            # Jeweler's Mansion
+            233: [13,0,0,"\xea"]
 
         }
 
         # Database of enemy types
-        # FORMAT: { ID: [Enemy set ID, Event addr, VanillaTemplate, Name]}
+        # FORMAT: { ID: [Enemyset, Event addr, VanillaTemplate, Name]}
         self.enemies = {
             0: [0,"\x55\x87\x8a","\x05","Underground Tunnel: Bat"], # a8755
             1: [0,"\x6c\x82\x8a","\x01","Underground Tunnel: Ribber"],
@@ -1895,7 +1978,7 @@ class World:
             21: [2,"\xf5\xaf\x8a","\x1a","Diamond Mine: Grundit"],
             22: [2,"\x03\xb1\x8a","\x19","Diamond Mine: Eye Stalker"],
             23: [2,"\x8a\xaa\x8a","\x18","Diamond Mine: Flayzer (master)"],
-#            24: [2,"\xf5\xa4\x8a","\x1a","Diamond Mine: Grundit (stationary)"],
+#            24: [2,"\xf5\xa4\x8a","\x1a","Diamond Mine: Grundit (stationary)"],  # Can't randomize this guy
             25: [2,"\xb3\xb0\x8a","\x19","Diamond Mine: Eye Stalker (stone)"],
             26: [2,"\xd8\xb0\x8a","\x62","Diamond Mine: Eye Stalker (stone)"],
 

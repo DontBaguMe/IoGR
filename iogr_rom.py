@@ -55,7 +55,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     copyfile(rom_path,rom_path_new)
 
     f = open(rom_path_new,"r+b")
-    rom = f.read()
 
     ##########################################################################
     #                                Sandbox
@@ -158,7 +157,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     # Turn South Cape house into map tracker for Easy mode
     if mode == 0:
-        addr = rom.find("\x15\x41\x00\x08\x00", int("d8000",16) + offset)
+        f.seek(0)
+        rom = f.read()
+        addr = rom.find("\x15\x41\x00\x08\x00", int("d8000",16) + rom_offset)
         f.seek(addr)
         f.write("\x15\x40")
     ##########################################################################
@@ -1523,7 +1524,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xe0\x6b")
 
     ##########################################################################
-    #                       Assign Room/Boss Rewards
+    #                Prepare Room/Boss Rewards for Randomization
     ##########################################################################
     # Remove existing rewards
     f_roomrewards = open(folder + "01aade_roomrewards.bin","r+b")
@@ -1551,61 +1552,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #f.write("\x00\x01\x01\xDF\xA5\x8B\x00\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
     f.seek(int("ce536",16)+rom_offset)  # Mummy Queen (Babel)
     f.write("\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
-
-    # Collect map numbers for valid room-clearing rewards
-    maps_castoth = [12,13,14,15,18]                                                 # Underground
-    maps_castoth += [29,32,33,34,35,37,38,39,40]                                    # Inca
-    maps_viper = [61,62,63,64,65,69,70]                                             # Mine
-    maps_viper += [77,78,79,80,81,82,83,84]                                         # Sky Garden
-    maps_vampires = [95,96,97,98,100,101]                                           # Mu
-    maps_vampires += [109,110,111,112,113,114]                                      # Angel
-    maps_sandfanger = [130,131,132,133,134,135,136]                                 # Wall
-    maps_sandfanger += [160,161,162,163,164,165,166,167,168]                        # Kress
-    maps_babel = [176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]      # Ankor Wat
-    maps_mummyqueen = [204,205,206,207,208,209,210,211,212,213,214,215,216,217,219] # Pyramid
-
-    random.shuffle(maps_castoth)
-    random.shuffle(maps_viper)
-    random.shuffle(maps_vampires)
-    random.shuffle(maps_sandfanger)
-    random.shuffle(maps_babel)
-    random.shuffle(maps_mummyqueen)
-
-    boss_areas = [maps_castoth,maps_viper,maps_vampires,maps_sandfanger,maps_babel,maps_mummyqueen]
-    boss_rewards = 4 - mode
-
-    rewards = []              # Total rewards by mode (HP/STR/DEF)
-    if mode == 0:             # Easy: 10/7/7
-        rewards += [1] * 10
-        rewards += [2] * 7
-        rewards += [3] * 7
-    elif mode == 1:           # Normal: 10/4/4
-        rewards += [1] * 10
-        rewards += [2] * 4
-        rewards += [3] * 4
-    elif mode == 2:           # Hard: 8/2/2
-        rewards += [1] * 8
-        rewards += [2] * 2
-        rewards += [3] * 2
-    elif mode == 3:           # Extreme: 6/0/0
-        rewards += [1] * 6
-
-    random.shuffle(rewards)
-
-    # Add in rewards, where applicable, by difficulty
-    for area in boss_areas:
-        i = 0
-        while i < boss_rewards:
-            map_num = area[i]
-            reward = rewards.pop(0)
-            f.seek(int("1aade",16) + map_num + rom_offset)
-            if reward == 1:
-                f.write("\x01")
-            elif reward == 2:
-                f.write("\x02")
-            elif reward == 3:
-                f.write("\x03")
-            i += 1
 
     ##########################################################################
     #                        Balance Enemy Stats
@@ -2022,7 +1968,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write("\xe0")
 
             # Assign Kara painting spriteset to appropriate Map
-            addr = rom.find("\x15\x0c\x00\x49\x00", int("d8000",16) + offset)
+            f.seek(0)
+            rom = f.read()
+            addr = rom.find("\x15\x0c\x00\x49\x00", int("d8000",16) + rom_offset)
             f.seek(addr)
             f.write("\x15\x0a")
 
