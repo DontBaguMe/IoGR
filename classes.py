@@ -978,8 +978,8 @@ class World:
                     #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
 
     # Build world
-    def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",
-        statues=[1,2,3,4,5,6],kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
+    def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],
+        variant="None",firebird=False,kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
 
         self.seed = seed
         self.statues = statues
@@ -990,6 +990,8 @@ class World:
         self.incatile = incatile
         self.hieroglyphs = hieroglyphs
         self.mode = mode
+        self.variant = variant
+        self.firebird = firebird
         self.placement_log = []
         self.spoilers = []
         self.dark_space_sets = [[46,47],[58,60]]
