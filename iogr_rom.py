@@ -365,6 +365,27 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     if mode == 0:         # Easy mode = full HP
         f.write("\x28")
 
+    # Change item functionality for game variants
+    f.seek(int("3fce0",16)+rom_offset)
+    f.write(qt.encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.",True))
+    f.seek(int("3fd40",16)+rom_offset)
+    f.write(qt.encode("As the Jewel disappears, Will feels his strength draining!",True))
+    # In OHKO, the HP Jewels do nothing, and start @1HP
+    if variant == "OHKO":
+        f.seek(int("8068",16)+rom_offset)
+        f.write("\x01")
+        f.seek(int("39f71",16)+rom_offset)
+        f.write("\xe0\xfc\x02\xd5\x29\x60")
+    # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
+#    elif variant == "Red Jewel Madness":
+#        f.seek(int("8068",16)+rom_offset)
+#        f.write("\x28")
+#        f.seek(int("384d5",16)+rom_offset)
+#        f.write("\x4c\x30\xfd")
+#        f.seek(int("3fd30",16)+rom_offset)
+#        f.write("\x02\xbf\x40\xfd\xce\xca\x0a\xce\xce\x0a\x4c\xd9\x84")
+
+
     ##########################################################################
     #                  Update overworld map movement scripts
     #   Removes overworld animation and allows free travel within continents

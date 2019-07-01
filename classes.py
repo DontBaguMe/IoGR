@@ -423,7 +423,8 @@ class World:
             while i < boss_rewards:
                 map = area[i]
                 reward = rewards.pop(0)
-                self.maps[map][2] = reward
+                if self.variant != "OHKO" or reward > 1:  # No HP rewards for OHKO
+                    self.maps[map][2] = reward
                 i += 1
 
     # Place Mystic Statues in World
@@ -1834,7 +1835,7 @@ class World:
             18: [0,1,0,"\x13","02 03 06 01 A7 1E D6 06 02 7D 78 DC"],
         }
 
-        
+
         # Enemy map database
         # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, NextMap(hex), HeaderData]}
         # Search string: "\x15" + self.enemy_groups[x][2] + "\x00" + self.maps[y][1] + "\x00\x02"

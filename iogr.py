@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "2.0.0"
+VERSION = "1.3.0"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -55,10 +55,12 @@ def generate_ROM():
     else:
         logic_chr = logic_str[0]
 
-    if variant_str == "None":
+    if variant_str == "OHKO":
+        variant_chr = "_OHKO"
+    elif variant_str == "Red Jewel Madness":
+        variant_chr = "_RJM"
+    else:
         variant_chr = ""
-    elif variant_str == "OHKO":
-        variant_chr == "_OHKO"
 
     filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + variant_chr + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"
