@@ -384,7 +384,7 @@ class World:
     def get_maps(self):
         maps = [[],[],[],[],[],[],[]]
         for map in self.maps:
-            boss = self.maps[map][1]
+            boss = self.maps[map][2]
             maps[boss].append(map)
 
         maps.pop(0)
@@ -424,7 +424,7 @@ class World:
                 map = area[i]
                 reward = rewards.pop(0)
                 if self.variant != "OHKO" or reward > 1:  # No HP rewards for OHKO
-                    self.maps[map][2] = reward
+                    self.maps[map][3] = reward
                 i += 1
 
     # Place Mystic Statues in World
@@ -841,7 +841,7 @@ class World:
     def write_to_rom(self,f,rom_offset=0):
         # Room-clearing rewards
         for map in self.maps:
-            reward = self.maps[map][2]
+            reward = self.maps[map][3]
             if reward > 0:
                 f.seek(int("1aade",16) + map + rom_offset)
                 if reward == 1:
@@ -952,8 +952,8 @@ class World:
 
         # Make all spritesets equal to Underground Tunnel
         for map in self.maps:
-            set = self.maps[map][0]
-            header_search = "\x15" + self.enemysets[set][0] + "\x00" + self.maps[map][3] + "\x00\x02"
+            set = self.maps[map][1]
+            header_search = "\x15" + self.enemysets[set][0] + "\x00" + self.maps[map][4] + "\x00\x02"
             addr = rom.find(header_search, int("d8000",16) + rom_offset)
             if addr < 0:
                 print "ERROR: Couldn't find header for map ", map
@@ -1806,9 +1806,10 @@ class World:
         # Database of enemy groups and spritesets
         # FORMAT: { ID: [ROM_Loction, HeaderCode, HeaderData, Name]}
         self.enemysets = {
-            0: ["\x02","11 06 00 90 42 D4","Underground Tunnel"],
-            1: ["\x05","11 04 00 90 42 D4 03 00 10 10 BC 33 C2 01 04 00 60 A0 0C 77 DE 10 2A 0F 00 E6 08 D5","Inca Ruins (Mud Monster and Larva)"],
-            2: ["\x06","11 07 00 0F 67 D4 03 00 10 10 23 4D C2 01 04 00 60 A0 CC 77 DE 10 36 23 00 24 45 CC","Inca Ruins (Statues)"],
+            0: ["\x02","03 00 10 10 EC 59 CD 01 04 00 60 A0 8C 75 DE 10 D0 21 00 47 ED 9F","Underground Tunnel"],
+            0.5: ["\x03","03 00 10 10 6A E0 93 01 04 00 60 A0 3C 7F D8 10 63 14 00 1D 54 D3","Inca Ruins (???)"
+            1: ["\x05","03 00 10 10 BC 33 C2 01 04 00 60 A0 0C 77 DE 10 2A 0F 00 E6 08 D5","Inca Ruins (Mud Monster and Larva)"],
+            2: ["\x06","03 00 10 10 23 4D C2 01 04 00 60 A0 CC 77 DE 10 36 23 00 24 45 CC","Inca Ruins (Statues)"],
             3: ["\x0e","","Diamond Mine"],
             4: ["\x0d","","Sky Garden (top)"],
             5: ["\x0f","","Sky Garden (bottom)"],
@@ -1824,41 +1825,38 @@ class World:
         }
 
         # Mapset database
-        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, NextMap(hex), HeaderData]}
-        # Search string: "\x15" + self.enemy_groups[x][2] + "\x00" + self.maps[y][1] + "\x00\x02"
-        # ROM address for room reward table is mapID + $1aade
+        # FORMAT: { ID: HeaderData]}
         self.mapsets = {
-            12: [0,1,0,"\x0d","02 05 06 01 E8 17 DF"],
-            13: [0,1,0,"\x0e","02 03 06 01 94 7B D3 06 02 A3 7C DD"],
-            14: [0,1,0,"\x0f","02 03 06 01 20 5F DA 06 02 AC 0C DE"],
-            15: [0,1,0,"\x10","02 03 06 01 DE 17 DC 06 02 F4 70 DE"],
-            18: [0,1,0,"\x13","02 03 06 01 A7 1E D6 06 02 7D 78 DC"],
+            0: ["\x30","11 06 00 90 42 D4 03 00 10 00 09 DB 9D 00 03 00 10 10 77 48 CA 00 04 00 70 10 53 32 DE 05 00 20 00 01 00 00 D9 05 00 20 00 02 E6 68 DA"],                # Underground Tunnel
+            1: ["","11 07 00 0F 67 D4 03 00 20 00 BC A9 99 00 04 00 70 10 D3 35 DE 05 00 20 00 01 59 60 D9 05 00 20 00 02 BA 40 DD"], # Inca (outside)
+            2: ["","11 07 00 0F 67 D4 03 00 10 00 0A 19 C3 00 03 00 10 10 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 05 00 20 00 02 4A 3A D8"], # Inca (inside)
+            3: ["",""], # Diamond Mine
+            4: ["",""], #
         }
 
-
         # Enemy map database
-        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, NextMap(hex), HeaderData]}
+        # FORMAT: { ID: [MapSet, EnemySet, RewardBoss(0 for no reward), Reward, NextMap(hex), HeaderData]}
         # Search string: "\x15" + self.enemy_groups[x][2] + "\x00" + self.maps[y][1] + "\x00\x02"
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # Underground Tunnel
-            12: [0,1,0,"\x0d","02 05 06 01 E8 17 DF"],
-            13: [0,1,0,"\x0e","02 03 06 01 94 7B D3 06 02 A3 7C DD"],
-            14: [0,1,0,"\x0f","02 03 06 01 20 5F DA 06 02 AC 0C DE"],
-            15: [0,1,0,"\x10","02 03 06 01 DE 17 DC 06 02 F4 70 DE"],
-            18: [0,1,0,"\x13","02 03 06 01 A7 1E D6 06 02 7D 78 DC"],
+            12: [0,0,1,0,"\x0d","02 05 06 01 E8 17 DF"],
+            13: [0,0,1,0,"\x0e","02 03 06 01 94 7B D3 06 02 A3 7C DD"],
+            14: [0,0,1,0,"\x0f","02 03 06 01 20 5F DA 06 02 AC 0C DE"],
+            15: [0,0,1,0,"\x10","02 03 06 01 DE 17 DC 06 02 F4 70 DE"],
+            18: [0,0,1,0,"\x13","02 03 06 01 A7 1E D6 06 02 7D 78 DC"],
 
             # Inca Ruins
 #            27: [1,0,0,"\x1c",""],  # Moon Tribe cave
-            29: [1,1,0,"\x1e","02 0F 03 00 20 00 BC A9 99 00 04 00 70 10 D3 35 DE 05 00 20 00 01 59 60 D9 06 01 00 00 D4 05 00 20 00 02 BA 40 DD 06 02 EC 47 DC"],
-            32: [1,1,0,"\x21","02 08 06 01 10 1F DD 03 00 10 00 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 "],  # Broken statue
-            33: [2,1,0,"\x22","02 08 06 01 C2 23 D7 03 00 10 00 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 "],  # Floor switch
-            34: [2,1,0,"\x23","02 08 06 01 15 27 D8 03 00 10 00 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 "],  # Floor switch
-            35: [2,1,0,"\x24",""],
-            37: [1,1,0,"\x26",""],  # Diamond block
-            38: [1,1,0,"\x27",""],  # Broken statues
-            39: [1,1,0,"\x28",""],
-            40: [1,1,0,"\x29",""],  # Falling blocks
+            29: [1,1,1,0,"\x1e","02 0F 06 01 00 00 D4 06 02 EC 47 DC "],
+            32: [2,1,1,0,"\x21","02 08 06 01 10 1F DD "],  # Broken statue
+            33: [2,2,1,0,"\x22","02 08 06 01 C2 23 D7 "],  # Floor switch
+            34: [2,2,1,0,"\x23","02 08 06 01 15 27 D8 "],  # Floor switch
+            35: [2,2,1,0,"\x24","02 0A 06 01 7D 71 D9 06 02 C2 23 D7"],
+            37: [2,1,1,0,"\x26","02 08 06 01 2A 73 DC "],  # Diamond block
+            38: [2,1,1,0,"\x27","02 08 06 01 CB 56 DC"],  # Broken statues
+            39: [2,1,1,0,"\x28","02 0A 06 01 9A 67 DB 06 02 CB 56 DC "],
+            40: [2,1,1,0,"\x29","02 08 06 01 ED 21 DC "],  # Falling blocks
 
             # Diamond Mine
             61: [3,2,0,"\x3e"],
