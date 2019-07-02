@@ -27,7 +27,7 @@ FORCE_CHANGE = "\x22\x30\xfd\x88"
 
 # Generate new ROM and prepare it for randomization
 def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized",
-    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",variant="None",firebird=False):
+    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",firebird=False):
 
     # Initiate random seed
     random.seed(rng_seed)
@@ -81,7 +81,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("1da4c",16)+rom_offset)
     f.write("\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
-    hash_str = version + mode_str + goal + logic_mode + variant + statues_reqstr + str(firebird)
+    hash_str = version + mode_str + goal + logic_mode + statues_reqstr + str(firebird)
     h = hmac.new(str(rng_seed),hash_str)
     hash = h.digest()
 
@@ -360,27 +360,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("39f7a",16)+rom_offset)
     if mode == 0:         # Easy mode = full HP
         f.write("\x28")
-
-    # Change item functionality for game variants
-    f.seek(int("3fce0",16)+rom_offset)
-    f.write(qt.encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.",True))
-    f.seek(int("3fd40",16)+rom_offset)
-    f.write(qt.encode("As the Jewel disappears, Will feels his strength draining!",True))
-    # In OHKO, the HP Jewels do nothing, and start @1HP
-    if variant == "OHKO":
-        f.seek(int("8068",16)+rom_offset)
-        f.write("\x01")
-        f.seek(int("39f71",16)+rom_offset)
-        f.write("\xe0\xfc\x02\xd5\x29\x60")
-    # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
-#    elif variant == "Red Jewel Madness":
-#        f.seek(int("8068",16)+rom_offset)
-#        f.write("\x28")
-#        f.seek(int("384d5",16)+rom_offset)
-#        f.write("\x4c\x30\xfd")
-#        f.seek(int("3fd30",16)+rom_offset)
-#        f.write("\x02\xbf\x40\xfd\xce\xca\x0a\xce\xce\x0a\x4c\xd9\x84")
-
 
     ##########################################################################
     #                  Update overworld map movement scripts
@@ -1313,24 +1292,24 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x80\xfa")
     f.seek(int("bfa80",16)+rom_offset)
     f.write("\xD3\xD2\x00\xD5\x00" + qt.encode("Contributors and Testers:") + "\xCB")
-    f.write(qt.encode("-Alchemic    -Austin21300") + "\xCB")
-    f.write(qt.encode("-Apokalysme  -Bonzaibier") + "\xCB")
-    f.write(qt.encode("-Atlas       -BOWIEtheHERO") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Alchemic    -Bonzaibier") + "\xCB")
+    f.write(qt.encode("-Atlas       -BOWIEtheHERO") + "\xCB")
+    f.write(qt.encode("-Austin21300 -Crazyhaze") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Crazyhaze   -Lassic") + "\xCB")
     f.write(qt.encode("-djtifaheart -Le Hulk") + "\xCB")
     f.write(qt.encode("-Eppy37      -manafreak") + "\xCB")
-    f.write(qt.encode("-Keypaladin  -Mr Freet") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Keypaladin  -Mr Freet") + "\xCB")
+    f.write(qt.encode("-Lassic      -PozzumSenpai") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Plan        -PozzumSenpai") + "\xCB")
-    f.write(qt.encode("-Raeven0     -SDiezal") + "\xCB")
-    f.write(qt.encode("-roeya       -Skarsnik") + "\xCB")
-    f.write(qt.encode("-Scheris     -Skipsy") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Plan        -SDiezal") + "\xCB")
+    f.write(qt.encode("-Raeven0     -Skarsnik") + "\xCB")
+    f.write(qt.encode("-roeya       -Skipsy") + "\xCB")
+    f.write(qt.encode("-Scheris     -solarcell007") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-SmashManiac -solarcell007") + "\xCB")
-    f.write(qt.encode("-steve hacks -Veetorp") + "\xCB")
-    f.write(qt.encode("-Sye990      -Verallix") + "\xCB")
-    f.write(qt.encode("-Tymekeeper  -Volor") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-SmashManiac -Veetorp") + "\xCB")
+    f.write(qt.encode("-steve hacks -Verallix") + "\xCB")
+    f.write(qt.encode("-Sye990      -Volor") + "\xCB")
+    f.write(qt.encode("-Tymekeeper") + "\xC9\xB4\xCE")
 
     f.write(qt.encode("-Voranthe    -Xyrcord") + "\xCB")
     f.write(qt.encode("-Wilddin     -Z4t0x") + "\xCB")
@@ -1541,7 +1520,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xe0\x6b")
 
     ##########################################################################
-    #                Prepare Room/Boss Rewards for Randomization
+    #                       Assign Room/Boss Rewards
     ##########################################################################
     # Remove existing rewards
     f_roomrewards = open(folder + "01aade_roomrewards.bin","r+b")
@@ -1569,6 +1548,61 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #f.write("\x00\x01\x01\xDF\xA5\x8B\x00\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
     f.seek(int("ce536",16)+rom_offset)  # Mummy Queen (Babel)
     f.write("\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
+
+    # Collect map numbers for valid room-clearing rewards
+    maps_castoth = [12,13,14,15,18]                                                 # Underground
+    maps_castoth += [29,32,33,34,35,37,38,39,40]                                    # Inca
+    maps_viper = [61,62,63,64,65,69,70]                                             # Mine
+    maps_viper += [77,78,79,80,81,82,83,84]                                         # Sky Garden
+    maps_vampires = [95,96,97,98,100,101]                                           # Mu
+    maps_vampires += [109,110,111,112,113,114]                                      # Angel
+    maps_sandfanger = [130,131,132,133,134,135,136]                                 # Wall
+    maps_sandfanger += [160,161,162,163,164,165,166,167,168]                        # Kress
+    maps_babel = [176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]      # Ankor Wat
+    maps_mummyqueen = [204,205,206,207,208,209,210,211,212,213,214,215,216,217,219] # Pyramid
+
+    random.shuffle(maps_castoth)
+    random.shuffle(maps_viper)
+    random.shuffle(maps_vampires)
+    random.shuffle(maps_sandfanger)
+    random.shuffle(maps_babel)
+    random.shuffle(maps_mummyqueen)
+
+    boss_areas = [maps_castoth,maps_viper,maps_vampires,maps_sandfanger,maps_babel,maps_mummyqueen]
+    boss_rewards = 4 - mode
+
+    rewards = []              # Total rewards by mode (HP/STR/DEF)
+    if mode == 0:             # Easy: 10/7/7
+        rewards += [1] * 10
+        rewards += [2] * 7
+        rewards += [3] * 7
+    elif mode == 1:           # Normal: 10/4/4
+        rewards += [1] * 10
+        rewards += [2] * 4
+        rewards += [3] * 4
+    elif mode == 2:           # Hard: 8/2/2
+        rewards += [1] * 8
+        rewards += [2] * 2
+        rewards += [3] * 2
+    elif mode == 3:           # Extreme: 6/0/0
+        rewards += [1] * 6
+
+    random.shuffle(rewards)
+
+    # Add in rewards, where applicable, by difficulty
+    for area in boss_areas:
+        i = 0
+        while i < boss_rewards:
+            map_num = area[i]
+            reward = rewards.pop(0)
+            f.seek(int("1aade",16) + map_num + rom_offset)
+            if reward == 1:
+                f.write("\x01")
+            elif reward == 2:
+                f.write("\x02")
+            elif reward == 3:
+                f.write("\x03")
+            i += 1
 
     ##########################################################################
     #                        Balance Enemy Stats
@@ -2136,7 +2170,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         if seed_adj > 10:
             print "ERROR: Max number of seed adjustments exceeded"
             return False
-        w=classes.World(rng_seed,mode,goal,logic_mode,statues,variant,firebird,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
+        w=classes.World(rng_seed,mode,goal,logic_mode,statues,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
         done = w.randomize(seed_adj)
         seed_adj += 1
 
