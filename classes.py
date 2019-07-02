@@ -380,6 +380,53 @@ class World:
         #print probabilities
         return probabilities
 
+    # Returns a list of map lists, by boss
+    def get_maps(self):
+        maps = [[],[],[],[],[],[],[]]
+        for map in self.maps:
+            boss = self.maps[map][2]
+            maps[boss].append(map)
+
+        maps.pop(0)
+        return maps
+
+    # Randomize map-clearing rewards
+    def map_rewards(self):
+        maps = self.get_maps()
+
+        for area in maps:
+            random.shuffle(area)
+
+        boss_rewards = 4 - self.mode
+
+        rewards = []              # Total rewards by mode (HP/STR/DEF)
+        if self.mode == 0:             # Easy: 10/7/7
+            rewards += [1] * 10
+            rewards += [2] * 7
+            rewards += [3] * 7
+        elif self.mode == 1:           # Normal: 10/4/4
+            rewards += [1] * 10
+            rewards += [2] * 4
+            rewards += [3] * 4
+        elif self.mode == 2:           # Hard: 8/2/2
+            rewards += [1] * 8
+            rewards += [2] * 2
+            rewards += [3] * 2
+        elif self.mode == 3:           # Extreme: 6/0/0
+            rewards += [1] * 6
+
+        random.shuffle(rewards)
+
+        # Add in rewards, where applicable, by difficulty
+        for area in maps:
+            i = 0
+            while i < boss_rewards:
+                map = area[i]
+                reward = rewards.pop(0)
+                if self.variant != "OHKO" or reward > 1:  # No HP rewards for OHKO
+                    self.maps[map][3] = reward
+                i += 1
+
     # Place Mystic Statues in World
     def fill_statues(self,locations=[148,149,150,151,152,153]):
         return self.random_fill([54,55,56,57,58,59],locations)
@@ -548,6 +595,9 @@ class World:
         solved = False
 
         random.seed(self.seed + seed_adj)
+
+        # Assign map rewards
+        self.map_rewards()
 
         # Initialize and shuffle location list
         item_locations = self.list_item_locations()
@@ -789,6 +839,19 @@ class World:
 
     # Modifies game ROM to reflect the current state of the World
     def write_to_rom(self,f,rom_offset=0):
+        # Room-clearing rewards
+        for map in self.maps:
+            reward = self.maps[map][3]
+            if reward > 0:
+                f.seek(int("1aade",16) + map + rom_offset)
+                if reward == 1:
+                    f.write("\x01")
+                elif reward == 2:
+                    f.write("\x02")
+                elif reward == 3:
+                    f.write("\x03")
+
+        # Items and abilities
         for x in self.item_locations:
             type = self.item_locations[x][1]
 
@@ -808,7 +871,6 @@ class World:
                 if item_code:
                     f.seek(int(item_addr,16)+rom_offset)
                     f.write(item_code)
-
 
                 # Write item text, if appropriate
                 if text1_addr:
@@ -908,8 +970,8 @@ class World:
                     #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
 
     # Build world
-    def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",
-        statues=[1,2,3,4,5,6],kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
+    def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],
+        variant="None",firebird=False,kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
 
         self.seed = seed
         self.statues = statues
@@ -920,6 +982,8 @@ class World:
         self.incatile = incatile
         self.hieroglyphs = hieroglyphs
         self.mode = mode
+        self.variant = variant
+        self.firebird = firebird
         self.placement_log = []
         self.spoilers = []
         self.dark_space_sets = [[46,47],[58,60]]
