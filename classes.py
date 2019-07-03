@@ -384,7 +384,7 @@ class World:
     def get_maps(self):
         maps = [[],[],[],[],[],[],[]]
         for map in self.maps:
-            boss = self.maps[map][2]
+            boss = self.maps[map][1]
             maps[boss].append(map)
 
         maps.pop(0)
@@ -424,7 +424,7 @@ class World:
                 map = area[i]
                 reward = rewards.pop(0)
                 if self.variant != "OHKO" or reward > 1:  # No HP rewards for OHKO
-                    self.maps[map][3] = reward
+                    self.maps[map][2] = reward
                 i += 1
 
     # Place Mystic Statues in World
@@ -841,7 +841,7 @@ class World:
     def write_to_rom(self,f,rom_offset=0):
         # Room-clearing rewards
         for map in self.maps:
-            reward = self.maps[map][3]
+            reward = self.maps[map][2]
             if reward > 0:
                 f.seek(int("1aade",16) + map + rom_offset)
                 if reward == 1:
@@ -952,9 +952,9 @@ class World:
 
         # Make all spritesets equal to Underground Tunnel
         for map in self.maps:
-            set = self.maps[map][1]
-            header_search = "\x15" + self.enemysets[set][0] + "\x00" + self.maps[map][4] + "\x00\x02"
-            addr = rom.find(header_search, int("d8000",16) + rom_offset)
+            set = self.maps[map][0]
+            #header_search = "\x15" + self.enemysets[set][0] + "\x00" + self.maps[map][4] + "\x00\x02"
+            addr = rom.find(self.maps[map][3], int("d8000",16) + rom_offset)
             if addr < 0:
                 print "ERROR: Couldn't find header for map ", map
             else:
@@ -1807,7 +1807,6 @@ class World:
         # FORMAT: { ID: [ROM_Loction, HeaderCode, HeaderData, Name]}
         self.enemysets = {
             0: ["\x02","03 00 10 10 EC 59 CD 01 04 00 60 A0 8C 75 DE 10 D0 21 00 47 ED 9F","Underground Tunnel"],
-            0.5: ["\x03","03 00 10 10 6A E0 93 01 04 00 60 A0 3C 7F D8 10 63 14 00 1D 54 D3","Inca Ruins (???)"],
             1: ["\x05","03 00 10 10 BC 33 C2 01 04 00 60 A0 0C 77 DE 10 2A 0F 00 E6 08 D5","Inca Ruins (Mud Monster and Larva)"],
             2: ["\x06","03 00 10 10 23 4D C2 01 04 00 60 A0 CC 77 DE 10 36 23 00 24 45 CC","Inca Ruins (Statues)"],
             3: ["\x0e","","Diamond Mine"],
@@ -1835,119 +1834,118 @@ class World:
         }
 
         # Enemy map database
-        # FORMAT: { ID: [MapSet, EnemySet, RewardBoss(0 for no reward), Reward, NextMap(hex), HeaderData]}
-        # Search string: "\x15" + self.enemy_groups[x][2] + "\x00" + self.maps[y][1] + "\x00\x02"
+        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, SearchHeader, SpritesetOffset,RestrictedEnemysets]}
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # Underground Tunnel
-            12: [0,0,1,0,"\x0d","02 05 06 01 E8 17 DF"],
-            13: [0,0,1,0,"\x0e","02 03 06 01 94 7B D3 06 02 A3 7C DD"],
-            14: [0,0,1,0,"\x0f","02 03 06 01 20 5F DA 06 02 AC 0C DE"],
-            15: [0,0,1,0,"\x10","02 03 06 01 DE 17 DC 06 02 F4 70 DE"],
-            18: [0,0,1,0,"\x13","02 03 06 01 A7 1E D6 06 02 7D 78 DC"],
+            12: [0,1,0,"\x0C\x00\x02\x05\x06",9,[]],
+            13: [0,1,0,"\x0D\x00\x02\x03\x06",14,[]],
+            14: [0,1,0,"\x0E\x00\x02\x03\x06",14,[]],  # Statues, spike balls
+            15: [0,1,0,"\x0F\x00\x02\x03\x06",14,[]],
+            18: [0,1,0,"\x12\x00\x02\x03\x06",14,[]],  # Spike balls
 
             # Inca Ruins
 #            27: [1,0,0,"\x1c",""],  # Moon Tribe cave
-            29: [1,1,1,0,"\x1e","02 0F 06 01 00 00 D4 06 02 EC 47 DC "],
-            32: [2,1,1,0,"\x21","02 08 06 01 10 1F DD "],  # Broken statue
-            33: [2,2,1,0,"\x22","02 08 06 01 C2 23 D7 "],  # Floor switch
-            34: [2,2,1,0,"\x23","02 08 06 01 15 27 D8 "],  # Floor switch
-            35: [2,2,1,0,"\x24","02 0A 06 01 7D 71 D9 06 02 C2 23 D7"],
-            37: [2,1,1,0,"\x26","02 08 06 01 2A 73 DC "],  # Diamond block
-            38: [2,1,1,0,"\x27","02 08 06 01 CB 56 DC"],  # Broken statues
-            39: [2,1,1,0,"\x28","02 0A 06 01 9A 67 DB 06 02 CB 56 DC "],
-            40: [2,1,1,0,"\x29","02 08 06 01 ED 21 DC "],  # Falling blocks
+            29: [1,1,0,"\x1D\x00\x02\x0F\x03",22],
+            32: [1,1,0,"\x20\x00\x02\x08\x06",9],  # Broken statue
+            33: [2,1,0,"\x21\x00\x02\x08\x06",9],  # Floor switch
+            34: [2,1,0,"\x22\x00\x02\x08\x06",9],  # Floor switch
+            35: [2,1,0,"\x23\x00\x02\x0A\x06",14],
+            37: [1,1,0,"\x25\x00\x02\x08\x06\x01\x2A\x73\xDC",9],  # Diamond block
+            38: [1,1,0,"\x26\x00\x02\x08\x06\x01\xCB\x56\xDC",9],  # Broken statues
+            39: [1,1,0,"\x27\x00\x02\x0A\x06\x01\x9A\x67\xDB",14],
+            40: [1,1,0,"\x28\x00\x02\x08\x06\x01\xED\x21\xDC",9],  # Falling blocks
 
             # Diamond Mine
-            61: [0,3,2,0,"\x3e"],
-            62: [0,3,2,0,"\x3f"],
-            63: [0,3,2,0,"\x40"],
-            64: [0,3,2,0,"\x41"],  # Trapped laborer (??)
-            65: [0,3,2,0,"\x42"],  # Stationary Grundit
-            69: [0,3,2,0,"\x46"],  # Stationary Grundit
-            70: [0,3,2,0,"\x47"],  # Stationary Grundit
+            61: [3,2,0,"\x3e"],
+            62: [3,2,0,"\x3f"],
+            63: [3,2,0,"\x40"],
+            64: [3,2,0,"\x41"],  # Trapped laborer (??)
+            65: [3,2,0,"\x42"],  # Stationary Grundit
+            69: [3,2,0,"\x46"],  # Stationary Grundit
+            70: [3,2,0,"\x47"],  # Stationary Grundit
 
             # Sky Garden
-            77: [0,4,2,0,"\x4e"],
-            78: [0,5,2,0,"\x4f"],
-            79: [0,4,2,0,"\x50"],
-            80: [0,5,2,0,"\x51"],
-            81: [0,4,2,0,"\x52"],
-            82: [0,5,2,0,"\x53"],
-            83: [0,4,2,0,"\x54"],
-            84: [0,5,2,0,"\x55"],
+            77: [4,2,0,"\x4e"],
+            78: [5,2,0,"\x4f"],
+            79: [4,2,0,"\x50"],
+            80: [5,2,0,"\x51"],
+            81: [4,2,0,"\x52"],
+            82: [5,2,0,"\x53"],
+            83: [4,2,0,"\x54"],
+            84: [5,2,0,"\x55"],
 
             # Mu
 #            92: [0,4,0,"\x5d"],  # Seaside Palace
-            95: [0,6,3,0,"\x60"],
-            96: [0,6,3,0,"\x61"],
-            97: [0,6,3,0,"\x62"],
-            98: [0,6,3,0,"\x63"],
-            100: [0,6,3,0,"\x65"],
-            101: [0,6,3,0,"\x66"],
+            95: [6,3,0,"\x60"],
+            96: [6,3,0,"\x61"],
+            97: [6,3,0,"\x62"],
+            98: [6,3,0,"\x63"],
+            100: [6,3,0,"\x65"],
+            101: [6,3,0,"\x66"],
 
             # Angel Dungeon
-            109: [0,7,3,0,"\x6e"],
-            110: [0,7,3,0,"\x6f"],
-            111: [0,7,3,0,"\x70"],
-            112: [0,7,3,0,"\x71"],
-            113: [0,7,3,0,"\x72"],
-            114: [0,7,3,0,"\x73"],
+            109: [7,3,0,"\x6e"],
+            110: [7,3,0,"\x6f"],
+            111: [7,3,0,"\x70"],
+            112: [7,3,0,"\x71"],
+            113: [7,3,0,"\x72"],
+            114: [7,3,0,"\x73"],
 
             # Great Wall
-            130: [0,8,4,0,"\x83"],
-            131: [0,8,4,0,"\x85"],
-            133: [0,8,4,0,"\x86"],
-            134: [0,8,4,0,"\x87"],
-            135: [0,8,4,0,"\x88"],
-            136: [0,8,4,0,"\x8a"],  # We removed "future city" map \x89
+            130: [8,4,0,"\x83"],
+            131: [8,4,0,"\x85"],
+            133: [8,4,0,"\x86"],
+            134: [8,4,0,"\x87"],
+            135: [8,4,0,"\x88"],
+            136: [8,4,0,"\x8a"],  # We removed "future city" map \x89
 
             # Mt Temple
-            160: [0,9,4,0,"\xa1"],
-            161: [0,9,4,0,"\xa2"],
-            162: [0,9,4,0,"\xa3"],
-            163: [0,9,4,0,"\xa4"],
-            164: [0,9,4,0,"\xa5"],
-            165: [0,9,4,0,"\xa6"],
-            166: [0,9,4,0,"\xa7"],
-            167: [0,9,4,0,"\xa8"],
-            168: [0,9,4,0,"\xa9"],
+            160: [9,4,0,"\xa1"],
+            161: [9,4,0,"\xa2"],
+            162: [9,4,0,"\xa3"],
+            163: [9,4,0,"\xa4"],
+            164: [9,4,0,"\xa5"],
+            165: [9,4,0,"\xa6"],
+            166: [9,4,0,"\xa7"],
+            167: [9,4,0,"\xa8"],
+            168: [9,4,0,"\xa9"],
 
             # Ankor Wat
-            176: [0,10,6,0,"\xb1"],
-            177: [0,11,6,0,"\xb2"],
-            178: [0,11,6,0,"\xb3"],
-            179: [0,11,6,0,"\xb4"],
-            180: [0,11,6,0,"\xb5"],
-            181: [0,11,6,0,"\xb6"],
-            182: [0,10,6,0,"\xb7"],
-            183: [0,11,6,0,"\xb8"],  # Earthquaker Golem
-            184: [0,11,6,0,"\xb9"],
-            185: [0,11,6,0,"\xba"],
-            186: [0,10,6,0,"\xbb"],
-            187: [0,11,6,0,"\xbc"],
-            188: [0,11,6,0,"\xbd"],
-            189: [0,11,6,0,"\xbe"],
-            190: [0,11,6,0,"\xbf"],
+            176: [10,6,0,"\xb1"],
+            177: [11,6,0,"\xb2"],
+            178: [11,6,0,"\xb3"],
+            179: [11,6,0,"\xb4"],
+            180: [11,6,0,"\xb5"],
+            181: [11,6,0,"\xb6"],
+            182: [10,6,0,"\xb7"],
+            183: [11,6,0,"\xb8"],  # Earthquaker Golem
+            184: [11,6,0,"\xb9"],
+            185: [11,6,0,"\xba"],
+            186: [10,6,0,"\xbb"],
+            187: [11,6,0,"\xbc"],
+            188: [11,6,0,"\xbd"],
+            189: [11,6,0,"\xbe"],
+            190: [11,6,0,"\xbf"],
 
             # Pyramid
-            204: [0,12,5,0,"\xcd"],
-            206: [0,12,5,0,"\xcf"],
-            207: [0,12,5,0,"\xd0"],
-            208: [0,12,5,0,"\xd1"],
-            209: [0,12,5,0,"\xd2"],
-            210: [0,12,5,0,"\xd3"],
-            211: [0,12,5,0,"\xd4"],
-            212: [0,12,5,0,"\xd5"],
-            213: [0,12,5,0,"\xd6"],
-            214: [0,12,5,0,"\xd7"],
-            215: [0,12,5,0,"\xd8"],
-            216: [0,12,5,0,"\xd9"],
-            217: [0,12,5,0,"\xda"],
-            219: [0,12,5,0,"\xdd"], # We cut parachute cutscene \xdc
+            204: [12,5,0,"\xcd"],
+            206: [12,5,0,"\xcf"],
+            207: [12,5,0,"\xd0"],
+            208: [12,5,0,"\xd1"],
+            209: [12,5,0,"\xd2"],
+            210: [12,5,0,"\xd3"],
+            211: [12,5,0,"\xd4"],
+            212: [12,5,0,"\xd5"],
+            213: [12,5,0,"\xd6"],
+            214: [12,5,0,"\xd7"],
+            215: [12,5,0,"\xd8"],
+            216: [12,5,0,"\xd9"],
+            217: [12,5,0,"\xda"],
+            219: [12,5,0,"\xdd"], # We cut parachute cutscene \xdc
 
             # Jeweler's Mansion
-            233: [0,13,0,0,"\xea"]
+            233: [13,0,0,"\xea"]
 
         }
 
