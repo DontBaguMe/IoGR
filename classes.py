@@ -393,6 +393,7 @@ class World:
     # Randomize map-clearing rewards
     def map_rewards(self):
         maps = self.get_maps()
+        #print maps
 
         for area in maps:
             random.shuffle(area)
@@ -953,13 +954,13 @@ class World:
         # Make all spritesets equal to Underground Tunnel
         for map in self.maps:
             set = self.maps[map][0]
-            #header_search = "\x15" + self.enemysets[set][0] + "\x00" + self.maps[map][4] + "\x00\x02"
-            addr = rom.find(self.maps[map][3], int("d8000",16) + rom_offset)
-            if addr < 0:
-                print "ERROR: Couldn't find header for map ", map
-            else:
-                f.seek(addr)
-                f.write("\x15" + self.enemysets[0][0])
+            if self.maps[map][3]:
+                addr = rom.find(self.maps[map][3], int("d8000",16) + rom_offset)
+                if addr < 0:
+                    print "ERROR: Couldn't find header for map ", map
+                else:
+                    f.seek(addr+self.maps[map][4])
+                    f.write(self.enemysets[0][1])
 
         # Turn all enemies into bats
         f.seek(0)
@@ -1806,9 +1807,9 @@ class World:
         # Database of enemy groups and spritesets
         # FORMAT: { ID: [ROM_Loction, HeaderCode, HeaderData, Name]}
         self.enemysets = {
-            0: ["\x02","03 00 10 10 EC 59 CD 01 04 00 60 A0 8C 75 DE 10 D0 21 00 47 ED 9F","Underground Tunnel"],
-            1: ["\x05","03 00 10 10 BC 33 C2 01 04 00 60 A0 0C 77 DE 10 2A 0F 00 E6 08 D5","Inca Ruins (Mud Monster and Larva)"],
-            2: ["\x06","03 00 10 10 23 4D C2 01 04 00 60 A0 CC 77 DE 10 36 23 00 24 45 CC","Inca Ruins (Statues)"],
+            0: ["\x02","\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Underground Tunnel"],
+            1: ["\x05","\x03\x00\x10\x10\xBC\x33\xC2\x01\x04\x00\x60\xA0\x0C\x77\xDE\x10\x2A\x0F\x00\xE6\x08\xD5","Inca Ruins (Mud Monster and Larva)"],
+            2: ["\x06","\x03\x00\x10\x10\x23\x4D\xC2\x01\x04\x00\x60\xA0\xCC\x77\xDE\x10\x36\x23\x00\x24\x45\xCC","Inca Ruins (Statues)"],
             3: ["\x0e","","Diamond Mine"],
             4: ["\x0d","","Sky Garden (top)"],
             5: ["\x0f","","Sky Garden (bottom)"],
