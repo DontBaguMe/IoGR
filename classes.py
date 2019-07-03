@@ -1862,8 +1862,8 @@ class World:
             63: [3,2,0,"\x40"],
             64: [3,2,0,"\x41"],  # Trapped laborer (??)
             65: [3,2,0,"\x42"],  # Stationary Grundit
-            69: [3,2,0,"\x46"],  # Stationary Grundit
-            70: [3,2,0,"\x47"],  # Stationary Grundit
+            69: [3,2,0,"\x46"],
+            70: [3,2,0,"\x47"],
 
             # Sky Garden
             77: [4,2,0,"\x4e"],
