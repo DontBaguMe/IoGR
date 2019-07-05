@@ -943,7 +943,7 @@ class World:
                 f.write(self.spoilers[i])
                 i += 1
 
-        #self.enemize(f,rom_offset)
+        self.enemize(f,rom_offset)
         #print "ROM successfully created"
 
     # Shuffle enemies in ROM
@@ -956,7 +956,7 @@ class World:
             set = self.maps[map][0]
             if self.maps[map][3]:
                 addr = rom.find(self.maps[map][3], int("d8000",16) + rom_offset)
-                if addr < 0:
+                if addr < 0 or addr > int("daffe",16)+rom_offset:
                     print "ERROR: Couldn't find header for map ", map
                 else:
                     f.seek(addr+self.maps[map][4])
@@ -1894,59 +1894,59 @@ class World:
             114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,False],
 
             # Great Wall
-            130: [8,4,0,"",0,False],
-            131: [8,4,0,"",0,False],
-            133: [8,4,0,"",0,False],
-            134: [8,4,0,"",0,False],
-            135: [8,4,0,"",0,False],
-            136: [8,4,0,"",0,False],
+            130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
+            131: [8,4,0,"\x83\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
+            133: [8,4,0,"\x85\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
+            134: [8,4,0,"\x86\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
+            135: [8,4,0,"\x87\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
+            136: [8,4,0,"\x88\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
 
             # Mt Temple
-            160: [9,4,0,"",0,False],
-            161: [9,4,0,"",0,False],
-            162: [9,4,0,"",0,False],
-            163: [9,4,0,"",0,False],
-            164: [9,4,0,"",0,False],
-            165: [9,4,0,"",0,False],
-            166: [9,4,0,"",0,False],
-            167: [9,4,0,"",0,False],
-            168: [9,4,0,"",0,False],
+            160: [9,4,0,"\xA0\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            161: [9,4,0,"\xA1\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            162: [9,4,0,"\xA2\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            163: [9,4,0,"\xA3\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            164: [9,4,0,"\xA4\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            165: [9,4,0,"\xA5\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            166: [9,4,0,"\xA6\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            167: [9,4,0,"\xA7\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            168: [9,4,0,"\xA8\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
 
             # Ankor Wat
-            176: [10,6,0,"",0,False],
-            177: [11,6,0,"",0,False],
-            178: [11,6,0,"",0,False],
-            179: [11,6,0,"",0,False],
-            180: [11,6,0,"",0,False],
-            181: [11,6,0,"",0,False],
-            182: [10,6,0,"",0,False],
-            183: [11,6,0,"",0,False],  # Earthquaker Golem
-            184: [11,6,0,"",0,False],
-            185: [11,6,0,"",0,False],
-            186: [10,6,0,"",0,False],
-            187: [11,6,0,"",0,False],
-            188: [11,6,0,"",0,False],
-            189: [11,6,0,"",0,False],
-            190: [11,6,0,"",0,False],
+            176: [10,6,0,"\xB0\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,False],
+            177: [11,6,0,"\xB1\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            178: [11,6,0,"\xB2\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            179: [11,6,0,"\xB3\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            180: [11,6,0,"\xB4\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            181: [11,6,0,"\xB5\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            182: [10,6,0,"\xB6\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,False],
+            183: [11,6,0,"\xB7\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],  # Earthquaker Golem
+            184: [11,6,0,"\xB8\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            185: [11,6,0,"\xB9\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            186: [10,6,0,"\xBA\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,False],
+            187: [11,6,0,"\xBB\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            188: [11,6,0,"\xBC\x00\x02\x24\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            189: [11,6,0,"\xBD\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            190: [11,6,0,"\xBE\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
 
             # Pyramid
-            204: [12,5,0,"",0,False],
-            206: [12,5,0,"",0,False],
-            207: [12,5,0,"",0,False],
-            208: [12,5,0,"",0,False],
-            209: [12,5,0,"",0,False],
-            210: [12,5,0,"",0,False],
-            211: [12,5,0,"",0,False],
-            212: [12,5,0,"",0,False],
-            213: [12,5,0,"",0,False],
-            214: [12,5,0,"",0,False],
-            215: [12,5,0,"",0,False],
-            216: [12,5,0,"",0,False],
-            217: [12,5,0,"",0,False],
-            219: [12,5,0,"",0,False], # We cut parachute cutscene \xdc
+            204: [12,5,0,"\xCC\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            206: [12,5,0,"\xCE\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            207: [12,5,0,"\xCF\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            208: [12,5,0,"\xD0\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            209: [12,5,0,"\xD1\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            210: [12,5,0,"\xD2\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            211: [12,5,0,"\xD3\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            212: [12,5,0,"\xD4\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            213: [12,5,0,"\xD5\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            214: [12,5,0,"\xD6\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            215: [12,5,0,"\xD7\x00\x02\x28\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            216: [12,5,0,"\xD8\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            217: [12,5,0,"\xD9\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            219: [12,5,0,"\xDB\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
 
             # Jeweler's Mansion
-            233: [13,0,0,"",0,False]
+            233: [13,0,0,"\xE9\x00\x02\x22\x11\x06\x00\x90\x42\xD4",51,False]
 
         }
 
@@ -2035,8 +2035,11 @@ class World:
             96: [9,"\xbb\xbf\x8b","\x43","Ankor Wat: Frenzie"],
             97: [9,"\xd0\xbf\x8b","\x43","Ankor Wat: Frenzie 2"],
             98: [9,"\x66\xbb\x8b","\x44","Ankor Wat: Wall Walker"],
-            99: [9,"\x5c\xbb\x8b","\x44","Ankor Wat: Wall Walker 2"],
-            100: [9,"\x4f\xaf\x8b","\x4a","Ankor Wat: Zip Fly"],
+            99: [9,"\x66\xbb\x8b","\x3a","Ankor Wat: Wall Walker 2"],
+            100: [9,"\x5c\xbb\x8b","\x44","Ankor Wat: Wall Walker 3"],
+            101: [9,"\x5c\xbb\x8b","\x3a","Ankor Wat: Wall Walker 4"],
+            102: [9,"\x4f\xaf\x8b","\x4a","Ankor Wat: Zip Fly"],
+            103: [9,"\xaf\x99\x88","\x45","Ankor Wat: Gorgon (block)"],
 
             110: [10,"\x5f\xc6\x8b","\x4f","Pyramid: Mystic Ball (stationary)"],
             111: [10,"\xfc\xc5\x8b","\x4f","Pyramid: Mystic Ball"],
