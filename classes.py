@@ -954,33 +954,79 @@ class World:
         test_enemy = 41
         test_set = self.enemies[test_enemy][0]
 
+        # Get list of enemysets
+        enemysets = []
+        for set in self.enemysets:
+            enemysets.append(set)
+
+        f.seek(0)
+        rom = f.read()
+
         # Make all spritesets equal to Underground Tunnel
         for map in self.maps:
-            set = self.maps[map][0]
+            # Determine new eneset for map
+            if not self.maps[map][5]:
+                sets = enemysets[:]
+            else:
+                sets = self.maps[map][5][:]
+
+            random.shuffle(sets)
+            newset = sets[0]
+            #set = self.maps[map][0]
+
+            # Gather enemies from new set
+            enemies = []
+            for enemy in self.enemies:
+                if self.enemies[enemy][0] == newset and self.enemies[enemy][5]:
+                    enemies.append(enemy)
+
+            # Update map header to reflect new enemyset
             if self.maps[map][3]:
                 addr = rom.find(self.maps[map][3], int("d8000",16) + rom_offset)
                 if addr < 0 or addr > int("daffe",16)+rom_offset:
                     print "ERROR: Couldn't find header for map ", map
                 else:
                     f.seek(addr + self.maps[map][4])
-                    f.write(self.enemysets[test_set][0])
+                    f.write(self.enemysets[newset][0])
 
-        # Turn all enemies into bats
-        f.seek(0)
-        rom = f.read()
-        for enemy in self.enemies:
-            #print self.enemies[enemy][3]
-            done = False
-            addr = int("c8200",16) + rom_offset
-            while not done:
-                addr = rom.find(self.enemies[enemy][1] + self.enemies[enemy][2],addr+1)
-                if addr < 0 or addr > int("ce5e4",16)+rom_offset:
-                    done = True
-                else:
-                    f.seek(addr)
-                    #print addr
-                    f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # Bat
-                    #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
+            # Gather map event address range data from ROM
+            f.seek(int("c8000",16) + 2*map + rom_offset)
+            byte_low = f.read(1)
+            byte_high = f.read(1)
+            nextbyte_low = f.read(1)
+            nextbyte_high = f.read(1)
+            addr_start = "c" + binascii.hexlify(byte_high) + binascii.hexlify(byte_low)
+            addr_end = "c" + binascii.hexlify(nextbyte_high) + binascii.hexlify(nextbyte_low)
+            #print map, addr_start, addr_end
+
+            # Randomize each enemy in map
+            for enemy in self.enemies:
+                #print self.enemies[enemy][3]
+                done = False
+                addr = int(addr_start,16) + rom_offset
+                while not done:
+                    addr = rom.find(self.enemies[enemy][1] + self.enemies[enemy][2],addr+1)
+                    if addr < 0 or addr > int(addr_end,16)+rom_offset:
+                        done = True
+                    else:
+                        # Pick an enemy from new set
+                        enemytype = self.enemies[enemy][3]
+                        placementtype = self.enemies[enemy][4]
+                        random.shuffle(enemies)
+                        i = 0
+                        found_enemy = False
+                        while not found_enemy:
+                            new_enemy = enemies[i]
+                            new_enemytype = self.enemies[new_enemy][3]
+                            new_placementtype = self.enemies[new_enemy][4]
+                            if placementtype == new_placementtype or enemytype == new_enemytype or new_enemytype == 3 or i == len(enemies)-1:
+                                found_enemy = True
+                            i += 1
+                        f.seek(addr)
+                        #print addr
+                        f.write(self.enemies[new_enemy][1] + self.enemies[new_enemy][2])
+                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])
+                        #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
 
         # Disable all non-enemy sprites
         for sprite in self.nonenemy_sprites:
@@ -1842,7 +1888,8 @@ class World:
 #        }
 
         # Enemy map database
-        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, SearchHeader, SpritesetOffset,RestrictedEnemysets]}
+        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, SearchHeader,
+        #           SpritesetOffset,RestrictedEnemysets]}
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # Underground Tunnel
@@ -1959,115 +2006,115 @@ class World:
 
         # Database of enemy types
         # FORMAT: { ID: [Enemyset, Event addr, VanillaTemplate,
-        #           Type(1=stationary,2=walking,3=flying),CanBeRandom,Name]}
+        #           Type(1=stationary,2=walking,3=flying),OnWalkableTile,CanBeRandom,Name]}
         self.enemies = {
             # Underground Tunnel
-            0: [0,"\x55\x87\x8a","\x05",2,True,"Bat"], # a8755
-            1: [0,"\x6c\x82\x8a","\x01",2,True,"Ribber"],
-            2: [0,"\x00\x80\x8a","\x02",1,True,"Canal Worm"],
-            3: [0,"\xf7\x85\x8a","\x03",2,False,"King Bat"],
-            4: [0,"\x76\x84\x8a","\x10",2,True,"Skull Chaser"],
-            5: [0,"\xff\x86\x8a","\x04",2,False,"Bat Minion 1"],
-            6: [0,"\x9a\x86\x8a","\x04",2,False,"Bat Minion 2"],
-            7: [0,"\x69\x86\x8a","\x04",2,False,"Bat Minion 3"],
-            8: [0,"\xcb\x86\x8a","\x04",2,False,"Bat Minion 4"],
+            0: [0,"\x55\x87\x8a","\x05",2,True,True,"Bat"], # a8755
+            1: [0,"\x6c\x82\x8a","\x01",2,True,True,"Ribber"],
+            2: [0,"\x00\x80\x8a","\x02",1,False,True,"Canal Worm"],
+            3: [0,"\xf7\x85\x8a","\x03",2,True,False,"King Bat"],
+            4: [0,"\x76\x84\x8a","\x10",2,True,True,"Skull Chaser"],
+            5: [0,"\xff\x86\x8a","\x04",2,True,False,"Bat Minion 1"],
+            6: [0,"\x9a\x86\x8a","\x04",2,True,False,"Bat Minion 2"],
+            7: [0,"\x69\x86\x8a","\x04",2,True,False,"Bat Minion 3"],
+            8: [0,"\xcb\x86\x8a","\x04",2,True,False,"Bat Minion 4"],
 
             # Inca Ruins
-            10: [1,"\xb7\x8d\x8a","\x0b",2,True,"Slugger"],
-            11: [1,"\xb6\x8e\x8a","\x0b",2,False,"Scuttlebug"],
-            12: [1,"\x1b\x8b\x8a","\x0a",2,True,"Mudpit"],
-            13: [1,"\x70\x8c\x8a","\x0c",1,True,"Four Way"],
-            14: [2,"\xee\x97\x8a","\x0f",2,True,"Splop"],
-            15: [2,"\xbc\x98\x8a","\x0e",3,True,"Whirligig"],
-            16: [2,"\xc2\x95\x8a","\x0d",2,False,"Stone Lord R"],  # shoots fire
-            17: [2,"\xb3\x95\x8a","\x0d",2,True,"Stone Lord D"],  # shoots fire
-            18: [2,"\xb8\x95\x8a","\x0d",2,False,"Stone Lord U"],  # shoots fire
-            19: [2,"\xbd\x95\x8a","\x0d",2,False,"Stone Lord L"],  # shoots fire
-            20: [2,"\x70\x90\x8a","\x0d",2,False,"Stone Guard R"], # throws spears
-            21: [2,"\x6b\x90\x8a","\x0d",2,False,"Stone Guard L"], # throws spears
-            22: [2,"\x61\x90\x8a","\x0d",2,True,"Stone Guard D"], # throws spears
-            23: [2,"\xc3\x99\x8a","\x0e",1,False,"Whirligig (stationary)"],
+            10: [1,"\xb7\x8d\x8a","\x0b",2,True,True,"Slugger"],
+            11: [1,"\xb6\x8e\x8a","\x0b",2,True,False,"Scuttlebug"],
+            12: [1,"\x1b\x8b\x8a","\x0a",2,True,True,"Mudpit"],
+            13: [1,"\x70\x8c\x8a","\x0c",1,True,True,"Four Way"],
+            14: [2,"\xee\x97\x8a","\x0f",2,True,True,"Splop"],
+            15: [2,"\xbc\x98\x8a","\x0e",3,True,True,"Whirligig"],
+            16: [2,"\xc2\x95\x8a","\x0d",2,True,False,"Stone Lord R"],  # shoots fire
+            17: [2,"\xb3\x95\x8a","\x0d",2,True,True,"Stone Lord D"],  # shoots fire
+            18: [2,"\xb8\x95\x8a","\x0d",2,True,False,"Stone Lord U"],  # shoots fire
+            19: [2,"\xbd\x95\x8a","\x0d",2,True,False,"Stone Lord L"],  # shoots fire
+            20: [2,"\x70\x90\x8a","\x0d",2,True,False,"Stone Guard R"], # throws spears
+            21: [2,"\x6b\x90\x8a","\x0d",2,True,False,"Stone Guard L"], # throws spears
+            22: [2,"\x61\x90\x8a","\x0d",2,True,True,"Stone Guard D"], # throws spears
+            23: [2,"\xc3\x99\x8a","\x0e",1,True,False,"Whirligig (stationary)"],
 
             # Diamond Mine
-            30: [3,"\xca\xaa\x8a","\x18",2,True,"Flayzer 1"],
-            31: [3,"\x54\xaa\x8a","\x18",2,False,"Flayzer 2"],
-            32: [3,"\x8a\xaa\x8a","\x18",2,False,"Flayzer 3"],
-            33: [3,"\x03\xb1\x8a","\x19",2,True,"Eye Stalker"],
-            34: [3,"\xb3\xb0\x8a","\x19",2,False,"Eye Stalker (stone)"],
-            35: [3,"\xf5\xaf\x8a","\x1a",1,True,"Grundit"],
+            30: [3,"\xca\xaa\x8a","\x18",2,True,True,"Flayzer 1"],
+            31: [3,"\x54\xaa\x8a","\x18",2,True,False,"Flayzer 2"],
+            32: [3,"\x8a\xaa\x8a","\x18",2,True,False,"Flayzer 3"],
+            33: [3,"\x03\xb1\x8a","\x19",2,True,True,"Eye Stalker"],
+            34: [3,"\xb3\xb0\x8a","\x19",2,True,False,"Eye Stalker (stone)"],
+            35: [3,"\xf5\xaf\x8a","\x1a",1,True,True,"Grundit"],
 #            36: [3,"\xf5\xa4\x8a","\x1a","Grundit (stationary)"],  # Can't randomize this guy
 
             # Sky Garden
-            40: [4,"\xb0\xb4\x8a","\x1d",2,True,"Blue Cyber"],
-            41: [4,"\x20\xc5\x8a","\x1b",2,True,"Dynapede 1"],
-            42: [4,"\x33\xc5\x8a","\x1b",2,False,"Dynapede 2"],
-            43: [5,"\xb0\xb8\x8a","\x1e",2,True,"Red Cyber"],
-            44: [5,"\x16\xc8\x8a","\x1c",2,True,"Nitropede"],
+            40: [4,"\xb0\xb4\x8a","\x1d",2,True,True,"Blue Cyber"],
+            41: [4,"\x20\xc5\x8a","\x1b",2,True,True,"Dynapede 1"],
+            42: [4,"\x33\xc5\x8a","\x1b",2,True,False,"Dynapede 2"],
+            43: [5,"\xb0\xb8\x8a","\x1e",2,True,True,"Red Cyber"],
+            44: [5,"\x16\xc8\x8a","\x1c",2,True,True,"Nitropede"],
 
             # Mu
-            50: [6,"\xcc\xe6\x8a","\x2b",2,True,"Slipper"],
-            51: [6,"\x5c\xe4\x8a","\x2a",2,True,"Skuddle"],
-            52: [6,"\x9e\xdd\x8a","\x28",2,True,"Cyclops"],
-            53: [6,"\x6e\xe2\x8a","\x29",3,True,"Flasher"],
-            54: [6,"\x07\xde\x8a","\x28",2,False,"Cyclops (asleep)"],
+            50: [6,"\xcc\xe6\x8a","\x2b",2,True,True,"Slipper"],
+            51: [6,"\x5c\xe4\x8a","\x2a",2,True,True,"Skuddle"],
+            52: [6,"\x9e\xdd\x8a","\x28",2,True,True,"Cyclops"],
+            53: [6,"\x6e\xe2\x8a","\x29",3,True,True,"Flasher"],
+            54: [6,"\x07\xde\x8a","\x28",2,True,False,"Cyclops (asleep)"],
 
             # Angel Dungeon
-            60: [7,"\x9f\xee\x8a","\x2d",3,True,"Dive Bat"],
-            61: [7,"\x51\xea\x8a","\x2c",2,True,"Steelbones"],
-            62: [7,"\x33\xef\x8a","\x2e",1,True,"Draco"],
-            63: [7,"\xc7\xf0\x8a","\x2e",1,True,"Ramskull"],
+            60: [7,"\x9f\xee\x8a","\x2d",3,False,True,"Dive Bat"],
+            61: [7,"\x51\xea\x8a","\x2c",2,True,True,"Steelbones"],
+            62: [7,"\x33\xef\x8a","\x2e",1,True,True,"Draco"],
+            63: [7,"\xc7\xf0\x8a","\x2e",1,True,True,"Ramskull"],
 
             # Great Wall
-            70: [8,"\x55\x91\x8b","\x33",2,True,"Archer 1"],
-            71: [8,"\xfe\x8e\x8b","\x33",2,False,"Archer Statue"],
-            72: [8,"\xbe\x8d\x8b","\x34",2,True,"Eyesore"],
-            73: [8,"\x70\x8c\x8b","\x35",3,True,"Fire Bug 1"],
-            74: [8,"\x70\x8c\x8b","\x33",3,False,"Fire Bug 2"],
-            75: [8,"\x23\x94\x8b","\x32",2,True,"Asp"],
-            76: [8,"\x65\x91\x8b","\x33",2,False,"Archer 2"],
-            77: [8,"\x77\x91\x8b","\x33",2,False,"Archer 3"],
-            78: [8,"\x72\x8f\x8b","\x46",2,False,"Archer Statue (switch)"],
+            70: [8,"\x55\x91\x8b","\x33",2,True,True,"Archer 1"],
+            71: [8,"\xfe\x8e\x8b","\x33",2,True,False,"Archer Statue"],
+            72: [8,"\xbe\x8d\x8b","\x34",2,True,True,"Eyesore"],
+            73: [8,"\x70\x8c\x8b","\x35",3,False,True,"Fire Bug 1"],
+            74: [8,"\x70\x8c\x8b","\x33",3,False,False,"Fire Bug 2"],
+            75: [8,"\x23\x94\x8b","\x32",2,True,True,"Asp"],
+            76: [8,"\x65\x91\x8b","\x33",2,True,False,"Archer 2"],
+            77: [8,"\x77\x91\x8b","\x33",2,True,False,"Archer 3"],
+            78: [8,"\x72\x8f\x8b","\x46",2,True,False,"Archer Statue (switch)"],
 
             # Mt. Kress
-            80: [9,"\xac\x9b\x8b","\x3e",2,True,"Skulker (N/S)"],
-            81: [9,"\x4e\x9c\x8b","\x3e",2,True,"Skulker (E/W)"],
-            82: [9,"\x44\x9c\x8b","\x3e",2,False,"Skulker (E/W)"],
-            83: [9,"\xa2\x9b\x8b","\x3e",2,False,"Skulker (E/W)"],
-            84: [9,"\x8b\x9e\x8b","\x3d",3,True,"Yorrick (E/W)"],
-            85: [9,"\x53\x9f\x8b","\x3d",3,False,"Yorrick (E/W)"],
-            86: [9,"\x0f\x9d\x8b","\x3d",3,True,"Yorrick (N/S)"],
-            87: [9,"\xcd\x9d\x8b","\x3d",3,False,"Yorrick (N/S)"],
-            88: [9,"\x3b\x98\x8b","\x3f",3,True,"Fire Sprite"],
-            89: [9,"\x1d\xa0\x8b","\x3c",2,True,"Acid Splasher 2"],
-            90: [9,"\xa1\xa0\x8b","\x3c",2,False,"Acid Splasher (stationary E)"],
-            91: [9,"\x75\xa0\x8b","\x3c",2,False,"Acid Splasher (stationary W)"],
-            92: [9,"\x49\xa0\x8b","\x3c",2,False,"Acid Splasher (stationary S)"],
-            93: [9,"\xcf\xa0\x8b","\x3c",2,False,"Acid Splasher (stationary N)"],
+            80: [9,"\xac\x9b\x8b","\x3e",3,True,True,"Skulker (N/S)"],
+            81: [9,"\x4e\x9c\x8b","\x3e",3,True,True,"Skulker (E/W)"],
+            82: [9,"\x44\x9c\x8b","\x3e",3,True,False,"Skulker (E/W)"],
+            83: [9,"\xa2\x9b\x8b","\x3e",3,True,False,"Skulker (E/W)"],
+            84: [9,"\x8b\x9e\x8b","\x3d",3,False,True,"Yorrick (E/W)"],
+            85: [9,"\x53\x9f\x8b","\x3d",3,False,False,"Yorrick (E/W)"],
+            86: [9,"\x0f\x9d\x8b","\x3d",3,False,True,"Yorrick (N/S)"],
+            87: [9,"\xcd\x9d\x8b","\x3d",3,False,False,"Yorrick (N/S)"],
+            88: [9,"\x3b\x98\x8b","\x3f",3,False,True,"Fire Sprite"],
+            89: [9,"\x1d\xa0\x8b","\x3c",2,True,True,"Acid Splasher 2"],
+            90: [9,"\xa1\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary E)"],
+            91: [9,"\x75\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary W)"],
+            92: [9,"\x49\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary S)"],
+            93: [9,"\xcf\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary N)"],
 
             # Ankor Wat
-            100: [10,"\xd7\xb1\x8b","\x49",2,True,"Shrubber"],
-            101: [10,"\xb4\xb1\x8b","\x49",2,False,"Shrubber 2"],
-            102: [10,"\x75\xb2\x8b","\x46",2,True,"Zombie"],
-            103: [10,"\x4f\xaf\x8b","\x4a",3,True,"Zip Fly"],
-            104: [11,"\x8d\xbd\x8b","\x42",3,True,"Goldcap"],
-            105: [11,"\x25\xb8\x8b","\x45",2,True,"Gorgon"],
-            106: [11,"\x17\xb8\x8b","\x45",2,False,"Gorgon (jump down)"],
-            107: [11,"\xbb\xbf\x8b","\x43",2,True,"Frenzie"],
-            108: [11,"\xd0\xbf\x8b","\x43",2,False,"Frenzie 2"],
-            109: [11,"\x66\xbb\x8b","\x44",1,True,"Wall Walker"],
-            110: [11,"\x66\xbb\x8b","\x3a",1,False,"Wall Walker 2"],
-            111: [11,"\x5c\xbb\x8b","\x44",1,False,"Wall Walker 3"],
-            112: [11,"\x5c\xbb\x8b","\x3a",1,False,"Wall Walker 4"],
-            113: [11,"\xaf\x99\x88","\x45",2,False,"Gorgon (block)"],
+            100: [10,"\xd7\xb1\x8b","\x49",2,True,True,"Shrubber"],
+            101: [10,"\xb4\xb1\x8b","\x49",2,True,False,"Shrubber 2"],
+            102: [10,"\x75\xb2\x8b","\x46",2,True,True,"Zombie"],
+            103: [10,"\x4f\xaf\x8b","\x4a",3,True,True,"Zip Fly"],
+            104: [11,"\x8d\xbd\x8b","\x42",3,True,True,"Goldcap"],
+            105: [11,"\x25\xb8\x8b","\x45",2,True,True,"Gorgon"],
+            106: [11,"\x17\xb8\x8b","\x45",2,True,False,"Gorgon (jump down)"],
+            107: [11,"\xbb\xbf\x8b","\x43",2,True,False,"Frenzie"],
+            108: [11,"\xd0\xbf\x8b","\x43",2,True,True,"Frenzie 2"],
+            109: [11,"\x66\xbb\x8b","\x44",1,False,True,"Wall Walker"],
+            110: [11,"\x66\xbb\x8b","\x3a",1,False,False,"Wall Walker 2"],
+            111: [11,"\x5c\xbb\x8b","\x44",1,False,False,"Wall Walker 3"],
+            112: [11,"\x5c\xbb\x8b","\x3a",1,False,False,"Wall Walker 4"],
+            113: [11,"\xaf\x99\x88","\x45",2,True,False,"Gorgon (block)"],
 
             # Pyramid
-            120: [12,"\x5f\xc6\x8b","\x4f",2,True,"Mystic Ball (stationary)"],
-            121: [12,"\xfc\xc5\x8b","\x4f",2,True,"Mystic Ball"],
-            122: [12,"\xa3\xc5\x8b","\x4f",2,True,"Mystic Ball"],
-            123: [12,"\x9d\xc3\x8b","\x4e",2,True,"Tuts"],
-            124: [12,"\x98\xc7\x8b","\x51",1,True,"Blaster"],
-            125: [12,"\x84\xc1\x8b","\x4c",2,False,"Haunt (stationary)"],
-            126: [12,"\xa7\xc1\x8b","\x4c",2,True,"Haunt"],
+            120: [12,"\x5f\xc6\x8b","\x4f",2,True,True,"Mystic Ball (stationary)"],
+            121: [12,"\xfc\xc5\x8b","\x4f",2,True,True,"Mystic Ball"],
+            122: [12,"\xa3\xc5\x8b","\x4f",2,True,True,"Mystic Ball"],
+            123: [12,"\x9d\xc3\x8b","\x4e",2,True,True,"Tuts"],
+            124: [12,"\x98\xc7\x8b","\x51",1,True,True,"Blaster"],
+            125: [12,"\x84\xc1\x8b","\x4c",2,True,False,"Haunt (stationary)"],
+            126: [12,"\xa7\xc1\x8b","\x4c",2,True,True,"Haunt"],
 
             # Babel Tower
 #            130: [14,"\xd7\x99\x8a","\x5a","Castoth (boss)"],
@@ -2078,10 +2125,10 @@ class World:
 #            135: [14,"\x1a\xa6\x8b","\x5e","Mummy Queen (boss)"],
 
             # Jeweler's Mansion
-            140: [13,"\xca\xaa\x8a","\x61",2,True,"Flayzer"],
-            141: [13,"\xf5\xaf\x8a","\x63",1,True,"Grundit"],
-            142: [13,"\xd8\xb0\x8a","\x62",2,True,"Eye Stalker 1"],
-            143: [13,"\x03\xb1\x8a","\x62",2,False,"Eye Stalker 2"]
+            140: [13,"\xca\xaa\x8a","\x61",2,True,True,"Flayzer"],
+            141: [13,"\xf5\xaf\x8a","\x63",1,True,True,"Grundit"],
+            142: [13,"\xd8\xb0\x8a","\x62",2,True,False,"Eye Stalker 1"],
+            143: [13,"\x03\xb1\x8a","\x62",2,True,True,"Eye Stalker 2"]
 
             # Bosses
 #            24: [15,"\x03\x9b\x8a","\x14","Castoth (boss)"],

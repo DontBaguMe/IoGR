@@ -16,3 +16,5 @@ classes.pyc
 iogr_rom.pyc
 quintet_comp.pyc
 quintet_text.pyc
+bin/ishtarmap.bin
+bin/ishtarmapcomp.bin
