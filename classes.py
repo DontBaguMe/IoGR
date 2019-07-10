@@ -963,7 +963,7 @@ class World:
                     print "ERROR: Couldn't find header for map ", map
                 else:
                     f.seek(addr + self.maps[map][4])
-                    f.write(self.enemysets[test_set][0])
+                    #f.write(self.enemysets[test_set][0])
 
         # Turn all enemies into bats
         f.seek(0)
@@ -979,7 +979,7 @@ class World:
                 else:
                     f.seek(addr)
                     #print addr
-                    f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # Bat
+                    #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # Bat
                     #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
 
         # Disable all non-enemy sprites
@@ -1869,28 +1869,28 @@ class World:
             62: [3,2,0,"\x3E\x00\x02\x08\x06\x01\x9B\x4D\xDB",9,[]],
             63: [3,2,0,"\x3F\x00\x02\x05\x06\x01\x50\x77\xC9",9,[]],
             64: [3,2,0,"\x40\x00\x02\x08\x06\x01\xD0\x5C\xDB",9,[]],  # Trapped laborer (??)
-            65: [3,2,0,"\x41\x00\x02\x00\x11\x06\x00\x90\x42\xD4",51,[]],  # Stationary Grundit
+            65: [3,2,0,"\x41\x00\x02\x00\x11\x06\x00\x90\x42\xD4",51,[1,3]],  # Stationary Grundit
             69: [3,2,0,"\x45\x00\x02\x08\x06\x01\xA3\x59\xDD",9,[]],
             70: [3,2,0,"\x46\x00\x02\x08\x06\x01\x2F\x2A\xDD",9,[]],
 
             # Sky Garden
             77: [4,2,0,"\x4D\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
             78: [5,2,0,"\x4E\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
-            79: [4,2,0,"\x4F\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            79: [4,2,0,"\x4F\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[4,5]],
             80: [5,2,0,"\x50\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
             81: [4,2,0,"\x51\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
-            82: [5,2,0,"\x52\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
-            83: [4,2,0,"\x53\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
-            84: [5,2,0,"\x54\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            82: [5,2,0,"\x52\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[4,5]],
+            83: [4,2,0,"\x53\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[4,5]],
+            84: [5,2,0,"\x54\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[4,5]],
 
             # Mu
 #            92: [0,4,0,"",0,[]],  # Seaside Palace
             95: [6,3,0,"\x5F\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
-            96: [6,3,0,"\x60\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
-            97: [6,3,0,"\x61\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
+            96: [6,3,0,"\x60\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
+            97: [6,3,0,"\x61\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
             98: [6,3,0,"\x62\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
             100: [6,3,0,"\x64\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
-            101: [6,3,0,"\x65\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
+            101: [6,3,0,"\x65\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
 
             # Angel Dungeon
             109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[]],
@@ -2109,12 +2109,54 @@ class World:
             7: [0,"a89de","Spike ball 5"],
 
             # Inca Ruins
-            10: [1,"9c26f","Skeleton"],
-            11: [1,"a8896","Broken statue (chest)"],
-            12: [1,"a88de","Broken statue (blockade)"],
+            10: [1,"9c26f","Skeleton 1"],
+            11: [1,"9c798","Skeleton 2"],
+#            12: [1,"9c89d","Skeleton 3"],   # Spriteset already restricted for this room
+            13: [1,"9c8f7","Skeleton 4"],
+            14: [1,"a8896","Broken statue (chest)"],
+            15: [1,"a88de","Broken statue (blockade)"],
 
             # Diamond Mine
             20: [3,"5d6a8","Elevator sign"],
-            21: [3,"aa4f5","Elevator platform"],
+            21: [3,"aa4f5","Elevator platform 1"],
+            22: [3,"aa50c","Elevator platform 2"],
+
+            # Sky Garden
+            30: [4,"5f8c0","Broken statue"],
+            31: [4,"ac0fe","Sword statue 1"],
+#            32: [4,"ac150","Sword statue 2"],
+            33: [4,"ac3b3","Sword statue 3"],
+#            34: [4,"ac409","Sword statue 4"],
+            35: [4,"accd4","Fire snake (top)"],
+            36: [5,"accf1","Fire snake (bottom)"],
+
+            # Mu
+            40: [6,"69ce9","Floor spikes 1"],
+            41: [6,"69d1f","Floor spikes 2"],
+            42: [6,"ae943","Fire snake"],
+#            43: [6,"69d4d","Donut"],
+
+            # Angel
+            50: [7,"6d56f","Flame 1"],
+            51: [7,"6d57e","Flame 2"],
+
+            # Great Wall
+            60: [8,"b8c30","Wall spike 1"],
+            61: [8,"b8bf8","Wall spike 2"],
+            62: [8,"7bd17","Wall spike 3"],
+            63: [8,"7bd46","Wall spike 4"],
+            64: [8,"7bd75","Wall spike 5"],
+
+            # Mt Kress (nothing)
+
+            # Ankor Wat
+            80: [11,"89f2c","Floating crystal"],
+            81: [11,"89ffc","Skeleton"]
+
+            # Pyramid
+#            90: [12,"8b6a2","Warp point"],
+#            91: [12,"8cd6c","Warp point"],
+
+            # Jeweler's Mansion (nothing)
 
         }
