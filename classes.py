@@ -951,7 +951,7 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        test_enemy = 0
+        test_enemy = 30
         test_set = self.enemies[test_enemy][0]
 
         # Make all spritesets equal to Underground Tunnel
@@ -963,7 +963,7 @@ class World:
                     print "ERROR: Couldn't find header for map ", map
                 else:
                     f.seek(addr + self.maps[map][4])
-                    #f.write(self.enemysets[test_set][0])
+                    f.write(self.enemysets[test_set][0])
 
         # Turn all enemies into bats
         f.seek(0)
@@ -979,7 +979,7 @@ class World:
                 else:
                     f.seek(addr)
                     #print addr
-                    #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # Bat
+                    f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # Bat
                     #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
 
         # Disable all non-enemy sprites
