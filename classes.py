@@ -951,6 +951,9 @@ class World:
         f.seek(0)
         rom = f.read()
 
+        test_enemy = 0
+        test_set = self.enemies[test_enemy][0]
+
         # Make all spritesets equal to Underground Tunnel
         for map in self.maps:
             set = self.maps[map][0]
@@ -959,8 +962,8 @@ class World:
                 if addr < 0 or addr > int("daffe",16)+rom_offset:
                     print "ERROR: Couldn't find header for map ", map
                 else:
-                    f.seek(addr+self.maps[map][4])
-                    f.write(self.enemysets[0][0])
+                    f.seek(addr + self.maps[map][4])
+                    f.write(self.enemysets[test_set][0])
 
         # Turn all enemies into bats
         f.seek(0)
@@ -976,8 +979,13 @@ class World:
                 else:
                     f.seek(addr)
                     #print addr
-                    f.write("\x55\x87\x8a\x05")
+                    f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # Bat
                     #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
+
+        # Disable all non-enemy sprites
+        for sprite in self.nonenemy_sprites:
+            f.seek(int(self.nonenemy_sprites[sprite][1],16) + rom_offset + 3)
+            f.write("\x02\xe0")
 
     # Build world
     def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],
@@ -1810,18 +1818,17 @@ class World:
             0: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Underground Tunnel"],
             1: ["\x03\x00\x10\x10\xBC\x33\xC2\x01\x04\x00\x60\xA0\x0C\x77\xDE\x10\x2A\x0F\x00\xE6\x08\xD5","Inca Ruins (Mud Monster and Larva)"],
             2: ["\x03\x00\x10\x10\x23\x4D\xC2\x01\x04\x00\x60\xA0\xCC\x77\xDE\x10\x36\x23\x00\x24\x45\xCC","Inca Ruins (Statues)"],
-            3: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Diamond Mine"],
-            4: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Sky Garden (top)"],
-            5: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Sky Garden (bottom)"],
-#            ?: ["","Seaside Palace"],
-            6: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Mu"],
-            7: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Angel Dungeon"],
-            8: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Great Wall"],
-            9: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Mt. Kress"],
-            10: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Ankor Wat (outside)"],
-            11: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Ankor Wat (inside)"],
-            12: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Pyramid"],
-            13: ["\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F","Jeweler's Mansion"]
+            3: ["\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xCC\x7A\xDE\x10\x30\x29\x00\xBE\x2F\xCB","Diamond Mine"],
+            4: ["\x03\x00\x10\x10\x62\x3D\xCF\x01\x04\x00\x60\xA0\x4C\x7C\xDE\x10\x54\x1D\x00\xEF\xEE\x9E","Sky Garden (top)"],
+            5: ["\x03\x00\x10\x10\x62\x3D\xCF\x01\x04\x00\x60\xA0\x0C\x7D\xDE\x10\x54\x1D\x00\xEF\xEE\x9E","Sky Garden (bottom)"],
+            6: ["\x03\x00\x10\x10\x2D\x2E\xCC\x01\x04\x00\x60\xA0\x00\x00\xDF\x10\x16\x1C\x00\x41\x36\xD1","Mu"],
+            7: ["\x03\x00\x10\x10\xD1\x14\xCF\x01\x04\x00\x60\xA0\x40\x02\xDF\x10\x7F\x0F\x00\x2C\x2B\xD5","Angel Dungeon"],
+            8: ["\x03\x00\x10\x10\x6D\x13\xD0\x01\x04\x00\x60\xA0\x40\x05\xDF\x10\xFF\x16\x00\xF7\xF3\x99","Great Wall"],
+            9: ["\x03\x00\x10\x10\x00\x00\xD0\x01\x04\x00\x60\xA0\x40\x08\xDF\x10\x70\x0E\x00\x5C\x4D\xD8","Mt. Kress"],
+            10: ["\x03\x00\x10\x10\xEA\x15\xCE\x01\x04\x00\x70\x90\x53\x55\xDE\x10\xD5\x14\x00\x08\x73\xCC","Ankor Wat (outside)"],
+            11: ["\x03\x00\x10\x10\x81\x6A\xC1\x01\x04\x00\x70\x90\x13\x57\xDE\x10\x57\x10\x00\x5F\x39\xD4","Ankor Wat (inside)"],
+            12: ["\x03\x00\x10\x10\x0D\x18\xCB\x01\x04\x00\x60\x90\x80\x0A\xDF\x10\xFB\x13\x00\x0E\x67\xD1","Pyramid"],
+            13: ["\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xC0\x0C\xDF\x10\x30\x29\x00\xBE\x2F\xCB","Jeweler's Mansion"]
         }
 
         # Mapset database
@@ -1835,242 +1842,279 @@ class World:
 #        }
 
         # Enemy map database
-        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, SearchHeader, SpritesetOffset,RestrictedEnemyset]}
+        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, SearchHeader, SpritesetOffset,RestrictedEnemysets]}
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # Underground Tunnel
-            12: [0,1,0,"\x0C\x00\x02\x05\x06",9,False],
-            13: [0,1,0,"\x0D\x00\x02\x03\x06",14,False],
-            14: [0,1,0,"\x0E\x00\x02\x03\x06",14,False],  # Statues, spike balls
-            15: [0,1,0,"\x0F\x00\x02\x03\x06",14,False],
-            18: [0,1,0,"\x12\x00\x02\x03\x06",14,False],  # Spike balls
+            12: [0,1,0,"\x0C\x00\x02\x05\x06",9,[]],
+            13: [0,1,0,"\x0D\x00\x02\x03\x06",14,[]],
+            14: [0,1,0,"\x0E\x00\x02\x03\x06",14,[]],  # Statues, spike balls
+            15: [0,1,0,"\x0F\x00\x02\x03\x06",14,[]],
+            18: [0,1,0,"\x12\x00\x02\x03\x06",14,[]],  # Spike balls
 
             # Inca Ruins
 #            27: [1,0,0,"\x1c",""],  # Moon Tribe cave
-            29: [1,1,0,"\x1D\x00\x02\x0F\x03\x00\x10\x10\xBC\x33\xC2\x01",4,False],
-            32: [1,1,0,"\x20\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,False],  # Broken statue
-            33: [2,1,0,"\x21\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,False],  # Floor switch
-            34: [2,1,0,"\x22\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,False],  # Floor switch
-            35: [2,1,0,"\x23\x00\x02\x0A\x03\x00\x10\x10\x23\x4D\xC2\x01",4,False],
-            37: [1,1,0,"\x25\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,True],  # Diamond block
-            38: [1,1,0,"\x26\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,False],  # Broken statues
-            39: [1,1,0,"\x27\x00\x02\x0A\x03\x00\x10\x10\xBC\x33\xC2\x01",4,False],
-            40: [1,1,0,"\x28\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,False],  # Falling blocks
+            29: [1,1,0,"\x1D\x00\x02\x0F\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],
+            32: [1,1,0,"\x20\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],  # Broken statue
+            33: [2,1,0,"\x21\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],  # Floor switch
+            34: [2,1,0,"\x22\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],  # Floor switch
+            35: [2,1,0,"\x23\x00\x02\x0A\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],
+            37: [1,1,0,"\x25\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[1]],  # Diamond block
+            38: [1,1,0,"\x26\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],  # Broken statues
+            39: [1,1,0,"\x27\x00\x02\x0A\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],
+            40: [1,1,0,"\x28\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[1]],  # Falling blocks
 
             # Diamond Mine
-            61: [3,2,0,"\x3D\x00\x02\x08\x06\x01\x6D\x5F\xDC",9,False],
-            62: [3,2,0,"\x3E\x00\x02\x08\x06\x01\x9B\x4D\xDB",9,False],
-            63: [3,2,0,"\x3F\x00\x02\x05\x06\x01\x50\x77\xC9",9,False],
-            64: [3,2,0,"\x40\x00\x02\x08\x06\x01\xD0\x5C\xDB",9,False],  # Trapped laborer (??)
-            65: [3,2,0,"\x41\x00\x02\x00\x11\x06\x00\x90\x42\xD4",51,False],  # Stationary Grundit
-            69: [3,2,0,"\x45\x00\x02\x08\x06\x01\xA3\x59\xDD",9,False],
-            70: [3,2,0,"\x46\x00\x02\x08\x06\x01\x2F\x2A\xDD",9,False],
+            61: [3,2,0,"\x3D\x00\x02\x08\x06\x01\x6D\x5F\xDC",9,[]],
+            62: [3,2,0,"\x3E\x00\x02\x08\x06\x01\x9B\x4D\xDB",9,[]],
+            63: [3,2,0,"\x3F\x00\x02\x05\x06\x01\x50\x77\xC9",9,[]],
+            64: [3,2,0,"\x40\x00\x02\x08\x06\x01\xD0\x5C\xDB",9,[]],  # Trapped laborer (??)
+            65: [3,2,0,"\x41\x00\x02\x00\x11\x06\x00\x90\x42\xD4",51,[]],  # Stationary Grundit
+            69: [3,2,0,"\x45\x00\x02\x08\x06\x01\xA3\x59\xDD",9,[]],
+            70: [3,2,0,"\x46\x00\x02\x08\x06\x01\x2F\x2A\xDD",9,[]],
 
             # Sky Garden
-            77: [4,2,0,"\x4D\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
-            78: [5,2,0,"\x4E\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
-            79: [4,2,0,"\x4F\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
-            80: [5,2,0,"\x50\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
-            81: [4,2,0,"\x51\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
-            82: [5,2,0,"\x52\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
-            83: [4,2,0,"\x53\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
-            84: [5,2,0,"\x54\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,False],
+            77: [4,2,0,"\x4D\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            78: [5,2,0,"\x4E\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            79: [4,2,0,"\x4F\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            80: [5,2,0,"\x50\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            81: [4,2,0,"\x51\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            82: [5,2,0,"\x52\x00\x02\x10\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            83: [4,2,0,"\x53\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
+            84: [5,2,0,"\x54\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
 
             # Mu
-#            92: [0,4,0,"",0,False],  # Seaside Palace
-            95: [6,3,0,"\x5F\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,False],
-            96: [6,3,0,"\x60\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,False],
-            97: [6,3,0,"\x61\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,False],
-            98: [6,3,0,"\x62\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,False],
-            100: [6,3,0,"\x64\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,False],
-            101: [6,3,0,"\x65\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,False],
+#            92: [0,4,0,"",0,[]],  # Seaside Palace
+            95: [6,3,0,"\x5F\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
+            96: [6,3,0,"\x60\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
+            97: [6,3,0,"\x61\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
+            98: [6,3,0,"\x62\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
+            100: [6,3,0,"\x64\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
+            101: [6,3,0,"\x65\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
 
             # Angel Dungeon
-            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,False],
-            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,False],
-            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,False],
-            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,False],
-            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,False],
-            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,False],
+            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[]],
+            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,[]],
+            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,[]],
+            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,[]],
+            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,[]],
+            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,[]],
 
             # Great Wall
-            130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
-            131: [8,4,0,"\x83\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
-            133: [8,4,0,"\x85\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
-            134: [8,4,0,"\x86\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
-            135: [8,4,0,"\x87\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
-            136: [8,4,0,"\x88\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,False],
+            130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
+            131: [8,4,0,"\x83\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
+            133: [8,4,0,"\x85\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
+            134: [8,4,0,"\x86\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
+            135: [8,4,0,"\x87\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
+            136: [8,4,0,"\x88\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
 
             # Mt Temple
-            160: [9,4,0,"\xA0\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            161: [9,4,0,"\xA1\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            162: [9,4,0,"\xA2\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            163: [9,4,0,"\xA3\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            164: [9,4,0,"\xA4\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            165: [9,4,0,"\xA5\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            166: [9,4,0,"\xA6\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            167: [9,4,0,"\xA7\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
-            168: [9,4,0,"\xA8\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,False],
+            160: [9,4,0,"\xA0\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            161: [9,4,0,"\xA1\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            162: [9,4,0,"\xA2\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            163: [9,4,0,"\xA3\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            164: [9,4,0,"\xA4\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            165: [9,4,0,"\xA5\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            166: [9,4,0,"\xA6\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            167: [9,4,0,"\xA7\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            168: [9,4,0,"\xA8\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
 
             # Ankor Wat
-            176: [10,6,0,"\xB0\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,False],
-            177: [11,6,0,"\xB1\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            178: [11,6,0,"\xB2\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            179: [11,6,0,"\xB3\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            180: [11,6,0,"\xB4\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            181: [11,6,0,"\xB5\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            182: [10,6,0,"\xB6\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,False],
-            183: [11,6,0,"\xB7\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],  # Earthquaker Golem
-            184: [11,6,0,"\xB8\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            185: [11,6,0,"\xB9\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            186: [10,6,0,"\xBA\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,False],
-            187: [11,6,0,"\xBB\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            188: [11,6,0,"\xBC\x00\x02\x24\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            189: [11,6,0,"\xBD\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
-            190: [11,6,0,"\xBE\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,False],
+            176: [10,6,0,"\xB0\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,[]],
+            177: [11,6,0,"\xB1\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            178: [11,6,0,"\xB2\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            179: [11,6,0,"\xB3\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            180: [11,6,0,"\xB4\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            181: [11,6,0,"\xB5\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            182: [10,6,0,"\xB6\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,[]],
+            183: [11,6,0,"\xB7\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],  # Earthquaker Golem
+            184: [11,6,0,"\xB8\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            185: [11,6,0,"\xB9\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            186: [10,6,0,"\xBA\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,[]],
+            187: [11,6,0,"\xBB\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            188: [11,6,0,"\xBC\x00\x02\x24\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            189: [11,6,0,"\xBD\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            190: [11,6,0,"\xBE\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
 
             # Pyramid
-            204: [12,5,0,"\xCC\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            206: [12,5,0,"\xCE\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            207: [12,5,0,"\xCF\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            208: [12,5,0,"\xD0\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            209: [12,5,0,"\xD1\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            210: [12,5,0,"\xD2\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            211: [12,5,0,"\xD3\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            212: [12,5,0,"\xD4\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            213: [12,5,0,"\xD5\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            214: [12,5,0,"\xD6\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            215: [12,5,0,"\xD7\x00\x02\x28\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            216: [12,5,0,"\xD8\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            217: [12,5,0,"\xD9\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
-            219: [12,5,0,"\xDB\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,False],
+            204: [12,5,0,"\xCC\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            206: [12,5,0,"\xCE\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            207: [12,5,0,"\xCF\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            208: [12,5,0,"\xD0\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            209: [12,5,0,"\xD1\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            210: [12,5,0,"\xD2\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            211: [12,5,0,"\xD3\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            212: [12,5,0,"\xD4\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            213: [12,5,0,"\xD5\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            214: [12,5,0,"\xD6\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            215: [12,5,0,"\xD7\x00\x02\x28\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            216: [12,5,0,"\xD8\x00\x02\x08\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            217: [12,5,0,"\xD9\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
+            219: [12,5,0,"\xDB\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
 
             # Jeweler's Mansion
-            233: [13,0,0,"\xE9\x00\x02\x22\x11\x06\x00\x90\x42\xD4",51,False]
+            233: [13,0,0,"\xE9\x00\x02\x22\x11\x06\x00\x90\x42\xD4",51,[]]
 
         }
 
         # Database of enemy types
         # FORMAT: { ID: [Enemyset, Event addr, VanillaTemplate, Name]}
         self.enemies = {
-            0: [0,"\x55\x87\x8a","\x05","Underground Tunnel: Bat"], # a8755
-            1: [0,"\x6c\x82\x8a","\x01","Underground Tunnel: Ribber"],
-            2: [0,"\x00\x80\x8a","\x02","Underground Tunnel: Canal Worm"],
-            3: [0,"\xf7\x85\x8a","\x03","Underground Tunnel: King Bat"],
-            4: [0,"\x76\x84\x8a","\x10","Underground Tunnel: Skull Chaser"],
-            5: [0,"\xff\x86\x8a","\x04","Underground Tunnel: Bat Minion 1"],
-            6: [0,"\x9a\x86\x8a","\x04","Underground Tunnel: Bat Minion 2"],
-            7: [0,"\x69\x86\x8a","\x04","Underground Tunnel: Bat Minion 3"],
-            8: [0,"\xcb\x86\x8a","\x04","Underground Tunnel: Bat Minion 4"],
+            # Underground Tunnel
+            0: [0,"\x55\x87\x8a","\x05","Bat"], # a8755
+            1: [0,"\x6c\x82\x8a","\x01","Ribber"],
+            2: [0,"\x00\x80\x8a","\x02","Canal Worm"],
+            3: [0,"\xf7\x85\x8a","\x03","King Bat"],
+            4: [0,"\x76\x84\x8a","\x10","Skull Chaser"],
+            5: [0,"\xff\x86\x8a","\x04","Bat Minion 1"],
+            6: [0,"\x9a\x86\x8a","\x04","Bat Minion 2"],
+            7: [0,"\x69\x86\x8a","\x04","Bat Minion 3"],
+            8: [0,"\xcb\x86\x8a","\x04","Bat Minion 4"],
 
-            10: [1,"\xb7\x8d\x8a","\x0b","Inca Ruins: Slugger"],
-            11: [1,"\x1b\x8b\x8a","\x0a","Inca Ruins: Mudpit"],
-            12: [1,"\x70\x8c\x8a","\x0c","Inca Ruins: Four Way"],
-            13: [2,"\xee\x97\x8a","\x0f","Inca Ruins: Splop"],
-            14: [1,"\xb6\x8e\x8a","\x0b","Inca Ruins: Scuttlebug"],
-            15: [2,"\xbc\x98\x8a","\x0e","Inca Ruins: Whirligig"],
-            16: [2,"\xc2\x95\x8a","\x0d","Inca Ruins: Stone Lord R"],  # shoots fire
-            17: [2,"\xb3\x95\x8a","\x0d","Inca Ruins: Stone Lord D"],  # shoots fire
-            18: [2,"\xb8\x95\x8a","\x0d","Inca Ruins: Stone Lord U"],  # shoots fire
-            19: [2,"\xbd\x95\x8a","\x0d","Inca Ruins: Stone Lord L"],  # shoots fire
-            20: [2,"\x70\x90\x8a","\x0d","Inca Ruins: Stone Guard R"], # throws spears
-            21: [2,"\x6b\x90\x8a","\x0d","Inca Ruins: Stone Guard L"], # throws spears
-            22: [2,"\x61\x90\x8a","\x0d","Inca Ruins: Stone Guard D"], # throws spears
-            23: [2,"\xc3\x99\x8a","\x0e","Inca Ruins: Whirligig (stationary)"],
-#            24: [14,"\x03\x9b\x8a","\x14","Inca Ruins: Castoth (boss)"],
+            # Inca Ruins
+            10: [1,"\xb7\x8d\x8a","\x0b","Slugger"],
+            11: [1,"\xb6\x8e\x8a","\x0b","Scuttlebug"],
+            12: [1,"\x1b\x8b\x8a","\x0a","Mudpit"],
+            13: [1,"\x70\x8c\x8a","\x0c","Four Way"],
+            14: [2,"\xee\x97\x8a","\x0f","Splop"],
+            15: [2,"\xbc\x98\x8a","\x0e","Whirligig"],
+            16: [2,"\xc2\x95\x8a","\x0d","Stone Lord R"],  # shoots fire
+            17: [2,"\xb3\x95\x8a","\x0d","Stone Lord D"],  # shoots fire
+            18: [2,"\xb8\x95\x8a","\x0d","Stone Lord U"],  # shoots fire
+            19: [2,"\xbd\x95\x8a","\x0d","Stone Lord L"],  # shoots fire
+            20: [2,"\x70\x90\x8a","\x0d","Stone Guard R"], # throws spears
+            21: [2,"\x6b\x90\x8a","\x0d","Stone Guard L"], # throws spears
+            22: [2,"\x61\x90\x8a","\x0d","Stone Guard D"], # throws spears
+            23: [2,"\xc3\x99\x8a","\x0e","Whirligig (stationary)"],
 
-            30: [3,"\xca\xaa\x8a","\x18","Diamond Mine: Flayzer 1"],
-            33: [3,"\x54\xaa\x8a","\x18","Diamond Mine: Flayzer 2"],
-            31: [3,"\xf5\xaf\x8a","\x1a","Diamond Mine: Grundit"],
-            32: [3,"\x03\xb1\x8a","\x19","Diamond Mine: Eye Stalker"],
-            33: [3,"\x8a\xaa\x8a","\x18","Diamond Mine: Flayzer (master)"],
-#            34: [3,"\xf5\xa4\x8a","\x1a","Diamond Mine: Grundit (stationary)"],  # Can't randomize this guy
-            35: [3,"\xb3\xb0\x8a","\x19","Diamond Mine: Eye Stalker (stone)"],
-            36: [3,"\xd8\xb0\x8a","\x62","Diamond Mine: Eye Stalker (stone)"],
+            # Diamond Mine
+            30: [3,"\xca\xaa\x8a","\x18","Flayzer 1"],
+            31: [3,"\x54\xaa\x8a","\x18","Flayzer 2"],
+            32: [3,"\x8a\xaa\x8a","\x18","Flayzer 3"],
+            33: [3,"\x03\xb1\x8a","\x19","Eye Stalker"],
+            34: [3,"\xb3\xb0\x8a","\x19","Eye Stalker (stone)"],
+            35: [3,"\xf5\xaf\x8a","\x1a","Grundit"],
+#            36: [3,"\xf5\xa4\x8a","\x1a","Grundit (stationary)"],  # Can't randomize this guy
 
-            40: [4,"\xb0\xb4\x8a","\x1d","Sky Garden: Blue Cyber"],
-            41: [4,"\x20\xc5\x8a","\x1b","Sky Garden: Dynapede 1"],
-            42: [4,"\x33\xc5\x8a","\x1b","Sky Garden: Dynapede 2"],
-            43: [5,"\xb0\xb8\x8a","\x1e","Sky Garden: Red Cyber"],
-            44: [5,"\x16\xc8\x8a","\x1c","Sky Garden: Nitropede"],
-#            45: [15,"\x6f\xd1\x8a","\x27","Sky Garden: Viper (boss)"],
+            # Sky Garden
+            40: [4,"\xb0\xb4\x8a","\x1d","Blue Cyber"],
+            41: [4,"\x20\xc5\x8a","\x1b","Dynapede 1"],
+            42: [4,"\x33\xc5\x8a","\x1b","Dynapede 2"],
+            43: [5,"\xb0\xb8\x8a","\x1e","Red Cyber"],
+            44: [5,"\x16\xc8\x8a","\x1c","Nitropede"],
 
-            50: [6,"\xcc\xe6\x8a","\x2b","Mu: Slipper"],
-            51: [6,"\x5c\xe4\x8a","\x2a","Mu: Skuddle"],
-            52: [6,"\x9e\xdd\x8a","\x28","Mu: Cyclops"],
-            53: [6,"\x6e\xe2\x8a","\x29","Mu: Flasher"],
-            54: [6,"\x07\xde\x8a","\x28","Mu: Cyclops (asleep)"],
-#            55: [6,"\xf7\xf1\x8a","\x2f","Mu: Vampire (boss)"],
-#            56: [6,"\xc8\xf3\x8a","\x30","Mu: Vampire (boss)"],
+            # Mu
+            50: [6,"\xcc\xe6\x8a","\x2b","Slipper"],
+            51: [6,"\x5c\xe4\x8a","\x2a","Skuddle"],
+            52: [6,"\x9e\xdd\x8a","\x28","Cyclops"],
+            53: [6,"\x6e\xe2\x8a","\x29","Flasher"],
+            54: [6,"\x07\xde\x8a","\x28","Cyclops (asleep)"],
 
-            60: [7,"\x9f\xee\x8a","\x2d","Angel Dungeon: Dive Bat"],
-            61: [7,"\x51\xea\x8a","\x2c","Angel Dungeon: Steelbones"],
-            62: [7,"\x33\xef\x8a","\x2e","Angel Dungeon: Draco"],
-            63: [7,"\xc7\xf0\x8a","\x2e","Angel Dungeon: Ramskull"],
+            # Angel Dungeon
+            60: [7,"\x9f\xee\x8a","\x2d","Dive Bat"],
+            61: [7,"\x51\xea\x8a","\x2c","Steelbones"],
+            62: [7,"\x33\xef\x8a","\x2e","Draco"],
+            63: [7,"\xc7\xf0\x8a","\x2e","Ramskull"],
 
-            70: [8,"\x55\x91\x8b","\x33","Great Wall: Archer 1"],
-            71: [8,"\xfe\x8e\x8b","\x33","Great Wall: Archer Statue"],
-            72: [8,"\xbe\x8d\x8b","\x34","Great Wall: Eyesore"],
-            73: [8,"\x70\x8c\x8b","\x35","Great Wall: Fire Bug 1"],
-            74: [8,"\x70\x8c\x8b","\x33","Great Wall: Fire Bug 2"],
-            75: [8,"\x23\x94\x8b","\x32","Great Wall: Asp"],
-            76: [8,"\x65\x91\x8b","\x33","Great Wall: Archer 2"],
-            77: [8,"\x77\x91\x8b","\x33","Great Wall: Archer 3"],
-            78: [8,"\x72\x8f\x8b","\x46","Great Wall: Archer Statue (switch)"],
-#            79: [8,"\x5c\x81\x8b","\x36","Great Wall: Sand Fanger (boss)"],
+            # Great Wall
+            70: [8,"\x55\x91\x8b","\x33","Archer 1"],
+            71: [8,"\xfe\x8e\x8b","\x33","Archer Statue"],
+            72: [8,"\xbe\x8d\x8b","\x34","Eyesore"],
+            73: [8,"\x70\x8c\x8b","\x35","Fire Bug 1"],
+            74: [8,"\x70\x8c\x8b","\x33","Fire Bug 2"],
+            75: [8,"\x23\x94\x8b","\x32","Asp"],
+            76: [8,"\x65\x91\x8b","\x33","Archer 2"],
+            77: [8,"\x77\x91\x8b","\x33","Archer 3"],
+            78: [8,"\x72\x8f\x8b","\x46","Archer Statue (switch)"],
 
-            80: [9,"\xac\x9b\x8b","\x3e","Mt Temple: Skulker (N/S)"],
-            81: [9,"\x4e\x9c\x8b","\x3e","Mt Temple: Skulker (E/W)"],
-            82: [9,"\x44\x9c\x8b","\x3e","Mt Temple: Skulker (E/W)"],
-            83: [9,"\xa2\x9b\x8b","\x3e","Mt Temple: Skulker (E/W)"],
-            84: [9,"\x8b\x9e\x8b","\x3d","Mt Temple: Yorrick (E/W)"],
-            85: [9,"\x53\x9f\x8b","\x3d","Mt Temple: Yorrick (E/W)"],
-            86: [9,"\x0f\x9d\x8b","\x3d","Mt Temple: Yorrick (N/S)"],
-            87: [9,"\xcd\x9d\x8b","\x3d","Mt Temple: Yorrick (N/S)"],
-            88: [9,"\x3b\x98\x8b","\x3f","Mt Temple: Fire Sprite"],
-            89: [9,"\x1d\xa0\x8b","\x3c","Mt Temple: Acid Splasher 2"],
-            90: [9,"\xa1\xa0\x8b","\x3c","Mt Temple: Acid Splasher (stationary E)"],
-            91: [9,"\x75\xa0\x8b","\x3c","Mt Temple: Acid Splasher (stationary W)"],
-            92: [9,"\x49\xa0\x8b","\x3c","Mt Temple: Acid Splasher (stationary S)"],
-            93: [9,"\xcf\xa0\x8b","\x3c","Mt Temple: Acid Splasher (stationary N)"],
+            # Mt. Kress
+            80: [9,"\xac\x9b\x8b","\x3e","Skulker (N/S)"],
+            81: [9,"\x4e\x9c\x8b","\x3e","Skulker (E/W)"],
+            82: [9,"\x44\x9c\x8b","\x3e","Skulker (E/W)"],
+            83: [9,"\xa2\x9b\x8b","\x3e","Skulker (E/W)"],
+            84: [9,"\x8b\x9e\x8b","\x3d","Yorrick (E/W)"],
+            85: [9,"\x53\x9f\x8b","\x3d","Yorrick (E/W)"],
+            86: [9,"\x0f\x9d\x8b","\x3d","Yorrick (N/S)"],
+            87: [9,"\xcd\x9d\x8b","\x3d","Yorrick (N/S)"],
+            88: [9,"\x3b\x98\x8b","\x3f","Fire Sprite"],
+            89: [9,"\x1d\xa0\x8b","\x3c","Acid Splasher 2"],
+            90: [9,"\xa1\xa0\x8b","\x3c","Acid Splasher (stationary E)"],
+            91: [9,"\x75\xa0\x8b","\x3c","Acid Splasher (stationary W)"],
+            92: [9,"\x49\xa0\x8b","\x3c","Acid Splasher (stationary S)"],
+            93: [9,"\xcf\xa0\x8b","\x3c","Acid Splasher (stationary N)"],
 
-            100: [10,"\xd7\xb1\x8b","\x49","Ankor Wat: Shrubber"],
-            101: [10,"\xb4\xb1\x8b","\x49","Ankor Wat: Shrubber 2"],
-            102: [10,"\x75\xb2\x8b","\x46","Ankor Wat: Zombie"],
-            103: [11,"\x8d\xbd\x8b","\x42","Ankor Wat: Goldcap"],
-            104: [11,"\x25\xb8\x8b","\x45","Ankor Wat: Gorgon"],
-            105: [11,"\x17\xb8\x8b","\x45","Ankor Wat: Gorgon (jump down)"],
-            106: [11,"\xbb\xbf\x8b","\x43","Ankor Wat: Frenzie"],
-            107: [11,"\xd0\xbf\x8b","\x43","Ankor Wat: Frenzie 2"],
-            108: [11,"\x66\xbb\x8b","\x44","Ankor Wat: Wall Walker"],
-            109: [11,"\x66\xbb\x8b","\x3a","Ankor Wat: Wall Walker 2"],
-            110: [11,"\x5c\xbb\x8b","\x44","Ankor Wat: Wall Walker 3"],
-            111: [11,"\x5c\xbb\x8b","\x3a","Ankor Wat: Wall Walker 4"],
-            112: [10,"\x4f\xaf\x8b","\x4a","Ankor Wat: Zip Fly"],
-            113: [11,"\xaf\x99\x88","\x45","Ankor Wat: Gorgon (block)"],
+            # Ankor Wat
+            100: [10,"\xd7\xb1\x8b","\x49","Shrubber"],
+            101: [10,"\xb4\xb1\x8b","\x49","Shrubber 2"],
+            102: [10,"\x75\xb2\x8b","\x46","Zombie"],
+            103: [10,"\x4f\xaf\x8b","\x4a","Zip Fly"],
+            104: [11,"\x8d\xbd\x8b","\x42","Goldcap"],
+            105: [11,"\x25\xb8\x8b","\x45","Gorgon"],
+            106: [11,"\x17\xb8\x8b","\x45","Gorgon (jump down)"],
+            107: [11,"\xbb\xbf\x8b","\x43","Frenzie"],
+            108: [11,"\xd0\xbf\x8b","\x43","Frenzie 2"],
+            109: [11,"\x66\xbb\x8b","\x44","Wall Walker"],
+            110: [11,"\x66\xbb\x8b","\x3a","Wall Walker 2"],
+            111: [11,"\x5c\xbb\x8b","\x44","Wall Walker 3"],
+            112: [11,"\x5c\xbb\x8b","\x3a","Wall Walker 4"],
+            113: [11,"\xaf\x99\x88","\x45","Gorgon (block)"],
 
-            120: [12,"\x5f\xc6\x8b","\x4f","Pyramid: Mystic Ball (stationary)"],
-            121: [12,"\xfc\xc5\x8b","\x4f","Pyramid: Mystic Ball"],
-            122: [12,"\xa3\xc5\x8b","\x4f","Pyramid: Mystic Ball"],
-            123: [12,"\x9d\xc3\x8b","\x4e","Pyramid: Tuts"],
-            124: [12,"\x98\xc7\x8b","\x51","Pyramid: Blaster"],
-            125: [12,"\x84\xc1\x8b","\x4c","Pyramid: Haunt (stationary)"],
-            126: [12,"\xa7\xc1\x8b","\x4c","Pyramid: Haunt"],
-#            127: [12,"\x\x\x","\x","Pyramid: Haunt's Spirit"],     # bc2d0
-#            128: [12,"\xb6\xa6\x8b","\x50","Pyramid: Mummy Queen (boss)"],
+            # Pyramid
+            120: [12,"\x5f\xc6\x8b","\x4f","Mystic Ball (stationary)"],
+            121: [12,"\xfc\xc5\x8b","\x4f","Mystic Ball"],
+            122: [12,"\xa3\xc5\x8b","\x4f","Mystic Ball"],
+            123: [12,"\x9d\xc3\x8b","\x4e","Tuts"],
+            124: [12,"\x98\xc7\x8b","\x51","Blaster"],
+            125: [12,"\x84\xc1\x8b","\x4c","Haunt (stationary)"],
+            126: [12,"\xa7\xc1\x8b","\x4c","Haunt"],
 
-#            130: [14,"\xd7\x99\x8a","\x5a","Babel: Castoth (boss)"],
-#            131: [15,"\xd5\xd0\x8a","\x5b","Babel: Viper (boss)"],
-#            132: [16,"\x50\xf1\x8a","\x5c","Babel: Vampire (boss)"],
-#            133: [16,"\x9c\xf1\x8a","\x5c","Babel: Vampire (boss)"],
-#            134: [17,"\x00\x80\x8b","\x5d","Babel: Sand Fanger (boss)"],
-#            135: [18,"\x1a\xa6\x8b","\x5e","Babel: Mummy Queen (boss)"],
+            # Babel Tower
+#            130: [14,"\xd7\x99\x8a","\x5a","Castoth (boss)"],
+#            131: [14,"\xd5\xd0\x8a","\x5b","Viper (boss)"],
+#            132: [14,"\x50\xf1\x8a","\x5c","Vampire (boss)"],
+#            133: [14,"\x9c\xf1\x8a","\x5c","Vampire (boss)"],
+#            134: [14,"\x00\x80\x8b","\x5d","Sand Fanger (boss)"],
+#            135: [14,"\x1a\xa6\x8b","\x5e","Mummy Queen (boss)"],
 
-            140: [3,"\xca\xaa\x8a","\x61","Diamond Mine: Flayzer 1"],
-            141: [3,"\xf5\xaf\x8a","\x63","Diamond Mine: Grundit"],
-            142: [3,"\x03\xb1\x8a","\x62","Diamond Mine: Eye Stalker"]
-#            143: [19,"\x09\xf7\x88","\x5f","Jeweler's Mansion: Solid Arm (boss)"],
+            # Jeweler's Mansion
+            140: [13,"\xca\xaa\x8a","\x61","Flayzer"],
+            141: [13,"\xf5\xaf\x8a","\x63","Grundit"],
+            142: [13,"\xd8\xb0\x8a","\x62","Eye Stalker 1"],
+            143: [13,"\x03\xb1\x8a","\x62","Eye Stalker 2"]
 
-#            140: [20,"\xaa\xee\x8c","\x54","Final Boss: Dark Gaia"]
+            # Bosses
+#            24: [15,"\x03\x9b\x8a","\x14","Castoth (boss)"],
+#            45: [15,"\x6f\xd1\x8a","\x27","Viper (boss)"],
+#            55: [15,"\xf7\xf1\x8a","\x2f","Vampire (boss)"],
+#            56: [15,"\xc8\xf3\x8a","\x30","Vampire (boss)"],
+#            79: [15,"\x5c\x81\x8b","\x36","Sand Fanger (boss)"],
+#            128: [15,"\xb6\xa6\x8b","\x50","Mummy Queen (boss)"],
+#            143: [15,"\x09\xf7\x88","\x5f","Solid Arm (boss)"],
+#            140: [15,"\xaa\xee\x8c","\x54","Dark Gaia"]
+
+        }
+
+
+        # Database of non-enemy sprites to disable in enemizer
+        # FORMAT: { ID: [Enemyset, Event addr, Name]}
+        self.nonenemy_sprites = {
+            # Underground Tunnel
+            0: [0,"a8835","Movable statue"],
+            1: [0,"a87ce","Falling spear 1"],
+            2: [0,"a87c3","Falling spear 2"],
+            3: [0,"a8aae","Spike ball 1"],
+            4: [0,"a8a0f","Spike ball 2"],
+            5: [0,"a8a7d","Spike ball 3"],
+            6: [0,"a8a46","Spike ball 4"],
+            7: [0,"a89de","Spike ball 5"],
+
+            # Inca Ruins
+            10: [1,"9c26f","Skeleton"],
+            11: [1,"a8896","Broken statue (chest)"],
+            12: [1,"a88de","Broken statue (blockade)"],
+
+            # Diamond Mine
+            20: [3,"5d6a8","Elevator sign"],
+            21: [3,"aa4f5","Elevator platform"],
 
         }
