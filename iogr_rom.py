@@ -1323,21 +1323,22 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-Crazyhaze   -Lassic") + "\xCB")
     f.write(qt.encode("-djtifaheart -Le Hulk") + "\xCB")
     f.write(qt.encode("-Eppy37      -manafreak") + "\xCB")
-    f.write(qt.encode("-Keypaladin  -Mr Freet") + "\xC9\xB4\xCE")
-
+    f.write(qt.encode("-Keypaladin  -Mikan") + "\xC9\xB4\xCE")
+-
+    f.write(qt.encode("-Mr Freet    -Scheris") + "\xCB")
     f.write(qt.encode("-Plan        -PozzumSenpai") + "\xCB")
     f.write(qt.encode("-Raeven0     -SDiezal") + "\xCB")
-    f.write(qt.encode("-roeya       -Skarsnik") + "\xCB")
-    f.write(qt.encode("-Scheris     -Skipsy") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-roeya       -Skarsnik") + "\xC9\xB4\xCE")
 
+    f.write(qt.encode("-Skipsy      -Tymekeeper") + "\xCB")
     f.write(qt.encode("-SmashManiac -solarcell007") + "\xCB")
     f.write(qt.encode("-steve hacks -Veetorp") + "\xCB")
-    f.write(qt.encode("-Sye990      -Verallix") + "\xCB")
-    f.write(qt.encode("-Tymekeeper  -Volor") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Sye990      -Verallix") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Voranthe    -Xyrcord") + "\xCB")
-    f.write(qt.encode("-Wilddin     -Z4t0x") + "\xCB")
-    f.write(qt.encode("-wormsofcan  -ZockerStu") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Volor       -Xyrcord") + "\xCB")
+    f.write(qt.encode("-Voranthe    -Z4t0x") + "\xCB")
+    f.write(qt.encode("-Wilddin     -ZockerStu") + "\xCB")
+    f.write(qt.encode("-wormsofcan") + "\xC9\xB4\xCE")
 
     f.write("\xCB" + qt.encode("  Thank you all so much!"))
     f.write("\xCB" + qt.encode("     This was so fun!"))
