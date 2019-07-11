@@ -964,7 +964,8 @@ class World:
 
         # Make all spritesets equal to Underground Tunnel
         for map in self.maps:
-            # Determine new eneset for map
+            oldset = self.maps[map][0]
+            # Determine new enemyset for map
             if not self.maps[map][5]:
                 sets = enemysets[:]
             else:
@@ -972,13 +973,16 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            #set = self.maps[map][0]
+            #newset = testset
 
-            # Gather enemies from new set
-            enemies = []
+            # Gather enemies from old and new sets
+            old_enemies = []
+            new_enemies = []
             for enemy in self.enemies:
+                if self.enemies[enemy][0] == oldset and self.enemies[enemy][5]:
+                    old_enemies.append(enemy)
                 if self.enemies[enemy][0] == newset and self.enemies[enemy][5]:
-                    enemies.append(enemy)
+                    new_enemies.append(enemy)
 
             # Update map header to reflect new enemyset
             if self.maps[map][3]:
@@ -1000,7 +1004,7 @@ class World:
             #print map, addr_start, addr_end
 
             # Randomize each enemy in map
-            for enemy in self.enemies:
+            for enemy in old_enemies:
                 #print self.enemies[enemy][3]
                 done = False
                 addr = int(addr_start,16) + rom_offset
@@ -1012,14 +1016,14 @@ class World:
                         # Pick an enemy from new set
                         enemytype = self.enemies[enemy][3]
                         placementtype = self.enemies[enemy][4]
-                        random.shuffle(enemies)
+                        random.shuffle(new_enemies)
                         i = 0
                         found_enemy = False
                         while not found_enemy:
-                            new_enemy = enemies[i]
+                            new_enemy = new_enemies[i]
                             new_enemytype = self.enemies[new_enemy][3]
                             new_placementtype = self.enemies[new_enemy][4]
-                            if placementtype == new_placementtype or enemytype == new_enemytype or new_enemytype == 3 or i == len(enemies)-1:
+                            if placementtype == new_placementtype or enemytype == new_enemytype or new_enemytype == 3 or i == len(new_enemies)-1:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
