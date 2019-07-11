@@ -1321,7 +1321,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-djtifaheart -Le Hulk") + "\xCB")
     f.write(qt.encode("-Eppy37      -manafreak") + "\xCB")
     f.write(qt.encode("-Keypaladin  -Mikan") + "\xC9\xB4\xCE")
--
+
     f.write(qt.encode("-Mr Freet    -Scheris") + "\xCB")
     f.write(qt.encode("-Plan        -PozzumSenpai") + "\xCB")
     f.write(qt.encode("-Raeven0     -SDiezal") + "\xCB")
