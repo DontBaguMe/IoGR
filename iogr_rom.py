@@ -27,7 +27,7 @@ FORCE_CHANGE = "\x22\x30\xfd\x88"
 
 # Generate new ROM and prepare it for randomization
 def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized",
-    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",variant="None",firebird=False):
+    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",variant="None",enemizer="None",firebird=False):
 
     # Initiate random seed
     random.seed(rng_seed)
@@ -81,7 +81,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("1da4c",16)+rom_offset)
     f.write("\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
-    hash_str = version + mode_str + goal + logic_mode + variant + statues_reqstr + str(firebird)
+    hash_str = version + mode_str + goal + logic_mode + variant + enemizer + statues_reqstr + str(firebird)
     h = hmac.new(str(rng_seed),hash_str)
     hash = h.digest()
 
@@ -150,13 +150,16 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                           Update map headers
     ##########################################################################
-    if mode == 0:
-        f_mapdata = open(folder + "0d8000_mapdataeasy.bin","r+b")
-    else:
-        f_mapdata = open(folder + "0d8000_mapdata.bin","r+b")
+    f_mapdata = open(folder + "0d8000_mapdata.bin","r+b")
     f.seek(int("d8000",16)+rom_offset)
     f.write(f_mapdata.read())
     f_mapdata.close
+
+    if mode == 0:
+        f.seek(int("d8199",16)+rom_offset)
+        f.write("\x09")
+        f.seek(int("d81b7",16)+rom_offset)
+        f.write("\x07")
 
     ##########################################################################
     #                        Update treasure chest data
@@ -2140,7 +2143,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         if seed_adj > 10:
             print "ERROR: Max number of seed adjustments exceeded"
             return False
-        w=classes.World(rng_seed,mode,goal,logic_mode,statues,variant,firebird,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
+        w=classes.World(rng_seed,mode,goal,logic_mode,statues,variant,enemizer,firebird,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
         done = w.randomize(seed_adj)
         seed_adj += 1
 

@@ -44,6 +44,7 @@ def generate_ROM():
     logic_str = logic.get()
     diff_str = difficulty.get()
     variant_str = variant.get()
+    enemizer_str = enemizer.get()
 
     if goal_str == "Dark Gaia":
         goal_cd = "DG" + statues_str[0]
@@ -62,10 +63,15 @@ def generate_ROM():
     else:
         variant_chr = ""
 
-    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + variant_chr + "_" + seed_str
+    if enemizer_str == "Basic":
+        enemizer_chr = "_E"
+    else:
+        enemizer_chr = ""
+
+    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + variant_chr + enemizer_chr + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"
 
-    if iogr_rom.generate_rom(VERSION,rom_offset,int(seed_str),rompath,filename,diff_str,goal_str,logic_str,statues_str,variant_str):
+    if iogr_rom.generate_rom(VERSION,rom_offset,int(seed_str),rompath,filename,diff_str,goal_str,logic_str,statues_str,variant_str,enemizer_str):
         showinfo("Success!", filename + " has been successfully created!")
     else:
         showinfo("ERROR", "Operation failed (unspecified error)")
@@ -79,7 +85,7 @@ else:
 
 # Add a grid
 mainframe = Frame(root)
-mainframe.grid(column=2,row=6, sticky=(N,W,E,S) )
+mainframe.grid(column=2,row=7, sticky=(N,W,E,S) )
 mainframe.columnconfigure(0, weight = 1)
 mainframe.rowconfigure(0, weight = 1)
 mainframe.pack(pady = 20, padx = 20)
@@ -90,7 +96,8 @@ Label(mainframe,text="Difficulty").grid(row=2,column=0,sticky=W)
 Label(mainframe,text="Goal").grid(row=3,column=0,sticky=W)
 Label(mainframe,text="Logic").grid(row=4,column=0,sticky=W)
 Label(mainframe,text="Variant").grid(row=5,column=0,sticky=W)
-Label(mainframe,text="Statues").grid(row=6,column=0,sticky=W)
+Label(mainframe,text="Enemizer").grid(row=6,column=0,sticky=W)
+Label(mainframe,text="Statues").grid(row=7,column=0,sticky=W)
 
 difficulty = StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -108,6 +115,10 @@ variant = StringVar(root)
 variant_choices = ["None", "OHKO"]
 variant.set("None")
 
+enemizer = StringVar(root)
+enemizer_choices = ["None", "Basic"]
+enemizer.set("None")
+
 statues = StringVar(root)
 statue_choices = ["0","1","2","3","4","5","6","Random"]
 statues.set("Random")
@@ -123,10 +134,11 @@ diff_menu = OptionMenu(mainframe,difficulty,*diff_choices).grid(row=2,column=1)
 goal_menu = OptionMenu(mainframe,goal,*goal_choices).grid(row=3,column=1)
 logic_menu = OptionMenu(mainframe,logic,*logic_choices).grid(row=4,column=1)
 variant_menu = OptionMenu(mainframe,variant,*variant_choices).grid(row=5,column=1)
-statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=6,column=1)
+enemizer_menu = OptionMenu(mainframe,enemizer,*enemizer_choices).grid(row=6,column=1)
+statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=7,column=1)
 
 Button(mainframe,text='Browse...', command=find_ROM).grid(row=0,column=2)
 Button(mainframe,text='Generate Seed', command=generate_seed).grid(row=1,column=2)
-Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=6,column=2)
+Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=7,column=2)
 
 root.mainloop()

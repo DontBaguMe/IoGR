@@ -943,7 +943,8 @@ class World:
                 f.write(self.spoilers[i])
                 i += 1
 
-        self.enemize(f,rom_offset)
+        if self.enemizer == "Basic":
+            self.enemize(f,rom_offset)
         #print "ROM successfully created"
 
     # Shuffle enemies in ROM
@@ -951,8 +952,8 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        test_enemy = 41
-        test_set = self.enemies[test_enemy][0]
+        #test_enemy = 103
+        #test_set = self.enemies[test_enemy][0]
 
         # Get list of enemysets
         enemysets = []
@@ -973,13 +974,13 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            #newset = testset
+            #newset = test_set  # TESTING
 
             # Gather enemies from old and new sets
             old_enemies = []
             new_enemies = []
             for enemy in self.enemies:
-                if self.enemies[enemy][0] == oldset and self.enemies[enemy][5]:
+                if self.enemies[enemy][0] == oldset:
                     old_enemies.append(enemy)
                 if self.enemies[enemy][0] == newset and self.enemies[enemy][5]:
                     new_enemies.append(enemy)
@@ -1001,7 +1002,6 @@ class World:
             nextbyte_high = f.read(1)
             addr_start = "c" + binascii.hexlify(byte_high) + binascii.hexlify(byte_low)
             addr_end = "c" + binascii.hexlify(nextbyte_high) + binascii.hexlify(nextbyte_low)
-            #print map, addr_start, addr_end
 
             # Randomize each enemy in map
             for enemy in old_enemies:
@@ -1027,10 +1027,8 @@ class World:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
-                        #print addr
                         f.write(self.enemies[new_enemy][1] + self.enemies[new_enemy][2])
-                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])
-                        #print " ", addr, hex(addr), binascii.hexlify(f.read(4))
+                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
 
         # Disable all non-enemy sprites
         for sprite in self.nonenemy_sprites:
@@ -1039,7 +1037,7 @@ class World:
 
     # Build world
     def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],
-        variant="None",firebird=False,kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
+        variant="None",enemizer="None",firebird=False,kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
 
         self.seed = seed
         self.statues = statues
@@ -1051,6 +1049,7 @@ class World:
         self.hieroglyphs = hieroglyphs
         self.mode = mode
         self.variant = variant
+        self.enemizer = enemizer
         self.firebird = firebird
         self.placement_log = []
         self.spoilers = []
@@ -1920,7 +1919,7 @@ class World:
             62: [3,2,0,"\x3E\x00\x02\x08\x06\x01\x9B\x4D\xDB",9,[]],
             63: [3,2,0,"\x3F\x00\x02\x05\x06\x01\x50\x77\xC9",9,[]],
             64: [3,2,0,"\x40\x00\x02\x08\x06\x01\xD0\x5C\xDB",9,[]],  # Trapped laborer (??)
-            65: [3,2,0,"\x41\x00\x02\x00\x11\x06\x00\x90\x42\xD4",51,[1,3]],  # Stationary Grundit
+            65: [3,2,0,"\x41\x00\x02\x00\x11\x06\x00\x90\x42\xD4",51,[0,2,3,4,5,11]],  # Stationary Grundit
             69: [3,2,0,"\x45\x00\x02\x08\x06\x01\xA3\x59\xDD",9,[]],
             70: [3,2,0,"\x46\x00\x02\x08\x06\x01\x2F\x2A\xDD",9,[]],
 
@@ -1944,12 +1943,12 @@ class World:
             101: [6,3,0,"\x65\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
 
             # Angel Dungeon
-            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[]],
-            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,[]],
-            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,[]],
-            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,[]],
-            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,[]],
-            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,[]],
+            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[2,6,7,8,9,10,11]],
+            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,[2,6,7,8,9,10,11]],
+            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,[2,6,7,8,9,10,11]],
+            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,[2,6,7,8,9,10,11]],
+            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,[2,6,7,8,9,10,11]],
+            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,[2,6,7,8,9,10,11]],
 
             # Great Wall
             130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
@@ -2089,11 +2088,11 @@ class World:
             86: [9,"\x0f\x9d\x8b","\x3d",3,False,True,"Yorrick (N/S)"],
             87: [9,"\xcd\x9d\x8b","\x3d",3,False,False,"Yorrick (N/S)"],
             88: [9,"\x3b\x98\x8b","\x3f",3,False,True,"Fire Sprite"],
-            89: [9,"\x1d\xa0\x8b","\x3c",2,True,True,"Acid Splasher 2"],
+            89: [9,"\xcf\xa0\x8b","\x3c",2,True,True,"Acid Splasher"],
             90: [9,"\xa1\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary E)"],
             91: [9,"\x75\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary W)"],
             92: [9,"\x49\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary S)"],
-            93: [9,"\xcf\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary N)"],
+            93: [9,"\x1d\xa0\x8b","\x3c",2,True,False,"Acid Splasher (stationary N)"],
 
             # Ankor Wat
             100: [10,"\xd7\xb1\x8b","\x49",2,True,True,"Shrubber"],
@@ -2112,7 +2111,7 @@ class World:
             113: [11,"\xaf\x99\x88","\x45",2,True,False,"Gorgon (block)"],
 
             # Pyramid
-            120: [12,"\x5f\xc6\x8b","\x4f",2,True,True,"Mystic Ball (stationary)"],
+            120: [12,"\x5f\xc6\x8b","\x4f",1,True,True,"Mystic Ball (stationary)"],
             121: [12,"\xfc\xc5\x8b","\x4f",2,True,True,"Mystic Ball"],
             122: [12,"\xa3\xc5\x8b","\x4f",2,True,True,"Mystic Ball"],
             123: [12,"\x9d\xc3\x8b","\x4e",2,True,True,"Tuts"],
@@ -2172,6 +2171,7 @@ class World:
             20: [3,"5d6a8","Elevator sign"],
             21: [3,"aa4f5","Elevator platform 1"],
             22: [3,"aa50c","Elevator platform 2"],
+            23: [3,"aa4e2","Elevator platform 3"],
 
             # Sky Garden
             30: [4,"5f8c0","Broken statue"],
