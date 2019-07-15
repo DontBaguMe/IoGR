@@ -943,7 +943,7 @@ class World:
                 f.write(self.spoilers[i])
                 i += 1
 
-        if self.enemizer == "Basic":
+        if self.enemizer != "None":
             self.enemize(f,rom_offset)
         #print "ROM successfully created"
 
@@ -963,11 +963,13 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        # Make all spritesets equal to Underground Tunnel
+        # Randomize enemy spritesets
         for map in self.maps:
             oldset = self.maps[map][0]
             # Determine new enemyset for map
-            if not self.maps[map][5]:
+            if self.enemizer == "Basic":
+                sets = [oldset]
+            elif not self.maps[map][5]:
                 sets = enemysets[:]
             else:
                 sets = self.maps[map][5][:]
@@ -1015,15 +1017,17 @@ class World:
                     else:
                         # Pick an enemy from new set
                         enemytype = self.enemies[enemy][3]
-                        placementtype = self.enemies[enemy][4]
+                        walkable = self.enemies[enemy][4]
                         random.shuffle(new_enemies)
+
                         i = 0
                         found_enemy = False
+
                         while not found_enemy:
                             new_enemy = new_enemies[i]
                             new_enemytype = self.enemies[new_enemy][3]
-                            new_placementtype = self.enemies[new_enemy][4]
-                            if placementtype == new_placementtype or enemytype == new_enemytype or new_enemytype == 3 or i == len(new_enemies)-1:
+                            new_walkable = self.enemies[new_enemy][4]
+                            if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies)-1:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
@@ -1031,9 +1035,10 @@ class World:
                         #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
 
         # Disable all non-enemy sprites
-        for sprite in self.nonenemy_sprites:
-            f.seek(int(self.nonenemy_sprites[sprite][1],16) + rom_offset + 3)
-            f.write("\x02\xe0")
+        if self.enemizer != "Basic":
+            for sprite in self.nonenemy_sprites:
+                f.seek(int(self.nonenemy_sprites[sprite][1],16) + rom_offset + 3)
+                f.write("\x02\xe0")
 
     # Build world
     def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],
