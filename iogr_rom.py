@@ -787,7 +787,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_nazca.close
 
     # Allow exit to world map
-    f.seek(int("5e80c",16))
+    f.seek(int("5e80c",16)+rom_offset)
     f.write("\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
 
     ##########################################################################
@@ -1327,15 +1327,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-Raeven0     -SDiezal") + "\xCB")
     f.write(qt.encode("-roeya       -Skarsnik") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Skipsy      -Tymekeeper") + "\xCB")
-    f.write(qt.encode("-SmashManiac -solarcell007") + "\xCB")
-    f.write(qt.encode("-steve hacks -Veetorp") + "\xCB")
-    f.write(qt.encode("-Sye990      -Verallix") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Skipsy      -solarcell007") + "\xCB")
+    f.write(qt.encode("-SmashManiac -Tsurana") + "\xCB")
+    f.write(qt.encode("-steve hacks -Tymekeeper") + "\xCB")
+    f.write(qt.encode("-Sye990      -Veetorp") + "\xC9\xB4\xCE")
 
+    f.write(qt.encode("-Verallix    -wormsofcan") + "\xCB")
     f.write(qt.encode("-Volor       -Xyrcord") + "\xCB")
     f.write(qt.encode("-Voranthe    -Z4t0x") + "\xCB")
-    f.write(qt.encode("-Wilddin     -ZockerStu") + "\xCB")
-    f.write(qt.encode("-wormsofcan") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Wilddin     -ZockerStu") + "\xC9\xB4\xCE")
 
     f.write("\xCB" + qt.encode("  Thank you all so much!"))
     f.write("\xCB" + qt.encode("     This was so fun!"))
