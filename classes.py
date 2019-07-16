@@ -1908,7 +1908,7 @@ class World:
             18: [0,1,0,"\x12\x00\x02\x03\x06",14,[]],  # Spike balls
 
             # Inca Ruins
-#            27: [1,0,0,"\x1c",""],  # Moon Tribe cave
+            27: [1,0,0,"\x1B\x00\x02\x05\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[1]],  # Moon Tribe cave
             29: [1,1,0,"\x1D\x00\x02\x0F\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],
             32: [1,1,0,"\x20\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],  # Broken statue
             33: [2,1,0,"\x21\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],  # Floor switch
@@ -1939,7 +1939,7 @@ class World:
             84: [5,2,0,"\x54\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[4,5]],
 
             # Mu
-#            92: [0,4,0,"",0,[]],  # Seaside Palace
+#            92: [6,0,0,"\x5C\x00\x02\x15\x11\x04\x00\xB7\x49\xDB",62,[]],  # Seaside Palace
             95: [6,3,0,"\x5F\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[]],
             96: [6,3,0,"\x60\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
             97: [6,3,0,"\x61\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
@@ -2065,6 +2065,7 @@ class World:
             52: [6,"\x9e\xdd\x8a","\x28",2,True,True,"Cyclops"],
             53: [6,"\x6e\xe2\x8a","\x29",3,True,True,"Flasher"],
             54: [6,"\x07\xde\x8a","\x28",2,True,False,"Cyclops (asleep)"],
+            55: [6,"\xf4\xe6\x8a","\x2b",2,True,True,"Slipper (falling)"],
 
             # Angel Dungeon
             60: [7,"\x9f\xee\x8a","\x2d",3,False,True,"Dive Bat"],

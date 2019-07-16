@@ -487,11 +487,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("4fb50",16)+rom_offset)
     f.write(f_tutorial.read())
     f_tutorial.close
-    #f.seek(int("49231",16)+rom_offset)   # NPC in front of school
-    #f.write("\x50\xfb")
-    f.seek(int("49238",16)+rom_offset)   # Grants max stats
-    f.write("\xA9\x28\x00\x8D\xCA\x0A\x8D\xCE\x0A\x8D\xDC\x0A\x8D\xDE\x0A\x02\xBF\x4C\x92\x6B")
-    f.write(qt.encode("Max stats baby!",True))
+    f.seek(int("49231",16)+rom_offset)   # NPC in front of school
+    f.write("\x50\xfb")
+    #f.seek(int("49238",16)+rom_offset)   # Grants max stats
+    #f.write("\xA9\x28\x00\x8D\xCA\x0A\x8D\xCE\x0A\x8D\xDC\x0A\x8D\xDE\x0A\x02\xBF\x4C\x92\x6B")
+    #f.write(qt.encode("Max stats baby!",True))
 
     # Turns house in South Cape into item-tracking overworld map (Easy only)
     if mode == 0:
