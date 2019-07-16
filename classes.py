@@ -963,6 +963,23 @@ class World:
         f.seek(0)
         rom = f.read()
 
+        # Shuffle enemy stats in Chaos
+        if self.enemizer == "Chaos":
+            chaos_enemies = []
+            chaos_templates = []
+            for enemy in self.enemies:
+                if self.enemies[enemy][5]:
+                    chaos_enemies.append(enemy)
+                    chaos_templates.append(self.enemies[enemy][2])
+
+            random.shuffle(chaos_templates)
+            chaos_dictionary = {}
+            i = 0
+
+            for enemy in chaos_enemies:
+                chaos_dictionary[enemy] = chaos_templates[i]
+                i += 1
+
         # Randomize enemy spritesets
         for map in self.maps:
             oldset = self.maps[map][0]
@@ -1031,7 +1048,11 @@ class World:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
-                        f.write(self.enemies[new_enemy][1] + self.enemies[new_enemy][2])
+                        f.write(self.enemies[new_enemy][1])
+                        if self.enemizer == "Chaos":
+                            f.write(chaos_dictionary[new_enemy])
+                        else:
+                            f.write(self.enemies[new_enemy][2])
                         #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
 
         # Disable all non-enemy sprites
@@ -1039,6 +1060,7 @@ class World:
             for sprite in self.nonenemy_sprites:
                 f.seek(int(self.nonenemy_sprites[sprite][1],16) + rom_offset + 3)
                 f.write("\x02\xe0")
+
 
     # Build world
     def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],
@@ -1908,7 +1930,7 @@ class World:
             18: [0,1,0,"\x12\x00\x02\x03\x06",14,[]],  # Spike balls
 
             # Inca Ruins
-            27: [1,0,0,"\x1B\x00\x02\x05\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[1]],  # Moon Tribe cave
+#            27: [1,0,0,"\x1B\x00\x02\x05\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[0,1]],  # Moon Tribe cave
             29: [1,1,0,"\x1D\x00\x02\x0F\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],
             32: [1,1,0,"\x20\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],  # Broken statue
             33: [2,1,0,"\x21\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],  # Floor switch

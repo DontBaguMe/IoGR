@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "2.0.2"
+VERSION = "2.0.3"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -63,10 +63,10 @@ def generate_ROM():
     else:
         variant_chr = ""
 
-    if enemizer_str == "Basic":
-        enemizer_chr = "_E"
-    else:
+    if enemizer_str == "None":
         enemizer_chr = ""
+    else:
+        enemizer_chr = "_E" + enemizer_str[0]
 
     filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + variant_chr + enemizer_chr + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"
@@ -116,7 +116,7 @@ variant_choices = ["None", "OHKO"]
 variant.set("None")
 
 enemizer = StringVar(root)
-enemizer_choices = ["None", "Basic"]
+enemizer_choices = ["None", "Basic", "Full", "Chaos"]
 enemizer.set("None")
 
 statues = StringVar(root)
