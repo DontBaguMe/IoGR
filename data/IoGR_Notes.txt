@@ -1,3 +1,16 @@
+Enemizer bugs:
+Spin dash breaks Diamond Mine w/Angel enemies
+No Mu enemies in Angel
+Neutral flames in Angel Village or Great Wall
+Missed a spear in Great Wall
+No Mu enemies for Ankor Wat shortcut
+Inca Statues don't activate in Mt Kress
+Castoth looks weird in Babel
+Laborer room can't be random
+End credits broken
+
+
+
 0C 00 
 02 05 
 11 06 00 90 42 D4 

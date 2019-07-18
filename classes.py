@@ -963,21 +963,21 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        # Shuffle enemy stats in Chaos
-        if self.enemizer == "Chaos":
-            chaos_enemies = []
-            chaos_templates = []
+        # Shuffle enemy stats in Insane
+        if self.enemizer == "Insane":
+            insane_enemies = []
+            insane_templates = []
             for enemy in self.enemies:
-                if self.enemies[enemy][5]:
-                    chaos_enemies.append(enemy)
-                    chaos_templates.append(self.enemies[enemy][2])
+                if self.enemies[enemy][5] and enemy != 102:   # Special exception for Zombies
+                    insane_enemies.append(enemy)
+                    insane_templates.append(self.enemies[enemy][2])
 
-            random.shuffle(chaos_templates)
-            chaos_dictionary = {}
+            random.shuffle(insane_templates)
+            insane_dictionary = {}
             i = 0
 
-            for enemy in chaos_enemies:
-                chaos_dictionary[enemy] = chaos_templates[i]
+            for enemy in insane_enemies:
+                insane_dictionary[enemy] = insane_templates[i]
                 i += 1
 
         # Randomize enemy spritesets
@@ -1048,12 +1048,12 @@ class World:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
+                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
                         f.write(self.enemies[new_enemy][1])
-                        if self.enemizer == "Chaos":
-                            f.write(chaos_dictionary[new_enemy])
+                        if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
+                            f.write(insane_dictionary[new_enemy])
                         else:
                             f.write(self.enemies[new_enemy][2])
-                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
 
         # Disable all non-enemy sprites
         if self.enemizer != "Basic":
@@ -1907,15 +1907,6 @@ class World:
             13: ["\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xC0\x0C\xDF\x10\x30\x29\x00\xBE\x2F\xCB","Jeweler's Mansion"]
         }
 
-        # Mapset database
-        # FORMAT: { ID: HeaderData]}
-#        self.mapsets = {
-#            0: ["\x30","11 06 00 90 42 D4 03 00 10 00 09 DB 9D 00 03 00 10 10 77 48 CA 00 04 00 70 10 53 32 DE 05 00 20 00 01 00 00 D9 05 00 20 00 02 E6 68 DA"],                # Underground Tunnel
-#            1: ["","11 07 00 0F 67 D4 03 00 20 00 BC A9 99 00 04 00 70 10 D3 35 DE 05 00 20 00 01 59 60 D9 05 00 20 00 02 BA 40 DD"], # Inca (outside)
-#            2: ["","11 07 00 0F 67 D4 03 00 10 00 0A 19 C3 00 03 00 10 10 0A 19 C3 00 04 00 70 10 B3 36 DE 05 00 20 00 01 4A 3A D8 05 00 20 00 02 4A 3A D8"], # Inca (inside)
-#            3: ["",""], # Diamond Mine
-#            4: ["",""], #
-#        }
 
         # Enemy map database
         # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, SearchHeader,
@@ -1924,18 +1915,18 @@ class World:
         self.maps = {
             # Underground Tunnel
             12: [0,1,0,"\x0C\x00\x02\x05\x06",9,[]],
-            13: [0,1,0,"\x0D\x00\x02\x03\x06",14,[]],
-            14: [0,1,0,"\x0E\x00\x02\x03\x06",14,[]],  # Statues, spike balls
+            13: [0,1,0,"\x0D\x00\x02\x03\x06",14,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            14: [0,1,0,"\x0E\x00\x02\x03\x06",14,[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Statues, spike balls
             15: [0,1,0,"\x0F\x00\x02\x03\x06",14,[]],
-            18: [0,1,0,"\x12\x00\x02\x03\x06",14,[]],  # Spike balls
+            18: [0,1,0,"\x12\x00\x02\x03\x06",14,[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Spike balls
 
             # Inca Ruins
 #            27: [1,0,0,"\x1B\x00\x02\x05\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[0,1]],  # Moon Tribe cave
             29: [1,1,0,"\x1D\x00\x02\x0F\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],
             32: [1,1,0,"\x20\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],  # Broken statue
-            33: [2,1,0,"\x21\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],  # Floor switch
+            33: [2,1,0,"\x21\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Floor switch
             34: [2,1,0,"\x22\x00\x02\x08\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],  # Floor switch
-            35: [2,1,0,"\x23\x00\x02\x0A\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[]],
+            35: [2,1,0,"\x23\x00\x02\x0A\x03\x00\x10\x10\x23\x4D\xC2\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
             37: [1,1,0,"\x25\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[1]],  # Diamond block
             38: [1,1,0,"\x26\x00\x02\x08\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],  # Broken statues
             39: [1,1,0,"\x27\x00\x02\x0A\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[]],
@@ -1970,31 +1961,31 @@ class World:
             101: [6,3,0,"\x65\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
 
             # Angel Dungeon
-            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[2,6,7,8,9,10,11]],
-            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,[2,6,7,8,9,10,11]],
-            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,[2,6,7,8,9,10,11]],
-            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,[2,6,7,8,9,10,11]],
-            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,[2,6,7,8,9,10,11]],
-            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,[2,6,7,8,9,10,11]],
+            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[2,6,7,8,9,11]],  # Add 10's back in once flies are fixed
+            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,[2,6,7,8,9,11]],
+            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,[2,6,7,8,9,11]],
+            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,[2,6,7,8,9,11]],
+            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,[2,6,7,8,9,11]],
+            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,[2,6,7,8,9,11]],
 
             # Great Wall
-            130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
-            131: [8,4,0,"\x83\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
-            133: [8,4,0,"\x85\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
-            134: [8,4,0,"\x86\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
-            135: [8,4,0,"\x87\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
-            136: [8,4,0,"\x88\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[]],
+            130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],  # Add 10's back in once flies are fixed
+            131: [8,4,0,"\x83\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
+            133: [8,4,0,"\x85\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
+            134: [8,4,0,"\x86\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
+            135: [8,4,0,"\x87\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
+            136: [8,4,0,"\x88\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
 
             # Mt Temple
-            160: [9,4,0,"\xA0\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            161: [9,4,0,"\xA1\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            162: [9,4,0,"\xA2\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            163: [9,4,0,"\xA3\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            164: [9,4,0,"\xA4\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            165: [9,4,0,"\xA5\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            166: [9,4,0,"\xA6\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            167: [9,4,0,"\xA7\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
-            168: [9,4,0,"\xA8\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[]],
+            160: [9,4,0,"\xA0\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            161: [9,4,0,"\xA1\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            162: [9,4,0,"\xA2\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            163: [9,4,0,"\xA3\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            164: [9,4,0,"\xA4\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            165: [9,4,0,"\xA5\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            166: [9,4,0,"\xA6\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            167: [9,4,0,"\xA7\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            168: [9,4,0,"\xA8\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
 
             # Ankor Wat
             176: [10,6,0,"\xB0\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,[]],
@@ -2030,7 +2021,7 @@ class World:
             219: [12,5,0,"\xDB\x00\x02\x26\x03\x00\x10\x10\x0D\x18\xCB\x01",4,[]],
 
             # Jeweler's Mansion
-            233: [13,0,0,"\xE9\x00\x02\x22\x11\x06\x00\x90\x42\xD4",51,[]]
+            233: [13,0,0,"\xE9\x00\x02\x22\x11\x06\x00\x90\x42\xD4",51,[0,1,2,3,4,5,7,8,9,10,11,12,13]]
 
         }
 
@@ -2126,7 +2117,7 @@ class World:
             100: [10,"\xd7\xb1\x8b","\x49",2,True,True,"Shrubber"],
             101: [10,"\xb4\xb1\x8b","\x49",2,True,False,"Shrubber 2"],
             102: [10,"\x75\xb2\x8b","\x46",2,True,True,"Zombie"],
-            103: [10,"\x4f\xaf\x8b","\x4a",3,True,True,"Zip Fly"],
+            103: [10,"\x4f\xaf\x8b","\x4a",3,True,False,"Zip Fly"],    # False for now...
             104: [11,"\x8d\xbd\x8b","\x42",3,True,True,"Goldcap"],
             105: [11,"\x25\xb8\x8b","\x45",2,True,True,"Gorgon"],
             106: [11,"\x17\xb8\x8b","\x45",2,True,False,"Gorgon (jump down)"],

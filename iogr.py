@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "2.0.3"
+VERSION = "2.0.5"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -96,7 +96,7 @@ Label(mainframe,text="Difficulty").grid(row=2,column=0,sticky=W)
 Label(mainframe,text="Goal").grid(row=3,column=0,sticky=W)
 Label(mainframe,text="Logic").grid(row=4,column=0,sticky=W)
 Label(mainframe,text="Variant").grid(row=5,column=0,sticky=W)
-Label(mainframe,text="Enemizer").grid(row=6,column=0,sticky=W)
+Label(mainframe,text="Enemizer (beta)").grid(row=6,column=0,sticky=W)
 Label(mainframe,text="Statues").grid(row=7,column=0,sticky=W)
 
 difficulty = StringVar(root)
@@ -116,7 +116,7 @@ variant_choices = ["None", "OHKO"]
 variant.set("None")
 
 enemizer = StringVar(root)
-enemizer_choices = ["None", "Basic", "Full", "Chaos"]
+enemizer_choices = ["None", "Basic", "Full", "Insane"]
 enemizer.set("None")
 
 statues = StringVar(root)
