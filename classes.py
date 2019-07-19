@@ -1188,7 +1188,7 @@ class World:
             21: [13,1,False,0,[9],"4f375","4f38d","4f3a8","",   "Itory Village: Cave                 "],
             22: [12,2,False,0,[51,52,53],"c8b34","","","\x15",  "Itory Village: Dark Space           "],
 
-            23: [14,1,False,0,[],"4fae1","4faf9","4fb16","",    "Moon Tribe: Cave                    "],
+            23: [73,1,False,0,[],"4fae1","4faf9","4fb16","",    "Moon Tribe: Cave                    "],
 
             24: [15,1,False,0,[],"1AFB8","","","",              "Inca Ruins: Diamond-Block Chest     "],
             25: [16,1,False,0,[7],"1AFC2","","","",             "Inca Ruins: Broken Statues Chest    "],
@@ -1362,6 +1362,7 @@ class World:
             12: [False,[],"Itory Village",[23]],
             13: [False,[],"Itory Cave",[]],
             14: [False,[],"Moon Tribe",[25]],
+            73: [False,[],"Moon Tribe Cave",[]],
             15: [False,[],"Inca Ruins",[7]],
             16: [False,[],"Inca Ruins - Behind Diamond Tile & Psycho Dash",[8]],
             17: [False,[],"Inca Ruins - Behind Wind Melody",[3,4]],
@@ -1486,6 +1487,9 @@ class World:
             59: [15,16,[[7,1],[50,1]]],  # Inca Ruins w/ Tile and Spin Dash
             60: [16,17,[[8,1]]],         # Inca Ruins w/ Wind Melody
             61: [17,18,[[3,1],[4,1]]],   # Inca Ruins w/ Inca Statues
+            62: [14,73,[[48,1]]],        # Moon Tribe Cave w/ Psycho Dash
+            63: [14,73,[[49,1]]],        # Moon Tribe Cave w/ Psycho Slider
+            64: [14,73,[[50,1]]],        # Moon Tribe Cave w/ Spin Dash
 
             # SE Continent
             70:  [22,23,[[48,1]]],        # Diamond Mine Progression w/ Psycho Dash

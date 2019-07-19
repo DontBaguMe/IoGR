@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v1.3.2) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.3.2">Download</a>
+## The Illusion of Gaia Randomizer (v1.4.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.4.0">Download</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
@@ -163,3 +163,7 @@ There is a simple item tracker included with this release.  Official trackers fo
 ### Known Bugs and Quirks
 If you have an issue with the randomizer, please join our 
 <a href="https://discord.gg/KfZ4VeD">Discord</a> and report your issue in the #bugs channel.
+
+### Support the Dev
+No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a 
+<a href="https://www.patreon.com/dontbagume">patron.</a>

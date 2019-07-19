@@ -793,7 +793,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_nazca.close
 
     # Allow exit to world map
-    f.seek(int("5e80c",16))
+    f.seek(int("5e80c",16)+rom_offset)
     f.write("\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
 
     ##########################################################################
@@ -1333,15 +1333,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-Raeven0     -SDiezal") + "\xCB")
     f.write(qt.encode("-roeya       -Skarsnik") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Skipsy      -Tymekeeper") + "\xCB")
-    f.write(qt.encode("-SmashManiac -solarcell007") + "\xCB")
-    f.write(qt.encode("-steve hacks -Veetorp") + "\xCB")
-    f.write(qt.encode("-Sye990      -Verallix") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Skipsy      -solarcell007") + "\xCB")
+    f.write(qt.encode("-SmashManiac -Tsurana") + "\xCB")
+    f.write(qt.encode("-steve hacks -Tymekeeper") + "\xCB")
+    f.write(qt.encode("-Sye990      -Veetorp") + "\xC9\xB4\xCE")
 
+    f.write(qt.encode("-Verallix    -wormsofcan") + "\xCB")
     f.write(qt.encode("-Volor       -Xyrcord") + "\xCB")
     f.write(qt.encode("-Voranthe    -Z4t0x") + "\xCB")
-    f.write(qt.encode("-Wilddin     -ZockerStu") + "\xCB")
-    f.write(qt.encode("-wormsofcan") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Wilddin     -ZockerStu") + "\xC9\xB4\xCE")
 
     f.write("\xCB" + qt.encode("  Thank you all so much!"))
     f.write("\xCB" + qt.encode("     This was so fun!"))
@@ -1943,7 +1943,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
     if kara_location == KARA_ANGEL:
         # Set spoiler for Kara's location in Lance's Letter
-        f.seek(int("3951e",16)+rom_offset)
+        f.seek(int("39521",16)+rom_offset)
         f.write("\x40\x8d\x86\x84\x8b\xac\x66\x88\x8b\x8b\x80\x86\x84")
 
     else:
@@ -1953,7 +1953,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
         if kara_location == KARA_EDWARDS:  # Underground tunnel exit, map 19 (0x13)
             # Set spoiler for Kara's location in Lance's Letter
-            f.seek(int("3951e",16)+rom_offset)
+            f.seek(int("39521",16)+rom_offset)
             f.write("\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x60\xa2\x88\xa3\x8e\x8d")
 
             # Set map check ID for Magic Dust item event
@@ -1970,7 +1970,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
         elif kara_location == KARA_MINE:
             # Set spoiler for Kara's location in Lance's Letter
-            f.seek(int("3951e",16)+rom_offset)
+            f.seek(int("39521",16)+rom_offset)
             f.write("\x43\x88\x80\x8c\x8e\x8d\x83\xac\x4c\x88\x8d\x84")
 
             # Set map check ID for Magic Dust item event
@@ -2011,7 +2011,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         elif kara_location == KARA_KRESS:
 
             # Set spoiler for Kara's location in Lance's Letter
-            f.seek(int("3951e",16)+rom_offset)
+            f.seek(int("39521",16)+rom_offset)
             f.write("\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3")
 
             # Set map check ID for Magic Dust item event
@@ -2032,7 +2032,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
         elif kara_location == KARA_ANKORWAT:
             # Set spoiler for Kara's location in Lance's Letter
-            f.seek(int("3951e",16)+rom_offset)
+            f.seek(int("39521",16)+rom_offset)
             f.write("\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4")
 
             # Set map check ID for Magic Dust item event
