@@ -952,8 +952,8 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        test_enemy = 22
-        test_set = self.enemies[test_enemy][0]
+        #test_enemy = 22
+        #test_set = self.enemies[test_enemy][0]
 
         # Get list of enemysets
         enemysets = []
@@ -992,8 +992,8 @@ class World:
                 sets = self.maps[map][5][:]
 
             random.shuffle(sets)
-            #newset = sets[0]
-            newset = test_set  # TESTING
+            newset = sets[0]
+            #newset = test_set  # TESTING
 
             # Gather enemies from old and new sets
             old_enemies = []
@@ -1048,12 +1048,12 @@ class World:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
-                        f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
-                        #f.write(self.enemies[new_enemy][1])
-                        #if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
-                        #    f.write(insane_dictionary[new_enemy])
-                        #else:
-                        #    f.write(self.enemies[new_enemy][2])
+                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
+                        f.write(self.enemies[new_enemy][1])
+                        if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
+                            f.write(insane_dictionary[new_enemy])
+                        else:
+                            f.write(self.enemies[new_enemy][2])
 
         # Disable all non-enemy sprites
         if self.enemizer != "Basic":
