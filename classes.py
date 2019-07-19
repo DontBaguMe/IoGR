@@ -952,8 +952,8 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        #test_enemy = 103
-        #test_set = self.enemies[test_enemy][0]
+        test_enemy = 22
+        test_set = self.enemies[test_enemy][0]
 
         # Get list of enemysets
         enemysets = []
@@ -992,8 +992,8 @@ class World:
                 sets = self.maps[map][5][:]
 
             random.shuffle(sets)
-            newset = sets[0]
-            #newset = test_set  # TESTING
+            #newset = sets[0]
+            newset = test_set  # TESTING
 
             # Gather enemies from old and new sets
             old_enemies = []
@@ -1048,12 +1048,12 @@ class World:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
-                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
-                        f.write(self.enemies[new_enemy][1])
-                        if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
-                            f.write(insane_dictionary[new_enemy])
-                        else:
-                            f.write(self.enemies[new_enemy][2])
+                        f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
+                        #f.write(self.enemies[new_enemy][1])
+                        #if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
+                        #    f.write(insane_dictionary[new_enemy])
+                        #else:
+                        #    f.write(self.enemies[new_enemy][2])
 
         # Disable all non-enemy sprites
         if self.enemizer != "Basic":
@@ -1939,7 +1939,7 @@ class World:
             64: [3,2,0,"\x40\x00\x02\x08\x06\x01\xD0\x5C\xDB",9,[]],  # Trapped laborer (??)
             65: [3,2,0,"\x41\x00\x02\x00\x11\x06\x00\x90\x42\xD4",51,[0,2,3,4,5,11]],  # Stationary Grundit
             69: [3,2,0,"\x45\x00\x02\x08\x06\x01\xA3\x59\xDD",9,[]],
-            70: [3,2,0,"\x46\x00\x02\x08\x06\x01\x2F\x2A\xDD",9,[]],
+            70: [3,2,0,"\x46\x00\x02\x08\x06\x01\x2F\x2A\xDD",9,[3]],
 
             # Sky Garden
             77: [4,2,0,"\x4D\x00\x02\x12\x03\x00\x20\x00\xE5\x90\x8F\x00",22,[]],
@@ -1961,20 +1961,20 @@ class World:
             101: [6,3,0,"\x65\x00\x02\x14\x03\x00\x20\x00\x00\x80\x91\x00",17,[6]],
 
             # Angel Dungeon
-            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[2,6,7,8,9,11]],  # Add 10's back in once flies are fixed
-            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,[2,6,7,8,9,11]],
-            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,[2,6,7,8,9,11]],
-            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,[2,6,7,8,9,11]],
-            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,[2,6,7,8,9,11]],
-            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,[2,6,7,8,9,11]],
+            109: [7,3,0,"\x6D\x00\x02\x16\x06\x01\x37\x5A\xDA",14,[2,7,8,9,11]],  # Add 10's back in once flies are fixed
+            110: [7,3,0,"\x6E\x00\x02\x18\x06\x01\x02\x0E\xDB",9,[2,7,8,9,11]],
+            111: [7,3,0,"\x6F\x00\x02\x1B\x06\x01\x13\x7A\xDD",21,[2,7,8,9,11]],
+            112: [7,3,0,"\x70\x00\x02\x16\x06\x01\x21\x7C\xDA",14,[2,7,8,9,11]],
+            113: [7,3,0,"\x71\x00\x02\x18\x06\x01\x00\x00\xDE",9,[2,7,8,9,11]],
+            114: [7,3,0,"\x72\x00\x02\x18\x06\x01\xDA\x4B\xDD",9,[2,7,8,9,11]],
 
             # Great Wall
-            130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],  # Add 10's back in once flies are fixed
-            131: [8,4,0,"\x83\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
-            133: [8,4,0,"\x85\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
-            134: [8,4,0,"\x86\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
-            135: [8,4,0,"\x87\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
-            136: [8,4,0,"\x88\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,6,7,8,9,11]],
+            130: [8,4,0,"\x82\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,7,8,9,11]],  # Add 10's back in once flies are fixed
+            131: [8,4,0,"\x83\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,7,8,9,11]],
+            133: [8,4,0,"\x85\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,7,8,9,11]],
+            134: [8,4,0,"\x86\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,7,8,9,11]],
+            135: [8,4,0,"\x87\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,7,8,9,11]],
+            136: [8,4,0,"\x88\x00\x02\x1D\x03\x00\x10\x10\x6D\x13\xD0\x01",4,[2,7,8,9,11]],
 
             # Mt Temple
             160: [9,4,0,"\xA0\x00\x02\x20\x03\x00\x10\x10\x00\x00\xD0\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
@@ -1989,7 +1989,7 @@ class World:
 
             # Ankor Wat
             176: [10,6,0,"\xB0\x00\x02\x2C\x03\x00\x10\x10\xEA\x15\xCE\x01",4,[]],
-            177: [11,6,0,"\xB1\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
+            177: [11,6,0,"\xB1\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],
             178: [11,6,0,"\xB2\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
             179: [11,6,0,"\xB3\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
             180: [11,6,0,"\xB4\x00\x02\x08\x03\x00\x10\x10\x81\x6A\xC1\x01",4,[]],
@@ -2210,6 +2210,7 @@ class World:
             # Angel
             50: [7,"6d56f","Flame 1"],
             51: [7,"6d57e","Flame 2"],
+            52: [7,"6d58f","Flame 3"],
 
             # Great Wall
             60: [8,"b8c30","Wall spike 1"],
@@ -2217,6 +2218,7 @@ class World:
             62: [8,"7bd17","Wall spike 3"],
             63: [8,"7bd46","Wall spike 4"],
             64: [8,"7bd75","Wall spike 5"],
+            65: [8,"7bce8","Wall spike 5"],
 
             # Mt Kress (nothing)
 
