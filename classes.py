@@ -944,8 +944,71 @@ class World:
                 i += 1
 
         if self.enemizer != "None":
-            self.enemize(f,rom_offset)
+            #self.enemize(f,rom_offset)
+            self.parse_maps(f,rom_offset)
         #print "ROM successfully created"
+
+
+    # Shuffle enemies in ROM
+    def parse_maps(self,f,rom_offset=0):
+        f.seek(int("d8000",16) + rom_offset)
+
+        header_lengths = {
+            "\x02": 1,
+            "\x03": 7,
+            "\x04": 6,
+            "\x05": 7,
+            "\x06": 4,
+            "\x0e": 3,
+            "\x10": 6,
+            "\x11": 5,
+            "\x13": 2,
+            "\x14": 1,
+            "\x15": 1,
+            "\x17": 5
+        }
+
+        done = False
+        addr = 0
+        map_dataset = {}
+        anchor_dataset = {}
+
+        while not done:
+            map_id = f.read(2)
+            print binascii.hexlify(map_id)
+            map_headers = []
+            anchor_headers = []
+            map_done = False
+            anchor = False
+            while not map_done:
+                map_header = f.read(1)
+                if map_header == "\x14":
+                    anchor = True
+                    anchor_id = f.read(1)
+                    map_header += anchor_id
+                    map_headers.append(map_header)
+                    print binascii.hexlify(map_header)
+                elif map_header == "\x00":
+                    map_done = True
+                    print binascii.hexlify(map_header)
+                    print ""
+                else:
+                    header_len = header_lengths[map_header]
+                    map_header += f.read(header_len)
+                    map_headers.append(map_header)
+                    print binascii.hexlify(map_header)
+                    if anchor:
+                        anchor_headers.append(map_header)
+
+            anchor_dataset[map_id] = map_headers
+            if anchor_headers:
+                anchor_dataset[anchor_id] = anchor_headers
+
+            if f.tell() >= int("daffe",16)+rom_offset:
+                done = True
+
+#        print map_headers
+        print anchor_headers
 
     # Shuffle enemies in ROM
     def enemize(self,f,rom_offset=0):

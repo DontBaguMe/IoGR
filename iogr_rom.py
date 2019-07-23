@@ -156,10 +156,13 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_mapdata.close
 
     if mode == 0:
-        f.seek(int("d8199",16)+rom_offset)
-        f.write("\x09")
-        f.seek(int("d81b7",16)+rom_offset)
-        f.write("\x07")
+        rom = f.read()
+        addr = rom.find("\x00\x07\x00\x02\x01",int("d8000",16)+rom_offset)
+        f.seek(addr)
+        f.write("\x00\x09")
+        addr = rom.find("\x00\x09\x00\x02\x08",int("d8000",16)+rom_offset)
+        f.seek(addr)
+        f.write("\x00\x07")
 
     ##########################################################################
     #                        Update treasure chest data
@@ -1995,8 +1998,11 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.seek(0)
             rom = f.read()
             addr = rom.find("\x15\x0C\x00\x49\x00\x02",int("d8000",16)+rom_offset)
-            f.seek(addr)
-            f.write("\x15\x0a")
+            if addr < 0:
+                print "ERROR: Could not change spriteset for Diamond Mine"
+            else:
+                f.seek(addr)
+                f.write("\x15\x25")
 
             # Set Kara painting event in appropriate map
             f.seek(int("c9c6a",16)+rom_offset)
