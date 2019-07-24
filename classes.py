@@ -2121,7 +2121,7 @@ class World:
             20: [2,"\x70\x90\x8a","\x0d",2,True,False,"Stone Guard R"], # throws spears
             21: [2,"\x6b\x90\x8a","\x0d",2,True,False,"Stone Guard L"], # throws spears
             22: [2,"\x61\x90\x8a","\x0d",2,True,True,"Stone Guard D"], # throws spears
-            23: [2,"\xc3\x99\x8a","\x0e",1,True,False,"Whirligig (stationary)"],
+            23: [2,"\xc3\x99\x8a","\x0e",1,False,False,"Whirligig (stationary)"],
 
             # Diamond Mine
             30: [3,"\xca\xaa\x8a","\x18",2,True,True,"Flayzer 1"],
