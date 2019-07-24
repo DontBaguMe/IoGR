@@ -156,6 +156,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f_mapdata.close
 
     if mode == 0:
+        f.seek(0)
         rom = f.read()
         addr = rom.find("\x00\x07\x00\x02\x01",int("d8000",16)+rom_offset)
         f.seek(addr)
