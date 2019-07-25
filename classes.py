@@ -1015,7 +1015,7 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        #test_enemy = 22
+        #test_enemy = 140                         # TESTING!
         #test_set = self.enemies[test_enemy][0]
 
         # Get list of enemysets
@@ -1056,7 +1056,7 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            #newset = test_set  # TESTING
+            #newset = test_set  # TESTING!
 
             # Gather enemies from old and new sets
             old_enemies = []
@@ -1111,12 +1111,13 @@ class World:
                                 found_enemy = True
                             i += 1
                         f.seek(addr)
-                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING
+                        #f.write(self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING!
                         f.write(self.enemies[new_enemy][1])
-                        if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
-                            f.write(insane_dictionary[new_enemy])
-                        else:
-                            f.write(self.enemies[new_enemy][2])
+                        if map != 27:                                           # Moon Tribe cave enemies retain same template
+                            if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
+                                f.write(insane_dictionary[new_enemy])
+                            else:
+                                f.write(self.enemies[new_enemy][2])
 
         # Disable all non-enemy sprites
         if self.enemizer != "Basic":
@@ -1970,7 +1971,7 @@ class World:
             9: ["\x03\x00\x10\x10\x00\x00\xD0\x01\x04\x00\x60\xA0\x40\x08\xDF\x10\x70\x0E\x00\x5C\x4D\xD8","Mt. Kress"],
             10: ["\x03\x00\x10\x10\xEA\x15\xCE\x01\x04\x00\x70\x90\x53\x55\xDE\x10\xD5\x14\x00\x08\x73\xCC","Ankor Wat (outside)"],
             11: ["\x03\x00\x10\x10\x81\x6A\xC1\x01\x04\x00\x70\x90\x13\x57\xDE\x10\x57\x10\x00\x5F\x39\xD4","Ankor Wat (inside)"],
-            12: ["\x03\x04\x00\x60\x90\x80\x0A\xDF\x10\xFB\x13\x00\x0E\x67\xD1","Pyramid"],
+            12: ["\x03\x00\x10\x10\x0d\x18\xcb\x01\x04\x00\x60\x90\x80\x0a\xdf\x10\xfb\x13\x00\x0e\x67\xd1","Pyramid"],
             13: ["\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xC0\x0C\xDF\x10\x30\x29\x00\xBE\x2F\xCB","Jeweler's Mansion"]
         }
 
@@ -1988,7 +1989,7 @@ class World:
             18: [0,1,0,"\x12\x00\x02\x03\x03",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Spike balls
 
             # Inca Ruins
-#            27: [1,0,0,"\x1B\x00\x02\x05\x03\x00\x10\x10\xBC\x33\xC2\x01",4,[0,1]],  # Moon Tribe cave
+            27: [1,0,0,"\x1B\x00\x02\x05\x03",4,[]],  # Moon Tribe cave
             29: [1,1,0,"\x1D\x00\x02\x0F\x03",4,[]],
             32: [1,1,0,"\x20\x00\x02\x08\x03",4,[]],  # Broken statue
             33: [2,1,0,"\x21\x00\x02\x08\x03",4,[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Floor switch
@@ -2019,7 +2020,7 @@ class World:
             84: [5,2,0,"\x54\x00\x02\x12\x03",4,[4,5]],
 
             # Mu
-#            92: [6,0,0,"\x5C\x00\x02\x15\x11\x04\x00\xB7\x49\xDB",62,[]],  # Seaside Palace
+#            92: [6,0,0,"\x5C\x00\x02\x15\x03",4,[]],  # Seaside Palace
             95: [6,3,0,"\x5F\x00\x02\x14\x03",4,[]],
             96: [6,3,0,"\x60\x00\x02\x14\x03",4,[6]],
             97: [6,3,0,"\x61\x00\x02\x14\x03",4,[6]],
@@ -2082,7 +2083,7 @@ class World:
             212: [12,5,0,"\xD4\x00\x02\x08\x03",4,[]],
             213: [12,5,0,"\xD5\x00\x02\x08\x03",4,[]],
             214: [12,5,0,"\xD6\x00\x02\x26\x03",4,[]],
-            215: [12,5,0,"\xD7\x00\x02\x28\x03",4,[]],
+            215: [12,5,0,"\xD7\x00\x02\x28\x03",4,[0,2,3,4,5,6,8,9,10,11,12,13]],
             216: [12,5,0,"\xD8\x00\x02\x08\x03",4,[]],
             217: [12,5,0,"\xD9\x00\x02\x26\x03",4,[]],
             219: [12,5,0,"\xDB\x00\x02\x26\x03",4,[]],
@@ -2162,7 +2163,8 @@ class World:
             75: [8,"\x23\x94\x8b","\x32",2,True,True,"Asp"],
             76: [8,"\x65\x91\x8b","\x33",2,True,False,"Archer 2"],
             77: [8,"\x77\x91\x8b","\x33",2,True,False,"Archer 3"],
-            78: [8,"\x72\x8f\x8b","\x46",2,True,False,"Archer Statue (switch)"],
+            78: [8,"\x72\x8f\x8b","\x46",2,True,False,"Archer Statue (switch) 1"],
+            79: [8,"\x4f\x8f\x8b","\x33",2,True,False,"Archer Statue (switch) 2"],
 
             # Mt. Kress
             80: [9,"\xac\x9b\x8b","\x3e",3,True,True,"Skulker (N/S)"],

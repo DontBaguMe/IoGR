@@ -634,6 +634,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b")
     f.write("\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
 
+    # Adjust timer by mode
+    timer = 20
+    if mode == "Easy":
+        timer += 5
+    if enemizer != "None":
+        timer += 5
+        if enemizer != "Basic":
+            timer += 5
+    f.seek(int("4f8b8",16)+rom_offset)
+    f.write(binascii.unhexlify(str(timer)))
+
     # Shorten Inca Statue get
     f.seek(int("4fae7",16)+rom_offset)
     f.write("\x02\xbf\xf9\xfa\x6b")
