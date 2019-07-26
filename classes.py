@@ -1015,7 +1015,7 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        #test_enemy = 62                         # TESTING!
+        #test_enemy = 140                         # TESTING!
         #test_set = self.enemies[test_enemy][0]
 
         # Get list of enemysets
@@ -2034,7 +2034,7 @@ class World:
             131: [8,4,0,"\x83\x00\x02\x1D\x03",4,"cb845","cb966",[2,7,8,9,11]],
             133: [8,4,0,"\x85\x00\x02\x1D\x03",4,"cb97d","cbb18",[2,7,8,9,11]],
             134: [8,4,0,"\x86\x00\x02\x1D\x03",4,"cbb18","cbb87",[2,7,8,9,11]],
-            135: [8,4,0,"\x87\x00\x02\x1D\x03",4,"cbb87","cbc3b",[2,7,8,9,11]],
+            135: [8,4,0,"\x87\x00\x02\x1D\x03",4,"cbb87","cbc3b",[2,7,8,9]],
             136: [8,4,0,"\x88\x00\x02\x1D\x03",4,"cbc3b","cbd0a",[2,7,8,9,11]],
 
             # Mt Temple
@@ -2286,7 +2286,8 @@ class World:
 
             # Ankor Wat
             80: [11,"89f2c","Floating crystal"],
-            81: [11,"89ffc","Skeleton"]
+            81: [11,"89ffc","Skeleton 1"],
+            82: [11,"8a25e","Skeleton 2"]
 
             # Pyramid
 #            90: [12,"8b6a2","Warp point"],
