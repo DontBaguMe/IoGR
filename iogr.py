@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "1.4.0"
+VERSION = "1.4.1"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -70,6 +70,88 @@ def generate_ROM():
     else:
         showinfo("ERROR", "Operation failed (unspecified error)")
 
+def diff_help():
+    lines = []
+    lines.append("Difficulty affects enemy strength as well as stat upgrades available to the player (HP/STR/DEF):")
+    lines.append("")
+    lines.append("EASY:")
+    lines.append(" - Enemies have 50% STR/DEF and 67% HP compared to Normal")
+    lines.append(" - Herbs restore HP to full")
+    lines.append(" - Player upgrades available: 10/7/7 (4 upgrades per boss)")
+    lines.append("")
+    lines.append("NORMAL:")
+    lines.append(" - Enemy stats roughly mirror a vanilla playthrough")
+    lines.append(" - Herbs restore 8 HP")
+    lines.append(" - Player upgrades available: 10/4/4 (3 upgrades per boss)")
+    lines.append("")
+    lines.append("HARD:")
+    lines.append(" - Enemies have roughly 2x STR/DEF compared to Normal")
+    lines.append(" - Herbs restore 4 HP")
+    lines.append(" - Player upgrades available: 8/2/2 (2 upgrades per boss)")
+    lines.append("")
+    lines.append("EXTREME:")
+    lines.append(" - Enemies have roughly 2x STR/DEF compared to Normal")
+    lines.append(" - Herbs restore 2 HP, item hints are removed")
+    lines.append(" - Player upgrades available: 6/0/0 (1 upgrade per boss)")
+    showinfo("Difficulties", "\n".join(lines))
+
+def goal_help():
+    lines = []
+    lines.append("Goal determines the required conditions to beat the game:")
+    lines.append("")
+    lines.append("DARK GAIA:")
+    lines.append(" - Collect the required Mystic Statues (if any)")
+    lines.append(" - Rescue Kara from her portrait using the Magic Dust")
+    lines.append(" - Acquire and use the Aura to gain Shadow's form")
+    lines.append(" - Talk to Gaia in any Dark Space to face and defeat Dark Gaia")
+    lines.append("")
+    lines.append("RED JEWEL HUNT:")
+    lines.append("Collect the appropriate number of Red Jewels, by difficulty, and turn them into the Jeweler:")
+    lines.append(" - Easy: 35 Red Jewels")
+    lines.append(" - Normal: 40 Red Jewels")
+    lines.append(" - Hard/Extreme: 50 Red Jewels")
+    showinfo("Goal", "\n".join(lines))
+
+def logic_help():
+    lines = []
+    lines.append("Logic determines how items and abilities are placed:")
+    lines.append("")
+    lines.append("COMPLETABLE:")
+    lines.append(" - All locations are accessible")
+    lines.append(" - Freedan abilities will only show up in dungeons")
+    lines.append("")
+    lines.append("BEATABLE:")
+    lines.append(" - Some non-essential items may be inaccessible")
+    lines.append(" - Freedan abilities will only show up in dungeons")
+    lines.append("")
+    lines.append("CHAOS:")
+    lines.append(" - Some non-essential items may be inaccessible")
+    lines.append(" - Freedan abilities may show up in towns")
+    showinfo("Logic Modes", "\n".join(lines))
+
+def variant_help():
+    lines = []
+    lines.append("The following variants are currently available:")
+    lines.append("")
+    lines.append("OHKO:")
+    lines.append(" - Player starts with 1 HP")
+    lines.append(" - All HP upgrades are removed or negated")
+    showinfo("Variants", "\n".join(lines))
+
+def enemizer_help():
+    lines = []
+    lines.append("The following enemy shuffle modes are available:")
+    lines.append("")
+    lines.append("BASIC:")
+    lines.append(" - Enemies only appear within their own dungeons")
+    lines.append("")
+    lines.append("FULL:")
+    lines.append(" - Enemies can show up in any dungeon")
+    lines.append("")
+    lines.append("INSANE:")
+    lines.append(" - Same as Full, but enemy stats are shuffled")
+    showinfo("Enemizer", "\n".join(lines))
+
 root = Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
 if os.name == 'nt':
@@ -128,5 +210,11 @@ statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=6,column=1
 Button(mainframe,text='Browse...', command=find_ROM).grid(row=0,column=2)
 Button(mainframe,text='Generate Seed', command=generate_seed).grid(row=1,column=2)
 Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=6,column=2)
+
+Button(mainframe,text='?', command=diff_help).grid(row=2,column=2)
+Button(mainframe,text='?', command=goal_help).grid(row=3,column=2)
+Button(mainframe,text='?', command=logic_help).grid(row=4,column=2)
+Button(mainframe,text='?', command=variant_help).grid(row=5,column=2)
+Button(mainframe,text='?', command=enemizer_help).grid(row=6,column=2)
 
 root.mainloop()
