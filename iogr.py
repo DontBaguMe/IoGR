@@ -227,6 +227,6 @@ Button(mainframe,text='?', command=diff_help).grid(row=2,column=2)
 Button(mainframe,text='?', command=goal_help).grid(row=3,column=2)
 Button(mainframe,text='?', command=logic_help).grid(row=4,column=2)
 Button(mainframe,text='?', command=variant_help).grid(row=5,column=2)
-#Button(mainframe,text='?', command=enemizer_help).grid(row=6,column=2)
+Button(mainframe,text='?', command=enemizer_help).grid(row=6,column=2)
 
 root.mainloop()
