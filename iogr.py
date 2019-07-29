@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "2.1.1"
+VERSION = "2.2.0"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -43,6 +43,7 @@ def generate_ROM():
     goal_str = goal.get()
     logic_str = logic.get()
     diff_str = difficulty.get()
+    start_str = start.get()
     variant_str = variant.get()
     enemizer_str = enemizer.get()
 
@@ -63,15 +64,20 @@ def generate_ROM():
     else:
         variant_chr = ""
 
+    if start_str == "South Cape":
+        start_chr = ""
+    else:
+        start_chr = "_S" + start_str[0]
+
     if enemizer_str == "None":
         enemizer_chr = ""
     else:
         enemizer_chr = "_E" + enemizer_str[0]
 
-    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + variant_chr + enemizer_chr + "_" + seed_str
+    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + start_chr + variant_chr + enemizer_chr + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"
 
-    if iogr_rom.generate_rom(VERSION,rom_offset,int(seed_str),rompath,filename,diff_str,goal_str,logic_str,statues_str,variant_str,enemizer_str):
+    if iogr_rom.generate_rom(VERSION,rom_offset,int(seed_str),rompath,filename,diff_str,goal_str,logic_str,statues_str,start_str,variant_str,enemizer_str):
         showinfo("Success!", filename + " has been successfully created!")
     else:
         showinfo("ERROR", "Operation failed (unspecified error)")
@@ -158,6 +164,21 @@ def enemizer_help():
     lines.append(" - Same as Full, but enemy stats are shuffled")
     showinfo("Enemizer", "\n".join(lines))
 
+def start_help():
+    lines = []
+    lines.append("You can change this setting to affect where you start the game.")
+    lines.append("Where you start the game is also where Gaia sends you when you warp to start.")
+    lines.append("")
+    lines.append("SOUTH CAPE:")
+    lines.append(" - You start the game in South Cape, as normal")
+    lines.append("")
+    lines.append("SAFE:")
+    lines.append(" - You start the game in a random town, in front of a Dark Space")
+    lines.append("")
+    lines.append("UNSAFE:")
+    lines.append(" - You start the game in front of a random Dark Space, could be in a town or a dungeon")
+    showinfo("Start Location", "\n".join(lines))
+
 root = Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
 if os.name == 'nt':
@@ -177,9 +198,10 @@ Label(mainframe,text="Seed").grid(row=1,column=0,sticky=W)
 Label(mainframe,text="Difficulty").grid(row=2,column=0,sticky=W)
 Label(mainframe,text="Goal").grid(row=3,column=0,sticky=W)
 Label(mainframe,text="Logic").grid(row=4,column=0,sticky=W)
-Label(mainframe,text="Variant").grid(row=5,column=0,sticky=W)
-Label(mainframe,text="Enemizer (beta)").grid(row=6,column=0,sticky=W)
-Label(mainframe,text="Statues").grid(row=7,column=0,sticky=W)
+Label(mainframe,text="Start Location").grid(row=5,column=0,sticky=W)
+Label(mainframe,text="Variant").grid(row=6,column=0,sticky=W)
+Label(mainframe,text="Enemizer (beta)").grid(row=7,column=0,sticky=W)
+Label(mainframe,text="Statues").grid(row=8,column=0,sticky=W)
 
 difficulty = StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -192,6 +214,10 @@ goal.set("Dark Gaia")
 logic = StringVar(root)
 logic_choices = ["Completable", "Beatable", "Chaos"]
 logic.set("Completable")
+
+start = StringVar(root)
+start_choices = ["South Cape", "Safe", "Unsafe"]
+start.set("South Cape")
 
 variant = StringVar(root)
 variant_choices = ["None", "OHKO"]
@@ -215,18 +241,20 @@ seed.insert(10,random.randint(0,999999))
 diff_menu = OptionMenu(mainframe,difficulty,*diff_choices).grid(row=2,column=1)
 goal_menu = OptionMenu(mainframe,goal,*goal_choices).grid(row=3,column=1)
 logic_menu = OptionMenu(mainframe,logic,*logic_choices).grid(row=4,column=1)
-variant_menu = OptionMenu(mainframe,variant,*variant_choices).grid(row=5,column=1)
-enemizer_menu = OptionMenu(mainframe,enemizer,*enemizer_choices).grid(row=6,column=1)
-statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=7,column=1)
+start_menu = OptionMenu(mainframe,start,*start_choices).grid(row=5,column=1)
+variant_menu = OptionMenu(mainframe,variant,*variant_choices).grid(row=6,column=1)
+enemizer_menu = OptionMenu(mainframe,enemizer,*enemizer_choices).grid(row=7,column=1)
+statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=8,column=1)
 
 Button(mainframe,text='Browse...', command=find_ROM).grid(row=0,column=2)
 Button(mainframe,text='Generate Seed', command=generate_seed).grid(row=1,column=2)
-Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=7,column=2)
+Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=8,column=2)
 
 Button(mainframe,text='?', command=diff_help).grid(row=2,column=2)
 Button(mainframe,text='?', command=goal_help).grid(row=3,column=2)
 Button(mainframe,text='?', command=logic_help).grid(row=4,column=2)
-Button(mainframe,text='?', command=variant_help).grid(row=5,column=2)
-Button(mainframe,text='?', command=enemizer_help).grid(row=6,column=2)
+Button(mainframe,text='?', command=start_help).grid(row=5,column=2)
+Button(mainframe,text='?', command=variant_help).grid(row=6,column=2)
+Button(mainframe,text='?', command=enemizer_help).grid(row=7,column=2)
 
 root.mainloop()

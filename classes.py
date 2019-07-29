@@ -128,7 +128,7 @@ class World:
     def traverse(self,start_items=[]):
         #print "Traverse:"
         self.unsolve()
-        to_visit = [0]
+        to_visit = [-1]
         items = start_items[:]
         while to_visit:
             origin = to_visit.pop(0)
@@ -943,9 +943,14 @@ class World:
                 f.write(self.spoilers[i])
                 i += 1
 
+        # Enemizer
         if self.enemizer != "None":
             self.enemize(f,rom_offset)
             #self.parse_maps(f,rom_offset)
+
+        # Random start location
+        if self.start != "South Cape":
+            self.random_start(f,rom_offset)
         #print "ROM successfully created"
 
 
@@ -1009,6 +1014,20 @@ class World:
 
 #        print map_headers
         print anchor_headers
+
+    # Pick random start location
+    def get_start_locations(self):
+        locations = []
+        for location in self.item_locations:
+
+
+        return locations
+
+    # Pick random start location
+    def random_start(self,f,rom_offset=0):
+        locations = self.get_start_locations
+        f.seek(0)
+        rom = f.read()
 
     # Shuffle enemies in ROM
     def enemize(self,f,rom_offset=0):
@@ -1120,7 +1139,7 @@ class World:
 
 
     # Build world
-    def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],
+    def __init__(self, seed, mode, goal="Dark Gaia", logic_mode="Completable",statues=[1,2,3,4,5,6],start_mode="South Cape",
         variant="None",enemizer="None",firebird=False,kara=3,gem=[3,5,8,12,20,30,50],incatile=[9,5],hieroglyphs=[1,2,3,4,5,6]):
 
         self.seed = seed
@@ -1132,6 +1151,7 @@ class World:
         self.incatile = incatile
         self.hieroglyphs = hieroglyphs
         self.mode = mode
+        self.start_mode = start_mode
         self.variant = variant
         self.enemizer = enemizer
         self.firebird = firebird
@@ -1215,6 +1235,7 @@ class World:
         # Format: { ID: [Region, Type (1=item,2=ability,3=statue), Filled Flag,
         #                Filled Item, Restricted Items, Item Addr, Text Addr, Text2 Addr,
         #                Special (map# or inventory addr), Name, Swapped Flag]}
+        #         (For random start, [6]=Type, [7]=XY_spawn_data)
         self.item_locations = {
             0: [1,1,False,0,[],"8d019","8d19d","","8d260",      "Jeweler Reward 1                    "],
             1: [2,1,False,0,[],"8d028","8d1ba","","8d274",      "Jeweler Reward 2                    "],
@@ -1227,7 +1248,7 @@ class World:
             7: [0,1,False,0,[],"4846e","48479","","",           "South Cape: Fisherman               "], #text2 was 0c6a1
             8: [0,1,False,0,[],"F59D","F5AD","F5C3","",         "South Cape: Lance's House           "],
             9: [0,1,False,0,[],"499e4","49be5","","",           "South Cape: Lola                    "],
-            10: [0,2,False,0,[51,52,53],"c830a","","","\x01",   "South Cape: Dark Space              "],
+            10: [0,2,False,0,[51,52,53],"c830a","Safe","\xE0\x00\x70\x00\x03\x00\x43","\x01",   "South Cape: Dark Space              "],
 
             11: [7,1,False,0,[],"4c214","4c299","","",          "Edward's Castle: Hidden Guard       "],
             12: [7,1,False,0,[],"4d0ef","4d141","","",          "Edward's Castle: Basement           "],
@@ -1403,6 +1424,8 @@ class World:
         # Format: { Region ID: Traversed flag, [Accessible regions], Region Name],
         #                                                       ItemsToRemove }
         self.graph = {
+            -1: [False,[0],"Game Start",[]],
+
             0: [False,[7,14,15],"South Cape",[9]],
 
             1: [False,[],"Jeweler Reward 1",[]],

@@ -27,7 +27,7 @@ FORCE_CHANGE = "\x22\x30\xfd\x88"
 
 # Generate new ROM and prepare it for randomization
 def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized",
-    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",variant="None",enemizer="None",firebird=False):
+    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",start_mode="South Cape",variant="None",enemizer="None",firebird=False):
 
     # Initiate random seed
     random.seed(rng_seed)
@@ -81,7 +81,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("1da4c",16)+rom_offset)
     f.write("\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
-    hash_str = version + mode_str + goal + logic_mode + variant + enemizer + statues_reqstr + str(firebird)
+    hash_str = version + mode_str + goal + logic_mode + start_mode + variant + enemizer + statues_reqstr + str(firebird)
     h = hmac.new(str(rng_seed),hash_str)
     hash = h.digest()
 
@@ -2164,7 +2164,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
         if seed_adj > 10:
             print "ERROR: Max number of seed adjustments exceeded"
             return False
-        w=classes.World(rng_seed,mode,goal,logic_mode,statues,variant,enemizer,firebird,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
+        w=classes.World(rng_seed,mode,goal,logic_mode,statues,start_mode,variant,enemizer,firebird,kara_location,gem,[inca_x+1,inca_y+1],hieroglyph_order)
         done = w.randomize(seed_adj)
         seed_adj += 1
 
