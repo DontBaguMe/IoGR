@@ -148,11 +148,14 @@ def enemizer_help():
     lines = []
     lines.append("The following enemy shuffle modes are available:")
     lines.append("")
-    lines.append("BASIC:")
+    lines.append("LIMITED:")
     lines.append(" - Enemies only appear within their own dungeons")
     lines.append("")
+    lines.append("BALANCED:")
+    lines.append(" - Enemies can show up in any dungeon, but retain the stats of the enemies they replace")
+    lines.append("")
     lines.append("FULL:")
-    lines.append(" - Enemies can show up in any dungeon")
+    lines.append(" - Enemies can show up in any dungeon with their normal stats")
     lines.append("")
     lines.append("INSANE:")
     lines.append(" - Same as Full, but enemy stats are shuffled")
@@ -198,7 +201,7 @@ variant_choices = ["None", "OHKO"]
 variant.set("None")
 
 enemizer = StringVar(root)
-enemizer_choices = ["None", "Basic", "Full", "Insane"]
+enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
 statues = StringVar(root)
