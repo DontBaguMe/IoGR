@@ -1034,8 +1034,11 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        #test_enemy = 140                         # TESTING!
+        #test_enemy = 103                         # TESTING!
         #test_set = self.enemies[test_enemy][0]
+
+        complex_enemies = [4,15,53,62,88,103]  # Draco and Zip Flies can lock the game if too plentiful
+        max_complex = 4
 
         # Get list of enemysets
         enemysets = []
@@ -1064,9 +1067,10 @@ class World:
 
         # Randomize enemy spritesets
         for map in self.maps:
+            complex_ct = 0
             oldset = self.maps[map][0]
             # Determine new enemyset for map
-            if self.enemizer == "Basic":
+            if self.enemizer == "Limited":
                 sets = [oldset]
             elif not self.maps[map][7]:
                 sets = enemysets[:]
@@ -1075,6 +1079,8 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
+            #if 10 in sets:      # TESTING!
+            #    newset = 10
             #newset = test_set  # TESTING!
 
             # Gather enemies from old and new sets
@@ -1114,6 +1120,7 @@ class World:
 
                         i = 0
                         found_enemy = False
+                        # Limit number of complex enemies: enemy 62 (Draco) and 103 (zip fly)
 
                         while not found_enemy:
                             new_enemy = new_enemies[i]
@@ -1121,18 +1128,27 @@ class World:
                             new_walkable = self.enemies[new_enemy][4]
                             if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies)-1:
                                 found_enemy = True
+                                if new_enemy in complex_enemies:
+                                    complex_ct += 1
+                                    if complex_ct >= max_complex:
+                                        for enemy_tmp in new_enemies:
+                                            if enemy_tmp in complex_enemies:
+                                                new_enemies.remove(enemy_tmp)
+                                                i -= 1
                             i += 1
                         f.seek(addr-1)
                         #f.write("\x00" + self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING!
                         f.write("\x00" + self.enemies[new_enemy][1])
-                        if map != 27:                                           # Moon Tribe cave enemies retain same template
+                        if self.enemizer == "Balanced" and enemy == 102:
+                            f.write("\x47")
+                        elif map != 27 and self.enemizer != "Balanced":           # Moon Tribe cave enemies retain same template
                             if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
                                 f.write(insane_dictionary[new_enemy])
                             else:
                                 f.write(self.enemies[new_enemy][2])
 
         # Disable all non-enemy sprites
-        if self.enemizer != "Basic":
+        if self.enemizer != "Limited":
             for sprite in self.nonenemy_sprites:
                 f.seek(int(self.nonenemy_sprites[sprite][1],16) + rom_offset + 3)
                 f.write("\x02\xe0")
@@ -1997,60 +2013,61 @@ class World:
         #           SpritesetOffset,EventAddrLow,EventAddrHigh,RestrictedEnemysets]}
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
+            # For now, no one can have enemyset 10 (Ankor Wat outside)
             # Underground Tunnel
             12: [0,1,0,"\x0C\x00\x02\x05\x03",4,"c867a","c86ac",[]],
-            13: [0,1,0,"\x0D\x00\x02\x03\x03",4,"c86ac","c875c",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            14: [0,1,0,"\x0E\x00\x02\x03\x03",4,"c875c","c8847",[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Statues, spike balls
-            15: [0,1,0,"\x0F\x00\x02\x03\x03",4,"c8847","c8935",[]],
-            18: [0,1,0,"\x12\x00\x02\x03\x03",4,"c8986","c8aa9",[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Spike balls
+            13: [0,1,0,"\x0D\x00\x02\x03\x03",4,"c86ac","c875c",[0,1,2,3,4,5,7,8,9,11,12,13]],
+            14: [0,1,0,"\x0E\x00\x02\x03\x03",4,"c875c","c8847",[0,1,2,3,4,5,7,8,9,11,12,13]],  # Statues, spike balls
+            15: [0,1,0,"\x0F\x00\x02\x03\x03",4,"c8847","c8935",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
+            18: [0,1,0,"\x12\x00\x02\x03\x03",4,"c8986","c8aa9",[0,1,2,3,4,5,7,8,9,11,12,13]],  # Spike balls
 
             # Inca Ruins
-            27: [1,0,0,"\x1B\x00\x02\x05\x03",4,"c8c33","c8c87",[]],  # Moon Tribe cave
-            29: [1,1,0,"\x1D\x00\x02\x0F\x03",4,"c8cc4","c8d85",[]],
+            27: [1,0,0,"\x1B\x00\x02\x05\x03",4,"c8c33","c8c87",[0,1,2,3,4,5,6,7,8,9,10,11,12,13]],  # Moon Tribe cave
+            29: [1,1,0,"\x1D\x00\x02\x0F\x03",4,"c8cc4","c8d85",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             32: [1,1,0,"\x20\x00\x02\x08\x03",4,"c8e16","c8e75",[]],  # Broken statue
-            33: [2,1,0,"\x21\x00\x02\x08\x03",4,"c8e75","c8f57",[0,1,2,3,4,5,7,8,9,10,11,12,13]],  # Floor switch
+            33: [2,1,0,"\x21\x00\x02\x08\x03",4,"c8e75","c8f57",[0,1,2,3,4,5,7,8,9,11,12,13]],  # Floor switch
             34: [2,1,0,"\x22\x00\x02\x08\x03",4,"c8f57","c9029",[]],  # Floor switch
-            35: [2,1,0,"\x23\x00\x02\x0A\x03",4,"c9029","c90d5",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            35: [2,1,0,"\x23\x00\x02\x0A\x03",4,"c9029","c90d5",[0,1,2,3,4,5,7,8,9,11,12,13]],
             37: [1,1,0,"\x25\x00\x02\x08\x03",4,"c90f3","c91a0",[1]],  # Diamond block
             38: [1,1,0,"\x26\x00\x02\x08\x03",4,"c91a0","c9242",[]],  # Broken statues
-            39: [1,1,0,"\x27\x00\x02\x0A\x03",4,"c9242","c92f2",[]],
+            39: [1,1,0,"\x27\x00\x02\x0A\x03",4,"c9242","c92f2",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             40: [1,1,0,"\x28\x00\x02\x08\x03",4,"c92f2","c935f",[1]],  # Falling blocks
 
             # Diamond Mine
-            61: [3,2,0,"\x3D\x00\x02\x08\x03",4,"c9836","c98b7",[]],
+            61: [3,2,0,"\x3D\x00\x02\x08\x03",4,"c9836","c98b7",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             62: [3,2,0,"\x3E\x00\x02\x08\x03",4,"c98b7","c991a",[]],
             63: [3,2,0,"\x3F\x00\x02\x05\x03",4,"c991a","c9a41",[]],
-            64: [3,2,0,"\x40\x00\x02\x08\x03",4,"c9a41","c9a95",[]],  # Trapped laborer (??)
+            64: [3,2,0,"\x40\x00\x02\x08\x03",4,"c9a41","c9a95",[0,1,2,3,4,5,6,7,8,9,11,12,13]],  # Trapped laborer (??)
             65: [3,2,0,"\x41\x00\x02\x00\x03",4,"c9a95","c9b39",[0,2,3,4,5,11]],  # Stationary Grundit
             69: [3,2,0,"\x45\x00\x02\x08\x03",4,"c9ba1","c9bf4",[]],
-            70: [3,2,0,"\x46\x00\x02\x08\x03",4,"c9bf4","c9c5c",[3]],
+            70: [3,2,0,"\x46\x00\x02\x08\x03",4,"c9bf4","c9c5c",[3,13]],
 
             # Sky Garden
             77: [4,2,0,"\x4D\x00\x02\x12\x03",4,"c9db3","c9e92",[]],
             78: [5,2,0,"\x4E\x00\x02\x10\x03",4,"c9e92","c9f53",[]],
             79: [4,2,0,"\x4F\x00\x02\x12\x03",4,"c9f53","ca01a",[4,5]],
-            80: [5,2,0,"\x50\x00\x02\x10\x03",4,"ca01a","ca0cb",[]],
-            81: [4,2,0,"\x51\x00\x02\x12\x03",4,"ca0cb","ca192",[]],
+            80: [5,2,0,"\x50\x00\x02\x10\x03",4,"ca01a","ca0cb",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
+            81: [4,2,0,"\x51\x00\x02\x12\x03",4,"ca0cb","ca192",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             82: [5,2,0,"\x52\x00\x02\x10\x03",4,"ca192","ca247",[4,5]],
             83: [4,2,0,"\x53\x00\x02\x12\x03",4,"ca247","ca335",[4,5]],
             84: [5,2,0,"\x54\x00\x02\x12\x03",4,"ca335","ca43b",[4,5]],
 
             # Mu
 #            92: [6,0,0,"\x5C\x00\x02\x15\x03",4,[]],  # Seaside Palace
-            95: [6,3,0,"\x5F\x00\x02\x14\x03",4,"ca71b","ca7ed",[]],
+            95: [6,3,0,"\x5F\x00\x02\x14\x03",4,"ca71b","ca7ed",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             96: [6,3,0,"\x60\x00\x02\x14\x03",4,"ca7ed","ca934",[6]],
             97: [6,3,0,"\x61\x00\x02\x14\x03",4,"ca934","caa7b",[6]],
-            98: [6,3,0,"\x62\x00\x02\x14\x03",4,"caa7b","cab28",[]],
-            100: [6,3,0,"\x64\x00\x02\x14\x03",4,"cab4b","cabd4",[]],
+            98: [6,3,0,"\x62\x00\x02\x14\x03",4,"caa7b","cab28",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
+            100: [6,3,0,"\x64\x00\x02\x14\x03",4,"cab4b","cabd4",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             101: [6,3,0,"\x65\x00\x02\x14\x03",4,"cabd4","cacc3",[6]],
 
             # Angel Dungeon
-            109: [7,3,0,"\x6D\x00\x02\x16\x03",4,"caf6e","cb04b",[2,7,8,9,11]],  # Add 10's back in once flies are fixed
-            110: [7,3,0,"\x6E\x00\x02\x18\x03",4,"cb04b","cb13e",[2,7,8,9,11]],
-            111: [7,3,0,"\x6F\x00\x02\x1B\x03",4,"cb13e","cb1ae",[2,7,8,9,11]],
-            112: [7,3,0,"\x70\x00\x02\x16\x03",4,"cb1ae","cb258",[2,7,8,9,11]],
-            113: [7,3,0,"\x71\x00\x02\x18\x03",4,"cb258","cb29e",[2,7,8,9,11]],
-            114: [7,3,0,"\x72\x00\x02\x18\x03",4,"cb29e","cb355",[2,7,8,9,11]],
+            109: [7,3,0,"\x6D\x00\x02\x16\x03",4,"caf6e","cb04b",[2,7,8,9,10,11]],  # Add 10's back in once flies are fixed
+            110: [7,3,0,"\x6E\x00\x02\x18\x03",4,"cb04b","cb13e",[2,7,8,9,10,11]],
+            111: [7,3,0,"\x6F\x00\x02\x1B\x03",4,"cb13e","cb1ae",[2,7,8,9,10,11]],
+            112: [7,3,0,"\x70\x00\x02\x16\x03",4,"cb1ae","cb258",[2,7,8,9,10,11]],
+            113: [7,3,0,"\x71\x00\x02\x18\x03",4,"cb258","cb29e",[2,7,8,9,10,11]],
+            114: [7,3,0,"\x72\x00\x02\x18\x03",4,"cb29e","cb355",[2,7,8,9,10,11]],
 
             # Great Wall
             130: [8,4,0,"\x82\x00\x02\x1D\x03",4,"cb6c1","cb845",[2,7,8,9,11]],  # Add 10's back in once flies are fixed
@@ -2061,15 +2078,15 @@ class World:
             136: [8,4,0,"\x88\x00\x02\x1D\x03",4,"cbc3b","cbd0a",[2,7,8,9,11]],
 
             # Mt Temple
-            160: [9,4,0,"\xA0\x00\x02\x20\x03",4,"cc18c","cc21c",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            161: [9,4,0,"\xA1\x00\x02\x20\x03",4,"cc21c","cc335",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            162: [9,4,0,"\xA2\x00\x02\x20\x03",4,"cc335","cc3df",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            163: [9,4,0,"\xA3\x00\x02\x20\x03",4,"cc3df","cc4f7",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            164: [9,4,0,"\xA4\x00\x02\x20\x03",4,"cc4f7","cc5f8",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            165: [9,4,0,"\xA5\x00\x02\x20\x03",4,"cc5f8","cc703",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            166: [9,4,0,"\xA6\x00\x02\x20\x03",4,"cc703","cc7a1",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            167: [9,4,0,"\xA7\x00\x02\x20\x03",4,"cc7a1","cc9a3",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
-            168: [9,4,0,"\xA8\x00\x02\x20\x03",4,"cc9a3","cca02",[0,1,2,3,4,5,7,8,9,10,11,12,13]],
+            160: [9,4,0,"\xA0\x00\x02\x20\x03",4,"cc18c","cc21c",[]],
+            161: [9,4,0,"\xA1\x00\x02\x20\x03",4,"cc21c","cc335",[]],
+            162: [9,4,0,"\xA2\x00\x02\x20\x03",4,"cc335","cc3df",[]],
+            163: [9,4,0,"\xA3\x00\x02\x20\x03",4,"cc3df","cc4f7",[]],
+            164: [9,4,0,"\xA4\x00\x02\x20\x03",4,"cc4f7","cc5f8",[0,1,2,3,4,5,7,8,9,11,12,13]],
+            165: [9,4,0,"\xA5\x00\x02\x20\x03",4,"cc5f8","cc703",[]],
+            166: [9,4,0,"\xA6\x00\x02\x20\x03",4,"cc703","cc7a1",[]],
+            167: [9,4,0,"\xA7\x00\x02\x20\x03",4,"cc7a1","cc9a3",[]],
+            168: [9,4,0,"\xA8\x00\x02\x20\x03",4,"cc9a3","cca02",[]],
 
             # Ankor Wat
             176: [10,6,0,"\xB0\x00\x02\x2C\x03",4,"ccb1b","ccbd8",[]],
@@ -2077,14 +2094,14 @@ class World:
             178: [11,6,0,"\xB2\x00\x02\x08\x03",4,"ccca5","ccd26",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             179: [11,6,0,"\xB3\x00\x02\x08\x03",4,"ccd26","ccd83",[]],
             180: [11,6,0,"\xB4\x00\x02\x08\x03",4,"ccd83","ccdd7",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
-            181: [11,6,0,"\xB5\x00\x02\x08\x03",4,"ccdd7","cce7b",[]],
+            181: [11,6,0,"\xB5\x00\x02\x08\x03",4,"ccdd7","cce7b",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             182: [10,6,0,"\xB6\x00\x02\x2C\x03",4,"cce7b","cd005",[]],
-            183: [11,6,0,"\xB7\x00\x02\x08\x03",4,"cd005","cd092",[]],  # Earthquaker Golem
-            184: [11,6,0,"\xB8\x00\x02\x08\x03",4,"cd092","cd0df",[]],
+            183: [11,6,0,"\xB7\x00\x02\x08\x03",4,"cd005","cd092",[0,1,2,3,4,5,6,7,8,9,11,12,13]],  # Earthquaker Golem
+            184: [11,6,0,"\xB8\x00\x02\x08\x03",4,"cd092","cd0df",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             185: [11,6,0,"\xB9\x00\x02\x08\x03",4,"cd0df","cd137",[]],
             186: [10,6,0,"\xBA\x00\x02\x2C\x03",4,"cd137","cd197",[]],
             187: [11,6,0,"\xBB\x00\x02\x08\x03",4,"cd197","cd1f4",[]],
-            188: [11,6,0,"\xBC\x00\x02\x24\x03",4,"cd1f4","cd29a",[]],
+            188: [11,6,0,"\xBC\x00\x02\x24\x03",4,"cd1f4","cd29a",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             189: [11,6,0,"\xBD\x00\x02\x08\x03",4,"cd29a","cd339",[]],
             190: [11,6,0,"\xBE\x00\x02\x08\x03",4,"cd339","cd392",[]],
 
@@ -2098,14 +2115,14 @@ class World:
             211: [12,5,0,"\xD3\x00\x02\x08\x03",4,"cd8f1","cd9a1",[]],
             212: [12,5,0,"\xD4\x00\x02\x08\x03",4,"cd9a1","cda80",[]],
             213: [12,5,0,"\xD5\x00\x02\x08\x03",4,"cda80","cdb4b",[]],
-            214: [12,5,0,"\xD6\x00\x02\x26\x03",4,"cdb4b","cdc1e",[]],
-            215: [12,5,0,"\xD7\x00\x02\x28\x03",4,"cdc1e","cdcfd",[0,2,3,4,5,6,8,9,10,11,12,13]],
+            214: [12,5,0,"\xD6\x00\x02\x26\x03",4,"cdb4b","cdc1e",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
+            215: [12,5,0,"\xD7\x00\x02\x28\x03",4,"cdc1e","cdcfd",[0,2,3,4,5,6,8,9,11,12,13]],
             216: [12,5,0,"\xD8\x00\x02\x08\x03",4,"cdcfd","cde4f",[]],
-            217: [12,5,0,"\xD9\x00\x02\x26\x03",4,"cde4f","cdf3c",[]],
-            219: [12,5,0,"\xDB\x00\x02\x26\x03",4,"cdf76","ce010",[]],
+            217: [12,5,0,"\xD9\x00\x02\x26\x03",4,"cde4f","cdf3c",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
+            219: [12,5,0,"\xDB\x00\x02\x26\x03",4,"cdf76","ce010",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
 
             # Jeweler's Mansion
-            233: [13,0,0,"\xE9\x00\x02\x22\x03",4,"ce224","ce3a6",[0,1,2,3,4,5,7,8,9,10,11,12,13]]
+            233: [13,0,0,"\xE9\x00\x02\x22\x03",4,"ce224","ce3a6",[0,1,2,3,4,5,6,7,8,9,11,12,13]]
 
         }
 
@@ -2167,7 +2184,7 @@ class World:
             # Angel Dungeon
             60: [7,"\x9f\xee\x8a","\x2d",3,False,True,"Dive Bat"],
             61: [7,"\x51\xea\x8a","\x2c",2,True,True,"Steelbones"],
-            62: [7,"\x33\xef\x8a","\x2e",1,True,False,"Draco"],
+            62: [7,"\x33\xef\x8a","\x2e",1,True,True,"Draco"],   # False for now...
             63: [7,"\xc7\xf0\x8a","\x2e",1,True,True,"Ramskull"],
 
             # Great Wall
@@ -2202,7 +2219,7 @@ class World:
             100: [10,"\xd7\xb1\x8b","\x49",2,True,True,"Shrubber"],
             101: [10,"\xb4\xb1\x8b","\x49",2,True,False,"Shrubber 2"],
             102: [10,"\x75\xb2\x8b","\x46",2,True,True,"Zombie"],
-            103: [10,"\x4f\xaf\x8b","\x4a",3,True,False,"Zip Fly"],    # False for now...
+            103: [10,"\x4f\xaf\x8b","\x4a",3,True,True,"Zip Fly"],    # False for now...
             104: [11,"\x8d\xbd\x8b","\x42",3,True,True,"Goldcap"],
             105: [11,"\x25\xb8\x8b","\x45",2,True,True,"Gorgon"],
             106: [11,"\x17\xb8\x8b","\x45",2,True,False,"Gorgon (jump down)"],
