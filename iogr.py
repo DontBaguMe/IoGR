@@ -67,12 +67,12 @@ def generate_ROM():
     if start_str == "South Cape":
         start_chr = ""
     else:
-        start_chr = "_S" + start_str[0]
+        start_chr = "_s" + start_str[0]
 
     if enemizer_str == "None":
         enemizer_chr = ""
     else:
-        enemizer_chr = "_E" + enemizer_str[0]
+        enemizer_chr = "_e" + enemizer_str[0]
 
     filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + start_chr + variant_chr + enemizer_chr + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"

@@ -483,6 +483,10 @@ class World:
             self.item_pool[35][4] = True
             self.item_pool[38][4] = True
 
+        # Random start location
+        if self.start_mode != "South Cape":
+            self.random_start(f,rom_offset)
+
         # Chaos mode
         if self.logic_mode == "Chaos":
             # Add "Inaccessible" node to graph
@@ -530,6 +534,8 @@ class World:
         # Change logic based on which statues are required
         for x in self.statues:
             self.logic[155][2][x][1] = 1
+
+
 
     # Update item placement logic after abilities are placed
     def check_logic(self):
@@ -948,9 +954,6 @@ class World:
             self.enemize(f,rom_offset)
             #self.parse_maps(f,rom_offset)
 
-        # Random start location
-        if self.start != "South Cape":
-            self.random_start(f,rom_offset)
         #print "ROM successfully created"
 
 
@@ -1019,6 +1022,7 @@ class World:
     def get_start_locations(self):
         locations = []
         for location in self.item_locations:
+            i = 1
 
 
         return locations
@@ -1457,7 +1461,7 @@ class World:
             10: [False,[],"Underground Tunnel - Behind Lilly",[]],
             12: [False,[],"Itory Village",[23]],
             13: [False,[],"Itory Cave",[]],
-            14: [False,[],"Moon Tribe",[25]],
+            14: [False,[0],"Moon Tribe",[25]],
             73: [False,[],"Moon Tribe Cave",[]],
             15: [False,[],"Inca Ruins",[7]],
             16: [False,[],"Inca Ruins - Behind Diamond Tile & Psycho Dash",[8]],
@@ -1564,11 +1568,12 @@ class World:
             32: [27,48,[[13,1]]],        # Neil's to Euro w/ Memory Melody
             33: [27,61,[[13,1]]],        # Neil's to Dao w/ Memory Melody
             34: [27,66,[[13,1]]],        # Neil's to Babel w/ Memory Melody
-            35: [29,28,[[25,1]]],        # Sky Garden to Nazca w/ Teapot
-            36: [29,33,[[25,1]]],        # Sky Garden to Seaside Palace w/ Teapot
-            37: [44,48,[[24,1]]],        # Watermia to Euro w/ Will
-            38: [48,44,[[24,1]]],        # Euro to Watermia w/ Will
-            39: [54,61,[[10,1]]],        # Natives' to Dao w/ Large Roast
+            35: [29,14,[[25,1]]],        # Sky Garden to Moon Tribe w/ Teapot
+            36: [29,28,[[25,1]]],        # Sky Garden to Nazca w/ Teapot
+            37: [29,33,[[25,1]]],        # Sky Garden to Seaside Palace w/ Teapot
+            38: [44,48,[[24,1]]],        # Watermia to Euro w/ Will
+            39: [48,44,[[24,1]]],        # Euro to Watermia w/ Will
+            40: [54,61,[[10,1]]],        # Natives' to Dao w/ Large Roast
 
             # SW Continent
             50: [0,12,[[9,1]]],          # Cape to Itory w/ Lola's Melody
