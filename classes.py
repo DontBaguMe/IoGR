@@ -1018,8 +1018,8 @@ class World:
         #test_enemy = 103                         # TESTING!
         #test_set = self.enemies[test_enemy][0]
 
-        complex_enemies = [62,103]  # Draco and Zip Flies can lock the game if too plentiful
-        max_complex = 3
+        complex_enemies = [4,15,53,62,88,103]  # Draco and Zip Flies can lock the game if too plentiful
+        max_complex = 4
 
         # Get list of enemysets
         enemysets = []
@@ -1060,8 +1060,8 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            if 10 in sets:      # TESTING!
-                newset = 10
+            #if 10 in sets:      # TESTING!
+            #    newset = 10
             #newset = test_set  # TESTING!
 
             # Gather enemies from old and new sets
@@ -1120,7 +1120,9 @@ class World:
                         f.seek(addr-1)
                         #f.write("\x00" + self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING!
                         f.write("\x00" + self.enemies[new_enemy][1])
-                        if map != 27 and self.enemizer != "Balanced":           # Moon Tribe cave enemies retain same template
+                        if self.enemizer == "Balanced" and enemy == 102:
+                            f.write("\x47")
+                        elif map != 27 and self.enemizer != "Balanced":           # Moon Tribe cave enemies retain same template
                             if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
                                 f.write(insane_dictionary[new_enemy])
                             else:
