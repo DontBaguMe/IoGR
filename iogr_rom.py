@@ -2188,6 +2188,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     superhero_list.append(qt.encode("    Teen Titans, Go!") + "\xc3\x00\xc0")
     superhero_list.append(qt.encode("       Cowabunga!") + "\xc3\x00\xc0")
     superhero_list.append(qt.encode("       SPOOOOON!!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("There better be bacon when I get there...") + "\xc3\x00\xc0")
 
     # Assign final text box
     f.seek(int("98ebe",16)+rom_offset)
