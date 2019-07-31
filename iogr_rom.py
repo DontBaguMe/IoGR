@@ -1164,10 +1164,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     # Can give journal to the guide in hieroglyph room
     f.seek(int("8c207",16)+rom_offset)
     f.write("\x0E\xC2\x02\x0B\x02\xC1\x6B\x02\xD0\xEF\x01\x1E\xC2\x02\xD6\x26\x22\xC2")
-    f.write("\x02\xBF\x2D\xC2\x6B\x5C\x30\xF2\x83\x02\xCC\xEF\x02\xD5\x26\x02\xBF\x7F\xC2\x6B")
+    f.write("\x02\xBF\x2D\xC2\x6B\x5C\x08\xF2\x83\x02\xCC\xEF\x02\xD5\x26\x02\xBF\x7F\xC2\x6B")
     f.write(qt.encode("If you have any information about the pyramid, I'd be happy to hold onto it for you.",True))
     f.write(qt.encode("I'll hold onto that journal for you. Come back anytime if you want to read it.",True))
-    f.seek(int("3f230",16)+rom_offset)
+    f.seek(int("3f208",16)+rom_offset)
     f.write("\x02\xbf\x1a\x9e\x6b")
 
     # Shorten hieroglyph get
