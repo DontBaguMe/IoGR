@@ -1376,6 +1376,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_jeweler.read())
     f_jeweler.close
 
+    # Allow jeweler to take 2- and 3-jewel items
+    f_jeweler2 = open(folder + "08fd90_jeweler2.bin","r+b")
+    f.seek(int("8fd90",16)+rom_offset)
+    f.write(f_jeweler2.read())
+    f_jeweler2.close
+
     # Jeweler doesn't disappear when defeated
     f.seek(int("8cea5",16)+rom_offset)
     f.write("\x10\x00")
@@ -2158,6 +2164,34 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xc2\xd7")
     f.seek(int("d7b8",16)+rom_offset)
     f.write("\xc2\xd7")
+
+    ##########################################################################
+    #                          Have fun with final text
+    ##########################################################################
+    superhero_list = []
+    superhero_list.append(qt.encode("I must go, my people need me!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("     Up, up, and away!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       Up and atom!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("  It's clobberin' time!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       For Asgard!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    Back in a flash!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("      I am GROOT!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("Wonder Twin powers activate!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    Titans together!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       HULK SMASH!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("        Flame on!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    I have the power!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("        Shazam!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("     Bite me, fanboy.") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("  Hi-yo Silver... away!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("Here I come to save the day!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    Teen Titans, Go!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       Cowabunga!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       SPOOOOON!!") + "\xc3\x00\xc0")
+
+    # Assign final text box
+    f.seek(int("98ebe",16)+rom_offset)
+    f.write(superhero_list[random.randint(0,len(superhero_list)-1)])
 
     ##########################################################################
     #                   Randomize item and ability placement
