@@ -935,11 +935,9 @@ class World:
         # Special code for 2-item event in Dao
         item1 = self.item_locations[125][3]
         item2 = self.item_locations[126][3]
-        f.seek(int("8b21b",16)+rom_offset)
-        f.write(self.item_text_short[item1])
-        f.write("\xcb")
-        f.write(self.item_text_short[item2])
-        f.write("\xc0")
+        f.seek(int("8fde0",16)+rom_offset)
+        f.write("\xd3" + self.item_text_short[item1] + "\xcb")
+        f.write(self.item_text_short[item2] + "\xcf\xce")
 
         # Write in-game spoilers
         i = 0
@@ -1516,7 +1514,7 @@ class World:
             59: [False,[],"Ankor Wat - Behind Earthquaker",[]],
             60: [False,[],"Ankor Wat - Behind Black Glasses",[]],
 
-            61: [False,[55,74],"Dao",[]],
+            61: [False,[54,74],"Dao",[]],
             62: [False,[61],"Pyramid",[30,31,32,33,34,35,38]],
             63: [False,[],"Pyramid - Behind Aura",[]],
             64: [False,[],"Pyramid - Behind Spin Dash",[]],
@@ -1564,17 +1562,20 @@ class World:
             27: [6,68,[[1,gem[6]-5],[46,1],[47,1]]],
 
             # Inter-Continental Travel
-            30: [0,20,[[37,1]]],          # Cape to Coast w/ Lola's Letter
+            30: [0,20,[[37,1]]],         # Cape to Coast w/ Lola's Letter
             31: [0,44,[[37,1]]],         # Cape to Watermia w/ Lola's Letter
-            32: [27,48,[[13,1]]],        # Neil's to Euro w/ Memory Melody
-            33: [27,61,[[13,1]]],        # Neil's to Dao w/ Memory Melody
-            34: [27,66,[[13,1]]],        # Neil's to Babel w/ Memory Melody
-            35: [29,14,[[25,1]]],        # Sky Garden to Moon Tribe w/ Teapot
-            36: [29,28,[[25,1]]],        # Sky Garden to Nazca w/ Teapot
-            37: [29,33,[[25,1]]],        # Sky Garden to Seaside Palace w/ Teapot
-            38: [44,48,[[24,1]]],        # Watermia to Euro w/ Will
-            39: [48,44,[[24,1]]],        # Euro to Watermia w/ Will
-            40: [54,61,[[10,1]]],        # Natives' to Dao w/ Large Roast
+            32: [20,0,[[37,1]]],         # Coast to Cape w/ Lola's Letter
+            33: [20,44,[[37,1]]],        # Coast to Watermia w/ Lola's Letter
+            34: [44,0,[[37,1]]],         # Watermia to Cape w/ Lola's Letter
+            35: [44,20,[[37,1]]],        # Watermia to Coast w/ Lola's Letter
+            36: [27,48,[[13,1]]],        # Neil's to Euro w/ Memory Melody
+            37: [27,61,[[13,1]]],        # Neil's to Dao w/ Memory Melody
+            38: [27,66,[[13,1]]],        # Neil's to Babel w/ Memory Melody
+            39: [29,28,[[25,1]]],        # Sky Garden to Nazca w/ Teapot
+            40: [29,33,[[25,1]]],        # Sky Garden to Seaside Palace w/ Teapot
+            41: [44,48,[[24,1]]],        # Watermia to Euro w/ Will
+            42: [48,44,[[24,1]]],        # Euro to Watermia w/ Will
+            43: [54,61,[[10,1]]],        # Natives' to Dao w/ Large Roast
 
             # SW Continent
             50: [0,12,[[9,1]]],          # Cape to Itory w/ Lola's Melody

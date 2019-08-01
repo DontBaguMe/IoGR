@@ -706,6 +706,19 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                        Modify Diamond Coast events
     ##########################################################################
+    # Allow Turbo to contact Seth
+    f.seek(int("c953e",16)+rom_offset)
+    f.write("\x01")
+    f.seek(int("5aa76",16)+rom_offset)
+    f.write("\x00\xff")
+    f.seek(int("5ff00",16)+rom_offset)
+    f.write("\x02\xCC\x01\x02\xD0\x11\x01\x0E\xFF\x02\xBF\x60\xFF\x6B\x02\xD0\x12\x01\x1B\xFF")
+    f.write("\x02\xcc\x12\x02\xBF\x1F\xFF\x5C\xBD\xB9\x84")
+    f.write("\xd3" + qt.encode("Woof woof!") + "\xcb")
+    f.write(qt.encode("(Oh good, you know Morse Code. Let's see what Seth's up to:)") + "\xc0")
+    f.write("\xd3" + qt.encode("Woof woof!") + "\xcb")
+    f.write(qt.encode("(You don't happen to know Morse Code, do you?)") + "\xc0")
+
     # Kara event serves as an overworld exit
     f.seek(int("5aa9e",16)+rom_offset)
     f.write("\x00\x00\x30\x02\x45\x03\x00\x06\x01\xaa\xaa\x6b")
@@ -977,6 +990,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                           Modfy Watermia events
     ##########################################################################
+    # Allow NPC to contact Seth
+    f.seek(int("78542",16)+rom_offset)
+    f.write("\x50\xe9")
+    f.seek(int("7e950",16)+rom_offset)
+    f.write("\x02\xD0\x11\x01\x5B\xE9\x02\xBF\xb8\xe9\x6B\x02\xD0\x12\x01\x68\xE9")
+    f.write("\x02\xcc\x12\x02\xBF\x6c\xE9\x5C\xBD\xB9\x84")
+    f.write("\xd3" + qt.encode("Oh, you know Bagu? Then I can help you cross.") + "\xcb")
+    f.write(qt.encode("(And by Bagu I mean Morse Code.)") + "\xc0")
+    f.write("\xd3" + qt.encode("Only town folk may cross this river!") + "\xcb")
+    f.write(qt.encode("(Or, if you can talk to fish, I guess.)") + "\xc0")
+
     # Allow for travel from  Watermia to Euro
     # Update address pointer
     f.seek(int("78544",16)+rom_offset)
@@ -1167,11 +1191,25 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8a5b3",16)+rom_offset)
     f.write("\x14\x00")
 
+    # Allow travel back to Natives' Village
+    f.seek(int("8b16d",16)+rom_offset)
+    f.write("\x4c\x50\xfe")
+    f.seek(int("8fe50",16)+rom_offset)
+    f.write("\x02\xBF\x71\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE")
+    f.write("\x02\xBF\x93\xFE\x6B\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x02\xC5")
+    f.write("\xd3" + qt.encode("Go to Natives' Village?") + "\xcb\xac")
+    f.write(qt.encode("No") + "\xcb\xac" + qt.encode("Yes") + "\xca")
+    f.write("\xce" + qt.encode("Come back anytime!") + "\xc0")
+
     # Modify two-item acquisition event
     f.seek(int("8b1bb",16)+rom_offset)
     f.write("\x6b")
-    f.seek(int("8b21a",16)+rom_offset)
-    f.write("\xd3\x69\x8e\xa5\xac\x86\x8e\xa4\xac\x22\xac\x88\xa4\x84\x8c\xa3\x4f\xc0")
+    f.seek(int("8b189",16)+rom_offset)
+    f.write("\xe0\xfd")
+    f.seek(int("8fde0",16)+rom_offset)
+    f.write("\xD3\x4b\x8e\x8b\x80\x0e\xa3\xac\x4b\x84\xa4\xa4\x84\xa2\xCB")
+    f.write("\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xCF\xCE")
+    f.write(qt.encode("If you want a guide to take you to the Natives' Village, I can get one for you.") + "\xc0")
 
     # Spirit appears only after you defeat Mummy Queen or Solid Arm
     f.seek(int("980cb",16)+rom_offset)
@@ -1375,6 +1413,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8cec9",16)+rom_offset)
     f.write(f_jeweler.read())
     f_jeweler.close
+
+    # Allow jeweler to take 2- and 3-jewel items
+    f_jeweler2 = open(folder + "08fd90_jeweler2.bin","r+b")
+    f.seek(int("8fd90",16)+rom_offset)
+    f.write(f_jeweler2.read())
+    f_jeweler2.close
 
     # Jeweler doesn't disappear when defeated
     f.seek(int("8cea5",16)+rom_offset)
@@ -2158,6 +2202,35 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\xc2\xd7")
     f.seek(int("d7b8",16)+rom_offset)
     f.write("\xc2\xd7")
+
+    ##########################################################################
+    #                          Have fun with final text
+    ##########################################################################
+    superhero_list = []
+    superhero_list.append(qt.encode("I must go, my people need me!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("     Up, up, and away!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       Up and atom!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("  It's clobberin' time!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       For Asgard!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    Back in a flash!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("      I am GROOT!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("Wonder Twin powers activate!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    Titans together!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       HULK SMASH!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("        Flame on!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    I have the power!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("        Shazam!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("     Bite me, fanboy.") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("  Hi-yo Silver... away!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("Here I come to save the day!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("    Teen Titans, Go!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       Cowabunga!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("       SPOOOOON!!") + "\xc3\x00\xc0")
+    superhero_list.append(qt.encode("There better be bacon when I get there...") + "\xc3\x00\xc0")
+
+    # Assign final text box
+    f.seek(int("98ebe",16)+rom_offset)
+    f.write(superhero_list[random.randint(0,len(superhero_list)-1)])
 
     ##########################################################################
     #                   Randomize item and ability placement
