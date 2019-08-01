@@ -1280,7 +1280,7 @@ class World:
             16: [9,1,False,0,[2],"1AFAE","","","",              "Underground Tunnel: Small Room Chest"],
             17: [10,1,False,0,[2],"1AFB3","","","",             "Underground Tunnel: Ribber's Chest  "],
             18: [10,1,False,0,[],"F61D","F62D","F643","",       "Underground Tunnel: Barrels         "],
-            19: [10,2,True,0,[],"c8aa2","","","\x12",           "Underground Tunnel: Dark Space      "],   # Always open
+            19: [10,2,True,0,[],"c8aa2","Unsafe","\xE0\x00\x70\x00\x03\x00\x43","\x12",           "Underground Tunnel: Dark Space      "],   # Always open
 
             20: [12,1,False,0,[9],"F69D","F6AD","F6C3","",      "Itory Village: Logs                 "],
             21: [13,1,False,0,[9],"4f375","4f38d","4f3a8","",   "Itory Village: Cave                 "],
@@ -1446,31 +1446,32 @@ class World:
         self.graph = {
             -1: [False,[0],"Game Start",[]],
 
-            0: [False,[7,14,15],"South Cape",[9]],
+            0: [False,[7,14,15,74],"South Cape",[9]],
 
-            1: [False,[],"Jeweler Reward 1",[]],
-            2: [False,[],"Jeweler Reward 2",[]],
-            3: [False,[],"Jeweler Reward 3",[]],
-            4: [False,[],"Jeweler Reward 4",[]],
-            5: [False,[],"Jeweler Reward 5",[]],
-            6: [False,[],"Jeweler Reward 6",[]],
+            74: [False,[],"Jeweler Access",[]],
+            1:  [False,[],"Jeweler Reward 1",[]],
+            2:  [False,[],"Jeweler Reward 2",[]],
+            3:  [False,[],"Jeweler Reward 3",[]],
+            4:  [False,[],"Jeweler Reward 4",[]],
+            5:  [False,[],"Jeweler Reward 5",[]],
+            6:  [False,[],"Jeweler Reward 6",[]],
 
-            7: [False,[8],"Edward's Castle",[]],
-            8: [False,[],"Edward's Prison",[2]],
-            9: [False,[],"Underground Tunnel - Behind Prison Key",[]],
-            10: [False,[],"Underground Tunnel - Behind Lilly",[]],
-            12: [False,[],"Itory Village",[23]],
+            7:  [False,[0,8,14,15],"Edward's Castle",[]],
+            8:  [False,[],"Edward's Prison",[2]],
+            9:  [False,[],"Underground Tunnel - Behind Prison Key",[]],
+            10: [False,[7],"Underground Tunnel - Behind Lilly",[]],
+            12: [False,[0],"Itory Village",[23]],
             13: [False,[],"Itory Cave",[]],
-            14: [False,[0],"Moon Tribe",[25]],
+            14: [False,[0,7,15],"Moon Tribe",[25]],
             73: [False,[],"Moon Tribe Cave",[]],
-            15: [False,[],"Inca Ruins",[7]],
+            15: [False,[0,7,14],"Inca Ruins",[7]],
             16: [False,[],"Inca Ruins - Behind Diamond Tile & Psycho Dash",[8]],
             17: [False,[],"Inca Ruins - Behind Wind Melody",[3,4]],
             18: [False,[19],"Inca Ruins - Castoth",[]],
             19: [False,[20],"Gold Ship",[]],
 
             20: [False,[21,22,27,28],"Diamond Coast",[]],
-            21: [False,[],"Freejia",[]],
+            21: [False,[74],"Freejia",[]],
             22: [False,[],"Diamond Mine",[15]],
             23: [False,[],"Diamond Mine - Behind Psycho Dash",[]],
             24: [False,[],"Diamond Mine - Behind Dark Friar",[]],
@@ -1494,14 +1495,14 @@ class World:
             39: [False,[],"Mu - Behind Psycho Slide",[]],
             40: [False,[],"Mu - Behind Hope Statue 2",[19,19]],
             41: [False,[],"Mu - Vampires",[]],
-            42: [False,[36,44,45],"Angel Village",[]],
+            42: [False,[36,44,45,74],"Angel Village",[]],
             43: [False,[],"Angel Village Dungeon",[]],
-            44: [False,[42,45],"Watermia",[24]],
+            44: [False,[42,45,74],"Watermia",[24]],
             45: [False,[],"Great Wall",[]],
             46: [False,[],"Great Wall - Behind Dark Friar",[]],
             47: [False,[],"Great Wall - Sand Fanger",[]],
 
-            48: [False,[54,56],"Euro",[24,40]],
+            48: [False,[54,56,74],"Euro",[24,40]],
             49: [False,[],"Euro - Ann's Item",[]],
             50: [False,[],"Mt. Temple",[26]],
             51: [False,[],"Mt. Temple - Behind Drops 1",[26]],
@@ -1515,7 +1516,7 @@ class World:
             59: [False,[],"Ankor Wat - Behind Earthquaker",[]],
             60: [False,[],"Ankor Wat - Behind Black Glasses",[]],
 
-            61: [False,[],"Dao",[]],
+            61: [False,[55,74],"Dao",[]],
             62: [False,[61],"Pyramid",[30,31,32,33,34,35,38]],
             63: [False,[],"Pyramid - Behind Aura",[]],
             64: [False,[],"Pyramid - Behind Spin Dash",[]],
@@ -1533,10 +1534,10 @@ class World:
         # Format: { ID: [StartRegion, DestRegion, [[item1, qty1],[item2,qty2]...]]}
         self.logic = {
             # Jeweler Rewards
-            0: [0,1,[[1,gem[0]]]],                    # Jeweler Reward 1
-            1: [0,1,[[1,gem[0]-2],[46,1]]],
-            2: [0,1,[[1,gem[0]-3],[47,1]]],
-            3: [0,1,[[1,gem[0]-5],[46,1],[47,1]]],
+            0: [74,1,[[1,gem[0]]]],                    # Jeweler Reward 1
+            1: [74,1,[[1,gem[0]-2],[46,1]]],
+            2: [74,1,[[1,gem[0]-3],[47,1]]],
+            3: [74,1,[[1,gem[0]-5],[46,1],[47,1]]],
             4: [1,2,[[1,gem[1]]]],                    # Jeweler Reward 2
             5: [1,2,[[1,gem[1]-2],[46,1]]],
             6: [1,2,[[1,gem[1]-3],[47,1]]],
