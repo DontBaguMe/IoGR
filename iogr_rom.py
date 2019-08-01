@@ -1170,11 +1170,25 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8a5b3",16)+rom_offset)
     f.write("\x14\x00")
 
+    # Allow travel back to Natives' Village
+    f.seek(int("8b16d",16)+rom_offset)
+    f.write("\x4c\x50\xfe")
+    f.seek(int("8fe50",16)+rom_offset)
+    f.write("\x02\xBF\x71\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE")
+    f.write("\x02\xBF\x93\xFE\x6B\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x02\xC5")
+    f.write("\xd3" + qt.encode("Go to Natives' Village?") + "\xcb\xac")
+    f.write(qt.encode("No") + "\xcb\xac" + qt.encode("Yes") + "\xca")
+    f.write("\xce" + qt.encode("Come back anytime!") + "\xc0")
+
     # Modify two-item acquisition event
     f.seek(int("8b1bb",16)+rom_offset)
     f.write("\x6b")
-    f.seek(int("8b21a",16)+rom_offset)
-    f.write("\xd3\x69\x8e\xa5\xac\x86\x8e\xa4\xac\x22\xac\x88\xa4\x84\x8c\xa3\x4f\xc0")
+    f.seek(int("8b189",16)+rom_offset)
+    f.write("\xe0\xfd")
+    f.seek(int("8fde0",16)+rom_offset)
+    f.write("\xD3\x4b\x8e\x8b\x80\x0e\xa3\xac\x4b\x84\xa4\xa4\x84\xa2\xCB")
+    f.write("\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xCF\xCE")
+    f.write(qt.encode("If you want a guide to take you to the Natives' Village, I can get one for you.") + "\xc0")
 
     # Spirit appears only after you defeat Mummy Queen or Solid Arm
     f.seek(int("980cb",16)+rom_offset)

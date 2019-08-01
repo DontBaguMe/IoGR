@@ -928,11 +928,9 @@ class World:
         # Special code for 2-item event in Dao
         item1 = self.item_locations[125][3]
         item2 = self.item_locations[126][3]
-        f.seek(int("8b21b",16)+rom_offset)
-        f.write(self.item_text_short[item1])
-        f.write("\xcb")
-        f.write(self.item_text_short[item2])
-        f.write("\xc0")
+        f.seek(int("8fde0",16)+rom_offset)
+        f.write("\xd3" + self.item_text_short[item1] + "\xcb")
+        f.write(self.item_text_short[item2] + "\xcf\xce")
 
         # Write in-game spoilers
         i = 0
@@ -1330,7 +1328,7 @@ class World:
             59: [False,[],"Ankor Wat - Behind Earthquaker",[]],
             60: [False,[],"Ankor Wat - Behind Black Glasses",[]],
 
-            61: [False,[],"Dao",[]],
+            61: [False,[54],"Dao",[]],
             62: [False,[61],"Pyramid",[30,31,32,33,34,35,38]],
             63: [False,[],"Pyramid - Behind Aura",[]],
             64: [False,[],"Pyramid - Behind Spin Dash",[]],
