@@ -451,14 +451,25 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write("\x00\x80\xfc\x80")
 
     ##########################################################################
-    #                         Modify South Cape events
+    #                         Modify Game Start events
     ##########################################################################
-    # Overwrite opening cutscene, set initial progression flags instead
-    # TEMPORARILY SETS KARA RESCUE (0x8A) TO TRUE FOR TESTING PURPOSES
-    f_switches = open(folder + "048a94_switches.bin","r+b")
-    f.seek(int("48a94",16)+rom_offset)
+    # Set beginning switches
+    f.seek(int("be51c",16) + rom_offset)
+    f.write("\x80\x00\x12\x4c\x00\xfd")
+    f_switches = open(folder + "0bfd00_switches.bin","r+b")
+    f.seek(int("bfd00",16)+rom_offset)
     f.write(f_switches.read())
     f_switches.close
+
+    ##########################################################################
+    #                         Modify South Cape events
+    ##########################################################################
+    # Overwrite opening cutscene, spoil Mystic Statues required
+    # TEMPORARILY SETS KARA RESCUE (0x8A) TO TRUE FOR TESTING PURPOSES
+    f_teacher = open(folder + "048a94_teacher.bin","r+b")
+    f.seek(int("48a94",16)+rom_offset)
+    f.write(f_teacher.read())
+    f_teacher.close
 
     # Force fisherman to always appear on E side of docks, and fix inventory full
     f.seek(int("48377",16)+rom_offset)
@@ -1469,6 +1480,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("8fd30",16)+rom_offset)
     f.write(f_forcechange.read())
     f_forcechange.close
+
 
     ##########################################################################
     #                          Fix special attacks
