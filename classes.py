@@ -1378,16 +1378,20 @@ class World:
             27: [6,68,[[1,gem[6]-5],[46,1],[47,1]]],
 
             # Inter-Continental Travel
-            30: [0,20,[[37,1]]],          # Cape to Coast w/ Lola's Letter
+            30: [0,20,[[37,1]]],         # Cape to Coast w/ Lola's Letter
             31: [0,44,[[37,1]]],         # Cape to Watermia w/ Lola's Letter
-            32: [27,48,[[13,1]]],        # Neil's to Euro w/ Memory Melody
-            33: [27,61,[[13,1]]],        # Neil's to Dao w/ Memory Melody
-            34: [27,66,[[13,1]]],        # Neil's to Babel w/ Memory Melody
-            35: [29,28,[[25,1]]],        # Sky Garden to Nazca w/ Teapot
-            36: [29,33,[[25,1]]],        # Sky Garden to Seaside Palace w/ Teapot
-            37: [44,48,[[24,1]]],        # Watermia to Euro w/ Will
-            38: [48,44,[[24,1]]],        # Euro to Watermia w/ Will
-            39: [54,61,[[10,1]]],        # Natives' to Dao w/ Large Roast
+            32: [20,0,[[37,1]]],         # Coast to Cape w/ Lola's Letter
+            33: [20,44,[[37,1]]],        # Coast to Watermia w/ Lola's Letter
+            34: [44,0,[[37,1]]],         # Watermia to Cape w/ Lola's Letter
+            35: [44,20,[[37,1]]],        # Watermia to Coast w/ Lola's Letter
+            36: [27,48,[[13,1]]],        # Neil's to Euro w/ Memory Melody
+            37: [27,61,[[13,1]]],        # Neil's to Dao w/ Memory Melody
+            38: [27,66,[[13,1]]],        # Neil's to Babel w/ Memory Melody
+            39: [29,28,[[25,1]]],        # Sky Garden to Nazca w/ Teapot
+            40: [29,33,[[25,1]]],        # Sky Garden to Seaside Palace w/ Teapot
+            41: [44,48,[[24,1]]],        # Watermia to Euro w/ Will
+            42: [48,44,[[24,1]]],        # Euro to Watermia w/ Will
+            43: [54,61,[[10,1]]],        # Natives' to Dao w/ Large Roast
 
             # SW Continent
             50: [0,12,[[9,1]]],          # Cape to Itory w/ Lola's Melody

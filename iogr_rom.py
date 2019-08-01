@@ -685,6 +685,19 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                        Modify Diamond Coast events
     ##########################################################################
+    # Allow Turbo to contact Seth
+    f.seek(int("c953e",16)+rom_offset)
+    f.write("\x01")
+    f.seek(int("5aa76",16)+rom_offset)
+    f.write("\x00\xff")
+    f.seek(int("5ff00",16)+rom_offset)
+    f.write("\x02\xCC\x01\x02\xD0\x11\x01\x0E\xFF\x02\xBF\x60\xFF\x6B\x02\xD0\x12\x01\x1B\xFF")
+    f.write("\x02\xcc\x12\x02\xBF\x1F\xFF\x5C\xBD\xB9\x84")
+    f.write("\xd3" + qt.encode("Woof woof!") + "\xcb")
+    f.write(qt.encode("(Oh good, you know Morse Code. Let's see what Seth's up to:)") + "\xc0")
+    f.write("\xd3" + qt.encode("Woof woof!") + "\xcb")
+    f.write(qt.encode("(You don't happen to know Morse Code, do you?)") + "\xc0")
+
     # Kara event serves as an overworld exit
     f.seek(int("5aa9e",16)+rom_offset)
     f.write("\x00\x00\x30\x02\x45\x03\x00\x06\x01\xaa\xaa\x6b")
@@ -960,9 +973,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("78542",16)+rom_offset)
     f.write("\x50\xe9")
     f.seek(int("7e950",16)+rom_offset)
-    f.write("\x02\xD0\x11\x01\x5B\xE9\x02\xBF\xC9\x85\x6B\x02\xD0\x12\x01\x68\xE9")
+    f.write("\x02\xD0\x11\x01\x5B\xE9\x02\xBF\xb8\xe9\x6B\x02\xD0\x12\x01\x68\xE9")
     f.write("\x02\xcc\x12\x02\xBF\x6c\xE9\x5C\xBD\xB9\x84")
-    f.write(qt.encode("Oh, you know Bagu? Then I can help you cross.", True))
+    f.write("\xd3" + qt.encode("Oh, you know Bagu? Then I can help you cross.") + "\xcb")
+    f.write(qt.encode("(And by Bagu I mean Morse Code.)") + "\xc0")
+    f.write("\xd3" + qt.encode("Only town folk may cross this river!") + "\xcb")
+    f.write(qt.encode("(Or, if you can talk to fish, I guess.)") + "\xc0")
 
     # Allow for travel from  Watermia to Euro
     # Update address pointer
