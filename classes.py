@@ -1053,8 +1053,8 @@ class World:
             print "ERROR: Something is fishy with start locations"
             return -1
         else:
-            return 57   # TESTING!
-            #return locations[random.randint(0,len(locations)-1)]
+            #return 146   # TESTING!
+            return locations[random.randint(0,len(locations)-1)]
 
     # Shuffle enemies in ROM
     def enemize(self,f,rom_offset=0):
@@ -1449,7 +1449,7 @@ class World:
 
             112: [54,1,False,0,[],"FB1D","FB2D","FB43","",      "Natives' Village: Statue Room       "],
             113: [55,1,False,0,[29],"893af","8942a","","",      "Natives' Village: Statue            "],
-            114: [54,2,False,0,[51,52,53],"cca37","Safe","\xb0\x00\xb0\x00\x83\x00\x11","\xac",
+            114: [54,2,False,0,[51,52,53],"cca37","Safe","\xc0\x01\x50\x00\x83\x00\x22","\xac",
                                                                 "Natives' Village: Dark Space        "],
 
             115: [56,1,False,0,[],"1B056","","","",              "Ankor Wat: Ramp Chest               "],
@@ -1462,7 +1462,7 @@ class World:
             122: [76,2,True,0,[49,50],"cce92","Unsafe","\x20\x04\x30\x03\x83\x00\x46","\xb6",
                                                                  "Ankor Wat: Garden Dark Space        "],    # Always open
             123: [58,2,False,0,[49,50,51],"cd0a2","","","\xb8",  "Ankor Wat: Earthquaker Dark Space   "],
-            124: [60,2,True,0,[49,50,51,53],"cd1a7","Unsafe","\xb0\x02\xc0\x01\x83\x00\x33","\xbb",
+            124: [59,2,True,0,[49,50,51,53],"cd1a7","Unsafe","\xb0\x02\xc0\x01\x83\x00\x33","\xbb",
                                                                  "Ankor Wat: Drop Down Dark Space     "],   # Always open
 
             125: [61,1,False,0,[],"8b1b0","","","",              "Dao: Entrance Item 1                "],
@@ -1478,13 +1478,13 @@ class World:
             133: [63,1,False,0,[36],"1B06F","","","",            "Pyramid: Room 2 Chest               "],
             134: [63,1,False,0,[36],"8c879","8c88c","","",       "Pyramid: Hieroglyph 2               "],
             135: [64,1,False,0,[36],"1B079","","","",            "Pyramid: Room 3 Chest               "],
-            136: [63,1,False,0,[36],"8c921","8c934","","",       "Pyramid: Hieroglyph 3               "],
+            136: [78,1,False,0,[36],"8c921","8c934","","",       "Pyramid: Hieroglyph 3               "],
             137: [64,1,False,0,[36],"1B07E","","","",            "Pyramid: Room 4 Chest               "],
             138: [64,1,False,0,[36],"8c9c9","8c9dc","","",       "Pyramid: Hieroglyph 4               "],
             139: [63,1,False,0,[36],"1B074","","","",            "Pyramid: Room 5 Chest               "],
-            140: [63,1,False,0,[36],"8ca71","8ca84","","",       "Pyramid: Hieroglyph 5               "],
-            141: [63,1,False,0,[36],"8cb19","8cb2c","","",       "Pyramid: Hieroglyph 6               "],
-            142: [63,2,True,0,[],"cd570","Unsafe","\xc0\x01\x90\x03\x83\x00\x44","\xcc",
+            140: [79,1,False,0,[36],"8ca71","8ca84","","",       "Pyramid: Hieroglyph 5               "],
+            141: [77,1,False,0,[36],"8cb19","8cb2c","","",       "Pyramid: Hieroglyph 6               "],
+            142: [77,2,True,0,[],"cd570","Unsafe","\xc0\x01\x90\x03\x83\x00\x44","\xcc",
                                                                  "Pyramid: Dark Space Bottom          "],   # Always open
 
             143: [66,1,False,0,[],"FC9D","FCAD","FCC3","",       "Babel: Pillow                       "],
@@ -1579,13 +1579,16 @@ class World:
             76: [False,[56],"Ankor Wat - Garden",[]],
             57: [False,[56,76],"Ankor Wat - Behind Psycho Slide & Spin Dash",[]],
             58: [False,[],"Ankor Wat - Behind Dark Friar",[]],
-            59: [False,[57],"Ankor Wat - Behind Earthquaker",[]],
-            60: [False,[],"Ankor Wat - Behind Black Glasses",[]],
+            59: [False,[56],"Ankor Wat - Behind Earthquaker",[]],
+            60: [False,[76],"Ankor Wat - Behind Black Glasses",[]],
 
             61: [False,[54,74],"Dao",[]],
             62: [False,[61],"Pyramid",[30,31,32,33,34,35,38]],
-            63: [False,[62],"Pyramid - Behind Aura",[]],
-            64: [False,[],"Pyramid - Behind Spin Dash",[]],
+            77: [False,[62],"Pyramid - Bottom Level",[]],
+            63: [False,[77,78,79],"Pyramid - Behind Aura",[]],
+            64: [False,[77],"Pyramid - Behind Spin Dash",[]],
+            78: [False,[77],"Pyramid - Behind Dark Friar",[]],
+            79: [False,[77],"Pyramid - Behind Earthquaker",[]],
             65: [False,[],"Pyramid - Mummy Queen",[38]],
 
             66: [False,[],"Babel Tower",[]],
@@ -1712,11 +1715,12 @@ class World:
             # NW Continent
             130: [61,62,[[49,1]]],        # Pyramid foyer w/ Slide
             131: [61,62,[[50,1]]],        # Pyramid foyer w/ Spin
-            #132: [61,54,[[10,1]]],        # Dao to Natives' w/ Large Roast
-            133: [62,63,[[36,1]]],        # Pyramid Progression w/ Aura
-            134: [62,65,[[30,1],[31,1],[32,1],[33,1],[34,1],[35,1],[38,1]]],
+            132: [62,63,[[36,1]]],        # Pyramid Progression w/ Aura
+            132: [77,78,[[51,1]]],        # Pyramid Progression w/ Dark Friar
+            132: [77,79,[[53,1]]],        # Pyramid Progression w/ Earthquaker
+            133: [62,65,[[30,1],[31,1],[32,1],[33,1],[34,1],[35,1],[38,1]]],
                                           # Pyramid Boss w/ Hieroglyphs and Journal
-            135: [63,64,[[50,1]]],        # Pyramid Progression w/ Spin Dash
+            134: [77,64,[[50,1]]],        # Pyramid Progression w/ Spin Dash
 
             # Babel/Jeweler Mansion
             140: [66,67,[[36,1],[39,1]]], # Babel Progression w/ Aura and Crystal Ring
@@ -1843,13 +1847,13 @@ class World:
             74: "\x4c\xa5",   # "Mu"
             75: "\x4c\xa5",   # "Mu"
 
-            76: "\xd6\x01\xd6\xec",   # "Angel Village"
-            77: "\xd6\x01\xd6\xec",   # "Angel Village"
-            78: "\xd6\x01\xd6\xec",   # "Angel Village"
-            79: "\xd6\x01\xd6\xec",   # "Angel Village"
-            80: "\xd6\x01\xd6\xec",   # "Angel Village"
-            81: "\xd6\x01\xd6\xec",   # "Angel Village"
-            82: "\xd6\x01\xd6\xec",   # "Angel Village"
+            76: "\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",   # "Angel Village"
+            77: "\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",   # "Angel Village"
+            78: "\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",   # "Angel Village"
+            79: "\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",   # "Angel Village"
+            80: "\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",   # "Angel Village"
+            81: "\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",   # "Angel Village"
+            82: "\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",   # "Angel Village"
 
             83: "\x67\x80\xa4\x84\xa2\x8c\x88\x80",   # "Watermia"
             84: "\x67\x80\xa4\x84\xa2\x8c\x88\x80",   # "Watermia"
@@ -1884,9 +1888,9 @@ class World:
             110: "\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",   # "Mt. Kress"
             111: "\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",   # "Mt. Kress"
 
-            112: "\xd7\x21\xd6\xec",                       # "Natives' Village"
+            112: "\xd7\x21\x66\x88\x8b\x8b\x80\x86\x84",   # "Native Village"
             113: "\x63\xa4\x80\xa4\xa5\x84",               # "Statue"
-            114: "\xd7\x21\xd6\xec",                       # "Natives' Village"
+            114: "\xd7\x21\x66\x88\x8b\x8b\x80\x86\x84",   # "Native Village"
 
             115: "\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",   # "Ankor Wat"
             116: "\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",   # "Ankor Wat"
