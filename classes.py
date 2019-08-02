@@ -976,6 +976,17 @@ class World:
             f.seek(int("8de1f",16) + rom_offset)
             f.write(map_name + "\x0D\xCB\xAC\x4D\x8E\xCB\xAC\x69\x84\xA3\xCA")
 
+            # Check for additional switches that need to be set
+            switch_str = ""
+            if self.start_loc == 30:     # Inca ramp can hardlock you
+                switch_str = "\x02\xcd\x0c\x01"
+            elif self.start_loc == 47:   # Diamond Mine behind fences
+                switch_str = "\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01"
+
+            if switch_str:
+                f.seek(int("bfdf3",16) + rom_offset)
+                f.write(switch_str + "\x02\xe0")
+
         #print "ROM successfully created"
 
 
@@ -1053,7 +1064,7 @@ class World:
             print "ERROR: Something is fishy with start locations"
             return -1
         else:
-            #return 29   # TESTING!
+            #return 93   # TESTING!
             return locations[random.randint(0,len(locations)-1)]
 
     # Shuffle enemies in ROM
@@ -1336,7 +1347,7 @@ class World:
             28: [16,1,False,0,[7],"9c5bd","9c614","9c637","",   "Inca Ruins: Singing Statue          "],
             29: [16,2,True,0,[],"c9302","Unsafe","\x10\x01\x90\x00\x83\x00\x32","\x28",
                                                                 "Inca Ruins: Dark Space 1            "],   # Always open
-            30: [16,2,False,0,[],"c923b","Unsafe2","\xC0\x01\x50\x01\x83\x00\x32","\x26",
+            30: [16,2,False,0,[],"c923b","Unsafe","\xC0\x01\x50\x01\x83\x00\x32","\x26",
                                                                 "Inca Ruins: Dark Space 2            "],
             31: [17,2,False,0,[],"c8db8","","","\x1e",          "Inca Ruins: Final Dark Space        "],
 
@@ -1360,7 +1371,7 @@ class World:
             45: [26,1,False,0,[11,12,15],"5d2b0","5d2da","","", "Diamond Mine: Sam                   "],
             46: [22,2,False,0,[],"c9a87","Unsafe","\xb0\x01\x70\x01\x83\x00\x32","\x40",
                                                                 "Diamond Mine: Appearing Dark Space  "], # Always open
-            47: [22,2,False,0,[],"c98b0","Unsafe2","\xd0\x00\xc0\x00\x83\x00\x61","\x3d",
+            47: [22,2,False,0,[],"c98b0","Unsafe","\xd0\x00\xc0\x00\x83\x00\x61","\x3d",
                                                                 "Diamond Mine: Dark Space at Wall    "],
             48: [23,2,False,0,[],"c9b49","","","\x42",          "Diamond Mine: Dark Space behind Wall"],
 
@@ -1420,9 +1431,9 @@ class World:
             90: [45,1,False,0,[],"7b625","7b631","","",         "Great Wall: Necklace 2              "],
             91: [45,1,False,0,[],"1B033","","","",              "Great Wall: Chest 1                 "],
             92: [45,1,False,0,[],"1B038","","","",              "Great Wall: Chest 2                 "],
-            93: [45,2,False,0,[],"cbb11","Unsafe","\x60\x00\xc0\x02\x83\x20\x38","\x85",
+            93: [80,2,False,0,[],"cbb11","Unsafe","\x60\x00\xc0\x02\x83\x20\x38","\x85",
                                                                 "Great Wall: Archer Dark Space       "],
-            94: [45,2,True,0,[],"cbb80","Unsafe2","\x50\x01\x80\x04\x83\x00\x63","\x86",
+            94: [80,2,True,0,[],"cbb80","Unsafe","\x50\x01\x80\x04\x83\x00\x63","\x86",
                                                                 "Great Wall: Platform Dark Space     "],   # Always open
             95: [46,2,False,0,[51],"cbc60","","","\x88",        "Great Wall: Appearing Dark Space    "],
 
@@ -1523,7 +1534,7 @@ class World:
             7:  [False,[0,8,14,15],"Edward's Castle",[]],
             8:  [False,[],"Edward's Prison",[2]],
             9:  [False,[],"Underground Tunnel - Behind Prison Key",[]],
-            10: [False,[7],"Underground Tunnel - Behind Lilly",[]],
+            10: [False,[7,9],"Underground Tunnel - Behind Lilly",[]],
             12: [False,[0,7,14,15],"Itory Village",[23]],
             13: [False,[],"Itory Cave",[]],
             75: [False,[],"Got Lilly",[]],
@@ -1563,7 +1574,8 @@ class World:
             42: [False,[36,44,45,74],"Angel Village",[]],
             43: [False,[],"Angel Village Dungeon",[]],
             44: [False,[42,45,74],"Watermia",[24]],
-            45: [False,[42,44,45],"Great Wall",[]],
+            45: [False,[42,44,45,80],"Great Wall",[]],
+            80: [False,[],"Great Wall - Behind Ramp",[]],
             46: [False,[],"Great Wall - Behind Dark Friar",[]],
             47: [False,[46],"Great Wall - Sand Fanger",[]],
 
@@ -1694,9 +1706,9 @@ class World:
             98:  [71,40,[[18,2]]],         # Mu Progression w/ Statue of Hope 2
             99:  [40,41,[[19,2]]],         # Mu Progression w/ Rama Statues
             100: [42,43,[[49,1]]],         # Angel Village to Dungeon w/ Slide
-            101: [45,46,[[51,1]]],         # Great Wall Progression w/ Dark Friar
+            101: [80,46,[[51,1]]],         # Great Wall Progression w/ Dark Friar
             102: [46,47,[[50,1]]],         # Great Wall Progression w/ Spin Dash
-            103: [45,42,[[50,1]]],         # Escape Great Wall w/ Spin Dash
+            103: [80,45,[[50,1]]],         # Escape Great Wall w/ Spin Dash
 
             # N Continent
             110: [48,49,[[40,1]]],        # Ann item w/ Apple
@@ -1710,7 +1722,7 @@ class World:
             118: [57,58,[[51,1]]],        # Ankor Wat Progression w/ Dark Friar
             119: [57,58,[[36,1]]],        # Ankor Wat Progression w/ Aura
             120: [57,59,[[53,1]]],        # Ankor Wat Progression w/ Earthquaker
-            121: [59,60,[[28,1]]],        # Ankor Wat Progression w/ Black Glasses
+            121: [59,60,[[28,1],[49,1]]], # Ankor Wat Progression w/ Black Glasses
 
             # NW Continent
             130: [61,62,[[49,1]]],        # Pyramid foyer w/ Slide
