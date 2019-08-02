@@ -1045,21 +1045,23 @@ class World:
     def random_start(self):
         locations = []
         for loc in self.item_locations:
-            if self.item_locations[loc][6] == "Safe" or self.item_locations[loc][6] == self.start_mode:
+            if (self.start_mode == "Forced Unsafe" and self.item_locations[loc][6] == "Unsafe") or (
+                self.start_mode != "Forced Unsafe" and (self.item_locations[loc][6] == "Safe" or self.item_locations[loc][6] == self.start_mode)):
                 locations.append(loc)
 
         if not locations:
             print "ERROR: Something is fishy with start locations"
             return -1
         else:
-            return locations[random.randint(0,len(locations)-1)]
+            return 57   # TESTING!
+            #return locations[random.randint(0,len(locations)-1)]
 
     # Shuffle enemies in ROM
     def enemize(self,f,rom_offset=0):
         f.seek(0)
         rom = f.read()
 
-        #test_enemy = 103                         # TESTING!
+        #test_enemy = 13                         # TESTING!
         #test_set = self.enemies[test_enemy][0]
 
         complex_enemies = [4,15,53,62,88,103]  # Draco and Zip Flies can lock the game if too plentiful
@@ -1104,8 +1106,8 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            #if 10 in sets:      # TESTING!
-            #    newset = 10
+            #if 1 in sets:      # TESTING!
+            #    newset = 1
             #newset = test_set  # TESTING!
 
             # Gather enemies from old and new sets
@@ -1141,18 +1143,32 @@ class World:
                         # Pick an enemy from new set
                         enemytype = self.enemies[enemy][3]
                         walkable = self.enemies[enemy][4]
-                        random.shuffle(new_enemies)
+
+                        new_enemies_tmp = new_enemies[:]
+
+                        # Special exception: 4-Ways cannot be on a #$XF x-coord
+                        if newset == 1:
+                            f.seek(addr-3)
+                            xcoord = binascii.hexlify(f.read(1))
+                            if xcoord[1] == "f":
+                                new_enemies_tmp.remove(13)
+
+                        random.shuffle(new_enemies_tmp)
 
                         i = 0
                         found_enemy = False
-                        # Limit number of complex enemies: enemy 62 (Draco) and 103 (zip fly)
+
+                        #if 13 in new_enemies_tmp:   # TESTING!
+                        #    new_enemy = 13
+                        #    found_enemy = True
 
                         while not found_enemy:
-                            new_enemy = new_enemies[i]
+                            new_enemy = new_enemies_tmp[i]
                             new_enemytype = self.enemies[new_enemy][3]
                             new_walkable = self.enemies[new_enemy][4]
-                            if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies)-1:
+                            if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies_tmp)-1:
                                 found_enemy = True
+                                # Limit number of complex enemies per map
                                 if new_enemy in complex_enemies:
                                     complex_ct += 1
                                     if complex_ct >= max_complex:
@@ -1520,8 +1536,8 @@ class World:
             19: [False,[20],"Gold Ship",[]],
 
             20: [False,[21,22,27,28],"Diamond Coast",[]],
-            21: [False,[74],"Freejia",[]],
-            22: [False,[],"Diamond Mine",[15]],
+            21: [False,[20,22,27,28,74],"Freejia",[]],
+            22: [False,[20,21,27,28],"Diamond Mine",[15]],
             23: [False,[],"Diamond Mine - Behind Psycho Dash",[]],
             24: [False,[],"Diamond Mine - Behind Dark Friar",[]],
             25: [False,[],"Diamond Mine - Behind Elevator Key",[11,12]],
@@ -2080,7 +2096,7 @@ class World:
             # Underground Tunnel
             12: [0,1,0,"\x0C\x00\x02\x05\x03",4,"c867a","c86ac",[]],
             13: [0,1,0,"\x0D\x00\x02\x03\x03",4,"c86ac","c875c",[0,1,2,3,4,5,7,8,9,11,12,13]],
-            14: [0,1,0,"\x0E\x00\x02\x03\x03",4,"c875c","c8847",[0,2,3,4,5,7,8,9,11,12,13]],     # Weird 4way issues
+            14: [0,1,0,"\x0E\x00\x02\x03\x03",4,"c875c","c8847",[0,1,2,3,4,5,7,8,9,11,12,13]],     # Weird 4way issues
             15: [0,1,0,"\x0F\x00\x02\x03\x03",4,"c8847","c8935",[0,1,2,3,4,5,6,7,8,9,11,12,13]],
             18: [0,1,0,"\x12\x00\x02\x03\x03",4,"c8986","c8aa9",[0,1,2,3,4,5,7,8,9,11,12,13]],  # Spike balls
 
@@ -2171,7 +2187,7 @@ class World:
             # Pyramid
             204: [12,5,0,"\xCC\x00\x02\x08\x03",4,"cd539","cd58c",[]],
             206: [12,5,0,"\xCE\x00\x02\x08\x03",4,"cd5c6","cd650",[]],
-            207: [12,5,0,"\xCF\x00\x02\x08\x03",4,"cd650","cd6f3",[0,2,3,4,5,6,7,8,9,10,11,12,13]],   # Weird 4way issues
+            207: [12,5,0,"\xCF\x00\x02\x08\x03",4,"cd650","cd6f3",[0,1,2,3,4,5,6,7,8,9,10,11,12,13]],
             208: [12,5,0,"\xD0\x00\x02\x08\x03",4,"cd6f3","cd752",[]],
             209: [12,5,0,"\xD1\x00\x02\x08\x03",4,"cd752","cd81b",[]],
             210: [12,5,0,"\xD2\x00\x02\x08\x03",4,"cd81b","cd8f1",[]],

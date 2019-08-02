@@ -180,6 +180,9 @@ def start_help():
     lines.append("")
     lines.append("UNSAFE:")
     lines.append(" - You start the game in front of a random Dark Space, could be in a town or a dungeon")
+    lines.append("")
+    lines.append("FORCED UNSAFE:")
+    lines.append(" - You're guaranteed to start the game in the middle of a dungeon")
     showinfo("Start Location", "\n".join(lines))
 
 root = Tk()
@@ -219,7 +222,7 @@ logic_choices = ["Completable", "Beatable", "Chaos"]
 logic.set("Completable")
 
 start = StringVar(root)
-start_choices = ["South Cape", "Safe", "Unsafe"]
+start_choices = ["South Cape", "Safe", "Unsafe", "Forced Unsafe"]
 start.set("South Cape")
 
 variant = StringVar(root)

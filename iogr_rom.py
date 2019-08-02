@@ -844,6 +844,10 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(f_skygarden.read())
     f_skygarden.close
 
+    # Allow exit to Nazca
+    f.seek(int("5e6a5",16)+rom_offset)
+    f.write("\x50")
+
     # Instant form change & warp to Seaside Palace if Viper is defeated
     f.seek(int("ace9b",16)+rom_offset)
     f.write("\x4c\x90\xfd")
