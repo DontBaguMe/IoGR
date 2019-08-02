@@ -1053,7 +1053,7 @@ class World:
             print "ERROR: Something is fishy with start locations"
             return -1
         else:
-            #return 146   # TESTING!
+            #return 29   # TESTING!
             return locations[random.randint(0,len(locations)-1)]
 
     # Shuffle enemies in ROM
@@ -1336,7 +1336,7 @@ class World:
             28: [16,1,False,0,[7],"9c5bd","9c614","9c637","",   "Inca Ruins: Singing Statue          "],
             29: [16,2,True,0,[],"c9302","Unsafe","\x10\x01\x90\x00\x83\x00\x32","\x28",
                                                                 "Inca Ruins: Dark Space 1            "],   # Always open
-            30: [16,2,False,0,[],"c923b","Unsafe","\xC0\x01\x50\x01\x83\x00\x32","\x26",
+            30: [16,2,False,0,[],"c923b","Unsafe2","\xC0\x01\x50\x01\x83\x00\x32","\x26",
                                                                 "Inca Ruins: Dark Space 2            "],
             31: [17,2,False,0,[],"c8db8","","","\x1e",          "Inca Ruins: Final Dark Space        "],
 
@@ -1360,7 +1360,7 @@ class World:
             45: [26,1,False,0,[11,12,15],"5d2b0","5d2da","","", "Diamond Mine: Sam                   "],
             46: [22,2,False,0,[],"c9a87","Unsafe","\xb0\x01\x70\x01\x83\x00\x32","\x40",
                                                                 "Diamond Mine: Appearing Dark Space  "], # Always open
-            47: [22,2,False,0,[],"c98b0","Unsafe","\xd0\x00\xc0\x00\x83\x00\x61","\x3d",
+            47: [22,2,False,0,[],"c98b0","Unsafe2","\xd0\x00\xc0\x00\x83\x00\x61","\x3d",
                                                                 "Diamond Mine: Dark Space at Wall    "],
             48: [23,2,False,0,[],"c9b49","","","\x42",          "Diamond Mine: Dark Space behind Wall"],
 
@@ -1422,7 +1422,7 @@ class World:
             92: [45,1,False,0,[],"1B038","","","",              "Great Wall: Chest 2                 "],
             93: [45,2,False,0,[],"cbb11","Unsafe","\x60\x00\xc0\x02\x83\x20\x38","\x85",
                                                                 "Great Wall: Archer Dark Space       "],
-            94: [45,2,True,0,[],"cbb80","Unsafe","\x50\x01\x80\x04\x83\x00\x63","\x86",
+            94: [45,2,True,0,[],"cbb80","Unsafe2","\x50\x01\x80\x04\x83\x00\x63","\x86",
                                                                 "Great Wall: Platform Dark Space     "],   # Always open
             95: [46,2,False,0,[51],"cbc60","","","\x88",        "Great Wall: Appearing Dark Space    "],
 
@@ -1667,19 +1667,19 @@ class World:
             65: [14,73,[[50,1]]],        # Moon Tribe Cave w/ Spin Dash
 
             # SE Continent
-            70:  [22,23,[[48,1]]],        # Diamond Mine Progression w/ Psycho Dash
-            71:  [22,23,[[49,1]]],        # Diamond Mine Progression w/ Psycho Slide
-            72:  [22,23,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
-            73:  [22,24,[[51,1]]],        # Diamond Mine Progression w/ Dark Friar
-            74:  [22,24,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
-            75:  [22,25,[[15,1]]],        # Diamond Mine Progression w/ Elevator Key
-            76:  [25,26,[[11,1],[12,1]]], # Diamond Mine Progression w/ Mine Keys
-            77:  [29,30,[[51,1]]],        # Sky Garden Progression w/ Dark Friar
-            156: [29,72,[[52,1]]],        # Sky Garden Progression w/ Aura Barrier
-            78:  [29,32,[[14,4]]],        # Sky Garden Progression w/ Crystal Balls
-            79:  [29,31,[[48,1]]],        # Sky Garden Progression w/ Psycho Dash
-            80:  [29,31,[[49,1]]],        # Sky Garden Progression w/ Psycho Slide
-            81:  [29,31,[[50,1]]],        # Sky Garden Progression w/ Spin Dash
+            70: [22,23,[[48,1]]],        # Diamond Mine Progression w/ Psycho Dash
+            71: [22,23,[[49,1]]],        # Diamond Mine Progression w/ Psycho Slide
+            72: [22,23,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
+            73: [22,24,[[51,1]]],        # Diamond Mine Progression w/ Dark Friar
+            74: [22,24,[[50,1]]],        # Diamond Mine Progression w/ Spin Dash
+            75: [22,25,[[15,1]]],        # Diamond Mine Progression w/ Elevator Key
+            76: [25,26,[[11,1],[12,1]]], # Diamond Mine Progression w/ Mine Keys
+            77: [29,30,[[51,1]]],        # Sky Garden Progression w/ Dark Friar
+            78: [29,72,[[52,1]]],        # Sky Garden Progression w/ Aura Barrier
+            79: [29,32,[[14,4]]],        # Sky Garden Progression w/ Crystal Balls
+            80: [29,31,[[48,1]]],        # Sky Garden Progression w/ Psycho Dash
+            81: [29,31,[[49,1]]],        # Sky Garden Progression w/ Psycho Slide
+            82: [29,31,[[50,1]]],        # Sky Garden Progression w/ Spin Dash
 
             # NE Continent
             90:  [33,34,[[17,1]]],         # Seaside Progression w/ Purity Stone
@@ -1716,11 +1716,11 @@ class World:
             130: [61,62,[[49,1]]],        # Pyramid foyer w/ Slide
             131: [61,62,[[50,1]]],        # Pyramid foyer w/ Spin
             132: [62,63,[[36,1]]],        # Pyramid Progression w/ Aura
-            132: [77,78,[[51,1]]],        # Pyramid Progression w/ Dark Friar
-            132: [77,79,[[53,1]]],        # Pyramid Progression w/ Earthquaker
-            133: [62,65,[[30,1],[31,1],[32,1],[33,1],[34,1],[35,1],[38,1]]],
+            133: [77,78,[[51,1]]],        # Pyramid Progression w/ Dark Friar
+            134: [77,79,[[53,1]]],        # Pyramid Progression w/ Earthquaker
+            135: [62,65,[[30,1],[31,1],[32,1],[33,1],[34,1],[35,1],[38,1]]],
                                           # Pyramid Boss w/ Hieroglyphs and Journal
-            134: [77,64,[[50,1]]],        # Pyramid Progression w/ Spin Dash
+            136: [77,64,[[50,1]]],        # Pyramid Progression w/ Spin Dash
 
             # Babel/Jeweler Mansion
             140: [66,67,[[36,1],[39,1]]], # Babel Progression w/ Aura and Crystal Ring
