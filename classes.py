@@ -1544,7 +1544,7 @@ class World:
             26: [False,[],"Diamond Mine - Behind Mine Keys",[]],
             27: [False,[20,21,22,28],"Neil's Cottage",[13]],
             28: [False,[20,21,22,27,29],"Nazca Plain",[]],
-            29: [False,[],"Sky Garden",[14,14,14,14]],
+            29: [False,[28],"Sky Garden",[14,14,14,14]],
             30: [False,[72],"Sky Garden - Behind Dark Friar",[]],
             72: [False,[],"Sky Garden - Behind Friar or Barrier",[]],
             31: [False,[],"Sky Garden - Behind Psycho Dash",[]],
