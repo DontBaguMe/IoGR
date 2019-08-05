@@ -20,6 +20,8 @@ class World:
         self.item_locations[location][2] = True
         self.item_locations[location][3] = item
 
+        self.placement_log.append([item,location])
+
         return True
 
     # Removes an assigned item and returns it to item pool
@@ -32,6 +34,11 @@ class World:
         item = self.item_locations[location][3]
         self.item_locations[location][2] = False
         self.item_pool[item][0] += 1
+
+        for x in self.placement_log:
+            if x[1] == location:
+                self.placement_log.remove(x)
+                
         return item
 
     # Find and clear non-progression item to make room for progression item
@@ -48,13 +55,14 @@ class World:
                 if type == 1 and self.item_locations[loc][2]:
                     item = self.item_locations[loc][3]
                     if inv and not self.graph[region][0] and self.item_pool[item][4]:
-                        self.unfill_item(loc)
-                        unfilled.append(loc)
                         done = True
                     elif not inv and self.graph[region][0] and self.item_pool[item][5] != 1:
-                        self.unfill_item(loc)
-                        unfilled.append(loc)
                         done = True
+
+                if done:
+                    self.unfill_item(loc)
+                    unfilled.append(loc)
+
                 i += 1
                 if i >= len(item_locations):
                     return []
@@ -240,7 +248,7 @@ class World:
                         to_fill_new.remove(dest)
                         if self.forward_fill(to_place,to_fill_new):
                             #print "Filled ",dest," with ",item
-                            self.placement_log.append([item,dest])
+                            #self.placement_log.append([item,dest])
                             return True
                         else:
                             item = self.unfill_item(dest)
