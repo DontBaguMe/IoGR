@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v1.4.1) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.4.1">Download</a>
+## The Illusion of Gaia Randomizer (v1.5.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.5.0">Download</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
@@ -84,12 +84,12 @@ Movement between continents (and to locations not specified above) becomes possi
 - Defeating Castoth in Inca Ruins grants you access to the Gold Ship, which takes you to the Diamond Coast.
 - Defeating Viper in Sky Garden takes you to the Seaside Palace.
 - Acquiring the Teapot allows you to use it on the plateau in the Moon Tribe camp. This grants you access to the Sky Garden. (After using the Teapot, you can use the Sky Garden to travel to the Moon Tribe Camp, the Nacza Plain, or the Seaside Palace.)
-- Acquiring Lola's Letter allows you to learn Morse Code. After reading the letter, talk to Erik in the Seaside Cave in South Cape. Together you can communicate with Seth (who is in Riverson form), who can transport you to the Diamond Coast or Watermia.
+- Acquiring Lola's Letter allows you to learn Morse Code. After reading the letter, talk to Erik in the Seaside Cave in South Cape. Together you can communicate with Seth (who is in Riverson form), who can transport you to the Diamond Coast or Watermia. Turbo the dog (Diamond Coast) and the man standing at the entrance in Watermia can also communicate with Seth for you.
 - Upon acquiring the Memory Melody, you can visit Neil in his cottage, who has forgotten how to pilot his airplane. Playing this melody for him restores his memory. From then on, he is happy to take you to Euro, Dao, or Babel Tower. He can be found either in his home, in his mansion in Euro, or in his room in Dao.
 - Acquiring the Will allows you to use Kruks to travel between Watermia and Euro. When the Will is in your inventory, speak to the man tending his Kruks in Watermia just east of the town entrance, or to the man standing by the east entrance to the city of Euro. 
-- Upon acquiring the Large Roast, go to the Natives' Village and talk to the young boy. If you give him the roast, he will gratefully guide you across the treacherous expanse from the village to Dao.
-- In the Nazca Plain, if you go to the location of the tile buried in the sand, you can warp to the Sky Garden. However, the Moon Tribe will only appear there if you have healed them with the Teapot.
-- Mu and the Seaside Palace are accessible directly from Angel Village. What is originally the guest room in the original game takes you to the Passage to Mu inside the Seaside Palace. Mu is freely accessible this way, but the Seaside Palace Key is required to enter the Seaside Palace via this route.
+- Upon acquiring the Large Roast, go to the Natives' Village and talk to the young boy. If you give him the roast, he will gratefully guide you across the treacherous expanse from the village to Dao. The man in Dao who grants you two items can also hire a guide to take you back to Natives' for free.
+- In the Nazca Plain, if you go to the location of the tile buried in the sand, you can warp to the Sky Garden. However, the Moon Tribe will only appear there if you have healed them with the Teapot. You can exit to the overworld from the Sky Garden by going up into the area where you normally enter from Nazca.
+- Mu and the Seaside Palace are accessible directly from Angel Village. What is originally the guest room in the vanilla game takes you to the Passage to Mu inside the Seaside Palace. Mu is freely accessible this way, but the Mu Palace Key is required to enter the Seaside Palace via this route.
 #### Room Rewards and Stat Upgrades
 The number of HP, STR and DEF upgrades available in the game has been reduced to reflect the extreme balancing of enemy statistics throughout the game -- so though the number of upgrades has decreased, each upgrade is much more significant than in the vanilla game.  HP upgrades grant you +3 HP each.
 
