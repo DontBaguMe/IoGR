@@ -38,7 +38,7 @@ class World:
         for x in self.placement_log:
             if x[1] == location:
                 self.placement_log.remove(x)
-                
+
         return item
 
     # Find and clear non-progression item to make room for progression item
@@ -1065,7 +1065,8 @@ class World:
         locations = []
         for loc in self.item_locations:
             if (self.start_mode == "Forced Unsafe" and self.item_locations[loc][6] == "Unsafe") or (
-                self.start_mode != "Forced Unsafe" and (self.item_locations[loc][6] == "Safe" or self.item_locations[loc][6] == self.start_mode)):
+                self.start_mode != "Forced Unsafe" and self.item_locations[loc][6] == "Safe") or (
+                self.item_locations[loc][6] == self.start_mode)):
                 locations.append(loc)
 
         if not locations:
@@ -1508,7 +1509,7 @@ class World:
 
             143: [66,1,False,0,[],"FC9D","FCAD","FCC3","",       "Babel: Pillow                       "],
             144: [66,1,False,0,[],"99a4f","99ae4","99afe","",    "Babel: Force Field                  "], #item was  99a61
-            145: [66,2,False,0,[51,52,53],"ce09b","Unsafe","\x90\x07\xb0\x01\x83\x10\x28","\xdf",
+            145: [66,2,False,0,[51,52,53],"ce09b","Forced Unsafe","\x90\x07\xb0\x01\x83\x10\x28","\xdf",
                                                                  "Babel: Dark Space Bottom            "],
             146: [67,2,False,0,[51,52,53],"ce159","Safe","\xb0\x02\xb0\x01\x83\x10\x23","\xe3",
                                                                  "Babel: Dark Space Top               "],
