@@ -1356,7 +1356,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-Atlas      -BOWIEtheHERO") + "\xC9\xB4\xCE")
 
     f.write(qt.encode("-Crazyhaze  -DerTolleIgel") + "\xCB")
-    f.write(qt.encode("-Eppy37     -djtifaheart ") + "\xCB")
+    f.write(qt.encode("-Eppy37     -djtifaheart") + "\xCB")
     f.write(qt.encode("-DoodSF     -Keypaladin") + "\xCB")
     f.write(qt.encode("-Lassic     -Le Hulk") + "\xC9\xB4\xCE")
 
@@ -1375,7 +1375,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-Tymekeeper -Veetorp") + "\xC9\xB4\xCE")
 
     f.write(qt.encode("-Voranthe   -Xyrcord") + "\xCB")
-    f.write(qt.encode("-Wilddin    -Z4t0x  ") + "\xCB")
+    f.write(qt.encode("-Wilddin    -Z4t0x") + "\xCB")
     f.write(qt.encode("-wormsofcan -ZockerStu") + "\xC9\xB4\xCE")
 
     f.write("\xCB" + qt.encode("  Thank you all so much!"))
