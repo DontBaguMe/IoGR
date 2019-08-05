@@ -1066,13 +1066,14 @@ class World:
         for loc in self.item_locations:
             if (self.start_mode == "Forced Unsafe" and self.item_locations[loc][6] == "Unsafe") or (
                 self.start_mode != "Forced Unsafe" and self.item_locations[loc][6] == "Safe") or (
-                self.item_locations[loc][6] == self.start_mode)):
+                self.item_locations[loc][6] == self.start_mode):
                 locations.append(loc)
 
         if not locations:
             print "ERROR: Something is fishy with start locations"
             return -1
         else:
+            #print locations
             #return 93   # TESTING!
             return locations[random.randint(0,len(locations)-1)]
 
