@@ -1,3 +1,6 @@
+CHECKSUM
+https://codes-sources.commentcamarche.net/source/26284-snes-calculer-fixer-le-checksum-lire-editer-le-header-d-une-rom-super-famicom-super-nintendo-super-nes
+
 sye990Love
 sye990Hype
 sye990Nom
