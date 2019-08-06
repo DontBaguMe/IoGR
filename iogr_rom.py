@@ -1651,6 +1651,22 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("ce536",16)+rom_offset)  # Mummy Queen (Babel)
     f.write("\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
 
+    # Black Glasses OR Crystal Ring allow you to "see" which upgrades are available
+    f_startmenu = open(folder + "03fdb0_startmenu.bin","r+b")
+    f.seek(int("3fdb0",16)+rom_offset)
+    f.write(f_startmenu.read())
+    f_startmenu.close
+    f.seek(int("381d6",16)+rom_offset)
+    f.write("\x4C\xB0\xFD")
+
+    # Change start menu "FORCE" text
+    f.seek(int("1ff70",16)+rom_offset)
+    f.write("\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x00")    # "+3HP"
+    f.seek(int("1ff80",16)+rom_offset)
+    f.write("\x01\xC6\x01\x03\x14\x2D\x31\x53\x54\x52\x00")   # "+1STR"
+    f.seek(int("1ff90",16)+rom_offset)
+    f.write("\x01\xC6\x01\x03\x14\x2D\x31\x44\x45\x46\x00")   # "+1DEF"
+
     ##########################################################################
     #                        Balance Enemy Stats
     ##########################################################################
