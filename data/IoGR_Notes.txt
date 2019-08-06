@@ -1,86 +1,5 @@
-Enemizer bugs:
-Spin dash breaks Diamond Mine w/Angel enemies
-
-
-
-0C 00 
-02 05 
-11 06 00 90 42 D4 
-06 01 E8 17 DF 
-03 00 10 10 EC 59 CD 01 
-04 00 60 A0 8C 75 DE 
-10 D0 21 00 47 ED 9F 
-14 02 
-03 00 10 00 09 DB 9D 00 
-03 00 10 10 77 48 CA 00 
-04 00 70 10 53 32 DE 
-05 00 20 00 01 00 00 D9 
-05 00 20 00 02 E6 68 DA 
-00 
-
-0D 00 
-02 03 
-11 06 00 90 42 D4 
-06 01 94 7B D3 
-06 02 A3 7C DD 
-03 00 10 10 EC 59 CD 01 
-04 00 60 A0 8C 75 DE 
-10 D0 21 00 47 ED 9F 
-15 02 
-00 
-
-0E 00 
-02 03 
-11 06 00 90 42 D4 
-06 01 20 5F DA 
-06 02 AC 0C DE 
-03 00 10 10 EC 59 CD 01 
-04 00 60 A0 8C 75 DE 
-10 D0 21 00 47 ED 9F 
-15 02 
-00 
-
-0F 00 
-02 03 
-11 06 00 90 42 D4 
-06 01 DE 17 DC 
-06 02 F4 70 DE 
-03 00 10 10 EC 59 CD 01 
-04 00 60 A0 8C 75 DE 
-10 D0 21 00 47 ED 9F 
-15 02 
-00 
-
-10 00 
-02 05 
-11 06 00 90 42 D4 
-06 01 C7 3B DF 
-03 00 10 10 1D 84 97 01 
-04 00 60 90 33 33 DE 
-10 79 05 00 C1 25 DD 
-15 02 
-00 
-
-11 00 
-02 0B 
-11 06 00 90 42 D4 
-06 01 82 5E DD 
-15 02 
-00 
-
-12 00 
-02 03 
-11 06 00 90 42 D4 
-06 01 A7 1E D6 
-06 02 7D 78 DC 
-03 00 10 10 EC 59 CD 01 
-04 00 60 A0 8C 75 DE 
-10 D0 21 00 47 ED 9F 
-15 02 
-00
-
-
-
+CHECKSUM
+https://codes-sources.commentcamarche.net/source/26284-snes-calculer-fixer-le-checksum-lire-editer-le-header-d-une-rom-super-famicom-super-nintendo-super-nes
 
 sye990Love
 sye990Hype
@@ -96,11 +15,11 @@ XX YY [01/03/05] A9 D6 88 00
 Map 136, 28/40 (1c,28)
 :event @7bde8
 :7be09
-+02 9c AC D6 88 00 2B 
++02 9c AC D6 88 00 2B
 A5 0E 85 24 A9 00 20 85 0E 02 E0
 
 
-02 A0 B5 D6 88 C8 01 80 02 00 2B 
+02 A0 B5 D6 88 C8 01 80 02 00 2B
 A9 01 00 99 24 00 A9 00 20 99 0E 00 02 E0
 
 +@7be0b (also for )
@@ -112,7 +31,7 @@ A9 01 00 99 24 00 A9 00 20 99 0E 00 02 E0
        +AC D6 88 A8 00 C0 04 00 0B 4c 10 f7
 @9f710
 A5 0E 85 24 A9 00 20 85 0E 02 E0
-   
+
 
 Map 64, 28/22 (1c,16)
 1C 16 03 1E D6 85
@@ -192,7 +111,7 @@ E8
 E0 2E 00
 D0 [XX]
 02 CC 03
-3. 
+3.
 
 
 
@@ -255,20 +174,20 @@ FF
  10 1B 06 06 = Map  38 (0x26) - Herb
    08 1F 01 07 = Map  38 (0x26) - Red jewel
 FF 25 19 38 88 = Map  46 (0x2E) - Mystic Statue
-FF 38 27 
+FF 38 27
 06 09 = Map  63 (0x3F) - Herb
 FF 39 31 0E 8A = Map  77 (0x4D) - Crystal Ball
    09 33 06 0B = Map  77 (0x4D) - Herb
    34 05 01 0C = Map  77 (0x4D) - Red jewel
-FF 
+FF
 37 06 0E 8D = Map  80 (0x50) - Crystal Ball
 FF 03 2F 0E 8E = Map  81 (0x51) - Crystal Ball
 FF 07 08 01 0F = Map  82 (0x52) - Red jewel
-FF 35 
+FF 35
 32 06 10 = Map  83 (0x53) - Herb
    31 36 0E 91 = Map  83 (0x53) - Crystal Ball
 FF 37 1A 01 12 = Map  90 (0x5A) - Red jewel
-FF 07 07 01 
+FF 07 07 01
 13 = Map  91 (0x5B) - Red jewel
 FF 09 17 01 14 = Map  92 (0x5C) - Red jewel
 FF 20 19 13 95 = Map  95 (0x5F) - Rama Statue
@@ -277,7 +196,7 @@ FF
  1E 18 00 2E = Map  96 (0x60) - Nothing
    2D 1C 13 97 = Map  96 (0x60) - Rama Statue
 FF 0A 33 00 18 = Map  97 (0x61) - Nothing
-FF 07 28 
+FF 07 28
 01 19 = Map 112 (0x70) - Red jewel
 FF 27 08 14 9A = Map 116 (0x74) - Magic Dust
 FF 47 08 06 1B = Map 117 (0x75) - Herb
@@ -285,20 +204,20 @@ FF 47 08 06 1B = Map 117 (0x75) - Herb
 FF 1A 59 01 1D = Map 131 (0x83) - Red jewel
 FF 05 1A 06 1E = Map 133 (0x85) - Herb
 FF 18 36 01 1F = Map 162 (0xA2) - Red jewel
-FF 
+FF
 12 0B 1A A0 = Map 164 (0xA4) - Mushroom Drops
 FF 05 08 1A A1 = Map 166 (0xA6) - Mushroom Drops
 FF 22 10 1A A2 = Map 167 (0xA7) - Mushroom Drops
-FF 0E 
+FF 0E
 05 19 A3 = Map 169 (0xA9) - Teapot
 FF 67 05 01 24 = Map 177 (0xB1) - Red jewel
 FF 07 4E 06 25 = Map 181 (0xB5) - Herb
-FF 07 06 
+FF 07 06
 01 26 = Map 185 (0xB9) - Red jewel
 FF 11 20 01 27 = Map 187 (0xBB) - Red jewel
 FF 05 16 01 28 = Map 190 (0xBE) - Red jewel
 
-FF 37 59 01 
+FF 37 59 01
 29 = Map 209 (0xD1) - Red jewel
 FF 46 49 01 2A = Map 212 (0xD4) - Red jewel
 FF 47 09 01 2B = Map 214 (0xD6) - Red jewel
@@ -311,8 +230,8 @@ FF 37 16 06 2D = Map 233 (0xE9) - Herb
 ::END CREDITS
 
 str_endpause = "\xC9\xB4\xC8\xCA"
-bd558 (bd566)  "\xCB" + "    Thanks a million." + str_endpause 
-bd5a0 (bd5ac)  "\xCB" + " Extra special thanks to/       manafreak" + "\xC9\x78\xCE\xCB"  
+bd558 (bd566)  "\xCB" + "    Thanks a million." + str_endpause
+bd5a0 (bd5ac)  "\xCB" + " Extra special thanks to/       manafreak" + "\xC9\x78\xCE\xCB"
                " This project would not/  exist without his work." + "\xC9\x78\xCE\xCB"
                "     gaiathecreator/      .blogspot.com" + str_endpause
 bd70e (bd71c)  "    Created by/       DontBaguMe" + str_endpause
@@ -331,7 +250,7 @@ bded4**
 be075 (be07a)
 
 
-0x9dd10 
+0x9dd10
 ['????????         Class is over.???       Please be careful      crossing the street.???      We have had a lot of    traffic accidents lately.?X?', 151]
 
 |------------|-----------|
@@ -341,7 +260,7 @@ be075 (be07a)
 |------------|-----------|
 -Keypaladin  -Mr Freet
 -Lassic      -Plan
--Le Hulk     -Pozzum 
+-Le Hulk     -Pozzum
 -manafreak     Senpai
 |------------|-----------|
 -Raeven0     -Skarsnik
@@ -372,14 +291,14 @@ be075 (be07a)
 |-------------|----------|
 -Raeven0       -roeya
 -Scheris       -SDiezal
--SmashManiac   -Skarsnik   
+-SmashManiac   -Skarsnik
 |-------------|----------|
--steve hacks   -Skipsy              
+-steve hacks   -Skipsy
 -solarcell007  -Sye990
 -Tymekeeper    -Veetorp
 |-------------|----------|
 -Verallix      -Voranthe
--wormsofcan    -Wilddin       
+-wormsofcan    -Wilddin
 -Xyrcord       -Z4t0x
 -ZockerStu
 
@@ -389,7 +308,7 @@ be075 (be07a)
 :: IN-GAME TUTORIAL
 |------------------------|
         Welcome to       -
-   Bagu's Super-Helpful  - 
+   Bagu's Super-Helpful  -
    In-Game Tutorial!(TM) -
 |------------------------|
 Whadaya wanna know about?
@@ -595,7 +514,7 @@ ymax=6d972 (+20)
 :: ENEMY SPRITE PALETTES FOR ENEMIZER (all addr offset $d8000)
 
 Ed's Prison (#$0c): $2a2
-\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F 
+\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F
 
 Inca Ruins (#$1d): $5ac
 \x03\x00\x10\x10\xBC\x33\xC2\x01\x04\x00\x60\xA0\x0C\x77\xDE\x10\x2A\x0F\x00\xE6\x08\xD5
@@ -688,12 +607,12 @@ Mummy Queen (Pyramid)
 05 0A 30 8C C3 82 00 -
 00 00 00 ED EA 80 00 -
 11 11 00 96 EA 80 00 ****
-04 0C 30 BE AD 8B 00 
-04 1B 30 C7 AD 8B 00 
-1B 0C 30 BE AD 8B 00 
-1B 1B 30 CC AD 8B 00 
-0F 0C 30 B6 A6 8B 50 00 00 
-00 01 01 DF A5 8B 00 
+04 0C 30 BE AD 8B 00
+04 1B 30 C7 AD 8B 00
+1B 0C 30 BE AD 8B 00
+1B 1B 30 CC AD 8B 00
+0F 0C 30 B6 A6 8B 50 00 00
+00 01 01 DF A5 8B 00
 00 01 00 12 CE 88 00 ****
 00 01 01 BB C2 80 00 ********
 
@@ -701,40 +620,40 @@ Mummy Queen (Babel)
 05 0A 00 8C C3 82 00 -
 00 00 00 ED EA 80 00 -
 81 02 00 EC E9 80 00 -
-04 0C 30 BE AD 8B 00 
-04 1B 30 C7 AD 8B 00 
-1B 0C 30 BE AD 8B 00 
-1B 1B 30 CC AD 8B 00 
-0F 0C 30 1A A6 8B 5E 05 00 
+04 0C 30 BE AD 8B 00
+04 1B 30 C7 AD 8B 00
+1B 0C 30 BE AD 8B 00
+1B 1B 30 CC AD 8B 00
+0F 0C 30 1A A6 8B 5E 05 00
 00 01 01 DF A5 8B 00
 
 Solid Arm:
 05 0A 00 8C C3 82 00 -
 00 00 00 ED EA 80 00 -
 83 04 00 EC E9 80 00 -
-00 01 00 55 DC 8A 00 
+00 01 00 55 DC 8A 00
 08 07 00 09 F7 88 5F 00 00
 
 
 :: Move guard in castle @4d19d
 - Throw Will to the right:
-02 0c a9 08 00 8d b2 
+02 0c a9 08 00 8d b2
 
 
 :: Map data
 : Underground tunnel exit @ d837e, 67 bytes
 13 00
-02 08 
-11 06 00 90 42 D4 
-03 00 10 00 09 DB 9D 00 
-04 00 70 10 73 31 DE 
-05 00 20 00 01 00 00 D9 
-06 
-01 32 22 DF 
-03 00 10 10 77 48 CA 00 
-05 00 20 00 02 E6 68 DA 
-06 02 7D 78 DC 
-15 03 
+02 08
+11 06 00 90 42 D4
+03 00 10 00 09 DB 9D 00
+04 00 70 10 73 31 DE
+05 00 20 00 01 00 00 D9
+06
+01 32 22 DF
+03 00 10 10 77 48 CA 00
+05 00 20 00 02 E6 68 DA
+06 02 7D 78 DC
+15 03
 00 14 00 02 00 00
 
 
@@ -752,7 +671,7 @@ Solid Arm:
 03 00 10 10 fb 9b 9e 00
 04 00 70 10 73 3f de
 05 00 20 00 01 a8 13 d8
-06 01 c9 be 94 
+06 01 c9 be 94
 15 0c
 00
 
@@ -783,13 +702,13 @@ df df 00 [4d e9 80] 00
 
 
 :: Ankor Wat - Map 191 (bf) @da441:
-02 08 
-11 04 00 B7 49 DB 
-03 00 10 00 00 80 9F 00 
-04 00 70 10 33 56 DE 
-05 00 20 00 01 53 0C D9 
-06 01 51 56 DD 
-15 2D 
+02 08
+11 04 00 B7 49 DB
+03 00 10 00 00 80 9F 00
+04 00 70 10 33 56 DE
+05 00 20 00 01 53 0C D9
+06 01 51 56 DD
+15 2D
 00
 
 : Events @cd392:
@@ -799,70 +718,70 @@ df df 00 [4d e9 80] 00
 
 
 : Map 107 (6b) - Angel Village
-6b 00 
-02 16 
-11 03 00 fc 1c d4 
-03 00 20 00 07 8f 90 00 
-04 00 70 10 b3 4b de 
+6b 00
+02 16
+11 03 00 fc 1c d4
+03 00 20 00 07 8f 90 00
+04 00 70 10 b3 4b de
 05 00 20 00 01 44 53 d6
-06 01 5b 46 d7 
-05 00 20 00 02 4f 0a dc 
-06 02 d6 6a dc 
-14 25 
-03 00 10 10 36 18 ca 01 
-04 00 60 a0 80 01 df 
-10 43 0a 00 00 00 da 
+06 01 5b 46 d7
+05 00 20 00 02 4f 0a dc
+06 02 d6 6a dc
+14 25
+03 00 10 10 36 18 ca 01
+04 00 60 a0 80 01 df
+10 43 0a 00 00 00 da
 00
 
 
 : Map 115 (73) - Before Ishtar's Rooms
-73 00 
-02 16 
-11 1d 00 cb 2b df 
-03 00 20 00 07 8f 90 00 
-04 00 70 10 f3 49 de 
-05 00 20 00 01 44 53 d6 
-06 01 26 bd 8f 
-05 00 20 00 02 4f 0a dc 
-06 02 05 11 de 
-15 1f 
+73 00
+02 16
+11 1d 00 cb 2b df
+03 00 20 00 07 8f 90 00
+04 00 70 10 f3 49 de
+05 00 20 00 01 44 53 d6
+06 01 26 bd 8f
+05 00 20 00 02 4f 0a dc
+06 02 05 11 de
+15 1f
 00
 
 
 : Map 116 (74) - Ishtar's Rooms
-74 00 
-02 18 
-11 04 00 b7 49 db 
-03 00 20 00 07 8f 90 00 
-04 00 70 10 f3 49 de 
-05 00 20 00 01 44 53 d6 
-06 01 43 6f dd 
-15 25 
+74 00
+02 18
+11 04 00 b7 49 db
+03 00 20 00 07 8f 90 00
+04 00 70 10 f3 49 de
+05 00 20 00 01 44 53 d6
+06 01 43 6f dd
+15 25
 00
 
 
 ::::::: ENEMY DATA
-: Bat @ 
-1F 00 00 
-02 27 0C 
-02 B6 30 
+: Bat @
+1F 00 00
+02 27 0C
+02 B6 30
 : [5e 87]
-02 27 01 
-02 C2 
+02 27 01
+02 C2
 : [63 87]
-02 23 29 03 00 3A 30 07 F0 19 3A F0 2A 80 3C 02 16 [5E 87] A5 16 CD 96 06 B0 E1 02 83 1F 00 11 02 89 80 DD 02 15 [5E 87] A5 16 C9 10 00 90 CD 02 83 20 00 12 02 89 80 C9 02 17 [5E 87] A5 14 C9 10 00 90 B9 02 83 21 12 00 02 89 80 B5 02 18 [5E 87] A5 14 CD 92 06 B0 A5 02 83 A1 11 00 02 89 4C [63 87] 38 02 23 02 C1 
-02 21 03 [D9 87] 
-6B 38 
-02 23 02 C1 02 21 01 [D9 87] 6B 
+02 23 29 03 00 3A 30 07 F0 19 3A F0 2A 80 3C 02 16 [5E 87] A5 16 CD 96 06 B0 E1 02 83 1F 00 11 02 89 80 DD 02 15 [5E 87] A5 16 C9 10 00 90 CD 02 83 20 00 12 02 89 80 C9 02 17 [5E 87] A5 14 C9 10 00 90 B9 02 83 21 12 00 02 89 80 B5 02 18 [5E 87] A5 14 CD 92 06 B0 A5 02 83 A1 11 00 02 89 4C [63 87] 38 02 23 02 C1
+02 21 03 [D9 87]
+6B 38
+02 23 02 C1 02 21 01 [D9 87] 6B
 : [d9 87]
-02 23 29 3F 00 85 08 02 C2 02 A2 [2D 88 8A] 01 03 A5 16 38 E9 00 01 85 16 A9 00 20 14 10 02 07 13 02 82 39 0F 02 89 A9 00 01 14 10 02 07 1E 02 B4 
+02 23 29 3F 00 85 08 02 C2 02 A2 [2D 88 8A] 01 03 A5 16 38 E9 00 01 85 16 A9 00 20 14 10 02 07 13 02 82 39 0F 02 89 A9 00 01 14 10 02 07 1E 02 B4
 
 **02 80 3A **
 
-02 89 02 0B A9 00 01 04 10 02 DA EF 02 CA 20 A9 00 20 04 10 02 C2 A9 00 20 14 10 02 CB 02 0C 02 E0 
+02 89 02 0B A9 00 01 04 10 02 DA EF 02 CA 20 A9 00 20 04 10 02 C2 A9 00 20 14 10 02 CB 02 0C 02 E0
 : [2d 88]
 ** 02 80 3B **
-02 89 02 C1 6B 
+02 89 02 C1 6B
 
 
 
@@ -885,40 +804,40 @@ df df 00 [4d e9 80] 00
 
 : Eye Guy @ab103
 
-16 00 00 
-02 5B 08 00 02 27 0F A5 10 89 00 40 D0 F6 
+16 00 00
+02 5B 08 00 02 27 0F A5 10 89 00 40 D0 F6
 02 21 03 [2B B1]    << check if within distance
 : [19 b1]
-02 21 05 [48 B1] 
-A5 10 
-89 00 
-40 
+02 21 05 [48 B1]
+A5 10
+89 00
+40
 D0 E5               << Branch if not equal
-02 C8 [4E B1] 
+02 C8 [4E B1]
 80 E9               << Branch always
 
 :[2b b1]
-AD 44 06 
-C9 E9 
-00 D0 05 
+AD 44 06
+C9 E9
+00 D0 05
 02 C4 [19 B1 8A]    << go here if in Jeweler's Mansion
 
-A9 00 
-03 04 
+A9 00
+03 04
 10 02               << Branch if plus
 C8                  << increment y
 CA                  << decrement x
-B3 A9 
-00 
-03 14 
+B3 A9
+00
+03 14
 10 80               << Branch if plus
-CC 
+CC
 : [48 b1]
-02 C8 20 B2 80 D7 
+02 C8 20 B2 80 D7
 : [4e b1]
-A5 28 38 E9 16 00 29 03 00 8D 00 00 02 D9 00 00 60 B1 6E B1 9C B1 CA B1 F8 B1 02 C2 02 17 9C B1 02 80 18 02 89 02 17 96 B1 02 81 18 02 02 89 02 2C 83 B1 CA B1 02 2A 80 00 8D B1 8D B1 9C B1 02 C2 
+A5 28 38 E9 16 00 29 03 00 8D 00 00 02 D9 00 00 60 B1 6E B1 9C B1 CA B1 F8 B1 02 C2 02 17 9C B1 02 80 18 02 89 02 17 96 B1 02 81 18 02 02 89 02 2C 83 B1 CA B1 02 2A 80 00 8D B1 8D B1 9C B1 02 C2
 
-02 21 05 [14 B1] 80 DD 02 C2 02 18 CA B1 02 80 98 02 89 02 18 C4 B1 02 81 98 01 02 89 02 2C B1 B1 CA B1 02 2A 80 00 8D B1 BB B1 BB B1 02 C2 02 21 05 14 B1 80 DD 02 C2 02 16 [F8 B1] 02 80 16 02 89 02 16 F2 B1 02 82 16 01 02 89 02 2C 6E B1 DF B1 02 2B 80 00 17 B2 E9 B1 E9 B1 02 C2 02 21 05 14 B1 80 DD 02 C2 02 15 6E B1 02 80 17 02 89 02 15 68 B1 02 82 17 02 02 89 02 2C 6E B1 0D B2 02 2B 80 00 17 B2 17 B2 E9 B1 02 C2 02 21 05 14 B1 80 DD 02 2A 30 00 2A B2 B2 B2 6E B2 02 80 18 02 89 20 66 DD BF 18 00 7F 18 69 60 00 9F 18 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 18 02 80 08 02 22 18 02 02 1F 45 B2 A9 08 00 14 10 02 80 24 02 89 02 A4 9E B3 8A E8 EB 00 22 02 DA 05 02 C5 02 80 98 02 89 20 66 DD BF 18 00 7F 38 E9 50 00 9F 18 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 98 02 80 08 02 22 98 02 02 1F 89 B2 A9 08 00 14 10 02 80 A4 02 89 02 A4 99 B3 8A 18 EB 00 22 02 DA 05 02 C5 02 2B 30 00 BC B2 BC B2 00 B3 02 80 17 02 89 20 66 DD BF 1A 00 7F 18 69 60 00 9F 1A 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 17 02 80 08 02 22 17 02 02 1F D7 B2 A9 08 00 14 10 02 80 23 02 89 02 A4 44 B3 8A 00 F8 00 22 02 DA 05 02 C5 02 80 16 02 89 20 66 DD BF 1A 00 7F 38 E9 60 00 9F 1A 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 16 02 80 08 02 22 16 02 02 1F 1B B3 A9 08 00 14 10 02 80 22 02 89 02 A4 6D B3 8A 00 07 02 22 02 DA 05 02 C5 02 B6 30 A9 00 20 04 12 A9 00 20 14 10 02 07 20 02 82 25 03 02 89 02 82 26 05 02 89 02 82 27 07 02 89 A9 02 00 04 10 80 17 02 B6 30 A9 00 20 14 10 02 07 20 02 82 25 03 02 89 02 82 26 03 02 89 02 82 27 05 02 89 02 82 28 07 02 89 A5 10 89 00 40 F0 F3 02 E0 A9 00 40 04 12 02 B6 30 A9 00 20 14 10 02 07 20 02 81 29 04 02 89 02 81 2A 04 02 89 02 81 2B 06 02 89 02 81 2C 08 02 89 A5 10 89 00 40 F0 F3 02 E0 A5 28 38 E9 16 00 29 03 00 8D 00 00 02 D9 00 00 DC B3 E4 B3 08 B4 2C B4 2C B4 02 0B 02 80 19 02 89 02 CA 0C 02 84 1A 08 02 8A 02 21 03 FB B3 80 04 02 CB 80 7A 02 80 
+02 21 05 [14 B1] 80 DD 02 C2 02 18 CA B1 02 80 98 02 89 02 18 C4 B1 02 81 98 01 02 89 02 2C B1 B1 CA B1 02 2A 80 00 8D B1 BB B1 BB B1 02 C2 02 21 05 14 B1 80 DD 02 C2 02 16 [F8 B1] 02 80 16 02 89 02 16 F2 B1 02 82 16 01 02 89 02 2C 6E B1 DF B1 02 2B 80 00 17 B2 E9 B1 E9 B1 02 C2 02 21 05 14 B1 80 DD 02 C2 02 15 6E B1 02 80 17 02 89 02 15 68 B1 02 82 17 02 02 89 02 2C 6E B1 0D B2 02 2B 80 00 17 B2 17 B2 E9 B1 02 C2 02 21 05 14 B1 80 DD 02 2A 30 00 2A B2 B2 B2 6E B2 02 80 18 02 89 20 66 DD BF 18 00 7F 18 69 60 00 9F 18 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 18 02 80 08 02 22 18 02 02 1F 45 B2 A9 08 00 14 10 02 80 24 02 89 02 A4 9E B3 8A E8 EB 00 22 02 DA 05 02 C5 02 80 98 02 89 20 66 DD BF 18 00 7F 38 E9 50 00 9F 18 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 98 02 80 08 02 22 98 02 02 1F 89 B2 A9 08 00 14 10 02 80 A4 02 89 02 A4 99 B3 8A 18 EB 00 22 02 DA 05 02 C5 02 2B 30 00 BC B2 BC B2 00 B3 02 80 17 02 89 20 66 DD BF 1A 00 7F 18 69 60 00 9F 1A 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 17 02 80 08 02 22 17 02 02 1F D7 B2 A9 08 00 14 10 02 80 23 02 89 02 A4 44 B3 8A 00 F8 00 22 02 DA 05 02 C5 02 80 16 02 89 20 66 DD BF 1A 00 7F 38 E9 60 00 9F 1A 00 7F A9 08 00 04 10 80 09 20 83 DD 02 22 16 02 80 08 02 22 16 02 02 1F 1B B3 A9 08 00 14 10 02 80 22 02 89 02 A4 6D B3 8A 00 07 02 22 02 DA 05 02 C5 02 B6 30 A9 00 20 04 12 A9 00 20 14 10 02 07 20 02 82 25 03 02 89 02 82 26 05 02 89 02 82 27 07 02 89 A9 02 00 04 10 80 17 02 B6 30 A9 00 20 14 10 02 07 20 02 82 25 03 02 89 02 82 26 03 02 89 02 82 27 05 02 89 02 82 28 07 02 89 A5 10 89 00 40 F0 F3 02 E0 A9 00 40 04 12 02 B6 30 A9 00 20 14 10 02 07 20 02 81 29 04 02 89 02 81 2A 04 02 89 02 81 2B 06 02 89 02 81 2C 08 02 89 A5 10 89 00 40 F0 F3 02 E0 A5 28 38 E9 16 00 29 03 00 8D 00 00 02 D9 00 00 DC B3 E4 B3 08 B4 2C B4 2C B4 02 0B 02 80 19 02 89 02 CA 0C 02 84 1A 08 02 8A 02 21 03 FB B3 80 04 02 CB 80 7A 02 80
 
 
 
@@ -950,14 +869,14 @@ Castoth adds 5 to both STR and DEF
   - 3f068
   - 9ba93
   - bee3b
-  - 
+  -
  8d de 0a                 = set STR
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  -
+  -
+  -
+  -
+  -
+  -
 
 Check out: beded
 
@@ -981,7 +900,7 @@ Check out: beded
 
 
 : END TEXT SEQUENCE, text fields: bd558(72), bd5a0(366), bd70e, bd740
-(actual text at bd566) 
+(actual text at bd566)
 (text called from bd32b)
 (delimit w/"c9 78 ce", end with "c9 b4 c8 ca")
 
@@ -1041,63 +960,63 @@ ac ac ac ac ac ac ac a0 87 80 a9 a4 84 a3 a4 84 a2 a3 2f ac ac ac ac ac ac ac
 0000 0
 
 : FIX SWITCHES @START (48a8c) - next @48d21 -DONE
-35 00 10 
-a9 00 
-02 04 12 
-02 c0 [d9 8a] 
-02 0b 
-02 d0 10 00 [a3 8a] 
-02 c1 
-6b 
+35 00 10
+a9 00
+02 04 12
+02 c0 [d9 8a]
+02 0b
+02 d0 10 00 [a3 8a]
+02 c1
+6b
 : a3 8a
-a9 f0 cf 0c 5a 06 a9 00 04 8d 4a 06 
-02 da 1d 
-02 bf [e9 8a] 
-02 da 3b 
-02 ca 06
-02 08 09 09 
-02 c3 [c7 8a] 84 
-1e 00 
-: c7 8a
-02 cb 
+a9 f0 cf 0c 5a 06 a9 00 04 8d 4a 06
+02 da 1d
+02 bf [e9 8a]
 02 da 3b
-02 bf [01 8c] 
-02 da 3b 
-02 cc 10 
-02 c1 
-6b 
+02 ca 06
+02 08 09 09
+02 c3 [c7 8a] 84
+1e 00
+: c7 8a
+02 cb
+02 da 3b
+02 bf [01 8c]
+02 da 3b
+02 cc 10
+02 c1
+6b
 : d9 8a
-02 d0 21 01 [e4 8a] 
-02 bf [98 8c] 
-6b 
+02 d0 21 01 [e4 8a]
+02 bf [98 8c]
+6b
 : e4 8a
-02 bf [db 8c] 
+02 bf [db 8c]
 6b
 
 - SUNGLASSES - use switch 4f, event @89a1c-89aa2, replace @89a31 -DONE
-00 00 30 
-02 D0 B7 01 [3B 9A] 
-02 CC B7 
-A9 F0 CF 0C 5A 06 
-02 DA 1D 
-02 BF [65 9A] 
-A9 F0 CF 1C 5A 06 
+00 00 30
+02 D0 B7 01 [3B 9A]
+02 CC B7
+A9 F0 CF 0C 5A 06
+02 DA 1D
+02 BF [65 9A]
+A9 F0 CF 1C 5A 06
 : [3b 9a]
-02 D7 1C [5B 9A] 
-02 DA 13 
-02 3C CE B7 80 
-02 DA B3 
+02 D7 1C [5B 9A]
+02 DA 13
+02 3C CE B7 80
+02 DA B3
 : [5b 9a]
-02 C1 
-02 D7 1C [53 9A] 6B 
+02 C1
+02 D7 1C [53 9A] 6B
 : [53 9a]
-02 3C D8 B7 80 
-02 DA B3 
-02 C1 
-02 D7 1C [64 9A] 
-80 DF 6B 
+02 3C D8 B7 80
+02 DA B3
+02 C1
+02 D7 1C [64 9A]
+80 DF 6B
 : [65 9a]
-D3 C2 00 63 84 A4 A4 88 8D 86 AC 8E 8D 84 AC 85 8E 8E A4 AC 88 8D A3 88 83 84 2B CB A4 87 84 AC 85 8B 8E 80 A4 88 8D 86 AC 82 A2 A9 A3 A4 80 8B CB D6 CB A4 8E AC 86 8B 8E A7 4F C3 00 C0  
+D3 C2 00 63 84 A4 A4 88 8D 86 AC 8E 8D 84 AC 85 8E 8E A4 AC 88 8D A3 88 83 84 2B CB A4 87 84 AC 85 8B 8E 80 A4 88 8D 86 AC 82 A2 A9 A3 A4 80 8B CB D6 CB A4 8E AC 86 8B 8E A7 4F C3 00 C0 
 
 
 : MU PASSAGE TO SEASIDE PALACE -DONE
@@ -1129,32 +1048,32 @@ ce ... c0
 
 - LOLA'S MELODY - Itory switch 0x40
 : Lilly @ 4e2a3
- - put overworld exit at 4e3ce, 7 bytes to work with, followed by text (address called from 4e2ca) 
-1A 00 10 
-02 D0 2B 00 [B9 E2] 
-02 D0 3B 01 [CC E3] 
-02 25 41 26 4C [98 E3] 
-: [B9 E2] 
-02 D0 26 00 [CC E3] 
-A9 F0 CF 0C 5A 06 02 DA 1D 
+ - put overworld exit at 4e3ce, 7 bytes to work with, followed by text (address called from 4e2ca)
+1A 00 10
+02 D0 2B 00 [B9 E2]
+02 D0 3B 01 [CC E3]
+02 25 41 26 4C [98 E3]
+: [B9 E2]
+02 D0 26 00 [CC E3]
+A9 F0 CF 0C 5A 06 02 DA 1D
 : [c8 e2]
 02 BF [D5 E3]           << This happens when map is entered
-A9 00 60 1C 5A 06 A9 00 10 14 10 
+A9 00 60 1C 5A 06 A9 00 10 14 10
 : [d7 e2]
-02 C1 
-02 D0 40 01 [E6 E2] 
-02 40 01 0F [CE E3] 6B 
+02 C1
+02 D0 40 01 [E6 E2]
+02 40 01 0F [CE E3] 6B
 : [e6 e2]            << Transport to real map
-A9 00 10 04 10 A9 F0 EF 0C 5A 06 E2 20 A9 80 8D 30 21 A9 03 8D 31 21 C2 20 02 3C CE B7 80 02 DA 7F 02 CC 01 02 CA 10 AD C2 06 38 E9 10 00 8D C2 06 AC AA 09 B9 16 00 38 E9 10 00 99 16 00 A5 16 38 E9 10 00 85 16 02 CB A9 00 03 8D DC 06 02 CE 01 02 DA 3B 02 3C D8 B7 80 02 DA 9D 02 DA 59 
+A9 00 10 04 10 A9 F0 EF 0C 5A 06 E2 20 A9 80 8D 30 21 A9 03 8D 31 21 C2 20 02 3C CE B7 80 02 DA 7F 02 CC 01 02 CA 10 AD C2 06 38 E9 10 00 8D C2 06 AC AA 09 B9 16 00 38 E9 10 00 99 16 00 A5 16 38 E9 10 00 85 16 02 CB A9 00 03 8D DC 06 02 CE 01 02 DA 3B 02 3C D8 B7 80 02 DA 9D 02 DA 59
 : [45 e3]
-02 BF 6F E4 02 CC 02 02 D2 03 01 
-A9 F0 EF 1C 5A 06 
-02 CC 2B 
-A9 00 08 04 10 02 82 1E 11 02 89 02 81 21 01 02 89 02 86 1E 02 01 02 8A A9 F0 CF 1C 5A 06 02 85 21 06 01 02 8A 02 82 1E 11 02 89 02 85 21 02 01 02 8A 02 86 1F 06 12 02 8A 02 81 21 11 02 89 02 80 1D 02 89 A9 00 08 14 10 02 D2 04 01 A9 01 00 22 E4 C6 80 02 80 1A 02 89 02 BF 3C E5 A9 00 08 04 10 02 86 1F 02 12 02 8A 02 CC 05 02 86 1F 04 12 02 8A 
+02 BF 6F E4 02 CC 02 02 D2 03 01
+A9 F0 EF 1C 5A 06
+02 CC 2B
+A9 00 08 04 10 02 82 1E 11 02 89 02 81 21 01 02 89 02 86 1E 02 01 02 8A A9 F0 CF 1C 5A 06 02 85 21 06 01 02 8A 02 82 1E 11 02 89 02 85 21 02 01 02 8A 02 86 1F 06 12 02 8A 02 81 21 11 02 89 02 80 1D 02 89 A9 00 08 14 10 02 D2 04 01 A9 01 00 22 E4 C6 80 02 80 1A 02 89 02 BF 3C E5 A9 00 08 04 10 02 86 1F 02 12 02 8A 02 CC 05 02 86 1F 04 12 02 8A
 : [cc e3]
-02 E0 
+02 E0
 : [ce e3]
-02 BF [40 E4] 4C [D7 E2] 
+02 BF [40 E4] 4C [D7 E2]
 
 :NEW @4e2a3:
 00 00 30
@@ -1162,10 +1081,10 @@ A9 00 08 04 10 02 82 1E 11 02 89 02 81 21 01 02 89 02 86 1E 02 01 02 8A A9 F0 CF
 02 e0
 : [b0 e2]
 02 c1
-02 D2 40 
-A9 00 10 04 10 A9 F0 EF 0C 5A 06 E2 20 A9 80 8D 30 21 A9 03 8D 31 21 C2 20 02 3C CE B7 80 02 DA 7F 02 CC 01 02 CA 10 AD C2 06 38 E9 10 00 8D C2 06 AC AA 09 B9 16 00 38 E9 10 00 99 16 00 A5 16 38 E9 10 00 85 16 02 CB A9 00 03 8D DC 06 02 CE 01 02 DA 3B 02 3C D8 B7 80 02 DA 9D 02 DA 59 
-A9 F0 EF 1C 5A 06 
-A9 00 08 04 10 02 82 1E 11 02 89 02 81 21 01 02 89 02 86 1E 02 01 02 8A A9 F0 CF 1C 5A 06 02 85 21 06 01 02 8A 02 82 1E 11 02 89 02 85 21 02 01 02 8A 02 86 1F 06 12 02 8A 02 81 21 11 02 89 02 80 1D 02 89 A9 00 08 14 10 02 D2 04 01 A9 01 00 22 E4 C6 80 02 80 1A 02 89 02 BF 3C E5 A9 00 08 04 10 02 86 1F 02 12 02 8A 02 CC 05 02 86 1F 04 12 02 8A 
+02 D2 40
+A9 00 10 04 10 A9 F0 EF 0C 5A 06 E2 20 A9 80 8D 30 21 A9 03 8D 31 21 C2 20 02 3C CE B7 80 02 DA 7F 02 CC 01 02 CA 10 AD C2 06 38 E9 10 00 8D C2 06 AC AA 09 B9 16 00 38 E9 10 00 99 16 00 A5 16 38 E9 10 00 85 16 02 CB A9 00 03 8D DC 06 02 CE 01 02 DA 3B 02 3C D8 B7 80 02 DA 9D 02 DA 59
+A9 F0 EF 1C 5A 06
+A9 00 08 04 10 02 82 1E 11 02 89 02 81 21 01 02 89 02 86 1E 02 01 02 8A A9 F0 CF 1C 5A 06 02 85 21 06 01 02 8A 02 82 1E 11 02 89 02 85 21 02 01 02 8A 02 86 1F 06 12 02 8A 02 81 21 11 02 89 02 80 1D 02 89 A9 00 08 14 10 02 D2 04 01 A9 01 00 22 E4 C6 80 02 80 1A 02 89 02 BF 3C E5 A9 00 08 04 10 02 86 1F 02 12 02 8A 02 CC 05 02 86 1F 04 12 02 8A
 02 e0
 
 
@@ -1211,83 +1130,83 @@ A9 00 08 04 10 02 82 1E 11 02 89 02 81 21 01 02 89 02 86 1E 02 01 02 8A A9 F0 CF
 02 08 1D 1D A9 06 00 8D B4 09
 02 D6 27 [9A 99]
 02 D0 01 01 [BF 99]
-02 CC 01 
-02 9C [CC 99] 89 
+02 CC 01
+02 9C [CC 99] 89
 02 38
 
 : BF 99
-02 C1 
-02 45 75 17 77 19 [cb 99] 
-80 C5 
+02 C1
+02 45 75 17 77 19 [cb 99]
+80 C5
 : CB 99
-6B 
+6B
 : CC 99
-A9 F0 CF 0C 5A 06 
+A9 F0 CF 0C 5A 06
 : D2 99
-02 DA 0F 
-AC AA 09 
-B9 14 00 
-85 14 
-B9 16 00 
-85 16 
-A9 00 
-20 14 10 
-02 88 00 E0 8E 
-02 8D 02 
-02 63 
-02 06 00 02 AA 12 02 8B A5 2A F0 FA A5 08 64 08 85 24 02 64 C9 00 00 30 08 02 C2 C6 24 10 F3 80 E5 
-02 83 02 12 45 
-02 89 
-A9 02 
-00 14 
-10 A9 01 00 04 10 02 84 02 05 02 8A A9 00 08 14 10 
+02 DA 0F
+AC AA 09
+B9 14 00
+85 14
+B9 16 00
+85 16
+A9 00
+20 14 10
+02 88 00 E0 8E
+02 8D 02
+02 63
+02 06 00 02 AA 12 02 8B A5 2A F0 FA A5 08 64 08 85 24 02 64 C9 00 00 30 08 02 C2 C6 24 10 F3 80 E5
+02 83 02 12 45
+02 89
+A9 02
+00 14
+10 A9 01 00 04 10 02 84 02 05 02 8A A9 00 08 14 10
 
-02 BF [7a 9A] A9 00 08 04 10 A9 F0 CF 1C 5A 06 02 C0 [49 9A] 02 C1 02 80 02 02 89 6B A9 00 08 14 10 02 BF 91 9A 
+02 BF [7a 9A] A9 00 08 04 10 A9 F0 CF 1C 5A 06 02 C0 [49 9A] 02 C1 02 80 02 02 89 6B A9 00 08 14 10 02 BF 91 9A
 : 49 9a
-A9 00 08 04 10 
-02 D4 27 [75 9A] 02 cc dc A9 80 00 0C EC 09 02 19 17 E4 9A 89 02 E0 6B 
+A9 00 08 04 10
+02 D4 27 [75 9A] 02 cc dc A9 80 00 0C EC 09 02 19 17 E4 9A 89 02 E0 6B
 : 75 9A
-02 BF FE 9A 6B 
+02 BF FE 9A 6B
 
 NEW BABEL:
 @9999b:
 02 d0 dc 00 [a7 99]
 02 d0 3e 01 [9a 99]
 : [a7 99]
-02 08 1D 1D 
-A9 06 00 8D B4 09 
+02 08 1D 1D
+A9 06 00 8D B4 09
 02 d0 dc 01 [9a 99]
 02 d0 01 01 [9a 99]
-02 cc 01 
+02 cc 01
 02 9c [d4 99 89] 02 38
 : [c7 99]
-02 C1 
-02 45 75 17 77 19 [d3 99] 
-80 C5 
+02 C1
+02 45 75 17 77 19 [d3 99]
+80 C5
 : [d3 99]
 6b
 : [d4 99]
-A9 F0 CF 0C 5A 06 
-02 DA 0F 
-AC AA 09 B9 14 00 85 14 B9 16 00 85 16 A9 00 20 14 10 02 88 00 E0 8E 02 8D 02 02 63 02 06 00 02 AA 12 02 8B A5 2A F0 FA A5 08 64 08 85 24 02 64 C9 00 00 30 08 02 C2 C6 24 10 F3 80 E5 02 83 02 12 45 02 89 A9 02 00 14 10 A9 01 00 04 10 02 84 02 05 02 8A A9 00 08 14 10 
-02 BF [79 9A] 
-A9 00 08 04 10 A9 F0 CF 1C 5A 06 
+A9 F0 CF 0C 5A 06
+02 DA 0F
+AC AA 09 B9 14 00 85 14 B9 16 00 85 16 A9 00 20 14 10 02 88 00 E0 8E 02 8D 02 02 63 02 06 00 02 AA 12 02 8B A5 2A F0 FA A5 08 64 08 85 24 02 64 C9 00 00 30 08 02 C2 C6 24 10 F3 80 E5 02 83 02 12 45 02 89 A9 02 00 14 10 A9 01 00 04 10 02 84 02 05 02 8A A9 00 08 14 10
+02 BF [79 9A]
+A9 00 08 04 10 A9 F0 CF 1C 5A 06
 
-02 C0 [51 9A] 
-02 C1 
-02 80 02 02 89 6B 
+02 C0 [51 9A]
+02 C1
+02 80 02 02 89 6B
 : [51 9a]
-A9 00 08 14 10 
-02 BF [91 9A] 
-A9 00 08 04 10 
-02 D4 27 [74 9A] 
+A9 00 08 14 10
+02 BF [91 9A]
+A9 00 08 04 10
+02 D4 27 [74 9A]
 02 cc dc
-A9 80 00 0C EC 09 
-02 19 17 [E4 9A 89] 
+A9 80 00 0C EC 09
+02 19 17 [E4 9A 89]
 : [74 9a]
-02 E0 6B 
+02 E0 6B
 : [77 9a]
-02 BF [FE 9A] 6B 
+02 BF [FE 9A] 6B
 : [7c 9a]
 
 
@@ -1297,43 +1216,43 @@ NEW BABEL:
 02 08 1D 1D A9 06 00 8D B4 09
 02 D6 27 [9A 99]
 02 D0 01 01 [BF 99]
-02 CC 01 
-02 9C [CC 99] 89 
+02 CC 01
+02 9C [CC 99] 89
 02 38
 
 : BF 99
-02 C1 
-02 45 75 17 77 19 [cb 99] 
-80 C5 
+02 C1
+02 45 75 17 77 19 [cb 99]
+80 C5
 : CB 99
-6B 
+6B
 : CC 99
-A9 F0 CF 0C 5A 06 
+A9 F0 CF 0C 5A 06
 : D2 99
-02 DA 0F 
-AC AA 09 
-B9 14 00 
-85 14 
-B9 16 00 
-85 16 
-A9 00 
-20 14 10 
-02 88 00 E0 8E 
-02 8D 02 
-02 63 
-02 06 00 02 AA 12 02 8B A5 2A F0 FA A5 08 64 08 85 24 02 64 C9 00 00 30 08 02 C2 C6 24 10 F3 80 E5 
-02 83 02 12 45 
-02 89 
-A9 02 
-00 14 
-10 A9 01 00 04 10 02 84 02 05 02 8A A9 00 08 14 10 
+02 DA 0F
+AC AA 09
+B9 14 00
+85 14
+B9 16 00
+85 16
+A9 00
+20 14 10
+02 88 00 E0 8E
+02 8D 02
+02 63
+02 06 00 02 AA 12 02 8B A5 2A F0 FA A5 08 64 08 85 24 02 64 C9 00 00 30 08 02 C2 C6 24 10 F3 80 E5
+02 83 02 12 45
+02 89
+A9 02
+00 14
+10 A9 01 00 04 10 02 84 02 05 02 8A A9 00 08 14 10
 
-02 BF [7a 9A] A9 00 08 04 10 A9 F0 CF 1C 5A 06 02 C0 [49 9A] 02 C1 02 80 02 02 89 6B A9 00 08 14 10 02 BF 91 9A 
+02 BF [7a 9A] A9 00 08 04 10 A9 F0 CF 1C 5A 06 02 C0 [49 9A] 02 C1 02 80 02 02 89 6B A9 00 08 14 10 02 BF 91 9A
 : 49 9a
-A9 00 08 04 10 
-02 D4 27 [75 9A] 02 cc dc A9 80 00 0C EC 09 02 19 17 E4 9A 89 02 E0 6B 
+A9 00 08 04 10
+02 D4 27 [75 9A] 02 cc dc A9 80 00 0C EC 09 02 19 17 E4 9A 89 02 E0 6B
 : 75 9A
-02 BF FE 9A 6B 
+02 BF FE 9A 6B
 
 
 : go to 99a7b, have 22 bytes to work with
@@ -1359,7 +1278,7 @@ d3 d7 15 4b 88 a3 a4 84 8d 4f c0
 : HAVE DARKSPACES CHECK FOR GAME END STATE -DONE
 : 8db07 - checks for first conversation - check for "8a" (Kara rescued) instead
 02 d0 dc 01 14 db 02 cc dc 02 bf 0b dd
-02 d0 10 01 0b dd 
+02 d0 10 01 0b dd
 
 : Eventually... perhaps @8dd0b-8ddca? (75 bytes from 191 bytes)
 02 d0 8a 00 14 db
@@ -1371,7 +1290,7 @@ d3 d7 15 4b 88 a3 a4 84 8d 4f c0
 02 d0 fc 00 14 db         >> 8dd31
 02 d0 fd 00 14 db         >> 8dd37
 02 bf CC CC 02 be 02 01 AA AA
-14 db 14 db BB BB 
+14 db 14 db BB BB
 02 26 e4 f0 00 40 01 80 00 22 9c d4 0a 02 c5
 02 bf DD DD
 "Face Dark(d60c) Gaia?/ No/ Yes"
@@ -1384,7 +1303,7 @@ ce ... c0
 : first text @98903    "heya."
 : second text? @989a2  "you've been(d670) busy, huh?"
 : text after Mystic Statue @ 98caa  "welp."
-02 26 df 58 07 a0 01 03 10 28 
+02 26 df 58 07 a0 01 03 10 28
 
 
 : UNDERGROUND TUNNEL DARK SPACE (a9 d6 88)
@@ -1441,73 +1360,73 @@ ce ... c0
 
 
 :: HAMLET IN EDWARD'S PRISON @4d202
-23 00 38 
-02 d0 24 01 0e d3 
-02 a5 00 db 84 00 00 00 20 
-02 0f [0e 11] 
-02 0f [0f 11] 
+23 00 38
+02 d0 24 01 0e d3
+02 a5 00 db 84 00 00 00 20
+02 0f [0e 11]
+02 0f [0f 11]
 *a9 00                 << CHANGE TO 02 d0 23 00 dd d2 02 e0 (@4d21c)
-08 14 10 
-a9 f0 
+08 14 10
+a9 f0
 cf 0c 5a 06            << Disable player movement
-02 da 1d 
-02 bf 2f d4 
-a9 f0 cf 1c 5a 06 
-02 d2 02 01 
-02 d2 03 01 
-02 d2 04 01 
-a9 00 
-10 14 10 
-02 c3 [51 d2 84] b0 04 
-a9 00 
-10 04 10 
-02 bf 0a d6 
-02 a0 [46 d3 84] 08 01 d0 ff 
-02 10 02 d2                         << REMOVE TILE BARRIER
-01 01 a9 00 
-10 14 10 
-02 c3 [75 d2 84] 58 02 
-a9 00
-10 04 10 
-a9 f0 
-cf 0c 5a 06 
-02 bf 79 d6 
 02 da 1d
-02 3c [e2 b7 80] 
-02 da bf 
-02 bf 32 d7 
-02 3c [ec b7 80] 
-02 da bf 
-a9 f0 
-cf 1c 5a 06 
-02 bf 8a d7 
-02 be 02 02 a6 d2 ac d2 ac d2 ac d2 
-02 bf 7d d8 
-02 a0 [08 d4 84] b8 00 70 ff 
-20 00 
-02 c1 
-ad d6 0a d0 01 6b 
-02 da 1d 
-02 bf d2 d8 
-a9 00 
-10 14 10 
-02 c3 [d6 d2 84] 2c 01 
-a9 00 
-10 04 10 
-a9 00 
-20 14 10 
+02 bf 2f d4
+a9 f0 cf 1c 5a 06
+02 d2 02 01
+02 d2 03 01
+02 d2 04 01
+a9 00
+10 14 10
+02 c3 [51 d2 84] b0 04
+a9 00
+10 04 10
+02 bf 0a d6
+02 a0 [46 d3 84] 08 01 d0 ff
+02 10 02 d2                         << REMOVE TILE BARRIER
+01 01 a9 00
+10 14 10
+02 c3 [75 d2 84] 58 02
+a9 00
+10 04 10
+a9 f0
+cf 0c 5a 06
+02 bf 79 d6
+02 da 1d
+02 3c [e2 b7 80]
+02 da bf
+02 bf 32 d7
+02 3c [ec b7 80]
+02 da bf
+a9 f0
+cf 1c 5a 06
+02 bf 8a d7
+02 be 02 02 a6 d2 ac d2 ac d2 ac d2
+02 bf 7d d8
+02 a0 [08 d4 84] b8 00 70 ff
+20 00
+02 c1
+ad d6 0a d0 01 6b
+02 da 1d
+02 bf d2 d8
+a9 00
+10 14 10
+02 c3 [d6 d2 84] 2c 01
+a9 00
+10 04 10
+a9 00
+20 14 10
 02 bf a5 d4                  << OINK OINK @4d2e0
-02 86 27 06 02 
-02 8a 
-02 85 29 02 01 
+02 86 27 06 02
 02 8a
-02 82 27 12 
-02 89 
+02 85 29 02 01
+02 8a
+02 82 27 12
+02 89
 02 9e 10 d3 84 00 00 f0 ff 00
 10 02 d2 23 01 02 86 26 0e 01 02 8a 02 e0 a9 00
-02 04 12 02 88 00 e0 8e 
+02 04 12 02 88 00 e0 8e
 
-02 c0 29 d3 
+02 c0 29 d3
 02 80 00 02
 89 02 d2 23 01 02 e0 02 bf b1 d4 02 d4 02 42 d3
 02 cc 23 a9 80 00 0c ec 09 02 19 17 f4 d5 84 6b
@@ -1532,64 +1451,64 @@ d6 2d 82 a2 84 80 a4 88 a6 84 ac 82 a5 88 a3 88
 
 :: KARA PAINTING EVENT @6d14e, Map 116 (0x74)
 :: Map 6B (angel village) header:
-6B 00 
-02 16 
-11 03 00 FC 1C D4 
-03 00 20 00 07 8F 90 00 
-04 00 70 10 B3 4B DE 
-05 00 20 00 01 44 53 D6 
-06 01 5B 46 D7 
-05 00 20 00 02 4F 0A DC 
-06 02 D6 6A DC 
-14 25 
-03 00 10 10 36 18 CA 01 
-04 00 60 A0 80 01 DF 
+6B 00
+02 16
+11 03 00 FC 1C D4
+03 00 20 00 07 8F 90 00
+04 00 70 10 B3 4B DE
+05 00 20 00 01 44 53 D6
+06 01 5B 46 D7
+05 00 20 00 02 4F 0A DC
+06 02 D6 6A DC
+14 25
+03 00 10 10 36 18 CA 01
+04 00 60 A0 80 01 DF
 **10 43 0A 00 00 00 DA ** SPRITE DATA
-00 
+00
 
 
-: Pointer [88 b3] 07 08 00 [4e d1 86] 
-16 00 10 
-02 D0 8C 01 [58 D2] 
+: Pointer [88 b3] 07 08 00 [4e d1 86]
+16 00 10
+02 D0 8C 01 [58 D2]
 02 BC 08 FD                         << Set position offset
 02 B6 10                            << set sprite properties
 02 9E [51 D2] 86 00 00 10 00 00 30    << Place new sprite?
-02 C1 
+02 C1
 02 D6 14 [71 D1] 6B                   << Item possession
 
 : [71 d1]
-02 0F 0B 0C 
+02 0F 0B 0C
 02 D2 01 01                         << Wait for switch condition
 02 D2 8A 01                         << Wait for Kara to be rescued
-A9 F0 
-FF 0C 5A 06 
-E2 20 
-A9 00 
-8D 30 21 
-A9 21 
-8D 31 21 
-C2 20 
+A9 F0
+FF 0C 5A 06
+E2 20
+A9 00
+8D 30 21
+A9 21
+8D 31 21
+C2 20
 
-02 3C F6 B7 80 
-02 DA 3B 
-A9 00 
-20 04 10 02 3C F6 B7 80 02 DA 3B A9 00 20 04 10 02 51 02 A0 9D 00 70 7E 02 4F 00 70 7E 00 50 00 08 02 4F 00 78 7E 00 54 00 08 02 4F 00 80 7E 00 58 00 08 02 4F 00 88 7E 00 5C 00 08 02 50 8C 7B DE 00 A0 50 02 51 D9 75 CB 00 40 7E 02 25 0B 10 02 B6 20 A9 00 20 14 10 02 86 1F 03 12 02 8A 02 84 1B 3C 02 8A 02 86 1F 03 12 02 8A 02 81 20 12 02 89 02 82 1F 12 02 89 02 80 1C 02 89 02 DA 3B 02 BF 39 D3 A9 03 00 22 E4 C6 80 02 C2 02 BF 64 D3 02 81 20 02 02 89 02 80 1C 02 89 02 BF CC D3 02 CC 8C A9 04 04 8D 4A 06 02 26 6A A0 01 B0 00 03 00 12 02 C1 6B 
+02 3C F6 B7 80
+02 DA 3B
+A9 00
+20 04 10 02 3C F6 B7 80 02 DA 3B A9 00 20 04 10 02 51 02 A0 9D 00 70 7E 02 4F 00 70 7E 00 50 00 08 02 4F 00 78 7E 00 54 00 08 02 4F 00 80 7E 00 58 00 08 02 4F 00 88 7E 00 5C 00 08 02 50 8C 7B DE 00 A0 50 02 51 D9 75 CB 00 40 7E 02 25 0B 10 02 B6 20 A9 00 20 14 10 02 86 1F 03 12 02 8A 02 84 1B 3C 02 8A 02 86 1F 03 12 02 8A 02 81 20 12 02 89 02 82 1F 12 02 89 02 80 1C 02 89 02 DA 3B 02 BF 39 D3 A9 03 00 22 E4 C6 80 02 C2 02 BF 64 D3 02 81 20 02 02 89 02 80 1C 02 89 02 BF CC D3 02 CC 8C A9 04 04 8D 4A 06 02 26 6A A0 01 B0 00 03 00 12 02 C1 6B
 
 : [51 d2]
-02 C0 [5A D2] 02 C1 6B 
+02 C0 [5A D2] 02 C1 6B
 : [58 d2]
-02 E0 
+02 E0
 : [5a d2]
-02 D0 89 00 [73 D2] 
-02 D0 01 01 [6B D2] 
-02 BF 78 D2 
-6B 
+02 D0 89 00 [73 D2]
+02 D0 01 01 [6B D2]
+02 BF 78 D2
+6B
 : [6b d2]
-02 BF A4 D2 
+02 BF A4 D2
 02 CC 8A                << Set "Kara rescued" switch
-6B 
+6B
 : [73 d2]
-02 BF FF D2 6B  
+02 BF FF D2 6B 
 
 
 
@@ -1598,19 +1517,19 @@ A9 00
 
 : Edward's castle room, map data @ d832d
 : spriteset 19(13)
-10 00 
-02 05 11 
-06 00 90 42 D4 06 01 C7 3B DF 03 00 
-10 10 1D 84 97 01 04 00 60 90 33 33 DE 10 79 05 00 C1 25 DD 15 30 
+10 00
+02 05 11
+06 00 90 42 D4 06 01 C7 3B DF 03 00
+10 10 1D 84 97 01 04 00 60 90 33 33 DE 10 79 05 00 C1 25 DD 15 30
 00
 
 
 : Ishtar's room, map data @ d9732
 : timemap 8, tilesets 76/77(4c/4d), paletteset 54(36), music 21(15), index 24(18), spriteset 33(21), sprite paletteset 57(39), sprite tileset 38(26)
-74 00 
-02 18 11 
-04 00 b7 49 db 03 00 20 00 07 8f 90 00 04 00 70 
-10 f3 49 de 05 00 20 00 01 44 53 d6 06 01 43 6f dd 15 25 
+74 00
+02 18 11
+04 00 b7 49 db 03 00 20 00 07 8f 90 00 04 00 70
+10 f3 49 de 05 00 20 00 01 44 53 d6 06 01 43 6f dd 15 25
 00
 
 
@@ -1622,13 +1541,13 @@ TILESET: 38  PALATTESET 0,0
 0b 24 00 4e d1 86
 
 : Angel Village: map 116 (74), x07, y08 (replace @cb396) ???
-07 08 00 4e d1 86 
+07 08 00 4e d1 86
 
 : Mt. Temple: map 169 (a9), x18, y06 (can't replace)
-12 06 00 4e d1 86 
+12 06 00 4e d1 86
 
 : Ankor Wat: map 191 (bf), x15, y06 (can't replace)
-0f 06 00 4e d1 86 
+0f 06 00 4e d1 86
 
 -------------------------
 
@@ -1641,17 +1560,17 @@ TILESET: 38  PALATTESET 0,0
 -------------------------
 
 :APPLE CART @7c0a7 - USE SWITCH 9a    (24 bytes)
-02 d6 28 b6 c0 
+02 d6 28 b6 c0
 02 bf [f3 c0]            # here you go
-02 d4 28 bb c0 6b 
+02 d4 28 bb c0 6b
 02 bf [dd c0] 6b         # you already have it
 5c 8e c9 80
 
 : NEW CODE @7c0a7                     (28 bytes)
 02 d0 9a 01 [-- --]
-02 d4 28 [-- --] 
+02 d4 28 [-- --]
 02 cc 98
-02 bf [f3 c0] 6b        
+02 bf [f3 c0] 6b
 02 bf [dd c0] 6b
 5c 8e c9 80
 
@@ -1710,12 +1629,12 @@ f2 ed >> "Aura Barrier"
 
 
 : PYRAMID HIEROGLYPH CHECK @8cb9a
-00 00 30 DA 
-A0 00 00 B9 [28 0B] 30 14 AA E2 20 BF [94 CB] 88 DA 48 98 4A AA 68 9F 65 A0 7E FA C2 20 C8 C8 C0 0C 00 D0 E0 FA 02 D0 D1 01 09 CC 02 C1 
-A0 00 00 B9 [28 0B] 30 09 C8 C8 C0 0C 00 D0 F4 80 01 6B 
-A0 00 00 A9 00 00 D9 [28 0B] D0 24 C8 C8 1A C9 06 00 D0 F3 
+00 00 30 DA
+A0 00 00 B9 [28 0B] 30 14 AA E2 20 BF [94 CB] 88 DA 48 98 4A AA 68 9F 65 A0 7E FA C2 20 C8 C8 C0 0C 00 D0 E0 FA 02 D0 D1 01 09 CC 02 C1
+A0 00 00 B9 [28 0B] 30 09 C8 C8 C0 0C 00 D0 F4 80 01 6B
+A0 00 00 A9 00 00 D9 [28 0B] D0 24 C8 C8 1A C9 06 00 D0 F3
 
-02 CC D1 
+02 CC D1
 
 
 
@@ -1748,77 +1667,77 @@ Therefore...
 
 20 B2 9F                 = remove equipped item
 A9 XX 00 8D 22 0B        = increase health by XX amount
-AD [XX XX] [YY YY]       = 
+AD [XX XX] [YY YY]       =
 
 
 
 :FISHERMAN event @ 4836f -DONE
 : Command we want starts @483b4
-22 00 10 
-A9 00 
-02 04 12 
+22 00 10
+A9 00
+02 04 12
 
 : 48377
 02 23 C9 F8 00 B0 2C C9 C8 00 B0 10    << Replace with 02 d0 10 01 [AA 83]
-02 C0 [E7 83] 
-02 25 06 2F 
-02 0B 
-02 BC 04 00 
-80 3D 
-02 C0 [EC 83] 
-02 25 0B 33 
-02 BB 
-A9 02 
-00 04 12 
-02 0B 
-02 BC FC 00 
-80 26 
+02 C0 [E7 83]
+02 25 06 2F
+02 0B
+02 BC 04 00
+80 3D
+02 C0 [EC 83]
+02 25 0B 33
+02 BB
+A9 02
+00 04 12
+02 0B
+02 BC FC 00
+80 26
 
 : [AA 83] HERE WE GO
-02 D0 D7 01 [93 83] 
-02 C0 [F1 83] 
-02 25 29 30 
-02 9E [4F 84 84] F0 FF 00 00 [00 10 02] BB A9 02 00 04 12 
-02 0B 
-02 BC FC FE 
-02 C1 
-02 80 22 
-02 89 
-AD A4 09 
-C9 50 
-02 90 04 
-02 CC 00 6B 
-02 CE 00 6B 
-02 BF F6 83 6B 
-02 BF 0F 84 6B 
-02 BF 36 84 6B 
-D3 46 8E A3 87 2A CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 D6 12 88 85 AC 48 AC D6 B5 A4 8E CB D6 6E A0 8B 80 82 84 CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 47 84 AC 8B 88 85 A4 84 83 AC A4 87 84 CB D6 C7 A4 84 80 A0 8E A4 2A C0  
+02 D0 D7 01 [93 83]
+02 C0 [F1 83]
+02 25 29 30
+02 9E [4F 84 84] F0 FF 00 00 [00 10 02] BB A9 02 00 04 12
+02 0B
+02 BC FC FE
+02 C1
+02 80 22
+02 89
+AD A4 09
+C9 50
+02 90 04
+02 CC 00 6B
+02 CE 00 6B
+02 BF F6 83 6B
+02 BF 0F 84 6B
+02 BF 36 84 6B
+D3 46 8E A3 87 2A CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 D6 12 88 85 AC 48 AC D6 B5 A4 8E CB D6 6E A0 8B 80 82 84 CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 47 84 AC 8B 88 85 A4 84 83 AC A4 87 84 CB D6 C7 A4 84 80 A0 8E A4 2A C0 
 
 
-: 5e647 - NAZCA WARP TO SKY GARDEN 
-00 00 30 
-02 9C D0 E7 
-85 00 20 
+: 5e647 - NAZCA WARP TO SKY GARDEN
+00 00 30
+02 9C D0 E7
+85 00 20
 02 D2 [10] 01                                                : Wait for switch 9
 02 C0 AD E6                                                : On key input, go to Neil's exclamation
 02 D2 0F 01                                                : Wait for switch 15
 A9 F0 EF 0C 5A 06 A9 E0 00 9F 10 00 7F
 02 CA 08 BF 10 00 7F E2 20 8D 32 21 C2 20 1A 9F 10 00 7F   : Set repeats?
-02 DA [01] 
-02 CB 
+02 DA [01]
+02 CB
 02 [c1 02 c1]                                                : Erik - "something huge"
-02 [c1 02 c1 02 c1] 
-02 9C A6 E7 85 00 03 
-02 DA 3B 
-02 [c1 02 c1]                                                : Kara: 
-A9 04 04 8D 4A 06 
-02 26 4C 68 01 40 00 83 00 22 
-02 C1 6B 
+02 [c1 02 c1 02 c1]
+02 9C A6 E7 85 00 03
+02 DA 3B
+02 [c1 02 c1]                                                : Kara:
+A9 04 04 8D 4A 06
+02 26 4C 68 01 40 00 83 00 22
+02 C1 6B
 
 : 5e6ad
 02 D0 0B 00 BB E6                                           : go to Neil's exclamation // THIS IS WHAT GETS CHANGED
-02 BF C0 E6 
-02 CC 0F 6B 
+02 BF C0 E6
+02 CC 0F 6B
 02 BF 21 E7 6B                                              : Neil: Will, don't do it!
 
 
@@ -1845,7 +1764,7 @@ d3 67 80 a2 a0 ac a4 8e ac 63 8a a9 ac 46 80 a2 83 84 8d 0d cb ac 69 84 a3 cb ac
 02 bf [AA AA] 02 be 02 01 [0a XX]       # "wanna go?"
 [10 XX] [10 XX] [15 XX]
 02 bf [BB BB] 6b                        # "suit yourself"
-02 D6 18 [1a XX] 
+02 D6 18 [1a XX]
 02 bf [CC CC] 6b                        # "can't take you"
 
 
@@ -1853,18 +1772,18 @@ d3 67 80 a2 a0 ac a4 8e ac 63 8a a9 ac 46 80 a2 83 84 8d 0d cb ac 69 84 a3 cb ac
 
 : - Man in Watermia
 : 78542 - 12 options:
- 5A 85 : 
-=69 85 : 
- 64 85 : 
- 69 85 : 
- A1 85 : 
- A6 85 : 
- AB 85 : 
- B0 85 : 
- B5 85 : 
- BA 85 : 
- BF 85 : 
- BF 85 : 
+ 5A 85 :
+=69 85 :
+ 64 85 :
+ 69 85 :
+ A1 85 :
+ A6 85 :
+ AB 85 :
+ B0 85 :
+ B5 85 :
+ BA 85 :
+ BF 85 :
+ BF 85 :
 
  02 BF C9 85 6B : This is Watermia...
  02 BF 07 86 6B : This animal is called a Kruk...
@@ -1873,17 +1792,17 @@ d3 67 80 a2 a0 ac a4 8e ac 63 8a a9 ac 46 80 a2 83 84 8d 0d cb ac 69 84 a3 cb ac
  02 BF 6E 87 6B : This leaf is full.
 -02 BF 9B 87 6B : Luke: Take care of my house
  02 BF DA 87 6B : If you need a lot of money...
- 02 BF 1B 88 6B : 
- 02 BF 81 88 6B : 
- 02 BF DE 88 6B : 
+ 02 BF 1B 88 6B :
+ 02 BF 81 88 6B :
+ 02 BF DE 88 6B :
  02 BF E0 88 6B
- : 
+ :
 
 : NEW 78569
 02 bf [c1 86] 02 be 21 03 [73 85]       # "wanna go?"
 [79 85] [79 85] [7E 85]
 02 bf [24 87] 6b                        # "suit yourself"
-02 D6 18 [32 87] 
+02 D6 18 [32 87]
 02 bf [41 87] 6b                        # "can't take you"
 
 # 26 character max
@@ -1945,7 +1864,7 @@ ce 69 8e a5 ac d6 82 d7 9e a4 8e ac d6 98 cb a4 87 84 ac a0 a2 8e a0 84 a2 ac a0
 02 bf [3f c6] 02 be [21??] 03 [67 c4]       # "i run stables"
 [6d c4] [6d c4] [6f c4]
 02 bf [fe c6] 6b                        # "come back"
-02 D6 18 [d0 c4] 
+02 D6 18 [d0 c4]
 02 bf [09 c5] 6b                        # "no papers"
 
 : 7c480 - 7c74a = text characters
@@ -1980,8 +1899,8 @@ GLOWING BLOCK IN INCA:
        ^  ^    ^  ^ Change to new start/end X/Y coordinates
 
 :: 1f38d9 # Map arrangmenet data for tile = 104 bytes
-[02 02] [00 04] 
-80 3B FC 01 E1 1F 11 78 CF C8 9E 55 F3 37 9D FD 11 E9 9F 55 7A EF D9 9E DD F7 77 BF FC 21 E2 1F 19 79 0F CA 9E 65 F3 B7 A1 FD 31 EA 9F 5D 7B 2F DB 9E ED F7 F7 83 FC 41 E3 1F 21 79 4F CC 9E 75 F4 37 A5 FD 51 EB 9F 65 7B 6F DD 9E FD F0 77 87 FC 61 E4 1F 29 79 8B 68 14 13 16 50 A8 66 2F 4A FA 9B D6 FE C8 F6 CF BA 88 
+[02 02] [00 04]
+80 3B FC 01 E1 1F 11 78 CF C8 9E 55 F3 37 9D FD 11 E9 9F 55 7A EF D9 9E DD F7 77 BF FC 21 E2 1F 19 79 0F CA 9E 65 F3 B7 A1 FD 31 EA 9F 5D 7B 2F DB 9E ED F7 F7 83 FC 41 E3 1F 21 79 4F CC 9E 75 F4 37 A5 FD 51 EB 9F 65 7B 6F DD 9E FD F0 77 87 FC 61 E4 1F 29 79 8B 68 14 13 16 50 A8 66 2F 4A FA 9B D6 FE C8 F6 CF BA 88
 
 
 
@@ -2056,7 +1975,7 @@ BACKGROUND MUSIC
 :: Sky Garden events
 :: We want Nazca, Seaside, Angel, Natives, and Pyramid (60 bytes)
 : 5f356 (Moon Tribe 1)
-3C 00 10 A9 00 02 04 12 [ADD HERE] 02 C0 [6C F3] 02 0B 02 C1 02 80 3C 02 89 6B 
+3C 00 10 A9 00 02 04 12 [ADD HERE] 02 C0 [6C F3] 02 0B 02 C1 02 80 3C 02 89 6B
                          ^ 02 d0 2a 01 xx xx 02 e0 6b
 
 : 6c f3                                   << NOW [75 f3]
@@ -2073,7 +1992,7 @@ BACKGROUND MUSIC
 
 
 : 5f3ae (Moon Tribe 2)
-3C 00 10 A9 00 02 04 12 02 C0 [6c f3] 02 0B 02 C1 02 80 3C 02 89 6B 
+3C 00 10 A9 00 02 04 12 02 C0 [6c f3] 02 0B 02 C1 02 80 3C 02 89 6B
 
 : c4 f3 - PUT TEXT HERE
 : Euro
@@ -2081,64 +2000,64 @@ BACKGROUND MUSIC
 : Babel
 02 26 78 78 02 90 03 00 00 45 02 C5
 
-46 80 A2 83 84 8D AC 88 A3 AC 8E A5 A2 AC 8C 8E 83 84 CB 8E 85 AC A4 A2 80 8D A3 A0 8E A2 A4 80 A4 88 8E 8D 2A CF 64 87 84 A2 84 AC 80 A2 84 AC 85 8E A5 A2 AC D6 07 CB 41 80 8B 8B A3 AC 88 8D AC 85 8E A5 A2 AC 8B 8E 82 80 A4 88 8E 8D A3 2A CB 45 88 8D 83 AC 84 80 82 87 AC 8E 8D 84 AC 88 8D AC CB 82 8B 8E 82 8A A7 88 A3 84 AC 8E A2 83 84 A2 2A 2A 2A AC C0   
+46 80 A2 83 84 8D AC 88 A3 AC 8E A5 A2 AC 8C 8E 83 84 CB 8E 85 AC A4 A2 80 8D A3 A0 8E A2 A4 80 A4 88 8E 8D 2A CF 64 87 84 A2 84 AC 80 A2 84 AC 85 8E A5 A2 AC D6 07 CB 41 80 8B 8B A3 AC 88 8D AC 85 8E A5 A2 AC 8B 8E 82 80 A4 88 8E 8D A3 2A CB 45 88 8D 83 AC 84 80 82 87 AC 8E 8D 84 AC 88 8D AC CB 82 8B 8E 82 8A A7 88 A3 84 AC 8E A2 83 84 A2 2A 2A 2A AC C0  
 
 : 5f453 (Moon Tribe 3)
-3C 00 10 A9 00 02 04 12 02 C0 [6c f3] 02 0B 02 C1 02 80 3C 02 89 6B 
+3C 00 10 A9 00 02 04 12 02 C0 [6c f3] 02 0B 02 C1 02 80 3C 02 89 6B
 
 02 26 78 78 02 90 03 00 00 45 02 C5
 02 26 78 78 02 90 03 00 00 45 02 C5
-02 BF 6E F4 6B D3 D6 31 64 A2 88 81 84 2F AC 43 A2 8E A0 AC 8E 85 85 AC A4 87 84 AC CB 82 8B 88 85 85 AC 80 A4 AC A4 87 84 AC 85 A2 8E 8D A4 AC 80 8D 83 AC CB D6 73 A4 8E AC D6 90 A4 87 84 AC CB A5 A0 6D A3 88 83 84 AC 83 8E A7 8D AC A7 8E A2 8B 83 2A 2A 2A AC C0 
+02 BF 6E F4 6B D3 D6 31 64 A2 88 81 84 2F AC 43 A2 8E A0 AC 8E 85 85 AC A4 87 84 AC CB 82 8B 88 85 85 AC 80 A4 AC A4 87 84 AC 85 A2 8E 8D A4 AC 80 8D 83 AC CB D6 73 A4 8E AC D6 90 A4 87 84 AC CB A5 A0 6D A3 88 83 84 AC 83 8E A7 8D AC A7 8E A2 8B 83 2A 2A 2A AC C0
 
 : "Where'd you like(d6a5) to go?/ Quit(d642)        Nazca/ Angel Vil.  Euro/ Dao        Babel"
 
 
 ::MOON TRIBE EVENTS
 : 9d0f5
-00 00 30 a9 00 02 04 12 
+00 00 30 a9 00 02 04 12
 02 d0 2a 01 [37 d1]
-da a2 e0 00 a9 00 00 9f 00 0b 7f e8 e8 e0 00 01 d0 f5 fa 
-02 c1 
+da a2 e0 00 a9 00 00 9f 00 0b 7f e8 e8 e0 00 01 d0 f5 fa
+02 c1
 02 21 02 1e d1 6b                  << Check if in distance
 
 :: 9d11e REPLACE THIS (25 bytes)
 02 bf [fc d1] 02 be 03 01 28       << first text box
-d1 30 d1 30 d1 30 d1 30 d1 
-02 bf [d0 d2] 
-02 da 27 
+d1 30 d1 30 d1 30 d1 30 d1
+02 bf [d0 d2]
+02 da 27
 ***********************************************
 :: 9d11eNEW
 02 d0 08 00 [25 d1] 6b     << "Moon(d631) Tribe:/Heal us... /The Teapot..."
 02 bf AA AA
 02 cc 08 6b
 ***********************************************
-a9 00 20 14 10 
-02 cc 2a 
-02 3c 00 b8 80 
-02 0b 
-02 c0 [d3 d1] 
-02 c1 
-02 82 27 3b 
+a9 00 20 14 10
+02 cc 2a
+02 3c 00 b8 80
+02 0b
+02 c0 [d3 d1]
+02 c1
+02 82 27 3b
 02 89 6b
 
 9d153
-00 00 30 02 d2 2a 01 a9 00 20 14 10 
-02 0b a9 00 
+00 00 30 02 d2 2a 01 a9 00 20 14 10
+02 0b a9 00
 02 04 12 02 c0 [d8 d1] 02 c1 02 82 27 3b 02 89 6b
                 ^ change to [d3 d1]
 
 ***9d173
-00 00 30 02 d2 2a 01 a9 00 20 14 10 02 0b a9 00 
+00 00 30 02 d2 2a 01 a9 00 20 14 10 02 0b a9 00
 02 04 12 02 c0 [dd d1] 02 c1 02 82 27 3b 02 89 6b
                 ^ change to [d3 d1]
 
 9d193
-00 00 30 02 d2 2a 01 a9 00 20 14 10 02 0b a9 00 
+00 00 30 02 d2 2a 01 a9 00 20 14 10 02 0b a9 00
 02 04 12 02 c0 [f2 d1] 02 c1 02 82 27 3b 02 89 6b
                 ^ change to [d3 d1]
 
 9d1b3
-00 00 30 02 d2 2a 01 a9 00 20 14 10 02 0b a9 00 
+00 00 30 02 d2 2a 01 a9 00 20 14 10 02 0b a9 00
 02 04 12 02 c0 [f7 d1] 02 c1 02 82 27 3b 02 89 6b
                 ^ change to [d3 d1]
 
@@ -2194,7 +2113,7 @@ ce 69 8e a5 ac d6 82 d6 98 a4 87 84 ac 64 84 80 a0 8e a4 2a 2a 2a c0
 
 
 OR...
-02 26 95 
+02 26 95
 ***********************************************
 
 
@@ -2206,7 +2125,7 @@ D1DD: "One of my party..."  # Change to "Wanna go to Euro?"
 
 
 D1E1: "Do you know?..."     # Change to "Bye"
-02 BE 02 01 [E7 D1] 
+02 BE 02 01 [E7 D1]
 [ED D1] [ED D1] [ED D1]
 
 
@@ -2224,7 +2143,7 @@ NEW D1DD: Item Possession Condition (check for teapot)
 02 BF [xx xx] 6b
 02 26 91 D0 03 30 04 06 00 54 02 C5
 02 BF AD D4 6b
-D3 
+D3
 
 
 NEW 4922c (test)
@@ -2277,8 +2196,8 @@ NEW D4 AD: New Text Boxes
 
 
 
-# 
-FF 0D 2E 04 02 0C 58 00 50 00 03 
+#
+FF 0D 2E 04 02 0C 58 00 50 00 03
 
 
 
@@ -2286,7 +2205,7 @@ FF 0D 2E 04 02 0C 58 00 50 00 03
 
 
 
-00 12 1A 14 01 01 E6 78 00 C0 00 00 00  
+00 12 1A 14 01 01 E6 78 00 C0 00 00 00 
 
 
 
@@ -2295,44 +2214,44 @@ FF 0D 2E 04 02 0C 58 00 50 00 03
 
 
 
-3AD77: Overworld Movement Script Pointers 
-01: C3 AD 
-02: D8 AD 
-03: F1 AD 
-04: 06 AE 
-: 23 AE 
-: 38 AE 
-: 5D AE 
-: 76 AE 
-: 9B AE 
-: A0 AE 
-: BD AE 
-: DA AE 
-: EB AE 
-: 10 AF 
-: 2D AF 
-: 42 AF 
-: 5F AF 
-: 9C AF 
-: BD AF 
-: CE AF 
-: EB AF 
-: 0C B0 
-: 2D B0 
-: 46 B0 
-: 63 B0 
-: 80 B0 
-: 9D B0 
-: AE B0 
-: C7 B0 
-: E0 B0 
-: F5 B0 
-: 0E B1 
-: 2F B1 
-: 54 B1 
-: 7D B1 
-: 9E B1 
-: BF B1 
+3AD77: Overworld Movement Script Pointers
+01: C3 AD
+02: D8 AD
+03: F1 AD
+04: 06 AE
+: 23 AE
+: 38 AE
+: 5D AE
+: 76 AE
+: 9B AE
+: A0 AE
+: BD AE
+: DA AE
+: EB AE
+: 10 AF
+: 2D AF
+: 42 AF
+: 5F AF
+: 9C AF
+: BD AF
+: CE AF
+: EB AF
+: 0C B0
+: 2D B0
+: 46 B0
+: 63 B0
+: 80 B0
+: 9D B0
+: AE B0
+: C7 B0
+: E0 B0
+: F5 B0
+: 0E B1
+: 2F B1
+: 54 B1
+: 7D B1
+: 9E B1
+: BF B1
 
 
 ******************
@@ -2374,115 +2293,115 @@ Itory/Babel - Euro/Mu
 00000240 010200b0 00000240 01000090 00000180 ff
 
 01 - adc3 - Cape-Edwards
-[00 02 00 30] [00 00 02 40] [01 02 00 30] [00 00 01 40] [00 02 00 10] FF 
+[00 02 00 30] [00 00 02 40] [01 02 00 30] [00 00 01 40] [00 02 00 10] FF
 
 02 - add8 - Edwards-Cape
-[00 00 01 80] [02 00 00 30] [00 00 01 80] [00 01 00 70] [00 00 02 80] [00 00 02 80] FF 
+[00 00 01 80] [02 00 00 30] [00 00 01 80] [00 01 00 70] [00 00 02 80] [00 00 02 80] FF
 
 03 - adf1 - Cape-Itory
-[00 02 00 A0] [00 00 01 20] [12 02 00 20] [00 00 02 20] [00 02 00 30] FF 
+[00 02 00 A0] [00 00 01 20] [12 02 00 20] [00 00 02 20] [00 02 00 30] FF
 
 04 - ae06 - Itory-Cape
-[00 00 02 80] [00 00 02 40] [01 01 00 10] [00 00 02 40] [00 01 00 E0] [00 00 02 80] [00 00 02 7B] FF 
+[00 00 02 80] [00 00 02 40] [01 01 00 10] [00 00 02 40] [00 01 00 E0] [00 00 02 80] [00 00 02 7B] FF
 
 05 - ae23 - Itory-Moon
-[00 02 00 20] [00 00 01 40] [02 02 00 30] [00 00 02 40] [00 02 00 10] FF 
+[00 02 00 20] [00 00 01 40] [02 02 00 30] [00 00 02 40] [00 02 00 10] FF
 
 06 - ae38 - Moon-Larai
-[00 00 02 80] [00 00 02 80] [00 01 00 10] [00 00 01 40] [01 01 00 30] [00 00 01 40] [01 00 00 70] [00 00 01 80] [00 02 00 10] FF 
+[00 00 02 80] [00 00 02 80] [00 01 00 10] [00 00 01 40] [01 01 00 30] [00 00 01 40] [01 00 00 70] [00 00 01 80] [00 02 00 10] FF
 
 07 - ae5d - Itory-Inca
-[00 00 02 40] [01 02 00 20] [00 00 02 40] [01 00 00 50] [00 00 01 80] [00 02 00 10] FF 
+[00 00 02 40] [01 02 00 20] [00 00 02 40] [01 00 00 50] [00 00 01 80] [00 02 00 10] FF
 
 08 - ae76 - Inca-Itory
-[00 00 01 80] [00 00 01 20] [02 11 00 40] [00 00 02 20] [02 00 00 30] [00 00 01 80] [00 01 00 10] [00 00 01 80] [00 00 01 80] FF 
+[00 00 01 80] [00 00 01 20] [02 11 00 40] [00 00 02 20] [02 00 00 30] [00 00 01 80] [00 01 00 10] [00 00 01 80] [00 00 01 80] FF
 
 09 - ae9b - Coast-Freejia
-[00 02 00 80] FF 
+[00 02 00 80] FF
 
 0a - aea0 - Freejia-Mine
-[00 00 02 80] [01 00 00 30] [00 00 02 20] [01 11 00 A0] [00 00 02 20] [01 01 00 10] [00 00 01 C0] FF 
+[00 00 02 80] [01 00 00 30] [00 00 02 20] [01 11 00 A0] [00 00 02 20] [01 01 00 10] [00 00 01 C0] FF
 
 0b - aebd - Mine-Freejia
-[00 00 01 40] [02 02 00 10] [00 00 01 20] [02 12 00 A0] [00 00 01 20] [02 00 00 30] [00 00 02 80] FF 
+[00 00 01 40] [02 02 00 10] [00 00 01 20] [02 12 00 A0] [00 00 01 20] [02 00 00 30] [00 00 02 80] FF
 
 0c - aeda - Freejia-Neil's
-[00 00 02 40] [01 02 00 20] [00 00 01 40] [00 02 00 50] FF 
+[00 00 02 40] [01 02 00 20] [00 00 01 40] [00 02 00 50] FF
 
 0d - aeeb - Neil's-Nazca
-[00 00 02 80] [00 00 02 40] [01 01 00 20] [00 00 01 40] [01 00 00 30] [00 00 02 20] [01 11 00 40] [00 00 01 20] [00 00 01 80] FF 
+[00 00 02 80] [00 00 02 40] [01 01 00 20] [00 00 01 40] [01 00 00 30] [00 00 02 20] [01 11 00 40] [00 00 01 20] [00 00 01 80] FF
 
 0e - af10 - Unused; Nazca-Freejia?
-[00 00 01 80] [00 00 01 40] [02 01 00 50] [00 00 02 40] [02 00 00 60] [00 00 02 80] [00 02 00 10] FF 
+[00 00 01 80] [00 00 01 40] [02 01 00 50] [00 00 02 40] [02 00 00 60] [00 00 02 80] [00 02 00 10] FF
 
 0f - af2d - Unused; Freejia-Nazca?
-[00 00 02 80] [01 00 00 70] [00 00 01 40] [01 02 00 40] [00 00 01 40] FF 
+[00 00 02 80] [01 00 00 70] [00 00 01 40] [01 02 00 40] [00 00 01 40] FF
 
 10 - af42 - Unused; Nazca-Mine?
-[00 00 02 80] [00 00 02 60] [11 01 00 A0] [00 00 02 20] [00 01 00 40] [00 00 02 80] [00 00 02 80] FF 
+[00 00 02 80] [00 00 02 60] [11 01 00 A0] [00 00 02 20] [00 01 00 40] [00 00 02 80] [00 00 02 80] FF
 
 11 - af5f - Angel-Watermia
-[00 00 02 80] [00 00 02 80] [00 01 00 20] [00 00 02 40] [02 01 00 30] [00 00 02 40] [02 00 00 10] [00 00 02 40] [02 02 00 20] [00 00 01 40] [02 00 00 50] [00 00 01 80] [00 01 00 10] [00 00 01 80] [00 00 01 80] FF 
+[00 00 02 80] [00 00 02 80] [00 01 00 20] [00 00 02 40] [02 01 00 30] [00 00 02 40] [02 00 00 10] [00 00 02 40] [02 02 00 20] [00 00 01 40] [02 00 00 50] [00 00 01 80] [00 01 00 10] [00 00 01 80] [00 00 01 80] FF
 
 12 - af9c - Watermia-Angel
-[00 02 00 10] [00 00 02 80] [01 00 00 60] [00 00 01 40] [01 02 00 30] [00 00 02 40] [01 00 00 20] [00 00 01 80] FF 
+[00 02 00 10] [00 00 02 80] [01 00 00 60] [00 00 01 40] [01 02 00 30] [00 00 02 40] [01 00 00 20] [00 00 01 80] FF
 
 13 - afbd - Watermia-Wall
-[00 02 00 50] [00 00 01 40] [02 02 00 30] [00 00 02 40] FF 
+[00 02 00 50] [00 00 01 40] [02 02 00 30] [00 00 02 40] FF
 
 14 - afce - Wall-Watermia
-[00 00 02 80] [00 00 02 40] [01 01 00 30] [00 00 02 40] [00 01 00 50] [00 00 02 80] [00 00 02 80] FF 
+[00 00 02 80] [00 00 02 40] [01 01 00 30] [00 00 02 40] [00 01 00 50] [00 00 02 80] [00 00 02 80] FF
 
 15 - afeb - Watermia-Euro
-[00 00 01 40] [02 02 00 20] [00 00 01 20] [02 12 00 80] [00 00 01 20] [02 00 00 60] [00 00 02 80] [00 02 00 10] FF 
+[00 00 01 40] [02 02 00 20] [00 00 01 20] [02 12 00 80] [00 00 01 20] [02 00 00 60] [00 00 02 80] [00 02 00 10] FF
 
 16 - b00c - Euro-Watermia
-[00 00 02 80] [01 00 00 40] [00 00 02 20] [01 11 00 A0] [00 00 02 20] [01 01 00 20] [00 00 01 40] [00 00 01 80] FF 
+[00 00 02 80] [01 00 00 40] [00 00 02 20] [01 11 00 A0] [00 00 02 20] [01 01 00 20] [00 00 01 40] [00 00 01 80] FF
 
 17 - b02d - Euro-Kress
-[00 00 02 40] [01 02 00 30] [01 02 00 08] [00 00 01 40] [00 02 00 40] [00 02 00 08] FF 
+[00 00 02 40] [01 02 00 30] [01 02 00 08] [00 00 01 40] [00 02 00 40] [00 02 00 08] FF
 
 18 - b046 - Kress-Euro
-[00 00 01 80] [00 00 01 80] [00 01 00 40] [00 00 02 40] [02 01 00 40] [00 00 02 40] [00 00 02 80] FF 
+[00 00 01 80] [00 00 01 80] [00 01 00 40] [00 00 02 40] [02 01 00 40] [00 00 02 40] [00 00 02 80] FF
 
 19 - b063 - Euro-Natives'
-[00 00 01 80] [02 00 00 20] [00 00 01 40] [02 01 00 70] [00 00 02 40] [02 00 00 20] [00 00 02 80] FF 
+[00 00 01 80] [02 00 00 20] [00 00 01 40] [02 01 00 70] [00 00 02 40] [02 00 00 20] [00 00 02 80] FF
 
 1a - b080 - Natives'-Euro
-[00 00 02 80] [01 00 00 20] [00 00 01 40] [01 02 00 70] [00 00 02 40] [01 00 00 20] [00 00 01 80] FF 
+[00 00 02 80] [01 00 00 20] [00 00 01 40] [01 02 00 70] [00 00 02 40] [01 00 00 20] [00 00 01 80] FF
 
 1b - b09d - Natives'-Ankor
-[00 00 02 20] [11 02 00 20] [00 00 01 20] [00 02 00 30] FF 
+[00 00 02 20] [11 02 00 20] [00 00 01 20] [00 02 00 30] FF
 
 1c - b0ae - Ankor-Natives'
-[00 00 01 80] [00 00 01 80] [00 01 00 50] [00 00 02 80] [02 00 00 10] [00 00 02 80] FF 
+[00 00 01 80] [00 00 01 80] [00 01 00 50] [00 00 02 80] [02 00 00 10] [00 00 02 80] FF
 
 1d - b0c7 - Natives'-Dao
-[00 00 01 80] [02 00 00 40] [00 00 02 40] [02 02 00 50] [00 00 02 40] [00 02 00 40] FF 
+[00 00 01 80] [02 00 00 40] [00 00 02 40] [02 02 00 50] [00 00 02 40] [00 02 00 40] FF
 
 1e - b0e0 - Dao-Pyramid
-[00 02 00 30] [00 00 01 40] [02 02 00 20] [00 00 02 40] [00 02 00 10] FF 
+[00 02 00 30] [00 00 01 40] [02 02 00 20] [00 00 02 40] [00 02 00 10] FF
 
 1f - b0f5 - Pyramid-Dao
-[00 00 02 80] [00 00 02 80] [00 01 00 60] [00 00 01 80] [01 00 00 20] [00 00 01 80] FF 
+[00 00 02 80] [00 00 02 80] [00 01 00 60] [00 00 01 80] [01 00 00 20] [00 00 01 80] FF
 
 20 - b10e - Dao-Natives'
-[00 00 02 80] [00 00 02 80] [00 01 00 80] [00 00 01 40] [01 01 00 10] [00 00 01 40] [01 00 00 80] [00 00 01 80] FF 
+[00 00 02 80] [00 00 02 80] [00 01 00 80] [00 00 01 40] [01 01 00 10] [00 00 01 40] [01 00 00 80] [00 00 01 80] FF
 
 21 - b12f - Dao-Babel
-[00 00 02 80] [00 00 02 40] [01 01 00 60] [00 00 01 40] [01 00 00 90] [00 00 02 40] [01 01 00 80] [00 00 01 40] [00 00 01 80] FF 
+[00 00 02 80] [00 00 02 40] [01 01 00 60] [00 00 01 40] [01 00 00 90] [00 00 02 40] [01 01 00 80] [00 00 01 40] [00 00 01 80] FF
 
 22 - b154 - Unused; Mu-Inca?
-[00 00 01 80] [00 00 01 80] [00 01 00 A0] [00 01 00 C0] [00 00 02 40] [02 01 00 A0] [00 00 02 40] [02 00 00 A0] [02 00 00 C0] [00 00 02 80] FF 
+[00 00 01 80] [00 00 01 80] [00 01 00 A0] [00 01 00 C0] [00 00 02 40] [02 01 00 A0] [00 00 02 40] [02 00 00 A0] [02 00 00 C0] [00 00 02 80] FF
 
 23 - b17d - Unused; Inca-Mu?
-[00 00 02 80] [01 00 00 A0] [01 00 00 C0] [00 00 01 40] [01 02 00 A0] [00 00 01 40] [00 02 00 A0] [00 02 00 C0] FF 
+[00 00 02 80] [01 00 00 A0] [01 00 00 C0] [00 00 01 40] [01 02 00 A0] [00 00 01 40] [00 02 00 A0] [00 02 00 C0] FF
 
 24 - b19e - Unused; Euro-Freejia?
-[00 00 02 80] [00 00 02 40] [01 01 00 80] [00 00 02 40] [00 01 00 A0] [00 01 00 80] [00 00 02 80] [00 00 02 80] FF 
+[00 00 02 80] [00 00 02 40] [01 01 00 80] [00 00 02 40] [00 01 00 A0] [00 01 00 80] [00 00 02 80] [00 00 02 80] FF
 
 25 - b1bf - Unused; Freejia-Euro?
-[00 02 00 A0] [00 02 00 80] [00 00 01 40] [02 02 00 80] [00 00 02 40] FF 
+[00 02 00 A0] [00 02 00 80] [00 00 01 40] [02 02 00 80] [00 00 02 40] FF
 
 
 
@@ -2493,26 +2412,26 @@ FaceDir: 00 (up), 17 (right), 06 (left), 03 (down)
 02 67 00 [01] 02 26 [0A] [F8 01] [C0 02] [00] [20 34] 02 C5                             >> 01: South Cape -> Edward's Castle
 02 67 00 [03] 02 26 [15] [D8 02] [B0 02] [00] [00 35] 02 C5                             >> 03: South Cape -> Itory
 02 67 00 [04] 02 26 [01] [78 01] [40 00] [03] [00 43] 02 C5                             >> 04: Itory -> South Cape
-02 67 00 [08] 02 26 [15] [D8 02] [B0 02] [00] [00 35] 02 C5                             >> 08: 
-02 67 00 [07] 02 26 [1C] [68 00] [A0 01] [80] [00 22] 02 C5                             >> 07: 
-02 67 00 [0A] 02 26 [3E] [A8 00] [D0 03] [80] [00 42] 02 C5                             >> 10: 
-02 67 00 [0B] 02 26 [32] [30 01] [50 03] [00] [00 45] 02 C5                             >> 11: 
-02 67 00 [11] 02 26 [78] [78 02] [90 03] [00] [00 45] 02 C5                             >> 17: 
-02 67 00 [12] 02 26 [69] [A0 02] [C0 00] [00] [00 13] 02 C5                             >> 18: 
-02 67 00 [13] 02 26 [82] [20 00] [90 00] [87] [00 18] 02 C5                             >> 19: 
-02 67 00 [14] 02 26 [78] [78 02] [90 03] [00] [00 45] 02 C5 A9 07 00 8D 60 0D           >> 20: 
-02 67 00 [15] 02 26 [91] [D0 03] [30 04] [06] [00 54] 02 C5 A9 07 00 8D 60 0D           >> 21: 
-02 67 00 [16] 02 26 [78] [78 02] [90 03] [00] [00 45] 02 C5                             >> 22: 
-02 67 00 [17] 02 26 [A0] [C8 02] [B0 01] [86] [00 23] 02 C5                             >> 23: 
-02 67 00 [18] 02 26 [91] [D0 03] [30 04] [06] [00 54] 02 C5                             >> 24: 
-02 67 00 [19] 02 26 [AC] [C0 01] [D0 01] [06] [00 22] 02 C5                             >> 25: 
-02 67 00 [1A] 02 26 [91] [D0 03] [30 04] [06] [00 54] 02 C5                             >> 26: 
-02 67 00 [1B] 02 26 [B0] [F8 01] [C0 04] [80] [00 54] 02 C5                             >> 27: 
-02 67 00 [1C] 02 26 [AC] [C0 01] [D0 01] [06] [00 22] 02 C5                             >> 28: 
-02 67 00 [20] 02 26 [AC] [C0 01] [D0 01] [06] [00 22] 02 C5                             >> 32: 
-02 67 00 [1E] 02 26 [CC] [10 00] [D0 00] [87] [00 44] 02 C5                             >> 30: 
-02 67 00 [1D] 02 26 [C3] [10 00] [E0 00] [07] [00 23] 02 C5                             >> 29: 
-02 67 00 [1F] 02 26 [C3] [10 00] [E0 00] [07] [00 23] 02 C5                             >> 31: 
+02 67 00 [08] 02 26 [15] [D8 02] [B0 02] [00] [00 35] 02 C5                             >> 08:
+02 67 00 [07] 02 26 [1C] [68 00] [A0 01] [80] [00 22] 02 C5                             >> 07:
+02 67 00 [0A] 02 26 [3E] [A8 00] [D0 03] [80] [00 42] 02 C5                             >> 10:
+02 67 00 [0B] 02 26 [32] [30 01] [50 03] [00] [00 45] 02 C5                             >> 11:
+02 67 00 [11] 02 26 [78] [78 02] [90 03] [00] [00 45] 02 C5                             >> 17:
+02 67 00 [12] 02 26 [69] [A0 02] [C0 00] [00] [00 13] 02 C5                             >> 18:
+02 67 00 [13] 02 26 [82] [20 00] [90 00] [87] [00 18] 02 C5                             >> 19:
+02 67 00 [14] 02 26 [78] [78 02] [90 03] [00] [00 45] 02 C5 A9 07 00 8D 60 0D           >> 20:
+02 67 00 [15] 02 26 [91] [D0 03] [30 04] [06] [00 54] 02 C5 A9 07 00 8D 60 0D           >> 21:
+02 67 00 [16] 02 26 [78] [78 02] [90 03] [00] [00 45] 02 C5                             >> 22:
+02 67 00 [17] 02 26 [A0] [C8 02] [B0 01] [86] [00 23] 02 C5                             >> 23:
+02 67 00 [18] 02 26 [91] [D0 03] [30 04] [06] [00 54] 02 C5                             >> 24:
+02 67 00 [19] 02 26 [AC] [C0 01] [D0 01] [06] [00 22] 02 C5                             >> 25:
+02 67 00 [1A] 02 26 [91] [D0 03] [30 04] [06] [00 54] 02 C5                             >> 26:
+02 67 00 [1B] 02 26 [B0] [F8 01] [C0 04] [80] [00 54] 02 C5                             >> 27:
+02 67 00 [1C] 02 26 [AC] [C0 01] [D0 01] [06] [00 22] 02 C5                             >> 28:
+02 67 00 [20] 02 26 [AC] [C0 01] [D0 01] [06] [00 22] 02 C5                             >> 32:
+02 67 00 [1E] 02 26 [CC] [10 00] [D0 00] [87] [00 44] 02 C5                             >> 30:
+02 67 00 [1D] 02 26 [C3] [10 00] [E0 00] [07] [00 23] 02 C5                             >> 29:
+02 67 00 [1F] 02 26 [C3] [10 00] [E0 00] [07] [00 23] 02 C5                             >> 31:
 
 Map Events:
 04cfb2 - Edward's to Cape
@@ -2589,8 +2508,8 @@ Option Indexes:
 1b - b8d6 - Cape - Nowhere
 
 
-a9 00 00 8d 60 0d 
-a9 01 00 8d 62 0d 
+a9 00 00 8d 60 0d
+a9 01 00 8d 62 0d
 a9 02 04 8d 4a 06
 
 Overworld Sprites:
@@ -2612,70 +2531,70 @@ Overworld Sprites:
 ***************************
 
 1a95e:
-7E A9 
-92 A9 
-AE A9 
-C2 A9 
-D6 A9 
-EA A9 
-06 AA 
-1A AA 
-2E AA 
-42 AA 
-56 AA 
-72 AA 
-86 AA 
-9A AA 
-AE AA 
+7E A9
+92 A9
+AE A9
+C2 A9
+D6 A9
+EA A9
+06 AA
+1A AA
+2E AA
+42 AA
+56 AA
+72 AA
+86 AA
+9A AA
+AE AA
 C2 AA
 
 a97e
-[03 01] [03 02] [03 04] [03 06] [12 08] [03 06] [03 04] [03 02] [03 01] [00 00] 
+[03 01] [03 02] [03 04] [03 06] [12 08] [03 06] [03 04] [03 02] [03 01] [00 00]
 
 a992
-[03 01] [03 02] [03 04] [03 06] [03 08] [03 0A] [15 0C] [03 0A] [03 08] [03 06] [03 04] [03 02] [03 01] [00 00] 
+[03 01] [03 02] [03 04] [03 06] [03 08] [03 0A] [15 0C] [03 0A] [03 08] [03 06] [03 04] [03 02] [03 01] [00 00]
 
 a9ae
-[03 01 03 02 03 04 03 06 10 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 10 08 03 06 03 04 03 02 03 01 00 00
 
 a9c2
-[03 01 03 02 03 04 03 06 14 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 14 08 03 06 03 04 03 02 03 01 00 00
 
 a9d6
-[03 01 03 02 03 04 03 06 16 08 03 06 03 04 03 02 03 01 00 00 03 01 
+[03 01 03 02 03 04 03 06 16 08 03 06 03 04 03 02 03 01 00 00 03 01
 
 a9ea
-[03 02 03 04 03 06 03 08 03 0A 55 0C 03 0A 03 08 03 06 03 04 03 02 03 01 00 00 
+[03 02 03 04 03 06 03 08 03 0A 55 0C 03 0A 03 08 03 06 03 04 03 02 03 01 00 00
 
 aa06
-[03 01 03 02 03 04 03 06 18 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 18 08 03 06 03 04 03 02 03 01 00 00
 
 aa1a
-[03 01 03 02 03 04 03 06 1A 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 1A 08 03 06 03 04 03 02 03 01 00 00
 
 aa2e
-[03 01 03 02 03 04 03 06 1C 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 1C 08 03 06 03 04 03 02 03 01 00 00
 
 aa42
-[03 01 03 02 03 04 03 06 1E 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 1E 08 03 06 03 04 03 02 03 01 00 00
 
 aa56
-[03 01 03 02 03 04 03 06 03 08 03 0A 29 0C 03 0A 03 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 03 08 03 0A 29 0C 03 0A 03 08 03 06 03 04 03 02 03 01 00 00
 
 aa72
-[03 01 03 02 03 04 03 06 22 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 22 08 03 06 03 04 03 02 03 01 00 00
 
 aa86
-[03 01 03 02 03 04 03 06 2E 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02 03 04 03 06 2E 08 03 06 03 04 03 02 03 01 00 00
 
 aa9a
-[03 01 03 02] 03 04 03 06 30 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02] 03 04 03 06 30 08 03 06 03 04 03 02 03 01 00 00
 
 aaae:
-[03 01 03 02] 03 04 03 06 34 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02] 03 04 03 06 34 08 03 06 03 04 03 02 03 01 00 00
 
 aac2:
-[03 01 03 02] 03 04 03 06 05 08 03 0A 29 0C 03 0A 05 08 03 06 03 04 03 02 03 01 00 00 
+[03 01 03 02] 03 04 03 06 05 08 03 0A 29 0C 03 0A 05 08 03 06 03 04 03 02 03 01 00 00
 
 
 
@@ -2691,19 +2610,19 @@ Talk Button Condition (0xC0): Defines an action that takes playe after the talk 
 
 
 c62d: Set spriteset, change sprite, set event layer: same, player distance condition(set event layer: Below, change sprite), player dist condition(set sound repetition rate, set event layer: below, change sprite)
-07 00 10 
-02 88 00 DA 8E 02 80 07 02 89 02 0B 02 21 01 [5D 
-C6] 02 27 0A 
+07 00 10
+02 88 00 DA 8E 02 80 07 02 89 02 0B 02 21 01 [5D
+C6] 02 27 0A
 
 c644:
-02 21 01 [4A C6] 6B 
+02 21 01 [4A C6] 6B
 
 c64a:
-02 CA 08 02 40 00 
-08 [58 C6] 02 C4 [44 C6] 80 
+02 CA 08 02 40 00
+08 [58 C6] 02 C4 [44 C6] 80
 
 c658:
-02 CB 02 06 01 
+02 CB 02 06 01
 
 c65d:
 02 0C 02
@@ -2720,57 +2639,57 @@ c667: Set Switch, Disable Event
 ************************
 
 c66f: pick up a Red Jewel
-00 
-00 30 
+00
+00 30
 
 c672: Button Condition
-02 C0 [81 C6] 
+02 C0 [81 C6]
 
-c676: 
-02 88 00 E0 8E 
+c676:
+02 88 00 E0 8E
 
-c67b: 
-02 8D 00 02 C1 
+c67b:
+02 8D 00 02 C1
 
 c680: done
 
-6B 
+6B
 
 c681:
-A5 0E 18 69 80 00 22 89 B4 80 B0 18 
+A5 0E 18 69 80 00 22 89 B4 80 B0 18
 
 c68d: Get Jewel
-02 D4 01 
-[A1 C6] 
+02 D4 01
+[A1 C6]
 
 c692: Go to command? (call normal text box)
-02 BF [A6 C6] 
+02 BF [A6 C6]
 
-c696: 
-A5 0E 18 69 80 00 22 81 B4 80 
-6B 
+c696:
+A5 0E 18 69 80 00 22 81 B4 80
+6B
 
 c6a1: Go to command? (call alternate text box)
-02 BF [BF C6] 
+02 BF [BF C6]
 
 c6a5: done
-6B 
+6B
 
 c6a6, Text box called(type, Xpos, Ypos, ??, Width, Height):
-C1 03 11 C7 0D 03 
+C1 03 11 C7 0D 03
 
 Text: "You found a Red Jewel!"
 69 8E A5 AC
  D6 8F 80 AC 62 84 83 AC 49 84 A7 84 8B 4F
- C0 
+ C0
 
 c6bf, text box called(type, Xpos, Ypos, ??, Width, Height):
-C1 
-03 11 C7 0D 03 
+C1
+03 11 C7 0D 03
 
 Text: "You found a jewel but your inventory's full."
-69 8E A5 AC D6 8F 80 AC 49 84 A7 
-84 8B AC 81 A5 A4 CB D6 FE D6 A0 88 A3 AC 85 A5 
+69 8E A5 AC D6 8F 80 AC 49 84 A7
+84 8B AC 81 A5 A4 CB D6 FE D6 A0 88 A3 AC 85 A5
 8B 8B 2A C0
 
 DA 0A
@@ -2778,21 +2697,21 @@ DA 0A
 ************************
 
 c6e3
-C0 DA 0A AA BF [10 C7] 80 AE AA 09 9D 00 
-00 E2 20 A9 82 9D 02 00 C2 20 9E 08 00 9E 2C 00 
-9E 2E 00 A9 00 00 9F 2C 00 7F 9F 2E 00 7F FA 6B 
+C0 DA 0A AA BF [10 C7] 80 AE AA 09 9D 00
+00 E2 20 A9 82 9D 02 00 C2 20 9E 08 00 9E 2C 00
+9E 2E 00 A9 00 00 9F 2C 00 7F 9F 2E 00 7F FA 6B
 
 
 c710:
-7F C4 8F C4 9F C4 AF C4 A5 14 9F 10 00 7F A5 16 
-9F 12 00 7F 6B 02 23 29 07 00 8D 00 00 02 D9 
+7F C4 8F C4 9F C4 AF C4 A5 14 9F 10 00 7F A5 16
+9F 12 00 7F 6B 02 23 29 07 00 8D 00 00 02 D9
 
 c72f:
-00 
+00
 00 [33 C7] [4D C7] [43 C7] 57 C7 61 C7 98 C7 7B C7 B5
 C7 D2 C7 BF 26 00 7F 18 69 00 00 80 1E BF 26 00
 7F 18 69 01 00 80 14 BF 26 00 7F 18 69 02 00 80
-0A BF 26 00 7F 18 69 03 00 80 00 85 28 64 2A 22 
+0A BF 26 00 7F 18 69 03 00 80 00 85 28 64 2A 22
 55 CA 83 A9 78 00 85 08 02 0B 6B BF 12 00 7F 18
 69 30 00 C5 16 90 BC 02 16 43 C7 02 AB 11 BF 26
 00 7F 18 69 04 00 80 57 BF 12 00 7F 38 E9 30 00
@@ -2817,7 +2736,7 @@ Text (You found a Red Jewel!) 69 8E A5
  AC D6 8F 80 AC 62 84 83 AC 49 84 A7 84 8B 4F
 
 Alt Text Box
-Text (You found a jewel but your inventory's full.) 69 8E A5 AC D6 8F 80 AC 49 84 
+Text (You found a jewel but your inventory's full.) 69 8E A5 AC D6 8F 80 AC 49 84
 A7 84 8B AC 81 A5 A4 CB D6 FE D6 A0 88 A3 AC 85
 A5 8B 8B
  2A
@@ -2832,77 +2751,77 @@ Hieroglyph events
 EVENT 1 (27 steps):
 
 8c77f:
-00 00 30 
+00 00 30
 
 8c782:
-[A9 00] 
+[A9 00]
 
-8c784: 
-[01 8D DC 06] 
+8c784:
+[01 8D DC 06]
 
 8c788: Switch Condition [switch 194 (0xC2), switch val]
-02 D0 [C2] 01 [9F C7] 
+02 D0 [C2] 01 [9F C7]
 
 8c78e: ??
-A9 00 
+A9 00
 
 8c790: Play music [Music ID 18 (0x12)]
-02 04 12 
+02 04 12
 
 8c793: Set position offset (Xoff, Yoff)
-02 BC 00 02 
+02 BC 00 02
 
 8c797: Button Condition
-02 C0 [A6 C7] 
+02 C0 [A6 C7]
 
 8c79b: Set Switch [switch 194(0xC2), val 1)
-02 D2 [C2] 01 
+02 D2 [C2] 01
 
 8c79f: Change map arrangement (map ID 94)
 02 32 94
 
-8c7a2: 
-02 33 02 E0 
+8c7a2:
+02 33 02 E0
 
 8c7a6: Switch Condition If [switch 194 (0xC2), switch val]
-02 D0 [C2] 01 [C4 C7] 
+02 D0 [C2] 01 [C4 C7]
 
 8c7ac: Go to command?
-02 BF [C9 C7] 
+02 BF [C9 C7]
 
 8c7b0: Add Item
 02 D4
  [1E] [C5 C7]
 
 8c7b5: Set switch?
-02 CC [C2] A9 
+02 CC [C2] A9
 
 8c7b9: ???
-80 00 0C EC 09 
+80 00 0C EC 09
 
 8c7be: Play music and wait [Music ID 23 (0x17)
-02 19 17 [31 C8] 88 
+02 19 17 [31 C8] 88
 
 8c7c4:
-6B 
+6B
 
 c7c5:
-[5C 8E C9 80] 
+[5C 8E C9 80]
 
 8c7c9:
-D3 C2 00 
+D3 C2 00
 
 8c7cc:
 "There's a lithograph on/this wall. I heard in/Dao that it's/a hieroglyph...//Let's try to remove/the lithograph."
-"64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A" 
+"64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A"
 
 8c82d:
-C3 00 CF CA 
+C3 00 CF CA
 
 ------------------
 
 8c831:
-[CE] 
+[CE]
 
 "You've got the /Hieroglyph Stone!"
 "D2 00 D5 09 D6 67 86 8E A4 AC A4 87 84 AC CB D6 1B 63 A4 8E 8D 84 4F"
@@ -2914,67 +2833,67 @@ C3 00 CF CA
 
 EVENT 2:
 8c84c:
-00 00 30 
+00 00 30
 
-02 D0 [C3] 01 [66] [C8] A9 00 02 04 12 02 BC 00 02 02 C0 [6D] [C8] 02 D2 [C3] 01 02 32 [95] 02 33 02 E0 02 D0 [C3] 01 [8B] [C8] 02 BF [8C] [C8] 02 
+02 D0 [C3] 01 [66] [C8] A9 00 02 04 12 02 BC 00 02 02 C0 [6D] [C8] 02 D2 [C3] 01 02 32 [95] 02 33 02 E0 02 D0 [C3] 01 [8B] [C8] 02 BF [8C] [C8] 02
 
-D4 [1F] 
+D4 [1F]
 
-C5 C7 02 CC [C3] A9 80 00 0C EC 09 
+C5 C7 02 CC [C3] A9 80 00 0C EC 09
 
 : Play music and wait
-02 19 17 [31 C8 88] 6B 
+02 19 17 [31 C8 88] 6B
 
-D3 C2 00 
+D3 C2 00
 
-"64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A" 
+"64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A"
 
-C3 00 CF CA 
+C3 00 CF CA
 
 -----------------
 
 EVENT 3:
 8c8f4:
-00 00 30 
+00 00 30
 
-02 D0 [C4] 01 [0E] [C9] A9 00 02 04 12 02 BC 00 02 02 C0 [15] [C9] 02 D2 [C4] 01 02 32 [96] 02 33 02 E0 02 D0 [C4] 01 [33] [C9] 02 BF [34] [C9] 02 
+02 D0 [C4] 01 [0E] [C9] A9 00 02 04 12 02 BC 00 02 02 C0 [15] [C9] 02 D2 [C4] 01 02 32 [96] 02 33 02 E0 02 D0 [C4] 01 [33] [C9] 02 BF [34] [C9] 02
 
-D4 [20] 
+D4 [20]
 
-C5 C7 02 CC [C4] A9 80 00 0C EC 09 02 19 17 [31 C8 88] 6B 
+C5 C7 02 CC [C4] A9 80 00 0C EC 09 02 19 17 [31 C8 88] 6B
 
-D3 C2 00 
+D3 C2 00
 
-"64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A" 
+"64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A"
 
-C3 00 CF CA 
+C3 00 CF CA
 
 8c99c:
-00 00 30 02 D0 C5 01 B6 C9 A9 00 02 04 12 02 BC 00 02 02 C0 BD C9 02 D2 C5 01 02 32 97 02 33 02 E0 02 D0 C5 01 DB C9 02 BF DC C9 02 D4 21 C5 C7 02 CC C5 A9 80 00 0C EC 09 02 19 17 31 C8 88 6B D3 C2 00 64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A C3 00 CF CA 
+00 00 30 02 D0 C5 01 B6 C9 A9 00 02 04 12 02 BC 00 02 02 C0 BD C9 02 D2 C5 01 02 32 97 02 33 02 E0 02 D0 C5 01 DB C9 02 BF DC C9 02 D4 21 C5 C7 02 CC C5 A9 80 00 0C EC 09 02 19 17 31 C8 88 6B D3 C2 00 64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A C3 00 CF CA
 
 8ca44:
-00 00 30 02 D0 C6 01 5E CA A9 00 02 04 12 02 BC 00 02 02 C0 65 CA 02 D2 C6 01 02 32 98 02 33 02 E0 02 D0 C6 01 83 CA 02 BF 84 CA 02 D4 22 C5 C7 02 CC C6 A9 80 00 0C EC 09 02 19 17 31 C8 88 6B D3 C2 00 64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A C3 00 CF CA 
+00 00 30 02 D0 C6 01 5E CA A9 00 02 04 12 02 BC 00 02 02 C0 65 CA 02 D2 C6 01 02 32 98 02 33 02 E0 02 D0 C6 01 83 CA 02 BF 84 CA 02 D4 22 C5 C7 02 CC C6 A9 80 00 0C EC 09 02 19 17 31 C8 88 6B D3 C2 00 64 87 84 A2 84 0E A3 AC 80 AC 8B 88 A4 87 8E 86 A2 80 A0 87 AC 8E 8D CB D6 D6 A7 80 8B 8B 2A AC 48 AC D6 99 88 8D CB 43 80 8E AC D6 D7 88 A4 0E A3 CB 80 AC 87 88 84 A2 8E 86 8B A9 A0 87 2A 2A 2A CF D6 2B A4 A2 A9 AC A4 8E AC A2 84 8C 8E A6 84 CB A4 87 84 AC 8B 88 A4 87 8E 86 A2 80 A0 87 2A C3 00 CF CA
 
 ********************************
 
 0x4c3c8: Convo with King Edward
-2A 00 10 A9 00 02 04 12 02 BC 08 00 02 C0 [EC C3] 02 D2 05 01 A9 F0 CF 0C 5A 06 02 CC 0A 
+2A 00 10 A9 00 02 04 12 02 BC 08 00 02 C0 [EC C3] 02 D2 05 01 A9 F0 CF 0C 5A 06 02 CC 0A
 
-02 BF [56 C5] 
+02 BF [56 C5]
 
-02 C1 6B 
+02 C1 6B
 
 c3ec:
-02 BF [0E C4] 
+02 BF [0E C4]
 
 c3f0: Call option text box
-02 BE 02 02 [F6 C3] 
+02 BE 02 02 [F6 C3]
 
 c3f6:
-[FC C3] 02 C4 [FC C3] 
+[FC C3] 02 C4 [FC C3]
 
 c3fc:
-02 BF D5 C4 80 04 02 BF 60 C4 02 BF FB C4 02 CC 05 6B C2 0F C2 04 D6 27 44 83 A7 80 A2 83 2F AC CB D6 69 67 88 8B 8B 0D AC CB 69 8E A5 AC D6 A9 A3 8E 2A 2A 2A A3 87 80 81 81 A9 2A CF D6 63 83 88 83 AC A9 8E A5 AC 81 A2 88 8D 86 CB A4 87 84 AC D6 07 62 88 8D 86 0D [CB C3] 00 AC 69 84 A3 CB AC 4D 8E CA CE C2 04 D6 18 40 8D AC 87 8E 8D 84 A3 A4 AC 8B 80 83 2A CB 46 88 A6 84 AC 8C 84 AC A4 87 84 AC 62 88 8D 86 2A CF C2 00 67 88 8B 8B 2F AC CB 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A CF C2 04 D6 27 44 83 A7 80 A2 83 2F 
+02 BF D5 C4 80 04 02 BF 60 C4 02 BF FB C4 02 CC 05 6B C2 0F C2 04 D6 27 44 83 A7 80 A2 83 2F AC CB D6 69 67 88 8B 8B 0D AC CB 69 8E A5 AC D6 A9 A3 8E 2A 2A 2A A3 87 80 81 81 A9 2A CF D6 63 83 88 83 AC A9 8E A5 AC 81 A2 88 8D 86 CB A4 87 84 AC D6 07 62 88 8D 86 0D [CB C3] 00 AC 69 84 A3 CB AC 4D 8E CA CE C2 04 D6 18 40 8D AC 87 8E 8D 84 A3 A4 AC 8B 80 83 2A CB 46 88 A6 84 AC 8C 84 AC A4 87 84 AC 62 88 8D 86 2A CF C2 00 67 88 8B 8B 2F AC CB 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A 2A CF C2 04 D6 27 44 83 A7 80 A2 83 2F
 
 
 ******************************
@@ -2982,221 +2901,221 @@ c3fc:
 
 
 0x8585 - 0x8644
-23 9E 35 9E 57 9E 79 9E AB 9E C8 
-9E F5 9E 22 9F 8F 9F AA 9F C0 9F DE 9F F1 9F 1E 
+23 9E 35 9E 57 9E 79 9E AB 9E C8
+9E F5 9E 22 9F 8F 9F AA 9F C0 9F DE 9F F1 9F 1E
 A0 36 A0 6B A0 81 A0 A7 A0 CD A0 03 A1 19 A1 59
- A1 6E A1 B5 A1 00 A2 4B A2 67 A2 8C A2 A8 A2 CD 
-A2 03 A3 42 A3 70 A3 A7 A3 D4 A3 01 A4 40 A4 99 
-A4 33 A5 DE A5 A1 A6 B1 A6 C1 A6 D7 A6 ED A6 13 
-A7 31 A7 4F A7 6D A7 99 A7 B3 A7 BE A7 C9 A7 D4 
+ A1 6E A1 B5 A1 00 A2 4B A2 67 A2 8C A2 A8 A2 CD
+A2 03 A3 42 A3 70 A3 A7 A3 D4 A3 01 A4 40 A4 99
+A4 33 A5 DE A5 A1 A6 B1 A6 C1 A6 D7 A6 ED A6 13
+A7 31 A7 4F A7 6D A7 99 A7 B3 A7 BE A7 C9 A7 D4
 A7 DF A7 F4 A7 09 A8 16 A8 23 A8 2E A8 39 A8 67
- A8 94 A8 FB A8 EB A9 FB A9 07 AA 13 AA 30 AA 60 
-AA 8B AA 9B AA B6 AA C6 AA D8 AA 0E AB 41 AB 51 
-AB 60 AB 70 AB 7F AB 8E AB C2 AB D7 AB 05 AC 27 
-AC 38 AC 5A AC 82 AC 94 AC C1 AC D6 AC DF AC 17 AD 57 AD 8F AD 
+ A8 94 A8 FB A8 EB A9 FB A9 07 AA 13 AA 30 AA 60
+AA 8B AA 9B AA B6 AA C6 AA D8 AA 0E AB 41 AB 51
+AB 60 AB 70 AB 7F AB 8E AB C2 AB D7 AB 05 AC 27
+AC 38 AC 5A AC 82 AC 94 AC C1 AC D6 AC DF AC 17 AD 57 AD 8F AD
 
 
 F7 A5 74 AA 47 AA EA 80 FD BB 08
  20 B8 AE BF 06 00 7F 1A 9F 06 00 7F 29 FE 01 18
- 69 00 89 8F 01 88 7E 18 69 FE 00 8F 04 88 7E E2 
+ 69 00 89 8F 01 88 7E 18 69 FE 00 8F 04 88 7E E2
 20 A9
 
 
 1c14
 
 Points to... 9e23-ad8f
-BB A7 0A E6 0A 29 FF 00 20 5F 9F A5 0A 
-85 00 83 02 40 
-BB A7 0A E6 0A 29 FF 00 20 5F 9F 
-A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C A5 0A 85 00 83 02 40 
-BB A7 0A E6 0A 29 FF 00 20 
-5F 9F A7 0A E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1 
-85 2E A5 0A 85 00 83 02 40 
-BB A7 0A E6 0A 29 FF 
-00 20 5F 9F A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 
-57 B1 85 2C A7 0A E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A 85 00 83 02 40 
+BB A7 0A E6 0A 29 FF 00 20 5F 9F A5 0A
+85 00 83 02 40
+BB A7 0A E6 0A 29 FF 00 20 5F 9F
+A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C A5 0A 85 00 83 02 40
+BB A7 0A E6 0A 29 FF 00 20
+5F 9F A7 0A E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1
+85 2E A5 0A 85 00 83 02 40
+BB A7 0A E6 0A 29 FF
+00 20 5F 9F A7 0A E6 0A 29 FF 00 9F 18 00 7F 20
+57 B1 85 2C A7 0A E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A 85 00 83 02 40
 BB A7 0A E6 0A
- 29 FF 00 20 5F 9F A7 0A E6 0A 29 FF 00 9F 16 00 
-7F A5 0A 85 00 83 02 40 
-BB A7 0A E6 0A 29 FF 00 
+ 29 FF 00 20 5F 9F A7 0A E6 0A 29 FF 00 9F 16 00
+7F A5 0A 85 00 83 02 40
+BB A7 0A E6 0A 29 FF 00
 20 5F 9F A7 0A E6 0A 29 FF 00 9F 16 00 7F A7 0A
- E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C A5 0A 
-85 00 83 02 40 
-BB A7 0A E6 0A 29 FF 00 20 5F 9F 
+ E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C A5 0A
+85 00 83 02 40
+BB A7 0A E6 0A 29 FF 00 20 5F 9F
 A7 0A E6 0A 29 FF 00 9F 16 00 7F A7 0A E6 0A 29
- FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A 85 00 83 
-02 40 
-BB A7 0A E6 0A 29 FF 00 20 5F 9F A7 0A E6 
+ FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A 85 00 83
+02 40
+BB A7 0A E6 0A 29 FF 00 20 5F 9F A7 0A E6
 0A 29 FF 00 9F 16 00 7F A7 0A E6 0A 29 FF 00 9F
- 18 00 7F 20 57 B1 85 2C A7 0A E6 0A 29 FF 00 9F 
-1A 00 7F 20 57 B1 85 2E A5 0A 85 00 83 02 40 64 
+ 18 00 7F 20 57 B1 85 2C A7 0A E6 0A 29 FF 00 9F
+1A 00 7F 20 57 B1 85 2E A5 0A 85 00 83 02 40 64
 2A C9 FF 00 D0 01 60 89 80 00 F0 13 29 7F FF 85
- 28 A5 12 89 02 00 F0 01 60 A9 00 40 04 0E 60 85 
-28 A5 12 89 02 00 F0 01 60 A9 00 40 14 0E 60 
-BB 
+ 28 A5 12 89 02 00 F0 01 60 A9 00 40 04 0E 60 85
+28 A5 12 89 02 00 F0 01 60 A9 00 40 14 0E 60
+BB
 A7 0A E6 0A E6 0A 9F 06 00 7F A7 0A E6 0A 29 FF
- 00 9F 08 00 7F A5 0A 83 02 40 
-BB 22 55 CA 83 90 
-0C A9 00 00 85 2C 85 2E A5 0A 83 02 40 68 68 6B 
+ 00 9F 08 00 7F A5 0A 83 02 40
+BB 22 55 CA 83 90
+0C A9 00 00 85 2C 85 2E A5 0A 83 02 40 68 68 6B
 
 BB 22 55 CA 83 90 14 BF 16 00 7F 3A 9F 16 00 7F
- D0 EF 64 2C 64 2E A5 0A 83 02 40 68 68 6B 
-BB 22 
+ D0 EF 64 2C 64 2E A5 0A 83 02 40 68 68 6B
+BB 22
 55 CA 83 90 07 A9 00 00 85 2C 85 2E A5 0A 83 02
- 40 
+ 40
 BB 22 55 CA 83 90 13 A9 00 00 85 2C 85 2E A7
- 0A E6 0A 29 FF 00 A5 0A 83 02 40 A7 0A E6 0A 29 
-FF 00 C5 2A F0 03 68 68 6B A5 0A 83 02 40 
+ 0A E6 0A 29 FF 00 A5 0A 83 02 40 A7 0A E6 0A 29
+FF 00 C5 2A F0 03 68 68 6B A5 0A 83 02 40
 BB A7
  0A E6 0A 29 FF 00 20 5F 9F 22 55 CA 83 64 2A A5
- 0A 85 00 83 02 40 
-BB E2 20 A7 0A 8D C8 0A 0A 18 
+ 0A 85 00 83 02 40
+BB E2 20 A7 0A 8D C8 0A 0A 18
 67 0A 0A C2 20 29 FF 00 9F 0E 00 7F A8 B9 71 D9
  9F 06 00 7F B9 73 D9 29 FF 00 9F 08 00 7F A9 00
- 80 0C AE 09 E6 0A A5 0A 83 02 40 
-BB A7 0A E6 0A 
+ 80 0C AE 09 E6 0A A5 0A 83 02 40
+BB A7 0A E6 0A
 29 FF 00 85 28 64 2A 20 6D AF A5 0A 85 00 83 02
- 40 
+ 40
 BB A7 0A E6 0A 29 FF 00 85 28 64 2A 20 6D AF
- A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C 
-A5 0A 85 00 83 02 40 
+ A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C
+A5 0A 85 00 83 02 40
 BB A7 0A E6 0A 29 FF 00 85
  28 64 2A 20 6D AF A7 0A E6 0A 29 FF 00 9F 1A 00
- 7F 20 57 B1 85 2E A5 0A 85 00 83 02 40 
-BB A7 0A 
+ 7F 20 57 B1 85 2E A5 0A 85 00 83 02 40
+BB A7 0A
 E6 0A 29 FF 00 85 28 64 2A 20 6D AF A7 0A E6 0A
  29 FF 00 9F 18 00 7F 20 57 B1 85 2C A7 0A E6 0A
- 29 FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A 85 00 
-83 02 40 
+ 29 FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A 85 00
+83 02 40
 BB 22 55 CA 83 90 0C A9 00 00 85 2C 85
- 2E A5 0A 83 02 40 68 68 6B 
+ 2E A5 0A 83 02 40 68 68 6B
 BB A7 0A E6 0A 29 FF
- 00 85 28 64 2A 20 6D AF A7 0A E6 0A 29 FF 00 9F 
+ 00 85 28 64 2A 20 6D AF A7 0A E6 0A 29 FF 00 9F
 18 00 7F 20 57 B1 85 2C A7 0A E6 0A 29 FF 00 9F
  1A 00 7F 20 57 B1 85 2E A7 0A E6 0A 29 FF 00 8D
- B0 09 A5 0A 85 00 83 02 40 
-BB AD 00 00 29 FF 00 
-85 28 64 2A 20 6D AF A5 0A 85 00 83 02 40 
+ B0 09 A5 0A 85 00 83 02 40
+BB AD 00 00 29 FF 00
+85 28 64 2A 20 6D AF A5 0A 85 00 83 02 40
 BB A7
  0A E6 0A E6 0A CD 56 06 D0 2A A5 16 89 0F 00 D0
- 1D 8D 1C 00 A5 14 8D 18 00 20 3B B4 29 FF 00 89 
+ 1D 8D 1C 00 A5 14 8D 18 00 20 3B B4 29 FF 00 89
 F0 00 D0 15 C9 0F 00 F0 10 CD B0 09 D0 06 22 55
  CA 83 90 0E A5 0A 83 02 40 A5 10 09 04 00 85 10
- 80 F2 68 68 6B 
-BB A7 0A E6 0A E6 0A CD 56 06 D0 
+ 80 F2 68 68 6B
+BB A7 0A E6 0A E6 0A CD 56 06 D0
 2E A5 16 89 0F 00 D0 21 38 E9 10 00 8D 1C 00 A5
  14 8D 18 00 20 3B B4 29 FF 00 89 F0 00 D0 15 C9
- 0F 00 F0 10 CD B0 09 D0 06 22 55 CA 83 90 0E A5 
+ 0F 00 F0 10 CD B0 09 D0 06 22 55 CA 83 90 0E A5
 0A 83 02 40 A5 10 09 04 00 85 10 80 F2 68 68 6B
- 
-BB A7 0A E6 0A E6 0A CD 56 06 D0 2E A5 16 89 0F 
-00 D0 21 18 69 10 00 8D 1C 00 A5 14 8D 18 00 20 
+
+BB A7 0A E6 0A E6 0A CD 56 06 D0 2E A5 16 89 0F
+00 D0 21 18 69 10 00 8D 1C 00 A5 14 8D 18 00 20
 3B B4 29 FF 00 89 F0 00 D0 15 C9 0F 00 F0 10 CD
  B0 09 D0 06 22 55 CA 83 90 0E A5 0A 83 02 40 A5
- 10 09 04 00 85 10 80 F2 68 68 6B 
-BB 20 5D B1 A7 
+ 10 09 04 00 85 10 80 F2 68 68 6B
+BB 20 5D B1 A7
 0A E6 0A E6 0A 99 00 00 A7 0A E6 0A 29 FF 00 99
- 02 00 A5 0A 83 02 40 
+ 02 00 A5 0A 83 02 40
 BB 20 5D B1 A7 0A E6 0A E6
- 0A 99 00 00 A7 0A E6 0A 29 FF 00 99 02 00 A7 0A 
-E6 0A E6 0A 99 10 00 A5 0A 83 02 40 
+ 0A 99 00 00 A7 0A E6 0A 29 FF 00 99 02 00 A7 0A
+E6 0A E6 0A 99 10 00 A5 0A 83 02 40
 BB 20 89 B1
  A7 0A E6 0A E6 0A 99 00 00 A7 0A E6 0A 29 FF 00
- 99 02 00 A5 0A 83 02 40 
-BB 20 89 B1 A7 0A E6 0A 
-E6 0A 99 00 00 A7 0A E6 0A 29 FF 00 99 02 00 A7 
-0A E6 0A E6 0A 99 10 00 A5 0A 83 02 40 
+ 99 02 00 A5 0A 83 02 40
+BB 20 89 B1 A7 0A E6 0A
+E6 0A 99 00 00 A7 0A E6 0A 29 FF 00 99 02 00 A7
+0A E6 0A E6 0A 99 10 00 A5 0A 83 02 40
 BB 20 89
- B1 A7 0A E6 0A E6 0A 99 00 00 A7 0A E6 0A 29 FF 
+ B1 A7 0A E6 0A E6 0A 99 00 00 A7 0A E6 0A 29 FF
 00 99 02 00 A7 0A E6 0A E6 0A 18 79 14 00 99 14
  00 A7 0A E6 0A E6 0A 18 79 16 00 99 16 00 A5 0A
- 83 02 40 
-BB 20 89 B1 A7 0A E6 0A E6 0A 99 00 00 
+ 83 02 40
+BB 20 89 B1 A7 0A E6 0A E6 0A 99 00 00
 A7 0A E6 0A 29 FF 00 99 02 00 A7 0A E6 0A E6 0A
  18 79 14 00 99 14 00 A7 0A E6 0A E6 0A 18 79 16
- 00 99 16 00 A7 0A E6 0A E6 0A 99 10 00 A5 0A 83 
-02 40 
+ 00 99 16 00 A7 0A E6 0A E6 0A 99 10 00 A5 0A 83
+02 40
 BB 20 89 B1 A7 0A E6 0A E6 0A 99 00 00 A7
  0A E6 0A 29 FF 00 99 02 00 A7 0A E6 0A E6 0A 99
- 14 00 A7 0A E6 0A E6 0A 99 16 00 A5 0A 83 02 40 
+ 14 00 A7 0A E6 0A E6 0A 99 16 00 A5 0A 83 02 40
 
 BB 20 89 B1 A7 0A E6 0A E6 0A 99 00 00 A7 0A E6
  0A 29 FF 00 99 02 00 A7 0A E6 0A E6 0A 99 14 00
- A7 0A E6 0A E6 0A 99 16 00 A7 0A E6 0A E6 0A 99 
-10 00 A5 0A 83 02 40 
+ A7 0A E6 0A E6 0A 99 16 00 A7 0A E6 0A E6 0A 99
+10 00 A5 0A 83 02 40
 BB 20 5D B1 A7 0A E6 0A E6
  0A 99 00 00 A7 0A E6 0A 29 FF 00 99 02 00 A7 0A
- E6 0A E6 0A 99 10 00 A9 40 00 04 12 20 CB B1 A5 
-0A 83 02 40 
+ E6 0A E6 0A 99 10 00 A9 40 00 04 12 20 CB B1 A5
+0A 83 02 40
 BB 20 89 B1 A7 0A E6 0A E6 0A 99 00
  00 A7 0A E6 0A 29 FF 00 99 02 00 A7 0A E6 0A E6
- 0A 99 10 00 A9 40 00 04 12 20 CB B1 A5 0A 83 02 
-40 
+ 0A 99 10 00 A9 40 00 04 12 20 CB B1 A5 0A 83 02
+40
 BB 20 89 B1 A7 0A E6 0A E6 0A 99 00 00 A7 0A
  E6 0A 29 FF 00 99 02 00 A7 0A E6 0A E6 0A 99 14
- 00 A7 0A E6 0A E6 0A 99 16 00 A7 0A E6 0A E6 0A 
+ 00 A7 0A E6 0A E6 0A 99 16 00 A7 0A E6 0A E6 0A
 99 10 00 A9 40 00 04 12 20 CB B1 A5 0A 83 02 40
- 
+
 
 BB 20 89 B1 A7 0A E6 0A E6 0A 99 00 00 A7 0A E6
- 0A 29 FF 00 99 02 00 A7 0A E6 0A 29 FF 00 89 80 
+ 0A 29 FF 00 99 02 00 A7 0A E6 0A 29 FF 00 89 80
 00 F0 03 09 00 FF 18 79 14 00 99 14 00 A7 0A E6
  0A 29 FF 00 89 80 00 F0 03 09 00 FF 18 79 16 00
- 99 16 00 A7 0A E6 0A E6 0A 99 10 00 A9 40 00 04 
+ 99 16 00 A7 0A E6 0A E6 0A 99 10 00 A9 40 00 04
 12 20 CB B1 A5 0A 83 02 40 5A A9 00 00 5B 22 01
  B5 80 B0 66 BB AC 58 00 8A 99 06 00 8D 58 00 98
- 9D 04 00 9E 06 00 9B 68 5B AA 20 DA B1 A7 0A E6 
+ 9D 04 00 9E 06 00 9B 68 5B AA 20 DA B1 A7 0A E6
 0A E6 0A 99 00 00 A7 0A E6 0A 29 FF 00 99 02 00
  A7 0A E6 0A 29 FF 00 89 80 00 F0 03 09 00 FF 18
- 79 14 00 99 14 00 A7 0A E6 0A 29 FF 00 89 80 00 
+ 79 14 00 99 14 00 A7 0A E6 0A 29 FF 00 89 80 00
 F0 03 09 00 FF 18 79 16 00 99 16 00 A7 0A E6 0A
  E6 0A 99 10 00 A5 0A 83 02 40 68 5B AA A7 0A E6
- 0A E6 0A A7 0A E6 0A 29 FF 00 A7 0A E6 0A 29 FF 
+ 0A E6 0A A7 0A E6 0A 29 FF 00 A7 0A E6 0A 29 FF
 00 A7 0A E6 0A 29 FF 00 A7 0A E6 0A E6 0A A5 0A
  83 02 40 5A A9 00 00 5B 22 01 B5 80 B0 70 BB AC
- 58 00 8A 99 06 00 8D 58 00 98 9D 04 00 9E 06 00 
+ 58 00 8A 99 06 00 8D 58 00 98 9D 04 00 9E 06 00
 9B 68 5B AA 20 DA B1 A7 0A E6 0A E6 0A 99 00 00
  A7 0A E6 0A 29 FF 00 99 02 00 A7 0A E6 0A 29 FF
- 00 99 28 00 A7 0A E6 0A 29 FF 00 89 80 00 F0 03 
+ 00 99 28 00 A7 0A E6 0A 29 FF 00 89 80 00 F0 03
 09 00 FF 18 79 14 00 99 14 00 A7 0A E6 0A 29 FF
  00 89 80 00 F0 03 09 00 FF 18 79 16 00 99 16 00
- A7 0A E6 0A E6 0A 99 10 00 A5 0A 83 02 40 68 5B 
+ A7 0A E6 0A E6 0A 99 10 00 A5 0A 83 02 40 68 5B
 AA A7 0A E6 0A E6 0A A7 0A E6 0A 29 FF 00 A7 0A
  E6 0A 29 FF 00 A7 0A E6 0A 29 FF 00 A7 0A E6 0A
- 29 FF 00 A7 0A E6 0A E6 0A A5 0A 83 02 40 BB 0B 
+ 29 FF 00 A7 0A E6 0A E6 0A A5 0A 83 02 40 BB 0B
 A5 12 89 40 00 F0 05 F4 EE A5 80 22 20 40 AF 68
  AA 5B A5 0A 83 02 40 BB 0B A5 12 89 40 00 F0 05
- F4 07 A6 80 09 20 40 AF 68 AA 5B 68 68 6B 8E 00 
+ F4 07 A6 80 09 20 40 AF 68 AA 5B 68 68 6B 8E 00
 00 BD 04 00 AA F0 0F BF 1C 00 7F CD 00 00 D0 06
  BD 04 00 AA D0 F1 8E 02 00 AE 00 00 BD 06 00 AA
- F0 0F BF 1C 00 7F CD 00 00 D0 06 BD 06 00 AA D0 
+ F0 0F BF 1C 00 7F CD 00 00 D0 06 BD 06 00 AA D0
 F1 8E 04 00 AE 02 00 D0 06 AE 56 00 20 B5 B1 BD
  06 00 CD 04 00 F0 06 AA 20 B5 B1 80 F2 AD 02 00
- D0 13 AE 04 00 8E 56 00 9E 04 00 A3 03 AA 5B AD 
+ D0 13 AE 04 00 8E 56 00 9E 04 00 A3 03 AA 5B AD
 04 00 85 06 60 AD 04 00 D0 10 AE 02 00 8E 58 00
  9E 06 00 A3 03 AA 5B 64 06 60 AC 04 00 AD 02 00
- 99 04 00 AA 98 9D 06 00 A8 A3 03 AA 5B 98 85 06 
+ 99 04 00 AA 98 9D 06 00 A8 A3 03 AA 5B 98 85 06
 60 5A A5 04 5B AA 20 40 AF 68 5B AA A5 0A 83 02
  40 5A A5 06 5B AA 20 40 AF 68 5B AA A5 0A 83 02
- 40 BB A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 
+ 40 BB A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1
 85 2C A5 0A 83 02 40 BB A7 0A E6 0A 29 FF 00 9F
  1A 00 7F 20 57 B1 85 2E A5 0A 83 02 40 BB A7 0A
- E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C A7 0A 
+ E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 85 2C A7 0A
 E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A
  83 02 40 BB A7 0A E6 0A 29 FF 00 F0 0A A9 00 40
- 04 12 A5 0A 83 02 40 A9 00 40 14 12 A5 0A 83 02 
+ 04 12 A5 0A 83 02 40 A9 00 40 14 12 A5 0A 83 02
 40 BB A7 0A E6 0A 29 FF 00 F0 0A A9 00 20 04 12
  A5 0A 83 02 40 A9 00 20 14 12 A5 0A 83 02 40 BB
- A7 0A E6 0A 29 FF 00 F0 0A A9 00 60 04 12 A5 0A 
+ A7 0A E6 0A 29 FF 00 F0 0A A9 00 60 04 12 A5 0A
 83 02 40 A9 00 60 14 12 A5 0A 83 02 40 5A AE 58
- 00 A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 9D 
-2C 00 A7 0A E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1 
+ 00 A7 0A E6 0A 29 FF 00 9F 18 00 7F 20 57 B1 9D
+2C 00 A7 0A E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1
 9D 2E 00 FA A5 0A 83 02 40 BB BF 18 00 7F 20 57
  B1 9D 2C 00 BF 1A 00 7F 20 57 B1 9D 2E 00 A5 0A
- 83 02 40 BB A9 02 00 04 10 A5 0A 83 02 40 BB A9 
+ 83 02 40 BB A9 02 00 04 10 A5 0A 83 02 40 BB A9
 01 00 04 10 A5 0A 83 02 40 BB A9 02 00 14 10 A5
  0A 83 02 40 BB A9 01 00 14 10 A5 0A 83 02 40 BB
- A9 00 30 14 0E A7 0A E6 0A 29 FF 00 EB 04 0E A5 
+ A9 00 30 14 0E A7 0A E6 0A 29 FF 00 EB 04 0E A5
 0A 83 02 40 BB A9 00 0E 14 0E A7 0A E6 0A 29 FF
  00 EB 04 0E A5 0A 83 02 40 BB A5 0E 49 00 40 85
  0E A5 0A 83 02 40 BB A5 0E 49 00 80 85 0E A5 0A
@@ -3237,10 +3156,10 @@ E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A
  85 02 64 08 68 68 6B BB A7 0A E6 0A E6 0A 85 00
  A7 0A E6 0A 29 FF 00 85 02 64 08 A5 0A 83 02 40
  BB BF 04 00 7F F0 0A 83 02 A9 00 00 9F 04 00 7F
- 40 68 68 6B BB BF 04 00 7F F0 0D 83 02 A9 00 00 
+ 40 68 68 6B BB BF 04 00 7F F0 0D 83 02 A9 00 00
 9F 04 00 7F A9 FF FF 40 68 68 6B BB A7 0A E6 0A
  E6 0A 9F 04 00 7F A5 0A 83 02 40 BB A7 0A E6 0A
- E6 0A 85 00 83 02 A7 0A E6 0A 29 FF 00 E2 20 85 
+ E6 0A 85 00 83 02 A7 0A E6 0A 29 FF 00 E2 20 85
 02 83 04 C2 20 40 BB A7 0A E6 0A E6 0A 83 02 A5
  0A 9F 04 00 7F 40 BB A7 0A E6 0A E6 0A 85 00 A5
  0A 9F 04 00 7F 68 68 6B BB E0 00 10 90 18 A7 0A
@@ -3283,14 +3202,14 @@ E6 0A 29 FF 00 9F 1A 00 7F 20 57 B1 85 2E A5 0A
  E2 20 85 2A C2 20 80 0E C2 20 20 36 B1 90 05 A5
  0A 83 02 40 85 2A A5 2B 29 0F 00 38 ED C2 06 F0
  06 10 0F 49 FF FF 1A 8D C2 06 CD D8 06 30 03 68
- 68 6B A5 0A 83 02 40 BB A5 2A 29 FF 00 3A 30 08 
+ 68 6B A5 0A 83 02 40 BB A5 2A 29 FF 00 3A 30 08
 E2 20 85 2A C2 20 80 0E C2 20 20 36 B1 90 05 A5
  0A 83 02 40 85 2A A5 2B 29 0F 00 18 6D BE 06 8D
  BE 06 CD DA 06 10 03 68 68 6B A5 0A 83 02 40 BB
 
 
 
-FF041A0601FF07080102FF111E0103FF06060704FF02170605FF101B0606081F0107FF25193808FF38270609FF39310E0A0933060B3405010CFF37060E0DFF032F0E0EFF0708010FFF3532061031360E11FF371A0112FF07070113FF09170114FF201913152F270116FF1E18002E2D1C1317FF0A330018FF07280119FF2708141AFF4708061B5708011CFF1A59011DFF051A061EFF1836011FFF120B1A20FF05081A21FF22101A22FF0E051923FF67050124FF074E0625FF07060126FF11200127FF05160128FF37590129FF4649012AFF4709012BFF7529012CFF 
+FF041A0601FF07080102FF111E0103FF06060704FF02170605FF101B0606081F0107FF25193808FF38270609FF39310E0A0933060B3405010CFF37060E0DFF032F0E0EFF0708010FFF3532061031360E11FF371A0112FF07070113FF09170114FF201913152F270116FF1E18002E2D1C1317FF0A330018FF07280119FF2708141AFF4708061B5708011CFF1A59011DFF051A061EFF1836011FFF120B1A20FF05081A21FF22101A22FF0E051923FF67050124FF074E0625FF07060126FF11200127FF05160128FF37590129FF4649012AFF4709012BFF7529012CFF
 
 
 
@@ -3352,7 +3271,7 @@ c0c68e
 7E0AC3
 
 
-Call Red Jewel event?? 
+Call Red Jewel event??
 "01 8D 4A 06 02 26 FD"
 69f0f
 98880
@@ -3361,7 +3280,7 @@ f514a?
 12631e?
 
 
-Olman's = 
+Olman's =
 Lola hummed = 4b 8e 8b 80 ac 87 a5 8c 8c 84 83 (49d09 - 49d25) (29)
 outside the town = d6 bf a4 87 84 ac a4 8e a7 8d 2a
 That's pretty. =  a0 a2 84 a4 a4 a9 (49d31)
@@ -3461,30 +3380,30 @@ That's pretty. =  a0 a2 84 a4 a4 a9 (49d31)
 |------------------------| |------------------------| |------------------------| |------------------------|
 "Every man dies. Not      /every man really lives.   /  -William Wallace
 |------------------------| |------------------------| |------------------------| |------------------------|
-"Be calm. God awaits you at the door.”                  -Gabriel Garcia Marquez
+"Be calm. God awaits you at the door.ï¿½                  -Gabriel Garcia Marquez
 |------------------------| |------------------------| |------------------------| |------------------------|
 Death twitches my ear: 'Live,' he says... 'I'm coming.' -Virgil
 |------------------------| |------------------------| |------------------------| |------------------------|
-"We feel most alive when we are closest to death.” -Nenia Campbell
+"We feel most alive when we are closest to death.ï¿½ -Nenia Campbell
 |------------------------| |------------------------| |------------------------| |------------------------|
-"Grief, no matter how you try to cater to its wail, has a way of fading away.”  -V.C. Andrews
+"Grief, no matter how you try to cater to its wail, has a way of fading away.ï¿½  -V.C. Andrews
 |------------------------| |------------------------| |------------------------| |------------------------|
 Heaven is a place where all the dogs you've ever loved come to greet you. -Oliver Gaspirtz
 |------------------------| |------------------------| |------------------------| |------------------------|
-“Follow your dreams... death is nothing, life is everything.” -Stefan Karl Stefansson
-“Et tu Brute?” -Julius Caesar
-“To the wizard death is merely a belief.” -Deepak Chopra
-“Every time you die, it hurts.” -Josh Henderson
-“If I have to die, let me die fighting.” -Gabriel Garcia Marquez
-“Each death is as unique as each life.”  -Nicholas Wolterstorff
-“No one gets out of this world alive... except astronauts.” -Stewart Stafford
-“In life you can't move forward looking back.” -Mark Marsland
-“Death is perhaps an ordeal, but it is not an expiation.” -Alexandre Dumas
-“What really mattered in life, what gave it weight, was death.” -Jeffrey Eugenides
-“I can feel the daisies growing over me.” -John Keats
-“All deaths are sudden, no matter how gradual the dying may be.” -Michael McDowell
-“A person's destiny often ends before his death.” -Milan Kundera
-“Death is the destroyer and giver of sense.” -Andy Harglesis
+ï¿½Follow your dreams... death is nothing, life is everything.ï¿½ -Stefan Karl Stefansson
+ï¿½Et tu Brute?ï¿½ -Julius Caesar
+ï¿½To the wizard death is merely a belief.ï¿½ -Deepak Chopra
+ï¿½Every time you die, it hurts.ï¿½ -Josh Henderson
+ï¿½If I have to die, let me die fighting.ï¿½ -Gabriel Garcia Marquez
+ï¿½Each death is as unique as each life.ï¿½  -Nicholas Wolterstorff
+ï¿½No one gets out of this world alive... except astronauts.ï¿½ -Stewart Stafford
+ï¿½In life you can't move forward looking back.ï¿½ -Mark Marsland
+ï¿½Death is perhaps an ordeal, but it is not an expiation.ï¿½ -Alexandre Dumas
+ï¿½What really mattered in life, what gave it weight, was death.ï¿½ -Jeffrey Eugenides
+ï¿½I can feel the daisies growing over me.ï¿½ -John Keats
+ï¿½All deaths are sudden, no matter how gradual the dying may be.ï¿½ -Michael McDowell
+ï¿½A person's destiny often ends before his death.ï¿½ -Milan Kundera
+ï¿½Death is the destroyer and giver of sense.ï¿½ -Andy Harglesis
 "Like good sleep comes after hard work, good rest comes after an honest life."  -Turbo
 "To die will be a great adventure." -Peter Banning
 "You seem a decent fellow. I hate to kill you." -Inigo Montoya

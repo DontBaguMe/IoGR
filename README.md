@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v1.5.0) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.5.0">Download</a>
+## The Illusion of Gaia Randomizer (v1.5.1) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.5.1">Download</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
@@ -99,7 +99,9 @@ The rewards are shuffled at random throughout the entire game, map by map.  The 
 - Hard: 8/2/2 (max HP 35)
 - Extreme: 6/0/0 (max HP 29)
 
-Upgrades can be accessed by clearing rooms that have a "Force" in them on the start menu.  Alternatively, defeating a boss will grant you any unobtained upgrades in the following dungeons, by boss:
+Upgrades can be accessed by clearing rooms that have a "Force" in them on the start menu.  (If you have the Black Glasses or the Crystal Ring equipped, the start menu will forecast which stat upgrade you'll receive for clearing a room.)
+
+Alternatively, defeating a boss will grant you any unobtained upgrades in the following dungeons, by boss:
 - Castoth: Underground Tunnel and Inca Ruins
 - Viper: Diamond Mine and Sky Garden
 - Vampires: Mu and Angel Dungeon

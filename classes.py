@@ -38,7 +38,7 @@ class World:
         for x in self.placement_log:
             if x[1] == location:
                 self.placement_log.remove(x)
-                
+
         return item
 
     # Find and clear non-progression item to make room for progression item
@@ -1628,7 +1628,7 @@ class World:
 
             # Babel/Jeweler Mansion
             140: [66,67,[[36,1],[39,1]]], # Babel Progression w/ Aura and Crystal Ring
-            141: [68,67,[[49,1]]],         # Jeweler Mansion to Babel Top w/Slide
+            #141: [68,67,[[49,1]]],         # Jeweler Mansion to Babel Top w/Slide      # Solid Arm will not be required
 
             # Endgame
             150: [10,69,[[20,2]]],        # Rescue Kara from Edward's w/ Magic Dust
