@@ -1665,9 +1665,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #                            Randomize Inca tile
     ##########################################################################
     # Prepare file for uncompressed map data
-    path_incamapblank = folder + "incamapblank.bin"
-    path_incamapnew = folder + "incamap.bin"
-    copyfile(path_incamapblank,path_incamapnew)
+    f_incamapblank = open(folder + "incamapblank.bin","r+b")
+    f_incamap = tempfile.TemporaryFile()
+    #copyfile(path_incamapblank,path_incamapnew)
+
+    # Create temporary map file
+#    f_ishtarmapblank = open(folder + "ishtarmapblank.bin","rb")
+#    f_ishtarmap = tempfile.TemporaryFile()
+#    f_ishtarmap.write(f_ishtarmapblank.read())
+#    f_ishtarmapblank.close
 
     # Set random X/Y for new Inca tile
     inca_x = random.randint(0,11)
@@ -1693,15 +1699,14 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     addr = 16*row + column
 
     # Write single tile at new location in uncompressed data
-    f_incamap = open(folder + "incamap.bin","r+b")
+    #f_incamap = open(folder + "incamap.bin","r+b")
     f_incamap.seek(addr)
     f_incamap.write("\x40\x41\x00\x00\x00\x00\x00\x00\x00")
     f_incamap.write("\x00\x00\x00\x00\x00\x00\x00\x42\x43")
     f_incamap.seek(0)
 
     # Compress map data and write to file
-    f_incamapcomp = open(folder + "incamapcomp.bin","r+b")
-    f_incamapcomp.seek(0)
+    f_incamapcomp = tempfile.TemporaryFile()
     f_incamapcomp.write(quintet_comp.compress(f_incamap.read()))
     f_incamapcomp.seek(0)
     f_incamap.close
@@ -2254,9 +2259,9 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #                        Randomize Ishtar puzzle
     ##########################################################################
     # Prepare file for uncompressed map data
-    path_ishtarmapblank = folder + "ishtarmapblank.bin"
-    path_ishtarmapnew = folder + "ishtarmap.bin"
-    copyfile(path_ishtarmapblank,path_ishtarmapnew)
+    #path_ishtarmapblank = folder + "ishtarmapblank.bin"
+    #path_ishtarmapnew = folder + "ishtarmap.bin"
+    #copyfile(path_ishtarmapblank,path_ishtarmapnew)
 
     # Add checks for Will's hair in each room
     f.seek(int("6dc53",16)+rom_offset)
@@ -2278,7 +2283,12 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("6dbc6",16)+rom_offset)
     f.write("\xc2\x0a")
 
-    f_ishtarmap = open(folder + "ishtarmap.bin","r+b")
+    # Create temporary map file
+    f_ishtarmapblank = open(folder + "ishtarmapblank.bin","rb")
+    f_ishtarmap = tempfile.TemporaryFile()
+    f_ishtarmap.write(f_ishtarmapblank.read())
+    f_ishtarmapblank.close
+
     room_offsets = ["6d95e","6d98a","6d9b4","6d9de"]  # ROM addrs for cursor capture, by room
     coord_offsets = [3,8,15,20]                       # Offsets for xmin, xmax, ymin, ymax
     changes = [random.randint(1,8), random.randint(1,7), random.randint(1,5), random.randint(1,7)]
@@ -2471,10 +2481,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
             f.write(coords[i])
 
 
-
     # Compress map data and write to file
-    f_ishtarmapcomp = open(folder + "ishtarmapcomp.bin","r+b")
-    f_ishtarmapcomp.seek(0)
+    f_ishtarmapcomp = tempfile.TemporaryFile()
     f_ishtarmap.seek(0)
     f_ishtarmapcomp.write(quintet_comp.compress(f_ishtarmap.read()))
     f_ishtarmapcomp.seek(0)
