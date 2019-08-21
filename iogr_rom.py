@@ -1667,13 +1667,8 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     # Prepare file for uncompressed map data
     f_incamapblank = open(folder + "incamapblank.bin","r+b")
     f_incamap = tempfile.TemporaryFile()
-    #copyfile(path_incamapblank,path_incamapnew)
-
-    # Create temporary map file
-#    f_ishtarmapblank = open(folder + "ishtarmapblank.bin","rb")
-#    f_ishtarmap = tempfile.TemporaryFile()
-#    f_ishtarmap.write(f_ishtarmapblank.read())
-#    f_ishtarmapblank.close
+    f_incamap.write(f_incamapblank.read())
+    f_incamapblank.close
 
     # Set random X/Y for new Inca tile
     inca_x = random.randint(0,11)
@@ -1699,7 +1694,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     addr = 16*row + column
 
     # Write single tile at new location in uncompressed data
-    #f_incamap = open(folder + "incamap.bin","r+b")
     f_incamap.seek(addr)
     f_incamap.write("\x40\x41\x00\x00\x00\x00\x00\x00\x00")
     f_incamap.write("\x00\x00\x00\x00\x00\x00\x00\x42\x43")
@@ -2258,11 +2252,6 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                        Randomize Ishtar puzzle
     ##########################################################################
-    # Prepare file for uncompressed map data
-    #path_ishtarmapblank = folder + "ishtarmapblank.bin"
-    #path_ishtarmapnew = folder + "ishtarmap.bin"
-    #copyfile(path_ishtarmapblank,path_ishtarmapnew)
-
     # Add checks for Will's hair in each room
     f.seek(int("6dc53",16)+rom_offset)
     f.write("\x4c\x00\xdd\x86")
