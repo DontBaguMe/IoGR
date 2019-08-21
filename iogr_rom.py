@@ -6,6 +6,7 @@ import datetime
 import hmac
 import os
 import random
+import tempfile
 
 # Local libraries
 import classes
@@ -52,9 +53,17 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     folder_root = os.getcwd()
     folder = folder_root + os.path.sep + "bin" + os.path.sep
     rom_path_new = folder_dest + filename + ".sfc"
-    copyfile(rom_path,rom_path_new)
+    #copyfile(rom_path,rom_path_new)
 
-    f = open(rom_path_new,"r+b")
+    f_rom = open(rom_path,"rb")
+
+    f = tempfile.TemporaryFile()
+    f_rom.seek(0)
+    f.write(f_rom.read())
+
+    f_rom.close
+
+    #f = open(rom_path_new,"r+b")
 
     ##########################################################################
     #                                Sandbox
@@ -2483,8 +2492,13 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #f.write("\x00\x41")
 
     ##########################################################################
-    #                        Close file and return
+    #                        Export file and return
     ##########################################################################
+    f_new = open(rom_path_new,"w+b")
+    f.seek(0)
+    f_new.write(f.read())
+
     f.close
+    f_new.close
 
     return True
