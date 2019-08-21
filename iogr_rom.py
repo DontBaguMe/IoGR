@@ -464,8 +464,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     ##########################################################################
     #                         Modify South Cape events
     ##########################################################################
-    # Overwrite opening cutscene, spoil Mystic Statues required
-    # TEMPORARILY SETS KARA RESCUE (0x8A) TO TRUE FOR TESTING PURPOSES
+    # Teacher sets switch #$38 and spoils Mystic Statues required
     f_teacher = open(folder + "048a94_teacher.bin","r+b")
     f.seek(int("48a94",16)+rom_offset)
     f.write(f_teacher.read())
@@ -2006,7 +2005,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
 
                 statues_hex.pop(0)
 
-    f.seek(int("48aa8",16)+rom_offset)
+    f.seek(int("48aab",16)+rom_offset)
     f.write(statue_str)
 
     ##########################################################################
