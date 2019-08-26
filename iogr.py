@@ -7,7 +7,7 @@ import classes
 import iogr_rom
 import quintet_text
 
-VERSION = "2.2.4"
+VERSION = "2.3.0"
 
 def find_ROM():
     ROM.delete(0,END)
@@ -57,6 +57,11 @@ def generate_ROM():
     else:
         logic_chr = logic_str[0]
 
+    if firebird.get() == 1:
+        firebird_chr = "_f"
+    else:
+        firebird_chr = ""
+
     if variant_str == "OHKO":
         variant_chr = "_OHKO"
     elif variant_str == "Red Jewel Madness":
@@ -74,10 +79,10 @@ def generate_ROM():
     else:
         enemizer_chr = "_e" + enemizer_str[0]
 
-    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + start_chr + variant_chr + enemizer_chr + "_" + seed_str
+    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + firebird_chr + start_chr + variant_chr + enemizer_chr + "_" + seed_str
     #filename = "Illusion of Gaia Randomized.sfc"
 
-    if iogr_rom.generate_rom(VERSION,rom_offset,int(seed_str),rompath,filename,diff_str,goal_str,logic_str,statues_str,start_str,variant_str,enemizer_str):
+    if iogr_rom.generate_rom(VERSION,rom_offset,int(seed_str),rompath,filename,diff_str,goal_str,logic_str,statues_str,start_str,variant_str,enemizer_str,firebird.get()):
         showinfo("Success!", filename + " has been successfully created!")
     else:
         showinfo("ERROR", "Operation failed (unspecified error)")
@@ -141,6 +146,14 @@ def logic_help():
     lines.append(" - Freedan abilities may show up in towns")
     showinfo("Logic Modes", "\n".join(lines))
 
+def firebird_help():
+    lines = []
+    lines.append("Checking this box grants early access to the Firebird attack, when:")
+    lines.append(" - The Crystal Ring is equipped,")
+    lines.append(" - Kara is saved from her painting, and")
+    lines.append(" - Player is in Shadow's form.")
+    showinfo("Firebird", "\n".join(lines))
+
 def variant_help():
     lines = []
     lines.append("The following variants are currently available:")
@@ -194,7 +207,7 @@ else:
 
 # Add a grid
 mainframe = Frame(root)
-mainframe.grid(column=2,row=7, sticky=(N,W,E,S) )
+mainframe.grid(column=2,row=9, sticky=(N,W,E,S) )
 mainframe.columnconfigure(0, weight = 1)
 mainframe.rowconfigure(0, weight = 1)
 mainframe.pack(pady = 20, padx = 20)
@@ -204,10 +217,11 @@ Label(mainframe,text="Seed").grid(row=1,column=0,sticky=W)
 Label(mainframe,text="Difficulty").grid(row=2,column=0,sticky=W)
 Label(mainframe,text="Goal").grid(row=3,column=0,sticky=W)
 Label(mainframe,text="Logic").grid(row=4,column=0,sticky=W)
-Label(mainframe,text="Start Location").grid(row=5,column=0,sticky=W)
-Label(mainframe,text="Variant").grid(row=6,column=0,sticky=W)
-Label(mainframe,text="Enemizer (beta)").grid(row=7,column=0,sticky=W)
-Label(mainframe,text="Statues").grid(row=8,column=0,sticky=W)
+Label(mainframe,text="Early Firebird").grid(row=5,column=0,sticky=W)
+Label(mainframe,text="Start Location").grid(row=6,column=0,sticky=W)
+Label(mainframe,text="Variant").grid(row=7,column=0,sticky=W)
+Label(mainframe,text="Enemizer (beta)").grid(row=8,column=0,sticky=W)
+Label(mainframe,text="Statues").grid(row=9,column=0,sticky=W)
 
 difficulty = StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -220,6 +234,9 @@ goal.set("Dark Gaia")
 logic = StringVar(root)
 logic_choices = ["Completable", "Beatable", "Chaos"]
 logic.set("Completable")
+
+firebird = IntVar(root)
+firebird.set(0)
 
 start = StringVar(root)
 start_choices = ["South Cape", "Safe", "Unsafe", "Forced Unsafe"]
@@ -247,20 +264,22 @@ seed.insert(10,random.randint(0,999999))
 diff_menu = OptionMenu(mainframe,difficulty,*diff_choices).grid(row=2,column=1)
 goal_menu = OptionMenu(mainframe,goal,*goal_choices).grid(row=3,column=1)
 logic_menu = OptionMenu(mainframe,logic,*logic_choices).grid(row=4,column=1)
-start_menu = OptionMenu(mainframe,start,*start_choices).grid(row=5,column=1)
-variant_menu = OptionMenu(mainframe,variant,*variant_choices).grid(row=6,column=1)
-enemizer_menu = OptionMenu(mainframe,enemizer,*enemizer_choices).grid(row=7,column=1)
-statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=8,column=1)
+firebird_checkbox = Checkbutton(mainframe,variable=firebird,onvalue=1,offvalue=0).grid(row=5,column=1)
+start_menu = OptionMenu(mainframe,start,*start_choices).grid(row=6,column=1)
+variant_menu = OptionMenu(mainframe,variant,*variant_choices).grid(row=7,column=1)
+enemizer_menu = OptionMenu(mainframe,enemizer,*enemizer_choices).grid(row=8,column=1)
+statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=9,column=1)
 
 Button(mainframe,text='Browse...', command=find_ROM).grid(row=0,column=2)
 Button(mainframe,text='Generate Seed', command=generate_seed).grid(row=1,column=2)
-Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=8,column=2)
+Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=9,column=2)
 
 Button(mainframe,text='?', command=diff_help).grid(row=2,column=2)
 Button(mainframe,text='?', command=goal_help).grid(row=3,column=2)
 Button(mainframe,text='?', command=logic_help).grid(row=4,column=2)
-Button(mainframe,text='?', command=start_help).grid(row=5,column=2)
-Button(mainframe,text='?', command=variant_help).grid(row=6,column=2)
-Button(mainframe,text='?', command=enemizer_help).grid(row=7,column=2)
+Button(mainframe,text='?', command=firebird_help).grid(row=5,column=2)
+Button(mainframe,text='?', command=start_help).grid(row=6,column=2)
+Button(mainframe,text='?', command=variant_help).grid(row=7,column=2)
+Button(mainframe,text='?', command=enemizer_help).grid(row=8,column=2)
 
 root.mainloop()

@@ -28,7 +28,7 @@ FORCE_CHANGE = "\x22\x30\xfd\x88"
 
 # Generate new ROM and prepare it for randomization
 def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of Gaia Randomized",
-    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",start_mode="South Cape",variant="None",enemizer="None",firebird=False):
+    mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4",start_mode="South Cape",variant="None",enemizer="None",firebird=0):
 
     # Initiate random seed
     random.seed(rng_seed)
@@ -66,18 +66,36 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     #f = open(rom_path_new,"r+b")
 
     ##########################################################################
-    #                                Sandbox
+    #                             Early Firebird
     ##########################################################################
-    # Unleash Firebird!
-    if firebird:
+    # Write new Firebird logic into unused memory location
+    f_firebird = open(folder + "02f0c0_firebird.bin","r+b")
+    f.seek(int("2f0c0",16)+rom_offset)
+    f.write(f_firebird.read())
+    f_firebird.close
+
+
+    if firebird == 1:
+        # Change firebird logic
+        # Requires Shadow's form, Crystal Ring (switch #$3e) and Kara rescued (switch #$8a)
         f.seek(int("2cd07",16)+rom_offset)
-        f.write("\xad\xd4\x0a\xc9\x02\x00")
+        f.write("\x4c\xc0\xf0\xea\xea\xea")
         f.seek(int("2cd88",16)+rom_offset)
-        f.write("\xad\xd4\x0a\xc9\x02\x00")
+        f.write("\x4c\xe0\xf0\xea\xea\xea")
         f.seek(int("2ce06",16)+rom_offset)
-        f.write("\xad\xd4\x0a\xc9\x02\x00")
+        f.write("\x4c\x00\xf1\xea\xea\xea")
         f.seek(int("2ce84",16)+rom_offset)
-        f.write("\xad\xd4\x0a\xc9\x02\x00")
+        f.write("\x4c\x20\xf1\xea\xea\xea")
+
+        # Load firebird assets into every map
+        f.seek(int("3e03a",16)+rom_offset)
+        f.write("\x80\x00")
+        f.seek(int("eaf0",16)+rom_offset)
+        f.write("\x20\xa0\xf4\xea\xea")
+        f.seek(int("f4a0",16)+rom_offset)
+        f.write("\x02\x3b\x71\xb2\xf4\x80\xa9\x00\x10\x04\x12\x60")
+        f.seek(int("f4b0",16)+rom_offset)
+        f.write("\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
 
     ##########################################################################
     #                            Modify ROM Header
@@ -1659,7 +1677,7 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.seek(int("ce536",16)+rom_offset)  # Mummy Queen (Babel)
     f.write("\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
 
-    # Black Glasses OR Crystal Ring allow you to "see" which upgrades are available
+    # Black Glasses allow you to "see" which upgrades are available
     f_startmenu = open(folder + "03fdb0_startmenu.bin","r+b")
     f.seek(int("3fdb0",16)+rom_offset)
     f.write(f_startmenu.read())
