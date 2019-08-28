@@ -1413,15 +1413,15 @@ def generate_rom(version, rom_offset, rng_seed, rom_path, filename="Illusion of 
     f.write(qt.encode("-Apokalysme -Bonzaibier") + "\xCB")
     f.write(qt.encode("-Atlas      -BOWIEtheHERO") + "\xC9\xB4\xCE")
 
-    f.write(qt.encode("-Crazyhaze  -DerTolleIgel") + "\xCB")
-    f.write(qt.encode("-Eppy37     -djtifaheart") + "\xCB")
+    f.write(qt.encode("-bryon w    -DerTolleIgel") + "\xCB")
+    f.write(qt.encode("-Crazyhaze  -djtifaheart") + "\xCB")
     f.write(qt.encode("-DoodSF     -Keypaladin") + "\xCB")
-    f.write(qt.encode("-Lassic     -Le Hulk") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Eppy37     -Lassic") + "\xC9\xB4\xCE")
 
+    f.write(qt.encode("-Le Hulk    -Plan") + "\xCB")
     f.write(qt.encode("-manafreak  -Pozzum Senpai") + "\xCB")
     f.write(qt.encode("-Mikan      -Raeven0") + "\xCB")
-    f.write(qt.encode("-Mr Freet   -roeya") + "\xCB")
-    f.write(qt.encode("-Plan") + "\xC9\xB4\xCE")
+    f.write(qt.encode("-Mr Freet   -roeya") + "\xC9\xB4\xCE")
 
     f.write(qt.encode("-Scheris    -SmashManiac") + "\xCB")
     f.write(qt.encode("-SDiezal    -solarcell007") + "\xCB")
