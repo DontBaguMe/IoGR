@@ -62,7 +62,7 @@ AC D6 88 00 2B A5 0E 85 24 A9 00 20 85 0E 02 E0
 
     # Give appearing Dark Space the option of handling an ability
     f.seek(int("5d62f",16)+rom_offset)
-    f.write("\xAC\xD6\x88\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
+    f.write(b"\xAC\xD6\x88\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
 
 
 
@@ -229,16 +229,16 @@ FF 37 16 06 2D = Map 233 (0xE9) - Herb
 
 ::END CREDITS
 
-str_endpause = "\xC9\xB4\xC8\xCA"
-bd558 (bd566)  "\xCB" + "    Thanks a million." + str_endpause
-bd5a0 (bd5ac)  "\xCB" + " Extra special thanks to/       manafreak" + "\xC9\x78\xCE\xCB"
-               " This project would not/  exist without his work." + "\xC9\x78\xCE\xCB"
+str_endpause = b"\xC9\xB4\xC8\xCA"
+bd558 (bd566)  b"\xCB" + "    Thanks a million." + str_endpause
+bd5a0 (bd5ac)  b"\xCB" + " Extra special thanks to/       manafreak" + b"\xC9\x78\xCE\xCB"
+               " This project would not/  exist without his work." + b"\xC9\x78\xCE\xCB"
                "     gaiathecreator/      .blogspot.com" + str_endpause
 bd70e (bd71c)  "    Created by/       DontBaguMe" + str_endpause
-bd740 (bd74f)  "\xCB" + "    Thanks to all the/ amazing playtesters!"  + "\xC9\x78\xCE\xCB
+bd740 (bd74f)  b"\xCB" + "    Thanks to all the/ amazing playtesters!"  + b"\xC9\x78\xCE\xCB
        bdee2   "   Also, many thanks to/ Raeven0 for ASM support." + str_endpause
 
-      (bdee2)  "\xCB" + " That's it, show's over."
+      (bdee2)  b"\xCB" + " That's it, show's over."
 bd9fa (bda09)  "Is this the end?"
 
 
@@ -1016,7 +1016,8 @@ A9 F0 CF 1C 5A 06
 02 D7 1C [64 9A]
 80 DF 6B
 : [65 9a]
-D3 C2 00 63 84 A4 A4 88 8D 86 AC 8E 8D 84 AC 85 8E 8E A4 AC 88 8D A3 88 83 84 2B CB A4 87 84 AC 85 8B 8E 80 A4 88 8D 86 AC 82 A2 A9 A3 A4 80 8B CB D6 CB A4 8E AC 86 8B 8E A7 4F C3 00 C0 
+D3 C2 00 63 84 A4 A4 88 8D 86 AC 8E 8D 84 AC 85 8E 8E A4 AC 88 8D A3 88 83 84 2B CB A4 87 84 AC 85 8B 8E 80 A4 88 8D 86 AC 82 A2 A9 A3 A4 80 8B CB D6 CB A4 8E AC 86 8B 8E A7 4F C3 00 C0
+ 
 
 
 : MU PASSAGE TO SEASIDE PALACE -DONE
@@ -1048,7 +1049,8 @@ ce ... c0
 
 - LOLA'S MELODY - Itory switch 0x40
 : Lilly @ 4e2a3
- - put overworld exit at 4e3ce, 7 bytes to work with, followed by text (address called from 4e2ca)
+ - put overworld exit at 4e3ce, 7 bytes to work with, followed by text (address called from 4e2ca)
+
 1A 00 10
 02 D0 2B 00 [B9 E2]
 02 D0 3B 01 [CC E3]
@@ -1508,7 +1510,8 @@ A9 00
 02 CC 8A                << Set "Kara rescued" switch
 6B
 : [73 d2]
-02 BF FF D2 6B 
+02 BF FF D2 6B
+ 
 
 
 
@@ -1711,10 +1714,12 @@ C9 50
 02 BF F6 83 6B
 02 BF 0F 84 6B
 02 BF 36 84 6B
-D3 46 8E A3 87 2A CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 D6 12 88 85 AC 48 AC D6 B5 A4 8E CB D6 6E A0 8B 80 82 84 CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 47 84 AC 8B 88 85 A4 84 83 AC A4 87 84 CB D6 C7 A4 84 80 A0 8E A4 2A C0 
+D3 46 8E A3 87 2A CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 D6 12 88 85 AC 48 AC D6 B5 A4 8E CB D6 6E A0 8B 80 82 84 CB 48 AC D6 78 A0 A5 8B 8B AC 88 A4 AC A5 A0 2A 2A 2A C0 D3 47 84 AC 8B 88 85 A4 84 83 AC A4 87 84 CB D6 C7 A4 84 80 A0 8E A4 2A C0
+ 
 
 
-: 5e647 - NAZCA WARP TO SKY GARDEN
+: 5e647 - NAZCA WARP TO SKY GARDEN
+
 00 00 30
 02 9C D0 E7
 85 00 20
@@ -1904,7 +1909,7 @@ GLOWING BLOCK IN INCA:
 
 
 
-row=2*y + 8*int((x+2)/4) + 8*int(y/4) + 16 * int((x+2)/8)
+row=2*y b"\x*int((x+2)/4) + 8*int(y/4) + 16 * int((x+2)/8)
 column=2*((x+2)%4)
 
 addr_first = 512 + 16*row + column
@@ -2000,7 +2005,8 @@ BACKGROUND MUSIC
 : Babel
 02 26 78 78 02 90 03 00 00 45 02 C5
 
-46 80 A2 83 84 8D AC 88 A3 AC 8E A5 A2 AC 8C 8E 83 84 CB 8E 85 AC A4 A2 80 8D A3 A0 8E A2 A4 80 A4 88 8E 8D 2A CF 64 87 84 A2 84 AC 80 A2 84 AC 85 8E A5 A2 AC D6 07 CB 41 80 8B 8B A3 AC 88 8D AC 85 8E A5 A2 AC 8B 8E 82 80 A4 88 8E 8D A3 2A CB 45 88 8D 83 AC 84 80 82 87 AC 8E 8D 84 AC 88 8D AC CB 82 8B 8E 82 8A A7 88 A3 84 AC 8E A2 83 84 A2 2A 2A 2A AC C0  
+46 80 A2 83 84 8D AC 88 A3 AC 8E A5 A2 AC 8C 8E 83 84 CB 8E 85 AC A4 A2 80 8D A3 A0 8E A2 A4 80 A4 88 8E 8D 2A CF 64 87 84 A2 84 AC 80 A2 84 AC 85 8E A5 A2 AC D6 07 CB 41 80 8B 8B A3 AC 88 8D AC 85 8E A5 A2 AC 8B 8E 82 80 A4 88 8E 8D A3 2A CB 45 88 8D 83 AC 84 80 82 87 AC 8E 8D 84 AC 88 8D AC CB 82 8B 8E 82 8A A7 88 A3 84 AC 8E A2 83 84 A2 2A 2A 2A AC C0
+  
 
 : 5f453 (Moon Tribe 3)
 3C 00 10 A9 00 02 04 12 02 C0 [6c f3] 02 0B 02 C1 02 80 3C 02 89 6B
@@ -2205,7 +2211,8 @@ FF 0D 2E 04 02 0C 58 00 50 00 03
 
 
 
-00 12 1A 14 01 01 E6 78 00 C0 00 00 00 
+00 12 1A 14 01 01 E6 78 00 C0 00 00 00
+ 
 
 
 
@@ -2214,7 +2221,8 @@ FF 0D 2E 04 02 0C 58 00 50 00 03
 
 
 
-3AD77: Overworld Movement Script Pointers
+3AD77: Overworld Movement Script Pointers
+
 01: C3 AD
 02: D8 AD
 03: F1 AD
@@ -2549,7 +2557,8 @@ AE AA
 C2 AA
 
 a97e
-[03 01] [03 02] [03 04] [03 06] [12 08] [03 06] [03 04] [03 02] [03 01] [00 00]
+[
+03 01] [03 02] [03 04] [03 06] [12 08] [03 06] [03 04] [03 02] [03 01] [00 00]
 
 a992
 [03 01] [03 02] [03 04] [03 06] [03 08] [03 0A] [15 0C] [03 0A] [03 08] [03 06] [03 04] [03 02] [03 01] [00 00]
@@ -3209,7 +3218,45 @@ E2 20 85 2A C2 20 80 0E C2 20 20 36 B1 90 05 A5
 
 
 
-FF041A0601FF07080102FF111E0103FF06060704FF02170605FF101B0606081F0107FF25193808FF38270609FF39310E0A0933060B3405010CFF37060E0DFF032F0E0EFF0708010FFF3532061031360E11FF371A0112FF07070113FF09170114FF201913152F270116FF1E18002E2D1C1317FF0A330018FF07280119FF2708141AFF4708061B5708011CFF1A59011DFF051A061EFF1836011FFF120B1A20FF05081A21FF22101A22FF0E051923FF67050124FF074E0625FF07060126FF11200127FF05160128FF37590129FF4649012AFF4709012BFF7529012CFF
+FF041A0601
+FF07080102
+FF111E0103
+FF06060704
+FF02170605
+FF101B0606081F0107
+FF25193808
+FF38270609
+FF39310E0A0933060B3405010C
+FF37060E0D
+FF032F0E0E
+FF0708010F
+FF3532061031360E11
+FF371A0112
+FF07070113
+FF09170114
+FF201913152F270116
+FF1E18002E2D1C1317
+FF0A330018
+FF07280119
+FF2708141A
+FF4708061B5708011C
+FF1A59011D
+FF051A061E
+FF1836011F
+FF120B1A20
+FF05081A21
+FF22101A22
+FF0E051923
+FF67050124
+FF074E0625
+FF07060126
+FF11200127
+FF05160128
+FF37590129
+FF4649012A
+FF4709012B
+FF7529012C
+FF
 
 
 

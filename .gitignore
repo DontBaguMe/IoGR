@@ -27,3 +27,5 @@ bin/ishtarmap.bin
 iogr_rom.spec
 
 iogr.spec
+
+.vscode/
