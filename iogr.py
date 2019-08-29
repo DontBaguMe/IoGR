@@ -6,38 +6,29 @@ import random
 import classes
 import iogr_rom
 import quintet_text
+from errors import FileNotFoundError, OffsetError
 
-VERSION = "2.3.1"
+VERSION = iogr_rom.VERSION
+
 
 def find_ROM():
     ROM.delete(0,END)
     ROM.insert(10,askopenfilename())
 
+
 def generate_seed():
     seed.delete(0,END)
     seed.insert(10,random.randint(0,99999999))
+
 
 def generate_ROM():
     rompath = ROM.get()
     rompath = rompath.lower()
     seed_str = seed.get()
+
     if not seed_str.isdigit():
         showinfo("ERROR", "Please enter or generate a valid seed")
         return
-
-    try:
-        f = open(rompath,"rb")
-    except:
-        showinfo("ERROR", "ROM file does not exist")
-        return
-    rom_data = f.read()
-    header = "\x49\x4C\x4C\x55\x53\x49\x4F\x4E\x20\x4F\x46\x20\x47\x41\x49\x41\x20\x55\x53\x41"
-    h_addr = rom_data.find(header)
-    if h_addr < 0:
-        showinfo("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
-        return
-    else:
-        rom_offset = h_addr - int("ffc0",16)
 
     statues_str = statues.get()
     goal_str = goal.get()
@@ -47,44 +38,19 @@ def generate_ROM():
     variant_str = variant.get()
     enemizer_str = enemizer.get()
 
-    if goal_str == "Dark Gaia":
-        goal_cd = "DG" + statues_str[0]
-    elif goal.get() == "Red Jewel Hunt":
-        goal_cd = "RJ"
+    try:
+        seed_int = int(seed_str)
+        fb = firebird.get()
 
-    if logic_str == "Chaos":
-        logic_chr = "X"
-    else:
-        logic_chr = logic_str[0]
+        filename = iogr_rom.generate_filename(seed_int, diff_str, goal_str, logic_str, statues_str, start_str, variant_str, enemizer_str, fb)
+        iogr_rom.generate_rom(filename, rompath, seed_int, diff_str, goal_str, logic_str, statues_str, start_str, variant_str, enemizer_str, fb)
 
-    if firebird.get() == 1:
-        firebird_chr = "_f"
-    else:
-        firebird_chr = ""
-
-    if variant_str == "OHKO":
-        variant_chr = "_OHKO"
-    elif variant_str == "Red Jewel Madness":
-        variant_chr = "_RJM"
-    else:
-        variant_chr = ""
-
-    if start_str == "South Cape":
-        start_chr = ""
-    else:
-        start_chr = "_s" + start_str[0]
-
-    if enemizer_str == "None":
-        enemizer_chr = ""
-    else:
-        enemizer_chr = "_e" + enemizer_str[0]
-
-    filename = "IoGR_v" + VERSION + "_" + diff_str + "_" + goal_cd + "_" + logic_chr + firebird_chr + start_chr + variant_chr + enemizer_chr + "_" + seed_str
-    #filename = "Illusion of Gaia Randomized.sfc"
-
-    if iogr_rom.generate_rom(VERSION,rom_offset,int(seed_str),rompath,filename,diff_str,goal_str,logic_str,statues_str,start_str,variant_str,enemizer_str,firebird.get()):
         showinfo("Success!", filename + " has been successfully created!")
-    else:
+    except OffsetError:
+        showinfo("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
+    except FileNotFoundError:
+        showinfo("ERROR", "ROM file does not exist")
+    except:
         showinfo("ERROR", "Operation failed (unspecified error)")
 
 def diff_help():

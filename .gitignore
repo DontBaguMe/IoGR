@@ -1,4 +1,8 @@
+.idea/
+build/
+dist/
 
+**/*.pyc
 *.smc
 bin/incamap.bin
 bin/incamapcomp.bin
@@ -20,3 +24,6 @@ bin/ishtarmap.bin
 bin/ishtarmapcomp.bin
 bin/ishtarmapcomp.bin
 bin/ishtarmap.bin
+iogr_rom.spec
+
+iogr.spec
