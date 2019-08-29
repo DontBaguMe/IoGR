@@ -34,7 +34,6 @@ FORCE_CHANGE = "\x22\x30\xfd\x88"
 parser = argparse.ArgumentParser(description="Generate a randomly seeded ROM")
 parser.add_argument('-s', '--seed', dest="seed", type=int, required=False, default=random.randint(0, 999999999))
 parser.add_argument('-p', '--path', dest="path", type=str, required=True)
-parser.add_argument('-f', '--filename', dest="filename", type=str, required=False, default="Illusion of Gaia Randomized")
 parser.add_argument('-d', '--difficulty', dest="difficulty", type=str, required=False, default="Normal")
 parser.add_argument('-g', '--goal', dest="goal", type=str, required=False, default="Dark Gaia")
 parser.add_argument('-l', '--logic', dest="logic", type=str, required=False, default="Completable")
@@ -2707,14 +2706,14 @@ def generate_rom(filename, rom_path, rng_seed, mode_str="Normal", goal="Dark Gai
 
 
 def main(argv):
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     filename = generate_filename(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.variant, args.start, args.enemizer, args.firebird)
 
     try:
         generate_rom(filename, args.path, args.seed, args.difficulty, args.goal, args.logic, args.statues, args.start, args.variant, args.enemizer, args.firebird)
         print("File created: " + filename)
-    except:
-        print("An error occurred")
+    except Exception as e:
+        print (e)
 
 
 if __name__ == "__main__":
