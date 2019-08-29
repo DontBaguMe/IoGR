@@ -2708,11 +2708,11 @@ def main(argv):
     args = parser.parse_args(argv)
     filename = generate_filename(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.variant, args.start, args.enemizer, args.firebird)
 
-    #try:
-    generate_rom(filename, args.path, args.seed, args.difficulty, args.goal, args.logic, args.statues, args.start, args.variant, args.enemizer, args.firebird)
-    print("File created: " + filename)
-    # except Exception as e:
-    #     print (e)
+    try:
+        generate_rom(filename, args.path, args.seed, args.difficulty, args.goal, args.logic, args.statues, args.start, args.variant, args.enemizer, args.firebird)
+        print("File created: " + filename)
+    except Exception as e:
+        print (e)
 
 
 if __name__ == "__main__":
