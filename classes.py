@@ -963,6 +963,11 @@ class World:
 
         # Enemizer
         if self.enemizer != "None":
+            # "Fix" Ankor Wat Gorgons so they don't fall from the ceiling
+            f.seek(int("bb825",16)+rom_offset)
+            f.write("\x00\x00\x00\x02\x27\x0F\x02\xC1\x4C\xA0\xB8\x6B")
+
+            # Run enemizer
             self.enemize(f,rom_offset)
             #self.parse_maps(f,rom_offset)
 
@@ -1085,7 +1090,7 @@ class World:
         #test_enemy = 13                         # TESTING!
         #test_set = self.enemies[test_enemy][0]
 
-        complex_enemies = [4,15,53,62,88]  # Draco and Zip Flies can lock the game if too plentiful
+        complex_enemies = [4,15,53,62,88]  # Enemies with many sprites, or are no fun
         max_complex = 5
 
         # Get list of enemysets
@@ -2202,14 +2207,14 @@ class World:
 
             # Ankor Wat
             176: [10,6,0,"\xB0\x00\x02\x2C\x03",4,"ccb1b","ccbd8",[]],
-            177: [11,6,0,"\xB1\x00\x02\x08\x03",4,"ccbd8","ccca5",[0,1,2,3,4,5,7,8,9,11,12,13]],
-            178: [11,6,0,"\xB2\x00\x02\x08\x03",4,"ccca5","ccd26",[0,1,2,3,4,5,7,8,9,11,12,13]],
+            177: [11,6,0,"\xB1\x00\x02\x08\x03",4,"ccbd8","ccca5",[0,1,2,3,4,5,7,8,9,11,13]],
+            178: [11,6,0,"\xB2\x00\x02\x08\x03",4,"ccca5","ccd26",[0,1,2,3,4,5,7,8,9,11,13]],
             179: [11,6,0,"\xB3\x00\x02\x08\x03",4,"ccd26","ccd83",[]],
-            180: [11,6,0,"\xB4\x00\x02\x08\x03",4,"ccd83","ccdd7",[0,1,2,3,4,5,7,8,9,11,12,13]],
+            180: [11,6,0,"\xB4\x00\x02\x08\x03",4,"ccd83","ccdd7",[0,1,2,3,4,5,7,8,9,11,13]],
             181: [11,6,0,"\xB5\x00\x02\x08\x03",4,"ccdd7","cce7b",[]],
             182: [10,6,0,"\xB6\x00\x02\x2C\x03",4,"cce7b","cd005",[0,1,2,3,4,5,6,8,9,10,11,12,13]],
             183: [11,6,0,"\xB7\x00\x02\x08\x03",4,"cd005","cd092",[]],  # Earthquaker Golem
-            184: [11,6,0,"\xB8\x00\x02\x08\x03",4,"cd092","cd0df",[0,1,2,3,4,5,7,8,9,11,12,13]],
+            184: [11,6,0,"\xB8\x00\x02\x08\x03",4,"cd092","cd0df",[0,1,4,5,7,8,9,13]],
             185: [11,6,0,"\xB9\x00\x02\x08\x03",4,"cd0df","cd137",[]],
             186: [10,6,0,"\xBA\x00\x02\x2C\x03",4,"cd137","cd197",[]],
             187: [11,6,0,"\xBB\x00\x02\x08\x03",4,"cd197","cd1f4",[]],
