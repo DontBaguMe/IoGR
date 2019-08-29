@@ -1,7 +1,8 @@
 
 
 
-::: 3843F 
+::: 3843F
+ 
 ###############################################################################################
 :: BF 84               # 00 - Nothing
 ###############################################################################################
@@ -22,7 +23,8 @@ DA 0B AD AA 09 5B AA
 "D3 47 84 AC D6 C5 A4 87 84 AC 62 84 83 AC 49 84 A7 84 8B 4F CF 62 84 83 AC 49 84 A7 84 8B A3 CB 85 8B A9 AC A4 8E AC 49 84 A7 84 8B 84 A2 AC 46 84 8C 0E A3 AC 88 8D CB 80 AC A3 88 8D 86 8B 84 AC A2 80 A9 AC 8E 85 AC 8B 88 86 87 A4 4F C0"
 
 : 66 85
-02 A2 76 85 83 02 10 02 CA FF C6 16 02 CB 02 E0 02 88 00 E0 8E 02 8D 02 A9 01 00 9F 10 00 7F 9F 12 00 7F 02 06 25 02 8B A5 2A F0 FA A5 08 64 08 85 26 A4 24 22 C9 F3 80 02 C2 BF 10 00 7F 18 69 02 00 9F 10 00 7F BF 12 00 7F C9 FF 00 F0 0B 1A 9F 12 00 7F C6 26 10 DA 80 CC 02 E0  
+02 A2 76 85 83 02 10 02 CA FF C6 16 02 CB 02 E0 02 88 00 E0 8E 02 8D 02 A9 01 00 9F 10 00 7F 9F 12 00 7F 02 06 25 02 8B A5 2A F0 FA A5 08 64 08 85 26 A4 24 22 C9 F3 80 02 C2 BF 10 00 7F 18 69 02 00 9F 10 00 7F BF 12 00 7F C9 FF 00 F0 0B 1A 9F 12 00 7F C6 26 10 DA 80 CC 02 E0 
+ 
 
 ###############################################################################################
 : C2 85                # 02 - Edward Palace Key
@@ -464,42 +466,42 @@ F8 AD [B0 0A] 18 69 [03] 00 8D [B0 0A] D8
 :: B1 9F 
 
 
-# Acquisition Messages - INITIALIZATION PURPOSES ONLY
-#f.seek(int("1fda7",16)+ROM_OFFSET)
-#f.write("\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xca") # Red Jewel
-#f.write("\x60\xa2\x88\xa3\x8e\x8d\xac\x4a\x84\xa9\xca") # Prison Key
-#f.write("\xd6\x1e\xd6\x48\xca") #Inca Statue
-#f.write("\x47\x84\xa2\x81\xca") # Herb
-#f.write("\xd6\x0e\x41\x8b\x8e\x82\x8a\xca") # Diamond Block
-#f.write("\xd7\x3d\xd6\x34\xca") # Wind Melody
-#f.write("\xd6\x2d\xd6\x34\xca") # Lola's Melody
-#f.write("\x4b\x80\xa2\x86\x84\xac\x62\x8e\x80\xa3\xa4\xca") # Large Roast
-#f.write("\x4c\x88\x8d\x84\xac\x4a\x84\xa9\xca") # Mine Key
-#f.write("\xd7\x1d\xd6\x34\xca") # Memory Melody
-#f.write("\xd6\x07\x41\x80\x8b\x8b\xca") # Crystal Ball
-#f.write("\x64\x87\x84\xac\xd7\x5e\x8a\x84\xa9\xca") # The elevator key
-#f.write("\x4c\xa5\xac\xd7\x93\x8a\x84\xa9\xca") # Mu Palace Key
-#f.write("\xd6\x40\xd7\x9d\xca") # Purification Stone
-#f.write("\x47\x8e\xa0\x84\xac\xd6\x48\xca") # Hope Statue
-#f.write("\x62\x80\x8c\x80\xac\xd6\x48\xca") # Rama Statue
-#f.write("\x4c\x80\x86\x88\x82\xac\x43\xa5\xa3\xa4\xca") # Magic Dust
-#f.write("\x4b\x80\x8d\x82\x84\x0e\xa3\xac\xd7\x7f\xca") # Lance's Letter
-#f.write("\x4d\x84\x82\x8a\x8b\x80\x82\x84\xca") # Necklace
-#f.write("\x67\x88\x8b\x8b\xca") # Will
-#f.write("\x64\x84\x80\xa0\x8e\xa4\xca") # Teapot
-#f.write("\x4c\xa5\xa3\x87\xa2\x8e\x8e\x8c\xac\x43\xa2\x8e\xa0\xa3\xca") # Mushroom Drops
-#f.write("\xd6\x05\x46\x8b\x80\xa3\xa3\x84\xa3\xca") # Black Glasses
-#f.write("\x46\x8e\xa2\x86\x8e\x8d\xac\xd7\x68\xca") # Gorgon Flower
-#f.write("\xd6\x1b\xca") # Hieroglyph
-#f.write("\xd6\x03\xca") # Aura
-#f.write("\xd6\x2d\xd7\x7f\xca") # Lola's Letter
-#f.write("\xd6\x68\xd6\x92\x89\x8e\xa5\xa2\x8d\x80\x8b\xca") # Father's journal
-#f.write("\xd6\x07\x62\x88\x8d\x86\xca") # Crystal Ring
-#f.write("\x40\xa0\xa0\x8b\x84\xca") # Apple
-#f.write("\x47\x60\xca") # HP
-#f.write("\x43\x44\x45\xca") # DEF
-#f.write("\x63\x64\x62\xca") # STR
-#f.write("\x4b\x88\x86\x87\xa4\xac\x49\x84\xa7\x84\x8b\xca") # Light Jewel
-#f.write("\xd6\x0c\x49\x84\xa7\x84\x8b\xca") # Dark Jewel
-#f.write("\x62\x84\x83\xac\xd6\x22\xca") # Red Jewels
+# Acquis(b"\xn Messages - INITIALIZATION PURPOSES ONLY
+#f.seek((b"\x"1fda7",16)+ROM_OFFSET)
+#f.write(b"\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xca") # Red Jewel
+#f.write(b"\x60\xa2\x88\xa3\x8e\x8d\xac\x4a\x84\xa9\xca") # Prison Key
+#f.write(b"\xd6\x1e\xd6\x48\xca") #Inca Statue
+#f.write(b"\x47\x84\xa2\x81\xca") # Herb
+#f.write(b"\xd6\x0e\x41\x8b\x8e\x82\x8a\xca") # Diamond Block
+#f.write(b"\xd7\x3d\xd6\x34\xca") # Wind Melody
+#f.write(b"\xd6\x2d\xd6\x34\xca") # Lola's Melody
+#f.write(b"\x4b\x80\xa2\x86\x84\xac\x62\x8e\x80\xa3\xa4\xca") # Large Roast
+#f.write(b"\x4c\x88\x8d\x84\xac\x4a\x84\xa9\xca") # Mine Key
+#f.write(b"\xd7\x1d\xd6\x34\xca") # Memory Melody
+#f.write(b"\xd6\x07\x41\x80\x8b\x8b\xca") # Crystal Ball
+#f.write(b"\x64\x87\x84\xac\xd7\x5e\x8a\x84\xa9\xca") # The elevator key
+#f.write(b"\x4c\xa5\xac\xd7\x93\x8a\x84\xa9\xca") # Mu Palace Key
+#f.write(b"\xd6\x40\xd7\x9d\xca") # Purification Stone
+#f.write(b"\x47\x8e\xa0\x84\xac\xd6\x48\xca") # Hope Statue
+#f.write(b"\x62\x80\x8c\x80\xac\xd6\x48\xca") # Rama Statue
+#f.write(b"\x4c\x80\x86\x88\x82\xac\x43\xa5\xa3\xa4\xca") # Magic Dust
+#f.write(b"\x4b\x80\x8d\x82\x84\x0e\xa3\xac\xd7\x7f\xca") # Lance's Letter
+#f.write(b"\x4d\x84\x82\x8a\x8b\x80\x82\x84\xca") # Necklace
+#f.write(b"\x67\x88\x8b\x8b\xca") # Will
+#f.write(b"\x64\x84\x80\xa0\x8e\xa4\xca") # Teapot
+#f.write(b"\x4c\xa5\xa3\x87\xa2\x8e\x8e\x8c\xac\x43\xa2\x8e\xa0\xa3\xca") # Mushroom Drops
+#f.write(b"\xd6\x05\x46\x8b\x80\xa3\xa3\x84\xa3\xca") # Black Glasses
+#f.write(b"\x46\x8e\xa2\x86\x8e\x8d\xac\xd7\x68\xca") # Gorgon Flower
+#f.write(b"\xd6\x1b\xca") # Hieroglyph
+#f.write(b"\xd6\x03\xca") # Aura
+#f.write(b"\xd6\x2d\xd7\x7f\xca") # Lola's Letter
+#f.write(b"\xd6\x68\xd6\x92\x89\x8e\xa5\xa2\x8d\x80\x8b\xca") # Father's journal
+#f.write(b"\xd6\x07\x62\x88\x8d\x86\xca") # Crystal Ring
+#f.write(b"\x40\xa0\xa0\x8b\x84\xca") # Apple
+#f.write(b"\x47\x60\xca") # HP
+#f.write(b"\x43\x44\x45\xca") # DEF
+#f.write(b"\x63\x64\x62\xca") # STR
+#f.write(b"\x4b\x88\x86\x87\xa4\xac\x49\x84\xa7\x84\x8b\xca") # Light Jewel
+#f.write(b"\xd6\x0c\x49\x84\xa7\x84\x8b\xca") # Dark Jewel
+#f.write(b"\x62\x84\x83\xac\xd6\x22\xca") # Red Jewels
 

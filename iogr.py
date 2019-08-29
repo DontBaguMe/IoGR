@@ -1,6 +1,6 @@
-from Tkinter import *
-from tkMessageBox import *
-from tkFileDialog import askopenfilename
+import tkinter
+import tkinter.filedialog
+import tkinter.messagebox
 import os
 import random
 import classes
@@ -12,12 +12,12 @@ VERSION = iogr_rom.VERSION
 
 
 def find_ROM():
-    ROM.delete(0,END)
-    ROM.insert(10,askopenfilename())
+    ROM.delete(0, tkinter.END)    
+    ROM.insert(10, tkinter.filedialog.askopenfilename())
 
 
 def generate_seed():
-    seed.delete(0,END)
+    seed.delete(0, tkinter.END)
     seed.insert(10,random.randint(0,99999999))
 
 
@@ -27,7 +27,7 @@ def generate_ROM():
     seed_str = seed.get()
 
     if not seed_str.isdigit():
-        showinfo("ERROR", "Please enter or generate a valid seed")
+        tkinter.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
         return
 
     statues_str = statues.get()
@@ -45,13 +45,13 @@ def generate_ROM():
         filename = iogr_rom.generate_filename(seed_int, diff_str, goal_str, logic_str, statues_str, start_str, variant_str, enemizer_str, fb)
         iogr_rom.generate_rom(filename, rompath, seed_int, diff_str, goal_str, logic_str, statues_str, start_str, variant_str, enemizer_str, fb)
 
-        showinfo("Success!", filename + " has been successfully created!")
+        tkinter.messagebox.showinfo("Success!", filename + " has been successfully created!")
     except OffsetError:
-        showinfo("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
+        tkinter.messagebox.showinfo("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
     except FileNotFoundError:
-        showinfo("ERROR", "ROM file does not exist")
-    except:
-        showinfo("ERROR", "Operation failed (unspecified error)")
+        tkinter.messagebox.showinfo("ERROR", "ROM file does not exist")
+    except Exception as e:
+        tkinter.messagebox.showinfo("ERROR", e)
 
 def diff_help():
     lines = []
@@ -76,7 +76,7 @@ def diff_help():
     lines.append(" - Enemies have roughly 2x STR/DEF compared to Normal")
     lines.append(" - Herbs restore 2 HP, item hints are removed")
     lines.append(" - Player upgrades available: 6/0/0 (1 upgrade per boss)")
-    showinfo("Difficulties", "\n".join(lines))
+    tkinter.messagebox.showinfo("Difficulties", "\n".join(lines))
 
 def goal_help():
     lines = []
@@ -93,7 +93,7 @@ def goal_help():
     lines.append(" - Easy: 35 Red Jewels")
     lines.append(" - Normal: 40 Red Jewels")
     lines.append(" - Hard/Extreme: 50 Red Jewels")
-    showinfo("Goal", "\n".join(lines))
+    tkinter.messagebox.showinfo("Goal", "\n".join(lines))
 
 def logic_help():
     lines = []
@@ -110,7 +110,7 @@ def logic_help():
     lines.append("CHAOS:")
     lines.append(" - Some non-essential items may be inaccessible")
     lines.append(" - Freedan abilities may show up in towns")
-    showinfo("Logic Modes", "\n".join(lines))
+    tkinter.messagebox.showinfo("Logic Modes", "\n".join(lines))
 
 def firebird_help():
     lines = []
@@ -118,7 +118,7 @@ def firebird_help():
     lines.append(" - The Crystal Ring is equipped,")
     lines.append(" - Kara is saved from her painting, and")
     lines.append(" - Player is in Shadow's form.")
-    showinfo("Firebird", "\n".join(lines))
+    tkinter.messagebox.showinfo("Firebird", "\n".join(lines))
 
 def variant_help():
     lines = []
@@ -127,7 +127,7 @@ def variant_help():
     lines.append("OHKO:")
     lines.append(" - Player starts with 1 HP")
     lines.append(" - All HP upgrades are removed or negated")
-    showinfo("Variants", "\n".join(lines))
+    tkinter.messagebox.showinfo("Variants", "\n".join(lines))
 
 def enemizer_help():
     lines = []
@@ -144,7 +144,7 @@ def enemizer_help():
     lines.append("")
     lines.append("INSANE:")
     lines.append(" - Same as Full, but enemy stats are shuffled")
-    showinfo("Enemizer", "\n".join(lines))
+    tkinter.messagebox.showinfo("Enemizer", "\n".join(lines))
 
 def start_help():
     lines = []
@@ -162,90 +162,90 @@ def start_help():
     lines.append("")
     lines.append("FORCED UNSAFE:")
     lines.append(" - You're guaranteed to start the game in the middle of a dungeon")
-    showinfo("Start Location", "\n".join(lines))
+    tkinter.messagebox.showinfo("Start Location", "\n".join(lines))
 
-root = Tk()
+root = tkinter.Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
 if os.name == 'nt':
     root.wm_iconbitmap('iogr.ico')
 else:
-    root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file=os.path.join(".",'iogr.png')))
+    root.tk.call('wm', 'iconphoto', root._w, tkinter.PhotoImage(file=os.path.join(".",'iogr.png')))
 
 # Add a grid
-mainframe = Frame(root)
-mainframe.grid(column=2,row=9, sticky=(N,W,E,S) )
+mainframe = tkinter.Frame(root)
+mainframe.grid(column=2,row=9, sticky=(tkinter.N, tkinter.W, tkinter.E, tkinter.S))
 mainframe.columnconfigure(0, weight = 1)
 mainframe.rowconfigure(0, weight = 1)
 mainframe.pack(pady = 20, padx = 20)
 
-Label(mainframe,text="ROM File").grid(row=0,column=0,sticky=W)
-Label(mainframe,text="Seed").grid(row=1,column=0,sticky=W)
-Label(mainframe,text="Difficulty").grid(row=2,column=0,sticky=W)
-Label(mainframe,text="Goal").grid(row=3,column=0,sticky=W)
-Label(mainframe,text="Logic").grid(row=4,column=0,sticky=W)
-Label(mainframe,text="Early Firebird").grid(row=5,column=0,sticky=W)
-Label(mainframe,text="Start Location").grid(row=6,column=0,sticky=W)
-Label(mainframe,text="Variant").grid(row=7,column=0,sticky=W)
-Label(mainframe,text="Enemizer (beta)").grid(row=8,column=0,sticky=W)
-Label(mainframe,text="Statues").grid(row=9,column=0,sticky=W)
+tkinter.Label(mainframe,text="ROM File").grid(row=0,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Seed").grid(row=1,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Difficulty").grid(row=2,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Goal").grid(row=3,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Logic").grid(row=4,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Early Firebird").grid(row=5,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Start Location").grid(row=6,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Variant").grid(row=7,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Enemizer (beta)").grid(row=8,column=0,sticky=tkinter.W)
+tkinter.Label(mainframe,text="Statues").grid(row=9,column=0,sticky=tkinter.W)
 
-difficulty = StringVar(root)
+difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
 difficulty.set("Normal")
 
-goal = StringVar(root)
+goal = tkinter.StringVar(root)
 goal_choices = ["Dark Gaia", "Red Jewel Hunt"]
 goal.set("Dark Gaia")
 
-logic = StringVar(root)
+logic = tkinter.StringVar(root)
 logic_choices = ["Completable", "Beatable", "Chaos"]
 logic.set("Completable")
 
-firebird = IntVar(root)
+firebird = tkinter.IntVar(root)
 firebird.set(0)
 
-start = StringVar(root)
+start = tkinter.StringVar(root)
 start_choices = ["South Cape", "Safe", "Unsafe", "Forced Unsafe"]
 start.set("South Cape")
 
-variant = StringVar(root)
+variant = tkinter.StringVar(root)
 variant_choices = ["None", "OHKO"]
 variant.set("None")
 
-enemizer = StringVar(root)
+enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
-statues = StringVar(root)
+statues = tkinter.StringVar(root)
 statue_choices = ["0","1","2","3","4","5","6","Random"]
 statues.set("Random")
 
-ROM = Entry(mainframe,width="40")
+ROM = tkinter.Entry(mainframe,width="40")
 ROM.grid(row=0,column=1)
 
-seed = Entry(mainframe)
+seed = tkinter.Entry(mainframe)
 seed.grid(row=1,column=1)
 seed.insert(10,random.randint(0,999999))
 
-diff_menu = OptionMenu(mainframe,difficulty,*diff_choices).grid(row=2,column=1)
-goal_menu = OptionMenu(mainframe,goal,*goal_choices).grid(row=3,column=1)
-logic_menu = OptionMenu(mainframe,logic,*logic_choices).grid(row=4,column=1)
-firebird_checkbox = Checkbutton(mainframe,variable=firebird,onvalue=1,offvalue=0).grid(row=5,column=1)
-start_menu = OptionMenu(mainframe,start,*start_choices).grid(row=6,column=1)
-variant_menu = OptionMenu(mainframe,variant,*variant_choices).grid(row=7,column=1)
-enemizer_menu = OptionMenu(mainframe,enemizer,*enemizer_choices).grid(row=8,column=1)
-statues_menu = OptionMenu(mainframe,statues,*statue_choices).grid(row=9,column=1)
+diff_menu = tkinter.OptionMenu(mainframe,difficulty,*diff_choices).grid(row=2,column=1)
+goal_menu = tkinter.OptionMenu(mainframe,goal,*goal_choices).grid(row=3,column=1)
+logic_menu = tkinter.OptionMenu(mainframe,logic,*logic_choices).grid(row=4,column=1)
+firebird_checkbox = tkinter.Checkbutton(mainframe,variable=firebird,onvalue=1,offvalue=0).grid(row=5,column=1)
+start_menu = tkinter.OptionMenu(mainframe,start,*start_choices).grid(row=6,column=1)
+variant_menu = tkinter.OptionMenu(mainframe,variant,*variant_choices).grid(row=7,column=1)
+enemizer_menu = tkinter.OptionMenu(mainframe,enemizer,*enemizer_choices).grid(row=8,column=1)
+statues_menu = tkinter.OptionMenu(mainframe,statues,*statue_choices).grid(row=9,column=1)
 
-Button(mainframe,text='Browse...', command=find_ROM).grid(row=0,column=2)
-Button(mainframe,text='Generate Seed', command=generate_seed).grid(row=1,column=2)
-Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=9,column=2)
+tkinter.Button(mainframe,text='Browse...', command=find_ROM).grid(row=0,column=2)
+tkinter.Button(mainframe,text='Generate Seed', command=generate_seed).grid(row=1,column=2)
+tkinter.Button(mainframe,text='Generate ROM', command=generate_ROM).grid(row=9,column=2)
 
-Button(mainframe,text='?', command=diff_help).grid(row=2,column=2)
-Button(mainframe,text='?', command=goal_help).grid(row=3,column=2)
-Button(mainframe,text='?', command=logic_help).grid(row=4,column=2)
-Button(mainframe,text='?', command=firebird_help).grid(row=5,column=2)
-Button(mainframe,text='?', command=start_help).grid(row=6,column=2)
-Button(mainframe,text='?', command=variant_help).grid(row=7,column=2)
-Button(mainframe,text='?', command=enemizer_help).grid(row=8,column=2)
+tkinter.Button(mainframe,text='?', command=diff_help).grid(row=2,column=2)
+tkinter.Button(mainframe,text='?', command=goal_help).grid(row=3,column=2)
+tkinter.Button(mainframe,text='?', command=logic_help).grid(row=4,column=2)
+tkinter.Button(mainframe,text='?', command=firebird_help).grid(row=5,column=2)
+tkinter.Button(mainframe,text='?', command=start_help).grid(row=6,column=2)
+tkinter.Button(mainframe,text='?', command=variant_help).grid(row=7,column=2)
+tkinter.Button(mainframe,text='?', command=enemizer_help).grid(row=8,column=2)
 
 root.mainloop()
