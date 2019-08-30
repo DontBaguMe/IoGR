@@ -61,15 +61,18 @@ def generate_filename(seed, difficulty, goal, logic, statues, variant, start, en
     :param str enemizer: Shuffles the enemies. Possible values are 'None', 'Limited', 'Balanced', 'Full', and 'Insane'
     :param boolean firebird: Enables or disables early firebird access
     """
+
     if goal == "Dark Gaia":
         goal_cd = "DG" + statues[0]
     else:
         goal_cd = "RJ"
 
-    if logic == "Chaos":
-        logic_chr = "X"
+    if logic == "Completable":
+        logic_chr = ""
+    elif logic == "Chaos":
+        logic_chr = "_X"
     else:
-        logic_chr = logic[0]
+        logic_chr = "_" + logic[0]
 
     if variant == "OHKO":
         variant_chr = "_OHKO"
@@ -93,7 +96,7 @@ def generate_filename(seed, difficulty, goal, logic, statues, variant, start, en
     else:
         enemizer_chr = "_e" + enemizer[0]
 
-    return "IoGR_v" + VERSION + "_" + difficulty + "_" + goal_cd + "_" + logic_chr + firebird_chr + start_chr + variant_chr + enemizer_chr + "_" + str(seed)
+    return "IoGR_v" + VERSION + "_" + difficulty + "_" + goal_cd + logic_chr + firebird_chr + start_chr + variant_chr + enemizer_chr + "_" + str(seed)
 
 
 def get_offset(rom_data):
@@ -106,7 +109,7 @@ def get_offset(rom_data):
     return h_addr - int("ffc0", 16)
 
 
-def generate_rom(filename, rom_path, rng_seed, mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4", start_mode="South Cape", variant="None", enemizer="None", firebird=False):
+def generate_rom(filename, rom_path, rng_seed, mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4", variant="None", start_mode="South Cape", enemizer="None", firebird=False):
     """Generates a filename for a given seed.
     :param str filename: The filename of the randomized ROM.
     :param str rom_path: The path to the base ROM.
@@ -2709,7 +2712,7 @@ def main(argv):
     filename = generate_filename(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.variant, args.start, args.enemizer, args.firebird)
 
     try:
-        generate_rom(filename, args.path, args.seed, args.difficulty, args.goal, args.logic, args.statues, args.start, args.variant, args.enemizer, args.firebird)
+        generate_rom(filename, args.path, args.seed, args.difficulty, args.goal, args.logic, args.statues, args.variant, args.start, args.enemizer, args.firebird)
         print("File created: " + filename + ".sfc")
     except Exception as e:
         print (e)

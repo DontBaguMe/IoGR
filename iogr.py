@@ -12,7 +12,7 @@ VERSION = iogr_rom.VERSION
 
 
 def find_ROM():
-    ROM.delete(0, tkinter.END)    
+    ROM.delete(0, tkinter.END)
     ROM.insert(10, tkinter.filedialog.askopenfilename())
 
 
@@ -42,8 +42,8 @@ def generate_ROM():
         seed_int = int(seed_str)
         fb = firebird.get()
 
-        filename = iogr_rom.generate_filename(seed_int, diff_str, goal_str, logic_str, statues_str, start_str, variant_str, enemizer_str, fb)
-        iogr_rom.generate_rom(filename, rompath, seed_int, diff_str, goal_str, logic_str, statues_str, start_str, variant_str, enemizer_str, fb)
+        filename = iogr_rom.generate_filename(seed_int, diff_str, goal_str, logic_str, statues_str, variant_str, start_str, enemizer_str, fb)
+        iogr_rom.generate_rom(filename, rompath, seed_int, diff_str, goal_str, logic_str, statues_str, variant_str, start_str, enemizer_str, fb)
 
         tkinter.messagebox.showinfo("Success!", filename + " has been successfully created!")
     except OffsetError:
