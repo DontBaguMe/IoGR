@@ -1,5 +1,3 @@
-import bitstring
-
 MAX_WIDTH = 26
 
 text_words = {

@@ -93,7 +93,7 @@ def generate_filename(seed, difficulty, goal, logic, statues, variant, start, en
     else:
         enemizer_chr = "_e" + enemizer[0]
 
-    return "IoGR_v" + VERSION + "_" + difficulty + "_" + goal_cd + "_" + logic_chr + firebird_chr + start_chr + variant_chr + enemizer_chr + "_" + str(seed) + ".sfc"
+    return "IoGR_v" + VERSION + "_" + difficulty + "_" + goal_cd + "_" + logic_chr + firebird_chr + start_chr + variant_chr + enemizer_chr + "_" + str(seed)
 
 
 def get_offset(rom_data):
@@ -142,7 +142,7 @@ def generate_rom(filename, rom_path, rng_seed, mode_str="Normal", goal="Dark Gai
     folder_dest = os.path.dirname(rom_path) + os.path.sep
     folder_root = os.getcwd()
     folder = folder_root + os.path.sep + "bin" + os.path.sep
-    rom_path_new = folder_dest + filename
+    rom_path_new = folder_dest + filename + ".sfc"
 
     try:
         f_rom = open(rom_path, "rb")
@@ -2704,13 +2704,13 @@ def generate_rom(filename, rom_path, rng_seed, mode_str="Normal", goal="Dark Gai
     return True
 
 
-def main(argv):    
+def main(argv):
     args = parser.parse_args(argv)
     filename = generate_filename(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.variant, args.start, args.enemizer, args.firebird)
 
     try:
         generate_rom(filename, args.path, args.seed, args.difficulty, args.goal, args.logic, args.statues, args.start, args.variant, args.enemizer, args.firebird)
-        print("File created: " + filename)
+        print("File created: " + filename + ".sfc")
     except Exception as e:
         print (e)
 
