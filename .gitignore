@@ -1,6 +1,9 @@
 .idea/
+.vscode/
 build/
 dist/
+data/*.sfc
+data/output/**
 
 **/*.pyc
 *.smc
@@ -28,4 +31,4 @@ iogr_rom.spec
 
 iogr.spec
 
-.vscode/
+

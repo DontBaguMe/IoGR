@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Enemizer(Enum):
     NONE = 0
     LIMITED = 1

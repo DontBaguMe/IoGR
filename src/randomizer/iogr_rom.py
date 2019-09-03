@@ -1,20 +1,19 @@
-# Python libraries
-import sys
-from shutil import copyfile
-import csv
 import binascii
-import datetime
 import hmac
 import os
 import random
 import tempfile
+from typing import BinaryIO
 
-# Local libraries
-import classes
-import quintet_comp
-import quintet_text as qt
-
-from errors import FileNotFoundError, OffsetError
+from src.randomizer import classes, constants, quintet_comp, quintet_text as qt
+from src.randomizer.errors import FileNotFoundError, OffsetError
+from src.randomizer.models.randomizer_data import RandomizerData
+from src.randomizer.models.enums.difficulty import Difficulty
+from src.randomizer.models.enums.goal import Goal
+from src.randomizer.models.enums.logic import Logic
+from src.randomizer.models.enums.enemizer import Enemizer
+from src.randomizer.models.enums.start_location import StartLocation
+from src.randomizer.models.enums.entrance_shuffle import EntranceShuffle
 
 VERSION = "2.3.0"
 
@@ -31,23 +30,34 @@ GEMS_HARD = 50
 INV_FULL = b"\x5c\x8e\xc9\x80"
 FORCE_CHANGE = b"\x22\x30\xfd\x88"
 
-from models.enums.difficulty import Difficulty
-from models.enums.goal import Goal
-from models.enums.logic import Logic
-from models.enums.enemizer import Enemizer
-from models.enums.start_location import StartLocation
-from models.enums.entrance_shuffle import EntranceShuffle
+OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
+ROM_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "Illusion of Gaia.sfc"
+BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
+
+
+def get_offset(rom_data):
+    header = b"\x49\x4C\x4C\x55\x53\x49\x4F\x4E\x20\x4F\x46\x20\x47\x41\x49\x41\x20\x55\x53\x41"
+
+    h_addr = rom_data.find(header)
+    if h_addr < 0:
+        raise OffsetError
+
+    return h_addr - int("ffc0", 16)
+
 
 class Randomizer:
-    def __init__(self, data):
-        self.data = data
+    offset: int = 0
+    statues_required = 0
 
-    def generate_filename(self):        
+    def __init__(self, data: RandomizerData):
+        self.settings = data
+
+    def generate_filename(self):
         def getDifficulty(difficulty):
             if difficulty.value == Difficulty.EASY.value:
-                return "_easy"            
+                return "_easy"
             if difficulty.value == Difficulty.NORMAL.value:
-                return "_normal"            
+                return "_normal"
             if difficulty.value == Difficulty.HARD.value:
                 return "_hard"
             if difficulty.value == Difficulty.EXTREME.value:
@@ -90,306 +100,148 @@ class Randomizer:
                 return "_ei"
 
         def getSwitch(switch, param):
-            if switch == True:
+            if switch:
                 return "_" + param
             return ""
 
-
         filename = "IoGR_v" + VERSION
-        filename += getDifficulty(self.data.difficulty)
-        filename += getGoal(self.data.goal, self.data.statues)
-        filename += getLogic(self.data.logic)        
-        filename += getStartingLocation(self.data.start_location)
-        filename += getSwitch(self.data.firebird, "f")
-        filename += getEnemizer(self.data.enemizer)
-        filename += "_" + str(self.data.seed) + ".sfc"
-        
-        return filename        
+        filename += getDifficulty(self.settings.difficulty)
+        filename += getGoal(self.settings.goal, self.settings.statues)
+        filename += getLogic(self.settings.logic)
+        filename += getStartingLocation(self.settings.start_location)
+        filename += getSwitch(self.settings.firebird, "f")
+        filename += getEnemizer(self.settings.enemizer)
+        filename += "_" + str(self.settings.seed) + ".sfc"
 
-    def get_offset(self, rom_data):
-        header = b"\x49\x4C\x4C\x55\x53\x49\x4F\x4E\x20\x4F\x46\x20\x47\x41\x49\x41\x20\x55\x53\x41"
+        return filename
 
-        h_addr = rom_data.find(header)
-        if h_addr < 0:
-            raise OffsetError
-
-        return h_addr - int("ffc0", 16)
-
-    def generate_rom(self, filename, rom_path, rng_seed, mode_str="Normal", goal="Dark Gaia", logic_mode="Completable", statues_reqstr="4", start_mode="South Cape", variant="None", enemizer="None", firebird=False):
-        """Generates a filename for a given seed.
-        :param str filename: The filename of the randomized ROM.
-        :param str rom_path: The path to the base ROM.
-        :param int rng_seed: A numerical representation of the seed iteration
-        :param str mode_str: The difficulty of the seed. Possible values are 'Easy', 'Normal', 'Hard', and 'Extreme'
-        :param str goal: Determines what is necessary to complete the game. Possible values are 'Dark Gaia' and 'Red Jewel Hunt'
-        :param str logic_mode: Possible values are 'Completable', 'Beatable', and 'Chaos'
-        :param str statues_reqstr: The number of statues required for completion. Possible values are 0 - 6 and Random
-        :param str variant: Variations to the randomization. Possible values are 'OHKO' for One-Hit Knockout and 'Red Jewel Madness'
-        :param str start_mode: The starting position.  Possible values are 'South Cape', 'Safe', 'Unsafe' and 'Forced Unsafe'
-        :param str enemizer: Shuffles the enemies. Possible values are 'None', 'Limited', 'Balanced', 'Full', and 'Insane'
-        :param boolean firebird: Enables or disables early firebird access
-        """
+    def generate_rom(self, filename: str):
         # Initiate random seed
-        random.seed(rng_seed)
+        random.seed(self.settings.seed)
+        statues_required = self.__get_required_statues__()
 
-        if mode_str == "Easy":
-            mode = 0
-        elif mode_str == "Hard":
-            mode = 2
-        elif mode_str == "Extreme":
-            mode = 3
-        else:
-            mode = 1
-
-        if goal == "Red Jewel Hunt":
-            statues_required = 0
-        elif statues_reqstr == "Random":
-            statues_required = random.randint(0, 6)
-        else:
-            statues_required = int(statues_reqstr)
-
-        folder_dest = os.path.dirname(rom_path) + os.path.sep
-        folder_root = os.path.dirname(__file__)
-        folder = folder_root + os.path.sep + "bin" + os.path.sep
-        rom_path_new = folder_dest + filename
-
-        try:
-            f_rom = open(rom_path, "rb")
-        except:
-            raise FileNotFoundError
-
-        f = tempfile.TemporaryFile()
-        f_rom.seek(0)
-        f.write(f_rom.read())
-        f_rom.seek(0)
-
-        rom_data = f_rom.read()
-
-        f_rom.close()
-
-        rom_offset = self.get_offset(rom_data)
+        f = self.__copy_original_rom__()
+        rom_offset = self.offset
 
         ##########################################################################
         #                             Early Firebird
         ##########################################################################
         # Write new Firebird logic into unused memory location
-        f_firebird = open(folder + "02f0c0_firebird.bin", "rb")
-        f.seek(int("2f0c0", 16) + rom_offset)
-        f.write(f_firebird.read())
-        f_firebird.close()
+        self.__append_file_data__("02f0c0_firebird.bin", "2f0c0", f)
 
-        if firebird == 1:
+        if self.settings.firebird:
             # Change firebird logic
             # Requires Shadow's form, Crystal Ring (switch #$3e) and Kara rescued (switch #$8a)
-            f.seek(int("2cd07", 16) + rom_offset)
-            f.write(b"\x4c\xc0\xf0\xea\xea\xea")
-            f.seek(int("2cd88", 16) + rom_offset)
-            f.write(b"\x4c\xe0\xf0\xea\xea\xea")
-            f.seek(int("2ce06", 16) + rom_offset)
-            f.write(b"\x4c\x00\xf1\xea\xea\xea")
-            f.seek(int("2ce84", 16) + rom_offset)
-            f.write(b"\x4c\x20\xf1\xea\xea\xea")
+            self.__write_game_data__("2cd07", b"\x4c\xc0\xf0\xea\xea\xea", f)
+            self.__write_game_data__("2cd88", b"\x4c\xe0\xf0\xea\xea\xea", f)
+            self.__write_game_data__("2ce06", b"\x4c\x00\xf1\xea\xea\xea", f)
+            self.__write_game_data__("2ce84", b"\x4c\x20\xea\xea\xea\xea", f)
 
             # Load firebird assets into every map
-            f.seek(int("3e03a", 16) + rom_offset)
-            f.write(b"\x80\x00")
-            f.seek(int("eaf0", 16) + rom_offset)
-            f.write(b"\x20\xa0\xf4\xea\xea")
-            f.seek(int("f4a0", 16) + rom_offset)
-            f.write(b"\x02\x3b\x71\xb2\xf4\x80\xa9\x00\x10\x04\x12\x60")
-            f.seek(int("f4b0", 16) + rom_offset)
-            f.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
+            self.__write_game_data__("3e03a", b"\x80\x00", f)
+            self.__write_game_data__("eaf0", b"\x20\xa0\xf4\xea\xea", f)
+            self.__write_game_data__("f4a0", b"\x02\x3b\x71\xb2\xf4\x80\xa9\x00\x10\x04\x12\x60", f)
+            self.__write_game_data__("f4b0", b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef", f)
 
         ##########################################################################
         #                            Modify ROM Header
         ##########################################################################
-        # New game title
-        f.seek(int("ffd1", 16) + rom_offset)
-        f.write(b"\x52\x41\x4E\x44\x4F")
+        self.__write_game_data__("ffd1", b"\x52\x41\x4E\x44\x4F", f)  # New game title
+        self.__write_game_data__("1da4c", b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90", f)  # Put randomizer hash code on start screen
 
-        # Put randomizer hash code on start screen
-        f.seek(int("1da4c", 16) + rom_offset)
-        f.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
-
-        hash_str = filename
-        h = hmac.new(bytes(rng_seed), hash_str.encode())
-        hash = h.digest()
-
-        hash_dict = [b"\x20", b"\x21", b"\x28", b"\x29", b"\x2a", b"\x2b", b"\x2c", b"\x2d", b"\x2e", b"\x2f", b"\x30", b"\x31", b"\x32", b"\x33"]
-        hash_dict += [b"\x34", b"\x35", b"\x36", b"\x37", b"\x38", b"\x39", b"\x3a", b"\x3b", b"\x3c", b"\x3d", b"\x3e", b"\x3f", b"\x42", b"\x43"]
-        hash_dict += [b"\x44", b"\x46", b"\x47", b"\x48", b"\x4a", b"\x4b", b"\x4c", b"\x4d", b"\x4e", b"\x50", b"\x51", b"\x52", b"\x53", b"\x54"]
-        hash_dict += [b"\x56", b"\x57", b"\x58", b"\x59", b"\x5a", b"\x5b", b"\x5c", b"\x5d", b"\x5e", b"\x5f", b"\x7c", b"\x80", b"\x81"]
-
-        hash_len = len(hash_dict)
-
-        i = 0
-        hash_final = b""
-        while i < 6:
-            key = hash[i] % hash_len
-            hash_final += hash_dict[key]
-            i += 1
-
-        # print binascii.hexlify(hash_final)
-        f.seek(int("1da57", 16) + rom_offset)
-        f.write(hash_final)
+        hash_value = self.__build_hash__(filename)
+        self.__write_game_data__("1da57", hash_value, f)
 
         ##########################################################################
         #                           Negate useless switches
         #                 Frees up switches for the randomizer's use
         ##########################################################################
-        f.seek(int("48a03", 16) + rom_offset)  # Switch 17 - Enter Seth's house
-        f.write(b"\x10")
-        f.seek(int("4bca9", 16) + rom_offset)  # Switch 18 - Enter Will's house (1/2)
-        f.write(b"\x10")
-        f.seek(int("4bccc", 16) + rom_offset)  # Switch 18 - Enter Will's house (2/2)
-        f.write(b"\x10")
-        f.seek(int("4bcda", 16) + rom_offset)  # Switch 19 - Enter Lance's house
-        f.write(b"\x10")
-        f.seek(int("4bce8", 16) + rom_offset)  # Switch 20 - Enter Erik's house
-        f.write(b"\x10")
-        f.seek(int("4be3d", 16) + rom_offset)  # Switch 21 - Enter seaside cave
-        f.write(b"\x10")
-        f.seek(int("4bcf6", 16) + rom_offset)  # Switch 23 - Complete seaside cave events
-        f.write(b"\x10")
-        f.seek(int("9bf95", 16) + rom_offset)  # Switch 58 - First convo with Lilly
-        f.write(b"\x10")
-        f.seek(int("4928a", 16) + rom_offset)  # Switch 62 - First convo with Lola (1/2)
-        f.write(b"\x10")
-        f.seek(int("49873", 16) + rom_offset)  # Switch 62 - First convo with Lola (1/2)
-        f.write(b"\x10")
-        f.seek(int("4e933", 16) + rom_offset)  # Switch 65 - Hear Elder's voice
-        f.write(b"\x10")
-        f.seek(int("58a29", 16) + rom_offset)  # Switch 78 - Talk to Gold Ship queen
-        f.write(b"\x10")
-        f.seek(int("4b067", 16) + rom_offset)
-        f.write(b"\x10\x00")
-        f.seek(int("4b465", 16) + rom_offset)
-        f.write(b"\x10\x00")
-        f.seek(int("4b8b6", 16) + rom_offset)
-        f.write(b"\x10\x00")
-        f.seek(int("686fa", 16) + rom_offset)  # Switch 111 - meet Lilly at Seaside Palace
-        f.write(b"\x10")
-        f.seek(int("78d76", 16) + rom_offset)
-        f.write(b"\x10")
-        f.seek(int("78d91", 16) + rom_offset)
-        f.write(b"\x10")
-        f.seek(int("7d7b1", 16) + rom_offset)  # Switch 159 - Mt. Kress on map
-        f.write(b"\x10")
+        self.__write_game_data__("48a03", b"\x10", f)  # Switch 17 - Enter Seth's house
+        self.__write_game_data__("4bca9", b"\x10", f)  # Switch 18 - Enter Will's house (1/2)
+        self.__write_game_data__("4bccc", b"\x10", f)  # Switch 18 - Enter Will's house (2/2)
+        self.__write_game_data__("4bcda", b"\x10", f)  # Switch 19 - Enter Lance's house
+        self.__write_game_data__("4bce8", b"\x10", f)  # Switch 20 - Enter Erik's house
+        self.__write_game_data__("4be3d", b"\x10", f)  # Switch 21 - Enter seaside cave
+        self.__write_game_data__("4bcf6", b"\x10", f)  # Switch 23 - Complete seaside cave events
+        self.__write_game_data__("9bf95", b"\x10", f)  # Switch 58 - First convo with Lilly
+        self.__write_game_data__("4928a", b"\x10", f)  # Switch 62 - First convo with Lola (1/2)
+        self.__write_game_data__("49873", b"\x10", f)  # Switch 62 - First convo with Lola (2/2)
+        self.__write_game_data__("4e933", b"\x10", f)  # Switch 65 - Hear Elder's voice
+        self.__write_game_data__("58a29", b"\x10", f)  # Switch 78 - Talk to Gold Ship queen
+        self.__write_game_data__("4b067", b"\x10\x00", f)
+        self.__write_game_data__("4b465", b"\x10\x00", f)
+        self.__write_game_data__("4b8b6", b"\x10\x00", f)
+        self.__write_game_data__("686fa", b"\x10", f)  # Switch 111 - meet Lilly at Seaside Palace
+        self.__write_game_data__("78d76", b"\x10", f)
+        self.__write_game_data__("78d91", b"\x10", f)
+        self.__write_game_data__("7d7b1", b"\x10", f)  # Switch 159 - Mt. Kress on map
 
         ##########################################################################
         #                           Update map headers
         ##########################################################################
-        f_mapdata = open(folder + "0d8000_mapdata.bin", "rb")
-        f.seek(int("d8000", 16) + rom_offset)
-        f.write(f_mapdata.read())
-        f_mapdata.close
+        self.__append_file_data__("0d8000_mapdata.bin", "d8000", f)
 
-        if mode == 0:
+        if self.settings.difficulty.value == Difficulty.EASY.value:
             f.seek(0)
             rom = f.read()
-            addr = rom.find(b"\x00\x07\x00\x02\x01", int("d8000", 16) + rom_offset)
+            addr = rom.find(b"\x00\x07\x00\x02\x01", int("d8000", 16) + self.offset)
             f.seek(addr)
             f.write(b"\x00\x09")
-            addr = rom.find(b"\x00\x09\x00\x02\x08", int("d8000", 16) + rom_offset)
+            addr = rom.find(b"\x00\x09\x00\x02\x08", int("d8000", 16) + self.offset)
             f.seek(addr)
             f.write(b"\x00\x07")
 
         ##########################################################################
         #                        Update treasure chest data
         ##########################################################################
-        # Remove fanfares from treasure chests
-        f_chests = open(folder + "01afa6_chests.bin", "rb")
-        f.seek(int("1afa6", 16) + rom_offset)
-        f.write(f_chests.read())
-        f_chests.close
-
-        # Update item acquisition messages and add messages for new items (29-2f)
-        f_acquisition = open(folder + "01fd24_acquisition.bin", "rb")
-        f.seek(int("1fd24", 16) + rom_offset)
-        f.write(f_acquisition.read())
-        f_acquisition.close
+        self.__append_file_data__("01afa6_chests.bin", "1afa6", f)  # Remove fanfares from treasure chests
+        self.__append_file_data__("01fd24_acquisition.bin", "1fd24", f)  # Update item acquisition messages and add messages for new items (29-2f)
 
         ##########################################################################
         #                            Update item events
         #    Adds new items that increase HP, DEF, STR and improve abilities
         ##########################################################################
-        # Add pointers for new items @38491
-        f.seek(int("38491", 16) + rom_offset)
-        f.write(b"\x6f\x9f\x91\x9f\x1d\x88\x3a\x88\x5f\x88\x90\x9d\xd0\x9d")
-
-        # Add start menu descriptions for new items
-        f_startmenu = open(folder + "01dabf_startmenu.bin", "rb")
-        f.seek(int("1dabf", 16) + rom_offset)
-        f.write(f_startmenu.read())
-        f_startmenu.close
-        f_itemdesc = open(folder + "01e132_itemdesc.bin", "rb")
-        f.seek(int("1e132", 16) + rom_offset)
-        f.write(f_itemdesc.read())
-        f_itemdesc.close
+        self.__write_game_data__("38491", b"\x6f\x9f\x91\x9f\x1d\x88\x3a\x88\x5f\x88\x90\x9d\xd0\x9d", f)  # Add pointers for new items @38491
+        self.__append_file_data__("01dabf_startmenu.bin", "1dabf", f)  # Add start menu descriptions for new items
+        self.__append_file_data__("01e132_itemdesc.bin", "1e132", f)
 
         # Update sprites for new items - first new item starts @108052, 7 new items
         # Points all items to unused sprite for item 4c ("76 83" in address table)
-        f.seek(int("108052", 16) + rom_offset)
-        f.write(b"\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83")
-
-        # Update item removal restriction flags
-        f.seek(int("1e12a", 16) + rom_offset)
-        f.write(b"\x9f\xff\x97\x37\xb0\x01")
+        self.__write_game_data__("108052", b"\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83", f)
+        self.__write_game_data__("1e12a", b"\x9f\xff\x97\x37\xb0\x01", f)  # Update item removal restriction flags
 
         # Write STR, Psycho Dash, and Dark Friar upgrade items
         # Replaces code for item 05 - Inca Melody @3881d
-        f_item05 = open(folder + "03881d_item05.bin", "rb")
-        f.seek(int("3881d", 16) + rom_offset)
-        f.write(f_item05.read())
-        f_item05.close
+        self.__append_file_data__("03881d_item05.bin", "3881d", f)
 
         # Modify Prison Key, now is destroyed when used
-        f.seek(int("385d4", 16) + rom_offset)
-        f.write(b"\x0a\x17\x0c\x18")
-        f.seek(int("385fe", 16) + rom_offset)
-        f.write(b"\x02\xd5\x02\x60")
+        self.__write_game_data__("385d4", b"\x0a\x17\x0c\x18", f)
+        self.__write_game_data__("385fe", b"\x02\xd5\x02\x60", f)
 
         # Modify Lola's Melody, now is destroyed when used and only works in Itory
-        f_item09 = open(folder + "038bf5_item09.bin", "rb")
-        f.seek(int("38bf5", 16) + rom_offset)
-        f.write(f_item09.read())
-        f_item09.close
-        f.seek(int("38bbc", 16) + rom_offset)
-        f.write(b"\x00")
-        f.seek(int("38bc1", 16) + rom_offset)
-        f.write(b"\x00")
+        self.__append_file_data__("038bf5_item09.bin", "38bf5", f)
+        self.__write_game_data__("38bbc", b"\x00", f)
+        self.__write_game_data__("38bc1", b"\x00", f)
 
         # Modify code for Memory Melody to heal Neil's memory
-        f_item0d = open(folder + "038f17_item0d.bin", "rb")
-        f.seek(int("38f17", 16) + rom_offset)
-        f.write(f_item0d.read())
-        f_item0d.close
-
-        # Modify Magic Dust, alters switch set and text
-        f.seek(int("393c3", 16) + rom_offset)
-        f.write(b"\x8a")
+        self.__append_file_data__("038f17_item0d.bin", "38f17", f)
+        self.__write_game_data__("393c3", b"\x8a", f)  # Modify Magic Dust, alters switch set and text
 
         # Modify Blue Journal, functions as an in-game tutorial
-        f.seek(int("3943b", 16) + rom_offset)
-        f.write(b"\xf0\x94")
-        f.seek(int("39440", 16) + rom_offset)
-        f.write(b"\x10\xf2")
-        f.seek(int("39445", 16) + rom_offset)
-        f.write(b"\x00\xf8")
-        f.seek(int("3944a", 16) + rom_offset)
-        f.write(b"\x00\xfb")
+        self.__write_game_data__("3943b", b"\xf0\x94", f)
+        self.__write_game_data__("39440", b"\x10\xf2", f)
+        self.__write_game_data__("39445", b"\x00\xf8", f)
+        self.__write_game_data__("3944a", b"\x00\xfb", f)
 
-        f.seek(int("3944e", 16) + rom_offset)
-        f.write(b"\xce" + qt.encode("       Welcome to") + b"\xcb\xcb" + qt.encode("  Bagu's Super-Helpful"))
-        f.write(b"\xcb" + qt.encode("  In-Game Tutorial!(TM)|"))
-        f.write(qt.encode("Whadaya wanna know about?") + b"\xcb" + qt.encode(" Beating the Game") + b"\xcb")
-        f.write(qt.encode(" Exploring the World") + b"\xcb" + qt.encode(" What If I'm Stuck?") + b"\xca")
+        self.__write_game_data__("3944e",
+                                 b"\xce" + qt.encode("       Welcome to") + b"\xcb\xcb" + qt.encode("  Bagu's Super-Helpful") +
+                                 b"\xcb" + qt.encode("  In-Game Tutorial!(TM)|") +
+                                 qt.encode("Whadaya wanna know about?") + b"\xcb" + qt.encode(" Beating the Game") + b"\xcb" +
+                                 qt.encode(" Exploring the World") + b"\xcb" + qt.encode(" What If I'm Stuck?") + b"\xca", f)
+        self.__write_game_data__("394f0", b"\xce" + qt.encode("He closed the journal.") + b"\xc0", f)
 
-        f.seek(int("394f0", 16) + rom_offset)
-        f.write(b"\xce" + qt.encode("He closed the journal.") + b"\xc0")
-
-        f.seek(int("3f210", 16) + rom_offset)
-        if goal == "Dark Gaia":
+        self.__seek__("3f210", f)
+        if self.settings.goal.value == Goal.DARK_GAIA.value:
             f.write(b"\xce" + qt.encode("BEATING THE GAME:       You must do the following two things to beat the game:|"))
             f.write(qt.encode("1. RESCUE KARA          Kara is trapped in a painting! You need Magic Dust to free her.|"))
             f.write(qt.encode("She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|"))
@@ -406,110 +258,87 @@ class Randomizer:
             f.write(qt.encode("Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|"))
             f.write(qt.encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
             f.write(qt.encode("She will give you the option to face Dark Gaia and beat the game. Good luck, and have fun!") + b"\xc0")
-        elif goal == "Red Jewel Hunt":
+        elif self.settings.goal.value == Goal.RED_JEWEL_HUNT.value:
             f.write(b"\xce" + qt.encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
             f.write(qt.encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
             f.write(qt.encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
             f.write(qt.encode("Happy hunting!") + b"\xc0")
 
-        f.seek(int("3f800", 16) + rom_offset)
-        f.write(b"\xce" + qt.encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
-        f.write(qt.encode("As you gain more items, you will be able to visit other continents and access more locations.|"))
-        f.write(qt.encode("Here are some of the helpful travel items you can find in the game:|"))
-        f.write(qt.encode("- Lola's Letter         If you find this letter, read it and go see Erik in South Cape.|"))
-        f.write(qt.encode("- The Teapot            If you use the Teapot in the Moon Tribe camp, you can travel by Sky Garden.|"))
-        f.write(qt.encode("- Memory Melody         Play this melody in Neil's Cottage, and he'll fly you in his airplane.|"))
-        f.write(qt.encode("- The Will              Show this document to the stable masters in either Watermia or Euro.|"))
-        f.write(qt.encode("- The Large Roast       Give this to the hungry child in the Natives' Village.|"))
-        f.write(qt.encode("If you're ever stuck in a location, find a Dark Space. Gaia can always return you to South Cape.") + b"\xc0")
+        self.__write_game_data__("3f800",
+                                 b"\xce" +
+                                 qt.encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|") +
+                                 qt.encode("As you gain more items, you will be able to visit other continents and access more locations.|") +
+                                 qt.encode("Here are some of the helpful travel items you can find in the game:|") +
+                                 qt.encode("- Lola's Letter         If you find this letter, read it and go see Erik in South Cape.|") +
+                                 qt.encode("- The Teapot            If you use the Teapot in the Moon Tribe camp, you can travel by Sky Garden.|") +
+                                 qt.encode("- Memory Melody         Play this melody in Neil's Cottage, and he'll fly you in his airplane.|") +
+                                 qt.encode("- The Will              Show this document to the stable masters in either Watermia or Euro.|") +
+                                 qt.encode("- The Large Roast       Give this to the hungry child in the Natives' Village.|") +
+                                 qt.encode("If you're ever stuck in a location, find a Dark Space. Gaia can always return you to South Cape.") + b"\xc0",
+                                 f)
 
-        f.seek(int("3fb00", 16) + rom_offset)
+        self.__seek__("3fb00", f)
         f.write(b"\xce" + qt.encode("WHAT IF I'M STUCK?      There are a lot of item locations in this game! It's easy to get stuck.|"))
         f.write(qt.encode("Here are some resources that might help you:|"))
         f.write(qt.encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
         f.write(qt.encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-        if mode == 0:
+        if self.settings.difficulty.value == Difficulty.EASY.value:
             f.write(qt.encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
         else:
             f.write(qt.encode("- In-Game Tracker       (Easy mode only)|"))
         f.write(qt.encode("- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
 
-        # Modify Lance's Letter
-        # Prepare it to spoil Kara location
-        f_item16 = open(folder + "03950c_item16.bin", "rb")
-        f.seek(int("3950c", 16) + rom_offset)
-        f.write(f_item16.read())
-        f_item16.close
-
-        # Modify Teapot
-        # Now activates in Moon Tribe camp instead of Euro
-        f_item19 = open(folder + "03983d_item19.bin", "rb")
-        f.seek(int("3983d", 16) + rom_offset)
-        f.write(f_item19.read())
-        f_item19.close
+        self.__append_file_data__("03950c_item16.bin", "3950c", f)  # Modify Lance's Letter, Prepare it to spoil Kara location
+        self.__append_file_data__("03983d_item19.bin", "3983d", f)  # Modify Teapot, Now activates in Moon Tribe camp instead of Euro
 
         # Modify Black Glasses, now permanently worn and removed from inventory when used
-        f.seek(int("39981", 16) + rom_offset)
-        f.write(b"\x8a\x99\x02\xcc\xf5\x02\xd5\x1c\x60\xd3\x42\x8e\x8e\x8b\x8d\x84")
-        f.write(b"\xa3\xa3\xac\x88\x8d\xa4\x84\x8d\xa3\x88\x85\x88\x84\xa3\x4f\xc0")
+        self.__write_game_data__("39881", b"\x8a\x99\x02\xcc\xf5\x02\xd5\x1c\x60\xd3\x42\x8e\x8e\x8b\x8d\x84\xa3\xa3\xac\x88\x8d\xa4\x84\x8d\xa3\x88\x85\x88\x84\xa3\x4f\xc0", f)
 
         # Modify Aura, now unlocks Shadow's form when used
-        f.seek(int("39cdc", 16) + rom_offset)
-        f.write(b"\x02\xbf\xe4\x9c\x02\xcc\xb4\x60\xd3")
-        f.write(b"\xd6\x4c\x85\x8e\xa2\x8c\xac\xa5\x8d\x8b\x8e\x82\x8a\x84\x83\x4f\xc0")
+        self.__write_game_data__("39cdc", b"\x02\xbf\xe4\x9c\x02\xcc\xb4\x60\xd3\xd6\x4c\x85\x8e\xa2\x8c\xac\xa5\x8d\x8b\x8e\x82\x8a\x84\x83\x4f\xc0", f)
 
         # Write 2 Jewel and 3 Jewel items; Lola's Letter now teaches Morse Code
         # Replaces and modifies code for item 25 - Lola's Letter @39d09
-        f_item25 = open(folder + "039d09_item25.bin", "rb")
-        f.seek(int("39d09", 16) + rom_offset)
-        f.write(f_item25.read())
-        f_item25.close
+        self.__append_file_data__("039d09_item25.bin", "39d09", f)
 
         # Have fun with text in Item 26 (Father's Journal)
-        f.seek(int("39ea8", 16) + rom_offset)
-        f.write(qt.encode("It reads: ") + b"\x2d" + qt.encode("He who is ") + b"\xcb" + qt.encode("valiant and pure of spirit...") + b"\xcf\x2d")
-        f.write(qt.encode("... may find the Holy Grail in the Castle of... Aauugghh") + b"\x2e\xcf")
-        f.write(qt.encode("Here a page is missing.") + b"\xc0")
+        self.__write_game_data__("39ea8",
+                                 qt.encode("It reads: ") + b"\x2d" + qt.encode("He who is ") + b"\xcb" + qt.encode("valiant and pure of spirit...") + b"\xcf\x2d" +
+                                 qt.encode("... may find the Holy Grail in the Castle of... Aauugghh") + b"\x2e\xcf" +
+                                 qt.encode("Here a page is missing.") + b"\xc0", f)
 
         # Modify Crystal Ring, now permanently worn and removed from inventory when used
-        f.seek(int("39f32", 16) + rom_offset)
-        f.write(b"\x3b\x9f\x02\xcc\x3e\x02\xd5\x27\x60\xd3\x41\x8b")
-        f.write(b"\x88\x8d\x86\xac\x81\x8b\x88\x8d\x86\x2a\xc0")
+        self.__write_game_data__("39f32", b"\x3b\x9f\x02\xcc\x3e\x02\xd5\x27\x60\xd3\x41\x8b\x88\x8d\x86\xac\x81\x8b\x88\x8d\x86\x2a\xc0", f)
 
         # Write HP and DEF upgrade items; make the Apple non-consumable
         # Replaces and modifies code for item 28 - Apple @39f5d
-        f_item28 = open(folder + "039f5d_item28.bin", "rb")
-        f.seek(int("39f5d", 16) + rom_offset)
-        f.write(f_item28.read())
-        f_item28.close
+        self.__append_file_data__("039f5d_item28.bin", "39f5d", f)
 
         # Update herb HP fill based on difficulty
-        f.seek(int("3889f", 16) + rom_offset)
-        if mode == 0:  # Easy mode = full HP
+        self.__seek__("3889f", f)
+        if self.settings.difficulty.value == Difficulty.EASY.value:  # Easy mode = full HP
             f.write(b"\x28")
-        elif mode == 2:  # Hard mode = fill 4 HP
+        elif self.settings.difficulty.value == Difficulty.HARD.value:  # Hard mode = fill 4 HP
             f.write(b"\x04")
-        elif mode == 3:  # Extreme mode = fill 2 HP
+        elif self.settings.difficulty.value == Difficulty.EXTREME.value:  # Extreme mode = fill 2 HP
             f.write(b"\x02")
 
         # Update HP jewel HP fill based on difficulty
-        f.seek(int("39f7a", 16) + rom_offset)
-        if mode == 0:  # Easy mode = full HP
+        self.__seek__("39f7a", f)
+        if self.settings.difficulty.value == Difficulty.EASY.value:  # Easy mode = full HP
             f.write(b"\x28")
 
         # Change item functionality for game variants
-        f.seek(int("3fce0", 16) + rom_offset)
-        f.write(qt.encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.", True))
-        f.seek(int("3fd40", 16) + rom_offset)
-        f.write(qt.encode("As the Jewel disappears, Will feels his strength draining!", True))
+        self.__write_game_data__("3fce0", qt.encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.", True), f)
+        self.__write_game_data__("3fd40", qt.encode("As the Jewel disappears, Will feels his strength draining", True), f)
+
         # In OHKO, the HP Jewels do nothing, and start @1HP
-        if variant == "OHKO":
-            f.seek(int("8068", 16) + rom_offset)
-            f.write(b"\x01")
-            f.seek(int("39f71", 16) + rom_offset)
-            f.write(b"\xe0\xfc\x02\xd5\x29\x60")
+        if self.settings.ohko:
+            self.__write_game_data__("8068", b"\x01", f)
+            self.__write_game_data__("39f71", b"\xe0\xfc\x02\xd5\x29\x60", f)
+
         # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
-        #    elif variant == "Red Jewel Madness":
+        #    elif self.settings.red_jewel_madness:
         #        f.seek(int("8068",16)+rom_offset)
         #        f.write(b"\x28")
         #        f.seek(int("384d5",16)+rom_offset)
@@ -521,865 +350,481 @@ class Randomizer:
         #                  Update overworld map movement scripts
         #   Removes overworld animation and allows free travel within continents
         ##########################################################################
-        # Update map choice scripts
-        f_mapchoices = open(folder + "03b401_mapchoices.bin", "rb")
-        f.seek(int("3b401", 16) + rom_offset)
-        f.write(f_mapchoices.read())
-        f_mapchoices.close
-
-        # Update map destination array
-        f_mapdest = open(folder + "03b955_mapdest.bin", "rb")
-        f.seek(int("3b955", 16) + rom_offset)
-        f.write(f_mapdest.read())
-        f_mapdest.close
+        self.__append_file_data__("03b401_mapchoices.bin", "3b401", f)  # Update map choice scripts
+        self.__append_file_data__("03b955_mapdest.bin", "3b955", f)  # Update map destination array
 
         ##########################################################################
         #                   Rewrite Red Jewel acquisition event
         #      Makes unique code for each instance (overwrites unused code)
         ##########################################################################
-        # Fill block with new item acquisition code (16 items)
-        f_redjewel = open(folder + "00f500_redjewel.bin", "rb")
-        f.seek(int("f500", 16) + rom_offset)
-        f.write(f_redjewel.read())
-        f_redjewel.close
+        self.__append_file_data__("00f500_redjewel", "f500", f)
 
         # Update event table instances to point to new events
         # New pointers include leading zero byte to negate event parameters
-        f.seek(int("c8318", 16) + rom_offset)  # South Cape: bell tower
-        f.write(b"\x00\x00\xf5\x80")
-        f.seek(int("c837c", 16) + rom_offset)  # South Cape: Lance's house
-        f.write(b"\x00\x80\xf5\x80")
-        f.seek(int("c8ac0", 16) + rom_offset)  # Underground Tunnel: barrel
-        f.write(b"\x00\x00\xf6\x80")
-        f.seek(int("c8b50", 16) + rom_offset)  # Itory Village: logs
-        f.write(b"\x00\x80\xf6\x80")
-        f.seek(int("c9546", 16) + rom_offset)  # Diamond Coast: jar
-        f.write(b"\x00\x00\xf7\x80")
-        f.seek(int("c97a6", 16) + rom_offset)  # Freejia: hotel
-        f.write(b"\x00\x80\xf7\x80")
-        f.seek(int("caf60", 16) + rom_offset)  # Angel Village: dance hall
-        f.write(b"\x00\x00\xf8\x80")
-        f.seek(int("cb3a6", 16) + rom_offset)  # Angel Village: Ishtar's room
-        f.write(b"\x00\x80\xf8\x80")
-        f.seek(int("cb563", 16) + rom_offset)  # Watermia: west Watermia
-        f.write(b"\x00\x00\xf9\x80")
-        f.seek(int("cb620", 16) + rom_offset)  # Watermia: gambling house
-        f.write(b"\x00\x80\xf9\x80")
-        f.seek(int("cbf55", 16) + rom_offset)  # Euro: behind house
-        f.write(b"\x00\x00\xfa\x80")
-        f.seek(int("cc17c", 16) + rom_offset)  # Euro: slave room
-        f.write(b"\x00\x80\xfa\x80")
-        f.seek(int("ccb14", 16) + rom_offset)  # Natives' Village: statue room
-        f.write(b"\x00\x00\xfb\x80")
-        f.seek(int("cd440", 16) + rom_offset)  # Dao: east Dao
-        f.write(b"\x00\x80\xfb\x80")
-        f.seek(int("cd57e", 16) + rom_offset)  # Pyramid: east entrance
-        f.write(b"\x00\x00\xfc\x80")
-        f.seek(int("ce094", 16) + rom_offset)  # Babel: pillow
-        f.write(b"\x00\x80\xfc\x80")
+        self.__write_game_data__("c8318", b"\x00\x00\xf5\x80", f)  # South Cape: bell tower
+        self.__write_game_data__("c837c", b"\x00\x80\xf5\x80", f)  # South Cape: Lance's house
+        self.__write_game_data__("c8ac0", b"\x00\x00\xf6\x80", f)  # Underground Tunnel: barrel
+        self.__write_game_data__("c8b50", b"\x00\x80\xf6\x80", f)  # Itory Village: logs
+        self.__write_game_data__("c9546", b"\x00\x00\xf7\x80", f)  # Diamond Coast: jar
+        self.__write_game_data__("c97a6", b"\x00\x80\xf7\x80", f)  # Freejia: hotel
+        self.__write_game_data__("caf60", b"\x00\x00\xf8\x80", f)  # Angel Village: dance hall
+        self.__write_game_data__("cb3a6", b"\x00\x80\xf8\x80", f)  # Angel Village: Ishtar's room
+        self.__write_game_data__("cb563", b"\x00\x00\xf9\x80", f)  # Watermia: west Watermia
+        self.__write_game_data__("cb620", b"\x00\x80\xf9\x80", f)  # Watermia: gambling house
+        self.__write_game_data__("cbf55", b"\x00\x00\xfa\x80", f)  # Euro: behind house
+        self.__write_game_data__("cc17c", b"\x00\x80\xfa\x80", f)  # Euro: slave room
+        self.__write_game_data__("ccb14", b"\x00\x00\xfb\x80", f)  # Natives' Village: statue room
+        self.__write_game_data__("cd440", b"\x00\x80\xfb\x80", f)  # Dao: east Dao
+        self.__write_game_data__("cd57e", b"\x00\x00\xfc\x80", f)  # Pyramid: east entrance
+        self.__write_game_data__("ce094", b"\x00\x80\xfc\x80", f)  # Babel: pillow
 
         ##########################################################################
         #                         Modify Game Start events
         ##########################################################################
-        # Set beginning switches
-        f.seek(int("be51c", 16) + rom_offset)
-        f.write(b"\x80\x00\x12\x4c\x00\xfd")
-        f_switches = open(folder + "0bfd00_switches.bin", "rb")
-        f.seek(int("bfd00", 16) + rom_offset)
-        f.write(f_switches.read())
-        f_switches.close
+        self.__write_game_data__("be51c", b"\x80\x00\x12\x4c\x00\xfd", f)  # Set beginning switches
+        self.__append_file_data__("0bfd00_switches.bin", "bfd00", f)
 
         ##########################################################################
         #                         Modify South Cape events
         ##########################################################################
-        # Teacher sets switch #$38 and spoils Mystic Statues required
-        f_teacher = open(folder + "048a94_teacher.bin", "rb")
-        f.seek(int("48a94", 16) + rom_offset)
-        f.write(f_teacher.read())
-        f_teacher.close
-
-        # Force fisherman to always appear on E side of docks, and fix inventory full
-        f.seek(int("48377", 16) + rom_offset)
-        f.write(b"\x02\xd0\x10\x01\xaa\x83")
-        f.seek(int("48468", 16) + rom_offset)
-        f.write(b"\x02\xBF\x79\x84\x02\xD4\x01\x75\x84\x02\xCC\xD7\x6B" + INV_FULL)
-
-        # Disable Lola Melody cutscene
-        f.seek(int("49985", 16) + rom_offset)
-        f.write(b"\x6b")
-
+        self.__append_file_data__("048a94_teacher.bin", "48a94", f)  # Teacher sets switch #$38 and spoils Mystic Statues required
+        self.__write_game_data__("48377", b"\x02\xd0\x10\x01\xaa\x83", f)  # Force fisherman to always appear on E side of docks, and fix inventory full
+        self.__write_game_data__("48468", b"\x02\xBF\x79\x84\x02\xD4\x01\x75\x84\x02\xCC\xD7\x6B" + INV_FULL, f)
+        self.__write_game_data__("49985", b"\x6b", f)  # Disable Lola Melody cutscene
         # Set flag 35 at Lola Melody acquisition
-        f.seek(int("499dc", 16) + rom_offset)
-        f.write(b"\xeb\x99\x02\xbf\xe5\x9b\x02\xd4\x09\xf0\x99")
-        f.write(b"\x02\xcc\x35\x6b\x02\xbf\x94\x9d\x6b")
-        f.write(INV_FULL)
+        self.__write_game_data__("499dc", b"\xeb\x99\x02\xbf\xe5\x9b\x02\xd4\x09\xf0\x99\x02\xcc\x35\x6b\x02\xbf\x94\x9d\x6b" + INV_FULL, f)
 
-        # Erik in Seaside Cave allows player to use Lola's Letter to travel by sea
-        f_seaside = open(folder + "04b9a5_seaside.bin", "rb")
-        f.seek(int("4b9a5", 16) + rom_offset)
-        f.write(f_seaside.read())
-        f_seaside.close
-        f.seek(int("4b8b6", 16) + rom_offset)
-        f.write(b"\x10\x01\x62")
-        f.seek(int("4b96a", 16) + rom_offset)
-        f.write(b"\xa5")
+        self.__append_file_data__("04b9a5_seaside.bin", "4b9a5", f)  # Erik in Seaside Cave allows player to use Lola's Letter to travel by sea
+        self.__write_game_data__("4b8b6", b"\x10\x01\x62", f)
+        self.__write_game_data__("4b96a", b"\xa5", f)
 
-        # Various NPCs can give you a tutorial
-        f_tutorial = open(folder + "04fb50_tutorial.bin", "rb")
-        f.seek(int("4fb50", 16) + rom_offset)
-        f.write(f_tutorial.read())
-        f_tutorial.close
-        f.seek(int("49231", 16) + rom_offset)  # NPC in front of school
-        f.write(b"\x50\xfb")
+        self.__append_file_data__("04fb50_tutorial.bin", "4fb50", f)  # Various NPCs can give you a tutorial
+        self.__write_game_data__("49231", b"\x50\xfb", f)  # NPC in front of school
         # f.seek(int("49238",16)+rom_offset)   # Grants max stats
         # f.write(b"\xA9\x28\x00\x8D\xCA\x0A\x8D\xCE\x0A\x8D\xDC\x0A\x8D\xDE\x0A\x02\xBF\x4C\x92\x6B")
         # f.write(qt.encode("Max stats baby!",True))
 
         # Turns house in South Cape into item-tracking overworld map (Easy only)
-        if mode == 0:
-            f.seek(int("18480", 16) + rom_offset)
-            f.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
-            f.seek(int("1854e", 16) + rom_offset)
-            f.write(b"\x00\x3e\x40\x02")
-            f.seek(int("c846c", 16) + rom_offset)
-            f.write(b"\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
-
-            f_collectioncheck = open(folder + "06dd30_collectioncheck.bin", "rb")
-            f.seek(int("6dd30", 16) + rom_offset)
-            f.write(f_collectioncheck.read())
-            f_collectioncheck.close
+        if self.settings.difficulty.value == Difficulty.EASY.value:
+            self.__write_game_data__("18480", b"\x07\x90\x00\xd0\x03\x00\x00\x44", f)
+            self.__write_game_data__("1854e", b"\x00\x3e\x40\x02", f)
+            self.__write_game_data__("c846c", b"\x00\x01\x00\x00\xde\x86\x00\xFF\xCA", f)
+            self.__append_file_data__("06dd30_collectioncheck", "6dd30", f)
         else:
-            f.seek(int("491ed", 16) + rom_offset)
-            f.write(qt.encode("This room is a lot cooler in Easy mode.", True))
+            self.__write_game_data__("491ed", qt.encode("This room is a lot cooler in Easy mode.", True), f)
 
         ##########################################################################
         #                       Modify Edward's Castle events
         ##########################################################################
-        # Shorten Edward conversation
-        f.seek(int("4c3d6", 16) + rom_offset)
-        f.write(b"\x06\xc4")
-        f_edward = open(folder + "04c4fb_edward.bin", "rb")
-        f.seek(int("4c4fb", 16) + rom_offset)
-        f.write(f_edward.read())
-        f_edward.close
-
-        f.seek(int("4c4fb", 16) + rom_offset)
-        f.write(b"\xd3")
-
-        # Talking to Edward doesn't soft lock you
-        f.seek(int("4c746", 16) + rom_offset)
-        f.write(b"\x10")
-
-        # Move guard to allow roast location get
-        f_castleguard = open(folder + "04d1a0_castleguard.bin", "rb")
-        f.seek(int("4d1a0", 16) + rom_offset)
-        f.write(f_castleguard.read())
-        f_castleguard.close
-        f.seek(int("c8551", 16) + rom_offset)
-        f.write(b"\x10")
-
+        self.__write_game_data__("4c3d6", b"\x06\xc4", f)  # Shorten Edward conversation
+        self.__append_file_data__("04c4fb_edward", "4c4fb", f)
+        self.__write_game_data__("4c4fb", b"\xd3", f)
+        self.__write_game_data__("4c746", b"\x10", f)  # Talking to Edward doesn't soft lock you
+        self.__append_file_data__("04d1a0_castleguard", "4d1a0", f)  # Move guard to allow roast location get
+        self.__write_game_data__("c8551", b"\x10", f)
         #  Update Large Roast event
-        f.seek(int("4d0da", 16) + rom_offset)
-        f.write(b"\x02\xc0\xe1\xd0\x02\xc1\x6b\x02\xd0\x46\x00\xe9\xd0\x02\xe0")
-        f.write(b"\x02\xbf\x41\xd1\x02\xd4\x0a\xf6\xd0\x02\xcc\x46\x6b")
-        f.write(INV_FULL)
+        self.__write_game_data__("4d0da", b"\x02\xc0\xe1\xd0\x02\xc1\x6b\x02\xd0\x46\x00\xe9\xd0\x02\xe0\x02\xbf\x41\xd1\x02\xd4\x0a\xf6\xd0\x02\xcc\x46\x6b" + INV_FULL, f)
 
-        # Fix hidden guard text box
-        f.seek(int("4c297", 16) + rom_offset)
-        f.write(b"\xc0")
-        f.seek(int("4c20e", 16) + rom_offset)
-        f.write(b"\x02\xBF\x99\xC2\x02\xD4\x00\x1B\xC2\x02\xCC\xD8\x6B" + INV_FULL)
+        self.__write_game_data__("4c297", b"\xc0", f)  # Fix hidden guard text box
+        self.__write_game_data__("4c20e", b"\x02\xBF\x99\xC2\x02\xD4\x00\x1B\xC2\x02\xCC\xD8\x6B" + INV_FULL, f)
 
         ##########################################################################
         #                   Modify Edward's Prison/Tunnel events
         ##########################################################################
         # Skip long cutscene in prison
-        f.seek(int("4d209", 16) + rom_offset)
-        f.write(b"\x34\xd2")
-        f.seek(int("4d234", 16) + rom_offset)
-        f.write(b"\x02\xd0\x23\x00\xcf\xd2\x02\xe0")
-        f.seek(int("4d335", 16) + rom_offset)
-        f.write(b"\x6b")
+        self.__write_game_data__("4d209", b"\x34\xd2", f)
+        self.__write_game_data__("4d234", b"\x02\xd0\x23\x00\xcf\xd2\x02\xe0", f)
+        self.__write_game_data__("4d335", b"\x6b", f)
 
         # Move Dark Space, allows player to exit area without key
-        # Set new X/Y coordinates in exit table
-        f.seek(int("18614", 16) + rom_offset)
-        f.write(b"\x12\x07")
-        # Set new X/Y coordinates in event table
-        f.seek(int("C8635", 16) + rom_offset)
-        f.write(b"\x12\x08")
+        self.__write_game_data__("18614", b"\x12\x07", f)  # Set new X/Y coordinates in exit table
+        self.__write_game_data__("C8635", b"\x12\x08", f)  # Set new X/Y coordinates in event table
 
         # Progression triggers when Lilly is with you
-        f.seek(int("9aa45", 16) + rom_offset)
-        f.write(b"\x6f\x00")
-        f.seek(int("9aa4b", 16) + rom_offset)
-        f.write(b"\x02")
-        f.seek(int("9be74", 16) + rom_offset)
-        f.write(b"\xd7\x18")
+        self.__write_game_data__("9aa45", b"\x6f\x00", f)
+        self.__write_game_data__("9aa4b", b"\x02", f)
+        self.__write_game_data__("9be74", b"\xd7\x18", f)
 
         # Give appearing Dark Space the option of handling an ability
-        f.seek(int("9bf7f", 16) + rom_offset)
-        f.write(b"\xAC\xD6\x88\xA8\x00\xC0\x04\x00\x0B\x4c\x10\xf7")
-        f.seek(int("9f710", 16) + rom_offset)
-        f.write(b"\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
-        f.seek(int("c8aa2", 16) + rom_offset)
-        f.write(b"\x03")
-
-        # Fix forced form change
-        f.seek(int("9c037", 16) + rom_offset)
-        f.write(FORCE_CHANGE + b"\x02\xe0")
+        self.__write_game_data__("9bf7f", b"\xAC\xD6\x88\xA8\x00\xC0\x04\x00\x0B\x4c\x10\xf7", f)
+        self.__write_game_data__("9f710", b"\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0", f)
+        self.__write_game_data__("c8aa2", b"\x03", f)
+        self.__write_game_data__("9c037", b"\x02\xe0", f)  # Fix forced form change
 
         ##########################################################################
         #                            Modify Itory events
         ##########################################################################
-        # Lilly event becomes Lola's Melody handler
-        f_itory = open(folder + "04e2a3_itory.bin", "rb")
-        f.seek(int("4e2a3", 16) + rom_offset)
-        f.write(f_itory.read())
-        f_itory.close
-
-        # Lilly now joins if you give her the Necklace
-        f_lilly = open(folder + "04e5ff_lilly.bin", "rb")
-        f.seek(int("4e5ff", 16) + rom_offset)
-        f.write(f_lilly.read())
-        f_lilly.close
-        f.seek(int("4e5a6", 16) + rom_offset)
-        f.write(b"\x6f")
-        f.seek(int("4e5ac", 16) + rom_offset)
-        f.write(b"\xff\xe5\x02\x0b\x6b")
-
-        # Shorten Inca Statue get
-        f.seek(int("4f37b", 16) + rom_offset)
-        f.write(b"\x02\xbf\x8d\xf3\x6b")
-
+        self.__append_file_data__("04e2a3_itory", "4e2a3", f)  # Lilly event becomes Lola's Melody handler
+        self.__append_file_data__("04e5ff_lilly", "4e5ff", f)  # Lilly now joins if you give her the Necklace
+        self.__write_game_data__("4e5a6", b"\x6f", f)
+        self.__write_game_data__("4e5ac", b"\xff\xe5\x02\x0b\x6b", f)
+        self.__write_game_data__("4f37b", b"\x02\xbf\x8d\xf3\x6b", f)  # Shorten Inca Statue get
         # For elder to always give spoiler
-        f.seek(int("4e933", 16) + rom_offset)
-        f.write(b"\x10\x01")
-        f.seek(int("4e97a", 16) + rom_offset)
-        f.write(b"\x02\xbf\xff\xe9\x6b")
+        self.__write_game_data__("4e933", b"\x10\x01", f)
+        self.__write_game_data__("4e97a", b"\x02\xbf\xff\xe9\x6b", f)
 
         ##########################################################################
         #                          Modify Moon Tribe events
         ##########################################################################
-        # Allows player to use Teapot to travel by Sky Garden
-        f_moontribe = open(folder + "09d11e_moontribe.bin", "rb")
-        f.seek(int("9d11e", 16) + rom_offset)
-        f.write(f_moontribe.read())
-        f_moontribe.close
+        self.__append_file_data__("09d11e_moontribe", "9d11e", f)  # Allows player to use Teapot to travel by Sky Garden
 
         # Lilly event serves as an overworld exit
-        f.seek(int("4f441", 16) + rom_offset)
-        f.write(b"\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b")
-        f.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
+        self.__write_game_data__("4f441", b"\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b", f)
 
         # Adjust timer by mode
         timer = 20
-        if mode == "Easy":
+        if self.settings.difficulty.value == Difficulty.EASY.value:
             timer += 5
-        if enemizer != "None":
+        if self.settings.enemizer.value != Enemizer.NONE.value:
             timer += 5
-            if enemizer != "Basic":
+            if self.settings.enemizer.value != Enemizer.LIMITED:
                 timer += 5
-        f.seek(int("4f8b8", 16) + rom_offset)
-        f.write(binascii.unhexlify(str(timer)))
-
-        # Shorten Inca Statue get
-        f.seek(int("4fae7", 16) + rom_offset)
-        f.write(b"\x02\xbf\xf9\xfa\x6b")
+        self.__write_game_data__("4f8b8", binascii.unhexlify(str(timer)), f)
+        self.__write_game_data__("4fae7", b"\x02\xbf\xf9\xfa\x6b", f)  # Shorten Inca Statue get
 
         ##########################################################################
         #                          Modify Inca events
         ##########################################################################
-        # Fix forced form change
-        f.seek(int("9cfaa", 16) + rom_offset)
-        f.write(FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
-
-        # Put Gold Ship captain at Inca entrance
-        f.seek(int("c8c9c", 16) + rom_offset)
-        f.write(b"\x19\x1c\x00\x4e\x85\x85\x00")
+        self.__write_game_data__("9cfaa", FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0", f)  # Fix forced form change
+        self.__write_game_data__("c8c9c", b"\x19\x1c\x00\x4e\x85\x85\x00", f)  # Put Gold Ship captain at Inca entrance
 
         ##########################################################################
         #                          Modify Gold Ship events
         ##########################################################################
         # Move Seth from deserted ship to gold ship, allows player to acquire item
         # Write pointer to Seth event in new map
-        f.seek(int("c945c", 16) + rom_offset)
-        f.write(b"\x0b\x24\x00\x3e\x96\x85\x00\xff\xca")
-        f.seek(int("c805a", 16) + rom_offset)
-        f.write(b"\x65")
-        # Modify Seth event to ignore switch conditions
-        f.seek(int("59643", 16) + rom_offset)
-        f.write(b"\x10\x00")
-        # Add in inventory full text
-        f.seek(int("59665", 16) + rom_offset)
-        f.write(INV_FULL)
-
+        self.__write_game_data__("c945c", b"\x0b\x24\x00\x3e\x96\x85\x00\xff\xca", f)
+        self.__write_game_data__("c805a", b"\x65", f)
+        self.__write_game_data__("59643", b"\x10\x00", f)  # Modify Seth event to ignore switch conditions
+        self.__write_game_data__("59665", INV_FULL, f)  # Add in inventory full text
         # Entering Gold Ship doesn't lock out Castoth
-        f.seek(int("58188", 16) + rom_offset)
-        f.write(b"\x02\xc1\x02\xc1")
-        f.seek(int("18a09", 16) + rom_offset)
-        f.write(b"\xd0\x00\x40\x02\x03")
-
-        # Have ladder NPC move aside only if Mystic Statue has been acquired
-        f.seek(int("583cb", 16) + rom_offset)
-        f.write(b"\x10")
+        self.__write_game_data__("58188", b"\x02\xc1\x02\xc1", f)
+        self.__write_game_data__("18a09", b"\xd0\x00\x40\x02\x03", f)
+        self.__write_game_data__("583cb", b"\x10", f)  # Have ladder NPC move aside only if Mystic Statue has been acquired
 
         # Modify queen switches
-        f.seek(int("58a04", 16) + rom_offset)
-        f.write(b"\x10\x00")
-        f.seek(int("58a1f", 16) + rom_offset)
-        f.write(b"\x10")
+        self.__write_game_data__("58a04", b"\x10\x00", f)
+        self.__write_game_data__("58a1f", b"\x10", f)
 
         # Have crow's nest NPC warp directly to Diamond Coast
         # Also checks for Castoth being defeated
-        f_goldship = open(folder + "0584a9_goldship.bin", "rb")
-        f.seek(int("584a9", 16) + rom_offset)
-        f.write(f_goldship.read())
-        f_goldship.close
-
-        # Sleeping sends player to Diamond Coast
-        f.seek(int("586a3", 16) + rom_offset)
-        f.write(b"\x02\x26\x30\x48\x00\x20\x00\x03\x00\x21")
+        self.__append_file_data__("0584a9_goldship.bin", "584a9", f)
+        self.__write_game_data__("586a3", b"\x02\x26\x30\x48\x00\x20\x00\x03\x00\x21", f)  # Sleeping sends player to Diamond Coast
 
         ##########################################################################
         #                        Modify Diamond Coast events
         ##########################################################################
         # Allow Turbo to contact Seth
-        f.seek(int("c953e", 16) + rom_offset)
-        f.write(b"\x01")
-        f.seek(int("5aa76", 16) + rom_offset)
-        f.write(b"\x00\xff")
-        f.seek(int("5ff00", 16) + rom_offset)
-        f.write(b"\x02\xCC\x01\x02\xD0\x11\x01\x0E\xFF\x02\xBF\x60\xFF\x6B\x02\xD0\x12\x01\x1B\xFF")
-        f.write(b"\x02\xcc\x12\x02\xBF\x1F\xFF\x5C\xBD\xB9\x84")
-        f.write(b"\xd3" + qt.encode("Woof woof!") + b"\xcb")
-        f.write(qt.encode("(Oh good, you know Morse Code. Let's see what Seth's up to:)") + b"\xc0")
-        f.write(b"\xd3" + qt.encode("Woof woof!") + b"\xcb")
-        f.write(qt.encode("(You don't happen to know Morse Code, do you?)") + b"\xc0")
-
+        self.__write_game_data__("c953e", b"\x01", f)
+        self.__write_game_data__("5aa76", b"\x00\xff", f)
+        self.__write_game_data__("5ff00", b"\x02\xCC\x01\x02\xD0\x11\x01\x0E\xFF\x02\xBF\x60\xFF\x6B\x02\xD0\x12\x01\x1B\xFF\x02\xcc\x12\x02\xBF\x1F\xFF\x5C\xBD\xB9\x84\xd3" +
+                                 qt.encode("Woof woof!") + b"\xcb" + qt.encode("(Oh good, you know Morse Code. Let's see what Seth's up to:)") + b"\xc0" +
+                                 b"\xd3" + qt.encode("Woof woof!") + b"\xcb" + qt.encode("(You don't happen to know Morse Code, do you?)") + b"\xc0", f)
         # Kara event serves as an overworld exit
-        f.seek(int("5aa9e", 16) + rom_offset)
-        f.write(b"\x00\x00\x30\x02\x45\x03\x00\x06\x01\xaa\xaa\x6b")
-        f.write(b"\x02\x40\x00\x08\xb1\xaa\x6b\x02\x66\x50\x02\x50\x03\x07\x02\xC1\x6b")
+        self.__write_game_data__("5aa9e", b"\x00\x00\x30\x02\x45\x03\x00\x06\x01\xaa\xaa\x6b\x02\x40\x00\x08\xb1\xaa\x6b\x02\x66\x50\x02\x50\x03\x07\x02\xC1\x6b", f)
 
         ##########################################################################
         #                           Modify Freejia events
         ##########################################################################
         # Trash can 1 gives you an item instead of a status upgrade
         # NOTE: This cannibalizes the following event @5cfbc (locked door)
-        f_freejia = open(folder + "05cf85_freejia.bin", "rb")
-        f.seek(int("5cf85", 16) + rom_offset)
-        f.write(f_freejia.read())
-        f_freejia.close
-
-        # Give full inventory text to trash can 2
-        f.seek(int("5cf37", 16) + rom_offset)
-        f.write(b"\x02\xBF\x49\xCF\x02\xD4\x12\x44\xCF\x02\xCC\x53\x6B" + INV_FULL)
+        self.__append_file_data__("05cf85_freejia.bin", "5cf85", f)
+        self.__write_game_data__("5cf37", b"\x02\xBF\x49\xCF\x02\xD4\x12\x44\xCF\x02\xCC\x53\x6B" + INV_FULL, f)  # Give full inventory text to trash can 2
 
         # Redirect event table to bypass deleted event
         # Changes locked door to a normal door
-        f.seek(int("c95bb", 16) + rom_offset)
-        f.write(b"\xf3\xc5\x80")
+        self.__write_game_data__("c95bb", b"\xf3\xc5\x80", f)
 
         # Update NPC dialogue to acknowledge change
-        f.seek(int("5c331", 16) + rom_offset)
-        f.write(b"\x42\xa2\x80\xa0\x2b\xac\x48\xac\xd6\xae\xa4\x87\x84\xac\xd7\x58\xcb\xa5")
-        f.write(b"\x8d\x8b\x8e\x82\x8a\x84\x83\xac\x80\x86\x80\x88\x8d\x2a\x2a\x2a\xc0")
-
-        # Add inventory full option to Creepy Guy event
-        f.seek(int("5b6df", 16) + rom_offset)
-        f.write(INV_FULL)
-
-        # Alter laborer text
-        f.seek(int("5bfdb", 16) + rom_offset)
-        f.write(b"\xde\xbf")
+        self.__write_game_data__("5c331",
+                                 b"\x42\xa2\x80\xa0\x2b\xac\x48\xac\xd6\xae\xa4\x87\x84\xac\xd7\x58\xcb\xa5\x8d\x8b\x8e\x82\x8a\x84\x83\xac\x80\x86\x80\x88\x8d\x2a\x2a\x2a\xc0", f)
+        self.__write_game_data__("5b6df", INV_FULL, f)  # Add inventory full option to Creepy Guy event
+        self.__write_game_data__("5bfdb", b"\xde\xbf", f)  # Alter laborer text
 
         # Have some fun with snitch item text
-        f.seek(int("5b8bc", 16) + rom_offset)
-        f.write(b"\x62")
-        f.seek(int("5b925", 16) + rom_offset)
-        f.write(b"\x88\xa4\x84\x8c\x2a\xcb\xac\x69\x84\xa3\x2b\xac\x48\x0e\x8c\xac\x80\xac\x81")
-        f.write(b"\x80\x83\xac\xa0\x84\xa2\xa3\x8e\x8d\xcb\xac\x63\x8d\x88\xa4\x82\x87\x84\xa3")
-        f.write(b"\xac\x86\x84\xa4\xac\xa3\xa4\x88\xa4\x82\x87\x84\xa3\x2b\xac\xa9\x8e\xca")
+        self.__write_game_data__("5b8bc", b"\x62", f)
+        self.__write_game_data__("5b925", b"\x88\xa4\x84\x8c\x2a\xcb\xac\x69\x84\xa3\x2b\xac\x48\x0e\x8c\xac\x80\xac\x81\x80\x83\xac\xa0\x84\xa2\xa3\x8e\x8d" +
+                                 b"\xcb\xac\x63\x8d\x88\xa4\x82\x87\x84\xa3\xac\x86\x84\xa4\xac\xa3\xa4\x88\xa4\x82\x87\x84\xa3\x2b\xac\xa9\x8e\xca", f)
 
         ##########################################################################
         #                        Modify Diamond Mine events
         ##########################################################################
-        # Trapped laborer gives you an item instead of sending Jewels to Jeweler
-        f.seek(int("5d739", 16) + rom_offset)
-        f.write(b"\x4c\x5d\xd8\x85")
-        f_trappedlaborer = open(folder + "05d7e2_trappedlaborer.bin", "rb")
-        f.seek(int("5d7e2", 16) + rom_offset)
-        f.write(f_trappedlaborer.read())
-        f_trappedlaborer.close
+        self.__write_game_data__("5d739", b"\x4c\x5d\xd8\x85", f)  # Trapped laborer gives you an item instead of sending Jewels to Jeweler
+        self.__append_file_data__("05d7e2_trappedlaborer.bin", "5d7e3", f)
 
         # Shorten laborer items
-        f.seek(int("aa753", 16) + rom_offset)
-        f.write(b"\xef\xa7")
-        f.seek(int("aa75a", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("aa773", 16) + rom_offset)
-        f.write(b"\x5c\xa8")
-        f.seek(int("aa77a", 16) + rom_offset)
-        f.write(b"\x6b")
-
-        # Shorten morgue item get
-        f.seek(int("5d4d8", 16) + rom_offset)
-        f.write(b"\x02\xbf\xeb\xd4\x02\xe0")
-
-        # Cut out Sam's song
-        f.seek(int("5d24f", 16) + rom_offset)
-        f.write(b"\x6b")
-
-        # Give appearing Dark Space the option of handling an ability
-        f.seek(int("5d62f", 16) + rom_offset)
-        f.write(b"\xAC\xD6\x88\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
+        self.__write_game_data__("aa753", b"\xef\xa7", f)
+        self.__write_game_data__("aa75a", b"\x6b", f)
+        self.__write_game_data__("aa773", b"\x5c\xa8", f)
+        self.__write_game_data__("aa77a", b"\x6b", f)
+        self.__write_game_data__("5d4d8", b"\x02\xbf\xeb\xd4\x02\xe0", f)  # Shorten morgue item get
+        self.__write_game_data__("5d24f", b"\x6b", f)  # Cut out Sam's song
+        self.__write_game_data__("5d62f", b"\xAC\xD6\x88\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0", f)  # Give appearing Dark Space the option of handling an ability
 
         ##########################################################################
         #                       Modify Neil's Cottage events
         ##########################################################################
-        # Allow travel by plane with the Memory Melody
-        f_neilscottage = open(folder + "05d89a_neilscottage.bin", "rb")
-        f.seek(int("5d89a", 16) + rom_offset)
-        f.write(f_neilscottage.read())
-        f_neilscottage.close
-
+        self.__append_file_data__("05d89a_neilscottage.bin", "5d89a", f)  # Allow travel by plane with the Memory Melody
         # Invention event serves as an overworld exit
-        f.seek(int("5e305", 16) + rom_offset)
-        f.write(b"\x00\x00\x30\x02\x45\x07\x0d\x0a\x0e\x11\xe3\x6b")
-        f.write(b"\x02\x40\x00\x04\x18\xe3\x6b\x02\x66\x70\x02\x70\x02\x07\x02\xC1\x6b")
+        self.__write_game_data__("5e305", b"\x00\x00\x30\x02\x45\x07\x0d\x0a\x0e\x11\xe3\x6b\x02\x40\x00\x04\x18\xe3\x6b\x02\x66\x70\x02\x70\x02\x07\x02\xC1\x6b", f)
 
         ##########################################################################
         #                            Modify Nazca events
         ##########################################################################
-        # Speedup warp sequence to Sky Garden
-        f_nazca = open(folder + "05e647_nazca.bin", "rb")
-        f.seek(int("5e647", 16) + rom_offset)
-        f.write(f_nazca.read())
-        f_nazca.close
-
+        self.__append_file_data__("05e647_nazca.bin", "5e647", f)  # Speedup warp sequence to Sky Garden
         # Allow exit to world map
-        f.seek(int("5e80c", 16) + rom_offset)
-        f.write(b"\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
+        self.__write_game_data__("5e80c", b"\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B", f)
 
         ##########################################################################
         #                          Modify Sky Garden events
         ##########################################################################
-        # Allow travel from Sky Garden to other locations
-        f_skygarden = open(folder + "05f356_skygarden.bin", "rb")
-        f.seek(int("5f356", 16) + rom_offset)
-        f.write(f_skygarden.read())
-        f_skygarden.close
-
+        self.__append_file_data__("05f356_skygarden.bin", "5f356", f)  # Allow travel from Sky Garden to other locations
         # Instant form change & warp to Seaside Palace if Viper is defeated
-        f.seek(int("ace9b", 16) + rom_offset)
-        f.write(b"\x4c\x90\xfd")
-        f.seek(int("acecb", 16) + rom_offset)
-        f.write(b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
-
-        f_viperchange = open(folder + "0afd90_viperchange.bin", "rb")
-        f.seek(int("afd90", 16) + rom_offset)
-        f.write(f_viperchange.read())
-        f_viperchange.close
+        self.__write_game_data__("ace9b", b"\x4c\x90\xfd", f)
+        self.__write_game_data__("acecb", b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b", f)
+        self.__append_file_data__("0afd90_viperchange.bin", "afd90", f)
 
         ##########################################################################
         #                       Modify Seaside Palace events
         ##########################################################################
-        # Add exit from Mu passage to Angel Village @191de
-        f.seek(int("191de", 16) + rom_offset)
-        f.write(b"\x04\x06\x02\x03\x69\xa0\x02\x38\x00\x00\x00\x13")  # Temporarily put exit one tile south
+        self.__write_game_data__("191de", b"\x04\x06\x02\x03\x69\xa0\x02\x38\x00\x00\x00\x13", f)  # Add exit from Mu passage to Angel Village @191de
+        # Temporarily put exit one tile south
         # f.write(b"\x04\x05\x02\x03\x69\xa0\x02\x38\x00\x00\x00\x13")  # Change to this if map is ever updated
 
-        # Replace Mu Passage map with one that includes a door to Angel Village
-        f_mupassage = open(folder + "1e28a5_mupassage.bin", "rb")
-        f.seek(int("1e28a5", 16) + rom_offset)
-        f.write(f_mupassage.read())
-        f_mupassage.close
-
-        # Shorten NPC item get
-        f.seek(int("68b01", 16) + rom_offset)
-        f.write(b"\x6b")
+        self.__append_file_data__("1e28a5_mupassage.bin", "1e28a5", f)  # Replace Mu Passage map with one that includes a door to Angel Village
+        self.__write_game_data__("68b01", b"\x6b", f)  # Shorten NPC item get
 
         # Purification event won't softlock if you don't have Lilly
-        f.seek(int("69406", 16) + rom_offset)
-        f.write(b"\x10")
-        f.seek(int("6941a", 16) + rom_offset)
-        f.write(b"\x01\x02\xc1\x02\xc1")
+        self.__write_game_data__("69406", b"\x10", f)
+        self.__write_game_data__("6941a", b"\x01\x02\xc1\x02\xc1", f)
 
         # Remove Lilly text when Mu door opens
-        f.seek(int("39174", 16) + rom_offset)
-        f.write(b"\x60")
-        f.seek(int("391d7", 16) + rom_offset)
-        f.write(b"\xc0")
+        self.__write_game_data__("39174", b"\x60", f)
+        self.__write_game_data__("391d7", b"\xc0", f)
 
         # Allow player to open Mu door from the back
-        f_mudoor = open(folder + "069739_mudoor.bin", "rb")
-        f.seek(int("69739", 16) + rom_offset)
-        f.write(f_mudoor.read())
-        f_mudoor.close
+        self.__append_file_data__("069739_mudoor.bin", "69739", f)
 
         # Remove fanfare from coffin item get
-        f.seek(int("69232", 16) + rom_offset)
-        f.write(b"\x9e\x93\x4c\x61\x92")
-        f.seek(int("69267", 16) + rom_offset)
-        f.write(b"\x80\x04")
+        self.__write_game_data__("69232", b"\x9e\x93\x4c\x61\x92", f)
+        self.__write_game_data__("69267", b"\x80\x04", f)
 
         # Make coffin spoiler re-readable
-        f.seek(int("68ff3", 16) + rom_offset)
-        f.write(b"\xf5\x8f")
-        f.seek(int("68ffb", 16) + rom_offset)
-        f.write(b"\x70\xe5")
-        f.seek(int("69092", 16) + rom_offset)
-        f.write(b"\x02\xce\x01\x02\x25\x2F\x0A\x4c\xfd\x8f")
-        f.seek(int("6e570", 16) + rom_offset)
-        f.write(b"\x02\xD1\x3A\x01\x01\x8A\xE5\x02\xD0\x6F\x01\x82\xE5\x02\xBF\xA7\x90\x6B")
-        f.write(b"\x02\xBF\xCF\x90\x02\xCC\x01\x6B\x02\xBF\x67\x91\x6B")
+        self.__write_game_data__("68ff3", b"\xf5\x8f", f)
+        self.__write_game_data__("68ffb", b"\x70\xe5", f)
+        self.__write_game_data__("69092", b"\x02\xce\x01\x02\x25\x2F\x0A\x4c\xfd\x8f", f)
+        self.__write_game_data__("6e570", b"\x02\xD1\x3A\x01\x01\x8A\xE5\x02\xD0\x6F\x01\x82\xE5\x02\xBF\xA7\x90\x6B\x02\xBF\xCF\x90\x02\xCC\x01\x6B\x02\xBF\x67\x91\x6B", f)
 
         ##########################################################################
         #                             Modify Mu events
         ##########################################################################
-        # Add "inventory full" option to Statue of Hope items
-        f.seek(int("698cd", 16) + rom_offset)
-        f.write(INV_FULL)
+        self.__write_game_data__("698cd", INV_FULL, f)  # Add "inventory full" option to Statue of Hope items
 
         # Shorten Statue of Hope get
-        f.seek(int("698b8", 16) + rom_offset)
-        f.write(b"\x02\xBF\xD2\x98\x02\xD4\x28\xCD\x98\x02\xCC\x79\x6B")
-        f.seek(int("69960", 16) + rom_offset)
-        f.write(b"\x02\xBF\x75\x99\x02\xD4\x1E\xCD\x98\x02\xCC\x7F\x6B")
+        self.__write_game_data__("698b8", b"\x02\xBF\xD2\x98\x02\xD4\x28\xCD\x98\x02\xCC\x79\x6B", f)
+        self.__write_game_data__("69960", b"\x02\xBF\x75\x99\x02\xD4\x1E\xCD\x98\x02\xCC\x7F\x6B", f)
 
         # Shorten Rama statue event
-        f.seek(int("69e50", 16) + rom_offset)
-        f.write(b"\x10")
-        f.seek(int("69f26", 16) + rom_offset)
-        f.write(b"\x00")
+        self.__write_game_data__("69e50", b"\x10", f)
+        self.__write_game_data__("69f26", b"\x00", f)
 
         # Text in Hope Room
-        f.seek(int("69baa", 16) + rom_offset)
-        f.write(qt.encode("Hey.", True))
+        self.__write_game_data__("69baa", qt.encode("Hey.", True), f)
 
         # Spirits in Rama statue room can't lock you
-        f.seek(int("6a07a", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("6a082", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("6a08a", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("6a092", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("6a09a", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("6a0a2", 16) + rom_offset)
-        f.write(b"\x6b")
+        self.__write_game_data__("6a07a", b"\x6b", f)
+        self.__write_game_data__("6a082", b"\x6b", f)
+        self.__write_game_data__("6a08a", b"\x6b", f)
+        self.__write_game_data__("6a092", b"\x6b", f)
+        self.__write_game_data__("6a09a", b"\x6b", f)
+        self.__write_game_data__("6a0a2", b"\x6b", f)
 
         # Move exits around to make Vampires required for Statue
-        f.seek(int("193ea", 16) + rom_offset)
-        f.write(b"\x5f\x80\x00\x50\x00\x03\x00\x44")
-        f.seek(int("193f8", 16) + rom_offset)
-        f.write(b"\x65\xb8\x00\x80\x02\x03\x00\x44")
-        f.seek(int("69c62", 16) + rom_offset)
-        f.write(b"\x67\x78\x01\xd0\x01\x80\x01\x22")
-        f.seek(int("6a4c9", 16) + rom_offset)
-        f.write(b"\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b")
+        self.__write_game_data__("193ea", b"\x5f\x80\x00\x50\x00\x03\x00\x44", f)
+        self.__write_game_data__("193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", f)
+        self.__write_game_data__("69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", f)
+        self.__write_game_data__("6a4c9", b"\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b", f)
 
         # Instant form change after Vamps are defeated
-        f.seek(int("6a43b", 16) + rom_offset)
-        f.write(b"\x4c\x00\xe5")
-
-        f_vampchange = open(folder + "06e500_vampchange.bin", "rb")
-        f.seek(int("6e500", 16) + rom_offset)
-        f.write(f_vampchange.read())
-        f_vampchange.close
+        self.__write_game_data__("6a43b", b"\x4c\x00\xe5", f)
+        self.__append_file_data__("06e500_vampchange.bin", "6e500", f)
 
         ##########################################################################
         #                       Modify Angel Village events
         ##########################################################################
         # Add exit from Angel Village to Mu passage @1941a
-        f.seek(int("1941a", 16) + rom_offset)
-        f.write(b"\x2a\x05\x01\x01\x5e\x48\x00\x90\x00\x01\x00\x14")  # Temporarily put exit one tile south
+        self.__write_game_data__("1941a", b"\x2a\x05\x01\x01\x5e\x48\x00\x90\x00\x01\x00\x14", f)
         # f.write(b"\x2a\x05\x01\x01\x5e\x48\x00\x80\x00\x01\x00\x14")  # Change to this if map is ever updated
 
         # Update sign to read "Passage to Mu"
-        f_angelsign = open(folder + "06ba36_angelsign.bin", "rb")
-        f.seek(int("6ba36", 16) + rom_offset)
-        f.write(f_angelsign.read())
-        f_angelsign.close
+        self.__append_file_data__("06ba36_angelsign.bin", "6ba36", f)
 
         # Entering this area clears your enemy defeat count and forces change to Will
-        f.seek(int("6bff7", 16) + rom_offset)
-        f.write(b"\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b")
-        f.write(b"\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6")
-        f.write(FORCE_CHANGE + b"\x02\xE0")
+        self.__write_game_data__("6bff7", b"\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6" +
+                                 FORCE_CHANGE + b"\x02\xE0", f)
 
         # Insert new arrangement for map 109, takes out rock to prevent spin dash softlock
-        f_angelmap = open(folder + "1a5a37_angelmap.bin", "rb")
-        f.seek(int("1a5a37", 16) + rom_offset)
-        f.write(f_angelmap.read())
-        f_angelmap.close
+        self.__append_file_data__("1a5a37_angelmap.bin", "1a5a37", f)
 
         # Ishtar's game never closes
-        f.seek(int("6d9fc", 16) + rom_offset)
-        f.write(b"\x10")
-        f.seek(int("6cede", 16) + rom_offset)
-        f.write(b"\x9c\xa6\x0a\x6b")
-        f.seek(int("6cef6", 16) + rom_offset)
-        f.write(b"\x40\x86\x80\x88\x8d\x4f\xc0")
+        self.__write_game_data__("6d9fc", b"\x10", f)
+        self.__write_game_data__("6cede", b"\x9c\xa6\x0a\x6b", f)
+        self.__write_game_data__("6cef6", b"\x40\x86\x80\x88\x8d\x4f\xc0", f)
 
         ##########################################################################
         #                           Modfy Watermia events
         ##########################################################################
         # Allow NPC to contact Seth
-        f.seek(int("78542", 16) + rom_offset)
-        f.write(b"\x50\xe9")
-        f.seek(int("7e950", 16) + rom_offset)
-        f.write(b"\x02\xD0\x11\x01\x5B\xE9\x02\xBF\xb8\xe9\x6B\x02\xD0\x12\x01\x68\xE9")
-        f.write(b"\x02\xcc\x12\x02\xBF\x6c\xE9\x5C\xBD\xB9\x84")
-        f.write(b"\xd3" + qt.encode("Oh, you know Bagu? Then I can help you cross.") + b"\xcb")
-        f.write(qt.encode("(And by Bagu I mean Morse Code.)") + b"\xc0")
-        f.write(b"\xd3" + qt.encode("Only town folk may cross this river!") + b"\xcb")
-        f.write(qt.encode("(Or, if you can talk to fish, I guess.)") + b"\xc0")
+        self.__write_game_data__("78542", b"\x50\xe9", f)
+        self.__write_game_data__("7e950", b"\x02\xD0\x11\x01\x5B\xE9\x02\xBF\xb8\xe9\x6B\x02\xD0\x12\x01\x68\xE9" +
+                                 b"\x02\xcc\x12\x02\xBF\x6c\xE9\x5C\xBD\xB9\x84" +
+                                 b"\xd3" + qt.encode("Oh, you know Bagu? Then I can help you cross.") + b"\xcb" +
+                                 qt.encode("(And by Bagu I mean Morse Code.)") + b"\xc0" +
+                                 b"\xd3" + qt.encode("Only town folk may cross this river!") + b"\xcb" +
+                                 qt.encode("(Or, if you can talk to fish, I guess.)") + b"\xc0",
+                                 f)
 
         # Allow for travel from  Watermia to Euro
         # Update address pointer
-        f.seek(int("78544", 16) + rom_offset)
-        f.write(b"\x69")
+        self.__write_game_data__("78544", b"\x69", f)
 
-        # Update event address pointers
-        f_watermia1 = open(folder + "078569_watermia1.bin", "rb")
-        f.seek(int("78569", 16) + rom_offset)
-        f.write(f_watermia1.read())
-        f_watermia1.close
-
-        # Change textbox contents
-        f_watermia2 = open(folder + "0786c1_watermia2.bin", "rb")
-        f.seek(int("786c1", 16) + rom_offset)
-        f.write(f_watermia2.read())
-        f_watermia2.close
-
-        # Russian Glass NPC just gives you the item
-        f_russianglass = open(folder + "079237_russianglass.bin", "rb")
-        f.seek(int("79237", 16) + rom_offset)
-        f.write(f_russianglass.read())
-        f_russianglass.close
+        self.__append_file_data__("078569_watermia1.bin", "78569", f)  # Update event address pointers
+        self.__append_file_data__("0786c1_watermia2.bin", "786c1", f)  # Change textbox contents
+        self.__append_file_data__("079237_russianglass.bin", "79237", f)  # Russian Glass NPC just gives you the item
 
         # Fix Lance item get text
-        f.seek(int("7ad28", 16) + rom_offset)
-        f.write(INV_FULL)
+        self.__write_game_data__("7ad28", INV_FULL, f)
 
         ##########################################################################
         #                          Modify Great Wall events
         ##########################################################################
         # Rewrite Necklace Stone acquisition event
         # Fill block with new item acquisition code (2 items)
-        f_necklace = open(folder + "07b59e_necklace.bin", "rb")
-        f.seek(int("7b59e", 16) + rom_offset)
-        f.write(f_necklace.read())
-        f_necklace.close
+        self.__append_file_data__("07b59e_necklace.bin", "7b59e", f)
 
         # Update event table instance to point to new events
         # New pointers include leading zero byte to negate event parameters
-        f.seek(int("cb822", 16) + rom_offset)  # First stone, map 130
-        f.write(b"\x00\x9e\xb5\x87")
-        f.seek(int("cb94a", 16) + rom_offset)  # Second stone, map 131
-        f.write(b"\x00\xfe\xb5\x87")
+        self.__write_game_data__("cb822", b"\x00\x9e\xb5\x87", f)  # First stone, map 130
+        self.__write_game_data__("cb94a", b"\x00\xfe\xb5\x87", f)  # Second stone, map 131
 
         # Entering wrong door in 2nd map area doesn't softlock you
-        f.seek(int("19a4c", 16) + rom_offset)
-        f.write(b"\x84")
+        self.__write_game_data__("19a4c", b"\x84", f)
 
         # Give appearing Dark Space the option of handling an ability
-        f.seek(int("7be0b", 16) + rom_offset)
-        f.write(b"\xAC\xD6\x88\xC8\x01\x80\x02\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
-        f.seek(int("cbc60", 16) + rom_offset)
-        f.write(b"\x03")
+        self.__write_game_data__("7be0b", b"\xAC\xD6\x88\xC8\x01\x80\x02\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0", f)
+        self.__write_game_data__("cbc60", b"\x03", f)
 
         # Exit after Sand Fanger takes you back to start
-        f.seek(int("19c84", 16) + rom_offset)
-        f.write(b"\x82\x10\x00\x90\x00\x07\x00\x18")
+        self.__write_game_data__("19c84", b"\x82\x10\x00\x90\x00\x07\x00\x18", f)
 
         ##########################################################################
         #                            Modify Euro events
         ##########################################################################
         # Allow travel from Euro to Watermia
-        # Update event address pointers
-        f_euro1 = open(folder + "07c432_euro1.bin", "rb")
-        f.seek(int("7c432", 16) + rom_offset)
-        f.write(f_euro1.read())
-        f_euro1.close
-        # Change textbox contents
-        f_euro2 = open(folder + "07c4d0_euro2.bin", "rb")
-        f.seek(int("7c4d0", 16) + rom_offset)
-        f.write(f_euro2.read())
-        f_euro2.close
-        f.seek(int("7c482", 16) + rom_offset)
-        f.write(qt.encode("A moose once bit my sister.", True))
+        self.__append_file_data__("07c432_euro1.bin", "7c432", f)  # Update event address pointers
+        self.__append_file_data__("07c4d0_euro2.bin", "7c4d0", f)  # Change textbox contents
+        self.__write_game_data__("7c482", qt.encode("A moose once bit my sister.", True), f)
 
-        # Neil in Euro
-        f_euroneil = open(folder + "07e398_euroneil.bin", "rb")
-        f.seek(int("7e398", 16) + rom_offset)
-        f.write(f_euroneil.read())
-        f_euroneil.close
-        f.seek(int("7e37f", 16) + rom_offset)
-        f.write(b"\x14\x00")
-        f.seek(int("7e394", 16) + rom_offset)
-        f.write(b"\x10\x00")
+        self.__append_file_data__("07e398_euroneil.bin", "7e398", f)  # Neil in Euro
+        self.__write_game_data__("7e37f", b"\x14\x00", f)
+        self.__write_game_data__("7e394", b"\x10\x00", f)
 
-        # Hidden house replaces STR upgrade with item acquisition
-        f_euroitem = open(folder + "07e517_euroitem.bin", "rb")
-        f.seek(int("7e517", 16) + rom_offset)
-        f.write(f_euroitem.read())
-        f_euroitem.close
-
-        # Speed up store line
-        f.seek(int("7d5e1", 16) + rom_offset)
-        f.write(b"\x00\x01")
+        self.__append_file_data__("07e517_euroitem.bin", "7e517", f)  # Hidden house replaces STR upgrade with item acquisition
+        self.__write_game_data__("7d5e1", b"\x00\x01", f)  # Speed up store line
 
         # Change vendor event, allows for only one item acquisition
         # Note: this cannibalizes the following event
-        f.seek(int("7c0a7", 16) + rom_offset)
-        f.write(b"\x02\xd0\x9a\x01\xba\xc0\x02\xbf\xf3\xc0\x02\xd4\x28\xbf\xc0")
-        f.write(b"\x02\xcc\x9a\x6b\x02\xbf\xdd\xc0\x6b")
-        f.write(INV_FULL)
-        # Change pointer for cannibalized event
-        f.seek(int("7c09b", 16) + rom_offset)
-        f.write(b"\xc4")
+        self.__write_game_data__("7c0a7", b"\x02\xd0\x9a\x01\xba\xc0\x02\xbf\xf3\xc0\x02\xd4\x28\xbf\xc0\x02\xcc\x9a\x6b\x02\xbf\xdd\xc0\x6b" + INV_FULL, f)
+        self.__write_game_data__("7c09b", b"\xc4", f)  # Change pointer for cannibalized event
 
         # Store replaces status upgrades with item acquisition
-        f.seek(int("7cd03", 16) + rom_offset)  # HP upgrade
-        f.write(b"\x02\xd0\xf0\x01\x32\xcd\x02\xc0\x10\xcd\x02\xc1\x6b")
-        f.write(b"\x02\xd4\x29\x20\xcd\x02\xcc\xf0\x02\xbf\x39\xcd\x02\xe0")
-        f.seek(int("7cdf7", 16) + rom_offset)  # Dark Friar upgrade
-        f.write(b"\x02\xd4\x2d\x05\xce\x02\xcc\xf1\x02\xbf\x28\xce\x02\xe0")
-        f.write(b"\x02\xbf\x3e\xce\x6b")
+        # HP upgrade
+        self.__write_game_data__("7cd03", b"\x02\xd0\xf0\x01\x32\xcd\x02\xc0\x10\xcd\x02\xc1\x6b\x02\xd4\x29\x20\xcd\x02\xcc\xf0\x02\xbf\x39\xcd\x02\xe0", f)
+        # Dark Friar upgrade
+        self.__write_game_data__("7cdf7", b"\x02\xd4\x2d\x05\xce\x02\xcc\xf1\x02\xbf\x28\xce\x02\xe0\x02\xbf\x3e\xce\x6b", f)
 
         # Old men text no longer checks for Teapot
-        f.seek(int("7d60a", 16) + rom_offset)
-        f.write(b"\x14\xd6")
-        f.seek(int("7d7a5", 16) + rom_offset)
-        f.write(b"\xbd\xd7")
+        self.__write_game_data__("7d60a", b"\x14\xd6", f)
+        self.__write_game_data__("7d7a5", b"\xbd\xd7", f)
 
         # Various NPC dialogue
-        f.seek(int("7d6db", 16) + rom_offset)
-        f.write(b"\x2A\xD0\xC8\xC9\x1E\xC2\x0B\xC2\x03" + qt.encode("It could be carried by an African swallow!"))
-        f.write(b"\xCF\xC2\x03\xC2\x04" + qt.encode("Oh yeah, an African swallow maybe, but not a European swallow, that's my point!") + b"\xc0")
-        f.seek(int("7d622", 16) + rom_offset)
-        f.write(qt.encode("Rofsky: Wait a minute, supposing two swallows carried it together?...") + b"\xc0")
-        f.seek(int("7c860", 16) + rom_offset)
-        f.write(b"\xce" + qt.encode("Nobody expects the Spanish Inquisition!") + b"\xc0")
-        f.seek(int("7c142", 16) + rom_offset)
-        f.write(qt.encode("I am no longer infected.", True))
-        f.seek(int("7c160", 16) + rom_offset)
-        f.write(qt.encode("My hovercraft is full of eels.", True))
-        f.seek(int("7c182", 16) + rom_offset)
-        f.write(qt.encode("... w-i-i-i-i-ith... a herring!!", True))
-        f.seek(int("7c1b6", 16) + rom_offset)
-        f.write(qt.encode("It's only a wafer-thin mint, sir...", True))
-        f.seek(int("7c1dc", 16) + rom_offset)
-        f.write(b"\xd3" + qt.encode("The mill's closed. There's no more work. We're destitute.|"))
-        f.write(qt.encode("I've got no option but to sell you all for scientific experiments.") + b"\xc0")
-        f.seek(int("7c3d4", 16) + rom_offset)
-        f.write(qt.encode("You're a looney.", True))
+        self.__write_game_data__("7d6db", b"\x2A\xD0\xC8\xC9\x1E\xC2\x0B\xC2\x03" + qt.encode("It could be carried by an African swallow!") +
+                                 b"\xCF\xC2\x03\xC2\x04" + qt.encode("Oh yeah, an African swallow maybe, but not a European swallow, that's my point!") +
+                                 b"\xc0", f)
+        self.__write_game_data__("7d622", qt.encode("Rofsky: Wait a minute, supposing two swallows carried it together?...") + b"\xc0", f)
+        self.__write_game_data__("7c860", b"\xce" + qt.encode("Nobody expects the Spanish Inquisition!") + b"\xc0", f)
+        self.__write_game_data__("7c142", qt.encode("I am no longer infected.", True), f)
+        self.__write_game_data__("7c160", qt.encode("My hovercraft is full of eels.", True), f)
+        self.__write_game_data__("7c182", qt.encode("... w-i-i-i-i-ith... a herring!!", True), f)
+        self.__write_game_data__("7c1b6", qt.encode("It's only a wafer-thin mint, sir...", True), f)
+        self.__write_game_data__("7c1dc", b"\xd3" + qt.encode("The mill's closed. There's no more work. We're destitute.|") +
+                                 qt.encode("I've got no option but to sell you all for scientific experiments.") + b"\xc0", f)
+        self.__write_game_data__("7c3d4", qt.encode("You're a looney.", True), f)
 
         ##########################################################################
         #                        Modify Native Village events
         ##########################################################################
         # Native can guide you to Dao if you give him the roast
-        f_natives = open(folder + "088fc4_natives.bin", "rb")
-        f.seek(int("88fc4", 16) + rom_offset)
-        f.write(f_natives.read())
-        f_natives.close
-
+        self.__append_file_data__("088fc4_natives.bin", "88fc4", f)
         # Change event pointers for cannibalized NPC code
-        f.seek(int("cca93", 16) + rom_offset)
-        f.write(b"\x88\x8f\x88")
+        self.__write_game_data__("cca93", b"\x88\x8f\x88", f)
 
         ##########################################################################
         #                         Modify Ankor Wat events
         ##########################################################################
         # Modify Gorgon Flower event, make it a simple item get
-        f_ankorwat1 = open(folder + "089abf_ankorwat.bin", "rb")
-        f.seek(int("89abf", 16) + rom_offset)
-        f.write(f_ankorwat1.read())
-        f_ankorwat1.close
+        self.__append_file_data__("089abf_ankorwat.bin", "89abf", f)
 
         # Shorten black glasses get
-        f.seek(int("89fa9", 16) + rom_offset)
-        f.write(b"\x02\xe0")
+        self.__write_game_data__("89fa9", b"\x02\xe0", f)
 
         # Bright room looks at switch 4f rather than equipment
-        f_ankorwat2 = open(folder + "089a31_ankorwat.bin", "rb")
-        f.seek(int("89a31", 16) + rom_offset)
-        f.write(f_ankorwat2.read())
-        f_ankorwat2.close
+        self.__append_file_data__("089a31_ankorwat.bin", "89a31", f)
 
         ##########################################################################
         #                            Modify Dao events
         ##########################################################################
         # Snake game grants an item instead of sending Jewels to the Jeweler
-        f_snakegame = open(folder + "08b010_snakegame.bin", "rb")
-        f.seek(int("8b010", 16) + rom_offset)
-        f.write(f_snakegame.read())
-        f_snakegame.close
-
+        self.__append_file_data__("08b010_snakegame.bin", "8b010", f)
         # Neil in Dao
-        f_daoneil = open(folder + "08a5bd_daoneil.bin", "rb")
-        f.seek(int("8a5bd", 16) + rom_offset)
-        f.write(f_daoneil.read())
-        f_daoneil.close
-        f.seek(int("8a5b3", 16) + rom_offset)
-        f.write(b"\x14\x00")
+        self.__append_file_data__("08a5bd_daoneil.bin", "8a5bd", f)
+        self.__write_game_data__("8a5b3", b"\x14\x00", f)
 
         # Allow travel back to Natives' Village
-        f.seek(int("8b16d", 16) + rom_offset)
-        f.write(b"\x4c\x50\xfe")
-        f.seek(int("8fe50", 16) + rom_offset)
-        f.write(b"\x02\xBF\x71\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE")
-        f.write(b"\x02\xBF\x93\xFE\x6B\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x02\xC5")
-        f.write(b"\xd3" + qt.encode("Go to Natives' Village?") + b"\xcb\xac")
-        f.write(qt.encode("No") + b"\xcb\xac" + qt.encode("Yes") + b"\xca")
-        f.write(b"\xce" + qt.encode("Come back anytime!") + b"\xc0")
+        self.__write_game_data__("8b16d", b"\x4c\x50\xfe", f)
+        self.__write_game_data__("8fe50", b"\x02\xBF\x71\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE" +
+                                 b"\x02\xBF\x93\xFE\x6B\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x02\xC5" +
+                                 b"\xd3" + qt.encode("Go to Natives' Village?") + b"\xcb\xac" +
+                                 qt.encode("No") + b"\xcb\xac" + qt.encode("Yes") + b"\xca" +
+                                 b"\xce" + qt.encode("Come back anytime!") + b"\xc0", f)
 
         # Modify two-item acquisition event
-        f.seek(int("8b1bb", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("8b189", 16) + rom_offset)
-        f.write(b"\xe0\xfd")
-        f.seek(int("8fde0", 16) + rom_offset)
-        f.write(b"\xD3\x4b\x8e\x8b\x80\x0e\xa3\xac\x4b\x84\xa4\xa4\x84\xa2\xCB")
-        f.write(b"\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xCF\xCE")
-        f.write(qt.encode("If you want a guide to take you to the Natives' Village, I can get one for you.") + b"\xc0")
+        self.__write_game_data__("8b1bb", b"\x6b", f)
+        self.__write_game_data__("8b189", b"\xe0\xfd", f)
+        self.__write_game_data__("8fde0", b"\xD3\x4b\x8e\x8b\x80\x0e\xa3\xac\x4b\x84\xa4\xa4\x84\xa2\xCB\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xCF\xCE" +
+                                 qt.encode("If you want a guide to take you to the Natives' Village, I can get one for you.") + b"\xc0", f)
 
         # Spirit appears only after you defeat Mummy Queen or Solid Arm
-        f.seek(int("980cb", 16) + rom_offset)
-        f.write(b"\x4c\xb0\xf6")
-        f.seek(int("9f6b0", 16) + rom_offset)
-        f.write(b"\x02\xd0\xf6\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0")
+        self.__write_game_data__("980cb", b"\x4c\xb0\xf6", f)
+        self.__write_game_data__("9f6b0", b"\x02\xd0\xf6\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0", f)
 
         ##########################################################################
         #                           Modify Pyramid events
         ##########################################################################
         # Can give journal to the guide in hieroglyph room
-        f.seek(int("8c207", 16) + rom_offset)
-        f.write(b"\x0E\xC2\x02\x0B\x02\xC1\x6B\x02\xD0\xEF\x01\x1E\xC2\x02\xD6\x26\x22\xC2")
-        f.write(b"\x02\xBF\x2D\xC2\x6B\x5C\x08\xF2\x83\x02\xCC\xEF\x02\xD5\x26\x02\xBF\x7F\xC2\x6B")
-        f.write(qt.encode("If you have any information about the pyramid, I'd be happy to hold onto it for you.", True))
-        f.write(qt.encode("I'll hold onto that journal for you. Come back anytime if you want to read it.", True))
-        f.seek(int("3f208", 16) + rom_offset)
-        f.write(b"\x02\xbf\x1a\x9e\x6b")
+        self.__write_game_data__("8c207", b"\x0E\xC2\x02\x0B\x02\xC1\x6B\x02\xD0\xEF\x01\x1E\xC2\x02\xD6\x26\x22\xC2\x02\xBF\x2D\xC2" +
+                                 b"\x6B\x5C\x08\xF2\x83\x02\xCC\xEF\x02\xD5\x26\x02\xBF\x7F\xC2\x6B" +
+                                 qt.encode("If you have any information about the pyramid, I'd be happy to hold onto it for you.", True) +
+                                 qt.encode("I'll hold onto that journal for you. Come back anytime if you want to read it.", True), f)
+        self.__write_game_data__("3f208", b"\x02\xbf\x1a\x9e\x6b", f)
 
         # Shorten hieroglyph get
-        f.seek(int("8c7b8", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("8c87f", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("8c927", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("8c9cf", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("8ca77", 16) + rom_offset)
-        f.write(b"\x6b")
-        f.seek(int("8cb1f", 16) + rom_offset)
-        f.write(b"\x6b")
+        self.__write_game_data__("8c7b8", b"\x6b", f)
+        self.__write_game_data__("8c87f", b"\x6b", f)
+        self.__write_game_data__("8c927", b"\x6b", f)
+        self.__write_game_data__("8c9cf", b"\x6b", f)
+        self.__write_game_data__("8ca77", b"\x6b", f)
+        self.__write_game_data__("8cb1f", b"\x6b", f)
 
         ##########################################################################
         #                            Modify Babel events
@@ -1387,226 +832,143 @@ class Randomizer:
         # Move Dark Space in Babel Tower from map 224 to map 223
         # Allows player to exit Babel without crystal ring
         # Modify address pointer for Maps 224 in exit table
-        f.seek(int("183f4", 16) + rom_offset)
-        f.write(b"\xea")
-        # Move Dark Space exit data to Map 223
-        f_babel1 = open(folder + "01a7c2_babel.bin", "rb")
-        f.seek(int("1a7c2", 16) + rom_offset)
-        f.write(f_babel1.read())
-        f_babel1.close
-        # Modify address pointer for Maps 224-227 in event table
-        f.seek(int("c81c0", 16) + rom_offset)
-        f.write(b"\xa2\xe0\xe3\xe0\x0f\xe1\x2d\xe1")
-        # Assign new Dark Space correct overworld name
-        f.seek(int("bf8c4", 16) + rom_offset)
-        f.write(b"\x47\xfa")
+        self.__write_game_data__("183f4", b"\xea", f)
+
+        self.__append_file_data__("01a7c2_babel.bin", "1a7c2", f)  # Move Dark Space exit data to Map 223
+        self.__write_game_data__("c81c0", b"\xa2\xe0\xe3\xe0\x0f\xe1\x2d\xe1", f)  # Modify address pointer for Maps 224-227 in event table
+        self.__write_game_data__("bf8c4", b"\x47\xfa", f)  # Assign new Dark Space correct overworld name
         # Move Dark Space event data to Map 223
         # Also move spirits for entrance warp
-        f_babel2 = open(folder + "0ce099_babel.bin", "rb")
-        f.seek(int("ce099", 16) + rom_offset)
-        f.write(f_babel2.read())
-        f_babel2.close
+        self.__append_file_data__("0ce099_babel.bin", "ce099", f)
 
         # Spirits can warp you back to start
-        f.seek(int("99b69", 16) + rom_offset)
-        f.write(b"\x76\x9B\x76\x9B\x76\x9B\x76\x9B")
-        f.seek(int("99b7a", 16) + rom_offset)
-        f.write(b"\x02\xBE\x02\x01\x80\x9B\x86\x9B\x86\x9B\x16\x9D\x02\xBF\x95\x9C\x6B")
-        f.seek(int("99c1e", 16) + rom_offset)
-        f.write(b"\xd3" + qt.encode("What'd you like to do?") + b"\xcb\xac")
-        f.write(qt.encode("Git gud") + b"\xcb\xac" + qt.encode("Run away!") + b"\xca")
-        f.seek(int("99c95", 16) + rom_offset)
-        f.write(b"\xce" + qt.encode("Darn straight.") + b"\xc0")
-        f.seek(int("99d16", 16) + rom_offset)
-        f.write(b"\x02\x26\xDE\x78\x00\xC0\x00\x00\x00\x11\x02\xC5")
+        self.__write_game_data__("99b69", b"\x76\x9B\x76\x9B\x76\x9B\x76\x9B", f)
+        self.__write_game_data__("99b7a", b"\x02\xBE\x02\x01\x80\x9B\x86\x9B\x86\x9B\x16\x9D\x02\xBF\x95\x9C\x6B", f)
+        self.__write_game_data__("99c1e", b"\xd3" + qt.encode("What'd you like to do?") + b"\xcb\xac" + qt.encode("Git gud") + b"\xcb\xac" + qt.encode("Run away!") + b"\xca", f)
+        self.__write_game_data__("99c95", b"\xce" + qt.encode("Darn straight.") + b"\xc0", f)
+        self.__write_game_data__("99d16", b"\x02\x26\xDE\x78\x00\xC0\x00\x00\x00\x11\x02\xC5", f)
 
         # Change switch conditions for Crystal Ring item
-        f.seek(int("9999b", 16) + rom_offset)
-        f.write(b"\x4c\xd0\xf6")
-        f.seek(int("9f6d0", 16) + rom_offset)
-        f.write(b"\x02\xd0\xdc\x00\xa0\x99\x02\xd0\x3e\x00\xa0\x99\x02\xd0\xb4\x01\x9a\x99\x4c\xa0\x99")
-        f.seek(int("999aa", 16) + rom_offset)
-        f.write(b"\x4c\xf0\xf6")
-        f.seek(int("9f6f0", 16) + rom_offset)
-        f.write(b"\x02\xd0\xdc\x01\x9a\x99\x4c\xaf\x99")
-        f.seek(int("99a49", 16) + rom_offset)
-        f.write(b"\x02\xbf\xe4\x9a\x02\xd4\x27\x57\x9a\x02\xcc\xdc\x02\xe0" + INV_FULL)
+        self.__write_game_data__("9999b", b"\x4c\xd0\xf6", f)
+        self.__write_game_data__("9f6d0", b"\x02\xd0\xdc\x00\xa0\x99\x02\xd0\x3e\x00\xa0\x99\x02\xd0\xb4\x01\x9a\x99\x4c\xa0\x99", f)
+        self.__write_game_data__("999aa", b"\x4c\xf0\xf6", f)
+        self.__write_game_data__("9f6f0", b"\x02\xd0\xdc\x01\x9a\x99\x4c\xaf\x99", f)
+        self.__write_game_data__("99a49", b"\x02\xbf\xe4\x9a\x02\xd4\x27\x57\x9a\x02\xcc\xdc\x02\xe0" + INV_FULL, f)
         # Change text
-        f.seek(int("99a70", 16) + rom_offset)
-        f.write(qt.encode("Well, lookie there.", True))
+        self.__write_game_data__("99a70", qt.encode("Well, lookie there.", True), f)
 
         # Olman event no longer warps you out of the room
-        f.seek(int("98891", 16) + rom_offset)
-        f.write(b"\x02\x0b\x6b")
+        self.__write_game_data__("98891", b"\x02\x0b\x6b", f)
 
         # Shorten Olman text boxes
-        f.seek(int("9884c", 16) + rom_offset)
-        f.write(b"\x01\x00")
-        f.seek(int("98903", 16) + rom_offset)
-        f.write(qt.encode("heya.", True))
-        f.seek(int("989a2", 16) + rom_offset)
-        f.write(qt.encode("you've been busy, huh?", True))
+        self.__write_game_data__("9884c", b"\x01\x00", f)
+        self.__write_game_data__("98903", qt.encode("heya.", True), f)
+        self.__write_game_data__("989a2", qt.encode("you've been busy, huh?", True), f)
 
         # Speed up roof sequence
-        f.seek(int("98fad", 16) + rom_offset)
-        f.write(b"\x02\xcc\x0e\x02\xcc\x0f\x6b")
+        self.__write_game_data__("98fad", b"\x02\xcc\x0e\x02\xcc\x0f\x6b", f)
 
         ##########################################################################
         #                      Modify Jeweler's Mansion events
         ##########################################################################
         # Set exit warp to Dao
-        f.seek(int("8fcb2", 16) + rom_offset)
-        f.write(b"\x02\x26\xc3\x40\x01\x88\x00\x00\x00\x23")
-
+        self.__write_game_data__("8fcb2", b"\x02\x26\xc3\x40\x01\x88\x00\x00\x00\x23", f)
         # Set flag when Solid Arm is killed
-        f.seek(int("8fa25", 16) + rom_offset)
-        f.write(b"\x4c\x20\xfd")
-        f.seek(int("8fd20", 16) + rom_offset)
-        f.write(b"\x02\xcc\xf6\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0")
+        self.__write_game_data__("8fa25", b"\x4c\x20\xfd", f)
+        self.__write_game_data__("8fd20", b"\x02\xcc\xf6\x02\x26\xe3\x80\x02\xa0\x01\x80\x10\x23\x02\xe0", f)
 
         # Solid Arm text
-        f.seek(int("8fa32", 16) + rom_offset)
-        f.write(qt.encode("Weave a circle round him") + b"\xcb" + qt.encode("  thrice,"))
-        f.write(b"\xcb" + qt.encode("And close your eyes with") + b"\xcb" + qt.encode("  holy dread,"))
-        f.write(b"\xcf" + qt.encode("For he on honey-dew hath") + b"\xcb" + qt.encode("  fed,"))
-        f.write(b"\xcb" + qt.encode("And drunk the milk of ") + b"\xcb" + qt.encode("  Paradise.") + b"\xc0")
+        self.__write_game_data__("8fa32", qt.encode("Weave a circle round him") + b"\xcb" + qt.encode("  thrice,") +
+                                 b"\xcb" + qt.encode("And close your eyes with") + b"\xcb" + qt.encode("  holy dread,") +
+                                 b"\xcf" + qt.encode("For he on honey-dew hath") + b"\xcb" + qt.encode("  fed,") +
+                                 b"\xcb" + qt.encode("And drunk the milk of ") + b"\xcb" + qt.encode("  Paradise.") + b"\xc0", f)
 
-        f.seek(int("8fbc9", 16) + rom_offset)
-        f.write(b"\xd5\x02" + qt.encode("Ed, what an ugly thing to say... does this mean we're not friends anymore?|"))
-        f.write(qt.encode("You know, Ed, if I thought you weren't my friend, I just don't think I could bear it.") + b"\xc0")
+        self.__write_game_data__("8fbc9", b"\xd5\x02" +
+                                 qt.encode("Ed, what an ugly thing to say... does this mean we're not friends anymore?|") +
+                                 qt.encode("You know, Ed, if I thought you weren't my friend, I just don't think I could bear it.") + b"\xc0", f)
 
         ##########################################################################
         #                           Modify Ending cutscene
         ##########################################################################
         # Custom credits
         str_endpause = b"\xC9\xB4\xC8\xCA"
-        f.seek(int("bd566", 16) + rom_offset)
-        f.write(b"\xCB" + qt.encode("    Thanks a million.") + str_endpause)
-        f.seek(int("bd5ac", 16) + rom_offset)
-        f.write(b"\xCB" + qt.encode(" Extra special thanks to") + b"\xCB" + qt.encode("       manafreak"))
-        f.write(b"\xC9\x78\xCE\xCB" + qt.encode(" This project would not") + b"\xCB" + qt.encode("  exist without his work."))
-        f.write(b"\xC9\x78\xCE\xCB" + qt.encode("     gaiathecreator") + b"\xCB" + qt.encode("      .blogspot.com") + str_endpause)
-        f.seek(int("bd71c", 16) + rom_offset)
-        f.write(qt.encode("    Created by") + b"\xCB" + qt.encode("       DontBaguMe") + str_endpause)
-        f.seek(int("bd74f", 16) + rom_offset)
-        f.write(qt.encode("Additional Development By") + b"\xCB" + qt.encode("    bryon w and Raeven0"))
-        f.write(b"\xCB" + qt.encode("  EmoTracker by Apokalysme"))
-        f.write(b"\xC9\x78\xCE\xCB" + qt.encode("   Thanks to all the") + b"\xCB" + qt.encode("  amazing playtesters!") + str_endpause)
-        f.seek(int("bdee2", 16) + rom_offset)
-        # f.write(b"\xCB" + qt.encode("  Thanks RPGLimitBreak!") + str_endpause)
-        f.write(b"\xCB" + qt.encode(" That's it, show's over.") + str_endpause)
-        f.seek(int("bda09", 16) + rom_offset)
-        f.write(b"\xCB" + qt.encode("   Thanks for playing!") + str_endpause)
-        f.seek(int("bdca5", 16) + rom_offset)
-        f.write(qt.encode("Wait a minute...") + b"\xCB" + qt.encode("what happened to Hamlet?") + str_endpause)
-        f.seek(int("bdd48", 16) + rom_offset)
-        f.write(qt.encode("Um...") + b"\xCB" + qt.encode("I wouldn't worry about") + b"\xCB" + qt.encode("that too much...") + str_endpause)
-        f.seek(int("bddf6", 16) + rom_offset)
-        f.write(qt.encode("Well, but...") + str_endpause)
-        f.seek(int("bde16", 16) + rom_offset)
-        f.write(qt.encode("Shh... here,") + b"\xCB" + qt.encode("have some bacon.") + str_endpause)
+
+        self.__write_game_data__("bd566", b"\xCB" + qt.encode("    Thanks a million.") + str_endpause, f)
+        self.__write_game_data__("bd5ac", b"\xCB" + qt.encode(" Extra special thanks to") + b"\xCB" + qt.encode("       manafreak") +
+                                 b"\xC9\x78\xCE\xCB" + qt.encode(" This project would not") + b"\xCB" + qt.encode("  exist without his work.") +
+                                 b"\xC9\x78\xCE\xCB" + qt.encode("     gaiathecreator") + b"\xCB" + qt.encode("      .blogspot.com") + str_endpause, f)
+        self.__write_game_data__("bd71c", qt.encode("    Created by") + b"\xCB" + qt.encode("       DontBaguMe") + str_endpause, f)
+        self.__write_game_data__("bd74f", qt.encode("Additional Development By") + b"\xCB" + qt.encode("    bryon w and Raeven0") + b"\xCB" +
+                                 qt.encode("  EmoTracker by Apokalysme") + b"\xC9\x78\xCE\xCB" + qt.encode("   Thanks to all the") + b"\xCB" +
+                                 qt.encode("  amazing playtesters!") + str_endpause, f)
+        self.__write_game_data__("bdee2", b"\xCB" + qt.encode(" That's it, show's over.") + str_endpause, f)
+        self.__write_game_data__("bda09", b"\xCB" + qt.encode("   Thanks for playing!") + str_endpause, f)
+        self.__write_game_data__("bdca5", qt.encode("Wait a minute...") + b"\xCB" + qt.encode("what happened to Hamlet?") + str_endpause, f)
+        self.__write_game_data__("bdd48", qt.encode("Um...") + b"\xCB" + qt.encode("I wouldn't worry about") + b"\xCB" + qt.encode("that too much...") + str_endpause, f)
+        self.__write_game_data__("bddf6", qt.encode("Well, but...") + str_endpause, f)
+        self.__write_game_data__("bde16", qt.encode("Shh... here,") + b"\xCB" + qt.encode("have some bacon.") + str_endpause, f)
 
         # Thank the playtesters
-        f.seek(int("be056", 16) + rom_offset)
-        f.write(b"\x80\xfa")
-        f.seek(int("bfa80", 16) + rom_offset)
-        f.write(b"\xD3\xD2\x00\xD5\x00" + qt.encode("Contributors and Testers:") + b"\xCB")
-        f.write(qt.encode("-Alchemic   -Austin21300") + b"\xCB")        
-        f.write(qt.encode("-Atlas      -BOWIEtheHERO") + b"\xCB")
-        f.write(qt.encode("-Bonzaibier -BubbaSWalter") + b"\xC9\xB4\xCE")
+        self.__write_game_data__("be056", b"\x80\xfa", f)
+        self.__write_game_data__("bfa80", b"\xD3\xD2\x00\xD5\x00" +
+                                 qt.encode("Contributors and Testers:") +
+                                 b"\xCB" + qt.encode("-Alchemic   -Austin21300")
+                                 + b"\xCB" + qt.encode("-Atlas      -BOWIEtheHERO")
+                                 + b"\xCB" + qt.encode("-Bonzaibier -BubbaSWalter")
+                                 + b"\xC9\xB4\xCE" + qt.encode("-Crazyhaze  -DerTolleIgel")
+                                 + b"\xCB" + qt.encode("-DoodSF     -djtifaheart")
+                                 + b"\xCB" + qt.encode("-Eppy37     -Keypaladin")
+                                 + b"\xCB" + qt.encode("-Lassic")
+                                 + b"\xC9\xB4\xCE" + qt.encode("-Le Hulk    -Plan")
+                                 + b"\xCB" + qt.encode("-manafreak  -Pozzum Senpai")
+                                 + b"\xCB" + qt.encode("-Mikan      -roeya")
+                                 + b"\xCB" + qt.encode("-Mr Freet")
+                                 + b"\xC9\xB4\xCE" + qt.encode("-Scheris    -SmashManiac")
+                                 + b"\xCB" + qt.encode("-SDiezal    -solarcell007")
+                                 + b"\xCB" + qt.encode("-Skarsnik   -steve hacks")
+                                 + b"\xCB" + qt.encode("-Skipsy")
+                                 + b"\xC9\xB4\xCE" + qt.encode("-Sye990     -Verallix")
+                                 + b"\xCB" + qt.encode("-Tsurana    -Volor") + b"\xCB"
+                                 + qt.encode("-Tymekeeper -Veetorp")
+                                 + b"\xC9\xB4\xCE" + qt.encode("-Voranthe   -Xyrcord")
+                                 + b"\xCB" + qt.encode("-Wilddin    -Z4t0x")
+                                 + b"\xCB" + qt.encode("-wormsofcan -ZockerStu")
+                                 + b"\xC9\xB4\xCE\xCB" + qt.encode("  Thank you all so much!") + b"\xCB" + qt.encode("     This was so fun!") + b"\xC9\xF0\xC8\xCA", f)
 
-        f.write(qt.encode("-Crazyhaze  -DerTolleIgel") + b"\xCB")
-        f.write(qt.encode("-DoodSF     -djtifaheart") + b"\xCB")
-        f.write(qt.encode("-Eppy37     -Keypaladin") + b"\xCB")
-        f.write(qt.encode("-Lassic") + b"\xC9\xB4\xCE")
-
-        f.write(qt.encode("-Le Hulk    -Plan") + b"\xCB")
-        f.write(qt.encode("-manafreak  -Pozzum Senpai") + b"\xCB")
-        f.write(qt.encode("-Mikan      -roeya") + b"\xCB")
-        f.write(qt.encode("-Mr Freet") + b"\xC9\xB4\xCE")
-
-        f.write(qt.encode("-Scheris    -SmashManiac") + b"\xCB")
-        f.write(qt.encode("-SDiezal    -solarcell007") + b"\xCB")
-        f.write(qt.encode("-Skarsnik   -steve hacks") + b"\xCB")
-        f.write(qt.encode("-Skipsy") + b"\xC9\xB4\xCE")
-
-        f.write(qt.encode("-Sye990     -Verallix") + b"\xCB")
-        f.write(qt.encode("-Tsurana    -Volor") + b"\xCB")
-        f.write(qt.encode("-Tymekeeper -Veetorp") + b"\xC9\xB4\xCE")
-
-        f.write(qt.encode("-Voranthe   -Xyrcord") + b"\xCB")
-        f.write(qt.encode("-Wilddin    -Z4t0x") + b"\xCB")
-        f.write(qt.encode("-wormsofcan -ZockerStu") + b"\xC9\xB4\xCE")
-
-        f.write(b"\xCB" + qt.encode("  Thank you all so much!"))
-        f.write(b"\xCB" + qt.encode("     This was so fun!"))
-
-        f.write(b"\xC9\xF0\xC8\xCA")
 
         ##########################################################################
         #                           Modify Jeweler event
         ##########################################################################
-        # Replace status upgrades with item acquisitions
-        f_jeweler = open(folder + "08cec9_jeweler.bin", "rb")
-        f.seek(int("8cec9", 16) + rom_offset)
-        f.write(f_jeweler.read())
-        f_jeweler.close
-
-        # Allow jeweler to take 2- and 3-jewel items
-        f_jeweler2 = open(folder + "08fd90_jeweler2.bin", "rb")
-        f.seek(int("8fd90", 16) + rom_offset)
-        f.write(f_jeweler2.read())
-        f_jeweler2.close
-
-        # Jeweler doesn't disappear when defeated
-        f.seek(int("8cea5", 16) + rom_offset)
-        f.write(b"\x10\x00")
+        self.__append_file_data__("08cec9_jeweler.bin", "8cec9", f)  # Replace status upgrades with item acquisitions
+        self.__append_file_data__("08fd90_jeweler2.bin", "8fd90", f)  # Allow jeweler to take 2- and 3-jewel items
+        self.__write_game_data__("8cea5", b"\x10\x00", f)  # Jeweler doesn't disappear when defeated
 
         # Jeweler warps you to credits for Red Jewel hunts
-        if goal == "Red Jewel Hunt":
-            f.seek(int("8d32a", 16) + rom_offset)
-            f.write(b"\xE5\x00\x00\x00\x00\x00\x00\x11")
-            f.seek(int("8d2d8", 16) + rom_offset)
-            f.write(qt.encode("Beat the game"))
+        if self.settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+            self.__write_game_data__("8d32a", b"\xE5\x00\x00\x00\x00\x00\x00\x11", f)
+            self.__write_game_data__("8d2d8", qt.encode("Beat the game"), f)
 
         ##########################################################################
         #                          Update dark space code
         ##########################################################################
         # Allow player to return to South Cape at any time
         # Also, checks for end game state and warps to final boss
-        f_darkspace = open(folder + "08db07_darkspace.bin", "rb")
-        f.seek(int("8db07", 16) + rom_offset)
-        f.write(f_darkspace.read())
-        f_darkspace.close
-
-        # Shorten ability acquisition text
-        f.seek(int("8eb81", 16) + rom_offset)
-        f.write(b"\xc0")
+        self.__append_file_data__("08db07_darkspace.bin", "8db07", f)
+        self.__write_game_data__("8eb81", b"\xc0", f)  # Shorten ability acquisition text
 
         # Cut out ability explanation text
-        f.seek(int("8eb15", 16) + rom_offset)
-        f.write(b"\xa4\x26\xa9\x00\x00\x99\x24\x00\x02\x04\x16")
-        f.write(b"\x02\xda\x01\xa9\xf0\xff\x1c\x5a\x06\x02\xe0")
+        self.__write_game_data__("8eb15", b"\xa4\x26\xa9\x00\x00\x99\x24\x00\x02\x04\x16\x02\xda\x01\xa9\xf0\xff\x1c\x5a\x06\x02\xe0", f)
 
         # Remove abilities from all Dark Spaces
-        f.seek(int("c8b34", 16) + rom_offset)  # Itory Village (Psycho Dash)
-        f.write(b"\x01")
-        f.seek(int("c9b49", 16) + rom_offset)  # Diamond Mine (Dark Friar)
-        f.write(b"\x03")
-        f.seek(int("caa99", 16) + rom_offset)  # Mu (Psycho Slide)
-        f.write(b"\x03")
-        f.seek(int("cbb80", 16) + rom_offset)  # Great Wall (Spin Dash)
-        f.write(b"\x03")
-        f.seek(int("cc7b8", 16) + rom_offset)  # Mt. Temple (Aura Barrier)
-        f.write(b"\x03")
-        f.seek(int("cd0a2", 16) + rom_offset)  # Ankor Wat (Earthquaker)
-        f.write(b"\x03")
+        self.__write_game_data__("c8b34", b"\x01", f)  # Itory Village (Psycho Dash)
+        self.__write_game_data__("c9b49", b"\x03", f)  # Diamond Mine (Dark Friar)
+        self.__write_game_data__("caa99", b"\x03", f)  # Mu (Psycho Slide)
+        self.__write_game_data__("cbb80", b"\x03", f)  # Great Wall (Spin Dash)
+        self.__write_game_data__("cc7b8", b"\x03", f)  # Mt. Temple (Aura Barrier)
+        self.__write_game_data__("cd0a2", b"\x03", f)  # Ankor Wat (Earthquaker)
 
         # Insert subroutine that can force change back to Will
-        f_forcechange = open(folder + "08fd30_forcechange.bin", "rb")
-        f.seek(int("8fd30", 16) + rom_offset)
-        f.write(f_forcechange.read())
-        f_forcechange.close
+        self.__append_file_data__("08fd30_forcechange.bin", "8fd30", f)
 
         ##########################################################################
         #                          Fix special attacks
@@ -1797,19 +1159,18 @@ class Randomizer:
         #                        Balance Enemy Stats
         ##########################################################################
         # Determine enemy stats, by difficulty
-        if mode == 0:
+        if self.settings.difficulty.value == Difficulty.EASY.value:
             f_enemies = open(folder + "01abf0_enemieseasy.bin", "rb")
-        elif mode == 1:
+        elif self.settings.difficulty.value == Difficulty.NORMAL.value:
             f_enemies = open(folder + "01abf0_enemiesnormal.bin", "rb")
-        elif mode == 2:
+        elif self.settings.difficulty.value == Difficulty.HARD.value:
             f_enemies = open(folder + "01abf0_enemieshard.bin", "rb")
-        elif mode == 3:
+        elif self.settings.difficulty.value == Difficulty.EXTREME.value:
             f_enemies = open(folder + "01abf0_enemiesextreme.bin", "rb")
 
-        if mode < 4:
-            f.seek(int("1abf0", 16) + rom_offset)
-            f.write(f_enemies.read())
-            f_enemies.close
+        f.seek(int("1abf0", 16) + rom_offset)
+        f.write(f_enemies.read())
+        f_enemies.close
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -1952,10 +1313,10 @@ class Randomizer:
         gem.append(random.randint(26, 34))
         gem.append(random.randint(36, 50))
 
-        if goal == "Red Jewel Hunt":
-            if mode == 0:
+        if self.settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+            if self.settings.difficulty.value == Difficulty.EASY.value:
                 gem[6] = GEMS_EASY
-            elif mode == 1:
+            elif self.settings.difficulty.value == Difficulty.NORMAL.value:
                 gem[6] = GEMS_NORMAL
             else:
                 gem[6] = GEMS_HARD
@@ -2095,7 +1456,7 @@ class Randomizer:
             i += 1
 
         # Can't face Dark Gaia in Red Jewel hunts
-        if goal != "Dark Gaia":
+        if self.settings.goal.value != Goal.DARK_GAIA.value:
             f.seek(int("8dd0d", 16) + rom_offset)
             f.write(b"\x10\x01")
 
@@ -2103,7 +1464,7 @@ class Randomizer:
         statues_hex.sort()
 
         # Teacher at start spoils required Mystic Statues
-        statue_str = ""
+        statue_str = b""
         if len(statues_hex) == 0:
             statue_str = b"\xd3\x4d\x8e\xac\xd6\xd2\x80\xa2\x84\xac"
             statue_str += b"\xa2\x84\xa1\xa5\x88\xa2\x84\x83\x4f\xc0"
@@ -2210,7 +1571,7 @@ class Randomizer:
                 rom = f.read()
                 addr = rom.find(b"\x15\x0C\x00\x49\x00\x02", int("d8000", 16) + rom_offset)
                 if addr < 0:
-                    print ("ERROR: Could not change spriteset for Diamond Mine")
+                    print("ERROR: Could not change spriteset for Diamond Mine")
                 else:
                     f.seek(addr)
                     f.write(b"\x15\x25")
@@ -2409,7 +1770,7 @@ class Randomizer:
             b"\x2d\x43\x84\x80\xa4\x87\xac\x88\xa3\xac\xa4\x87\x84\xac\xa7\x88\xa3\x87\xac\x8e\x85\xcb\xa3\x8e\x8c\x84\x2b\xac\xa4\x87\x84\xac\xa2\x84\x8b\x88\x84\x85\xac\x8e\x85\xac\x8c\x80\x8d\xa9\x2b\xcb\x80\x8d\x83\xac\xa4\x87\x84\xac\x84\x8d\x83\xac\x8e\x85\xac\x80\x8b\x8b\x2a\x2e\xcb\xac\xac\x6d\x4B\xa5\x82\x88\xa5\xa3\xac\x40\x8d\x8d\x80\x84\xa5\xa3\xac\x63\x84\x8d\x84\x82\x80\xc0")
         death_list.append(
             b"\x2d\x43\x84\x80\xa4\x87\xac\xa7\x88\x8b\x8b\xac\x81\x84\xac\x80\xac\x86\xa2\x84\x80\xa4\xcb\xa2\x84\x8b\x88\x84\x85\x2a\xac\x4D\x8e\xac\x8c\x8e\xa2\x84\xcb\x88\x8d\xa4\x84\xa2\xa6\x88\x84\xa7\xa3\x2a\x2e\xcb\xac\xac\x6d\x4A\x80\xa4\x87\x80\xa2\x88\x8d\x84\xac\x47\x84\xa0\x81\xa5\xa2\x8d\xc0\xc0")
-        if mode == 3:
+        if self.settings.difficulty.value == Difficulty.EXTREME.value:
             death_list.append(b"\x2d\x46\x88\xa4\xac\x86\xa5\x83\xac\xa3\x82\xa2\xa5\x81\x2a\x2e\xcb\xac\xac\x6d\x41\x80\x86\xa5\xc0")
 
         # Will death text
@@ -2459,14 +1820,15 @@ class Randomizer:
         seed_adj = 0
         while not done:
             if seed_adj > 10:
-                print ("ERROR: Max number of seed adjustments exceeded")
+                print("ERROR: Max number of seed adjustments exceeded")
                 return False
-            w = classes.World(rng_seed, mode, goal, logic_mode, statues, start_mode, variant, enemizer, firebird, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order)
+            w = classes.World(self.settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order)
+            # w = classes.World(settings.seed, settings.difficulty.value, settings.goal.value, settings.logic.value, statues, start_mode, variant, enemizer, firebird, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order)
             done = w.randomize(seed_adj)
             seed_adj += 1
 
         # w.print_spoiler()
-        w.generate_spoiler(folder_dest, VERSION, filename)
+        w.generate_spoiler(OUTPUT_FOLDER, VERSION, filename)
         w.write_to_rom(f, rom_offset)
 
         ##########################################################################
@@ -2605,7 +1967,7 @@ class Randomizer:
 
         # Set change for Room 3
         # Check for chest contents, only change map if contents are the same
-        if w.item_locations[80][3] == w.item_locations[81][3]:
+        if constants.ITEM_LOCATIONS[80][3] == constants.ITEM_LOCATIONS[81][3]:
             if changes[2] == 1:  # Remove rock
                 f_ishtarmap.seek(int("5bd", 16))
                 f_ishtarmap.write(b"\x73")
@@ -2704,11 +2066,75 @@ class Randomizer:
         ##########################################################################
         #                        Export file and return
         ##########################################################################
-        f_new = open(rom_path_new, "w+b")
-        f.seek(0)
-        f_new.write(f.read())
-
-        f.close
-        f_new.close
+        output_path = OUTPUT_FOLDER + filename
+        randomized_file = self.__write_randomized_rom__(output_path, f)
 
         return True
+
+    def __get_required_statues__(self) -> int:
+        if self.settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+            return 0
+
+        if self.settings.statues.lower() == "random":
+            return random.randrange(0, 6)
+
+        return int(self.settings.statues)
+
+    def __append_file_data__(self, data_filename: str, address: str, f: BinaryIO) -> None:
+        to_append = open(BIN_PATH, data_filename, "rb")
+        f.seek(int(address, 16) + self.offset)
+        f.write(to_append.read())
+        to_append.close()
+
+    def __write_game_data__(self, address: str, value: bytes, f: BinaryIO) -> None:
+        f.seek(int(address, 16) + self.offset)
+        f.write(value)
+
+    def __seek__(self, address: str, f: BinaryIO) -> None:
+        f.seek(int(address, 16) + self.offset)
+
+    def __write_randomized_rom__(self, output_path: str, f: BinaryIO) -> BinaryIO:
+        output = open(output_path, "w+b")
+        f.seek(0)
+        output.write(f.read())
+        f.close()
+        output.close()
+        return output
+
+    def __copy_original_rom__(self):
+        try:
+            f_rom = open(ROM_PATH, "rb")
+        except:
+            raise FileNotFoundError
+
+        f = tempfile.TemporaryFile()
+        f_rom.seek(0)
+        f.write(f_rom.read())
+        f_rom.seek(0)
+
+        rom_data = f_rom.read()
+        self.offset = get_offset(rom_data)
+
+        f_rom.close()
+        return f
+
+    def __build_hash__(self, filename: str):
+        hash_str = filename
+        h = hmac.new(bytes(self.settings.seed), hash_str.encode())
+        digest = h.digest()
+
+        hash_dict = [b"\x20", b"\x21", b"\x28", b"\x29", b"\x2a", b"\x2b", b"\x2c", b"\x2d", b"\x2e", b"\x2f", b"\x30", b"\x31", b"\x32", b"\x33"]
+        hash_dict += [b"\x34", b"\x35", b"\x36", b"\x37", b"\x38", b"\x39", b"\x3a", b"\x3b", b"\x3c", b"\x3d", b"\x3e", b"\x3f", b"\x42", b"\x43"]
+        hash_dict += [b"\x44", b"\x46", b"\x47", b"\x48", b"\x4a", b"\x4b", b"\x4c", b"\x4d", b"\x4e", b"\x50", b"\x51", b"\x52", b"\x53", b"\x54"]
+        hash_dict += [b"\x56", b"\x57", b"\x58", b"\x59", b"\x5a", b"\x5b", b"\x5c", b"\x5d", b"\x5e", b"\x5f", b"\x7c", b"\x80", b"\x81"]
+
+        hash_len = len(hash_dict)
+
+        i = 0
+        hash_final = b""
+        while i < 6:
+            key = digest[i] % hash_len
+            hash_final += hash_dict[key]
+            i += 1
+
+        return hash_final

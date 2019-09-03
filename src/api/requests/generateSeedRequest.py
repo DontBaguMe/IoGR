@@ -8,6 +8,8 @@ from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
 
+from api.exceptions.exceptions import InvalidRequestParameters
+
 class generateSeedRequest(object):
     schema = {
         'type': 'object',
@@ -69,21 +71,18 @@ class generateSeedRequest(object):
 
     def _validateStatues(self, payload):
         statues = payload.get("statues")
-        switch = {
-            0: "0",
-            1: "1",
-            2: "2",
-            3: "3",
-            4: "4",
-            5: "5",
-            6: "6",
-            7: "random",
-        }
 
         if statues is not None:
-            self.statues = switch.get(statues.lower(), "Random")
+            if statues == "random":
+                self.statues = random.randrange(0, 6)
+            else:
+                count = int(statues)
+                if count >= 0 and count <= 6:
+                    self.statues = count
+                else:
+                    self.statues = 4
         else:
-            self.statues = "4"
+            self.statues = 4
 
     def _validateLogic(self, payload):
         logic = payload.get("logic")
@@ -118,28 +117,22 @@ class generateSeedRequest(object):
             self.entrance_shuffle = EntranceShuffle.NONE
 
     def _validateSwitches(self, payload):
-        self.allow_glitches = payload.get("allowGlitches")
-        if self.allow_glitches is None: self.allow_glitches = False
+        def getSwitch(switch):
+            if switch is None:
+                return False
+            return switch
 
-        self.ohko = payload.get("ohko")
-        if self.ohko is None: self.ohko = False
+        self.allow_glitches = getSwitch(payload.get("allowGlitches"))
+        self.ohko = getSwitch(payload.get("ohko"))
+        self.red_jewel_madness = getSwitch(payload.get("redJewelMadness"))
+        self.firebird = getSwitch(payload.get("firebird"))
+        self.boss_shuffle = getSwitch(payload.get("bossShuffle"))     
+        self.dungeon_shuffle = getSwitch(payload.get("dungeonShuffle"))
+        self.overworld_shuffle = getSwitch(payload.get("overworldShuffle"))
 
-        self.red_jewel_madness = payload.get("redJewelMadness")
-        if self.red_jewel_madness is None: self.red_jewel_madness = False
+        if self.red_jewel_madness and self.ohko:
+            raise InvalidRequestParameters("Can't have OHKO and Red Jewel Madness both flagged")
 
-        self.firebird = payload.get("firebird")
-        if self.firebird is None: self.firebird = False
-
-        self.boss_shuffle = payload.get("bossShuffle")
-        if self.boss_shuffle is None: self.boss_shuffle = False
-            
-        self.dungeon_shuffle = payload.get("dungeonShuffle")
-        if self.dungeon_shuffle is None: self.dungeon_shuffle = False
-
-        self.overworld_shuffle = payload.get("overworldShuffle")
-        if self.overworld_shuffle is None: self.overworld_shuffle = False
-
-    
 #endregion
 
     def to_json(self):

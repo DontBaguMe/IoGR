@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class StartLocation(Enum):
     SOUTH_CAPE = 0
     SAFE = 1
