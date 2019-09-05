@@ -17,6 +17,10 @@ def bad_request(errors):
     return make_response(jsonify({'errors': errors.description}), 400)
 
 
+@app.route("/v1/hello", methods=["GET"])
+def hello() -> Response:
+    return make_response("Hello!", 200)
+
 @app.route("/v1/seed/generate", methods=["POST"])
 @expects_json(GenerateSeedRequest.schema)
 def generateSeed() -> Response:
