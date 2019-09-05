@@ -1,3 +1,20 @@
-from setuptools import setup, find_packages
+import os
 
-setup(name='randomizer', version='1.0', packages=find_packages())
+import setuptools
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+
+setuptools.setup(
+    name='iog-randomizer',
+    version='0.1.0',
+    description='The Illusion of Gaia Randomizer',
+    author='dontbagume,bryon_w,raeven0',
+    packages=setuptools.find_packages(),
+    package_data={'': [
+        'bin/*.bin'
+    ]},
+    install_requires=['bitstring'],
+    python_requires='>=3.7'
+)
