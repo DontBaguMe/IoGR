@@ -92,12 +92,12 @@ def generate_ROM():
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
 
-        randomizer = Randomizer(rom_filename, rompath, settings)
+        randomizer = Randomizer(rompath)
 
-        patch = randomizer.generate_rom()
+        patch = randomizer.generate_rom(rom_filename, settings)
         spoiler = randomizer.generate_spoiler()
 
-        write_patch(patch, rompath, rom_filename, rompath)
+        write_patch(patch, rompath, rom_filename)
         write_spoiler(spoiler, spoiler_filename, rompath)
 
         tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")

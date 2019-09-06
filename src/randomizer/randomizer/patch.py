@@ -19,7 +19,7 @@ class Patch:
         #  self.logger.debug("address," + str(self.temp.tell()) + ",value," + str(len(arr)))
         #  print("address," + str(self.temp.tell()) + ",value," + str(len(arr)))
 
-        self.data[self.temp.tell()] = arr
+        self.data[int(self.temp.tell())] = arr
         self.temp.write(data)
 
     def read(self, n: int = None):
