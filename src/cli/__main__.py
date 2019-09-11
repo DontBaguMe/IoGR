@@ -58,6 +58,10 @@ def write_spoiler(spoiler, filename, rom_path):
     print("Spoiler created: " + filename)
 
 
+def sort_patch(val):
+    return val['index']
+
+
 def write_patch(patch, filename, rom_path):
     original = open(rom_path, "rb")
     randomized = open(os.path.dirname(rom_path) + os.path.sep + filename, "wb")
@@ -65,9 +69,14 @@ def write_patch(patch, filename, rom_path):
 
     original.close()
     data = json.loads(patch)
+    data.sort(key=sort_patch)
+
     for k in data:
-        randomized.seek(int(k))
-        randomized.write(bytes(data[k]))
+        address = int(k['address'])
+        value = bytes(k['data'])
+
+        randomized.seek(address)
+        randomized.write(value)
     randomized.close()
     print("Patch created: " + filename)
 

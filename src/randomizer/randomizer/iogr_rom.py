@@ -2661,7 +2661,7 @@ class Randomizer:
         # self.seek(patch, int("d977e",16)+rom_offset)
         # self.write(patch, b"\x00\x41")
 
-        return json.dumps(patch.data)
+        return json.dumps(patch.patch_data)
 
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)

@@ -2,8 +2,10 @@ import tempfile
 
 
 class Patch:
+    step = 0
+
     def __init__(self, rom_data, logger):
-        self.data = dict()
+        self.patch_data = []
         self.logger = logger
         self.temp = tempfile.TemporaryFile()
         self.temp.write(rom_data)
@@ -16,11 +18,11 @@ class Patch:
 
     def write(self, data: bytes) -> None:
         arr = [x for x in data]
-        #  self.logger.debug("address," + str(self.temp.tell()) + ",value," + str(len(arr)))
-        #  print("address," + str(self.temp.tell()) + ",value," + str(len(arr)))
+        address = int(self.temp.tell())
 
-        self.data[int(self.temp.tell())] = arr
+        self.patch_data.append({'index': self.step, 'address': address, 'data': arr})
         self.temp.write(data)
+        self.step += 1
 
     def read(self, n: int = None):
         return self.temp.read(n)
