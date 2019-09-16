@@ -8,7 +8,7 @@ from .enums.start_location import StartLocation
 
 
 class RandomizerData:
-    def __init__(self, seed: int = random.randrange(0, 999999999),
+    def __init__(self, seed: int = random.randint(0, 999999999),
                  difficulty: Difficulty = Difficulty.NORMAL, goal: Goal = Goal.DARK_GAIA,
                  logic: Logic = Logic.COMPLETABLE, statues: str = "4", enemizer: Enemizer = Enemizer.NONE,
                  start_location: StartLocation = StartLocation.SOUTH_CAPE, firebird: bool = False, ohko: bool = False,
