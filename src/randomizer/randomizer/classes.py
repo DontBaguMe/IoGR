@@ -1144,12 +1144,7 @@ class World:
 
             # Update map header to reflect new enemyset
             if self.maps[map][3]:
-                addr = rom.find(self.maps[map][3], int("d8000", 16) + rom_offset)
-                if addr < 0 or addr > int("daffe", 16) + rom_offset:
-                    print("ERROR: Couldn't find header for map ", map)
-                else:
-                    f.seek(addr + self.maps[map][4])
-                    f.write(self.enemysets[newset][0])
+                self.map_patches.append([self.maps[map][3],self.enemysets[newset][0],self.maps[map][4]])
 
             # Randomize each enemy in map
             addr_start = self.maps[map][5]
@@ -1281,6 +1276,7 @@ class World:
         self.good_items = [10, 13, 24, 25, 49, 50, 51]
         self.trolly_locations = [32, 45, 64, 65, 102, 108, 121, 128, 136, 147]
         self.free_locations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24]
+        self.map_patches = []
 
         # Initialize item pool, considers special attacks as "items"
         # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue),

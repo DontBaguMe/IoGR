@@ -127,11 +127,11 @@ class Randomizer:
     def generate_rom(self, filename: str, settings: RandomizerData):
         patch = self.__generate_patch__()
         rom_offset = self.__get_offset__(patch)
-        
+
         random.seed(settings.seed)
         statues_required = self.__get_required_statues__(settings)
         mode = settings.difficulty.value
-        
+
         ##########################################################################
         #                             Early Firebird
         ##########################################################################
@@ -240,20 +240,23 @@ class Randomizer:
         patch.write(b"\x10")
 
         ##########################################################################
-        #                           Update map headers
+        #                     Initialize map header dataset
         ##########################################################################
-        f_mapdata = open(BIN_PATH + "0d8000_mapdata.bin", "rb")
-        patch.seek(int("d8000", 16) + rom_offset)
-        patch.write(f_mapdata.read())
-        f_mapdata.close
+        f_mapdata_orig = open(BIN_PATH + "0d8000_mapdata.bin", "rb")
+        f_mapdata = tempfile.TemporaryFile()
+        f_mapdata.write(f_mapdata_orig.read())
+        f_mapdata_orig.close
 
+        f_mapdata.seek(0)
+
+        # Insert tutorial map in Easy mode
         if mode == 0:
-            addr = patch.find(b"\x00\x07\x00\x02\x01", int("d8000", 16) + rom_offset)
-            patch.seek(addr)
-            patch.write(b"\x00\x09")
-            addr = patch.find(b"\x00\x09\x00\x02\x08", int("d8000", 16) + rom_offset)
-            patch.seek(addr)
-            patch.write(b"\x00\x07")
+            addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
+            f_mapdata.seek(addr)
+            f_mapdata.write(b"\x00\x09")
+            addr = f_mapdata.read().find(b"\x00\x09\x00\x02\x08")
+            f_mapdata.seek(addr)
+            f_mapdata.write(b"\x00\x07")
 
         ##########################################################################
         #                        Update treasure chest data
@@ -2167,13 +2170,13 @@ class Randomizer:
                 patch.write(b"\xe0")
 
                 # Assign Kara painting spriteset to appropriate Map
-                patch.seek(0)
-                addr = patch.find(b"\x15\x0C\x00\x49\x00\x02", int("d8000", 16) + rom_offset)
+                f_mapdata.seek(0)
+                addr = f_mapdata.read().find(b"\x15\x0C\x00\x49\x00\x02")
                 if addr < 0:
                     self.logger.error("ERROR: Could not change spriteset for Diamond Mine")
                 else:
-                    patch.seek(addr)
-                    patch.write(b"\x15\x25")
+                    f_mapdata.seek(addr)
+                    f_mapdata.write(b"\x15\x25")
 
                 # Set Kara painting event in appropriate map
                 patch.seek(int("c9c6a", 16) + rom_offset)
@@ -2430,6 +2433,18 @@ class Randomizer:
         self.w.write_to_rom(patch, rom_offset)
 
         ##########################################################################
+        #                   Update map dataset after Enemizer
+        ##########################################################################
+        for map_patch in self.w.map_patches:
+            f_mapdata.seek(0)
+            addr = f_mapdata.read().find(map_patch[0], int("d8000", 16) + rom_offset)
+            if addr < 0:
+                print("ERROR: Couldn't find header for map ", map)
+            else:
+                f_mapdata.seek(addr + map_patch[2])
+                f.write(map_patch[1])
+
+        ##########################################################################
         #                        Randomize Ishtar puzzle
         ##########################################################################
         # Add checks for Will's hair in each room
@@ -2661,6 +2676,13 @@ class Randomizer:
         # patch.seek(int("d977e",16)+rom_offset)
         # patch.write(b"\x00\x41")
 
+        ##########################################################################
+        #                Finalize map headers and return patch data
+        ##########################################################################
+        f_mapdata.seek(0)
+        patch.seek(int("d8000", 16) + rom_offset)
+        patch.write(f_mapdata.read())
+
         return json.dumps(patch.patch_data)
 
     def generate_spoiler(self) -> str:
@@ -2689,4 +2711,3 @@ class Randomizer:
             raise OffsetError
 
         return h_addr - int("ffc0", 16)
-
