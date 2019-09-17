@@ -2437,12 +2437,12 @@ class Randomizer:
         ##########################################################################
         for map_patch in self.w.map_patches:
             f_mapdata.seek(0)
-            addr = f_mapdata.read().find(map_patch[0], int("d8000", 16) + rom_offset)
+            addr = f_mapdata.read().find(map_patch[0])
             if addr < 0:
-                print("ERROR: Couldn't find header for map ", map)
+                print("ERROR: Couldn't find header: ", binascii.hexlify(map_patch[0]))
             else:
                 f_mapdata.seek(addr + map_patch[2])
-                f.write(map_patch[1])
+                f_mapdata.write(map_patch[1])
 
         ##########################################################################
         #                        Randomize Ishtar puzzle
