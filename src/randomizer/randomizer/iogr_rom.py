@@ -247,13 +247,14 @@ class Randomizer:
         f_mapdata.write(f_mapdata_orig.read())
         f_mapdata_orig.close
 
-        f_mapdata.seek(0)
-
         # Insert tutorial map in Easy mode
         if mode == 0:
+            f_mapdata.seek(0)
             addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
             f_mapdata.seek(addr)
             f_mapdata.write(b"\x00\x09")
+
+            f_mapdata.seek(0)
             addr = f_mapdata.read().find(b"\x00\x09\x00\x02\x08")
             f_mapdata.seek(addr)
             f_mapdata.write(b"\x00\x07")
