@@ -1,3 +1,4 @@
+pip install wheel &
 cd /d "src/randomizer" &
 python "setup.py" sdist --dist-dir "../../dist/randomizer/" &
 python "setup.py" bdist_wheel --dist-dir "../../dist/randomizer/" &
