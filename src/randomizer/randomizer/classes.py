@@ -439,7 +439,7 @@ class World:
             while i < boss_rewards:
                 map = area[i]
                 reward = rewards.pop(0)
-                if (self.variant != "OHKO" and self.variant != "RJM") or reward > 1:  # No HP rewards for OHKO or RJM
+                if self.variant != "OHKO" or reward > 1:  # No HP rewards for OHKO
                     self.maps[map][2] = reward
                 i += 1
 
