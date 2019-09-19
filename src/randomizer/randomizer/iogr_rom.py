@@ -491,8 +491,8 @@ class Randomizer:
             patch.write(b"\x02\xbf\x30\xfd\xce\xca\x0a\xce\xce\x0a\xce\xca\x0a\xce\xce\x0a\x60")
             # 3 Red Jewels (item #$2f) removes 3 HP when used
             patch.seek(int("39ddf",16)+rom_offset)
-            patch.write(b"\x4c\x8c\xfd")
-            patch.seek(int("3fd8c",16)+rom_offset)
+            patch.write(b"\x4c\x8e\xfd")
+            patch.seek(int("3fd8e",16)+rom_offset)
             patch.write(b"\x02\xbf\x30\xfd\xce\xca\x0a\xce\xce\x0a\xce\xca\x0a\xce\xce\x0a\xce\xca\x0a\xce\xce\x0a\x60")
 
 
