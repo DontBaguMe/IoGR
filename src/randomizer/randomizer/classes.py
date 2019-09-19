@@ -1259,6 +1259,8 @@ class World:
 
         if settings.ohko:
             self.variant = "OHKO"
+        elif settings.red_jewel_madness:
+            self.variant = "RJM"
         else:
             self.variant = ""
 

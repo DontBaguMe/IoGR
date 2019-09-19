@@ -96,6 +96,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getStartingLocation(settings.start_location)
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
+    filename += getSwitch(settings.red_jewel_madness, "rjm")
     filename += getEnemizer(settings.enemizer)
     filename += "_" + str(settings.seed)
     filename += "."
@@ -465,8 +466,14 @@ class Randomizer:
         # Change item functionality for game variants
         patch.seek(int("3fce0", 16) + rom_offset)
         patch.write(qt_encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.", True))
-        patch.seek(int("3fd40", 16) + rom_offset)
+        patch.seek(int("3fd30", 16) + rom_offset)
         patch.write(qt_encode("As the Jewel disappears, Will feels his strength draining!", True))
+
+        f_rjm = open(BIN_PATH + "03fd70_rjm.bin", "rb")
+        patch.seek(int("3fd70", 16) + rom_offset)
+        patch.write(f_rjm.read())
+        f_rjm.close
+
         # In OHKO, the HP Jewels do nothing, and start @1HP
         if settings.ohko:
             patch.seek(int("8068", 16) + rom_offset)
@@ -474,13 +481,20 @@ class Randomizer:
             patch.seek(int("39f71", 16) + rom_offset)
             patch.write(b"\xe0\xfc\x02\xd5\x29\x60")
         # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
-        #    elif variant == "Red Jewel Madness":
-        #        patch.seek(int("8068",16)+rom_offset)
-        #        patch.write(b"\x28")
-        #        patch.seek(int("384d5",16)+rom_offset)
-        #        patch.write(b"\x4c\x30\xfd")
-        #        patch.seek(int("3fd30",16)+rom_offset)
-        #        patch.write(b"\x02\xbf\x40\xfd\xce\xca\x0a\xce\xce\x0a\x4c\xd9\x84")
+        elif settings.red_jewel_madness:
+            # Start @ 40 HP
+            patch.seek(int("8068", 16) + rom_offset)
+            patch.write(b"\x28")
+            # Red Jewels (item #$01) remove 1 HP when used
+            patch.seek(int("384d5", 16) + rom_offset)
+            patch.write(b"\x4c\x70\xfd")
+            # 2 Red Jewels (item #$2e) removes 2 HP when used
+            patch.seek(int("39d9f", 16) + rom_offset)
+            patch.write(b"\x4c\x76\xfd")
+            # 3 Red Jewels (item #$2f) removes 3 HP when used
+            patch.seek(int("39ddf", 16) + rom_offset)
+            patch.write(b"\x4c\x7c\xfd")
+
 
         ##########################################################################
         #                  Update overworld map movement scripts
@@ -1518,10 +1532,17 @@ class Randomizer:
         f_jeweler.close
 
         # Allow jeweler to take 2- and 3-jewel items
-        f_jeweler2 = open(BIN_PATH + "08fd90_jeweler2.bin", "rb")
-        patch.seek(int("8fd90", 16) + rom_offset)
+        # Also, jewel turn-in reduces health in RJM variant
+        if settings.red_jewel_madness:
+            patch.seek(int("8cf97", 16) + rom_offset)
+            patch.write(b"\x4c\xc9\xfd")
+            f_jeweler2 = open(BIN_PATH + "08fd80_jeweler2_rjm.bin", "rb")
+        else:
+            f_jeweler2 = open(BIN_PATH + "08fd80_jeweler2.bin", "rb")
+        patch.seek(int("8fd80", 16) + rom_offset)
         patch.write(f_jeweler2.read())
         f_jeweler2.close
+
 
         # Jeweler doesn't disappear when defeated
         patch.seek(int("8cea5", 16) + rom_offset)
@@ -1743,12 +1764,12 @@ class Randomizer:
         patch.write(b"\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
 
         # Black Glasses allow you to "see" which upgrades are available
-        f_startmenu = open(BIN_PATH + "03fdb0_startmenu.bin", "rb")
-        patch.seek(int("3fdb0", 16) + rom_offset)
+        f_startmenu = open(BIN_PATH + "03fdc0_startmenu.bin", "rb")
+        patch.seek(int("3fdc0", 16) + rom_offset)
         patch.write(f_startmenu.read())
         f_startmenu.close
         patch.seek(int("381d6", 16) + rom_offset)
-        patch.write(b"\x4C\xB0\xFD")
+        patch.write(b"\x4C\xC0\xFD")
 
         # Change start menu "FORCE" text
         patch.seek(int("1ff70", 16) + rom_offset)
