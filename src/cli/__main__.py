@@ -37,14 +37,15 @@ parser.set_defaults(red_jewel_madness=False)
 
 def main(argv):
     args = parser.parse_args(argv)
+
     settings = RandomizerData(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.enemizer, args.start, args.firebird, args.ohko, args.red_jewel_madness,
                               args.allow_glitches, args.boss_shuffle, args.overworld_shuffle, args.dungeon_shuffle)
 
     rom_filename = generate_filename(settings, "sfc")
     spoiler_filename = generate_filename(settings, "json")
 
-    randomizer = Randomizer(rom_filename, args.path, settings)
-    patch = randomizer.generate_rom()
+    randomizer = Randomizer(args.path)
+    patch = randomizer.generate_rom(rom_filename, settings)
     spoiler = randomizer.generate_spoiler()
 
     write_patch(patch, rom_filename, args.path)
