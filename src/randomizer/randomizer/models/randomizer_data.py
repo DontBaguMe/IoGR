@@ -24,7 +24,7 @@ class RandomizerData:
         self.firebird = firebird
         self.ohko = ohko
         self.red_jewel_madness = red_jewel_madness
-        self.allow_glitchs = allow_glitches
+        self.allow_glitches = allow_glitches
         self.boss_shuffle = boss_shuffle
         self.overworld_shuffle = overworld_shuffle
         self.dungeon_shuffle = dungeon_shuffle

@@ -439,7 +439,7 @@ class World:
             while i < boss_rewards:
                 map = area[i]
                 reward = rewards.pop(0)
-                if self.variant != "OHKO" or reward > 1:  # No HP rewards for OHKO
+                if "OHKO" not in self.variant or reward > 1:  # No HP rewards for OHKO
                     self.maps[map][2] = reward
                 i += 1
 
@@ -502,6 +502,16 @@ class World:
         if self.start_mode != "South Cape":
             self.start_loc = self.random_start()
             self.graph[-1][1] = [self.item_locations[self.start_loc][0]]
+
+        # Allow glitches
+        if "Allow Glitches" in self.variant:
+            self.graph[29][1].append(31)          # Sky Garden: Ramp glitch
+            self.graph[38][1].append(71)          # Mu: Golem skip
+            self.item_locations[94][2] = False    # Great Wall: Slider glitch
+            self.logic[121][2][1][1] = 0          # Ankor Wat: Earthquaker not required
+            self.logic[122][2][0][1] = 0          # Ankor Wat: Glasses not required
+            self.item_locations[124][2] = False   # Ankor Wat: Dropdown DS has abilities
+            self.item_locations[142][2] = False   # Pyramid: Bottom DS has abilities
 
         # Chaos mode
         if self.logic_mode == "Chaos":
@@ -1258,11 +1268,14 @@ class World:
             self.enemizer = "Insane"
 
         if settings.ohko:
-            self.variant = "OHKO"
+            self.variant = ["OHKO"]
         elif settings.red_jewel_madness:
-            self.variant = "RJM"
+            self.variant = ["RJM"]
         else:
-            self.variant = ""
+            self.variant = []
+
+        if settings.allow_glitches:
+            self.variant.append("Allow Glitches")
 
         self.firebird = settings.firebird
         self.start_loc = 10

@@ -87,7 +87,7 @@ def generate_ROM():
 
     try:
         seed_int = int(seed_str)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(), firebird.get(), ohko.get(), red_jewel_madness.get())
+        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(), firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -217,6 +217,7 @@ tkinter.Label(mainframe, text="One Hit KO").grid(row=7, column=0, sticky=tkinter
 tkinter.Label(mainframe, text="Red Jewel Madness").grid(row=8, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=9, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -243,6 +244,9 @@ ohko.set(0)
 red_jewel_madness = tkinter.IntVar(root)
 red_jewel_madness.set(0)
 
+glitches = tkinter.IntVar(root)
+glitches.set(0)
+
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
@@ -267,6 +271,7 @@ ohko_checkbox = tkinter.Checkbutton(mainframe, variable=ohko, onvalue=1, offvalu
 rjm_checkbox = tkinter.Checkbutton(mainframe, variable=red_jewel_madness, onvalue=1, offvalue=0).grid(row=8, column=1)
 enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(row=9, column=1)
 statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=10, column=1)
+glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=11, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(mainframe, text='Generate Seed', command=generate_seed).grid(row=1, column=2)
