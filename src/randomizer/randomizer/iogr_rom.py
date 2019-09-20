@@ -23,7 +23,8 @@ KARA_ANKORWAT = 5
 
 GEMS_EASY = 35
 GEMS_NORMAL = 40
-GEMS_HARD = 50
+GEMS_HARD = 45
+GEMS_EXTREME = 50
 
 INV_FULL = b"\x5c\x8e\xc9\x80"
 FORCE_CHANGE = b"\x22\x30\xfd\x88"
@@ -1944,8 +1945,10 @@ class Randomizer:
                 gem[6] = GEMS_EASY
             elif mode == 1:
                 gem[6] = GEMS_NORMAL
-            else:
+            elif mode == 2:
                 gem[6] = GEMS_HARD
+            elif mode == 3:
+                gem[6] = GEMS_EXTREME
 
         gem_str = []
 
