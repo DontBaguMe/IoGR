@@ -86,7 +86,7 @@ Each seed may require a certain number of the six Mystic Statues. Talking to the
 Once you rescue Kara, unlock Shadow's form, and earn the applicable Statues (if any), you may talk to Gaia at any Dark Space, who will grant you the option to face Dark Gaia and win the game.
 
 #### Red Jewel Hunt
-For this mode, the sole objective is to collect the required number of Red Jewels as quickly as possible and turn them into the Jeweler.  The number of Red Jewels required is 35 for Easy, 40 for Normal, and 50 for Hard/Extreme.  Turning these into the Jeweler and speaking with him allows you to beat the game.
+For this mode, the sole objective is to collect the required number of Red Jewels as quickly as possible and turn them into the Jeweler.  The number of Red Jewels required is 35 for Easy, 40 for Normal, 45 for Hard, and 50 for Extreme.  Turning these into the Jeweler and speaking with him allows you to beat the game.
 
 ### Features
 
