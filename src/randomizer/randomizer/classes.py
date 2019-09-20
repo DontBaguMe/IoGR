@@ -1770,7 +1770,8 @@ class World:
             118: [57, 58, [[51, 1]]],  # Ankor Wat Progression w/ Dark Friar
             119: [57, 58, [[36, 1]]],  # Ankor Wat Progression w/ Aura
             120: [57, 59, [[53, 1]]],  # Ankor Wat Progression w/ Earthquaker
-            121: [59, 60, [[28, 1], [49, 1]]],  # Ankor Wat Progression w/ Black Glasses
+            121: [57, 59, [[51, 1], [45, 2]]],  # Ankor Wat Progression w/ upgraded Friar
+            122: [59, 60, [[28, 1], [49, 1]]],  # Ankor Wat Progression w/ Black Glasses
 
             # NW Continent
             130: [61, 62, [[49, 1]]],  # Pyramid foyer w/ Slide
