@@ -505,12 +505,14 @@ class World:
 
         # Allow glitches
         if "Allow Glitches" in self.variant:
+            self.graph[14][1].append(73)          # Moon Tribe: No ability required**************
             self.graph[29][1].append(31)          # Sky Garden: Ramp glitch
             self.graph[38][1].append(71)          # Mu: Golem skip
             self.item_locations[94][2] = False    # Great Wall: Slider glitch
             self.logic[121][2][1][1] = 0          # Ankor Wat: Earthquaker not required
             self.logic[122][2][0][1] = 0          # Ankor Wat: Glasses not required
             self.item_locations[124][2] = False   # Ankor Wat: Dropdown DS has abilities
+            self.graph[61][1].append(62)          # Pyramid: No ability required**************
             self.item_locations[142][2] = False   # Pyramid: Bottom DS has abilities
 
         # Chaos mode
