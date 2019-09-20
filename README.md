@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v1.5.1) - <a href="https://github.com/DontBaguMe/IoGR/releases/tag/v1.5.1">Download</a>
+## The Illusion of Gaia Randomizer (v2.4.1) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
@@ -7,21 +7,15 @@ This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 
-#### The .exe package
-The executable has been verified to work on Windows, Linux and Wine.
-
-NOTE: It is common for the randomizer program to be flagged as a virus in Windows Defender.  This is a known issue for many programs that have been compiled in Pyinstaller, and a ticket has been submitted for this program in particular.  In the meantime, you can <a href="https://support.microsoft.com/en-us/help/4028485/windows-10-add-an-exclusion-to-windows-security">create an exclusion</a> for the folder to which you extract the IoGR program files.
-
-#### the .py package
-For non-Windows user with Python 2.7 installed, use the "py" package and run the "iogr.py" script to execute the randomizer interface.
-
 ### Creating a Randomized ROM
-For the randomizer to function, you must ensure that "iogr.exe" or "iogr.py" is run from the same directory that also contains the "bin" directory (as well as "iogr.ico" or "iogr.png" for the .exe).  It is recommended that a copy of the US version of the Illusion of Gaia ROM also exist within this directory, to make browsing within the user interface more convenient.  The name of the ROM file does not need to adhere to a standard format.
-
-Running "iogr.exe" or "iogr.py", inputting the desired settings, and hitting "Generate ROM" will create a randomized ROM (as well as a spoiler log) in the same directory as your original ROM file.  The original file will remain intact.
+Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting "Generate ROM" will allow you to download a randomized ROM (as well as a spoiler log).  The original file will remain intact.
 
 ### Randomizer Settings
 Below are explanations of the various settings of the randomizer.
+
+#### Seed
+This is a non-negative integer value that initializes the randomization algorithm.  Generating randomizers with the same seed and randomizer settings will produce identical games.
+
 #### Difficulty
 There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficulty chosen affects the following game mechanics:
 - Enemies: Enemies scale in strength with each difficulty mode.
@@ -32,17 +26,44 @@ There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficu
 #### Goal
 This allows you to choose a game mode, whether Dark Gaia or Red Jewel Hunt (see below).
 
+#### Statues
+You can choose the number of Mystic Statues required to complete Dark Gaia seeds, or make the number random. This parameter is ignored for Red Jewel Hunts.
+
+#### Starting Location
+You can choose to have the game start you in random locations throughout the world. Gaia's "warp to start" will return you to wherever you begin the game.
+- South Cape: You start the game in the vanilla location.
+- Safe: You start the game in a random safe location (e.g. a town)
+- Unsafe: You can start the game at any random Dark Space. It can be either a safe location (town) or an unsafe location (dungeon).
+- Forced Unsafe: You will start the game in the middle of a random dungeon.
+
 #### Logic
 There are three logic modes available to the player.
 - Completable: This logic ensures that every item and ability location is reachable, allowing every seed to be completed 100%. This tends to yield slightly longer gameplay experiences.
 - Beatable: In Beatable seeds, you are guaranteed to have access to every item and ability you need to complete your goal, though you may not have access to every item location in the game. This tends to yield slightly more streamlined seeds -- however, it could also make helpful items like status upgrades unattainable, making this mode slightly more dangerous.
 - Chaos: Ability placement restrictions have been drastically loosened in this mode -- for instance, Freedan abilities can show up in towns, and Dark Spaces that are typically reserved for form changes might contain abilities, preventing the player from completing dungeons and accessing certain item locations.  As in Beatable, Chaos mode still ensures that the player has access to all the items and locations necessary to beat the game.
 
-#### Statues
-You can choose the number of Mystic Statues required to complete Dark Gaia seeds, or make the number random. This parameter is ignored for Red Jewel Hunts.
+#### Variants
+- Allow Glitches: You may be required to perform simple glitches to access progression items or abilities.
+- OHKO (One Hit Knockout): You start the game with 1 HP and will never gain an HP upgrade, so each hit kills you automatically.
+- Red Jewel Madness: You start the game with 40 HP (max) and lose 1 HP for every Red Jewel you turn into the Jeweler. If you reach 0 total HP, you will be caught in an infinite death loop. Note: Gaining an HP upgrade when you're at or near 40 HP may result in lost upgrades, as any HP value above 40 is ignored.
+- Early Firebird: In this mode, you gain access to the Firebird attack when 1) you rescure Kara, 2) you equip the Crystal Ring, and 3) you're in Shadow's form.
+
+#### Enemizer (beta)
+The enemizer is (and likely will forever be) in beta, so play at your own risk. Graphical glitches abound, and some seeds may be incompletable due to enemy placement. Please report any game-breaking situations in the Discord. 
+References to enemy stats refer to STR, DEF and HP.
+Note: Non-enemy sprites in dungeons have been largely removed in every enemizer setting except for Limited.
+- Limited: Enemies will be shuffled, but will only appear in their vanilla dungeons.
+- Balanced: Enemies can appear in any dungeon, but they will retain the stats of the enemies they replace, making each dungeon's difficulty relatively balanced to vanilla levels.
+- Full: Enemies can appear in any dungeon and retain their vanilla stats.
+- Insane: Enemeies can appear in any dungeon. Furthermore, enemy stats have been shuffled, so early enemies can have the stats of later enemies, and vice versa.
+- Boss Shuffle (not yet implemented): In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. Each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. 
+
+#### Entrance Randomizer (future feature)
+This feature will be implemented in a future version.
 
 ### Beating the Game
 There are currently two modes (goals) for completing the game:
+
 #### Dark Gaia
 In this mode, you must find the Magic Dust and use it to free Kara from her portrait.  You must then unite with her to defeat Dark Gaia, a process which requires you to have Shadow's form unlocked (by obtaining and using the Aura) as well as a certain number of the game's six Mystic Statues.
 
@@ -68,10 +89,18 @@ Once you rescue Kara, unlock Shadow's form, and earn the applicable Statues (if 
 For this mode, the sole objective is to collect the required number of Red Jewels as quickly as possible and turn them into the Jeweler.  The number of Red Jewels required is 35 for Easy, 40 for Normal, and 50 for Hard/Extreme.  Turning these into the Jeweler and speaking with him allows you to beat the game.
 
 ### Features
+
+#### In-Game Tutorial
+You can speak to the NPC standing in front of the school in South Cape for an in-game tutorial.  This guide will be tailored to the seed settings.
+
 #### Item Shuffle
-The items in the game will be shuffled across the game.  If the randomizer is created with "Completable" logic, every item location will be accessible; if it is "Beatable", certain items not required to fulfill the game's objectives may be inaccessible.
+The items in the game will be shuffled across the game.  If the randomizer is created with "Completable" logic, every item location will be accessible; if it is "Beatable" or "Chaos", certain items not required to fulfill the game's objectives may be inaccessible.
+
 #### Ability Shuffle
-The special attacks are shuffled throughout the Dark Spaces in the game.  Dark Spaces in peaceful locations can only contain Will abilities, whereas Dark Spaces in battle areas can contain either Will or Freedan abilities.  In "Completable" mode, some Dark Spaces are reserved for form changes and will never contain abilities -- such as the Dark Space in the Underground Tunnel, for example.
+The special attacks are shuffled throughout the Dark Spaces in the game.  In "Completable" and "Beatable" logic, Dark Spaces in peaceful locations can only contain Will abilities, whereas Dark Spaces in battle areas can contain either Will or Freedan abilities.  In "Chaos" logic, town Dark Spaces can contain Freedan abilities.
+
+Also, in "Completable" mode, some Dark Spaces are reserved for form changes and will never contain abilities -- such as the Dark Space in the Underground Tunnel, for example. If one of these Dark Spaces contains an ability in "Beatable" or "Chaos", the logic will assume you don't have access to the rest of the dungeon.
+
 #### Overworld Movement
 The world is broken up into continents. The locations in a continent are all accessible to one another through the world map screen. The following locations are accessible to one another via the overworld:
 - South-West Continent (South Cape, Edward's Castle, Itory Village, Moon Tribe Camp, Inca Ruins)
@@ -90,6 +119,8 @@ Movement between continents (and to locations not specified above) becomes possi
 - Upon acquiring the Large Roast, go to the Natives' Village and talk to the young boy. If you give him the roast, he will gratefully guide you across the treacherous expanse from the village to Dao. The man in Dao who grants you two items can also hire a guide to take you back to Natives' for free.
 - In the Nazca Plain, if you go to the location of the tile buried in the sand, you can warp to the Sky Garden. However, the Moon Tribe will only appear there if you have healed them with the Teapot. You can exit to the overworld from the Sky Garden by going up into the area where you normally enter from Nazca.
 - Mu and the Seaside Palace are accessible directly from Angel Village. What is originally the guest room in the vanilla game takes you to the Passage to Mu inside the Seaside Palace. Mu is freely accessible this way, but the Mu Palace Key is required to enter the Seaside Palace via this route.
+- The man playing the flute at the entrance to Dao can hire a guide to take you to the Natives' Village.
+
 #### Room Rewards and Stat Upgrades
 The number of HP, STR and DEF upgrades available in the game has been reduced to reflect the extreme balancing of enemy statistics throughout the game -- so though the number of upgrades has decreased, each upgrade is much more significant than in the vanilla game.  HP upgrades grant you +3 HP each.
 
@@ -110,12 +141,10 @@ Alternatively, defeating a boss will grant you any unobtained upgrades in the fo
 - Babel Tower: Ankor Wat
 
 Each boss (and, by extension, the dungeons under each boss) is guaranteed to grant a total number of upgrades based on difficulty: 4 for Easy, 3 for Normal, 2 for Hard, and 1 for Extreme.
-#### In-Game Tutorial
-You can speak to the NPC standing in front of the school in South Cape for an in-game tutorial.  This guide will be tailored to the seed settings.
 
 Additionally, for Easy Mode, enter right-most house in South Cape for an interactive overworld map that allows you to explore how many items and Dark Spaces are available in each location, as well as the number of items you've gathered for each location.
-#### In-Game Hints
 
+#### In-Game Hints
 You may speak to a number of NPCs throughout the game to receive hints as to the location of certain key items in the game, as well as the contents of certain hard-to-reach locations.  The following NPCs will give you a hint (hints have been removed in Extreme difficulty):
 - Kara's Guard in Edward's Castle
 - The Elder at Itory Village
@@ -128,6 +157,7 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - The spirit at the end of Ankor Wat
 - The girl with Jackal's note in Dao
 - The first spirit in Babel Tower
+
 #### Other Features
 - The location of the glowing Gold Tile in Inca Ruins has been randomized, making the Wind Melody a requirement to progress to the end of that dungeon.
 - The differences between the puzzle rooms in Ishtar's Studio in Angel Village are also random and could differ from the vanilla game.
@@ -145,7 +175,7 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 #### Misc. Notes and Strategies
 - Sky Garden: The Dark Space in the SW room does not in fact require Dark Friar to access. You can stand below the switch as Freedan and reach it easily with his sword. Also, you can use Aura Barrier to complete the NW room instead of Dark Friar.
 
-- Great Wall: The Dark Space where Spin Dash is normally found, as it's the only Dark Space in that area that can be accessed without any abilities, will actually never have an ability and will always be open for changing forms.  The Dark Space in the previous room might have an ability, and you can reach it without Spin Dash by turning into Freedan or Shadow, walking back, and using the longer reach of one of these characters to hit the switch that allows entrance into that map.
+- Great Wall: In Completable logic, the Dark Space where Spin Dash is normally found, as it's the only Dark Space in that area that can be accessed without any abilities, will actually never have an ability and will always be open for changing forms.  The Dark Space in the previous room might have an ability, and you can reach it without Spin Dash by turning into Freedan or Shadow, walking back, and using the longer reach of one of these characters to hit the switch that allows entrance into that map.
 
 - Ankor Wat: The Gorgon that blocks the way (for which you are intended to use the Earthquaker) can be easily defeated if you have Dark Friar, 2nd upgrade, by standing on the platform and spamming him with fireballs before he blocks the passage.
 
@@ -153,11 +183,10 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 
 - Pyramid: Room 3 (the "killer 6" room) can be done with Fredan if you have Dark Friar.  Some might find this form to be helpful to survive in this area, especially if you have upgraded Dark Friar and/or Aura Barrier.  Similarly, Room 5 can be completed with Freedan if you have the Earthquaker ability by using that ability from the various platforms in this area.  (Tiles will fall from the ceiling, allowing you to progress.)
 
-### Item Tracker
-There is a simple item tracker included with this release.  Official trackers for the game are in development.
+### EmoTracker
+The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is available for download. Furthermore, you can access a beta version of the autotracker by joining the <a href="https://discord.gg/KfZ4VeD">Discord</a> and referring to the #tracker channel.
 
 ### Future Releases
-- Enemizer
 - Entrance randomizer
 - Boss shuffle
 - More text edits
