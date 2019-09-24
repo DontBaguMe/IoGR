@@ -1929,6 +1929,29 @@ class Randomizer:
                 patch.write(b"\x8e")
 
         ##########################################################################
+        #                          Randomize Snake Game
+        ##########################################################################
+        # Randomize snake game duration/goal
+        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By difficulty (mode)
+        snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
+        snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
+        snake_target = int(snake_timer * snakes_per_sec[mode] * snake_adj)
+
+        snake_frames_str = format((60 * snake_timer) % 256, "02x") + format(int((60 * snake_timer) / 256), "02x")
+        snake_target_str = format(int(snake_target / 10), "x") + format(snake_target % 10, "x")
+
+        # Update snake game logic with new values
+        patch.seek(int("8afe6", 16) + rom_offset)   # Timer, in frames (vanilla b"\x10\x0e")
+        patch.write(binascii.unhexlify(snake_frames_str))
+        patch.seek(int("8aff7", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
+        patch.write(binascii.unhexlify(snake_target_str))
+
+        # Update text to reflect changes
+        patch.seek(int("8af2e", 16) + rom_offset)
+        patch.write(qt_encode("Hit " + str(snake_target) + " snakes in " + str(snake_timer) + " seconds."))
+        patch.write(b"\xcb\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac")
+
+        ##########################################################################
         #                    Randomize Jeweler Reward amounts
         ##########################################################################
         # Randomize jeweler reward values
