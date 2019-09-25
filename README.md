@@ -195,6 +195,76 @@ The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is av
 If you have an issue with the randomizer, please join our 
 <a href="https://discord.gg/KfZ4VeD">Discord</a> and report your issue in the #bugs channel.
 
+### FAQ
+#### Can special abilities be found in any Dark Space?
+If you're playing Completable or Beatable logic (without glitches allowed), certain Dark Spaces will always be reserved for form changes and will never have abilities in them. (Though enabling glitches or choosing Chaos logic breaks this restriction.) You can skip checking these:
+- Underground Tunnel: THe DS behind Lily's room will never have an ability
+- Inca Ruins: The DS north of the singing statue will never have an ability
+- Diamond Mine: If one of the Dark Spaces (not counting the one behind the false wall) has an ability, the other one is guaranteed not to have one
+- Sky Garden: between the Dark Spaces in the SE and NW rooms, one of them is guaranteed not to have an ability
+- Mu: the Dark Space to the west of the row of spikes will never have an ability
+- Great Wall: The DS you have to backtrack to with either Freedan or Spin Dash will never have an ability
+- Ankor Wat: The DS in the garden will never have an ability
+- Pyramid: Neither DS will ever have an ability
+
+#### If you have Psycho Slider and Spin Dash, do you need to keep looking for Psycho Dash?
+No.  Anything you would need Psycho Dash for can be done with either Slider or Spin. 
+
+#### Where the heck is Dark Friar?
+It could be virtually anywhere, I'm afraid.  However, you may not need it:
+- The ramp at the end of Diamond Mine can be scaled with Spin Dash
+- The Dark Space in SW Sky Garden can be accessed with Freedan's sword alone
+- The two chests in NW Sky Garden can be accessed with Aura Barrier
+- In Ankor Wat, you can use Shadow's basic attack to access the Dark Space where Earthquaker normally is
+
+#### Are Aura Barrier and Earthquaker useful at all?
+Sort of.  If you happen to have Aura Barrier but not Dark Friar, you can access the two chests in NW Sky Garden.  If you have Earthquaker and don't have Dark Friar with both upgrades, you can use it to progess past the spinning Gorgon in Ankor Wat.  Beyond that, they're largely useless.
+
+#### Does the second Dark Friar upgrade do anything?
+Yes. If you have one upgrade, the fireball explodes upon impact only.  With two upgrades, you can control when it explodes by hitting the attack button again.
+
+#### I'm clearing rooms of enemies. Why am I not getting stat upgrades?
+Not every room has a stat upgrade, only those with a pulsing "Force" icon on the map screen.
+
+#### Why did you take away stat upgrades?
+Scaling down the range of enemy strength was necessary to make end-game enemies somewhat approachable with early-game stats; so reducing the number of upgrades available to the player accordingly was necessary to balance the game. Basically, there are less upgrades available, but each one is more significant than it was in the vanilla game.  For instance, each HP upgrade gives you +3 HP.
+
+#### Where did the stat upgrade items come from?  Were they taken from room rewards?
+No. In the vanilla game, there are a number of stat upgrades that are given through NPCs and other locations - namely, 1 DEF upgrade, 2 STR upgrades, and 3 HP upgrades.
+
+#### My inventory keeps getting full, what do I do?
+Inventory management is a big part of the game. You may be required to drop or use herbs to make space for key items, but the game will never give you access to more key items than you can carry or use. Keep in mind that you may be able to dump certain key items that only access bosses you don't need to fight (see below).
+
+#### Can I dump items that only grant access to bosses I don't need to fight?
+Generally yes.  The Rama Statues can be discarded from inventory if Statue 3 is not required, and the Hieroglyph Tiles/journal can be discarded if Statue 5 is not required. The restrictions on which items can be discarded changes from seed to seed.  Basically, if you're given the option to discard a key item, it means you don't need it to complete the game.
+
+#### I had to dump my tutorial journal to make room in my inventory. Can I get it back?
+Yes. The NPC in front of the school in South Cape will keep you stocked with an infinite supply of tutorial journals, should you desire.
+
+#### I've done everything I need to complete the game. Why can't I face Dark Gaia?
+For Dark Gaia seeds, you need to both acquire AND use the Aura, on top of freeing Kara and gathering the needed Mystic Statues.
+
+#### I forgot to open the chests in Ishtar's puzzle, and now I can't get back into those rooms.
+If you talk to Ishtar, the puzzle will reset and you can start again from the beginning.
+
+#### The jeweler keeps telling me poker's not my game.
+He's trying to give you an item, but your inventory's full. Make room and you can progress through that conversation.
+
+#### Who the heck is Samlet?
+Due to graphical limitations, when Kara's portrait is in the Diamond Mine, we had to turn Sam into Samlet.
+
+#### Who the heck is Buffy?
+That's what we named the NPC in the Seaside Palace who gives you an item after you purify the fountain.
+
+#### What does "nice try dodongo" mean?
+http://www.hrwiki.org/wiki/Nice_Try
+
+#### How many custom death quotes are there?
+Over 50 at this point. Collect them all for a commemorative patch.
+
+#### What do the Black Glasses and Crystal Ring do anyway?
+The Crystal Ring is one of the items you need to pass the force field at the base of Babel Tower.  In early Firebird seeds, it also is one of the triggers that grants access to the Firebird attack.  The Black Glasses make it so you can see in the white room in Ankor Wat. It also allows you to know which stat upgrades are available in each room.
+
 ### Support the Dev
 No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a 
 <a href="https://www.patreon.com/dontbagume">patron.</a>
