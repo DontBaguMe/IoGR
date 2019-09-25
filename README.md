@@ -265,6 +265,9 @@ Over 50 at this point. Collect them all for a commemorative patch.
 #### What do the Black Glasses and Crystal Ring do anyway?
 The Crystal Ring is one of the items you need to pass the force field at the base of Babel Tower.  In early Firebird seeds, it also is one of the triggers that grants access to the Firebird attack.  The Black Glasses make it so you can see in the white room in Ankor Wat. It also allows you to know which stat upgrades are available in each room.
 
+#### Why is the game so mean to me?
+#blamebagu
+
 ### Support the Dev
 No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a 
 <a href="https://www.patreon.com/dontbagume">patron.</a>
