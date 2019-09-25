@@ -203,7 +203,7 @@ If you're playing Completable or Beatable logic (without glitches allowed), cert
 - Diamond Mine: If one of the Dark Spaces (not counting the one behind the false wall) has an ability, the other one is guaranteed not to have one
 - Sky Garden: between the Dark Spaces in the SE and NW rooms, one of them is guaranteed not to have an ability
 - Mu: the Dark Space to the west of the row of spikes will never have an ability
-- Great Wall: The DS you have to backtrack to with either Freedan or Spin Dash will never have an ability
+- Great Wall: The DS you fall down to access (vanilla Spin Dash) will never have an ability
 - Ankor Wat: The DS in the garden will never have an ability
 - Pyramid: Neither DS will ever have an ability
 
