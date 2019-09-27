@@ -582,10 +582,15 @@ def encode(unencoded_str,full_box=False):
     i = 0
     while i < len(unencoded_str):
         char = unencoded_str[i]
-        word += char
-        if char == " " or i == len(unencoded_str)-1:
+        if char == "|":
             words.append(word)
+            words.append(char)
             word = ""
+        else:
+            word += char
+            if char == " " or i == len(unencoded_str)-1:
+                words.append(word)
+                word = ""
         i += 1
 
     #print words
@@ -599,7 +604,10 @@ def encode(unencoded_str,full_box=False):
         if len(word) > MAX_WIDTH:
             print("ERROR: Word too long >>", word)
             return ""
-        text_width += len(word)
+        if word == "|":
+            text_width = 0
+        else:
+            text_width += len(word)
         if text_width > MAX_WIDTH:
             str_encoded += b"\xCB"
             text_width = len(word)
