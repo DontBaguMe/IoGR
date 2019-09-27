@@ -1884,6 +1884,26 @@ class Randomizer:
             elif x == 6:
                 patch.write(b"\xca\xcb")
 
+        # Update RAM switches with correct order (for autotracker)
+        patch.seek(int("39e9a", 16) + rom_offset)
+        h_addrs = ["bfd01","bfd02","bfd07","bfd08","bfd0d","bfd0e"]
+        i = 0
+        while i < 6:
+            patch.seek(int(h_addrs[i], 16) + rom_offset)
+            if hieroglyph_order[i] == 1:
+                patch.write(b"\x01")
+            if hieroglyph_order[i] == 2:
+                patch.write(b"\x02")
+            if hieroglyph_order[i] == 3:
+                patch.write(b"\x03")
+            if hieroglyph_order[i] == 4:
+                patch.write(b"\x04")
+            if hieroglyph_order[i] == 5:
+                patch.write(b"\x05")
+            if hieroglyph_order[i] == 6:
+                patch.write(b"\x06")
+            i += 1
+
         # Update sprite pointers for hieroglyph items, Item 1e is @10803c
         patch.seek(int("10803c", 16) + rom_offset)
         for x in hieroglyph_order:
@@ -2064,6 +2084,10 @@ class Randomizer:
                 patch.seek(int("8dd19", 16) + rom_offset)
                 patch.write(b"\xf8")
 
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd1a", 16) + rom_offset)
+                patch.write(b"\xf8\x02")
+
             if statueOrder[i] == 2:
                 statues.append(2)
                 statues_hex.append(b"\x22")
@@ -2072,6 +2096,10 @@ class Randomizer:
                 patch.seek(int("8dd1f", 16) + rom_offset)
                 patch.write(b"\xf9")
 
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd1e", 16) + rom_offset)
+                patch.write(b"\xf9\x02")
+
             if statueOrder[i] == 3:
                 statues.append(3)
                 statues_hex.append(b"\x23")
@@ -2079,6 +2107,10 @@ class Randomizer:
                 # Check for Mystic Statue possession at end game state
                 patch.seek(int("8dd25", 16) + rom_offset)
                 patch.write(b"\xfa")
+
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd22", 16) + rom_offset)
+                patch.write(b"\xfa\x02")
 
                 # Restrict removal of Rama Statues from inventory
                 patch.seek(int("1e12c", 16) + rom_offset)
@@ -2092,6 +2124,10 @@ class Randomizer:
                 patch.seek(int("8dd2b", 16) + rom_offset)
                 patch.write(b"\xfb")
 
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd26", 16) + rom_offset)
+                patch.write(b"\xfb\x02")
+
             if statueOrder[i] == 5:
                 statues.append(5)
                 statues_hex.append(b"\x25")
@@ -2099,6 +2135,10 @@ class Randomizer:
                 # Check for Mystic Statue possession at end game state
                 patch.seek(int("8dd31", 16) + rom_offset)
                 patch.write(b"\xfc")
+
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd2a", 16) + rom_offset)
+                patch.write(b"\xfc\x02")
 
                 # Restrict removal of Hieroglyphs from inventory
                 patch.seek(int("1e12d", 16) + rom_offset)
@@ -2111,6 +2151,10 @@ class Randomizer:
                 # Check for Mystic Statue possession at end game state
                 patch.seek(int("8dd37", 16) + rom_offset)
                 patch.write(b"\xfd")
+
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd2e", 16) + rom_offset)
+                patch.write(b"\xfd\x02")
 
             i += 1
 
@@ -2190,6 +2234,10 @@ class Randomizer:
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x60\xa2\x88\xa3\x8e\x8d")
 
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x01")
+
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
                 patch.write(b"\x13\x00\xD0\x08\x02\x45\x0b\x0b\x0d\x0d")
@@ -2206,6 +2254,10 @@ class Randomizer:
                 # Set spoiler for Kara's location in Lance's Letter
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x43\x88\x80\x8c\x8e\x8d\x83\xac\x4c\x88\x8d\x84")
+
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x02")
 
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
@@ -2250,6 +2302,10 @@ class Randomizer:
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3")
 
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x04")
+
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
                 patch.write(b"\xa9\x00\xD0\x08\x02\x45\x12\x06\x14\x08")
@@ -2270,6 +2326,10 @@ class Randomizer:
                 # Set spoiler for Kara's location in Lance's Letter
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4")
+
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x05")
 
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
