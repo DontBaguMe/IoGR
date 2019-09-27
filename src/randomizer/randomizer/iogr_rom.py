@@ -1421,9 +1421,15 @@ class Randomizer:
         patch.seek(int("98891", 16) + rom_offset)
         patch.write(b"\x02\x0b\x6b")
 
-        # Shorten Olman text boxes
+        # Shorten Olman text boxes, also check for conditions before giving up Statue
         patch.seek(int("9884c", 16) + rom_offset)
         patch.write(b"\x01\x00")
+        patch.seek(int("988d2", 16) + rom_offset)
+        patch.write(b"\x4c\x30\xf7")
+        patch.seek(int("9f730", 16) + rom_offset)
+        patch.write(b"\x02\xD1\x79\x01\x01\x42\xF7\x02\xD0\xF6\x01\x42\xF7")
+        patch.write(b"\x02\xBF\x4A\xF7\x6B\x02\xBF\x03\x89\x02\xCC\x01\x6B")
+        patch.write(qt_encode("heya.|you look frustrated about something.|guess i'm pretty good at my job, huh?", True))
         patch.seek(int("98903", 16) + rom_offset)
         patch.write(qt_encode("heya.", True))
         patch.seek(int("989a2", 16) + rom_offset)
