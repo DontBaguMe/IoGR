@@ -492,11 +492,11 @@ class Randomizer:
             patch.seek(int("384d5", 16) + rom_offset)
             patch.write(b"\x4c\x70\xfd")
             # 2 Red Jewels (item #$2e) removes 2 HP when used
-            patch.seek(int("39d9f", 16) + rom_offset)
-            patch.write(b"\x4c\x76\xfd")
+            patch.seek(int("39d99", 16) + rom_offset)
+            patch.write(b"\x01\x00\x8D\xB0\x0A\xD8\x4c\x76\xfd")
             # 3 Red Jewels (item #$2f) removes 3 HP when used
-            patch.seek(int("39ddf", 16) + rom_offset)
-            patch.write(b"\x4c\x7c\xfd")
+            patch.seek(int("39dd9", 16) + rom_offset)
+            patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
 
 
         ##########################################################################
