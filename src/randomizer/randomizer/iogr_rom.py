@@ -57,33 +57,33 @@ def generate_filename(settings: RandomizerData, extension: str):
 
     def getLogic(logic):
         if logic.value == Logic.COMPLETABLE.value:
-            return "_C"
+            return ""
         if logic.value == Logic.BEATABLE.value:
-            return "_B"
+            return "_L(b)"
         if logic.value == Logic.CHAOS.value:
-            return "_X"
+            return "_L(x)"
 
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
             return ""
         if start_location.value == StartLocation.SAFE.value:
-            return "_ss"
+            return "_S(s)"
         if start_location.value == StartLocation.UNSAFE.value:
-            return "_su"
+            return "_S(u)"
         if start_location.value == StartLocation.FORCED_UNSAFE.value:
-            return "_sf"
+            return "_S(f)"
 
     def getEnemizer(enemizer):
         if enemizer.value == Enemizer.NONE.value:
             return ""
         if enemizer.value == Enemizer.BALANCED.value:
-            return "_eb"
+            return "_E(b)"
         if enemizer.value == Enemizer.LIMITED.value:
-            return "_el"
+            return "_E(l)"
         if enemizer.value == Enemizer.FULL.value:
-            return "_ef"
+            return "_E(f)"
         if enemizer.value == Enemizer.INSANE.value:
-            return "_ei"
+            return "_E(i)"
 
     def getSwitch(switch, param):
         if switch:
@@ -95,11 +95,11 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getGoal(settings.goal, settings.statues)
     filename += getLogic(settings.logic)
     filename += getStartingLocation(settings.start_location)
+    filename += getEnemizer(settings.enemizer)
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
-    filename += getEnemizer(settings.enemizer)
     filename += "_" + str(settings.seed)
     filename += "."
     filename += extension
