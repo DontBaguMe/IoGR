@@ -1183,7 +1183,7 @@ class World:
 
                         # 4-Ways cannot be on a #$XF x-coord
                         if newset == 1 and 13 in new_enemies_tmp:
-                            if xcoord[1] == "f":
+                            if xcoord[1] == 102:
                                 new_enemies_tmp.remove(13)
                         # Zip Flies can't be too close to map origin
                         elif newset == 10 and 103 in new_enemies_tmp:
