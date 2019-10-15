@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.4.5"
+VERSION = "2.4.6"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1508,15 +1508,15 @@ class Randomizer:
         patch.write(qt_encode("-Eppy37     -Keypaladin") + b"\xCB")
         patch.write(qt_encode("-Lassic") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Le Hulk    -Plan") + b"\xCB")
-        patch.write(qt_encode("-manafreak  -Pozzum Senpai") + b"\xCB")
-        patch.write(qt_encode("-Mikan      -roeya") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Le Hulk    -Neomatamune") + b"\xCB")
+        patch.write(qt_encode("-manafreak  -NYRambler") + b"\xCB")
+        patch.write(qt_encode("-Mikan      -Plan") + b"\xCB")
+        patch.write(qt_encode("-Mr Freet   -Pozzum Senpai") + b"\xC9\xB4\xCE")
 
+        patch.write(qt_encode("-roeya      -Skipsy") + b"\xCB")
         patch.write(qt_encode("-Scheris    -SmashManiac") + b"\xCB")
         patch.write(qt_encode("-SDiezal    -solarcell007") + b"\xCB")
-        patch.write(qt_encode("-Skarsnik   -steve hacks") + b"\xCB")
-        patch.write(qt_encode("-Skipsy") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Skarsnik   -steve hacks") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-Sye990     -Verallix") + b"\xCB")
         patch.write(qt_encode("-Tsurana    -Volor") + b"\xCB")
