@@ -1885,7 +1885,6 @@ class Randomizer:
                 patch.write(b"\xca\xcb")
 
         # Update RAM switches with correct order (for autotracker)
-        patch.seek(int("39e9a", 16) + rom_offset)
         h_addrs = ["bfd01","bfd02","bfd07","bfd08","bfd0d","bfd0e"]
         i = 0
         while i < 6:
@@ -2030,6 +2029,14 @@ class Randomizer:
         gem_str.append(format(int(gem[6] / 10), "x") + format(gem[6] % 10, "x"))
         patch.seek(int("8cf40", 16) + rom_offset)
         patch.write(binascii.unhexlify(gem_str[6]))
+
+        # Update RAM switches with correct BCD jewel reward amounts (for autotracker)
+        gem_addrs = ["bfd32","bfd37","bfd38","bfd3d","bfd3e","bfd43","bfd44"]
+        i = 0
+        while i < 7:
+            patch.seek(int(gem_addrs[i], 16) + rom_offset)
+            patch.write(binascii.unhexlify(gem_str[i]))
+            i += 1
 
         # Write new values into inventory table (Quintet text table format)
         # NOTE: Hard-coded for 1st, 2nd and 3rd rewards each < 10
