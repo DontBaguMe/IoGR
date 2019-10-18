@@ -2492,3 +2492,38 @@ class World:
             # Jeweler's Mansion (nothing)
 
         }
+
+
+        # Database of map exits
+        # FORMAT: { ID: [CoupleID (0 if one-way), ShuffleID (0 if no shuffle), Type, FromRegion, ToRegion,
+        #           FromMap, ToMap, ROM_Location, DestString, Name]}
+        self.exits = {
+            # Bosses
+            1: [2, 0, "Boss", 17, 18, 30, 41, "18872", b"\x29\x78\x00\xC0\x00\x00\x00\x11", "Castoth entrance (in)"],
+            2: [1, 0, "Boss", 18, 17, 41, 30, "189e4", b"\x1E\x68\x00\x00\x01\x03\x00\x24", "Castoth entrance (out)"],
+            3: [0, 0, "Boss", 19, 20, 44, 48, "584cc", b"\x30\x48\x00\x10\x01\x03\x00\x21", "Gold Ship exit"],
+
+            4: [5, 0, "Boss", 29, 32, 76, 85, "18e20", b"\x55\x70\x00\xE0\x01\x00\x00\x22", "Viper entrance (in)"],
+            5: [4, 0, "Boss", 32, 29, 85, 76, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", "Viper entrance (out)"],
+            6: [0, 0, "Boss", 32, 33, 85, 90, "acece", b"\x5A\x90\x00\x70\x00\x83\x00\x14", "Viper exit"],
+
+            7: [8, 0, "Boss", 40, 41, 102, 103, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", "Vampires entrance (in)"],
+            8: [7, 0, "Boss", 41, 40, 103, 101, "193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", "Vampires entrance (out)"],
+            9: [0, 0, "Boss", 41, 37, 102, 95, "193ea", b"\x5f\x80\x00\x50\x00\x03\x00\x44", "Vampires exit"],
+
+            10: [11, 0, "Boss", 46, 47, 136, 138, "19c2a", b"\x8A\x50\x00\x90\x00\x87\x00\x33", "Sand Fanger entrance (in)"],
+            11: [10, 0, "Boss", 47, 46, 138, 136, "19c78", b"\x88\xE0\x03\x90\x00\x06\x00\x14", "Sand Fanger entrance (out)"],
+            12: [0, 0, "Boss", 47, 45, 138, 130, "19c84", b"\x82\x10\x00\x90\x00\x07\x00\x18", "Sand Fanger exit"],
+
+            13: [0, 0, "Boss", 62, 65, 204, 221, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", "Mummy Queen entrance"],
+            14: [0, 0, "Boss", 65, 62, 221, 204, "", b"\xcd\x70\x00\x90\x00\x03\x00\x11", "Mummy Queen exit"],     # This one's dumb
+
+            13: [0, 0, "Boss", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Viper exit"],
+        }
+
+
+        # Database of special map exits that don't conform to the typical "02 26" format, IDs correspond to self.exits
+        # FORMAT: { ID: [MapAddr, Xaddr, Yaddr, FaceDirAddr, CameraAddr]}
+        self.exits_detailed = {
+            14: ["8ce31", "8ce37", "8ce40", "", "8ce49"]
+        }
