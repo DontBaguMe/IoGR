@@ -1,4 +1,4 @@
-import binascii, hmac, logging, os, random, tempfile, json, copy
+import binascii, hashlib, logging, os, random, tempfile, json, copy
 from typing import BinaryIO
 
 from .patch import Patch
@@ -178,7 +178,8 @@ class Randomizer:
         patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
         hash_str = filename
-        h = hmac.new(bytes(settings.seed), hash_str.encode())
+        h = hashlib.sha256()
+        h.update(hash_str.encode())
         hash = h.digest()
 
         hash_dict = [b"\x20", b"\x21", b"\x28", b"\x29", b"\x2a", b"\x2b", b"\x2c", b"\x2d", b"\x2e", b"\x2f", b"\x30", b"\x31", b"\x32", b"\x33"]
