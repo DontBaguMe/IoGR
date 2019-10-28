@@ -2518,7 +2518,46 @@ class World:
             13: [0, 0, "Boss", 62, 65, 204, 221, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", "Mummy Queen entrance"],
             14: [0, 0, "Boss", 65, 62, 221, 204, "", b"\xcd\x70\x00\x90\x00\x03\x00\x11", "Mummy Queen exit"],     # This one's dumb
 
-            13: [0, 0, "Boss", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Viper exit"],
+            15: [0, 0, "Boss", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Babel entrance (in)"],
+            16: [0, 0, "Boss", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Babel entrance (out)"],
+            17: [0, 0, "Boss", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Babel exit"],
+
+            18: [0, 0, "Boss", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Solid Arm entrance"],
+            19: [0, 0, "Boss", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Solid Arm exit"],
+
+            # South Cape
+            30: [0, 0, "Overworld", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "South Cape entrance"],
+            31: [0, 0, "Overworld", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "South Cape exit"],
+            32: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "School main (in)"],
+            33: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "School main (out)"],
+            34: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "School roof (in)"],
+            35: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "School roof (out)"],
+            36: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Will's House (in)"],
+            37: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Will's House (out)"],
+            38: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "East House (in)"],
+            39: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "East House (out)"],
+            40: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Erik's House main (in)"],
+            41: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Erik's House main (out)"],
+            42: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Erik's House roof (in)"],
+            43: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Erik's House roof (out)"],
+            44: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Lance's House (in)"],
+            45: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Lance's House (out)"],
+            46: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Seth's House (in)"],
+            47: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Seth's House (out)"],
+            48: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Seaside Cave (in)"],
+            49: [0, 0, "Exit",      00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Seaside Cave (out)"],
+
+            # Edward's
+            60: [0, 0, "Overworld", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Edward's entrance"],
+            61: [0, 0, "Overworld", 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Edward's exit"],
+            61: [0, 0, "Entrance",  00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Prison entrance"],
+            61: [0, 0, "Dungeon",   00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Tunnel back entrance (in)"],
+            61: [0, 0, "Dungeon",   00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Tunnel back entrance (out)"],
+            61: [0, 0, "Dungeon",   00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Tunnel entrance (in)"],
+            61: [0, 0, "Dungeon",   00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Tunnel entrance (out)"],
+            61: [0, 0, "Room",   00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Tunnel entrance (in)"],
+            61: [0, 0, "Room",   00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", "Tunnel entrance (out)"],
+
         }
 
 
