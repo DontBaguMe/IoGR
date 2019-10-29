@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.4.7"
+VERSION = "2.4.8"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1764,8 +1764,8 @@ class Randomizer:
 
         # Change boss room ranges
         patch.seek(int("c31a", 16) + rom_offset)
-        patch.write(b"\x67\x5A\x73\x00\x8A\x82\xA8\x00\xDD\xCC\xDD\x00\xEA\xB0\xBF\x00")
-        # patch.write(b"\xF6\xB0\xBF\x00")   # If Solid Arm ever grants Babel rewards
+        patch.write(b"\x67\x5A\x73\x00\x8A\x82\xA8\x00\xDD\xCC\xDD\x00\xF6\xB0\xBF\x00")
+        # patch.write(b"\xEA\xB0\xBF\x00")   # If Solid Arm ever grants Babel rewards
 
         # Add boss reward events to Babel and Jeweler Mansion
         # patch.seek(int("ce3cb",16)+rom_offset)  # Solid Arm
