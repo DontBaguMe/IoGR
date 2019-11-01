@@ -515,6 +515,16 @@ class World:
             self.graph[61][1].append(62)          # Pyramid: No ability required**************
             self.item_locations[142][2] = False   # Pyramid: Bottom DS has abilities
 
+        # Boss Shuffle
+        if "Boss Shuffle" in self.variant:
+            boss_entrance_idx = [1,4,7,10,13,15]
+            boss_exit_idx = [3,6,9,12,14,17]
+            dungeon = 0
+            while dungeon < 6:
+                boss = self.boss_order[dungeon]
+                self.exits[boss_entrance_idx[dungeon]][1] = boss_entrance_idx[boss-1]
+                self.exits[boss_exit_idx[dungeon]][1] = boss_exit_idx[boss-1]
+
         # Chaos mode
         if self.logic_mode == "Chaos":
             # Add "Inaccessible" node to graph
@@ -1232,10 +1242,11 @@ class World:
                 f.write(b"\x02\xe0")
 
     # Build world
-    def __init__(self, settings: RandomizerData, statues=[1, 2, 3, 4, 5, 6], kara=3, gem=[3, 5, 8, 12, 20, 30, 50], incatile=[9, 5], hieroglyphs=[1, 2, 3, 4, 5, 6]):
+    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12 20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6]):
 
         self.seed = settings.seed
         self.statues = statues
+        self.boss_order = boss_order
 
         if settings.goal.value == Goal.DARK_GAIA.value:
             self.goal = "Dark Gaia"
@@ -1278,6 +1289,9 @@ class World:
 
         if settings.allow_glitches:
             self.variant.append("Allow Glitches")
+
+        if settings.boss_shuffle:
+            self.variant.append("Boss Shuffle")
 
         self.firebird = settings.firebird
         self.start_loc = 10

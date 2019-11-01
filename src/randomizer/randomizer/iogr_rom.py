@@ -96,6 +96,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getLogic(settings.logic)
     filename += getStartingLocation(settings.start_location)
     filename += getEnemizer(settings.enemizer)
+    filename += getSwitch(settings.boss_shuffle, "b")
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.allow_glitches, "g")
@@ -2204,6 +2205,50 @@ class Randomizer:
 
         patch.seek(int("48aab", 16) + rom_offset)
         patch.write(statue_str)
+
+        ##########################################################################
+        #                           Determine Boss Order
+        ##########################################################################
+        bossOrder = [1,2,3,4,5,6]
+        if settings.boss_shuffle:
+            # Determine statue order for shuffle
+            random.shuffle(bossOrder)
+
+            # Define music map headers
+            dungeon_music = [""]
+            dungeon_music.append(b"\x11\x07\x00\x0f\x67\xd4")   # Inca Ruins
+            dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
+            dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
+            dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
+            dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
+            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
+
+            # Find all music header locations in map data file
+            music_header_addrs = [[],[],[],[],[],[]]
+            i = 0
+            while 1 < 5:
+                done = False
+                f_mapdata.seek(0)
+                while not done:
+                    addr = rom.find(music_header_addrs[i], addr + 1)
+                    if addr < 0:
+                        done = True
+                    else:
+                        music_header_addrs[i].append(addr)
+
+            # Special case for Mansion
+            f_mapdata.seek(0)
+            addr = f_mapdata.read().find(b"\x00\xE9\x00\x02\x22") + 27
+            music_header_addrs[5].append(addr)
+
+            # Patch music headers into new dungeons
+            i = 0
+            while i < 6:
+                boss = bossOrder[i]
+                while music_header_addrs[i]:
+                    addr = music_header_addrs[i].pop(0)
+                    patch.seek(int("d8000", 16) + addr + rom_offset)
+                    patch.write(dungeon_music[boss])
 
         ##########################################################################
         #                   Randomize Location of Kara Portrait
