@@ -520,7 +520,7 @@ class World:
             boss_entrance_idx = [1,4,7,10,13,15]
             boss_exit_idx = [3,6,9,12,14,17]
             dungeon = 0
-            while dungeon < 6:
+            while dungeon < 5:
                 boss = self.boss_order[dungeon]
                 self.exits[boss_entrance_idx[dungeon]][1] = boss_entrance_idx[boss-1]
                 self.exits[boss_exit_idx[dungeon]][1] = boss_exit_idx[boss-1]
@@ -1242,7 +1242,7 @@ class World:
                 f.write(b"\x02\xe0")
 
     # Build world
-    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12 20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6]):
+    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[2,3,4,5,6,1]):
 
         self.seed = settings.seed
         self.statues = statues

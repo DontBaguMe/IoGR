@@ -2215,8 +2215,7 @@ class Randomizer:
             random.shuffle(bossOrder)
 
             # Define music map headers
-            dungeon_music = [""]
-            dungeon_music.append(b"\x11\x07\x00\x0f\x67\xd4")   # Inca Ruins
+            dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
             dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
             dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
             dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
@@ -2224,31 +2223,38 @@ class Randomizer:
             dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
 
             # Find all music header locations in map data file
-            music_header_addrs = [[],[],[],[],[],[]]
+            music_header_addrs = [[],[],[],[],[]]
             i = 0
-            while 1 < 5:
+            while i < 5:
                 done = False
-                f_mapdata.seek(0)
+                addr = 0
                 while not done:
-                    addr = rom.find(music_header_addrs[i], addr + 1)
+                    f_mapdata.seek(0)
+                    addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
                     if addr < 0:
                         done = True
                     else:
                         music_header_addrs[i].append(addr)
-
-            # Special case for Mansion
-            f_mapdata.seek(0)
-            addr = f_mapdata.read().find(b"\x00\xE9\x00\x02\x22") + 27
-            music_header_addrs[5].append(addr)
+                i += 1
 
             # Patch music headers into new dungeons
             i = 0
-            while i < 6:
+            while i < 5:
                 boss = bossOrder[i]
                 while music_header_addrs[i]:
                     addr = music_header_addrs[i].pop(0)
-                    patch.seek(int("d8000", 16) + addr + rom_offset)
-                    patch.write(dungeon_music[boss])
+                    f_mapdata.seek(addr)
+                    f_mapdata.write(dungeon_music[boss-1])
+                i += 1
+
+            # Special case for Mansion
+            f_mapdata.seek(0)
+            addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
+            if addr < 0:
+                print("ERROR: Boss shuffle failed")
+            else:
+                f_mapdata.seek(addr)
+                f_mapdata.write(dungeon_music[bossOrder[5]-1])
 
         ##########################################################################
         #                   Randomize Location of Kara Portrait
