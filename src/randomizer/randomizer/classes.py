@@ -462,17 +462,17 @@ class World:
     # Initialize World parameters
     def initialize(self):
         # Manage required items
-        if 1 in self.statues:
+        if 1 in self.dungeons_req:
             self.required_items += [3, 4, 7, 8]
-        if 2 in self.statues:
+        if 2 in self.dungeons_req:
             self.required_items += [14]
-        if 3 in self.statues:
+        if 3 in self.dungeons_req:
             self.required_items += [18, 19]
-        if 4 in self.statues:
+        if 4 in self.dungeons_req:
             self.required_items += [50, 51]
-        if 5 in self.statues:
+        if 5 in self.dungeons_req:
             self.required_items += [38, 30, 31, 32, 33, 34, 35]
-        if 6 in self.statues:
+        if 6 in self.dungeons_req:
             self.required_items += [39]
 
         if self.kara == 1:
@@ -487,9 +487,9 @@ class World:
             self.required_items += [28, 50, 53]
 
         # Update inventory space logic
-        if 3 in self.statues:
+        if 3 in self.dungeons_req:
             self.item_pool[19][4] = True
-        if 5 in self.statues:
+        if 5 in self.dungeons_req:
             self.item_pool[30][4] = True
             self.item_pool[31][4] = True
             self.item_pool[32][4] = True
@@ -524,6 +524,7 @@ class World:
                 boss = self.boss_order[dungeon]
                 self.exits[boss_entrance_idx[dungeon]][1] = boss_entrance_idx[boss-1]
                 self.exits[boss_exit_idx[dungeon]][1] = boss_exit_idx[boss-1]
+                dungeon += 1
 
         # Chaos mode
         if self.logic_mode == "Chaos":
@@ -538,9 +539,9 @@ class World:
             # Several locked Dark Spaces can have abilities
             ds_unlock = [74, 94, 124, 142]
 
-            if 1 not in self.statues:  # First DS in Inca
+            if 1 not in self.dungeons_req:  # First DS in Inca
                 ds_unlock.append(29)
-            if 4 in self.statues:
+            if 4 in self.dungeons_req:
                 self.dark_space_sets.append([93, 94])
             if self.kara != 1:  # DS in Underground Tunnel
                 ds_unlock.append(19)
@@ -569,15 +570,47 @@ class World:
             self.logic[154][2][0][1] = 1
             self.graph[60][3].append(20)
 
-        # Change logic based on which statues are required
-        for x in self.statues:
+        # Change logic based on which dungeons are required
+        for x in self.dungeons_req:
             self.logic[155][2][x][1] = 1
 
-    #        print self.start_loc
-    #        for x in self.graph:
-    #            print x, self.graph[x]
-    #        for y in self.logic:
-    #            print y, self.logic[y]
+        # Update graph in case bosses/entrances are shuffled
+        self.check_exits()
+
+    # Check entrances for unresolved shuffles
+    def check_exits(self):
+        for x in self.exits:
+            if self.exits[x][1] > 0:   # Check if exit has been mapped
+                self.map_exit(x)
+
+        # Check and resolve coupled exits
+        for y in self.exits:
+            x = self.exits[y][0]
+            if x > 0:
+                xprime = self.exits[x][1]
+                if self.exits[y][1] == 0 and xprime > 0:
+                    yprime = self.exits[xprime][0]
+                    if yprime > 0:
+                        self.exits[y][1] = yprime
+                        self.map_exit(y)
+
+
+    # Map new exit
+    def map_exit(self, from_exit):
+        to_exit = self.exits[from_exit][1]
+        from_region = self.exits[from_exit][4]
+        to_region_old = self.exits[from_exit][5]
+        to_region_new = self.exits[to_exit][5]
+
+        # Update graph with new link
+        if to_region_old in self.graph[from_region][1]:
+            self.graph[from_region][1].remove(to_region_old)
+            self.graph[from_region][1].append(to_region_new)
+
+        # Update logic with new link
+        for x in self.logic:
+            if self.logic[x][0] == from_region and self.logic[x][1] == to_region_old:
+                self.logic[x][1] = to_region_new
 
     # Update item placement logic after abilities are placed
     def check_logic(self):
@@ -1021,6 +1054,32 @@ class World:
                 f.seek(int("bfdf3", 16) + rom_offset)
                 f.write(switch_str + b"\x02\xe0")
 
+        # Swapped exits
+        for exit in self.exits:
+            if self.exits[exit][1] > 0:
+                map_str = self.exits[to_exit][9]
+                if self.exits[from_exit][8] != "":
+                    f.seek(int(self.exits[from_exit][8], 16) + rom_offset)
+                    f.write(map_str)
+                else:
+                    map_id = map_str[0]
+                    xcoord = map_str[1] >> 4 | map_str[2] << 4
+                    ycoord = map_str[3] >> 4 | map_str[4] << 4
+                    facedir = map_str[5]
+                    camera = map_str[-2:]
+
+                    f.seek(int(self.exits_detailed[from_exit][0], 16) + rom_offset)
+                    f.write(map_id)
+                    f.seek(int(self.exits_detailed[from_exit][1], 16) + rom_offset)
+                    f.write(xcoord)
+                    f.seek(int(self.exits_detailed[from_exit][2], 16) + rom_offset)
+                    f.write(ycoord)
+                    if self.exits_detailed[from_exit][3] != "":
+                        f.seek(int(self.exits_detailed[from_exit][3], 16) + rom_offset)
+                        f.write(facedir)
+                    f.seek(int(self.exits_detailed[from_exit][4], 16) + rom_offset)
+                    f.write(camera)
+
         # print "ROM successfully created"
 
     # Shuffle enemies in ROM
@@ -1242,11 +1301,14 @@ class World:
                 f.write(b"\x02\xe0")
 
     # Build world
-    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[2,3,4,5,6,1]):
+    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6]):
 
         self.seed = settings.seed
         self.statues = statues
         self.boss_order = boss_order
+        self.dungeons_req = []
+        for x in self.statues:
+            self.dungeons_req.append(self.boss_order[x-1])
 
         if settings.goal.value == Goal.DARK_GAIA.value:
             self.goal = "Dark Gaia"

@@ -2209,10 +2209,10 @@ class Randomizer:
         ##########################################################################
         #                           Determine Boss Order
         ##########################################################################
-        bossOrder = [1,2,3,4,5,6]
+        boss_order = [1,2,3,4,5,6]
         if settings.boss_shuffle:
             # Determine statue order for shuffle
-            random.shuffle(bossOrder)
+            random.shuffle(boss_order)
 
             # Define music map headers
             dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
@@ -2240,7 +2240,7 @@ class Randomizer:
             # Patch music headers into new dungeons
             i = 0
             while i < 5:
-                boss = bossOrder[i]
+                boss = boss_order[i]
                 while music_header_addrs[i]:
                     addr = music_header_addrs[i].pop(0)
                     f_mapdata.seek(addr)
@@ -2254,7 +2254,7 @@ class Randomizer:
                 print("ERROR: Boss shuffle failed")
             else:
                 f_mapdata.seek(addr)
-                f_mapdata.write(dungeon_music[bossOrder[5]-1])
+                f_mapdata.write(dungeon_music[boss_order[5]-1])
 
         ##########################################################################
         #                   Randomize Location of Kara Portrait
@@ -2595,12 +2595,12 @@ class Randomizer:
         ##########################################################################
         done = False
         seed_adj = 0
-        self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order)
+        self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
             if seed_adj > 10:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
-            self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order)
+            self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj)
             seed_adj += 1
 
