@@ -517,11 +517,11 @@ class World:
 
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
-            boss_entrance_idx = [1,4,7,10,13,15]
-            boss_exit_idx = [3,6,9,12,14,17]
+            boss_entrance_idx = [1,4,7,10,13,15,18]
+            boss_exit_idx = [3,6,9,12,14,17,19]
             dungeon = 0
             # print("Boss order: ",self.boss_order)
-            while dungeon < 6:
+            while dungeon < 7:
                 boss = self.boss_order[dungeon]
                 self.exits[boss_entrance_idx[dungeon]][1] = boss_entrance_idx[boss-1]
                 self.exits[boss_exit_idx[boss-1]][1] = boss_exit_idx[dungeon]
@@ -1309,7 +1309,7 @@ class World:
                 f.write(b"\x02\xe0")
 
     # Build world
-    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6]):
+    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
 
         self.seed = settings.seed
         self.statues = statues
