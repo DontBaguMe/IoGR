@@ -520,10 +520,11 @@ class World:
             boss_entrance_idx = [1,4,7,10,13,15]
             boss_exit_idx = [3,6,9,12,14,17]
             dungeon = 0
-            while dungeon < 5:
+            # print("Boss order: ",self.boss_order)
+            while dungeon < 6:
                 boss = self.boss_order[dungeon]
                 self.exits[boss_entrance_idx[dungeon]][1] = boss_entrance_idx[boss-1]
-                self.exits[boss_exit_idx[dungeon]][1] = boss_exit_idx[boss-1]
+                self.exits[boss_exit_idx[boss-1]][1] = boss_exit_idx[dungeon]
                 dungeon += 1
 
         # Chaos mode
@@ -601,16 +602,19 @@ class World:
         from_region = self.exits[from_exit][4]
         to_region_old = self.exits[from_exit][5]
         to_region_new = self.exits[to_exit][5]
+        # print("Mapping",from_exit," to", to_exit)
 
         # Update graph with new link
         if to_region_old in self.graph[from_region][1]:
             self.graph[from_region][1].remove(to_region_old)
             self.graph[from_region][1].append(to_region_new)
+            # print("Graph:",from_region,self.graph[from_region])
 
         # Update logic with new link
         for x in self.logic:
             if self.logic[x][0] == from_region and self.logic[x][1] == to_region_old:
                 self.logic[x][1] = to_region_new
+                # print("Logic",x,self.logic[x])
 
     # Update item placement logic after abilities are placed
     def check_logic(self):
@@ -849,9 +853,11 @@ class World:
         spoiler["seed"] = str(self.seed)
         spoiler["date"] = str(datetime.utcfromtimestamp(time.time()))
         spoiler["goal"] = str(self.goal)
+        spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
         spoiler["logic"] = str(self.logic_mode)
         spoiler["difficulty"] = str(mode_txt)
         spoiler["statues_required"] = self.statues
+        spoiler["boss_order"] = self.boss_order
         spoiler["kara_location"] = kara_txt
         spoiler["jeweler_amounts"] = self.gem
         spoiler["inca_tiles"] = self.incatile
@@ -860,7 +866,7 @@ class World:
         items = []
         for x in self.item_locations:
             item = self.item_locations[x][3]
-            location_name = self.item_locations[x][9]
+            location_name = self.item_locations[x][9].strip()
             item_name = self.item_pool[item][3]
             items.append({"location": location_name, "name": item_name})
 
@@ -1057,27 +1063,29 @@ class World:
         # Swapped exits
         for exit in self.exits:
             if self.exits[exit][1] > 0:
+                to_exit = self.exits[exit][1]
                 map_str = self.exits[to_exit][9]
-                if self.exits[from_exit][8] != "":
-                    f.seek(int(self.exits[from_exit][8], 16) + rom_offset)
+                if self.exits[exit][8] != "":
+                    f.seek(int(self.exits[exit][8], 16) + rom_offset)
                     f.write(map_str)
                 else:
-                    map_id = map_str[0]
-                    xcoord = map_str[1] >> 4 | map_str[2] << 4
-                    ycoord = map_str[3] >> 4 | map_str[4] << 4
-                    facedir = map_str[5]
-                    camera = map_str[-2:]
+                    map_id = map_str[0:1]
+                    xcoord = int.to_bytes(int.from_bytes(map_str[1:3], byteorder="little") // 16, 2, byteorder='little')
+                    ycoord = int.to_bytes(int.from_bytes(map_str[3:5], byteorder="little") // 16, 2, byteorder='little')
+                    facedir = map_str[5:6]
+                    camera = map_str[6:8]
+                    # print(map_id,xcoord,ycoord,facedir,camera)
 
-                    f.seek(int(self.exits_detailed[from_exit][0], 16) + rom_offset)
+                    f.seek(int(self.exits_detailed[exit][0], 16) + rom_offset)
                     f.write(map_id)
-                    f.seek(int(self.exits_detailed[from_exit][1], 16) + rom_offset)
+                    f.seek(int(self.exits_detailed[exit][1], 16) + rom_offset)
                     f.write(xcoord)
-                    f.seek(int(self.exits_detailed[from_exit][2], 16) + rom_offset)
+                    f.seek(int(self.exits_detailed[exit][2], 16) + rom_offset)
                     f.write(ycoord)
-                    if self.exits_detailed[from_exit][3] != "":
-                        f.seek(int(self.exits_detailed[from_exit][3], 16) + rom_offset)
+                    if self.exits_detailed[exit][3] != "":
+                        f.seek(int(self.exits_detailed[exit][3], 16) + rom_offset)
                         f.write(facedir)
-                    f.seek(int(self.exits_detailed[from_exit][4], 16) + rom_offset)
+                    f.seek(int(self.exits_detailed[exit][4], 16) + rom_offset)
                     f.write(camera)
 
         # print "ROM successfully created"
@@ -1644,7 +1652,7 @@ class World:
             146: [67, 2, False, 0, [51, 52, 53], "ce159", "Safe", b"\xb0\x02\xb0\x01\x83\x10\x23", b"\xe3",
                   "Babel: Dark Space Top               "],
 
-            147: [68, 1, False, 0, [], "1B083", "", "", "", "Jeweler's Mansion: Chest            "],
+            147: [81, 1, False, 0, [], "1B083", "", "", "", "Jeweler's Mansion: Chest            "],
 
             148: [18, 3, False, 0, [55, 56, 57, 58, 59], "", "", "", "", "Castoth Prize                       "],
             149: [32, 3, False, 0, [54, 56, 57, 58, 59], "", "", "", "", "Viper Prize                         "],
@@ -1709,14 +1717,14 @@ class World:
             71: [False, [], "Mu - Behind Dark Friar", []],
             39: [False, [], "Mu - Behind Psycho Slide", []],
             40: [False, [], "Mu - Behind Hope Statue 2", [19, 19]],
-            41: [False, [], "Mu - Vampires", []],
+            41: [False, [37], "Mu - Vampires", []],
             42: [False, [36, 44, 45, 74], "Angel Village", []],
             43: [False, [], "Angel Village Dungeon", []],
             44: [False, [42, 45, 74], "Watermia", [24]],
             45: [False, [42, 44, 45, 80], "Great Wall", []],
             80: [False, [], "Great Wall - Behind Ramp", []],
             46: [False, [], "Great Wall - Behind Dark Friar", []],
-            47: [False, [46], "Great Wall - Sand Fanger", []],
+            47: [False, [45], "Great Wall - Sand Fanger", []],
 
             48: [False, [54, 56, 74], "Euro", [24, 40]],
             49: [False, [], "Euro - Ann's Item", []],
@@ -1740,11 +1748,13 @@ class World:
             64: [False, [77], "Pyramid - Behind Spin Dash", []],
             78: [False, [77], "Pyramid - Behind Dark Friar", []],
             79: [False, [77], "Pyramid - Behind Earthquaker", []],
-            65: [False, [], "Pyramid - Mummy Queen", [38]],
+            65: [False, [62], "Pyramid - Mummy Queen", [38]],
 
             66: [False, [], "Babel Tower", []],
             67: [False, [61], "Babel Tower - Behind Crystal Ring and Aura", []],
             68: [False, [61], "Jeweler's Mansion", []],
+            81: [False, [82], "Jeweler's Mansion - Behind Psycho Slider", []],
+            82: [False, [67], "Jeweler's Mansion - Solid Arm", []],
 
             69: [False, [], "Rescue Kara", []],
             70: [False, [], "Dark Gaia", []]
@@ -1876,7 +1886,7 @@ class World:
 
             # Babel/Jeweler Mansion
             140: [66, 67, [[36, 1], [39, 1]]],  # Babel Progression w/ Aura and Crystal Ring
-            # 141: [68,67,[[49,1]]],         # Jeweler Mansion to Babel Top w/Slide      # Solid Arm will not be required
+            141: [68, 81, [[49,1]]],            # Jeweler Mansion progression w/Slide
 
             # Endgame
             150: [10, 69, [[20, 2]]],  # Rescue Kara from Edward's w/ Magic Dust
@@ -2594,12 +2604,12 @@ class World:
             13: [ 0, 0, "Boss", 0, 62, 65, 204, 221, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", False, False, False, "Mummy Queen entrance"],
             14: [ 0, 0, "Boss", 0, 65, 62, 221, 204,      "", b"\xcd\x70\x00\x90\x00\x03\x00\x11", False, False, False, "Mummy Queen exit"],     # This one's dumb
 
-            15: [16, 0, "Boss", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Babel entrance (in)"],
-            16: [15, 0, "Boss", 1, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Babel entrance (out)"],
-            17: [ 0, 0, "Boss", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Dao passage (Babel)"],
+            15: [16, 0, "Boss", 0, 66, 67, 226, 227, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", False, False, False, "Babel entrance (in)"],
+            16: [15, 0, "Boss", 1, 67, 66, 227, 226, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", False, False, False, "Babel entrance (out)"],
+            17: [ 0, 0, "Boss", 0, 67, 61, 227, 195, "9804a", b"\xC3\x10\x02\x90\x00\x03\x00\x23", False, False,  True, "Dao passage (Babel)"],
 
-            18: [ 0, 0, "Boss", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Solid Arm entrance"],
-            19: [ 0, 0, "Boss", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Dao passage (Solid Arm)"],
+            18: [ 0, 0, "Boss", 0, 81, 82, 233, 234, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", False, False, False, "Solid Arm entrance"],
+            19: [ 0, 0, "Boss", 0, 82, 67, 234, 227, "98115", b"\xE3\x80\x02\xB0\x01\x00\x10\x23", False, False,  True, "Babel passage (Solid Arm)"],
 
             # South Cape
             30: [31, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "South Cape entrance"],

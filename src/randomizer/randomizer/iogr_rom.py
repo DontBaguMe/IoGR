@@ -2237,24 +2237,39 @@ class Randomizer:
                         music_header_addrs[i].append(addr)
                 i += 1
 
-            # Patch music headers into new dungeons
-            i = 0
-            while i < 5:
-                boss = boss_order[i]
-                while music_header_addrs[i]:
-                    addr = music_header_addrs[i].pop(0)
-                    f_mapdata.seek(addr)
-                    f_mapdata.write(dungeon_music[boss-1])
-                i += 1
+            # Patch music headers into new dungeons (easy and normal modes)
+            if mode == "Easy" or mode == "Normal":
+                i = 0
+                while i < 5:
+                    boss = boss_order[i]
+                    while music_header_addrs[i]:
+                        addr = music_header_addrs[i].pop(0)
+                        f_mapdata.seek(addr)
+                        f_mapdata.write(dungeon_music[boss-1])
+                    i += 1
 
             # Special case for Mansion
             f_mapdata.seek(0)
             addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
-            if addr < 0:
-                print("ERROR: Boss shuffle failed")
+            if addr < 27:
+                print("ERROR: Couldn't find Mansion map header")
             else:
                 f_mapdata.seek(addr)
                 f_mapdata.write(dungeon_music[boss_order[5]-1])
+
+            # Change conditions for Pyramid boss portal
+            pyramid_boss = boss_order[4]
+            patch.seek(int("8cd71", 16) + rom_offset)
+            if pyramid_boss == 1:
+                patch.write(b"\xf8")
+            elif pyramid_boss == 2:
+                patch.write(b"\xf9")
+            elif pyramid_boss == 3:
+                patch.write(b"\xfa")
+            elif pyramid_boss == 4:
+                patch.write(b"\xfb")
+            elif pyramid_boss == 6:
+                patch.write(b"\xfd")
 
         ##########################################################################
         #                   Randomize Location of Kara Portrait
