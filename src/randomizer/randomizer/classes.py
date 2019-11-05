@@ -498,6 +498,11 @@ class World:
             self.item_pool[35][4] = True
             self.item_pool[38][4] = True
 
+        # Solid Arm can only be required in Extreme
+        if self.mode != "Extreme":
+            self.start_loc = self.random_start()
+            self.graph[82][1].remove(67)
+
         # Random start location
         if self.start_mode != "South Cape":
             self.start_loc = self.random_start()
