@@ -500,7 +500,6 @@ class World:
 
         # Solid Arm can only be required in Extreme
         if self.mode != 3:
-            self.start_loc = self.random_start()
             self.graph[82][1].remove(67)
 
         # Random start location
