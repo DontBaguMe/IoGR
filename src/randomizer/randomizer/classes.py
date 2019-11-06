@@ -2591,7 +2591,7 @@ class World:
             # Bosses
             1:  [ 2, 0, "Boss", 0, 17, 18, 30, 41, "18872", b"\x29\x78\x00\xC0\x00\x00\x00\x11", False, False, False, "Castoth entrance (in)"],
             2:  [ 1, 0, "Boss", 1, 18, 17, 41, 30, "189e4", b"\x1E\x68\x00\x00\x01\x03\x00\x24", False, False, False, "Castoth entrance (out)"],
-            3:  [ 0, 0, "Boss", 0, 19, 20, 44, 48, "584cc", b"\x30\x48\x00\x10\x01\x03\x00\x21", False, False,  True, "Diamond Coast passage (Gold Ship)"],
+            3:  [ 0, 0, "Boss", 0, 19, 20, 44, 48, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", False, False,  True, "Diamond Coast passage (Gold Ship)"],
 
             4:  [ 5, 0, "Boss", 0, 29, 32, 76, 85, "18e20", b"\x55\x70\x00\xE0\x01\x00\x00\x22", False, False, False, "Viper entrance (in)"],
             5:  [ 4, 0, "Boss", 1, 32, 29, 85, 76, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", False, False, False, "Viper entrance (out)"],
@@ -2599,21 +2599,21 @@ class World:
 
             7:  [ 8, 0, "Boss", 0, 40, 41, 102, 103, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", False, False, False, "Vampires entrance (in)"],
             8:  [ 7, 0, "Boss", 1, 41, 40, 103, 101, "193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", False, False, False, "Vampires entrance (out)"],
-            9:  [ 0, 0, "Boss", 0, 41, 37, 102, 95,  "193ea", b"\x5f\x80\x00\x50\x00\x03\x00\x44", False, False, False, "Vampires exit"],
+            9:  [ 0, 0, "Boss", 0, 41, 37, 102, 95,  "193ea", b"\x5f\x80\x00\x50\x00\x83\x00\x44", False, False, False, "Vampires exit"],
 
             10: [11, 0, "Boss", 0, 46, 47, 136, 138, "19c2a", b"\x8A\x50\x00\x90\x00\x87\x00\x33", False, False, False, "Sand Fanger entrance (in)"],
             11: [10, 0, "Boss", 1, 47, 46, 138, 136, "19c78", b"\x88\xE0\x03\x90\x00\x06\x00\x14", False, False, False, "Sand Fanger entrance (out)"],
-            12: [ 0, 0, "Boss", 0, 47, 45, 138, 130, "19c84", b"\x82\x10\x00\x90\x00\x07\x00\x18", False, False, False, "Sand Fanger exit"],
+            12: [ 0, 0, "Boss", 0, 47, 45, 138, 130, "19c84", b"\x82\x10\x00\x90\x00\x87\x00\x18", False, False, False, "Sand Fanger exit"],
 
             13: [ 0, 0, "Boss", 0, 62, 65, 204, 221, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", False, False, False, "Mummy Queen entrance"],
-            14: [ 0, 0, "Boss", 0, 65, 62, 221, 204,      "", b"\xcd\x70\x00\x90\x00\x03\x00\x11", False, False, False, "Mummy Queen exit"],     # This one's dumb
+            14: [ 0, 0, "Boss", 0, 65, 62, 221, 204,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", False, False, False, "Mummy Queen exit"],     # This one's dumb
 
             15: [16, 0, "Boss", 0, 66, 67, 226, 227, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", False, False, False, "Babel entrance (in)"],
             16: [15, 0, "Boss", 1, 67, 66, 227, 226, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", False, False, False, "Babel entrance (out)"],
-            17: [ 0, 0, "Boss", 0, 67, 61, 227, 195, "9804a", b"\xC3\x10\x02\x90\x00\x03\x00\x23", False, False,  True, "Dao passage (Babel)"],
+            17: [ 0, 0, "Boss", 0, 67, 61, 227, 195, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", False, False,  True, "Dao passage (Babel)"],
 
             18: [ 0, 0, "Boss", 0, 81, 82, 233, 234, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", False, False, False, "Solid Arm entrance"],
-            19: [ 0, 0, "Boss", 0, 82, 67, 234, 227, "98115", b"\xE3\x80\x02\xB0\x01\x00\x10\x23", False, False,  True, "Babel passage (Solid Arm)"],
+            19: [ 0, 0, "Boss", 0, 82, 67, 234, 227, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", False, False,  True, "Babel passage (Solid Arm)"],
 
             # South Cape
             30: [31, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "South Cape entrance"],
