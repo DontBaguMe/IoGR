@@ -1441,6 +1441,19 @@ class Randomizer:
         patch.seek(int("98fad", 16) + rom_offset)
         patch.write(b"\x02\xcc\x0e\x02\xcc\x0f\x6b")
 
+        # Update "Return to Dao" spirit text
+        patch.seek(int("98055", 16) + rom_offset)
+        patch.write(qt_encode("I'd tell you my story, but I'd hate to Babylon.|Thank you! I'm here all week!"))
+        patch.write(b"\xcb\xac\xd6\x42\xcb\xac")
+        patch.write(qt_encode("Go to Dao") + b"\xca")
+
+        # Fun with other text
+        patch.seek(int("99866", 16) + rom_offset)
+        patch.write(qt_encode("Don't worry, I won't sink my talons TOO far into your back.", True))
+        patch.seek(int("9974e", 16) + rom_offset)
+        patch.write(qt_encode("Oh yeah, we're not evil anymore... OR AREN'T WE?? >.>", True))
+        #patch.write(qt_encode("Oh yeah, we're not evil anymore. Didn't you get the memo?", True))
+
         ##########################################################################
         #                      Modify Jeweler's Mansion events
         ##########################################################################
@@ -2215,8 +2228,12 @@ class Randomizer:
             if mode == 3:
                 random.shuffle(boss_order)
             else:
+                boss_order.remove(5)
                 boss_order.remove(7)
                 random.shuffle(boss_order)
+                non_will_dungeons = [0,1,2,4]
+                random.shuffle(non_will_dungeons)
+                boss_order.insert(non_will_dungeons[0],5)
                 boss_order += [7]
 
             # Define music map headers
@@ -2263,19 +2280,56 @@ class Randomizer:
                     f_mapdata.seek(addr)
                     f_mapdata.write(dungeon_music[boss_order[6]-1])
 
-            # Change conditions for Pyramid boss portal
-            pyramid_boss = boss_order[4]
-            patch.seek(int("8cd71", 16) + rom_offset)
-            if pyramid_boss == 1:
-                patch.write(b"\xf8")
-            elif pyramid_boss == 2:
-                patch.write(b"\xf9")
-            elif pyramid_boss == 3:
-                patch.write(b"\xfa")
-            elif pyramid_boss == 4:
-                patch.write(b"\xfb")
-            elif pyramid_boss == 6:
-                patch.write(b"\xfd")
+        # Change conditions and text for Pyramid boss portal
+        pyramid_boss = boss_order[4]
+        patch.seek(int("8cd71", 16) + rom_offset)
+        if pyramid_boss == 5:
+            patch.write(b"\xfc")
+        elif pyramid_boss == 7:
+            patch.write(b"\xf6")
+        else:
+            patch.write(b"\x10\x00")
+
+        # Change "Return to Dao" Babel spirit text
+        babel_boss = boss_order[5]
+        patch.seek(int("980a6", 16) + rom_offset)
+        if babel_boss == 1:
+            patch.write(b"\x42\x8e\x80\xa3\xa4\xca")
+        elif babel_boss == 2:
+            patch.write(b"\x63\x84\x80\xac\x60\x80\x8b\x80\x82\x84\xca")
+        elif babel_boss == 3:
+            patch.write(b"\x4c\xa5\xca")
+        elif babel_boss == 4:
+            patch.write(b"\xd6\x16\x67\x80\x8b\x8b\xca")
+        elif babel_boss == 5:
+            patch.write(b"\xd6\x3f\xca")
+
+        patch.seek(int("8cddb", 16) + rom_offset)
+        patch.write(b"\x47\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\xa2\x84\x0e\xa3\xac\xcb")
+        if pyramid_boss == 1:
+            patch.write(b"\x42\x80\xa3\xa4\x8e\xa4\x87\x4f\xac\xac\xac\xac\xac\xac\xac\xac")
+        elif pyramid_boss == 2:
+            patch.write(b"\x66\x88\xa0\x84\xa2\x4f\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac")
+        elif pyramid_boss == 3:
+            patch.write(b"\x66\x80\x8c\xa0\x88\xa2\x84\xa3\x4f\xac\xac\xac\xac\xac\xac\xac")
+        elif pyramid_boss == 4:
+            patch.write(b"\x63\x80\x8d\x83\xac\x45\x80\x8d\x86\x84\xa2\x4f\xac\xac\xac\xac")
+        elif pyramid_boss == 5:
+            patch.write(b"\x4c\xa5\x8c\x8c\xa9\xac\x61\xa5\x84\x84\x8d\x4f\xac\xac\xac\xac")
+        elif pyramid_boss == 6:
+            patch.write(b"\x4c\xa5\x8c\x8c\xa9\xac\x61\xa5\x84\x84\x8d\xac\x22\x2a\x20\x4f")
+        elif pyramid_boss == 7:
+            patch.write(b"\x63\x8e\x8b\x88\x83\xac\x40\xa2\x8c\x4f\xac\xac\xac\xac\xac\xac")
+
+        # Update item removal restrictions based on required dungeons
+        if boss_order[2] in statues:
+            # Restrict removal of Rama Statues from inventory
+            patch.seek(int("1e12c", 16) + rom_offset)
+            patch.write(b"\x9f")
+        if boss_order[4] in statues:
+            # Restrict removal of Hieroglyphs from inventory
+            patch.seek(int("1e12d", 16) + rom_offset)
+            patch.write(b"\xf7\xff")
 
         ##########################################################################
         #                   Randomize Location of Kara Portrait
