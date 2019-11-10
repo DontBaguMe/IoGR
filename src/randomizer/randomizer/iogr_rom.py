@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.5.1"
+VERSION = "2.5.2"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1539,7 +1539,8 @@ class Randomizer:
 
         patch.write(qt_encode("-Voranthe   -Xyrcord") + b"\xCB")
         patch.write(qt_encode("-Wilddin    -Z4t0x") + b"\xCB")
-        patch.write(qt_encode("-wormsofcan -ZockerStu") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-wormsofcan -ZockerStu") + b"\xCB")
+        patch.write(qt_encode("-xIceblue") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
         patch.write(b"\xCB" + qt_encode("     This was so fun!"))
@@ -2279,6 +2280,22 @@ class Randomizer:
                 else:
                     f_mapdata.seek(addr)
                     f_mapdata.write(dungeon_music[boss_order[6]-1])
+
+        # Change conditions for ship captain @ Inca
+        inca_boss = boss_order[0]
+        patch.seek(int("584ab", 16) + rom_offset)
+        if inca_boss == 2:
+            patch.write(b"\xf9\x00")
+        elif inca_boss == 3:
+            patch.write(b"\xfa\x00")
+        elif inca_boss == 4:
+            patch.write(b"\xfb\x00")
+        elif inca_boss == 5:
+            patch.write(b"\xfc\x00")
+        elif inca_boss == 6:
+            patch.write(b"\xfd\x00")
+        elif inca_boss == 7:
+            patch.write(b"\xf6\x00")
 
         # Change conditions and text for Pyramid boss portal
         pyramid_boss = boss_order[4]

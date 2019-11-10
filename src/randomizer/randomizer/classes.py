@@ -1950,7 +1950,7 @@ class World:
             21: b"\x48\xa4\x8e\xa2\xa9",  # "Itory"
             22: b"\x48\xa4\x8e\xa2\xa9",  # "Itory"
 
-            23: b"\x4c\x8e\x8e\x8d\xac\x44\xa2\x88\x81\x84",  # "Moon Tribe"
+            23: b"\x4c\x8e\x8e\x8d\xac\x64\xa2\x88\x81\x84",  # "Moon Tribe"
 
             24: b"\x48\x8d\x82\x80",  # "Inca"
             25: b"\x48\x8d\x82\x80",  # "Inca"
