@@ -576,7 +576,7 @@ class World:
             self.graph[60][3].append(20)
 
         # Change logic based on which dungeons are required
-        for x in self.dungeons_req:
+        for x in self.statues:
             self.logic[155][2][x][1] = 1
 
         # Update graph in case bosses/entrances are shuffled
