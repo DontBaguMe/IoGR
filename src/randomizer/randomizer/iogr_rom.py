@@ -2293,7 +2293,7 @@ class Randomizer:
         elif inca_boss == 5:
             patch.write(b"\xfc\x00")
         elif inca_boss == 6:
-            patch.write(b"\xfd\x00")
+            patch.write(b"\x70\x01")
         elif inca_boss == 7:
             patch.write(b"\xf6\x00")
 
