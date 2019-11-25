@@ -2980,7 +2980,7 @@ class World:
             454: [508, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Watermia: Euro passage"],
             455: [  0, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Watermia: Seth passage 1"],
             456: [  0, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Watermia: Seth passage 2"],
-            457: [  0, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Watermia: Seth passage 3"]
+            457: [  0, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Watermia: Seth passage 3"],
 
             # Great Wall
             460: [461, 0, "Place", 0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Great Wall entrance"],
