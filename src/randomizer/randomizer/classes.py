@@ -3005,7 +3005,7 @@ class World:
             485: [484, 0, "Room",  1, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: West House (out)"],
             486: [487, 0, "Room",  0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Rolek Mansion West (in)"],
             487: [486, 0, "Room",  1, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Rolek Mansion West (out)"],
-            489: [489, 0, "Room",  0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Rolek Mansion East (in)"],
+            488: [489, 0, "Room",  0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Rolek Mansion East (in)"],
             489: [488, 0, "Room",  1, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Rolek Mansion East (out)"],
             490: [491, 0, "Room",  0, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Central House (in)"],
             491: [490, 0, "Room",  1, 00, 00, 00, 00, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Central House (out)"],
