@@ -1523,10 +1523,10 @@ class Randomizer:
         patch.write(qt_encode("-Lassic    -djtifaheart") + b"\xCB")
         patch.write(qt_encode("-Le Hulk   -GliitchWiitch") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Plan      -Keypaladin") + b"\xCB")
-        patch.write(qt_encode("-Mikan     -Neomatamune") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet  -Pozzum Senpai") + b"\xCB")
-        patch.write(qt_encode("-NYRambler") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Mikan     -Keypaladin") + b"\xCB")
+        patch.write(qt_encode("-Mr Freet  -Neomatamune") + b"\xCB")
+        patch.write(qt_encode("-NYRambler -Pozzum Senpai") + b"\xCB")
+        patch.write(qt_encode("-Plan") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-roeya     -Skipsy") + b"\xCB")
         patch.write(qt_encode("-Scheris   -SmashManiac") + b"\xCB")
