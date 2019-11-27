@@ -1061,7 +1061,7 @@ class World:
                 switch_str = b"\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01"
 
             if switch_str:
-                f.seek(int("bfdf3", 16) + rom_offset)
+                f.seek(int("bfe3b", 16) + rom_offset)
                 f.write(switch_str + b"\x02\xe0")
 
         # Swapped exits

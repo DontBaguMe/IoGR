@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.5.5"
+VERSION = "2.5.6"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1492,7 +1492,7 @@ class Randomizer:
         patch.seek(int("bd71c", 16) + rom_offset)
         patch.write(qt_encode("    Created by") + b"\xCB" + qt_encode("       DontBaguMe") + str_endpause)
         patch.seek(int("bd74f", 16) + rom_offset)
-        patch.write(qt_encode("Additional Development By") + b"\xCB" + qt_encode("    bryon w and Raeven0"))
+        patch.write(qt_encode("Additional Development By") + b"\xCB" + qt_encode("    bryon-w and Raeven0"))
         patch.write(b"\xCB" + qt_encode("  EmoTracker by Apokalysme"))
         patch.write(b"\xC9\x78\xCE\xCB" + qt_encode("   Thanks to all the") + b"\xCB" + qt_encode("  amazing playtesters!") + str_endpause)
         patch.seek(int("bdee2", 16) + rom_offset)
@@ -1514,33 +1514,33 @@ class Randomizer:
         patch.write(b"\x80\xfa")
         patch.seek(int("bfa80", 16) + rom_offset)
         patch.write(b"\xD3\xD2\x00\xD5\x00" + qt_encode("Contributors and Testers:") + b"\xCB")
-        patch.write(qt_encode("-Alchemic   -Austin21300") + b"\xCB")
-        patch.write(qt_encode("-Atlas      -BOWIEtheHERO") + b"\xCB")
-        patch.write(qt_encode("-Bonzaibier -BubbaSWalter") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Alchemic  -Austin21300") + b"\xCB")
+        patch.write(qt_encode("-Atlas     -BonzaiBier") + b"\xCB")
+        patch.write(qt_encode("-Crazyhaze -BOWIEtheHERO") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Crazyhaze  -DerTolleIgel") + b"\xCB")
-        patch.write(qt_encode("-DoodSF     -djtifaheart") + b"\xCB")
-        patch.write(qt_encode("-Eppy37     -Keypaladin") + b"\xCB")
-        patch.write(qt_encode("-Lassic") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-DoodSF    -BubbaSWalter") + b"\xCB")
+        patch.write(qt_encode("-Eppy37    -DerTolleIgel") + b"\xCB")
+        patch.write(qt_encode("-Lassic    -djtifaheart") + b"\xCB")
+        patch.write(qt_encode("-Le Hulk   -GliitchWiitch") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Le Hulk    -Neomatamune") + b"\xCB")
-        patch.write(qt_encode("-manafreak  -NYRambler") + b"\xCB")
-        patch.write(qt_encode("-Mikan      -Plan") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet   -Pozzum Senpai") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Plan      -Keypaladin") + b"\xCB")
+        patch.write(qt_encode("-Mikan     -Neomatamune") + b"\xCB")
+        patch.write(qt_encode("-Mr Freet  -Pozzum Senpai") + b"\xCB")
+        patch.write(qt_encode("-NYRambler") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-roeya      -Skipsy") + b"\xCB")
-        patch.write(qt_encode("-Scheris    -SmashManiac") + b"\xCB")
-        patch.write(qt_encode("-SDiezal    -solarcell007") + b"\xCB")
-        patch.write(qt_encode("-Skarsnik   -steve hacks") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-roeya     -Skipsy") + b"\xCB")
+        patch.write(qt_encode("-Scheris   -SmashManiac") + b"\xCB")
+        patch.write(qt_encode("-SDiezal   -solarcell007") + b"\xCB")
+        patch.write(qt_encode("-Skarsnik  -steve hacks") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Sye990     -Verallix") + b"\xCB")
-        patch.write(qt_encode("-Tsurana    -Volor") + b"\xCB")
-        patch.write(qt_encode("-Tymekeeper -Veetorp") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Sye990    -Tymekeeper") + b"\xCB")
+        patch.write(qt_encode("-Tsurana   -Veetorp") + b"\xCB")
+        patch.write(qt_encode("-Volor     -Verallix") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Voranthe   -Xyrcord") + b"\xCB")
-        patch.write(qt_encode("-Wilddin    -Z4t0x") + b"\xCB")
-        patch.write(qt_encode("-wormsofcan -ZockerStu") + b"\xCB")
-        patch.write(qt_encode("-xIceblue") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Voranthe  -wormsofcan") + b"\xCB")
+        patch.write(qt_encode("-Wilddin   -Xyrcord") + b"\xCB")
+        patch.write(qt_encode("-xIceblue  -ZockerStu") + b"\xCB")
+        patch.write(qt_encode("-Z4t0x") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
         patch.write(b"\xCB" + qt_encode("     This was so fun!"))
