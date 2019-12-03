@@ -2308,18 +2308,18 @@ class Randomizer:
             patch.write(b"\x10\x00")
 
         # Change "Return to Dao" Babel spirit text
-        babel_boss = boss_order[5]
+        babel_boss = boss_order.index(6)
         patch.seek(int("980a6", 16) + rom_offset)
-        if babel_boss == 1:
-            patch.write(b"\x42\x8e\x80\xa3\xa4\xca")
+        if babel_boss == 0:
+            patch.write(b"\x42\x8e\x80\xa3\xa4\xca")                      # "Coast"
+        elif babel_boss == 1:
+            patch.write(b"\x63\x84\x80\xac\x60\x80\x8b\x80\x82\x84\xca")  # "Seaside Palace"
         elif babel_boss == 2:
-            patch.write(b"\x63\x84\x80\xac\x60\x80\x8b\x80\x82\x84\xca")
+            patch.write(b"\x4c\xa5\xca")                                  # "Mu"
         elif babel_boss == 3:
-            patch.write(b"\x4c\xa5\xca")
+            patch.write(b"\xd6\x16\x67\x80\x8b\x8b\xca")                  # "Great Wall"
         elif babel_boss == 4:
-            patch.write(b"\xd6\x16\x67\x80\x8b\x8b\xca")
-        elif babel_boss == 5:
-            patch.write(b"\xd6\x3f\xca")
+            patch.write(b"\xd6\x3f\xca")                                  # "Pyramid"
 
         patch.seek(int("8cddb", 16) + rom_offset)
         patch.write(b"\x47\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\xa2\x84\x0e\xa3\xac\xcb")
