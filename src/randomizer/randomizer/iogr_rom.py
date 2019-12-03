@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.5.7"
+VERSION = "2.6.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -96,6 +96,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getLogic(settings.logic)
     filename += getStartingLocation(settings.start_location)
     filename += getEnemizer(settings.enemizer)
+    filename += getSwitch(settings.open_mode, "o")
     filename += getSwitch(settings.boss_shuffle, "b")
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")

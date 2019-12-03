@@ -519,6 +519,51 @@ class World:
             self.graph[61][1].append(62)          # Pyramid: No ability required**************
             self.item_locations[142][2] = False   # Pyramid: Bottom DS has abilities
 
+        # Open Mode
+        if "Open Mode" in self.variant:
+            # Update graph logic
+            self.graph[0][1].append(20,44)     # Lola's Letter
+            self.graph[20][1].append(0,44)
+            self.graph[44][1].append(0,20)
+            self.graph[27][1].append(48,61,66) # Memory Melody
+            self.graph[48][1].append(27,61,66)
+            self.graph[61][1].append(27,48,66)
+            self.graph[66][1].append(27,48,61)
+            self.graph[14][1].append(29)       # Teapot
+            self.graph[29][1].append(14,33)
+            self.graph[44][1].append(48)       # Will
+            self.graph[48][1].append(44)
+            self.graph[54][1].append(61)       # Roast
+
+            # Remove travel items from pool
+            self.item_pool[10][0] = 0  # Large Roast
+            self.item_pool[13][0] = 0  # Memory Melody
+            self.item_pool[24][0] = 0  # Will
+            self.item_pool[25][0] = 0  # Teapot
+            self.item_pool[37][0] = 0  # Lola's Letter
+
+            # Add in alternate items, by difficulty
+            if self.mode == 0:
+                self.item_pool[0][0]  += 0  # Nothing
+                self.item_pool[6][0]  += 1  # Herb
+                self.item_pool[42][0] += 2  # DEF Jewel
+                self.item_pool[43][0] += 2  # STR Jewel
+            elif self.mode == 1:
+                self.item_pool[0][0]  += 1  # Nothing
+                self.item_pool[6][0]  += 2  # Herb
+                self.item_pool[42][0] += 1  # DEF Jewel
+                self.item_pool[43][0] += 1  # STR Jewel
+            elif self.mode == 2:
+                self.item_pool[0][0]  += 2  # Nothing
+                self.item_pool[6][0]  += 1  # Herb
+                self.item_pool[42][0] += 1  # DEF Jewel
+                self.item_pool[43][0] += 1  # STR Jewel
+            elif self.mode == 3:
+                self.item_pool[0][0]  += 5  # Nothing
+                self.item_pool[6][0]  += 0  # Herb
+                self.item_pool[42][0] += 0  # DEF Jewel
+                self.item_pool[43][0] += 0  # STR Jewel
+
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
             boss_entrance_idx = [1,4,7,10,13,15,18]
@@ -1056,9 +1101,12 @@ class World:
             # Check for additional switches that need to be set
             switch_str = ""
             if self.start_loc == 30:  # Inca ramp can hardlock you
-                switch_str = b"\x02\xcd\x0c\x01"
+                switch_str += b"\x02\xcd\x0c\x01"
             elif self.start_loc == 47:  # Diamond Mine behind fences
-                switch_str = b"\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01"
+                switch_str += b"\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01"
+
+            if "Open Mode" in self.variant:
+                switch_str += b"\x02\xcc\x11\x02\xcc\x14\x02\xcc\x1f\x02\xcc\x2a\x02\xcc\x41"
 
             if switch_str:
                 f.seek(int("bfe3b", 16) + rom_offset)
@@ -1366,6 +1414,9 @@ class World:
 
         if settings.boss_shuffle:
             self.variant.append("Boss Shuffle")
+
+        if settings.open_mode:
+            self.variant.append("Open Mode")
 
         self.firebird = settings.firebird
         self.start_loc = 10
@@ -1807,7 +1858,7 @@ class World:
             36: [27, 48, [[13, 1]]],  # Neil's to Euro w/ Memory Melody
             37: [27, 61, [[13, 1]]],  # Neil's to Dao w/ Memory Melody
             38: [27, 66, [[13, 1]]],  # Neil's to Babel w/ Memory Melody
-            39: [14, 28, [[25, 1]]],  # Moon Tribe to Nazca w/ Teapot
+            39: [14, 29, [[25, 1]]],  # Moon Tribe to Sky Garden w/ Teapot
             40: [14, 33, [[25, 1]]],  # Moon Tribe to Seaside Palace w/ Teapot
             41: [44, 48, [[24, 1]]],  # Watermia to Euro w/ Will
             42: [48, 44, [[24, 1]]],  # Euro to Watermia w/ Will

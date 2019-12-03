@@ -13,7 +13,7 @@ class RandomizerData:
                  logic: Logic = Logic.COMPLETABLE, statues: str = "4", enemizer: Enemizer = Enemizer.NONE,
                  start_location: StartLocation = StartLocation.SOUTH_CAPE, firebird: bool = False, ohko: bool = False,
                  red_jewel_madness: bool = False, allow_glitches: bool = False, boss_shuffle: bool = False,
-                 overworld_shuffle: bool = False, dungeon_shuffle: bool = False):
+                 overworld_shuffle: bool = False, dungeon_shuffle: bool = False, open_mode: bool = False,):
         self.seed = seed
         self.difficulty = difficulty
         self.start_location = start_location
@@ -28,3 +28,4 @@ class RandomizerData:
         self.boss_shuffle = boss_shuffle
         self.overworld_shuffle = overworld_shuffle
         self.dungeon_shuffle = dungeon_shuffle
+        self.open_mode = open_mode

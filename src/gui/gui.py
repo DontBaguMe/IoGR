@@ -87,7 +87,8 @@ def generate_ROM():
 
     try:
         seed_int = int(seed_str)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(), firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get())
+        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
+            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -219,6 +220,7 @@ tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=9, column=0, sticky=tk
 tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Open Mpde").grid(row=13, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -251,6 +253,9 @@ glitches.set(0)
 boss_shuffle = tkinter.IntVar(root)
 boss_shuffle.set(0)
 
+open_mode = tkinter.IntVar(root)
+open_mode.set(0)
+
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
@@ -277,6 +282,7 @@ enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(
 statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=10, column=1)
 glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=11, column=1)
 boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=12, column=1)
+open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(mainframe, text='Generate Seed', command=generate_seed).grid(row=1, column=2)
