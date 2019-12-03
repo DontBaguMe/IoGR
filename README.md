@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v2.5.5) - <a href="https://www.iogr.app/">Play Now!</a>
+## The Illusion of Gaia Randomizer (v2.6.0) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
@@ -43,6 +43,7 @@ There are three logic modes available to the player.
 - Chaos: Ability placement restrictions have been drastically loosened in this mode -- for instance, Freedan abilities can show up in towns, and Dark Spaces that are typically reserved for form changes might contain abilities, preventing the player from completing dungeons and accessing certain item locations.  As in Beatable, Chaos mode still ensures that the player has access to all the items and locations necessary to beat the game.
 
 #### Variants
+- Open Mode: All overworld movement is unlocked from the start -- i.e. Lola's Letter, the Teapot, the Memory Melody, the Will, and the Large Roast are all activated at start.  Additionally, these five items have been removed from the item pool and have been replaced with STR upgrades, DEF upgrades, herbs, and/or nothing (dependent on difficulty setting).
 - Allow Glitches: You may be required to perform simple glitches to access progression items or abilities.
 - OHKO (One Hit Knockout): You start the game with 1 HP and will never gain an HP upgrade, so each hit kills you automatically.
 - Red Jewel Madness: You start the game with 40 HP (max) and lose 1 HP for every Red Jewel you turn into the Jeweler. If you reach 0 total HP, you will be caught in an infinite death loop. Note: Gaining an HP upgrade when you're at or near 40 HP may result in lost upgrades, as any HP value above 40 is ignored.
@@ -188,7 +189,6 @@ The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is av
 
 ### Future Releases
 - Entrance randomizer
-- Boss shuffle
 - More text edits
 
 ### Known Bugs and Quirks
