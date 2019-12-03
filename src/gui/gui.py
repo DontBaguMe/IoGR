@@ -220,7 +220,7 @@ tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=9, column=0, sticky=tk
 tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Open Mpde").grid(row=13, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]

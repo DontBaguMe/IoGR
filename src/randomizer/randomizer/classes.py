@@ -522,18 +522,18 @@ class World:
         # Open Mode
         if "Open Mode" in self.variant:
             # Update graph logic
-            self.graph[0][1].append(20,44)     # Lola's Letter
-            self.graph[20][1].append(0,44)
-            self.graph[44][1].append(0,20)
-            self.graph[27][1].append(48,61,66) # Memory Melody
-            self.graph[48][1].append(27,61,66)
-            self.graph[61][1].append(27,48,66)
-            self.graph[66][1].append(27,48,61)
-            self.graph[14][1].append(29)       # Teapot
-            self.graph[29][1].append(14,33)
-            self.graph[44][1].append(48)       # Will
-            self.graph[48][1].append(44)
-            self.graph[54][1].append(61)       # Roast
+            self.graph[0][1] += [20,44]     # Lola's Letter
+            self.graph[20][1] += [0,44]
+            self.graph[44][1] += [0,20]
+            self.graph[27][1] += [48,61,66] # Memory Melody
+            self.graph[48][1] += [27,61,66]
+            self.graph[61][1] += [27,48,66]
+            self.graph[66][1] += [27,48,61]
+            self.graph[14][1] += [29]       # Teapot
+            self.graph[29][1] += [14,33]
+            self.graph[44][1] += [48]       # Will
+            self.graph[48][1] += [44]
+            self.graph[54][1] += [61]       # Roast
 
             # Remove travel items from pool
             self.item_pool[10][0] = 0  # Large Roast
@@ -1098,19 +1098,21 @@ class World:
             f.seek(int("8de1f", 16) + rom_offset)
             f.write(map_name + b"\x0D\xCB\xAC\x4D\x8E\xCB\xAC\x69\x84\xA3\xCA")
 
-            # Check for additional switches that need to be set
-            switch_str = ""
-            if self.start_loc == 30:  # Inca ramp can hardlock you
-                switch_str += b"\x02\xcd\x0c\x01"
-            elif self.start_loc == 47:  # Diamond Mine behind fences
-                switch_str += b"\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01"
+        # Check for additional switches that need to be set
+        switch_str = []
+        if self.start_loc == 30:  # Inca ramp can hardlock you
+            switch_str.append(b"\x02\xcd\x0c\x01")
+        elif self.start_loc == 47:  # Diamond Mine behind fences
+            switch_str.append(b"\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01")
 
-            if "Open Mode" in self.variant:
-                switch_str += b"\x02\xcc\x11\x02\xcc\x14\x02\xcc\x1f\x02\xcc\x2a\x02\xcc\x41"
+        if "Open Mode" in self.variant:
+            switch_str.append(b"\x02\xcc\x11\x02\xcc\x14\x02\xcc\x1f\x02\xcc\x2a\x02\xcc\x41")
 
-            if switch_str:
-                f.seek(int("bfe3b", 16) + rom_offset)
-                f.write(switch_str + b"\x02\xe0")
+        if switch_str:
+            f.seek(int("bfe3b", 16) + rom_offset)
+            for x in switch_str:
+                f.write(x)
+            f.write(b"\x02\xe0")
 
         # Swapped exits
         for exit in self.exits:

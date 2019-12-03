@@ -40,7 +40,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     settings = RandomizerData(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.enemizer, args.start, args.firebird, args.ohko, args.red_jewel_madness,
-                              args.allow_glitches, args.boss_shuffle, args.overworld_shuffle, args.dungeon_shuffle, args.open_mode)
+                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.overworld_shuffle, args.dungeon_shuffle)
 
     rom_filename = generate_filename(settings, "sfc")
     spoiler_filename = generate_filename(settings, "json")
