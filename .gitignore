@@ -2,6 +2,7 @@
 .vscode/
 build/
 dist/
+releases/
 data/*.sfc
 data/output/**
 

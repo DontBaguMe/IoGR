@@ -1,6 +1,8 @@
 ## The Illusion of Gaia Randomizer (v2.6.0) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
+
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
 <a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
@@ -50,7 +52,7 @@ There are three logic modes available to the player.
 - Early Firebird: In this mode, you gain access to the Firebird attack when 1) you rescure Kara, 2) you equip the Crystal Ring, and 3) you're in Shadow's form.
 
 #### Enemizer (beta)
-The enemizer is (and likely will forever be) in beta, so play at your own risk. Graphical glitches abound, and some seeds may be incompletable due to enemy placement. Please report any game-breaking situations in the Discord. 
+The enemizer is (and likely will forever be) in beta, so play at your own risk. Graphical glitches abound, and some seeds may be incompletable due to enemy placement. Please report any game-breaking situations in the Discord.
 References to enemy stats refer to STR, DEF and HP.
 Note: Non-enemy sprites in dungeons have been largely removed in every enemizer setting except for Limited.
 - Limited: Enemies will be shuffled, but will only appear in their vanilla dungeons.
@@ -116,7 +118,7 @@ Movement between continents (and to locations not specified above) becomes possi
 - Acquiring the Teapot allows you to use it on the plateau in the Moon Tribe camp. This grants you access to the Sky Garden. (After using the Teapot, you can use the Sky Garden to travel to the Moon Tribe Camp, the Nacza Plain, or the Seaside Palace.)
 - Acquiring Lola's Letter allows you to learn Morse Code. After reading the letter, talk to Erik in the Seaside Cave in South Cape. Together you can communicate with Seth (who is in Riverson form), who can transport you to the Diamond Coast or Watermia. Turbo the dog (Diamond Coast) and the man standing at the entrance in Watermia can also communicate with Seth for you.
 - Upon acquiring the Memory Melody, you can visit Neil in his cottage, who has forgotten how to pilot his airplane. Playing this melody for him restores his memory. From then on, he is happy to take you to Euro, Dao, or Babel Tower. He can be found either in his home, in his mansion in Euro, or in his room in Dao.
-- Acquiring the Will allows you to use Kruks to travel between Watermia and Euro. When the Will is in your inventory, speak to the man tending his Kruks in Watermia just east of the town entrance, or to the man standing by the east entrance to the city of Euro. 
+- Acquiring the Will allows you to use Kruks to travel between Watermia and Euro. When the Will is in your inventory, speak to the man tending his Kruks in Watermia just east of the town entrance, or to the man standing by the east entrance to the city of Euro.
 - Upon acquiring the Large Roast, go to the Natives' Village and talk to the young boy. If you give him the roast, he will gratefully guide you across the treacherous expanse from the village to Dao. The man in Dao who grants you two items can also hire a guide to take you back to Natives' for free.
 - In the Nazca Plain, if you go to the location of the tile buried in the sand, you can warp to the Sky Garden. However, the Moon Tribe will only appear there if you have healed them with the Teapot. You can exit to the overworld from the Sky Garden by going up into the area where you normally enter from Nazca.
 - Mu and the Seaside Palace are accessible directly from Angel Village. What is originally the guest room in the vanilla game takes you to the Passage to Mu inside the Seaside Palace. Mu is freely accessible this way, but the Mu Palace Key is required to enter the Seaside Palace via this route.
@@ -192,13 +194,13 @@ The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is av
 - More text edits
 
 ### Known Bugs and Quirks
-If you have an issue with the randomizer, please join our 
+If you have an issue with the randomizer, please join our
 <a href="https://discord.gg/KfZ4VeD">Discord</a> and report your issue in the #bugs channel.
 
 ### FAQ
 #### Can special abilities be found in any Dark Space?
 If you're playing Completable or Beatable logic (without glitches allowed), certain Dark Spaces will always be reserved for form changes and will never have abilities in them. (Though enabling glitches or choosing Chaos logic breaks this restriction.) You can skip checking these:
-- Underground Tunnel: THe DS behind Lily's room will never have an ability
+- Underground Tunnel: The DS behind Lily's room will never have an ability
 - Inca Ruins: The DS north of the singing statue will never have an ability
 - Diamond Mine: If one of the Dark Spaces (not counting the one behind the false wall) has an ability, the other one is guaranteed not to have one
 - Sky Garden: between the Dark Spaces in the SE and NW rooms, one of them is guaranteed not to have an ability
@@ -208,7 +210,7 @@ If you're playing Completable or Beatable logic (without glitches allowed), cert
 - Pyramid: Neither DS will ever have an ability
 
 #### If you have Psycho Slider and Spin Dash, do you need to keep looking for Psycho Dash?
-No.  Anything you would need Psycho Dash for can be done with either Slider or Spin. 
+No.  Anything you would need Psycho Dash for can be done with either Slider or Spin.
 
 #### Where the heck is Dark Friar?
 It could be virtually anywhere, I'm afraid.  However, you may not need it:
@@ -269,5 +271,5 @@ The Crystal Ring is one of the items you need to pass the force field at the bas
 #blamebagu
 
 ### Support the Dev
-No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a 
+No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a
 <a href="https://www.patreon.com/dontbagume">patron.</a>
