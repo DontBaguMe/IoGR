@@ -9,6 +9,19 @@ This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 
+### Contents
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#randomizer-settings">Randomizer Settings</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#beating-the-game">How to Beat the Game</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#features">Features:</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#overworld-movement">Overworld Movement</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#room-rewards-and-stat-upgrades">Room Rewards and Stat Upgrades</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#in-game-hints">In-Game Hints</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#other-features">Other Features</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Frequently Asked Questions</a>
+
 ### Creating a Randomized ROM
 Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting "Generate ROM" will allow you to download a randomized ROM (as well as a spoiler log).  The original file will remain intact.
 
@@ -63,6 +76,8 @@ Note: Non-enemy sprites in dungeons have been largely removed in every enemizer 
 #### Entrance Randomizer (coming soon!)
 This feature will be implemented in a future version.
 
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
+
 ### Beating the Game
 There are currently two modes (goals) for completing the game:
 
@@ -89,6 +104,8 @@ Once you rescue Kara, unlock Shadow's form, and earn the applicable Statues (if 
 
 #### Red Jewel Hunt
 For this mode, the sole objective is to collect the required number of Red Jewels as quickly as possible and turn them into the Jeweler.  The number of Red Jewels required is 35 for Easy, 40 for Normal, 45 for Hard, and 50 for Extreme.  Turning these into the Jeweler and speaking with him allows you to beat the game.
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### Features
 
@@ -185,6 +202,8 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 
 - Pyramid: Room 3 (the "killer 6" room) can be done with Fredan if you have Dark Friar.  Some might find this form to be helpful to survive in this area, especially if you have upgraded Dark Friar and/or Aura Barrier.  Similarly, Room 5 can be completed with Freedan if you have the Earthquaker ability by using that ability from the various platforms in this area.  (Tiles will fall from the ceiling, allowing you to progress.)
 
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
+
 ### EmoTracker
 The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is available for download. Furthermore, you can access a beta version of the autotracker by joining the <a href="https://discord.gg/KfZ4VeD">Discord</a> and referring to the #tracker channel.
 
@@ -196,6 +215,8 @@ The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is av
 ### Known Bugs and Quirks
 If you have an issue with the randomizer, please join our 
 <a href="https://discord.gg/KfZ4VeD">Discord</a> and report your issue in the #bugs channel.
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### FAQ
 #### Can special abilities be found in any Dark Space?
@@ -270,6 +291,10 @@ The Crystal Ring is one of the items you need to pass the force field at the bas
 #### Why is the game so mean to me?
 #blamebagu
 
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
+
 ### Support the Dev
 No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a 
 <a href="https://www.patreon.com/dontbagume">patron.</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
