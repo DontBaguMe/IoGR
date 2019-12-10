@@ -1,6 +1,8 @@
 ## The Illusion of Gaia Randomizer (v2.4.7) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
+
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
 <a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
@@ -198,7 +200,7 @@ If you have an issue with the randomizer, please join our
 ### FAQ
 #### Can special abilities be found in any Dark Space?
 If you're playing Completable or Beatable logic (without glitches allowed), certain Dark Spaces will always be reserved for form changes and will never have abilities in them. (Though enabling glitches or choosing Chaos logic breaks this restriction.) You can skip checking these:
-- Underground Tunnel: THe DS behind Lily's room will never have an ability
+- Underground Tunnel: The DS behind Lily's room will never have an ability
 - Inca Ruins: The DS north of the singing statue will never have an ability
 - Diamond Mine: If one of the Dark Spaces (not counting the one behind the false wall) has an ability, the other one is guaranteed not to have one
 - Sky Garden: between the Dark Spaces in the SE and NW rooms, one of them is guaranteed not to have an ability
