@@ -26,6 +26,7 @@ parser.add_argument('--allow-glitches', dest="allow_glitches", type=bool, requir
 parser.add_argument('--boss-shuffle', dest="boss_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--overworld-shuffle', dest="overworld_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--dungeon-shuffle', dest="dungeon_shuffle", type=bool, required=False, default=False)
+parser.add_argument('--open-mode', dest="open_mode", type=bool, required=False, default=False)
 
 modeParser = parser.add_mutually_exclusive_group(required=False)
 modeParser.add_argument('--ohko', dest="ohko", action='store_true')
@@ -39,7 +40,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     settings = RandomizerData(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.enemizer, args.start, args.firebird, args.ohko, args.red_jewel_madness,
-                              args.allow_glitches, args.boss_shuffle, args.overworld_shuffle, args.dungeon_shuffle)
+                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.overworld_shuffle, args.dungeon_shuffle)
 
     rom_filename = generate_filename(settings, "sfc")
     spoiler_filename = generate_filename(settings, "json")

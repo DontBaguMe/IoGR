@@ -1,4 +1,4 @@
-import binascii, hmac, logging, os, random, tempfile, json, copy
+import binascii, hashlib, logging, os, random, tempfile, json, copy
 from typing import BinaryIO
 
 from .patch import Patch
@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.4.2"
+VERSION = "2.6.1"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -57,33 +57,33 @@ def generate_filename(settings: RandomizerData, extension: str):
 
     def getLogic(logic):
         if logic.value == Logic.COMPLETABLE.value:
-            return "_C"
+            return ""
         if logic.value == Logic.BEATABLE.value:
-            return "_B"
+            return "_L(b)"
         if logic.value == Logic.CHAOS.value:
-            return "_X"
+            return "_L(x)"
 
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
             return ""
         if start_location.value == StartLocation.SAFE.value:
-            return "_ss"
+            return "_S(s)"
         if start_location.value == StartLocation.UNSAFE.value:
-            return "_su"
+            return "_S(u)"
         if start_location.value == StartLocation.FORCED_UNSAFE.value:
-            return "_sf"
+            return "_S(f)"
 
     def getEnemizer(enemizer):
         if enemizer.value == Enemizer.NONE.value:
             return ""
         if enemizer.value == Enemizer.BALANCED.value:
-            return "_eb"
+            return "_E(b)"
         if enemizer.value == Enemizer.LIMITED.value:
-            return "_el"
+            return "_E(l)"
         if enemizer.value == Enemizer.FULL.value:
-            return "_ef"
+            return "_E(f)"
         if enemizer.value == Enemizer.INSANE.value:
-            return "_ei"
+            return "_E(i)"
 
     def getSwitch(switch, param):
         if switch:
@@ -95,11 +95,13 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getGoal(settings.goal, settings.statues)
     filename += getLogic(settings.logic)
     filename += getStartingLocation(settings.start_location)
+    filename += getEnemizer(settings.enemizer)
+    filename += getSwitch(settings.open_mode, "o")
+    filename += getSwitch(settings.boss_shuffle, "b")
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
-    filename += getEnemizer(settings.enemizer)
     filename += "_" + str(settings.seed)
     filename += "."
     filename += extension
@@ -150,11 +152,11 @@ class Randomizer:
             patch.seek(int("2cd07", 16) + rom_offset)
             patch.write(b"\x4c\xc0\xf0\xea\xea\xea")
             patch.seek(int("2cd88", 16) + rom_offset)
-            patch.write(b"\x4c\xe0\xf0\xea\xea\xea")
+            patch.write(b"\x4c\xf0\xf0\xea\xea\xea")
             patch.seek(int("2ce06", 16) + rom_offset)
-            patch.write(b"\x4c\x00\xf1\xea\xea\xea")
-            patch.seek(int("2ce84", 16) + rom_offset)
             patch.write(b"\x4c\x20\xf1\xea\xea\xea")
+            patch.seek(int("2ce84", 16) + rom_offset)
+            patch.write(b"\x4c\x50\xf1\xea\xea\xea")
 
             # Load firebird assets into every map
             patch.seek(int("3e03a", 16) + rom_offset)
@@ -178,7 +180,8 @@ class Randomizer:
         patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
         hash_str = filename
-        h = hmac.new(bytes(settings.seed), hash_str.encode())
+        h = hashlib.sha256()
+        h.update(hash_str.encode())
         hash = h.digest()
 
         hash_dict = [b"\x20", b"\x21", b"\x28", b"\x29", b"\x2a", b"\x2b", b"\x2c", b"\x2d", b"\x2e", b"\x2f", b"\x30", b"\x31", b"\x32", b"\x33"]
@@ -492,11 +495,11 @@ class Randomizer:
             patch.seek(int("384d5", 16) + rom_offset)
             patch.write(b"\x4c\x70\xfd")
             # 2 Red Jewels (item #$2e) removes 2 HP when used
-            patch.seek(int("39d9f", 16) + rom_offset)
-            patch.write(b"\x4c\x76\xfd")
+            patch.seek(int("39d99", 16) + rom_offset)
+            patch.write(b"\x01\x00\x8D\xB0\x0A\xD8\x4c\x76\xfd")
             # 3 Red Jewels (item #$2f) removes 3 HP when used
-            patch.seek(int("39ddf", 16) + rom_offset)
-            patch.write(b"\x4c\x7c\xfd")
+            patch.seek(int("39dd9", 16) + rom_offset)
+            patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
 
 
         ##########################################################################
@@ -756,7 +759,7 @@ class Randomizer:
 
         # Adjust timer by mode
         timer = 20
-        if mode == "Easy":
+        if mode == 0:
             timer += 5
         if settings.enemizer.value != Enemizer.NONE.value:
             timer += 5
@@ -1421,9 +1424,15 @@ class Randomizer:
         patch.seek(int("98891", 16) + rom_offset)
         patch.write(b"\x02\x0b\x6b")
 
-        # Shorten Olman text boxes
+        # Shorten Olman text boxes, also check for conditions before giving up Statue
         patch.seek(int("9884c", 16) + rom_offset)
         patch.write(b"\x01\x00")
+        patch.seek(int("988d2", 16) + rom_offset)
+        patch.write(b"\x4c\x30\xf7")
+        patch.seek(int("9f730", 16) + rom_offset)
+        patch.write(b"\x02\xD1\x79\x01\x01\x42\xF7\x02\xD0\xF6\x01\x42\xF7")
+        patch.write(b"\x02\xBF\x4A\xF7\x6B\x02\xBF\x03\x89\x02\xCC\x01\x6B")
+        patch.write(qt_encode("heya.|you look frustrated about something.|guess i'm pretty good at my job, huh?", True))
         patch.seek(int("98903", 16) + rom_offset)
         patch.write(qt_encode("heya.", True))
         patch.seek(int("989a2", 16) + rom_offset)
@@ -1432,6 +1441,19 @@ class Randomizer:
         # Speed up roof sequence
         patch.seek(int("98fad", 16) + rom_offset)
         patch.write(b"\x02\xcc\x0e\x02\xcc\x0f\x6b")
+
+        # Update "Return to Dao" spirit text
+        patch.seek(int("98055", 16) + rom_offset)
+        patch.write(qt_encode("I'd tell you my story, but I'd hate to Babylon.|Thank you! I'm here all week!"))
+        patch.write(b"\xcb\xac\xd6\x42\xcb\xac")
+        patch.write(qt_encode("Go to Dao") + b"\xca")
+
+        # Fun with other text
+        patch.seek(int("99866", 16) + rom_offset)
+        patch.write(qt_encode("Don't worry, I won't sink my talons TOO far into your back.", True))
+        patch.seek(int("9974e", 16) + rom_offset)
+        patch.write(qt_encode("Oh yeah, we're not evil anymore... OR AREN'T WE?? >.>", True))
+        #patch.write(qt_encode("Oh yeah, we're not evil anymore. Didn't you get the memo?", True))
 
         ##########################################################################
         #                      Modify Jeweler's Mansion events
@@ -1471,7 +1493,7 @@ class Randomizer:
         patch.seek(int("bd71c", 16) + rom_offset)
         patch.write(qt_encode("    Created by") + b"\xCB" + qt_encode("       DontBaguMe") + str_endpause)
         patch.seek(int("bd74f", 16) + rom_offset)
-        patch.write(qt_encode("Additional Development By") + b"\xCB" + qt_encode("    bryon w and Raeven0"))
+        patch.write(qt_encode("Additional Development By") + b"\xCB" + qt_encode("    bryon-w and Raeven0"))
         patch.write(b"\xCB" + qt_encode("  EmoTracker by Apokalysme"))
         patch.write(b"\xC9\x78\xCE\xCB" + qt_encode("   Thanks to all the") + b"\xCB" + qt_encode("  amazing playtesters!") + str_endpause)
         patch.seek(int("bdee2", 16) + rom_offset)
@@ -1493,32 +1515,33 @@ class Randomizer:
         patch.write(b"\x80\xfa")
         patch.seek(int("bfa80", 16) + rom_offset)
         patch.write(b"\xD3\xD2\x00\xD5\x00" + qt_encode("Contributors and Testers:") + b"\xCB")
-        patch.write(qt_encode("-Alchemic   -Austin21300") + b"\xCB")
-        patch.write(qt_encode("-Atlas      -BOWIEtheHERO") + b"\xCB")
-        patch.write(qt_encode("-Bonzaibier -BubbaSWalter") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Alchemic  -Austin21300") + b"\xCB")
+        patch.write(qt_encode("-Atlas     -BonzaiBier") + b"\xCB")
+        patch.write(qt_encode("-Crazyhaze -BOWIEtheHERO") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Crazyhaze  -DerTolleIgel") + b"\xCB")
-        patch.write(qt_encode("-DoodSF     -djtifaheart") + b"\xCB")
-        patch.write(qt_encode("-Eppy37     -Keypaladin") + b"\xCB")
-        patch.write(qt_encode("-Lassic") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-DoodSF    -BubbaSWalter") + b"\xCB")
+        patch.write(qt_encode("-Eppy37    -DerTolleIgel") + b"\xCB")
+        patch.write(qt_encode("-Lassic    -djtifaheart") + b"\xCB")
+        patch.write(qt_encode("-Le Hulk   -GliitchWiitch") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Le Hulk    -Plan") + b"\xCB")
-        patch.write(qt_encode("-manafreak  -Pozzum Senpai") + b"\xCB")
-        patch.write(qt_encode("-Mikan      -roeya") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Mikan     -Keypaladin") + b"\xCB")
+        patch.write(qt_encode("-Mr Freet  -Neomatamune") + b"\xCB")
+        patch.write(qt_encode("-NYRambler -Pozzum Senpai") + b"\xCB")
+        patch.write(qt_encode("-Plan") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Scheris    -SmashManiac") + b"\xCB")
-        patch.write(qt_encode("-SDiezal    -solarcell007") + b"\xCB")
-        patch.write(qt_encode("-Skarsnik   -steve hacks") + b"\xCB")
-        patch.write(qt_encode("-Skipsy") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-roeya     -Skipsy") + b"\xCB")
+        patch.write(qt_encode("-Scheris   -SmashManiac") + b"\xCB")
+        patch.write(qt_encode("-SDiezal   -solarcell007") + b"\xCB")
+        patch.write(qt_encode("-Skarsnik  -steve hacks") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Sye990     -Verallix") + b"\xCB")
-        patch.write(qt_encode("-Tsurana    -Volor") + b"\xCB")
-        patch.write(qt_encode("-Tymekeeper -Veetorp") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Sye990    -Tymekeeper") + b"\xCB")
+        patch.write(qt_encode("-Tsurana   -Veetorp") + b"\xCB")
+        patch.write(qt_encode("-Volor     -Verallix") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Voranthe   -Xyrcord") + b"\xCB")
-        patch.write(qt_encode("-Wilddin    -Z4t0x") + b"\xCB")
-        patch.write(qt_encode("-wormsofcan -ZockerStu") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Voranthe  -wormsofcan") + b"\xCB")
+        patch.write(qt_encode("-Wilddin   -Xyrcord") + b"\xCB")
+        patch.write(qt_encode("-xIceblue  -ZockerStu") + b"\xCB")
+        patch.write(qt_encode("-Z4t0x") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
         patch.write(b"\xCB" + qt_encode("     This was so fun!"))
@@ -1757,8 +1780,8 @@ class Randomizer:
 
         # Change boss room ranges
         patch.seek(int("c31a", 16) + rom_offset)
-        patch.write(b"\x67\x5A\x73\x00\x8A\x82\xA8\x00\xDD\xCC\xDD\x00\xEA\xB0\xBF\x00")
-        # patch.write(b"\xF6\xB0\xBF\x00")   # If Solid Arm ever grants Babel rewards
+        patch.write(b"\x67\x5A\x73\x00\x8A\x82\xA8\x00\xDD\xCC\xDD\x00\xF6\xB0\xBF\x00")
+        # patch.write(b"\xEA\xB0\xBF\x00")   # If Solid Arm ever grants Babel rewards
 
         # Add boss reward events to Babel and Jeweler Mansion
         # patch.seek(int("ce3cb",16)+rom_offset)  # Solid Arm
@@ -1878,6 +1901,25 @@ class Randomizer:
             elif x == 6:
                 patch.write(b"\xca\xcb")
 
+        # Update RAM switches with correct order (for autotracker)
+        h_addrs = ["bfd01","bfd02","bfd07","bfd08","bfd0d","bfd0e"]
+        i = 0
+        while i < 6:
+            patch.seek(int(h_addrs[i], 16) + rom_offset)
+            if hieroglyph_order[i] == 1:
+                patch.write(b"\x01")
+            if hieroglyph_order[i] == 2:
+                patch.write(b"\x02")
+            if hieroglyph_order[i] == 3:
+                patch.write(b"\x03")
+            if hieroglyph_order[i] == 4:
+                patch.write(b"\x04")
+            if hieroglyph_order[i] == 5:
+                patch.write(b"\x05")
+            if hieroglyph_order[i] == 6:
+                patch.write(b"\x06")
+            i += 1
+
         # Update sprite pointers for hieroglyph items, Item 1e is @10803c
         patch.seek(int("10803c", 16) + rom_offset)
         for x in hieroglyph_order:
@@ -1927,6 +1969,29 @@ class Randomizer:
                 patch.write(b"\x8d")
             elif x == 6:
                 patch.write(b"\x8e")
+
+        ##########################################################################
+        #                          Randomize Snake Game
+        ##########################################################################
+        # Randomize snake game duration/goal
+        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By difficulty (mode)
+        snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
+        snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
+        snake_target = int(snake_timer * snakes_per_sec[mode] * snake_adj)
+
+        snake_frames_str = format((60 * snake_timer) % 256, "02x") + format(int((60 * snake_timer) / 256), "02x")
+        snake_target_str = format(int(snake_target / 10), "x") + format(snake_target % 10, "x")
+
+        # Update snake game logic with new values
+        patch.seek(int("8afe6", 16) + rom_offset)   # Timer, in frames (vanilla b"\x10\x0e")
+        patch.write(binascii.unhexlify(snake_frames_str))
+        patch.seek(int("8aff7", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
+        patch.write(binascii.unhexlify(snake_target_str))
+
+        # Update text to reflect changes
+        patch.seek(int("8af2e", 16) + rom_offset)
+        patch.write(qt_encode("Hit " + str(snake_target) + " snakes in " + str(snake_timer) + " seconds."))
+        patch.write(b"\xcb\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac")
 
         ##########################################################################
         #                    Randomize Jeweler Reward amounts
@@ -1982,6 +2047,14 @@ class Randomizer:
         patch.seek(int("8cf40", 16) + rom_offset)
         patch.write(binascii.unhexlify(gem_str[6]))
 
+        # Update RAM switches with correct BCD jewel reward amounts (for autotracker)
+        gem_addrs = ["bfd32","bfd37","bfd38","bfd3d","bfd3e","bfd43","bfd44"]
+        i = 0
+        while i < 7:
+            patch.seek(int(gem_addrs[i], 16) + rom_offset)
+            patch.write(binascii.unhexlify(gem_str[i]))
+            i += 1
+
         # Write new values into inventory table (Quintet text table format)
         # NOTE: Hard-coded for 1st, 2nd and 3rd rewards each < 10
         gem_str[0] = format(2, "x") + format(gem[0] % 10, "x")
@@ -2035,6 +2108,10 @@ class Randomizer:
                 patch.seek(int("8dd19", 16) + rom_offset)
                 patch.write(b"\xf8")
 
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd1a", 16) + rom_offset)
+                patch.write(b"\xf8\x02")
+
             if statueOrder[i] == 2:
                 statues.append(2)
                 statues_hex.append(b"\x22")
@@ -2043,6 +2120,10 @@ class Randomizer:
                 patch.seek(int("8dd1f", 16) + rom_offset)
                 patch.write(b"\xf9")
 
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd1e", 16) + rom_offset)
+                patch.write(b"\xf9\x02")
+
             if statueOrder[i] == 3:
                 statues.append(3)
                 statues_hex.append(b"\x23")
@@ -2050,6 +2131,10 @@ class Randomizer:
                 # Check for Mystic Statue possession at end game state
                 patch.seek(int("8dd25", 16) + rom_offset)
                 patch.write(b"\xfa")
+
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd22", 16) + rom_offset)
+                patch.write(b"\xfa\x02")
 
                 # Restrict removal of Rama Statues from inventory
                 patch.seek(int("1e12c", 16) + rom_offset)
@@ -2063,6 +2148,10 @@ class Randomizer:
                 patch.seek(int("8dd2b", 16) + rom_offset)
                 patch.write(b"\xfb")
 
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd26", 16) + rom_offset)
+                patch.write(b"\xfb\x02")
+
             if statueOrder[i] == 5:
                 statues.append(5)
                 statues_hex.append(b"\x25")
@@ -2070,6 +2159,10 @@ class Randomizer:
                 # Check for Mystic Statue possession at end game state
                 patch.seek(int("8dd31", 16) + rom_offset)
                 patch.write(b"\xfc")
+
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd2a", 16) + rom_offset)
+                patch.write(b"\xfc\x02")
 
                 # Restrict removal of Hieroglyphs from inventory
                 patch.seek(int("1e12d", 16) + rom_offset)
@@ -2082,6 +2175,10 @@ class Randomizer:
                 # Check for Mystic Statue possession at end game state
                 patch.seek(int("8dd37", 16) + rom_offset)
                 patch.write(b"\xfd")
+
+                # Put statue requirements into RAM (for autotracker)
+                patch.seek(int("bfd2e", 16) + rom_offset)
+                patch.write(b"\xfd\x02")
 
             i += 1
 
@@ -2125,6 +2222,134 @@ class Randomizer:
         patch.write(statue_str)
 
         ##########################################################################
+        #                           Determine Boss Order
+        ##########################################################################
+        boss_order = [1,2,3,4,5,6,7]
+        if settings.boss_shuffle:
+            # Determine statue order for shuffle
+            if mode == 3:
+                random.shuffle(boss_order)
+            else:
+                boss_order.remove(5)
+                boss_order.remove(7)
+                random.shuffle(boss_order)
+                non_will_dungeons = [0,1,2,4]
+                random.shuffle(non_will_dungeons)
+                boss_order.insert(non_will_dungeons[0],5)
+                boss_order += [7]
+
+            # Define music map headers
+            dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
+            dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
+            dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
+            dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
+            dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
+            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Babel
+            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
+
+            # Find all music header locations in map data file
+            music_header_addrs = [[],[],[],[],[]]
+            i = 0
+            while i < 5:
+                done = False
+                addr = 0
+                while not done:
+                    f_mapdata.seek(0)
+                    addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
+                    if addr < 0:
+                        done = True
+                    else:
+                        music_header_addrs[i].append(addr)
+                i += 1
+
+            # Patch music headers into new dungeons (easy and normal modes)
+            if mode <= 1:
+                i = 0
+                while i < 5:
+                    boss = boss_order[i]
+                    while music_header_addrs[i]:
+                        addr = music_header_addrs[i].pop(0)
+                        f_mapdata.seek(addr)
+                        f_mapdata.write(dungeon_music[boss-1])
+                    i += 1
+
+                # Special case for Mansion
+                f_mapdata.seek(0)
+                addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
+                if addr < 27:
+                    print("ERROR: Couldn't find Mansion map header")
+                else:
+                    f_mapdata.seek(addr)
+                    f_mapdata.write(dungeon_music[boss_order[6]-1])
+
+        # Change conditions for ship captain @ Inca
+        inca_boss = boss_order[0]
+        patch.seek(int("584ab", 16) + rom_offset)
+        if inca_boss == 2:
+            patch.write(b"\xf9\x00")
+        elif inca_boss == 3:
+            patch.write(b"\xfa\x00")
+        elif inca_boss == 4:
+            patch.write(b"\xfb\x00")
+        elif inca_boss == 5:
+            patch.write(b"\xfc\x00")
+        elif inca_boss == 6:
+            patch.write(b"\x70\x01")
+        elif inca_boss == 7:
+            patch.write(b"\xf6\x00")
+
+        # Change conditions and text for Pyramid boss portal
+        pyramid_boss = boss_order[4]
+        patch.seek(int("8cd71", 16) + rom_offset)
+        if pyramid_boss == 5:
+            patch.write(b"\xfc")
+        elif pyramid_boss == 7:
+            patch.write(b"\xf6")
+        else:
+            patch.write(b"\x10\x00")
+
+        # Change "Return to Dao" Babel spirit text
+        babel_boss = boss_order.index(6)
+        patch.seek(int("980a6", 16) + rom_offset)
+        if babel_boss == 0:
+            patch.write(b"\x42\x8e\x80\xa3\xa4\xca")                      # "Coast"
+        elif babel_boss == 1:
+            patch.write(b"\x63\x84\x80\xac\x60\x80\x8b\x80\x82\x84\xca")  # "Seaside Palace"
+        elif babel_boss == 2:
+            patch.write(b"\x4c\xa5\xca")                                  # "Mu"
+        elif babel_boss == 3:
+            patch.write(b"\xd6\x16\x67\x80\x8b\x8b\xca")                  # "Great Wall"
+        elif babel_boss == 4:
+            patch.write(b"\xd6\x3f\xca")                                  # "Pyramid"
+
+        patch.seek(int("8cddb", 16) + rom_offset)
+        patch.write(b"\x47\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\xa2\x84\x0e\xa3\xac\xcb")
+        if pyramid_boss == 1:
+            patch.write(b"\x42\x80\xa3\xa4\x8e\xa4\x87\x4f\xac\xac\xac\xac\xac\xac\xac\xac")
+        elif pyramid_boss == 2:
+            patch.write(b"\x66\x88\xa0\x84\xa2\x4f\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac")
+        elif pyramid_boss == 3:
+            patch.write(b"\x66\x80\x8c\xa0\x88\xa2\x84\xa3\x4f\xac\xac\xac\xac\xac\xac\xac")
+        elif pyramid_boss == 4:
+            patch.write(b"\x63\x80\x8d\x83\xac\x45\x80\x8d\x86\x84\xa2\x4f\xac\xac\xac\xac")
+        elif pyramid_boss == 5:
+            patch.write(b"\x4c\xa5\x8c\x8c\xa9\xac\x61\xa5\x84\x84\x8d\x4f\xac\xac\xac\xac")
+        elif pyramid_boss == 6:
+            patch.write(b"\x4c\xa5\x8c\x8c\xa9\xac\x61\xa5\x84\x84\x8d\xac\x22\x2a\x20\x4f")
+        elif pyramid_boss == 7:
+            patch.write(b"\x63\x8e\x8b\x88\x83\xac\x40\xa2\x8c\x4f\xac\xac\xac\xac\xac\xac")
+
+        # Update item removal restrictions based on required dungeons
+        if boss_order[2] in statues:
+            # Restrict removal of Rama Statues from inventory
+            patch.seek(int("1e12c", 16) + rom_offset)
+            patch.write(b"\x9f")
+        if boss_order[4] in statues:
+            # Restrict removal of Hieroglyphs from inventory
+            patch.seek(int("1e12d", 16) + rom_offset)
+            patch.write(b"\xf7\xff")
+
+        ##########################################################################
         #                   Randomize Location of Kara Portrait
         #       Sets spoiler in Lance's Letter and places portrait sprite
         ##########################################################################
@@ -2161,6 +2386,10 @@ class Randomizer:
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x60\xa2\x88\xa3\x8e\x8d")
 
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x01")
+
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
                 patch.write(b"\x13\x00\xD0\x08\x02\x45\x0b\x0b\x0d\x0d")
@@ -2177,6 +2406,10 @@ class Randomizer:
                 # Set spoiler for Kara's location in Lance's Letter
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x43\x88\x80\x8c\x8e\x8d\x83\xac\x4c\x88\x8d\x84")
+
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x02")
 
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
@@ -2221,6 +2454,10 @@ class Randomizer:
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3")
 
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x04")
+
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
                 patch.write(b"\xa9\x00\xD0\x08\x02\x45\x12\x06\x14\x08")
@@ -2241,6 +2478,10 @@ class Randomizer:
                 # Set spoiler for Kara's location in Lance's Letter
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4")
+
+                # Set Kara's location in RAM switches (for autotracker)
+                patch.seek(int("bfd13", 16) + rom_offset)
+                patch.write(b"\x05")
 
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
@@ -2447,12 +2688,12 @@ class Randomizer:
         ##########################################################################
         done = False
         seed_adj = 0
-        self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order)
+        self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
             if seed_adj > 10:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
-            self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order)
+            self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj)
             seed_adj += 1
 
@@ -2502,7 +2743,8 @@ class Randomizer:
 
         room_offsets = ["6d95e", "6d98a", "6d9b4", "6d9de"]  # ROM addrs for cursor capture, by room
         coord_offsets = [3, 8, 15, 20]  # Offsets for xmin, xmax, ymin, ymax
-        changes = [random.randint(1, 8), random.randint(1, 7), random.randint(1, 5), random.randint(1, 7)]
+        changes = [random.randint(1, 11), random.randint(1, 9), random.randint(1, 5), random.randint(1, 7)]
+        #changes = [10,3,1,1]  #testing#########
 
         # Set change for Room 1
         if changes[0] == 1:  # Change right vase to light (vanilla)
@@ -2546,7 +2788,28 @@ class Randomizer:
             f_ishtarmap.write(b"\x74")
             coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
 
-        elif changes[0] == 8:  # Will's hair
+        elif changes[0] == 8:  # Remove left sconce
+            f_ishtarmap.seek(int("157", 16))
+            f_ishtarmap.write(b"\x12\x12")
+            f_ishtarmap.seek(int("167", 16))
+            f_ishtarmap.write(b"\x1a\x1a")
+            coords = [b"\x70\x01", b"\x90\x01", b"\x50\x00", b"\x70\x00"]
+
+        elif changes[0] == 9:  # Remove right sconce
+            f_ishtarmap.seek(int("15a", 16))
+            f_ishtarmap.write(b"\x12\x12")
+            f_ishtarmap.seek(int("16a", 16))
+            f_ishtarmap.write(b"\x1a\x1a")
+            coords = [b"\xa0\x01", b"\xc0\x01", b"\x50\x00", b"\x70\x00"]
+
+        elif changes[0] == 10:  # Shift right vase
+            f_ishtarmap.seek(int("17a", 16))
+            f_ishtarmap.write(b"\x83\x22")
+            f_ishtarmap.seek(int("18a", 16))
+            f_ishtarmap.write(b"\x87\x13")
+            coords = [b"\xa0\x01", b"\xb0\x01", b"\x70\x00", b"\x90\x00"]
+
+        elif changes[0] == 11:  # Will's hair
             patch.seek(int("6dd06", 16) + rom_offset)
             patch.write(b"\x5d")
             coords = [b"\xa0\x01", b"\xc0\x01", b"\xb0\x00", b"\xd0\x00"]
@@ -2557,19 +2820,33 @@ class Randomizer:
             patch.write(coords[i])
 
         # Set change for Room 2
-        if changes[1] == 1:  # Change both pots to dark (vanilla)
+        if changes[1] == 1:  # Change both vases to light (vanilla)
             f_ishtarmap.seek(int("3a3", 16))
             f_ishtarmap.write(b"\x7c\x7c")
             f_ishtarmap.seek(int("3b3", 16))
             f_ishtarmap.write(b"\x84\x84")
             coords = [b"\x30\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        elif changes[1] == 2:  # Remove rock
+        if changes[1] == 2:  # Change left vase to light
+            f_ishtarmap.seek(int("3a3", 16))
+            f_ishtarmap.write(b"\x7c")
+            f_ishtarmap.seek(int("3b3", 16))
+            f_ishtarmap.write(b"\x84")
+            coords = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
+
+        if changes[1] == 3:  # Change right vase to light
+            f_ishtarmap.seek(int("3a4", 16))
+            f_ishtarmap.write(b"\x7c")
+            f_ishtarmap.seek(int("3b4", 16))
+            f_ishtarmap.write(b"\x84")
+            coords = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
+
+        elif changes[1] == 4:  # Remove rock
             f_ishtarmap.seek(int("3bd", 16))
             f_ishtarmap.write(b"\x73")
             coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
 
-        elif changes[1] == 3:  # Add round table
+        elif changes[1] == 5:  # Add round table
             f_ishtarmap.seek(int("395", 16))
             f_ishtarmap.write(b"\x7d\x7e")
             f_ishtarmap.seek(int("3a5", 16))
@@ -2578,24 +2855,24 @@ class Randomizer:
             f_ishtarmap.write(b"\x8d\x8e")
             coords = [b"\x50\x03", b"\x70\x03", b"\x90\x00", b"\xb0\x00"]
 
-        elif changes[1] == 4:  # Add sconce
+        elif changes[1] == 6:  # Add sconce
             f_ishtarmap.seek(int("357", 16))
             f_ishtarmap.write(b"\x88\x89")
             f_ishtarmap.seek(int("367", 16))
             f_ishtarmap.write(b"\x90\x91")
             coords = [b"\x70\x03", b"\x90\x03", b"\x50\x00", b"\x70\x00"]
 
-        elif changes[1] == 5:  # Add rock
+        elif changes[1] == 7:  # Add rock
             f_ishtarmap.seek(int("3b2", 16))
             f_ishtarmap.write(b"\x77")
             coords = [b"\x20\x03", b"\x30\x03", b"\xb0\x00", b"\xc0\x00"]
 
-        elif changes[1] == 6:  # Will's hair
+        elif changes[1] == 8:  # Will's hair
             patch.seek(int("6dd0e", 16) + rom_offset)
             patch.write(b"\x5d")
             coords = [b"\x90\x03", b"\xb0\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        elif changes[1] == 7:  # Put moss on rock
+        elif changes[1] == 9:  # Put moss on rock
             f_ishtarmap.seek(int("3bd", 16))
             f_ishtarmap.write(b"\x8f")
             coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
