@@ -71,7 +71,7 @@ Note: Non-enemy sprites in dungeons have been largely removed in every enemizer 
 - Balanced: Enemies can appear in any dungeon, but they will retain the stats of the enemies they replace, making each dungeon's difficulty relatively balanced to vanilla levels.
 - Full: Enemies can appear in any dungeon and retain their vanilla stats.
 - Insane: Enemeies can appear in any dungeon. Furthermore, enemy stats have been shuffled, so early enemies can have the stats of later enemies, and vice versa.
-- Boss Shuffle (coming soon!): In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. Each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. 
+- Boss Shuffle: In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. For Easy and Normal difficulties, each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. Solid Arm will only be included in the shuffle for Extreme difficulty.
 
 #### Entrance Randomizer (coming soon!)
 This feature will be implemented in a future version.
