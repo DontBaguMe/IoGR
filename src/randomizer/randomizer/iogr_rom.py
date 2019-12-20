@@ -958,12 +958,12 @@ class Randomizer:
 
         # Instant form change & warp to Seaside Palace if Viper is defeated
         patch.seek(int("ace9b", 16) + rom_offset)
-        patch.write(b"\x4c\x90\xfd")
+        patch.write(b"\x4c\x82\xff")
         patch.seek(int("acecb", 16) + rom_offset)
         patch.write(b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
 
-        f_viperchange = open(BIN_PATH + "0afd90_viperchange.bin", "rb")
-        patch.seek(int("afd90", 16) + rom_offset)
+        f_viperchange = open(BIN_PATH + "0aff82_viperchange.bin", "rb")
+        patch.seek(int("aff82", 16) + rom_offset)
         patch.write(f_viperchange.read())
         f_viperchange.close
 
@@ -2979,6 +2979,19 @@ class Randomizer:
         # Direct map arrangement pointer to new data - NO LONGER NECESSARY
         # patch.seek(int("d977e",16)+rom_offset)
         # patch.write(b"\x00\x41")
+
+        ##########################################################################
+        #                                   Plugins
+        ##########################################################################
+        if settings.plugins_AG:
+            patch.seek(int("98de4",16)+rom_offset)
+            patch.write(b"\x80") # Respawn in space
+            for pluginfilename in os.listdir(BIN_PATH + "plugins/AG"):
+                if pluginfilename[-4:] == ".bin":
+                    f_plugin = open(BIN_PATH + "plugins/AG/" + pluginfilename, "rb")
+                    patch.seek(int(pluginfilename[:6],16)+rom_offset)
+                    patch.write(f_plugin.read())
+                    f_plugin.close
 
         ##########################################################################
         #                Finalize map headers and return patch data
