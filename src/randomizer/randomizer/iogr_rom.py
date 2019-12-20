@@ -958,12 +958,12 @@ class Randomizer:
 
         # Instant form change & warp to Seaside Palace if Viper is defeated
         patch.seek(int("ace9b", 16) + rom_offset)
-        patch.write(b"\x4c\x90\xfd")
+        patch.write(b"\x4c\x82\xff")
         patch.seek(int("acecb", 16) + rom_offset)
         patch.write(b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
 
-        f_viperchange = open(BIN_PATH + "0afd90_viperchange.bin", "rb")
-        patch.seek(int("afd90", 16) + rom_offset)
+        f_viperchange = open(BIN_PATH + "0aff82_viperchange.bin", "rb")
+        patch.seek(int("aff82", 16) + rom_offset)
         patch.write(f_viperchange.read())
         f_viperchange.close
 
@@ -2788,28 +2788,7 @@ class Randomizer:
             f_ishtarmap.write(b"\x74")
             coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
 
-        elif changes[0] == 8:  # Remove left sconce
-            f_ishtarmap.seek(int("157", 16))
-            f_ishtarmap.write(b"\x12\x12")
-            f_ishtarmap.seek(int("167", 16))
-            f_ishtarmap.write(b"\x1a\x1a")
-            coords = [b"\x70\x01", b"\x90\x01", b"\x50\x00", b"\x70\x00"]
-
-        elif changes[0] == 9:  # Remove right sconce
-            f_ishtarmap.seek(int("15a", 16))
-            f_ishtarmap.write(b"\x12\x12")
-            f_ishtarmap.seek(int("16a", 16))
-            f_ishtarmap.write(b"\x1a\x1a")
-            coords = [b"\xa0\x01", b"\xc0\x01", b"\x50\x00", b"\x70\x00"]
-
-        elif changes[0] == 10:  # Shift right vase
-            f_ishtarmap.seek(int("17a", 16))
-            f_ishtarmap.write(b"\x83\x22")
-            f_ishtarmap.seek(int("18a", 16))
-            f_ishtarmap.write(b"\x87\x13")
-            coords = [b"\xa0\x01", b"\xb0\x01", b"\x70\x00", b"\x90\x00"]
-
-        elif changes[0] == 11:  # Will's hair
+        elif changes[0] == 8:  # Will's hair
             patch.seek(int("6dd06", 16) + rom_offset)
             patch.write(b"\x5d")
             coords = [b"\xa0\x01", b"\xc0\x01", b"\xb0\x00", b"\xd0\x00"]
@@ -2820,33 +2799,19 @@ class Randomizer:
             patch.write(coords[i])
 
         # Set change for Room 2
-        if changes[1] == 1:  # Change both vases to light (vanilla)
+        if changes[1] == 1:  # Change both pots to dark (vanilla)
             f_ishtarmap.seek(int("3a3", 16))
             f_ishtarmap.write(b"\x7c\x7c")
             f_ishtarmap.seek(int("3b3", 16))
             f_ishtarmap.write(b"\x84\x84")
             coords = [b"\x30\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        if changes[1] == 2:  # Change left vase to light
-            f_ishtarmap.seek(int("3a3", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("3b3", 16))
-            f_ishtarmap.write(b"\x84")
-            coords = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
-
-        if changes[1] == 3:  # Change right vase to light
-            f_ishtarmap.seek(int("3a4", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("3b4", 16))
-            f_ishtarmap.write(b"\x84")
-            coords = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
-
-        elif changes[1] == 4:  # Remove rock
+        elif changes[1] == 2:  # Remove rock
             f_ishtarmap.seek(int("3bd", 16))
             f_ishtarmap.write(b"\x73")
             coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
 
-        elif changes[1] == 5:  # Add round table
+        elif changes[1] == 3:  # Add round table
             f_ishtarmap.seek(int("395", 16))
             f_ishtarmap.write(b"\x7d\x7e")
             f_ishtarmap.seek(int("3a5", 16))
@@ -2855,24 +2820,24 @@ class Randomizer:
             f_ishtarmap.write(b"\x8d\x8e")
             coords = [b"\x50\x03", b"\x70\x03", b"\x90\x00", b"\xb0\x00"]
 
-        elif changes[1] == 6:  # Add sconce
+        elif changes[1] == 4:  # Add sconce
             f_ishtarmap.seek(int("357", 16))
             f_ishtarmap.write(b"\x88\x89")
             f_ishtarmap.seek(int("367", 16))
             f_ishtarmap.write(b"\x90\x91")
             coords = [b"\x70\x03", b"\x90\x03", b"\x50\x00", b"\x70\x00"]
 
-        elif changes[1] == 7:  # Add rock
+        elif changes[1] == 5:  # Add rock
             f_ishtarmap.seek(int("3b2", 16))
             f_ishtarmap.write(b"\x77")
             coords = [b"\x20\x03", b"\x30\x03", b"\xb0\x00", b"\xc0\x00"]
 
-        elif changes[1] == 8:  # Will's hair
+        elif changes[1] == 6:  # Will's hair
             patch.seek(int("6dd0e", 16) + rom_offset)
             patch.write(b"\x5d")
             coords = [b"\x90\x03", b"\xb0\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        elif changes[1] == 9:  # Put moss on rock
+        elif changes[1] == 7:  # Put moss on rock
             f_ishtarmap.seek(int("3bd", 16))
             f_ishtarmap.write(b"\x8f")
             coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
@@ -2979,6 +2944,19 @@ class Randomizer:
         # Direct map arrangement pointer to new data - NO LONGER NECESSARY
         # patch.seek(int("d977e",16)+rom_offset)
         # patch.write(b"\x00\x41")
+
+        ##########################################################################
+        #                                   Plugins
+        ##########################################################################
+        if settings.plugins_AG:
+            patch.seek(int("98de4",16)+rom_offset)
+            patch.write(b"\x80") # Respawn in space
+            for pluginfilename in os.listdir(BIN_PATH + "plugins/AG"):
+                if pluginfilename[-4:] == ".bin":
+                    f_plugin = open(BIN_PATH + "plugins/AG/" + pluginfilename, "rb")
+                    patch.seek(int(pluginfilename[:6],16)+rom_offset)
+                    patch.write(f_plugin.read())
+                    f_plugin.close
 
         ##########################################################################
         #                Finalize map headers and return patch data
