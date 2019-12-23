@@ -266,7 +266,7 @@ enemizer.set("None")
 
 statues = tkinter.StringVar(root)
 statue_choices = ["0", "1", "2", "3", "4", "5", "6", "Random"]
-statues.set("Random")
+statues.set("4")
 
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)

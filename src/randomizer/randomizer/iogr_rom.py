@@ -2994,16 +2994,10 @@ class Randomizer:
         if settings.goal.value is Goal.APO_GAIA.value or (settings.goal.value is Goal.RANDOM_GAIA.value and gaia_coinflip):
             patch.seek(int("98de4",16)+rom_offset)
             patch.write(b"\x80") # Respawn in space
-            print(BIN_PATH)
-            print(AG_PLUGIN_PATH)
             for pluginfilename in os.listdir(AG_PLUGIN_PATH):
-                print("hey 2")
                 if pluginfilename[-4:] == ".bin":
-                    print("hey 3")
                     f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
-                    print("hey 4")
                     patch.seek(int(pluginfilename[:6],16)+rom_offset)
-                    print("hey 5")
                     patch.write(f_plugin.read())
                     f_plugin.close
 
