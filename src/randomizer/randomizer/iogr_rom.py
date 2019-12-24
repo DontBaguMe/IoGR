@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.6.1"
+VERSION = "2.7.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -31,6 +31,7 @@ FORCE_CHANGE = b"\x22\x30\xfd\x88"
 
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
+AG_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "AG" + os.path.sep
 
 
 def __get_data_file__(data_filename: str) -> BinaryIO:
@@ -52,6 +53,10 @@ def generate_filename(settings: RandomizerData, extension: str):
     def getGoal(goal, statues):
         if goal.value is Goal.DARK_GAIA.value:
             return "_DG" + statues[0]
+        if goal.value is Goal.APO_GAIA.value:
+            return "_AG" + statues[0]
+        if goal.value is Goal.RANDOM_GAIA.value:
+            return "_RG" + statues[0]
         if goal.value is Goal.RED_JEWEL_HUNT.value:
             return "_RJ"
 
@@ -360,7 +365,12 @@ class Randomizer:
         patch.write(b"\xce" + qt_encode("He closed the journal.") + b"\xc0")
 
         patch.seek(int("3f210", 16) + rom_offset)
-        if settings.goal.value == Goal.DARK_GAIA.value:
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+            patch.write(b"\xce" + qt_encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
+            patch.write(qt_encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
+            patch.write(qt_encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
+            patch.write(qt_encode("Happy hunting!") + b"\xc0")
+        else:
             patch.write(b"\xce" + qt_encode("BEATING THE GAME:       You must do three things to beat the game:|"))
             patch.write(qt_encode("1. RESCUE KARA         Kara is trapped in a painting! You need Magic Dust to free her.|"))
             patch.write(qt_encode("She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|"))
@@ -377,12 +387,8 @@ class Randomizer:
             patch.write(qt_encode("STATUE 6: BABEL TOWER   You need the Aura and the Crystal Ring to get in.|"))
             patch.write(qt_encode("Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|"))
             patch.write(qt_encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
-            patch.write(qt_encode("She will give you the option to face Dark Gaia and beat the game. Good luck, and have fun!") + b"\xc0")
-        elif settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-            patch.write(b"\xce" + qt_encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
-            patch.write(qt_encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
-            patch.write(qt_encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
-            patch.write(qt_encode("Happy hunting!") + b"\xc0")
+            patch.write(qt_encode("She will give you the option to face the final boss and beat the game. Good luck, and have fun!") + b"\xc0")
+
 
         patch.seek(int("3f800", 16) + rom_offset)
         patch.write(b"\xce" + qt_encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
@@ -958,12 +964,12 @@ class Randomizer:
 
         # Instant form change & warp to Seaside Palace if Viper is defeated
         patch.seek(int("ace9b", 16) + rom_offset)
-        patch.write(b"\x4c\x90\xfd")
+        patch.write(b"\x4c\x82\xff")
         patch.seek(int("acecb", 16) + rom_offset)
         patch.write(b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
 
-        f_viperchange = open(BIN_PATH + "0afd90_viperchange.bin", "rb")
-        patch.seek(int("afd90", 16) + rom_offset)
+        f_viperchange = open(BIN_PATH + "0aff82_viperchange.bin", "rb")
+        patch.seek(int("aff82", 16) + rom_offset)
         patch.write(f_viperchange.read())
         f_viperchange.close
 
@@ -2183,7 +2189,7 @@ class Randomizer:
             i += 1
 
         # Can't face Dark Gaia in Red Jewel hunts
-        if settings.goal.value != Goal.DARK_GAIA.value:
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
             patch.seek(int("8dd0d", 16) + rom_offset)
             patch.write(b"\x10\x01")
 
@@ -2979,6 +2985,21 @@ class Randomizer:
         # Direct map arrangement pointer to new data - NO LONGER NECESSARY
         # patch.seek(int("d977e",16)+rom_offset)
         # patch.write(b"\x00\x41")
+
+        ##########################################################################
+        #                                   Plugins
+        ##########################################################################
+        # Apocalypse Gaia
+        gaia_coinflip = random.randint(0, 1)
+        if settings.goal.value is Goal.APO_GAIA.value or (settings.goal.value is Goal.RANDOM_GAIA.value and gaia_coinflip):
+            patch.seek(int("98de4",16)+rom_offset)
+            patch.write(b"\x80") # Respawn in space
+            for pluginfilename in os.listdir(AG_PLUGIN_PATH):
+                if pluginfilename[-4:] == ".bin":
+                    f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
+                    patch.seek(int(pluginfilename[:6],16)+rom_offset)
+                    patch.write(f_plugin.read())
+                    f_plugin.close
 
         ##########################################################################
         #                Finalize map headers and return patch data
