@@ -460,7 +460,7 @@ class World:
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
-        return self.random_fill([54, 55, 56, 57, 58, 59], locations)
+        return self.random_fill([70, 71, 72, 73, 74, 75], locations)
 
     def lock_dark_spaces(self, item_locations=[]):
         for set in self.dark_space_sets:
@@ -1492,10 +1492,11 @@ class World:
         self.map_patches = []
 
         # Initialize item pool, considers special attacks as "items"
-        # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue),
+        # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue, 4=event switch),
         #                  ROM Code, Name, TakesInventorySpace,
         #                  ProgressionType (1=unlocks new locations,2=quest item,3=no progression)] }
         self.item_pool = {
+            # Items
             0: [2, 1, b"\x00", "Nothing", False, 3],
             1: [45, 1, b"\x01", "Red Jewel", False, 1],
             2: [1, 1, b"\x02", "Prison Key", True, 1],
@@ -1544,21 +1545,53 @@ class World:
             45: [2, 1, b"\x8b", "Dark Friar Upgrade", False, 3],
             46: [1, 1, b"\x2e", "2 Red Jewels", False, 3],
             47: [1, 1, b"\x2f", "3 Red Jewels", False, 3],
+
+            # Abilities
             48: [1, 2, "", "Psycho Dash", False, 1],
             49: [1, 2, "", "Psycho Slider", False, 1],
             50: [1, 2, "", "Spin Dash", False, 1],
             51: [1, 2, "", "Dark Friar", False, 1],
             52: [1, 2, "", "Aura Barrier", False, 1],
             53: [1, 2, "", "Earthquaker", False, 1],
-            54: [1, 3, "", "Mystic Statue 1", False, 2],
-            55: [1, 3, "", "Mystic Statue 2", False, 2],
-            56: [1, 3, "", "Mystic Statue 3", False, 2],
-            57: [1, 3, "", "Mystic Statue 4", False, 2],
-            58: [1, 3, "", "Mystic Statue 5", False, 2],
-            59: [1, 3, "", "Mystic Statue 6", False, 2],
+            54: [0, 2, "", "Firebird", False, 1],
             60: [0, 2, "", "Nothing", False, 3],
-            61: [0, 1, b"\x8c", "Heart Piece", False, 3],
-            62: [0, 2, "", "Lilly", False, 1]
+
+            # Mystic Statues
+            70: [1, 3, "", "Mystic Statue 1", False, 2],
+            71: [1, 3, "", "Mystic Statue 2", False, 2],
+            72: [1, 3, "", "Mystic Statue 3", False, 2],
+            73: [1, 3, "", "Mystic Statue 4", False, 2],
+            74: [1, 3, "", "Mystic Statue 5", False, 2],
+            75: [1, 3, "", "Mystic Statue 6", False, 2],
+
+            # Event Switches
+            200: [0, 4, "", "Kara Released", False, 1]
+            201: [0, 4, "", "Itory: Got Lilly", False, 1]
+            202: [0, 4, "", "Moon Tribe: Healed Spirits", False, 1]
+            203: [0, 4, "", "Inca: Beat Castoth", False, 1]
+            204: [0, 4, "", "Freejia: Found Laborer", False, 1]
+            205: [0, 4, "", "Neil's: Memory Restored", False, 1]
+            206: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1]
+            207: [0, 4, "", "Sky Garden: Map 82 NE Switch", False, 1]
+            208: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1]
+            209: [0, 4, "", "Sky Garden: Map 84 Switch", False, 1]
+            210: [0, 4, "", "Seaside: Fountain Purified", False, 1]
+            211: [0, 4, "", "Mu: Water Lowered 1", False, 1]
+            212: [0, 4, "", "Mu: Water Lowered 2", False, 1]
+            213: [0, 4, "", "Angel: Puzzle Complete", False, 1]
+            214: [0, 4, "", "Mt Kress: Drops Used 1", False, 1]
+            215: [0, 4, "", "Mt Kress: Drops Used 2", False, 1]
+            216: [0, 4, "", "Mt Kress: Drops Used 3", False, 1]
+            217: [0, 4, "", "Pyramid: Hieroglyphs Placed", False, 1]
+            218: [0, 4, "", "Babel: Castoth Defeated", False, 1]
+            219: [0, 4, "", "Babel: Viper Defeated", False, 1]
+            220: [0, 4, "", "Babel: Vampires Defeated", False, 1]
+            221: [0, 4, "", "Babel: Sand Fanger Defeated", False, 1]
+            222: [0, 4, "", "Babel: Mummy Queen Defeated", False, 1]
+            223: [0, 4, "", "Mansion: Solid Arm Defeated", False, 1]
+
+            # Fighting Form Access
+            300: [0, 5, "", "Freedan Access", False, 1]
         }
 
         # Define Item/Ability/Statue locations
@@ -1567,6 +1600,7 @@ class World:
         #                Special (map# or inventory addr), Name, Swapped Flag]}
         #         (For random start, [6]=Type, [7]=XY_spawn_data)
         self.item_locations = {
+            # Jeweler
             0: [2, 1, False, 0, [], "8d019", "8d19d", "", "8d260", "Jeweler Reward 1                    "],
             1: [3, 1, False, 0, [], "8d028", "8d1ba", "", "8d274", "Jeweler Reward 2                    "],
             2: [4, 1, False, 0, [], "8d037", "8d1d7", "", "8d288", "Jeweler Reward 3                    "],
@@ -1574,208 +1608,226 @@ class World:
             4: [6, 1, False, 0, [], "8d059", "8d211", "", "8d2b0", "Jeweler Reward 5                    "],
             5: [7, 1, False, 0, [], "8d069", "8d2ea", "", "8d2c4", "Jeweler Reward 6                    "],
 
-            6: [21, 1, False, 0, [], "F51D", "F52D", "F543", "", "South Cape: Bell Tower              "],
-            7: [20, 1, False, 0, [], "4846e", "48479", "", "", "South Cape: Fisherman               "],  # text2 was 0c6a1
-            8: [26, 1, False, 0, [], "F59D", "F5AD", "F5C3", "", "South Cape: Lance's House           "],
-            9: [23, 1, False, 0, [], "499e4", "49be5", "", "", "South Cape: Lola                    "],
-            10: [21, 2, False, 0, [51, 52, 53], "c830a", "Safe", b"\xE0\x00\x70\x00\x83\x00\x43", b"\x01",
-                 "South Cape: Dark Space              "],
+            # South Cape
+            6: [21, 1, False, 0, [],  "F51D",  "F52D", "F543", "", "South Cape: Bell Tower              "],
+            7: [20, 1, False, 0, [], "4846e", "48479",     "", "", "South Cape: Fisherman               "],  # text2 was 0c6a1
+            8: [26, 1, False, 0, [],  "F59D",  "F5AD", "F5C3", "", "South Cape: Lance's House           "],
+            9: [23, 1, False, 0, [], "499e4", "49be5",     "", "", "South Cape: Lola                    "],
 
+            10: [21, 2, False, 0, [51, 52, 53], "c830a", "Safe", b"\xE0\x00\x70\x00\x83\x00\x43", b"\x01", "South Cape: Dark Space              "],
+
+            # Edward's
             11: [30, 1, False, 0, [], "4c214", "4c299", "", "", "Edward's Castle: Hidden Guard       "],
             12: [30, 1, False, 0, [], "4d0ef", "4d141", "", "", "Edward's Castle: Basement           "],
-
             13: [32, 1, False, 0, [], "4d32f", "4d4b1", "", "", "Edward's Prison: Hamlet             "],  # text 4d5f4?
+
             14: [32, 2, False, 0, [51, 52, 53], "c8637", "", "", b"\x0b", "Edward's Prison: Dark Space         "],
 
-            15: [42, 1, False, 0, [2], "1AFA9", "", "", "", "Underground Tunnel: Spike's Chest   "],
-            16: [44, 1, False, 0, [2], "1AFAE", "", "", "", "Underground Tunnel: Small Room Chest"],
-            17: [48, 1, False, 0, [2], "1AFB3", "", "", "", "Underground Tunnel: Ribber's Chest  "],
-            18: [49, 1, False, 0, [], "F61D", "F62D", "F643", "", "Underground Tunnel: Barrels         "],
-            19: [47, 2, True, 0, [], "c8aa2", "Unsafe", b"\xA0\x00\xD0\x04\x83\x00\x74", b"\x12",
-                 "Underground Tunnel: Dark Space      "],  # Always open
+            # Underground Tunnel
+            15: [42, 1, False, 0, [2], "1AFA9",    "",     "", "", "Underground Tunnel: Spike's Chest   "],
+            16: [44, 1, False, 0, [2], "1AFAE",    "",     "", "", "Underground Tunnel: Small Room Chest"],
+            17: [48, 1, False, 0, [2], "1AFB3",    "",     "", "", "Underground Tunnel: Ribber's Chest  "],
+            18: [49, 1, False, 0,  [], "F61D", "F62D", "F643", "", "Underground Tunnel: Barrels         "],
 
-            20: [51, 1, False, 0, [9], "F69D", "F6AD", "F6C3", "", "Itory Village: Logs                 "],
+            19: [47, 2, True, 0, [], "c8aa2", "Unsafe", b"\xA0\x00\xD0\x04\x83\x00\x74", b"\x12", "Underground Tunnel: Dark Space      "],  # Always open
+
+            # Itory
+            20: [51, 1, False, 0, [9],  "F69D",  "F6AD",  "F6C3", "", "Itory Village: Logs                 "],
             21: [59, 1, False, 0, [9], "4f375", "4f38d", "4f3a8", "", "Itory Village: Cave                 "],
-            22: [51, 2, False, 0, [51, 52, 53], "c8b34", "Safe", b"\x30\x04\x90\x00\x83\x00\x35", b"\x15",
-                 "Itory Village: Dark Space           "],
 
+            22: [51, 2, False, 0, [51, 52, 53], "c8b34", "Safe", b"\x30\x04\x90\x00\x83\x00\x35", b"\x15", "Itory Village: Dark Space           "],
+
+            # Moon Tribe
             23: [63, 1, False, 0, [], "4fae1", "4faf9", "4fb16", "", "Moon Tribe: Cave                    "],
 
-            24: [71, 1, False, 0, [], "1AFB8", "", "", "", "Inca Ruins: Diamond-Block Chest     "],
-            25: [92, 1, False, 0, [7], "1AFC2", "", "", "", "Inca Ruins: Broken Statues Chest    "],
-            26: [83, 1, False, 0, [7], "1AFBD", "", "", "", "Inca Ruins: Stone Lord Chest        "],
-            27: [93, 1, False, 0, [7], "1AFC6", "", "", "", "Inca Ruins: Slugger Chest           "],
+            # Inca
+            24: [71, 1, False, 0, [],  "1AFB8",      "",      "", "", "Inca Ruins: Diamond-Block Chest     "],
+            25: [92, 1, False, 0, [7], "1AFC2",      "",      "", "", "Inca Ruins: Broken Statues Chest    "],
+            26: [83, 1, False, 0, [7], "1AFBD",      "",      "", "", "Inca Ruins: Stone Lord Chest        "],
+            27: [93, 1, False, 0, [7], "1AFC6",      "",      "", "", "Inca Ruins: Slugger Chest           "],
             28: [76, 1, False, 0, [7], "9c5bd", "9c614", "9c637", "", "Inca Ruins: Singing Statue          "],
-            29: [96, 2, True, 0, [], "c9302", "Unsafe", b"\x10\x01\x90\x00\x83\x00\x32", b"\x28",
-                 "Inca Ruins: Dark Space 1            "],  # Always open
-            30: [93, 2, False, 0, [], "c923b", "Unsafe", b"\xC0\x01\x50\x01\x83\x00\x32", b"\x26",
-                 "Inca Ruins: Dark Space 2            "],
-            31: [77, 2, False, 0, [], "c8db8", "", "", b"\x1e", "Inca Ruins: Final Dark Space        "],
 
+            29: [96, 2,  True, 0, [], "c9302", "Unsafe", b"\x10\x01\x90\x00\x83\x00\x32", b"\x28", "Inca Ruins: Dark Space 1            "],  # Always open
+            30: [93, 2, False, 0, [], "c923b", "Unsafe", b"\xC0\x01\x50\x01\x83\x00\x32", b"\x26", "Inca Ruins: Dark Space 2            "],
+            31: [77, 2, False, 0, [], "c8db8",       "",                              "", b"\x1e", "Inca Ruins: Final Dark Space        "],
+
+            # Gold Ship
             32: [100, 1, False, 0, [3, 4, 7, 8], "5965e", "5966e", "", "", "Gold Ship: Seth                     "],
 
+            # Diamond Coast
             33: [102, 1, False, 0, [], "F71D", "F72D", "F743", "", "Diamond Coast: Jar                  "],
 
-            34: [121, 1, False, 0, [], "F79D", "F7AD", "F7C3", "", "Freejia: Hotel                      "],
-            35: [110, 1, False, 0, [], "5b6d8", "5b6e8", "", "", "Freejia: Creepy Guy                 "],
+            # Freejia
+            34: [121, 1, False, 0, [],  "F79D",  "F7AD",  "F7C3", "", "Freejia: Hotel                      "],
+            35: [110, 1, False, 0, [], "5b6d8", "5b6e8",      "", "", "Freejia: Creepy Guy                 "],
             36: [110, 1, False, 0, [], "5cf9e", "5cfae", "5cfc4", "", "Freejia: Trash Can 1                "],
-            37: [110, 1, False, 0, [], "5cf3d", "5cf49", "", "", "Freejia: Trash Can 2                "],  # text2 was 5cf5b
+            37: [110, 1, False, 0, [], "5cf3d", "5cf49",      "", "", "Freejia: Trash Can 2                "],  # text2 was 5cf5b
             38: [115, 1, False, 0, [], "5b8b7", "5b962", "5b9ee", "", "Freejia: Snitch                     "],  # text1 was @5b94d
-            39: [125, 2, False, 0, [51, 52, 53], "c96ce", "Safe", b"\x40\x00\xa0\x00\x83\x00\x11", b"\x34",
-                 "Freejia: Dark Space                 "],
 
+            39: [125, 2, False, 0, [51, 52, 53], "c96ce", "Safe", b"\x40\x00\xa0\x00\x83\x00\x11", b"\x34", "Freejia: Dark Space                 "],
+
+            # Diamond Mine
             40: [134, 1, False, 0, [], "1AFD0", "", "", "", "Diamond Mine: Chest                 "],
             41: [137, 1, False, 0, [], "5d7e4", "5d819", "5d830", "", "Diamond Mine: Trapped Laborer       "],
             42: [143, 1, False, 0, [], "aa777", "aa85c", "", "", "Diamond Mine: Laborer w/Elevator Key"],  # text1 was aa811
             43: [148, 1, False, 0, [15], "5d4d2", "5d4eb", "5d506", "", "Diamond Mine: Morgue                "],
             44: [149, 1, False, 0, [15], "aa757", "aa7ef", "", "", "Diamond Mine: Laborer w/Mine Key    "],  # text1 was aa7b4
             45: [150, 1, False, 0, [11, 12, 15], "5d2b0", "5d2da", "", "", "Diamond Mine: Sam                   "],
-            46: [136, 2, False, 0, [], "c9a87", "Unsafe", b"\xb0\x01\x70\x01\x83\x00\x32", b"\x40",
-                 "Diamond Mine: Appearing Dark Space  "],  # Always open
-            47: [131, 2, False, 0, [], "c98b0", "Unsafe", b"\xd0\x00\xc0\x00\x83\x00\x61", b"\x3d",
-                 "Diamond Mine: Dark Space at Wall    "],
-            48: [142, 2, False, 0, [], "c9b49", "", "", b"\x42", "Diamond Mine: Dark Space behind Wall"],
-#*****************************************************
-            49: [29, 1, False, 0, [], "1AFDD", "", "", "", "Sky Garden: (NE) Platform Chest     "],
-            50: [29, 1, False, 0, [], "1AFD9", "", "", "", "Sky Garden: (NE) Blue Cyber Chest   "],
-            51: [29, 1, False, 0, [], "1AFD5", "", "", "", "Sky Garden: (NE) Statue Chest       "],
-            52: [30, 1, False, 0, [], "1AFE2", "", "", "", "Sky Garden: (SE) Dark Side Chest    "],
-            53: [31, 1, False, 0, [], "1AFE7", "", "", "", "Sky Garden: (SW) Ramp Chest         "],
-            54: [29, 1, False, 0, [], "1AFEC", "", "", "", "Sky Garden: (SW) Dark Side Chest    "],
-            55: [72, 1, False, 0, [], "1AFF1", "", "", "", "Sky Garden: (NW) Top Chest          "],
-            56: [72, 1, False, 0, [], "1AFF5", "", "", "", "Sky Garden: (NW) Bottom Chest       "],
-            57: [29, 2, False, 0, [51, 52, 53], "c9d63", "Unsafe", b"\x90\x00\x70\x00\x83\x00\x22", b"\x4c",
-                 "Sky Garden: Dark Space (Foyer)      "],
-            58: [29, 2, False, 0, [], "ca505", "Unsafe", b"\x70\x00\xa0\x00\x83\x00\x11", b"\x56",
-                 "Sky Garden: Dark Space (SE)         "],  # in the room
-            59: [29, 2, False, 0, [], "ca173", "", "", b"\x51", "Sky Garden: Dark Space (SW)         "],
-            60: [29, 2, False, 0, [], "ca422", "Unsafe", b"\x20\x00\x70\x00\x83\x00\x44", b"\x54",
-                 "Sky Garden: Dark Space (NW)         "],
 
-            61: [33, 1, False, 0, [], "1AFFF", "", "", "", "Seaside Palace: Side Room Chest     "],
-            62: [33, 1, False, 0, [], "1AFFA", "", "", "", "Seaside Palace: First Area Chest    "],
-            63: [33, 1, False, 0, [], "1B004", "", "", "", "Seaside Palace: Second Area Chest   "],
-            64: [34, 1, False, 0, [17], "68af7", "68ea9", "68f02", "", "Seaside Palace: Buffy               "],
-            65: [35, 1, False, 0, [9, 23], "6922d", "6939e", "693b7", "", "Seaside Palace: Coffin              "],  # text1 was 69377
-            66: [33, 2, False, 0, [51, 52, 53], "ca574", "Safe", b"\xf0\x02\x90\x00\x83\x00\x64", b"\x5a",
-                 "Seaside Palace: Dark Space          "],
+            46: [136, 2, False, 0, [], "c9a87", "Unsafe", b"\xb0\x01\x70\x01\x83\x00\x32", b"\x40", "Diamond Mine: Appearing Dark Space  "],  # Always open
+            47: [131, 2, False, 0, [], "c98b0", "Unsafe", b"\xd0\x00\xc0\x00\x83\x00\x61", b"\x3d", "Diamond Mine: Dark Space at Wall    "],
+            48: [142, 2, False, 0, [], "c9b49",       "",                              "", b"\x42", "Diamond Mine: Dark Space behind Wall"],
 
-            67: [37, 1, False, 0, [], "1B012", "", "", "", "Mu: Empty Chest 1                   "],
-            68: [37, 1, False, 0, [], "1B01B", "", "", "", "Mu: Empty Chest 2                   "],
-            69: [37, 1, False, 0, [], "698be", "698d2", "", "", "Mu: Hope Statue 1                   "],
-            70: [39, 1, False, 0, [], "69966", "69975", "", "", "Mu: Hope Statue 2                   "],
-            71: [40, 1, False, 0, [18], "1B00D", "", "", "", "Mu: Chest s/o Hope Room 2           "],
-            72: [40, 1, False, 0, [18], "1B009", "", "", "", "Mu: Rama Chest N                    "],
-            73: [40, 1, False, 0, [18], "1B016", "", "", "", "Mu: Rama Chest E                    "],
-            74: [38, 2, True, 0, [], "ca92d", "", "", b"\x60", "Mu: Open Dark Space                 "],  # Always open
-            75: [71, 2, False, 0, [], "caa99", "", "", b"\x62", "Mu: Slider Dark Space               "],
+            49: [173, 1, False, 0, [], "1AFDD", "", "", "", "Sky Garden: (NE) Platform Chest     "],
+            50: [174, 1, False, 0, [], "1AFD9", "", "", "", "Sky Garden: (NE) Blue Cyber Chest   "],
+            51: [175, 1, False, 0, [], "1AFD5", "", "", "", "Sky Garden: (NE) Statue Chest       "],
+            52: [181, 1, False, 0, [], "1AFE2", "", "", "", "Sky Garden: (SE) Dark Side Chest    "],
+            53: [186, 1, False, 0, [], "1AFE7", "", "", "", "Sky Garden: (SW) Ramp Chest         "],
+            54: [187, 1, False, 0, [], "1AFEC", "", "", "", "Sky Garden: (SW) Dark Side Chest    "],
+            55: [193, 1, False, 0, [], "1AFF1", "", "", "", "Sky Garden: (NW) Top Chest          "],
+            56: [193, 1, False, 0, [], "1AFF5", "", "", "", "Sky Garden: (NW) Bottom Chest       "],
 
-            76: [42, 1, False, 0, [], "F81D", "F82D", "F843", "", "Angel Village: Dance Hall           "],
-            77: [42, 2, False, 0, [51, 52, 53], "caf67", "Safe", b"\x90\x01\xb0\x00\x83\x01\x12", b"\x6c",
-                 "Angel Village: Dark Space           "],
+            57: [170, 2, False, 0, [51, 52, 53], "c9d63", "Unsafe", b"\x90\x00\x70\x00\x83\x00\x22", b"\x4c", "Sky Garden: Dark Space (Foyer)      "],
+            58: [169, 2, False, 0,           [], "ca505", "Unsafe", b"\x70\x00\xa0\x00\x83\x00\x11", b"\x56", "Sky Garden: Dark Space (SE)         "],  # in the room
+            59: [184, 2, False, 0,           [], "ca173",       "",                              "", b"\x51", "Sky Garden: Dark Space (SW)         "],
+            60: [195, 2, False, 0,           [], "ca422", "Unsafe", b"\x20\x00\x70\x00\x83\x00\x44", b"\x54", "Sky Garden: Dark Space (NW)         "],
 
-            78: [43, 1, False, 0, [], "1B020", "", "", "", "Angel Dungeon: Slider Chest         "],
-            79: [43, 1, False, 0, [], "F89D", "F8AD", "F8C3", "", "Angel Dungeon: Ishtar's Room        "],
-            80: [43, 1, False, 0, [], "1B02A", "", "", "", "Angel Dungeon: Puzzle Chest 1       "],
-            81: [43, 1, False, 0, [], "1B02E", "", "", "", "Angel Dungeon: Puzzle Chest 2       "],
-            82: [43, 1, False, 0, [], "1B025", "", "", "", "Angel Dungeon: Ishtar's Chest       "],
+            # Seaside Palace
+            61: [200, 1, False, 0,      [], "1AFFF",      "",      "", "", "Seaside Palace: Side Room Chest     "],
+            62: [199, 1, False, 0,      [], "1AFFA",      "",      "", "", "Seaside Palace: First Area Chest    "],
+            63: [203, 1, False, 0,      [], "1B004",      "",      "", "", "Seaside Palace: Second Area Chest   "],
+            64: [204, 1, False, 0,    [17], "68af7", "68ea9", "68f02", "", "Seaside Palace: Buffy               "],
+            65: [206, 1, False, 0, [9, 23], "6922d", "6939e", "693b7", "", "Seaside Palace: Coffin              "],  # text1 was 69377
 
-            83: [44, 1, False, 0, [], "F91D", "F92D", "F943", "", "Watermia: West Jar                  "],
-            # 84: [44,1,False,0,[],"7a5a8","","","",             "Watermia: Lance's Letter"],
-            85: [44, 1, False, 0, [], "7ad21", "7aede", "", "", "Watermia: Lance                     "],  # text2 was 7afa7
-            86: [44, 1, False, 0, [], "F99D", "F9AD", "F9C3", "", "Watermia: Gambling House            "],
-            87: [44, 1, False, 0, [], "79248", "79288", "792a1", "", "Watermia: Russian Glass             "],
-            88: [44, 2, False, 0, [51, 52, 53], "cb644", "Safe", b"\x40\x00\xa0\x00\x83\x00\x11", b"\x7c",
-                 "Watermia: Dark Space                "],
+            66: [199, 2, False, 0, [51, 52, 53], "ca574", "Safe", b"\xf0\x02\x90\x00\x83\x00\x64", b"\x5a", "Seaside Palace: Dark Space          "],
 
-            89: [45, 1, False, 0, [], "7b5c5", "7b5d1", "", "", "Great Wall: Necklace 1              "],
-            90: [45, 1, False, 0, [], "7b625", "7b631", "", "", "Great Wall: Necklace 2              "],
-            91: [45, 1, False, 0, [], "1B033", "", "", "", "Great Wall: Chest 1                 "],
-            92: [45, 1, False, 0, [], "1B038", "", "", "", "Great Wall: Chest 2                 "],
-            93: [80, 2, False, 0, [], "cbb11", "Unsafe", b"\x60\x00\xc0\x02\x83\x20\x38", b"\x85",
-                 "Great Wall: Archer Dark Space       "],
-            94: [80, 2, True, 0, [], "cbb80", "Unsafe", b"\x50\x01\x80\x04\x83\x00\x63", b"\x86",
-                 "Great Wall: Platform Dark Space     "],  # Always open
-            95: [46, 2, False, 0, [51], "cbc60", "", "", b"\x88", "Great Wall: Appearing Dark Space    "],
+            # Mu
+            67: [215, 1, False, 0,   [], "1B012",      "", "", "", "Mu: Empty Chest 1                   "],
+            68: [218, 1, False, 0,   [], "1B01B",      "", "", "", "Mu: Empty Chest 2                   "],
+            69: [223, 1, False, 0,   [], "698be", "698d2", "", "", "Mu: Hope Statue 1                   "],
+            70: [234, 1, False, 0,   [], "69966", "69975", "", "", "Mu: Hope Statue 2                   "],
+            71: [213, 1, False, 0, [18], "1B00D",      "", "", "", "Mu: Chest s/o Hope Room 2           "],
+            72: [212, 1, False, 0, [18], "1B009",      "", "", "", "Mu: Rama Chest N                    "],
+            73: [217, 1, False, 0, [18], "1B016",      "", "", "", "Mu: Rama Chest E                    "],
 
-            96: [48, 1, False, 0, [], "FA1D", "FA2D", "FA43", "", "Euro: Alley                         "],
-            97: [48, 1, False, 0, [], "7c0b3", "7c0f3", "", "", "Euro: Apple Vendor                  "],
-            98: [48, 1, False, 0, [], "7e51f", "7e534", "7e54a", "", "Euro: Hidden House                  "],
-            99: [48, 1, False, 0, [], "7cd12", "7cd39", "7cd9b", "", "Euro: Store Item 1                  "],
-            100: [48, 1, False, 0, [], "7cdf9", "7ce28", "7ce3e", "", "Euro: Store Item 2                  "],  # text2 was 7cedd
-            101: [48, 1, False, 0, [], "FA9D", "FAAD", "FAC3", "", "Euro: Laborer Room                  "],
-            102: [49, 1, False, 0, [40], "7df58", "7e10a", "", "", "Euro: Ann                           "],
-            103: [48, 2, False, 0, [51, 52, 53], "cc0b0", "Safe", b"\xb0\x00\xb0\x00\x83\x00\x11", b"\x99",
-                  "Euro: Dark Space                    "],
+            74: [216, 2,  True, 0, [], "ca92d", "", "", b"\x60", "Mu: Open Dark Space                 "],  # Always open
+            75: [226, 2, False, 0, [], "caa99", "", "", b"\x62", "Mu: Slider Dark Space               "],
 
-            104: [50, 1, False, 0, [], "1B03D", "", "", "", "Mt. Temple: Red Jewel Chest         "],
-            105: [50, 1, False, 0, [], "1B042", "", "", "", "Mt. Temple: Drops Chest 1           "],
-            106: [51, 1, False, 0, [], "1B047", "", "", "", "Mt. Temple: Drops Chest 2           "],
-            107: [52, 1, False, 0, [], "1B04C", "", "", "", "Mt. Temple: Drops Chest 3           "],
-            108: [53, 1, False, 0, [26], "1B051", "", "", "", "Mt. Temple: Final Chest             "],
-            109: [50, 2, False, 0, [50], "cc24f", "Unsafe", b"\xf0\x01\x10\x03\x83\x00\x44", b"\xa1",
-                  "Mt. Temple: Dark Space 1            "],
-            110: [50, 2, False, 0, [50], "cc419", "Unsafe", b"\xc0\x07\xc0\x00\x83\x00\x28", b"\xa3",
-                  "Mt. Temple: Dark Space 2            "],
-            111: [52, 2, False, 0, [50], "cc7b8", "", "", b"\xa7", "Mt. Temple: Dark Space 3            "],
+            # Angel Village
+            76: [254, 1, False, 0, [], "F81D", "F82D", "F843", "", "Angel Village: Dance Hall           "],
 
-            112: [54, 1, False, 0, [], "FB1D", "FB2D", "FB43", "", "Natives' Village: Statue Room       "],
-            113: [55, 1, False, 0, [29], "893af", "8942a", "", "", "Natives' Village: Statue            "],
-            114: [54, 2, False, 0, [51, 52, 53], "cca37", "Safe", b"\xc0\x01\x50\x00\x83\x00\x22", b"\xac",
-                  "Natives' Village: Dark Space        "],
+            77: [255, 2, False, 0, [51, 52, 53], "caf67", "Safe", b"\x90\x01\xb0\x00\x83\x01\x12", b"\x6c", "Angel Village: Dark Space           "],
 
-            115: [56, 1, False, 0, [], "1B056", "", "", "", "Ankor Wat: Ramp Chest               "],
-            116: [57, 1, False, 0, [], "1B05B", "", "", "", "Ankor Wat: Flyover Chest            "],
-            117: [59, 1, False, 0, [], "1B060", "", "", "", "Ankor Wat: U-Turn Chest             "],
-            118: [60, 1, False, 0, [28], "1B065", "", "", "", "Ankor Wat: Drop Down Chest          "],
-            119: [60, 1, False, 0, [28], "1B06A", "", "", "", "Ankor Wat: Forgotten Chest          "],
-            120: [59, 1, False, 0, [], "89fa3", "89fbb", "", "", "Ankor Wat: Glasses Location         "],  # slow text @89fdc
-            121: [60, 1, False, 0, [28], "89adc", "89af1", "89b07", "", "Ankor Wat: Spirit                   "],  # item was 89b0d, text was 89e2e
-            122: [76, 2, True, 0, [49, 50], "cce92", "Unsafe", b"\x20\x04\x30\x03\x83\x00\x46", b"\xb6",
-                  "Ankor Wat: Garden Dark Space        "],  # Always open
-            123: [58, 2, False, 0, [49, 50, 51], "cd0a2", "", "", b"\xb8", "Ankor Wat: Earthquaker Dark Space   "],
-            124: [59, 2, True, 0, [49, 50, 51, 53], "cd1a7", "Unsafe", b"\xb0\x02\xc0\x01\x83\x00\x33", b"\xbb",
-                  "Ankor Wat: Drop Down Dark Space     "],  # Always open
+            # Angel Dungeon
+            78: [265, 1, False, 0, [], "1B020",    "",     "", "", "Angel Dungeon: Slider Chest         "],
+            79: [271, 1, False, 0, [], "F89D", "F8AD", "F8C3", "", "Angel Dungeon: Ishtar's Room        "],
+            80: [274, 1, False, 0, [], "1B02A",    "",     "", "", "Angel Dungeon: Puzzle Chest 1       "],
+            81: [274, 1, False, 0, [], "1B02E",    "",     "", "", "Angel Dungeon: Puzzle Chest 2       "],
+            82: [273, 1, False, 0, [], "1B025",    "",     "", "", "Angel Dungeon: Ishtar's Chest       "],
 
-            125: [61, 1, False, 0, [], "8b1b0", "", "", "", "Dao: Entrance Item 1                "],
-            126: [61, 1, False, 0, [], "8b1b5", "", "", "", "Dao: Entrance Item 2                "],
-            127: [61, 1, False, 0, [], "FB9D", "FBAD", "FBC3", "", "Dao: East Grass                     "],
-            128: [61, 1, False, 0, [], "8b016", "8b073", "8b090", "", "Dao: Snake Game                     "],
-            129: [61, 2, False, 0, [51, 52, 53], "cd3d0", "Safe", b"\x20\x00\x80\x00\x83\x00\x23", b"\xc3",
-                  "Dao: Dark Space                     "],
+            # Watermia
+            83: [280, 1, False, 0, [],  "F91D",  "F92D",  "F943", "", "Watermia: West Jar                  "],
+            85: [287, 1, False, 0, [], "7ad21", "7aede",      "", "", "Watermia: Lance                     "],  # text2 was 7afa7
+            86: [284, 1, False, 0, [],  "F99D",  "F9AD",  "F9C3", "", "Watermia: Gambling House            "],
+            87: [280, 1, False, 0, [], "79248", "79288", "792a1", "", "Watermia: Russian Glass             "],
 
-            130: [62, 1, False, 0, [], "8dcb7", "8e66c", "8e800", "", "Pyramid: Dark Space Top             "],  # text2 was 8e800
-            131: [63, 1, False, 0, [36], "FC1D", "FC2D", "FC43", "", "Pyramid: Under Stairs               "],
-            132: [64, 1, False, 0, [36], "8c7b2", "8c7c9", "", "", "Pyramid: Hieroglyph 1               "],
-            133: [63, 1, False, 0, [36], "1B06F", "", "", "", "Pyramid: Room 2 Chest               "],
-            134: [63, 1, False, 0, [36], "8c879", "8c88c", "", "", "Pyramid: Hieroglyph 2               "],
-            135: [64, 1, False, 0, [36], "1B079", "", "", "", "Pyramid: Room 3 Chest               "],
-            136: [78, 1, False, 0, [36], "8c921", "8c934", "", "", "Pyramid: Hieroglyph 3               "],
-            137: [64, 1, False, 0, [36], "1B07E", "", "", "", "Pyramid: Room 4 Chest               "],
-            138: [64, 1, False, 0, [36], "8c9c9", "8c9dc", "", "", "Pyramid: Hieroglyph 4               "],
-            139: [63, 1, False, 0, [36], "1B074", "", "", "", "Pyramid: Room 5 Chest               "],
-            140: [79, 1, False, 0, [36], "8ca71", "8ca84", "", "", "Pyramid: Hieroglyph 5               "],
-            141: [77, 1, False, 0, [36], "8cb19", "8cb2c", "", "", "Pyramid: Hieroglyph 6               "],
-            142: [77, 2, True, 0, [], "cd570", "Unsafe", b"\xc0\x01\x90\x03\x83\x00\x44", b"\xcc",
-                  "Pyramid: Dark Space Bottom          "],  # Always open
+            88: [283, 2, False, 0, [51, 52, 53], "cb644", "Safe", b"\x40\x00\xa0\x00\x83\x00\x11", b"\x7c", "Watermia: Dark Space                "],
 
-            143: [66, 1, False, 0, [], "FC9D", "FCAD", "FCC3", "", "Babel: Pillow                       "],
-            144: [66, 1, False, 0, [], "99a4f", "99ae4", "99afe", "", "Babel: Force Field                  "],  # item was  99a61
-            145: [66, 2, False, 0, [51, 52, 53], "ce09b", "", b"\x90\x07\xb0\x01\x83\x10\x28", b"\xdf",
-                  "Babel: Dark Space Bottom            "],
-            146: [67, 2, False, 0, [51, 52, 53], "ce159", "Safe", b"\xb0\x02\xb0\x01\x83\x10\x23", b"\xe3",
-                  "Babel: Dark Space Top               "],
+            # Great Wall
+            89: [290, 1, False, 0, [], "7b5c5", "7b5d1", "", "", "Great Wall: Necklace 1              "],
+            90: [292, 1, False, 0, [], "7b625", "7b631", "", "", "Great Wall: Necklace 2              "],
+            91: [292, 1, False, 0, [], "1B033",      "", "", "", "Great Wall: Chest 1                 "],
+            92: [294, 1, False, 0, [], "1B038",      "", "", "", "Great Wall: Chest 2                 "],
 
-            147: [81, 1, False, 0, [], "1B083", "", "", "", "Jeweler's Mansion: Chest            "],
+            93: [295, 2, False, 0,   [], "cbb11", "Unsafe", b"\x60\x00\xc0\x02\x83\x20\x38", b"\x85", "Great Wall: Archer Dark Space       "],
+            94: [297, 2,  True, 0,   [], "cbb80", "Unsafe", b"\x50\x01\x80\x04\x83\x00\x63", b"\x86", "Great Wall: Platform Dark Space     "],  # Always open
+            95: [300, 2, False, 0, [51], "cbc60",       "",                              "", b"\x88", "Great Wall: Appearing Dark Space    "],
 
-            148: [18, 3, False, 0, [55, 56, 57, 58, 59], "", "", "", "", "Castoth Prize                       "],
-            149: [32, 3, False, 0, [54, 56, 57, 58, 59], "", "", "", "", "Viper Prize                         "],
-            150: [41, 3, False, 0, [54, 55, 57, 58, 59], "", "", "", "", "Vampires Prize                      "],
-            151: [47, 3, False, 0, [54, 55, 56, 58, 59], "", "", "", "", "Sand Fanger Prize                   "],
-            152: [65, 3, False, 0, [54, 55, 56, 57, 59], "", "", "", "", "Mummy Queen Prize                   "],
-            153: [67, 3, False, 0, [54, 55, 56, 57, 58], "", "", "", "", "Babel Prize                         "],
+            # Euro
+             96: [310, 1, False, 0,   [],  "FA1D",  "FA2D",  "FA43", "", "Euro: Alley                         "],
+             97: [310, 1, False, 0,   [], "7c0b3", "7c0f3",      "", "", "Euro: Apple Vendor                  "],
+             98: [321, 1, False, 0,   [], "7e51f", "7e534", "7e54a", "", "Euro: Hidden House                  "],
+             99: [324, 1, False, 0,   [], "7cd12", "7cd39", "7cd9b", "", "Euro: Store Item 1                  "],
+            100: [324, 1, False, 0,   [], "7cdf9", "7ce28", "7ce3e", "", "Euro: Store Item 2                  "],  # text2 was 7cedd
+            101: [322, 1, False, 0,   [],  "FA9D",  "FAAD",  "FAC3", "", "Euro: Shrine                        "],
+            102: [315, 1, False, 0, [40], "7df58", "7e10a",      "", "", "Euro: Ann                           "],
 
-            154: [75, 1, True, 61, [], "", "", "", "", "Lilly                         "]
+            103: [325, 2, False, 0, [51, 52, 53], "cc0b0", "Safe", b"\xb0\x00\xb0\x00\x83\x00\x11", b"\x99", "Euro: Dark Space                    "],
+
+            # Mt Temple
+            104: [336, 1, False, 0,   [], "1B03D", "", "", "", "Mt. Temple: Red Jewel Chest         "],
+            105: [338, 1, False, 0,   [], "1B042", "", "", "", "Mt. Temple: Drops Chest 1           "],
+            106: [342, 1, False, 0,   [], "1B047", "", "", "", "Mt. Temple: Drops Chest 2           "],
+            107: [343, 1, False, 0,   [], "1B04C", "", "", "", "Mt. Temple: Drops Chest 3           "],
+            108: [345, 1, False, 0, [26], "1B051", "", "", "", "Mt. Temple: Final Chest             "],
+
+            109: [332, 2, False, 0, [50], "cc24f", "Unsafe", b"\xf0\x01\x10\x03\x83\x00\x44", b"\xa1", "Mt. Temple: Dark Space 1            "],
+            110: [337, 2, False, 0, [50], "cc419", "Unsafe", b"\xc0\x07\xc0\x00\x83\x00\x28", b"\xa3", "Mt. Temple: Dark Space 2            "],
+            111: [343, 2, False, 0, [50], "cc7b8",       "",                              "", b"\xa7", "Mt. Temple: Dark Space 3            "],
+
+            # Natives'
+            112: [353, 1, False, 0,   [],  "FB1D",  "FB2D", "FB43", "", "Natives' Village: Statue Room       "],
+            113: [354, 1, False, 0, [29], "893af", "8942a",     "", "", "Natives' Village: Statue            "],
+
+            114: [350, 2, False, 0, [51, 52, 53], "cca37", "Safe", b"\xc0\x01\x50\x00\x83\x00\x22", b"\xac", "Natives' Village: Dark Space        "],
+
+            # Ankor Wat
+            115: [361, 1, False, 0,   [], "1B056",      "",      "", "", "Ankor Wat: Ramp Chest               "],
+            116: [370, 1, False, 0,   [], "1B05B",      "",      "", "", "Ankor Wat: Flyover Chest            "],
+            117: [378, 1, False, 0,   [], "1B060",      "",      "", "", "Ankor Wat: U-Turn Chest             "],
+            118: [382, 1, False, 0, [28], "1B065",      "",      "", "", "Ankor Wat: Drop Down Chest          "],
+            119: [389, 1, False, 0, [28], "1B06A",      "",      "", "", "Ankor Wat: Forgotten Chest          "],
+            120: [380, 1, False, 0,   [], "89fa3", "89fbb",      "", "", "Ankor Wat: Glasses Location         "],  # slow text @89fdc
+            121: [391, 1, False, 0, [28], "89adc", "89af1", "89b07", "", "Ankor Wat: Spirit                   "],  # item was 89b0d, text was 89e2e
+
+            122: [372, 2,  True, 0,         [49, 50], "cce92", "Unsafe", b"\x20\x04\x30\x03\x83\x00\x46", b"\xb6", "Ankor Wat: Garden Dark Space        "],  # Always open
+            123: [377, 2, False, 0,     [49, 50, 51], "cd0a2",       "",                              "", b"\xb8", "Ankor Wat: Earthquaker Dark Space   "],
+            124: [383, 2,  True, 0, [49, 50, 51, 53], "cd1a7", "Unsafe", b"\xb0\x02\xc0\x01\x83\x00\x33", b"\xbb", "Ankor Wat: Drop Down Dark Space     "],  # Always open
+
+            # Dao
+            125: [400, 1, False, 0, [], "8b1b0",      "",      "", "", "Dao: Entrance Item 1                "],
+            126: [400, 1, False, 0, [], "8b1b5",      "",      "", "", "Dao: Entrance Item 2                "],
+            127: [400, 1, False, 0, [],  "FB9D",  "FBAD",  "FBC3", "", "Dao: East Grass                     "],
+            128: [404, 1, False, 0, [], "8b016", "8b073", "8b090", "", "Dao: Snake Game                     "],
+
+            129: [400, 2, False, 0, [51, 52, 53], "cd3d0", "Safe", b"\x20\x00\x80\x00\x83\x00\x23", b"\xc3", "Dao: Dark Space                     "],
+
+            # Pyramid
+            130: [411, 1, False, 0,   [], "8dcb7", "8e66c", "8e800", "", "Pyramid: Dark Space Top             "],  # text2 was 8e800
+            131: [412, 1, False, 0, [36],  "FC1D",  "FC2D",  "FC43", "", "Pyramid: Hidden Platform            "],
+            132: [442, 1, False, 0, [36], "8c7b2", "8c7c9",      "", "", "Pyramid: Hieroglyph 1               "],
+            133: [422, 1, False, 0, [36], "1B06F",      "",      "", "", "Pyramid: Room 2 Chest               "],
+            134: [443, 1, False, 0, [36], "8c879", "8c88c",      "", "", "Pyramid: Hieroglyph 2               "],
+            135: [432, 1, False, 0, [36], "1B079",      "",      "", "", "Pyramid: Room 3 Chest               "],
+            136: [444, 1, False, 0, [36], "8c921", "8c934",      "", "", "Pyramid: Hieroglyph 3               "],
+            137: [439, 1, False, 0, [36], "1B07E",      "",      "", "", "Pyramid: Room 4 Chest               "],
+            138: [445, 1, False, 0, [36], "8c9c9", "8c9dc",      "", "", "Pyramid: Hieroglyph 4               "],
+            139: [428, 1, False, 0, [36], "1B074",      "",      "", "", "Pyramid: Room 5 Chest               "],
+            140: [446, 1, False, 0, [36], "8ca71", "8ca84",      "", "", "Pyramid: Hieroglyph 5               "],
+            141: [447, 1, False, 0, [36], "8cb19", "8cb2c",      "", "", "Pyramid: Hieroglyph 6               "],
+
+            142: [413, 2, True, 0, [], "cd570", "Unsafe", b"\xc0\x01\x90\x03\x83\x00\x44", b"\xcc", "Pyramid: Dark Space Bottom          "],  # Always open
+
+            # Babel
+            143: [461, 1, False, 0, [],  "FC9D",  "FCAD",  "FCC3", "", "Babel: Pillow                       "],
+            144: [461, 1, False, 0, [], "99a4f", "99ae4", "99afe", "", "Babel: Force Field                  "],  # item was  99a61
+
+            145: [461, 2, False, 0, [51, 52, 53], "ce09b", "Forced Unsafe", b"\x90\x07\xb0\x01\x83\x10\x28", b"\xdf", "Babel: Dark Space Bottom            "],
+            146: [472, 2, False, 0, [51, 52, 53], "ce159",          "Safe", b"\xb0\x02\xb0\x01\x83\x10\x23", b"\xe3", "Babel: Dark Space Top               "],
+
+            # Jeweler's Mansion
+            147: [480, 1, False, 0, [], "1B083", "", "", "", "Jeweler's Mansion: Chest            "],
+
+            # Mystic Statues
+            148: [101, 3, False, 0, [71, 72, 73, 74, 75], "", "", "", "", "Castoth Prize                       "],
+            149: [198, 3, False, 0, [70, 72, 73, 74, 75], "", "", "", "", "Viper Prize                         "],
+            150: [240, 3, False, 0, [70, 71, 73, 74, 75], "", "", "", "", "Vampires Prize                      "],
+            151: [302, 3, False, 0, [70, 71, 72, 74, 75], "", "", "", "", "Sand Fanger Prize                   "],
+            152: [448, 3, False, 0, [70, 71, 72, 73, 75], "", "", "", "", "Mummy Queen Prize                   "],
+            153: [479, 3, False, 0, [70, 71, 72, 73, 74], "", "", "", "", "Babel Prize                         "],
+
+            # Event Switches
+            200: [56, 1, True, 61, [], "", "", "", "", "Lilly                         "]
         }
 
         # World graph is initially populated only with "free" edges
@@ -1893,6 +1945,7 @@ class World:
             102: [False, [],   "Diamond Coast: Main Area", []],
             103: [False, [15], "Diamond Coast: Turbo", []],
             104: [False, [],   "Diamond Coast: House", []],
+            105: [False, [],   "Gold Ship: Captain", []],
 
             # Freejia
             110: [False, [],         "Freejia: Main Area", []],
@@ -1943,6 +1996,8 @@ class World:
             162: [False, [],   "Nazca Plain", []],
 
             # Sky Garden
+            168: [False, [],         "Sky Garden: Map 81 (north)", []],
+            169: [False, [],         "Sky Garden: Map 86 (DS Room)", []],
             170: [False, [],         "Sky Garden: Foyer", [14, 14, 14, 14]],
             171: [False, [16],       "Sky Garden: Spirits", []],
             172: [False, [],         "Sky Garden: Boss Entrance", []],
@@ -1955,13 +2010,14 @@ class World:
             179: [False, [],         "Sky Garden: Map 79 (behind barrier)", []],
             180: [False, [],         "Sky Garden: Map 80 (north)", []],
             181: [False, [],         "Sky Garden: Map 80 (south)", []],
-            182: [False, [],         "Sky Garden: Map 81 (main)", []],
+            182: [False, [168],      "Sky Garden: Map 81 (main)", []],
             183: [False, [182],      "Sky Garden: Map 81 (west)", []],
             184: [False, [],         "Sky Garden: Map 81 (Dark Space cage)", []],
             185: [False, [183],      "Sky Garden: Map 81 (SE platform)", []],
             186: [False, [183],      "Sky Garden: Map 81 (SW platform)", []],
             187: [False, [],         "Sky Garden: Map 82 (north)", []],        # deal with switches
             188: [False, [],         "Sky Garden: Map 82 (south)", []],
+            167: [False, [],         "Sky Garden: Map 82 (NE)", []],
             189: [False, [],         "Sky Garden: Map 82 (switch cage)", []],
             190: [False, [191],      "Sky Garden: Map 83 (NE)", []],
             191: [False, [190, 192], "Sky Garden: Map 83 (NW)", []],
@@ -1972,7 +2028,6 @@ class World:
             196: [False, [],         "Sky Garden: Map 84 (NE)", []],
             197: [False, [],         "Sky Garden: Map 84 (behind statue)", []],
             198: [False, [],         "Sky Garden: Boss Room", []],
-            169: [False, [],         "Sky Garden: Map 86 (DS Room)", []],
 
             # Seaside Palace
             199: [False, [], "Seaside Palace: Area 1", [16]],
@@ -2225,6 +2280,7 @@ class World:
             476: [False, [],    "Babel: Vampires", []],
             477: [False, [],    "Babel: Sand Fanger", []],
             478: [False, [],    "Babel: Mummy Queen", []],
+            479: [False, [],    "Babel: Statue Get", []],
 
             # Jeweler's Mansion
             480: [False, [], "Jeweler's Mansion: Main", []],
@@ -2240,86 +2296,127 @@ class World:
         # Format: { ID: [StartRegion, DestRegion, [[item1, qty1],[item2,qty2]...]]}
         self.logic = {
             # Jeweler Rewards
-            0: [74, 1, [[1, gem[0]]]],  # Jeweler Reward 1
-            1: [74, 1, [[1, gem[0] - 2], [46, 1]]],
-            2: [74, 1, [[1, gem[0] - 3], [47, 1]]],
-            3: [74, 1, [[1, gem[0] - 5], [46, 1], [47, 1]]],
-            4: [1, 2, [[1, gem[1]]]],  # Jeweler Reward 2
-            5: [1, 2, [[1, gem[1] - 2], [46, 1]]],
-            6: [1, 2, [[1, gem[1] - 3], [47, 1]]],
-            7: [1, 2, [[1, gem[1] - 5], [46, 1], [47, 1]]],
-            8: [2, 3, [[1, gem[2]]]],  # Jeweler Reward 3
-            9: [2, 3, [[1, gem[2] - 2], [46, 1]]],
-            10: [2, 3, [[1, gem[2] - 3], [47, 1]]],
-            11: [2, 3, [[1, gem[2] - 5], [46, 1], [47, 1]]],
-            12: [3, 4, [[1, gem[3]]]],  # Jeweler Reward 4
-            13: [3, 4, [[1, gem[3] - 2], [46, 1]]],
-            14: [3, 4, [[1, gem[3] - 3], [47, 1]]],
-            15: [3, 4, [[1, gem[3] - 5], [46, 1], [47, 1]]],
-            16: [4, 5, [[1, gem[4]]]],  # Jeweler Reward 5
-            17: [4, 5, [[1, gem[4] - 2], [46, 1]]],
-            18: [4, 5, [[1, gem[4] - 3], [47, 1]]],
-            19: [4, 5, [[1, gem[4] - 5], [46, 1], [47, 1]]],
-            20: [5, 6, [[1, gem[5]]]],  # Jeweler Reward 6
-            21: [5, 6, [[1, gem[5] - 2], [46, 1]]],
-            22: [5, 6, [[1, gem[5] - 3], [47, 1]]],
-            23: [5, 6, [[1, gem[5] - 5], [46, 1], [47, 1]]],
-            24: [6, 68, [[1, gem[6]]]],  # Jeweler Reward 7 (Mansion)
-            25: [6, 68, [[1, gem[6] - 2], [46, 1]]],
-            26: [6, 68, [[1, gem[6] - 3], [47, 1]]],
-            27: [6, 68, [[1, gem[6] - 5], [46, 1], [47, 1]]],
+            0: [1, 2, [[1, gem[0]]]],  # Jeweler Reward 1
+            1: [1, 2, [[1, gem[0] - 2], [46, 1]]],
+            2: [1, 2, [[1, gem[0] - 3], [47, 1]]],
+            3: [1, 2, [[1, gem[0] - 5], [46, 1], [47, 1]]],
+            4: [2, 3, [[1, gem[1]]]],  # Jeweler Reward 2
+            5: [2, 3, [[1, gem[1] - 2], [46, 1]]],
+            6: [2, 3, [[1, gem[1] - 3], [47, 1]]],
+            7: [2, 3, [[1, gem[1] - 5], [46, 1], [47, 1]]],
+            8: [3, 4, [[1, gem[2]]]],  # Jeweler Reward 3
+            9: [3, 4, [[1, gem[2] - 2], [46, 1]]],
+            10: [3, 4, [[1, gem[2] - 3], [47, 1]]],
+            11: [3, 4, [[1, gem[2] - 5], [46, 1], [47, 1]]],
+            12: [4, 5, [[1, gem[3]]]],  # Jeweler Reward 4
+            13: [4, 5, [[1, gem[3] - 2], [46, 1]]],
+            14: [4, 5, [[1, gem[3] - 3], [47, 1]]],
+            15: [4, 5, [[1, gem[3] - 5], [46, 1], [47, 1]]],
+            16: [5, 6, [[1, gem[4]]]],  # Jeweler Reward 5
+            17: [5, 6, [[1, gem[4] - 2], [46, 1]]],
+            18: [5, 6, [[1, gem[4] - 3], [47, 1]]],
+            19: [5, 6, [[1, gem[4] - 5], [46, 1], [47, 1]]],
+            20: [6, 7, [[1, gem[5]]]],  # Jeweler Reward 6
+            21: [6, 7, [[1, gem[5] - 2], [46, 1]]],
+            22: [6, 7, [[1, gem[5] - 3], [47, 1]]],
+            23: [6, 7, [[1, gem[5] - 5], [46, 1], [47, 1]]],
+            24: [7, 8, [[1, gem[6]]]],  # Jeweler Reward 7 (Mansion)
+            25: [7, 8, [[1, gem[6] - 2], [46, 1]]],
+            26: [7, 8, [[1, gem[6] - 3], [47, 1]]],
+            27: [7, 8, [[1, gem[6] - 5], [46, 1], [47, 1]]],
 
             # Inter-Continental Travel
-            30: [0, 20, [[37, 1]]],  # Cape to Coast w/ Lola's Letter
-            31: [0, 44, [[37, 1]]],  # Cape to Watermia w/ Lola's Letter
-            32: [20, 0, [[37, 1]]],  # Coast to Cape w/ Lola's Letter
-            33: [20, 44, [[37, 1]]],  # Coast to Watermia w/ Lola's Letter
-            34: [44, 0, [[37, 1]]],  # Watermia to Cape w/ Lola's Letter
-            35: [44, 20, [[37, 1]]],  # Watermia to Coast w/ Lola's Letter
-            36: [27, 48, [[13, 1]]],  # Neil's to Euro w/ Memory Melody
-            37: [27, 61, [[13, 1]]],  # Neil's to Dao w/ Memory Melody
-            38: [27, 66, [[13, 1]]],  # Neil's to Babel w/ Memory Melody
-            39: [14, 29, [[25, 1]]],  # Moon Tribe to Sky Garden w/ Teapot
-            40: [14, 33, [[25, 1]]],  # Moon Tribe to Seaside Palace w/ Teapot
-            41: [44, 48, [[24, 1]]],  # Watermia to Euro w/ Will
-            42: [48, 44, [[24, 1]]],  # Euro to Watermia w/ Will
-            43: [54, 61, [[10, 1]]],  # Natives' to Dao w/ Large Roast
+            30: [28, 29, [[37, 1]]],     # South Cape: Erik w/ Lola's Letter
+            31: [102, 103, [[37, 1]]],   # Coast: Turbo w/ Lola's Letter
+            32: [280, 281, [[37, 1]]],   # Watermia: Bridgeman w/ Lola's Letter
+            33: [160, 161, [[13, 1]]],   # Neil's: Neil w/ Memory Melody
+            34: [314, 316, [[205, 1]]],  # Euro: Neil w/ Memory restored
+            35: [402, 403, [[205, 1]]],  # Dao: Neil w/ Memory restored
+            36: [60, 61, [[25, 1]]],     # Moon Tribe healed w/ Teapot
+            37: [170, 171, [[202, 1]]],  # Sky Garden: Spirits w/ spirits healed
+            38: [280, 282, [[24, 1]]],   # Watermia: Stablemaster w/ Will
+            39: [310, 311, [[24, 1]]],   # Euro: Stablemaster w/ Will
+            40: [350, 351, [[10, 1]]],   # Natives': Child Guide w/ Large Roast
 
-            # SW Continent
-            50: [11, 12, [[9, 1]]],  # Itory Access w/ Lola's Melody
-            51: [8, 9, [[2, 1]]],  # Prison to Tunnel w/ Prison Key
-            52: [9, 10, [[61, 1]]],  # Tunnel Progression w/ Lilly
-            53: [12, 13, [[48, 1]]],  # Itory Cave w/ Psycho Dash
-            54: [12, 13, [[49, 1]]],  # Itory Cave w/ Psycho Slide
-            55: [12, 13, [[50, 1]]],  # Itory Cave w/ Spin Dash
-            56: [12, 75, [[23, 1]]],  # Get Lilly w/ Necklace
-            57: [14, 29, [[25, 1]]],  # Moon Tribe to Sky Garden w/ Teapot
-            58: [15, 16, [[7, 1], [48, 1]]],  # Inca Ruins w/ Tile and Psycho Dash
-            59: [15, 16, [[7, 1], [49, 1]]],  # Inca Ruins w/ Tile and Psycho Slide
-            60: [15, 16, [[7, 1], [50, 1]]],  # Inca Ruins w/ Tile and Spin Dash
-            156: [16, 83, [[48, 1]]],  # Inca Ruins w/ Psycho Dash (maze)
-            157: [16, 83, [[49, 1]]],  # Inca Ruins w/ Psycho Slide (maze)
-            158: [16, 83, [[50, 1]]],  # Inca Ruins w/ Spin Dash (maze)
-            61: [16, 17, [[8, 1]]],  # Inca Ruins w/ Wind Melody
-            62: [17, 18, [[3, 1], [4, 1]]],  # Inca Ruins w/ Inca Statues
-            63: [14, 73, [[48, 1]]],  # Moon Tribe Cave w/ Psycho Dash
-            64: [14, 73, [[49, 1]]],  # Moon Tribe Cave w/ Psycho Slider
-            65: [14, 73, [[50, 1]]],  # Moon Tribe Cave w/ Spin Dash
+            # Edward's / Tunnel
+            60: [32, 33, [[2, 1]]],    # Escape cell w/Prison Key
+            61: [45, 46, [[201, 1]]],  # Progression w/ Lilly
+            62: [47, 48, [[300, 1]]],  # Activate Bridge w/ Freedan
 
-            # SE Continent
-            70: [22, 23, [[48, 1]]],  # Diamond Mine Progression w/ Psycho Dash
-            71: [22, 23, [[49, 1]]],  # Diamond Mine Progression w/ Psycho Slide
-            72: [22, 23, [[50, 1]]],  # Diamond Mine Progression w/ Spin Dash
-            73: [22, 24, [[51, 1]]],  # Diamond Mine Progression w/ Dark Friar
-            74: [22, 24, [[50, 1]]],  # Diamond Mine Progression w/ Spin Dash
-            75: [22, 25, [[15, 1]]],  # Diamond Mine Progression w/ Elevator Key
-            76: [25, 26, [[11, 1], [12, 1]]],  # Diamond Mine Progression w/ Mine Keys
-            77: [29, 30, [[51, 1]]],  # Sky Garden Progression w/ Dark Friar
-            78: [29, 72, [[52, 1]]],  # Sky Garden Progression w/ Aura Barrier
-            79: [29, 32, [[14, 4]]],  # Sky Garden Progression w/ Crystal Balls
-            80: [29, 31, [[48, 1]]],  # Sky Garden Progression w/ Psycho Dash
-            81: [29, 31, [[49, 1]]],  # Sky Garden Progression w/ Psycho Slide
-            82: [29, 31, [[50, 1]]],  # Sky Garden Progression w/ Spin Dash
+            # Itory
+            70: [50, 51, [[9, 1]]],    # Town appears w/ Lola's Melody
+            71: [50, 51, [[9, 1]]],    # Town appears w/ Lola's Melody
+            72: [55, 56, [[23, 1]]],   # Get Lilly w/ Necklace
+            73: [57, 58, [[48, 1]]],   # Cave w/ Psycho Dash
+            74: [57, 58, [[49, 1]]],   # Cave w/ Psycho Slide
+            75: [57, 58, [[50, 1]]],   # Cave w/ Spin Dash
+
+            # Moon Tribe
+            80: [62, 63, [[48, 1]]],   # Cave challenge w/ Psycho Dash
+            81: [62, 63, [[49, 1]]],   # Cave challenge w/ Psycho Slide
+            82: [62, 63, [[50, 1]]],   # Cave challenge w/ Spin Dash
+
+            # Inca / Gold Ship / Freejia
+            90:  [77, 78, [[3, 1], [4, 1]]],  # Map 30 progression w/ Inca Statues
+            91:  [80, 81, [[48, 1]]],         # Map 32 progression w/ Psycho Dash
+            92:  [80, 81, [[49, 1]]],         # Map 32 progression w/ Psycho Slider
+            93:  [80, 81, [[50, 1]]],         # Map 32 progression w/ Spin Dash
+            94:  [85, 86, [[300, 1]]],        # Map 35 progression w/ Freedan
+            95:  [87, 88, [[8, 1]]],          # Map 36 progression w/ Wind Melody
+            96:  [89, 90, [[7, 1]]],          # Map 37 progression w/ Diamond Block
+            97:  [91, 92, [[48, 1]]],         # Map 38 progression w/ Psycho Dash
+            98:  [91, 92, [[49, 1]]],         # Map 38 progression w/ Psycho Slider
+            99:  [91, 92, [[50, 1]]],         # Map 38 progression w/ Spin Dash
+            100: [100, 105, [[70, 1]]],       # Gold Ship progression w/ Statue 1
+            101: [110, 115, [[204, 1]]],      # Freejia: Slaver item w/ Laborer Found
+
+            # Diamond Mine
+            110: [131, 132, [[48, 1]]],            # Map 61 false wall w/ Psycho Dash
+            111: [131, 132, [[49, 1]]],            # Map 61 false wall w/ Psycho Slider
+            112: [131, 132, [[50, 1]]],            # Map 61 false wall w/ Spin Dash
+            113: [134, 135, [[15, 1]]],            # Map 63 progression w/ Elevator Key
+            114: [136, 137, [[48, 1]]],            # Map 64 trapped laborer w/ Psycho Dash
+            115: [136, 137, [[49, 1]]],            # Map 64 trapped laborer w/ Psycho Slider
+            116: [136, 137, [[50, 1]]],            # Map 64 trapped laborer w/ Spin Dash
+            117: [138, 139, [[50, 1]]],            # Map 65 progression w/ Spin Dash
+            118: [138, 139, [[51, 1], [300, 1]]],  # Map 65 progression w/ Dark Friar
+
+            # Sky Garden
+            130: [170, 172, [[14, 4]]],            # Boss access w/ Crystal Balls
+            131: [178, 179, [[51, 1], [300, 1]]],  # Map 79 progression w/ Dark Friar
+            132: [178, 179, [[54, 1], [300, 1]]],  # Map 79 progression w/ Firebird
+            133: [168, 183, [[206, 1]]],           # Map 81 progression w/ switch 1
+            134: [183, 184, [[207, 1]]],           # Map 81 progression w/ switch 2
+            135: [183, 185, [[48, 1]]],            # Map 81 progression w/ Psycho Dash
+            136: [183, 185, [[49, 1]]],            # Map 81 progression w/ Psycho Dash
+            137: [183, 185, [[50, 1]]],            # Map 81 progression w/ Psycho Dash
+            138: [185, 186, [[208, 1], [48, 1]]],  # Map 81 progression w/ switch 3 & Psycho Dash
+            139: [185, 186, [[208, 1], [49, 1]]],  # Map 81 progression w/ switch 3 & Psycho Slider
+            140: [185, 186, [[208, 1], [50, 1]]],  # Map 81 progression w/ switch 3 & Spin Dash
+            141: [182, 183, [[50, 1]]],            # Map 81 progression w/ Spin Dash
+            142: [182, 185, [[50, 1]]],            # Map 81 progression w/ Spin Dash
+            143: [183, 186, [[50, 1]]],            # Map 81 progression w/ Spin Dash
+            144: [167, 189, [[300, 1]]],           # Map 82 progression w/ Freedan
+            145: [167, 189, [[301, 1]]],           # Map 82 progression w/ Glitches
+            146: [192, 190, [[50, 1]]],            # Map 83 progression w/ Spin Dash
+            147: [195, 197, [[51, 1], [300, 1]]],  # Map 84 progression w/ Dark Friar
+            148: [195, 197, [[52, 1], [300, 1]]],  # Map 84 progression w/ Aura Barrier
+
+            # Seaside Palace
+            160: [203, 206, [[201, 1]]],   # Coffin access w/ Lilly
+            161: [203, 204, [[210, 1]]],   # Buffy access w/ purified fountain
+            162: [199, 209, [[16, 1]]],    # Seaside to Mu w/ Mu key
+            163: [209, 199, [[16, 1]]],    # Mu to Seaside w/ Mu key
+
+            # Mu
+            170: [210, 243, [[49, 1]]],    # Map 95 progression w/ Psycho Slider
+            170: [210, 211, [[211, 1]]],   # Map 95 progression w/ water lowered 1
+            170: [211, 213, [[211, 2]]],   # Map 95 progression w/ water lowered 2
+            170: [212, 214, [[211, 2]]],   # Map 95 progression w/ water lowered 2
+            170: [215, 216, [[211, 1]]],   # Map 96 progression w/ water lowered 1
+            #****************************************
+            170: [220, 219, [[211, 1]]],   # Map 97 progression w/ water lowered 1
+
 
             # NE Continent
             90: [33, 34, [[17, 1]]],  # Seaside Progression w/ Purity Stone
@@ -2373,7 +2470,7 @@ class World:
             152: [43, 69, [[20, 2]]],  # Rescue Kara from Angel w/ Magic Dust
             153: [53, 69, [[20, 2]]],  # Rescue Kara from Mt. Temple w/ Magic Dust
             154: [60, 69, [[20, 2]]],  # Rescue Kara from Ankor Wat w/ Magic Dust
-            155: [69, 70, [[36, 1], [54, 0], [55, 0], [56, 0], [57, 0], [58, 0], [59, 0]]]
+            155: [69, 70, [[36, 1], [70, 0], [71, 0], [72, 0], [73, 0], [74, 0], [75, 0]]]
             # Beat Game w/Mystic Statues and Aura
         }
 
@@ -2385,7 +2482,7 @@ class World:
             # Bosses
             1:  [ 2, 0, "Boss", 0,  78,  97, "18872", b"\x29\x78\x00\xC0\x00\x00\x00\x11", False, False, False, "Castoth entrance (in)"],
             2:  [ 1, 0, "Boss", 1,   0,   0, "189e4", b"\x1E\x68\x00\x00\x01\x03\x00\x24", False, False, False, "Castoth entrance (out)"],
-            3:  [ 0, 0, "Boss", 0, 100, 102, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", False, False,  True, "Diamond Coast passage (Gold Ship)"],
+            3:  [ 0, 0, "Boss", 0, 105, 102, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", False, False,  True, "Diamond Coast passage (Gold Ship)"],
 
             4:  [ 5, 0, "Boss", 0, 171, 197, "18e20", b"\x55\x70\x00\xE0\x01\x00\x00\x22", False, False, False, "Viper entrance (in)"],
             5:  [ 4, 0, "Boss", 1,   0,   0, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", False, False, False, "Viper entrance (out)"],
@@ -2643,7 +2740,7 @@ class World:
             292: [291, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 79 to Map 80 (N)"],
             293: [294, 0, "Room",  0, 179, 181, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 79 to Map 80 (S)"],
             294: [293, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 80 to Map 79 (S)"],
-            295: [296, 0, "Room",  0, 182, 187, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 81 to Map 82 (NE)"],   # Room 3
+            295: [296, 0, "Room",  0, 168, 187, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 81 to Map 82 (NE)"],   # Room 3
             296: [295, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 82 to Map 81 (NW)"],
             297: [298, 0, "Room",  0, 183, 189, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 81 to Map 82 (NW)"],
             298: [297, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Sky Garden: Map 82 to Map 81 (NE)"],
