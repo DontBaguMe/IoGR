@@ -789,7 +789,7 @@ class World:
                 goal = False
                 print("ERROR: Inventory capacity exceeded")
             else:
-                goal = ((self.goal == "Dark Gaia" and self.graph[70][0]) or
+                goal = (("Gaia" in self.goal and self.graph[70][0]) or
                         (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
 
             # Get list of new progression options
@@ -1372,10 +1372,14 @@ class World:
         for x in self.statues:
             self.dungeons_req.append(self.boss_order[x-1])
 
-        if settings.goal.value == Goal.DARK_GAIA.value:
-            self.goal = "Dark Gaia"
-        else:
+        gaia_coinflip = random.randint(0, 1)
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
             self.goal = "Red Jewel Hunt"
+        elif settings.goal.value == Goal.APO_GAIA.value or (settings.goal.value == Goal.RANDOM_GAIA.value and gaia_coinflip):
+            self.goal = "Apocalypse Gaia"
+        else:
+            self.goal = "Dark Gaia"
+
 
         if settings.logic.value == Logic.COMPLETABLE.value:
             self.logic_mode = "Completable"

@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.7.0"
+VERSION = "2.7.1"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -786,8 +786,8 @@ class Randomizer:
         patch.write(FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
 
         # Put Gold Ship captain at Inca entrance
-        patch.seek(int("c8c9c", 16) + rom_offset)
-        patch.write(b"\x19\x1c\x00\x4e\x85\x85\x00")
+#        patch.seek(int("c8c9c", 16) + rom_offset)
+#        patch.write(b"\x19\x1c\x00\x4e\x85\x85\x00")
 
         ##########################################################################
         #                          Modify Gold Ship events
@@ -1523,17 +1523,17 @@ class Randomizer:
         patch.write(b"\xD3\xD2\x00\xD5\x00" + qt_encode("Contributors and Testers:") + b"\xCB")
         patch.write(qt_encode("-Alchemic  -Austin21300") + b"\xCB")
         patch.write(qt_encode("-Atlas     -BonzaiBier") + b"\xCB")
-        patch.write(qt_encode("-Crazyhaze -BOWIEtheHERO") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-ChaozJoe  -BOWIEtheHERO") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-DoodSF    -BubbaSWalter") + b"\xCB")
-        patch.write(qt_encode("-Eppy37    -DerTolleIgel") + b"\xCB")
-        patch.write(qt_encode("-Lassic    -djtifaheart") + b"\xCB")
-        patch.write(qt_encode("-Le Hulk   -GliitchWiitch") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Eppy37    -Crazyhaze") + b"\xCB")
+        patch.write(qt_encode("-Lassic    -DerTolleIgel") + b"\xCB")
+        patch.write(qt_encode("-Le Hulk   -djtifaheart") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Mikan     -Keypaladin") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet  -Neomatamune") + b"\xCB")
-        patch.write(qt_encode("-NYRambler -Pozzum Senpai") + b"\xCB")
-        patch.write(qt_encode("-Plan") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Mikan     -GliitchWiitch") + b"\xCB")
+        patch.write(qt_encode("-Mr Freet  -Keypaladin") + b"\xCB")
+        patch.write(qt_encode("-NYRambler -Neomatamune") + b"\xCB")
+        patch.write(qt_encode("-Plan      -Pozzum Senpai") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-roeya     -Skipsy") + b"\xCB")
         patch.write(qt_encode("-Scheris   -SmashManiac") + b"\xCB")
@@ -2288,22 +2288,6 @@ class Randomizer:
                     f_mapdata.seek(addr)
                     f_mapdata.write(dungeon_music[boss_order[6]-1])
 
-        # Change conditions for ship captain @ Inca
-        inca_boss = boss_order[0]
-        patch.seek(int("584ab", 16) + rom_offset)
-        if inca_boss == 2:
-            patch.write(b"\xf9\x00")
-        elif inca_boss == 3:
-            patch.write(b"\xfa\x00")
-        elif inca_boss == 4:
-            patch.write(b"\xfb\x00")
-        elif inca_boss == 5:
-            patch.write(b"\xfc\x00")
-        elif inca_boss == 6:
-            patch.write(b"\x70\x01")
-        elif inca_boss == 7:
-            patch.write(b"\xf6\x00")
-
         # Change conditions and text for Pyramid boss portal
         pyramid_boss = boss_order[4]
         patch.seek(int("8cd71", 16) + rom_offset)
@@ -2990,8 +2974,8 @@ class Randomizer:
         #                                   Plugins
         ##########################################################################
         # Apocalypse Gaia
-        gaia_coinflip = random.randint(0, 1)
-        if settings.goal.value is Goal.APO_GAIA.value or (settings.goal.value is Goal.RANDOM_GAIA.value and gaia_coinflip):
+
+        if self.w.goal == "Apocalypse Gaia":
             patch.seek(int("98de4",16)+rom_offset)
             patch.write(b"\x80") # Respawn in space
             for pluginfilename in os.listdir(AG_PLUGIN_PATH):
