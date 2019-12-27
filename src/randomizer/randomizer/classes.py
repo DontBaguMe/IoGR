@@ -1577,7 +1577,7 @@ class World:
             209: [0, 4, "", "Sky Garden: Map 84 Switch", False, 1]
             210: [0, 4, "", "Seaside: Fountain Purified", False, 1]
             211: [0, 4, "", "Mu: Water Lowered 1", False, 1]
-            212: [0, 4, "", "Mu: Water Lowered 2", False, 1]
+#            212: [0, 4, "", "Mu: Water Lowered 2", False, 1]
             213: [0, 4, "", "Angel: Puzzle Complete", False, 1]
             214: [0, 4, "", "Mt Kress: Drops Used 1", False, 1]
             215: [0, 4, "", "Mt Kress: Drops Used 2", False, 1]
@@ -1590,8 +1590,9 @@ class World:
             222: [0, 4, "", "Babel: Mummy Queen Defeated", False, 1]
             223: [0, 4, "", "Mansion: Solid Arm Defeated", False, 1]
 
-            # Fighting Form Access
+            # Misc
             300: [0, 5, "", "Freedan Access", False, 1]
+            301: [0, 5, "", "Glitches", False, 1]
         }
 
         # Define Item/Ability/Statue locations
@@ -1834,9 +1835,8 @@ class World:
         # Format: { Region ID: Traversed flag, [Accessible regions], Region Name],
         #                                                       ItemsToRemove }
         self.graph = {
-            -1: [False, [0], "Game Start", []],
-
-            0: [False, [7, 11, 14, 15, 74], "South Cape", []],
+     # Game Start
+            0: [False, [22], "Game Start", []],
 
             # Jeweler
             1: [False, [], "Jeweler Access", []],
@@ -2043,41 +2043,41 @@ class World:
             209: [False, [], "Seaside Palace: Mu Passage", [16]],
 
             # Mu
-            210: [False, [],    "Mu: Map 95 (top)", []],
-            211: [False, [],    "Mu: Map 95 (middle E)", []],
-            212: [False, [],    "Mu: Map 95 (middle W)", []],
-            213: [False, [],    "Mu: Map 95 (bottom E)", []],
-            214: [False, [],    "Mu: Map 95 (bottom W)", []],
-            215: [False, [],    "Mu: Map 96 (top)", []],
-            216: [False, [],    "Mu: Map 96 (middle)", []],
-            217: [False, [],    "Mu: Map 96 (bottom)", []],
-            218: [False, [],    "Mu: Map 97 (top main)", []],
-            219: [False, [],    "Mu: Map 97 (top island)", []],
-            220: [False, [],    "Mu: Map 97 (middle NE)", []],
-            221: [False, [],    "Mu: Map 97 (middle SW)", []],
-            222: [False, [],    "Mu: Map 97 (bottom)", []],
-            223: [False, [],    "Mu: Map 98 (top S)", []],
-            224: [False, [],    "Mu: Map 98 (top N)", []],
-            225: [False, [],    "Mu: Map 98 (middle E)", []],
-            226: [False, [],    "Mu: Map 98 (middle W)", []],
-            227: [False, [],    "Mu: Map 98 (bottom E)", []],
-            228: [False, [],    "Mu: Map 98 (bottom W)", []],
-            229: [False, [],    "Mu: Map 99 (Room of Hope 1)", [18]],
-            230: [False, [],    "Mu: Map 99 (Room of Hope 2)", [18]],
-            231: [False, [],    "Mu: Map 100 (middle E)", []],
-            232: [False, [],    "Mu: Map 100 (middle W)", []],
-            233: [False, [],    "Mu: Map 100 (bottom)", []],
-            234: [False, [],    "Mu: Map 101 (top)", []],
-            235: [False, [],    "Mu: Map 101 (middle W)", []],
-            236: [False, [],    "Mu: Map 101 (middle E)", []],
-            237: [False, [],    "Mu: Map 101 (bottom)", []],
-            238: [False, [],    "Mu: Map 102 (pedestals)", [19, 19]],
-            239: [False, [],    "Mu: Map 102 (main)", []],
-            240: [False, [],    "Mu: Map 102 (statue get)", []],
-            241: [False, [],    "Mu: Boss Room (entryway)", []],
-            242: [False, [],    "Mu: Boss Room (main)", []],
-            243: [False, [210], "Mu: Map 95 (top, Slider)", []],
-            244: [False, [224], "Mu: Map 98 (top, Slider)", []],
+            210: [False, [],         "Mu: Map 95 (top)", []],
+            211: [False, [210],      "Mu: Map 95 (middle E)", []],
+            212: [False, [],         "Mu: Map 95 (middle W)", []],
+            213: [False, [211],      "Mu: Map 95 (bottom E)", []],
+            214: [False, [212],      "Mu: Map 95 (bottom W)", []],
+            215: [False, [],         "Mu: Map 96 (top)", []],
+            216: [False, [215],      "Mu: Map 96 (middle)", []],
+            217: [False, [],         "Mu: Map 96 (bottom)", []],
+            218: [False, [],         "Mu: Map 97 (top main)", []],
+            219: [False, [220, 221], "Mu: Map 97 (top island)", []],
+            220: [False, [],         "Mu: Map 97 (middle NE)", []],
+            221: [False, [219],      "Mu: Map 97 (middle SW)", []],
+            222: [False, [],         "Mu: Map 97 (bottom)", []],
+            223: [False, [],         "Mu: Map 98 (top S)", []],
+            224: [False, [],         "Mu: Map 98 (top N)", []],
+            225: [False, [224],      "Mu: Map 98 (middle E)", []],
+            226: [False, [],         "Mu: Map 98 (middle W)", []],
+            227: [False, [225],      "Mu: Map 98 (bottom E)", []],
+            228: [False, [226],      "Mu: Map 98 (bottom W)", []],
+            229: [False, [],         "Mu: Map 99 (Room of Hope 1)", [18]],
+            230: [False, [],         "Mu: Map 99 (Room of Hope 2)", [18]],
+            231: [False, [],         "Mu: Map 100 (middle E)", []],
+            232: [False, [],         "Mu: Map 100 (middle W)", []],
+            233: [False, [],         "Mu: Map 100 (bottom)", []],
+            234: [False, [],         "Mu: Map 101 (top)", []],
+            235: [False, [],         "Mu: Map 101 (middle W)", []],
+            236: [False, [234],      "Mu: Map 101 (middle E)", []],
+            237: [False, [],         "Mu: Map 101 (bottom)", []],
+            238: [False, [],         "Mu: Map 102 (pedestals)", [19, 19]],
+            239: [False, [],         "Mu: Map 102 (main)", []],
+            240: [False, [],         "Mu: Map 102 (statue get)", []],
+            241: [False, [],         "Mu: Boss Room (entryway)", []],
+            242: [False, [],         "Mu: Boss Room (main)", []],
+            243: [False, [210],      "Mu: Map 95 (top, Slider)", []],
+            244: [False, [224],      "Mu: Map 98 (top, Slider)", []],
 
             # Angel Village
             250: [False, [],  "Angel Village: Outside", []],
@@ -2147,8 +2147,9 @@ class World:
             321: [False, [],    "Euro: Hidden House", []],
             322: [False, [],    "Euro: Shrine", []],
             323: [False, [],    "Euro: Explorer's House", []],
-            324: [False, [],    "Euro: Store", []],
+            324: [False, [326], "Euro: Store", []],
             325: [False, [],    "Euro: Dark Space House", []],
+            326: [False, [],    "Euro: Store Exit", []],
 
             # Mt. Kress
             330: [False, [],    "Mt. Kress: Map 160", []],
@@ -2259,6 +2260,7 @@ class World:
             446: [False, [],    "Pyramid: Hieroglyph 5", []],
             447: [False, [],    "Pyramid: Hieroglyph 6", []],
             448: [False, [],    "Pyramid: Boss Room", []],
+            449: [False, [],    "Pyramid: Hieroglyphs Placed", []],
 
             # Babel
             460: [False, [],    "Babel: Foyer", []],
@@ -2409,47 +2411,89 @@ class World:
             163: [209, 199, [[16, 1]]],    # Mu to Seaside w/ Mu key
 
             # Mu
-            170: [210, 243, [[49, 1]]],    # Map 95 progression w/ Psycho Slider
-            170: [210, 211, [[211, 1]]],   # Map 95 progression w/ water lowered 1
-            170: [211, 213, [[211, 2]]],   # Map 95 progression w/ water lowered 2
-            170: [212, 214, [[211, 2]]],   # Map 95 progression w/ water lowered 2
-            170: [215, 216, [[211, 1]]],   # Map 96 progression w/ water lowered 1
-            #****************************************
-            170: [220, 219, [[211, 1]]],   # Map 97 progression w/ water lowered 1
+            170: [210, 243, [[49, 1]]],                       # Map 95 progression w/ Psycho Slider
+            171: [210, 211, [[211, 1]]],                      # Map 95 progression w/ water lowered 1
+            172: [211, 213, [[211, 2]]],                      # Map 95 progression w/ water lowered 2
+            173: [212, 214, [[211, 2]]],                      # Map 95 progression w/ water lowered 2
+            174: [215, 216, [[211, 1]]],                      # Map 96 progression w/ water lowered 1
+            175: [220, 219, [[211, 1], [51, 1], [300, 1]]],   # Map 97 progression w/ water lowered 1 & Friar
+            176: [220, 219, [[211, 1], [54, 1], [300, 1]]],   # Map 97 progression w/ water lowered 1 & Firebird
+            177: [224, 244, [[49, 1]]],                       # Map 98 progression w/ Psycho Slider
+            178: [224, 225, [[211, 1]]],                      # Map 98 progression w/ water lowered 1
+            179: [225, 227, [[211, 2]]],                      # Map 98 progression w/ water lowered 2
+            180: [226, 228, [[211, 2]]],                      # Map 98 progression w/ water lowered 2
+            181: [227, 228, [[49, 1]]],                       # Map 98 progression w/ Psycho Slider
+            182: [228, 227, [[49, 1]]],                       # Map 98 progression w/ Psycho Slider
+            183: [235, 236, [[49, 1]]],                       # Map 101 progression w/ Psycho Slider
+            184: [238, 241, [[19, 2]]],                       # Map 102 progression w/ Rama Statues
 
+            # Angel Dungeon
+            210: [263, 264, [[49, 1]]],    # Map 112 progression w/ Psycho Slider
+            211: [267, 268, [[49, 1]]],    # Map 114 progression w/ Psycho Slider
+            212: [272, 273, [[213, 1]]],   # Ishtar's chest w/ puzzle complete
 
-            # NE Continent
-            90: [33, 34, [[17, 1]]],  # Seaside Progression w/ Purity Stone
-            91: [33, 35, [[9, 1], [16, 1], [23, 1], [37, 1]]],
-            # Seaside Progression w/ Lilly
-            92: [33, 36, [[16, 1]]],  # Seaside to Mu w/ Mu Key
-            93: [36, 33, [[16, 1]]],  # Mu to Seaside w/ Mu Key
-            94: [37, 38, [[18, 1]]],  # Mu Progression w/ Statue of Hope 1
-            95: [38, 71, [[51, 1]]],  # Mu Progression w/ Dark Friar
-            96: [38, 71, [[49, 1]]],  # Mu Progression w/ Psycho Slide
-            97: [38, 39, [[49, 1]]],  # Mu Progression w/ Psycho Slide
-            98: [71, 40, [[18, 2]]],  # Mu Progression w/ Statue of Hope 2
-            99: [40, 41, [[19, 2]]],  # Mu Progression w/ Rama Statues
-            100: [42, 43, [[49, 1]]],  # Angel Village to Dungeon w/ Slide
-            101: [80, 46, [[51, 1]]],  # Great Wall Progression w/ Dark Friar
-            102: [46, 47, [[50, 1]]],  # Great Wall Progression w/ Spin Dash
-            103: [80, 45, [[50, 1]]],  # Escape Great Wall w/ Spin Dash
+            # Great Wall
+            220: [294, 295, [[49, 1], [301, 1]]],  # Map 133 progression w/ Slider & glitches
+            221: [296, 295, [[50, 1]]],            # Map 133 progression w/ Spin Dash
+            222: [296, 295, [[300, 1]]],           # Map 133 progression w/ Freedan
+            223: [298, 299, [[51, 1], [300, 1]]],  # Map 135 progression w/ Friar
+            224: [298, 299, [[54, 1], [300, 1]]],  # Map 135 progression w/ Firebird
+            225: [299, 298, [[51, 1], [300, 1]]],  # Map 135 progression w/ Friar      -- IS THIS TRUE?
+            226: [299, 298, [[54, 1], [300, 1]]],  # Map 135 progression w/ Firebird   -- IS THIS TRUE?
+            227: [300, 301, [[50, 1]]],            # Map 136 progression w/ Spin Dash
 
-            # N Continent
-            110: [48, 49, [[40, 1]]],  # Ann item w/ Apple
-            111: [48, 50, [[50, 1]]],  # Euro to Mt. Temple w/ Spin Dash
-            112: [50, 51, [[26, 1]]],  # Mt. Temple Progression w/ Drops 1
-            113: [51, 52, [[26, 2]]],  # Mt. Temple Progression w/ Drops 2
-            114: [52, 53, [[26, 3]]],  # Mt. Temple Progression w/ Drops 3
-            115: [50, 48, [[50, 1]]],  # Mt. Temple to Euro w/ Spin
-            116: [54, 55, [[29, 1]]],  # Natives' Village Progression w/ Flower
-            117: [56, 57, [[49, 1], [50, 1]]],  # Ankor Wat Progression w/ Slide and Spin
-            118: [76, 58, [[51, 1]]],  # Ankor Wat Progression w/ Dark Friar
-            119: [76, 58, [[36, 1]]],  # Ankor Wat Progression w/ Aura
-            120: [76, 59, [[53, 1]]],  # Ankor Wat Progression w/ Earthquaker
-            121: [76, 59, [[51, 1], [45, 2]]],  # Ankor Wat Progression w/ upgraded Friar
-            122: [59, 60, [[28, 1], [49, 1]]],  # Ankor Wat Progression w/ Black Glasses and Slider
+            # Euro
+            230: [314, 315, [[40, 1]]],    # Ann item w/ Apple
 
+            # Mt. Temple
+            240: [331, 332, [[50, 1]]],    # Map 161 progression w/ Spin Dash
+            241: [332, 331, [[50, 1]]],    # Map 161 progression w/ Spin Dash
+            242: [333, 335, [[214, 1]]],   # Map 162 progression w/ Mushroom drops 1
+            243: [335, 333, [[214, 1]]],   # Map 162 progression w/ Mushroom drops 1  -- IS THIS TRUE?
+            244: [339, 340, [[215, 1]]],   # Map 162 progression w/ Mushroom drops 2
+            245: [340, 339, [[215, 1]]],   # Map 162 progression w/ Mushroom drops 2  -- IS THIS TRUE?
+            246: [340, 341, [[216, 1]]],   # Map 162 progression w/ Mushroom drops 3
+            247: [341, 340, [[216, 1]]],   # Map 162 progression w/ Mushroom drops 3  -- IS THIS TRUE?
+
+            # Natives'
+            250: [353, 354, [[29, 1]]],    # Statues awake w/ Gorgon Flower
+
+            # Ankor Wat
+            260: [361, 362, [[51, 1], [45, 2], [300, 1]]],   # Map 177 progression w/ upgraded Friar
+            261: [363, 364, [[50, 1]]],                      # Map 178 progression w/ Spin Dash
+            262: [364, 365, [[49, 1]]],                      # Map 178 progression w/ Psycho Slider
+            263: [365, 364, [[49, 1]]],                      # Map 178 progression w/ Psycho Slider  -- IS THIS TRUE?
+            264: [367, 366, [[50, 1]]],                      # Map 179 progression w/ Spin Dash      -- IS THIS TRUE?
+            265: [369, 370, [[49, 1]]],                      # Map 181 progression w/ Psycho Slider
+            266: [370, 371, [[50, 1]]],                      # Map 181 progression w/ Spin Dash
+            267: [373, 374, [[53, 1], [300, 1]]],            # Map 183 progression w/ Earthquaker
+            268: [373, 374, [[51, 1], [45, 2], [300, 1]]],   # Map 183 progression w/ upgraded Friar
+            269: [373, 374, [[51, 1], [300, 1], [301, 1]]],  # Map 183 progression w/ Friar and glitches
+            270: [373, 374, [[54, 1], [300, 1]]],            # Map 183 progression w/ Firebird       -- IS THIS TRUE?
+            271: [376, 377, [[51, 1], [300, 1]]],            # Map 184 progression w/ Friar
+            272: [376, 377, [[36, 1], [300, 1]]],            # Map 184 progression w/ Shadow
+            273: [384, 385, [[28, 1], [49, 1]]],             # Map 188 progression w/ Black Glasses & Slider
+            274: [385, 384, [[28, 1], [49, 1]]],             # Map 188 progression w/ Black Glasses & Slider
+            275: [384, 385, [[301, 1], [49, 1]]],            # Map 188 progression w/ glitches & Slider
+            276: [385, 384, [[301, 1], [49, 1]]],            # Map 188 progression w/ glitches & Slider
+            277: [386, 387, [[49, 1]]],                      # Map 188 progression w/ Psycho Slider
+            278: [387, 386, [[49, 1]]],                      # Map 188 progression w/ Psycho Slider
+
+            # Pyramid
+            290: [410, 411, [[49, 1]]],             # Map 204 progression w/ Slider
+            290: [410, 411, [[50, 1]]],             # Map 204 progression w/ Spin
+            290: [410, 411, [[301, 1]]],            # Map 204 progression w/ glitches
+            290: [411, 412, [[36, 1]]],             # Map 204 progression w/ Aura
+            290: [412, 413, [[36, 1]]],             # Map 204 progression w/ Aura
+            290: [415, 449, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
+                                                    # Boss door open w/ Hieroglyphs
+            266: [416, 417, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            266: [417, 416, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            266: [418, 419, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            266: [419, 418, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            266: [420, 421, [[36, 1], [300, 1]]],   # Map 208 progression w/ Aura
+            266: [420, 421, [[53, 1], [300, 1]]],   # Map 208 progression w/ Earthquaker  -- IS THIS TRUE?
+#***************************************************
             # NW Continent
             130: [61, 62, [[49, 1]]],  # Pyramid foyer w/ Slide
             131: [61, 62, [[50, 1]]],  # Pyramid foyer w/ Spin
