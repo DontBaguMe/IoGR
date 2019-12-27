@@ -1593,6 +1593,7 @@ class World:
             # Misc
             300: [0, 5, "", "Freedan Access", False, 1]
             301: [0, 5, "", "Glitches", False, 1]
+            302: [0, 5, "", "Early Firebird", False, 1]
         }
 
         # Define Item/Ability/Statue locations
@@ -1828,14 +1829,40 @@ class World:
             153: [479, 3, False, 0, [70, 71, 72, 73, 74], "", "", "", "", "Babel Prize                         "],
 
             # Event Switches
-            200: [56, 1, True, 61, [], "", "", "", "", "Lilly                         "]
+            201: [ 56, 1, True, 201, [], "", "", "", "", "Lilly                         "]
+            202: [ 61, 1, True, 202, [], "", "", "", "", "Moon Tribe: Spirits Healed     "]
+            203: [ 97, 1, True, 203, [], "", "", "", "", "Inca: Castoth defeated     "]
+            204: [122, 1, True, 204, [], "", "", "", "", "Freejia: Found Laborer     "]
+            205: [161, 1, True, 205, [], "", "", "", "", "Neil's Memory Restored     "]
+            206: [187, 1, True, 206, [], "", "", "", "", "Sky Garden: Map 82 NW Switch     "]
+            207: [189, 1, True, 207, [], "", "", "", "", "Sky Garden: Map 82 NE Switch     "]
+            208: [188, 1, True, 208, [], "", "", "", "", "Sky Garden: Map 82 SE Switch     "]
+            209: [197, 1, True, 209, [], "", "", "", "", "Sky Garden: Map 84 Switch     "]
+            210: [208, 1, True, 210, [], "", "", "", "", "Seaside: Fountain Purified     "]
+            211: [245, 1, True, 211, [], "", "", "", "", "Mu: Water Lowered 1     "]
+            212: [246, 1, True, 211, [], "", "", "", "", "Mu: Water Lowered 2     "]
+            213: [274, 1, True, 213, [], "", "", "", "", "Angel: Puzzle Complete     "]
+            214: [346, 1, True, 214, [], "", "", "", "", "Mt Kress: Drops used 1     "]
+            215: [347, 1, True, 215, [], "", "", "", "", "Mt Kress: Drops used 2     "]
+            216: [348, 1, True, 216, [], "", "", "", "", "Mt Kress: Drops used 3     "]
+            217: [449, 1, True, 217, [], "", "", "", "", "Pyramid: Hieroglyphs placed     "]
+            218: [474, 1, True, 218, [], "", "", "", "", "Babel: Castoth defeated     "]
+            219: [475, 1, True, 219, [], "", "", "", "", "Babel: Viper defeated     "]
+            220: [476, 1, True, 220, [], "", "", "", "", "Babel: Vampires defeated     "]
+            221: [477, 1, True, 221, [], "", "", "", "", "Babel: Sand Fanger defeated     "]
+            222: [478, 1, True, 222, [], "", "", "", "", "Babel: Mummy Queen defeated     "]
+            223: [482, 1, True, 223, [], "", "", "", "", "Mansion: Solid Arm defeated     "]
+
+            # Misc
+            301: [0, 1, True, 0, [], "", "", "", "", "Glitches                         "]
+            302: [0, 1, True, 0, [], "", "", "", "", "Early Firebird                         "]
         }
 
         # World graph is initially populated only with "free" edges
         # Format: { Region ID: Traversed flag, [Accessible regions], Region Name],
         #                                                       ItemsToRemove }
         self.graph = {
-     # Game Start
+            # Game Start
             0: [False, [22], "Game Start", []],
 
             # Jeweler
@@ -2231,9 +2258,9 @@ class World:
             417: [False, [416], "Pyramid: Map 206 (W)", []],
             418: [False, [],    "Pyramid: Map 207 (NE)", []],
             419: [False, [],    "Pyramid: Map 207 (SW)", []],
-            420: [False, [],    "Pyramid: Map 208 (N)", []],
+            420: [False, [421], "Pyramid: Map 208 (N)", []],
             421: [False, [420], "Pyramid: Map 208 (S)", []],
-            422: [False, [],    "Pyramid: Map 209 (W)", []],
+            422: [False, [423], "Pyramid: Map 209 (W)", []],
             423: [False, [422], "Pyramid: Map 209 (E)", []],
             424: [False, [],    "Pyramid: Map 210", []],
             425: [False, [],    "Pyramid: Map 211", []],
@@ -2244,7 +2271,7 @@ class World:
             430: [False, [],    "Pyramid: Map 213", []],
             431: [False, [],    "Pyramid: Map 214 (NW)", []],
             432: [False, [],    "Pyramid: Map 214 (NE)", []],
-            433: [False, [],    "Pyramid: Map 214 (SE)", []],
+            433: [False, [434], "Pyramid: Map 214 (SE)", []],
             434: [False, [],    "Pyramid: Map 214 (SW)", []],
             435: [False, [],    "Pyramid: Map 215", []],
             436: [False, [437], "Pyramid: Map 216 (N)", []],
@@ -2291,7 +2318,8 @@ class World:
 
             # Game End
             490: [False, [], "Kara Released", []]
-            491: [False, [], "Dark Gaia", []]
+            491: [False, [], "Firebird", []]
+            492: [False, [], "Dark Gaia", []]
         }
 
         # Define logical paths in dynamic graph
@@ -2426,6 +2454,8 @@ class World:
             182: [228, 227, [[49, 1]]],                       # Map 98 progression w/ Psycho Slider
             183: [235, 236, [[49, 1]]],                       # Map 101 progression w/ Psycho Slider
             184: [238, 241, [[19, 2]]],                       # Map 102 progression w/ Rama Statues
+            185: [229, 245, [[18, 1]]],                       # Water lowered 1 w/ Hope Statue
+            186: [230, 246, [[18, 2]]],                       # Water lowered 2 w/ Hope Statues
 
             # Angel Dungeon
             210: [263, 264, [[49, 1]]],    # Map 112 progression w/ Psycho Slider
@@ -2448,12 +2478,12 @@ class World:
             # Mt. Temple
             240: [331, 332, [[50, 1]]],    # Map 161 progression w/ Spin Dash
             241: [332, 331, [[50, 1]]],    # Map 161 progression w/ Spin Dash
-            242: [333, 335, [[214, 1]]],   # Map 162 progression w/ Mushroom drops 1
-            243: [335, 333, [[214, 1]]],   # Map 162 progression w/ Mushroom drops 1  -- IS THIS TRUE?
-            244: [339, 340, [[215, 1]]],   # Map 162 progression w/ Mushroom drops 2
-            245: [340, 339, [[215, 1]]],   # Map 162 progression w/ Mushroom drops 2  -- IS THIS TRUE?
-            246: [340, 341, [[216, 1]]],   # Map 162 progression w/ Mushroom drops 3
-            247: [341, 340, [[216, 1]]],   # Map 162 progression w/ Mushroom drops 3  -- IS THIS TRUE?
+            242: [333, 346, [[214, 1]]],   # Map 162 progression w/ Mushroom drops 1
+            243: [335, 346, [[214, 1]]],   # Map 162 progression w/ Mushroom drops 1  -- IS THIS TRUE?
+            244: [339, 347, [[215, 1]]],   # Map 162 progression w/ Mushroom drops 2
+            245: [340, 347, [[215, 1]]],   # Map 162 progression w/ Mushroom drops 2  -- IS THIS TRUE?
+            246: [340, 348, [[216, 1]]],   # Map 162 progression w/ Mushroom drops 3
+            247: [341, 348, [[216, 1]]],   # Map 162 progression w/ Mushroom drops 3  -- IS THIS TRUE?
 
             # Natives'
             250: [353, 354, [[29, 1]]],    # Statues awake w/ Gorgon Flower
@@ -2481,41 +2511,44 @@ class World:
 
             # Pyramid
             290: [410, 411, [[49, 1]]],             # Map 204 progression w/ Slider
-            290: [410, 411, [[50, 1]]],             # Map 204 progression w/ Spin
-            290: [410, 411, [[301, 1]]],            # Map 204 progression w/ glitches
-            290: [411, 412, [[36, 1]]],             # Map 204 progression w/ Aura
-            290: [412, 413, [[36, 1]]],             # Map 204 progression w/ Aura
-            290: [415, 449, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
+            291: [410, 411, [[50, 1]]],             # Map 204 progression w/ Spin
+            292: [410, 411, [[301, 1]]],            # Map 204 progression w/ glitches
+            293: [411, 412, [[36, 1]]],             # Map 204 progression w/ Aura
+            294: [412, 413, [[36, 1]]],             # Map 204 progression w/ Aura
+            295: [415, 449, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
                                                     # Boss door open w/ Hieroglyphs
-            266: [416, 417, [[50, 1]]],             # Map 206 progression w/ Spin Dash
-            266: [417, 416, [[50, 1]]],             # Map 206 progression w/ Spin Dash
-            266: [418, 419, [[50, 1]]],             # Map 206 progression w/ Spin Dash
-            266: [419, 418, [[50, 1]]],             # Map 206 progression w/ Spin Dash
-            266: [420, 421, [[36, 1], [300, 1]]],   # Map 208 progression w/ Aura
-            266: [420, 421, [[53, 1], [300, 1]]],   # Map 208 progression w/ Earthquaker  -- IS THIS TRUE?
-#***************************************************
-            # NW Continent
-            130: [61, 62, [[49, 1]]],  # Pyramid foyer w/ Slide
-            131: [61, 62, [[50, 1]]],  # Pyramid foyer w/ Spin
-            132: [62, 63, [[36, 1]]],  # Pyramid Progression w/ Aura
-            133: [77, 78, [[51, 1]]],  # Pyramid Progression w/ Dark Friar
-            134: [77, 79, [[53, 1]]],  # Pyramid Progression w/ Earthquaker
-            135: [62, 65, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
-            # Pyramid Boss w/ Hieroglyphs and Journal
-            136: [77, 64, [[50, 1]]],  # Pyramid Progression w/ Spin Dash
+            296: [416, 417, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            297: [417, 416, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            298: [418, 419, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            299: [419, 418, [[50, 1]]],             # Map 206 progression w/ Spin Dash
+            300: [426, 427, [[36, 1], [300, 1]]],   # Map 212 progression w/ Aura
+            301: [426, 427, [[53, 1], [300, 1]]],   # Map 212 progression w/ Earthquaker
+            302: [427, 428, [[36, 1], [300, 1]]],   # Map 212 progression w/ Aura
+            303: [427, 429, [[36, 1], [300, 1]]],   # Map 212 progression w/ Aura
+            304: [427, 429, [[53, 1], [300, 1]]],   # Map 212 progression w/ Earthquaker
+            305: [431, 432, [[50, 1]]],             # Map 214 progression w/ Spin Dash
+            306: [431, 434, [[36, 1], [300, 1]]],   # Map 214 progression w/ Aura
+            307: [431, 433, [[51, 1], [300, 1]]],   # Map 214 progression w/ Friar
+            308: [438, 439, [[50, 1]]],             # Map 217 progression w/ Spin Dash
+            309: [439, 438, [[50, 1]]],             # Map 217 progression w/ Spin Dash
+            310: [440, 441, [[50, 1]]],             # Map 219 progression w/ Spin Dash
+            311: [441, 440, [[50, 1]]],             # Map 219 progression w/ Spin Dash
 
-            # Babel/Jeweler Mansion
-            140: [66, 67, [[36, 1], [39, 1]]],  # Babel Progression w/ Aura and Crystal Ring
-            141: [68, 81, [[49,1]]],            # Jeweler Mansion progression w/Slide
+            # Babel / Mansion
+            320: [461, 462, [[36, 1], [39, 1]]],    # Map 219 progression w/ Aura and Ring
+            321: [473, 479, [[222, 1]]],            # Olman statue w/ Mummy Queen 2
+            322: [473, 479, [[223, 1]]],            # Olman statue w/ Solid Arm
+            323: [480, 481, [[49, 1]]],             # Mansion progression w/ Slider
 
-            # Endgame
-            150: [10, 69, [[20, 2]]],  # Rescue Kara from Edward's w/ Magic Dust
-            151: [26, 69, [[20, 2]]],  # Rescue Kara from Mine w/ Magic Dust
-            152: [43, 69, [[20, 2]]],  # Rescue Kara from Angel w/ Magic Dust
-            153: [53, 69, [[20, 2]]],  # Rescue Kara from Mt. Temple w/ Magic Dust
-            154: [60, 69, [[20, 2]]],  # Rescue Kara from Ankor Wat w/ Magic Dust
-            155: [69, 70, [[36, 1], [70, 0], [71, 0], [72, 0], [73, 0], [74, 0], [75, 0]]]
-            # Beat Game w/Mystic Statues and Aura
+            # Endgame / Misc
+            400: [49, 490, [[20, 2]]],                       # Rescue Kara from Edward's w/ Magic Dust
+            401: [150, 490, [[20, 2]]],                      # Rescue Kara from Mine w/ Magic Dust
+            402: [270, 490, [[20, 2]]],                      # Rescue Kara from Angel w/ Magic Dust
+            403: [345, 490, [[20, 2]]],                      # Rescue Kara from Mt. Temple w/ Magic Dust
+            404: [391, 490, [[20, 2]]],                      # Rescue Kara from Ankor Wat w/ Magic Dust
+            405: [490, 491, [[302, 1], [36, 1], [39, 1]]],   # Early Firebird w/ Kara, Aura and Ring
+            406: [490, 492, [[36, 1], [70, 0], [71, 0], [72, 0], [73, 0], [74, 0], [75, 0]]]
+                                                             # Beat Game w/Mystic Statues and Aura
         }
 
 
