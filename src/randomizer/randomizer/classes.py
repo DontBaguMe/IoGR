@@ -10,7 +10,7 @@ from .models.enums.logic import Logic
 from .models.randomizer_data import RandomizerData
 
 MAX_INVENTORY = 15
-PROGRESS_ADJ = [1.5, 1.25, 1, 0.75]  # Required items are more likely to be placed in easier modes
+PROGRESS_ADJ = [1.5, 1.25, 1, 1]  # Required items are more likely to be placed in easier modes
 MAX_CYCLES = 100
 INACCESSIBLE = 100
 
@@ -139,11 +139,99 @@ class World:
         for x in self.graph:
             self.graph[x][0] = False
 
+    # Translates exits to world graph
+    def map_exits(self):
+        for exit in self.exits:
+            # Check if exit has been shuffled
+            if self.exits[exit][1]:
+                new_exit = self.exits[exit][1]
+            else:
+                new_exit = exit
+
+            # Check if exit is coupled
+            if self.exits[new_exit][3]:
+                sister_exit = self.exits[new_exit][0]
+                origin = self.exits[sister_exit][5]
+                dest = self.exits[sister_exit][4]
+            else:
+                origin = self.exits[new_exit][4]
+                dest = self.exits[new_exit][5]
+
+            # Translate link into world graph
+            if dest not in self.graph[origin][1]:
+                self.graph[origin][1].append(dest)
+
+    # Entrance randomizer
+    def shuffle_exits(self):
+        # Make a clean copy of world graph for later replacement
+        graph_copy = self.graph.copy()
+
+        # Assume all items and abilities
+        for x in self.logic:
+            if x < 400 or x > 404 or (x - self.kara + 1) == 400:
+                origin = self.logic[x][0]
+                dest = self.logic[x][1]
+                if dest not in self.graph[origin][1]:
+                    self.graph[origin][1].append(dest)
+
+        # Map passages and internal dungeon exits to graph and list all available exits
+        exit_list = []
+        passages = [10,11,12,13,14,15,16,17]
+        for x in self.exits:
+            if self.exits[x][4] in passages or self.exits[x][5] in passages or (
+                    self.exits[x][9] and self.exits[x][2] == "Room"):
+                origin = self.exits[x][4]
+                dest = self.exits[x][5]
+                if dest not in self.graph[origin][1]:
+                    self.graph[origin][1].append(dest)
+            elif not self.exits[x][1] and not self.exits[x][3]:
+                exit_list.append(x)
+
+        # List all graph regions
+        region_list = []
+        for x in self.graph:
+            region_list.append(x)
+
+        # Shuffle lists
+        random.shuffle(exit_list)
+        random.shuffle(region_list)
+
+        solved = False
+        while not solved:
+            items = self.traverse()
+            while region_list:
+                region = region_list.pop(0)
+                if not self.graph[region][0]:    # If graph region is inaccessible
+                    print("mapping to region: ", region)
+                    found_exit = False
+                    for exit in self.exits:
+                        if not found_exit and not self.exits[exit][1]:
+                            if self.exits[exit][5] == region:
+                                print("Found a potential exit: ", exit)
+                                origin = self.exits[exit][4]
+                                if self.graph[origin][0]:
+                                    found_exit = True
+                                    exit_origin = exit_list.pop(0)
+                                    self.exits[exit_origin][1] = exit
+                                    self.exits[exit][1] = exit_origin
+                                    self.graph[region][0] = True
+                                    print("mapped exit: ", exit, exit_origin)
+                    if found_exit:
+                        items = self.traverse()
+                    else:
+                        region_list.append(region)
+
+        print("Done!")
+
+        # Re-initialize world graph
+        self.graph = graph_copy
+        return True
+
     # Finds all accessible locations and returns all accessible items
     def traverse(self, start_items=[]):
         # print "Traverse:"
         self.unsolve()
-        to_visit = [-1]
+        to_visit = [0]
         items = start_items[:]
         while to_visit:
             origin = to_visit.pop(0)
@@ -381,7 +469,7 @@ class World:
                         probability *= float(self.item_pool[item][0]) / float((sum_abilities - j))
                         j += 1
                     if item in self.required_items:
-                        probability *= PROGRESS_ADJ[self.difficulty]
+                        probability *= PROGRESS_ADJ[self.mode]
             probabilities.append([probability, current_prereq])
             sum_prob += probability
             sum_edges += 1
@@ -413,50 +501,35 @@ class World:
         for area in maps:
             random.shuffle(area)
 
-        boss_rewards = 4
+        boss_rewards = 4 - self.mode
 
-        # Total rewards by type, by level (HP/STR/DEF)
-        if "Z3 Mode" in self.variant:
-            rewards_tier1 = [1] * 6    # Expert: 6 HP
-            rewards_tier2 = [1] * 6    # Advanced: 12 HP
-            rewards_tier3 = [1] * 6    # Intermediate: 18 HP
-            rewards_tier4 = []         # Beginner: 18 HP
-        else:  # Remove all HP upgrades
-            rewards_tier1 = [1,1,1,1,1,1]    # Expert: 6/0/0
-            rewards_tier2 = [1,1,2,2,3,3]    # Advanced: 8/2/2
-            rewards_tier3 = [1,1,2,2,3,3]    # Intermediate: 10/4/4
-            rewards_tier4 = [2,2,2,3,3,3]    # Beginner: 10/7/7
+        rewards = []  # Total rewards by mode (HP/STR/DEF)
+        if self.mode == 0:  # Easy: 10/7/7
+            rewards += [1] * 10
+            rewards += [2] * 7
+            rewards += [3] * 7
+        elif self.mode == 1:  # Normal: 10/4/4
+            rewards += [1] * 10
+            rewards += [2] * 4
+            rewards += [3] * 4
+        elif self.mode == 2:  # Hard: 8/2/2
+            rewards += [1] * 8
+            rewards += [2] * 2
+            rewards += [3] * 2
+        elif self.mode == 3:  # Extreme: 6/0/0
+            rewards += [1] * 6
 
-        # Remove HP upgrades in OHKO
-        if "OHKO" in self.variant:
-            for n, i in enumerate(rewards_tier1):
-                if i == 1:
-                    rewards_tier1[n] = 0
-            for n, i in enumerate(rewards_tier2):
-                if i == 1:
-                    rewards_tier2[n] = 0
-            for n, i in enumerate(rewards_tier3):
-                if i == 1:
-                    rewards_tier3[n] = 0
-            for n, i in enumerate(rewards_tier4):
-                if i == 1:
-                    rewards_tier4[n] = 0
+        random.shuffle(rewards)
 
-        random.shuffle(rewards_tier1)
-        random.shuffle(rewards_tier2)
-        random.shuffle(rewards_tier3)
-        random.shuffle(rewards_tier4)
-
-        # Allocate rewards to maps
+        # Add in rewards, where applicable, by difficulty
         for area in maps:
-            random.shuffle(area)
-            self.maps[area[0]][2] = [rewards_tier1.pop(0),1]
-            self.maps[area[1]][2] = [rewards_tier2.pop(0),2]
-            self.maps[area[2]][2] = [rewards_tier3.pop(0),3]
-            if rewards_tier4:
-                self.maps[area[3]][2] = [rewards_tier4.pop(0),4]
-            else:
-                self.maps[area[3]][2] = [0,4]
+            i = 0
+            while i < boss_rewards:
+                map = area[i]
+                reward = rewards.pop(0)
+                if "OHKO" not in self.variant or reward > 1:  # No HP rewards for OHKO
+                    self.maps[map][2] = reward
+                i += 1
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
@@ -513,9 +586,9 @@ class World:
             self.item_pool[35][4] = True
             self.item_pool[38][4] = True
 
-        # Solid Arm can only be required in Expert
-        if self.difficulty != 3:
-            self.graph[82][1].remove(67)
+        # Solid Arm can only be required in Extreme  ******FIX THIS******************
+#        if self.mode != 3:
+#            self.graph[82][1].remove(67)
 
         # Random start location
         if self.start_mode != "South Cape":
@@ -534,15 +607,6 @@ class World:
             self.graph[61][1].append(62)          # Pyramid: No ability required**************
             self.item_locations[142][2] = False   # Pyramid: Bottom DS has abilities
 
-        # Zelda 3 Mode
-        if "Z3 Mode" in self.variant:
-            # Update item pool
-            self.item_pool[1][0] = 29  # Red Jewels
-            self.item_pool[41][0] = 5  # HP Jewels
-            self.item_pool[42][0] = 2  # DEF Jewels
-            self.item_pool[43][0] = 3  # STR Jewels
-            self.item_pool[61][0] = 12  # HP Pieces
-
         # Open Mode
         if "Open Mode" in self.variant:
             # Update graph logic
@@ -552,6 +616,7 @@ class World:
             self.graph[27][1] += [48,61,66] # Memory Melody
             self.graph[48][1] += [27,61,66]
             self.graph[61][1] += [27,48,66]
+            self.graph[66][1] += [27,48,61]
             self.graph[14][1] += [29]       # Teapot
             self.graph[29][1] += [14,33]
             self.graph[44][1] += [48]       # Will
@@ -564,30 +629,28 @@ class World:
             self.item_pool[24][0] = 0  # Will
             self.item_pool[25][0] = 0  # Teapot
             self.item_pool[37][0] = 0  # Lola's Letter
-            self.item_pool[6][0] += 4  # Herbs
-            self.item_pool[0][0] += 1  # Nothing
 
             # Add in alternate items, by difficulty
-#            if self.difficulty == 0:
-#                self.item_pool[0][0]  += 0  # Nothing
-#                self.item_pool[6][0]  += 1  # Herb
-#                self.item_pool[42][0] += 2  # DEF Jewel
-#                self.item_pool[43][0] += 2  # STR Jewel
-#            elif self.difficulty == 1:
-#                self.item_pool[0][0]  += 1  # Nothing
-#                self.item_pool[6][0]  += 2  # Herb
-#                self.item_pool[42][0] += 1  # DEF Jewel
-#                self.item_pool[43][0] += 1  # STR Jewel
-#            elif self.difficulty == 2:
-#                self.item_pool[0][0]  += 2  # Nothing
-#                self.item_pool[6][0]  += 1  # Herb
-#                self.item_pool[42][0] += 1  # DEF Jewel
-#                self.item_pool[43][0] += 1  # STR Jewel
-#            elif self.difficulty == 3:
-#                self.item_pool[0][0]  += 5  # Nothing
-#                self.item_pool[6][0]  += 0  # Herb
-#                self.item_pool[42][0] += 0  # DEF Jewel
-#                self.item_pool[43][0] += 0  # STR Jewel
+            if self.mode == 0:
+                self.item_pool[0][0]  += 0  # Nothing
+                self.item_pool[6][0]  += 1  # Herb
+                self.item_pool[42][0] += 2  # DEF Jewel
+                self.item_pool[43][0] += 2  # STR Jewel
+            elif self.mode == 1:
+                self.item_pool[0][0]  += 1  # Nothing
+                self.item_pool[6][0]  += 2  # Herb
+                self.item_pool[42][0] += 1  # DEF Jewel
+                self.item_pool[43][0] += 1  # STR Jewel
+            elif self.mode == 2:
+                self.item_pool[0][0]  += 2  # Nothing
+                self.item_pool[6][0]  += 1  # Herb
+                self.item_pool[42][0] += 1  # DEF Jewel
+                self.item_pool[43][0] += 1  # STR Jewel
+            elif self.mode == 3:
+                self.item_pool[0][0]  += 5  # Nothing
+                self.item_pool[6][0]  += 0  # Herb
+                self.item_pool[42][0] += 0  # DEF Jewel
+                self.item_pool[43][0] += 0  # STR Jewel
 
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
@@ -600,6 +663,8 @@ class World:
                 self.exits[boss_entrance_idx[dungeon]][1] = boss_entrance_idx[boss-1]
                 self.exits[boss_exit_idx[boss-1]][1] = boss_exit_idx[dungeon]
                 dungeon += 1
+
+        # Entrance Shuffle goes here **********************************
 
         # Chaos mode
         if self.logic_mode == "Chaos":
@@ -626,76 +691,21 @@ class World:
             for x in ds_unlock:
                 self.item_locations[x][2] = False
 
-        # Red Jewel Hunts change the graph
-        if self.goal == "Red Jewel Hunt":
-            self.logic[24][1] = 70
-            self.logic[25][1] = 70
-            self.logic[26][1] = 70
-            self.logic[27][1] = 70
-
         # Change graph logic depending on Kara's location
-        if self.kara == 1:
-            self.logic[150][2][0][1] = 1
-            self.graph[10][3].append(20)
-        elif self.kara == 2:
-            self.logic[151][2][0][1] = 1
-            self.graph[26][3].append(20)
-            # Change "Sam" to "Samlet"
-            self.location_text[45] = b"\x63\x80\x8c\x8b\x84\xa4"
-        elif self.kara == 3:
-            self.logic[152][2][0][1] = 1
-            self.graph[43][3].append(20)
-        elif self.kara == 4:
-            self.logic[153][2][0][1] = 1
-            self.graph[53][3].append(20)
-        elif self.kara == 5:
-            self.logic[154][2][0][1] = 1
-            self.graph[60][3].append(20)
+        kara_logic = 400 + self.kara - 1
+        kara_region = self.logic[kara_logic][0]
+        self.logic[kara_logic][2][0][1] = 1
+        self.graph[kara_region][3].append(20)
 
         # Change logic based on which dungeons are required
         for x in self.statues:
-            self.logic[155][2][x][1] = 1
+            self.logic[406][2][x][1] = 1
 
-        # Update graph in case bosses/entrances are shuffled
-        self.check_exits()
+        # Shuffle exits
+        self.shuffle_exits()
 
-    # Check entrances for unresolved shuffles
-    def check_exits(self):
-        for x in self.exits:
-            if self.exits[x][1] > 0:   # Check if exit has been mapped
-                self.map_exit(x)
-
-        # Check and resolve coupled exits
-        for y in self.exits:
-            x = self.exits[y][0]
-            if x > 0:
-                xprime = self.exits[x][1]
-                if self.exits[y][1] == 0 and xprime > 0:
-                    yprime = self.exits[xprime][0]
-                    if yprime > 0:
-                        self.exits[y][1] = yprime
-                        self.map_exit(y)
-
-
-    # Map new exit
-    def map_exit(self, from_exit):
-        to_exit = self.exits[from_exit][1]
-        from_region = self.exits[from_exit][4]
-        to_region_old = self.exits[from_exit][5]
-        to_region_new = self.exits[to_exit][5]
-        # print("Mapping",from_exit," to", to_exit)
-
-        # Update graph with new link
-        if to_region_old in self.graph[from_region][1]:
-            self.graph[from_region][1].remove(to_region_old)
-            self.graph[from_region][1].append(to_region_new)
-            # print("Graph:",from_region,self.graph[from_region])
-
-        # Update logic with new link
-        for x in self.logic:
-            if self.logic[x][0] == from_region and self.logic[x][1] == to_region_old:
-                self.logic[x][1] = to_region_new
-                # print("Logic",x,self.logic[x])
+        # Update graph with exits
+        self.map_exits()
 
     # Update item placement logic after abilities are placed
     def check_logic(self):
@@ -781,11 +791,11 @@ class World:
         non_prog_items += self.list_item_pool(0, [], 3)
 
         # For Easy mode
-        if self.logic_mode == "Chaos" or self.difficulty > 2:
+        if self.logic_mode == "Chaos" or self.mode > 2:
             non_prog_items += self.list_item_pool(2)
-        elif self.difficulty == 0:
+        elif self.mode == 0:
             non_prog_items += [52]
-        elif self.difficulty == 1:
+        elif self.mode == 1:
             non_prog_items += [49, 50, 52, 53]
 
         random.shuffle(non_prog_items)
@@ -821,7 +831,8 @@ class World:
                 goal = False
                 print("ERROR: Inventory capacity exceeded")
             else:
-                goal = self.graph[70][0]
+                goal = (("Gaia" in self.goal and self.graph[70][0]) or
+                        (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
 
             # Get list of new progression options
             progression_list = self.progression_list(start_items)
@@ -841,16 +852,6 @@ class World:
                     print("ERROR: Could not remove inventory item")
                     return False
                 progression_list = []
-
-            # print "To progress: ",progression_list
-
-            #            if not done and not progression_list:
-            #                #print "Gotta make room..."
-            #                removed = self.make_room(item_locations,inv_full)
-            #                if not removed:
-            #                    print "ERROR: Could not remove non-progression item"
-            #                    return False
-            #                #print "Cleared this location: ", removed
 
             if not done and progression_list:
                 # Determine next progression items to add to accessible locations
@@ -874,19 +875,12 @@ class World:
 
             # print goal, done
 
-        # print "Unaccessible: ",self.unaccessible_locations(item_locations)
-        #        for node in self.graph:
-        #            if not self.graph[node][0]:
-        #                print "Can't reach ",self.graph[node][2]
-
         junk_items = self.list_item_pool()
         self.random_fill(junk_items, item_locations, False)
 
         placement_log = self.placement_log[:]
         random.shuffle(placement_log)
         self.in_game_spoilers(placement_log)
-
-        # print cycle
 
         return True
 
@@ -900,8 +894,8 @@ class World:
                 if item in self.required_items or item in self.good_items or location in self.trolly_locations:
                     spoiler_str = b"\xd3" + self.location_text[location] + b"\xac\x87\x80\xa3\xcb"
                     spoiler_str += self.item_text_short[item] + b"\xc0"
-                    # No in-game spoilers in Expert mode
-                    if self.difficulty >= 3:
+                    # No in-game spoilers in Extreme mode
+                    if self.mode == 3:
                         spoiler_str = b"\xd3\x8d\x88\x82\x84\xac\xa4\xa2\xa9\xac\x83\x8e\x83\x8e\x8d\x86\x8e\x4f\xc0"
                     self.spoilers.append(spoiler_str)
                     # print item, location
@@ -919,14 +913,14 @@ class World:
         elif self.kara == 5:
             kara_txt = "Ankor Wat"
 
-        if self.difficulty == 0:
-            difficulty_txt = "Easy"
-        elif self.difficulty == 1:
-            difficulty_txt = "Normal"
-        elif self.difficulty == 2:
-            difficulty_txt = "Hard"
-        elif self.difficulty == 3:
-            difficulty_txt = "Extreme"
+        if self.mode == 0:
+            mode_txt = "Easy"
+        elif self.mode == 1:
+            mode_txt = "Normal"
+        elif self.mode == 2:
+            mode_txt = "Hard"
+        elif self.mode == 3:
+            mode_txt = "Extreme"
 
         spoiler = dict()
         spoiler["version"] = version
@@ -935,7 +929,7 @@ class World:
         spoiler["goal"] = str(self.goal)
         spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
         spoiler["logic"] = str(self.logic_mode)
-        spoiler["difficulty"] = str(difficulty_txt)
+        spoiler["difficulty"] = str(mode_txt)
         spoiler["statues_required"] = self.statues
         spoiler["boss_order"] = self.boss_order
         spoiler["kara_location"] = kara_txt
@@ -1001,111 +995,99 @@ class World:
     # Modifies game ROM to reflect the current state of the World
     def write_to_rom(self, f, rom_offset=0):
         # Room-clearing rewards
-        idx_tier2 = 0
-        idx_tier3 = 0
-        idx_tier4 = 0
         for map in self.maps:
-            reward_tier = self.maps[map][2][1]
-            if reward_tier > 0:
-                reward = self.maps[map][2][0]
+            reward = self.maps[map][2]
+            if reward > 0:
                 f.seek(int("1aade", 16) + map + rom_offset)
-                f.write(binascii.unhexlify(format(reward,"02x")))
-
-                # Populate player level logic
-                if reward_tier == 2:
-                    f.seek(int("f4a7", 16) + 4*idx_tier2 + rom_offset)
-                    f.write(binascii.unhexlify(format(map,"02x"))+b"\x03")
-                    idx_tier2 += 1
-                elif reward_tier == 3:
-                    f.seek(int("f4bf", 16) + 4*idx_tier3 + rom_offset)
-                    f.write(binascii.unhexlify(format(map,"02x"))+b"\x03")
-                    idx_tier3 += 1
-                elif reward_tier == 4:
-                    f.seek(int("f4d7", 16) + 4*idx_tier4 + rom_offset)
-                    f.write(binascii.unhexlify(format(map,"02x"))+b"\x03")
-                    idx_tier4 += 1
-
-
+                if reward == 1:
+                    f.write(b"\x01")
+                elif reward == 2:
+                    f.write(b"\x02")
+                elif reward == 3:
+                    f.write(b"\x03")
+        print("ROM: room rewards done")
         # Items and abilities
         for x in self.item_locations:
-            type = self.item_locations[x][1]
+            if x < 200:
+                type = self.item_locations[x][1]
 
-            # Write items to ROM
-            if type == 1:
-                item = self.item_locations[x][3]
-                # print "Writing item ", item
-                item_addr = self.item_locations[x][5]
-                item_code = self.item_pool[item][2]
-                text1_addr = self.item_locations[x][6]
-                text2_addr = self.item_locations[x][7]
-                text3_addr = self.item_locations[x][8]
-                text_long = self.item_text_long[item]
-                text_short = self.item_text_short[item]
+                # Write items to ROM
+                if type == 1:
+                    item = self.item_locations[x][3]
+                    # print "Writing item ", item
+                    item_addr = self.item_locations[x][5]
+                    item_code = self.item_pool[item][2]
+                    text1_addr = self.item_locations[x][6]
+                    text2_addr = self.item_locations[x][7]
+                    text3_addr = self.item_locations[x][8]
+                    text_long = self.item_text_long[item]
+                    text_short = self.item_text_short[item]
 
-                # Write item code to memory
-                if item_code:
-                    f.seek(int(item_addr, 16) + rom_offset)
-                    f.write(item_code)
+                    # Write item code to memory
+                    if item_code:
+                        f.seek(int(item_addr, 16) + rom_offset)
+                        f.write(item_code)
 
-                # Write item text, if appropriate
-                if text1_addr:
-                    f.seek(int(text1_addr, 16) + rom_offset)
-                    f.write(text_long)
-                    # f.write(b"\xd3")
-                    # f.write(text_short)
-                    f.write(b"\xc0")
+                    # Write item text, if appropriate
+                    if text1_addr:
+                        f.seek(int(text1_addr, 16) + rom_offset)
+                        f.write(text_long)
+                        # f.write(b"\xd3")
+                        # f.write(text_short)
+                        f.write(b"\xc0")
 
-                # Write "inventory full" item text, if appropriate
-                if text2_addr:
-                    f.seek(int(text2_addr, 16) + rom_offset)
-                    # f.write(b"\xd3")
-                    # f.write(text_short)
-                    f.write(text_long)
-                    f.write(b"\xcb\x45\x65\x4b\x4b\x4f\xc0")  # Just says "FULL!"
+                    # Write "inventory full" item text, if appropriate
+                    if text2_addr:
+                        f.seek(int(text2_addr, 16) + rom_offset)
+                        # f.write(b"\xd3")
+                        # f.write(text_short)
+                        f.write(text_long)
+                        f.write(b"\xcb\x45\x65\x4b\x4b\x4f\xc0")  # Just says "FULL!"
 
-                # Write jeweler inventory text, if apprpriate
-                if text3_addr:
-                    f.seek(int(text3_addr, 16) + rom_offset)
-                    f.write(text_short)
+                    # Write jeweler inventory text, if apprpriate
+                    if text3_addr:
+                        f.seek(int(text3_addr, 16) + rom_offset)
+                        f.write(text_short)
 
-            # Write abilities to ROM
-            elif type == 2:  # Check if filled
-                ability = self.item_locations[x][3]
-                ability_addr = self.item_locations[x][5]
-                map = self.item_locations[x][8]
+                # Write abilities to ROM
+                elif type == 2:  # Check if filled
+                    ability = self.item_locations[x][3]
+                    ability_addr = self.item_locations[x][5]
+                    map = self.item_locations[x][8]
 
-                # Change Dark Space type in event table
-                if ability in [48, 49, 50, 51, 52, 53]:
-                    f.seek(int(ability_addr, 16) + rom_offset)
-                    f.write(b"\x05")
+                    # Change Dark Space type in event table
+                    if ability in [48, 49, 50, 51, 52, 53]:
+                        f.seek(int(ability_addr, 16) + rom_offset)
+                        f.write(b"\x05")
 
-                # Update ability text table
-                if ability == 48:  # Psycho Dash
-                    # f.seek(int("8eb5a",16)+2*i+rom_offset)
-                    f.seek(int("8eb5a", 16) + rom_offset)
-                    f.write(map)
-                if ability == 49:  # Psycho Slide
-                    f.seek(int("8eb5c", 16) + rom_offset)
-                    f.write(map)
-                if ability == 50:  # Spin Dash
-                    f.seek(int("8eb5e", 16) + rom_offset)
-                    f.write(map)
-                if ability == 51:  # Dark Friar
-                    f.seek(int("8eb60", 16) + rom_offset)
-                    f.write(map)
-                if ability == 52:  # Aura Barrier
-                    f.seek(int("8eb62", 16) + rom_offset)
-                    f.write(map)
-                if ability == 53:  # Earthquaker
-                    f.seek(int("8eb64", 16) + rom_offset)
-                    f.write(map)
-
+                    # Update ability text table
+                    if ability == 48:  # Psycho Dash
+                        # f.seek(int("8eb5a",16)+2*i+rom_offset)
+                        f.seek(int("8eb5a", 16) + rom_offset)
+                        f.write(map)
+                    if ability == 49:  # Psycho Slide
+                        f.seek(int("8eb5c", 16) + rom_offset)
+                        f.write(map)
+                    if ability == 50:  # Spin Dash
+                        f.seek(int("8eb5e", 16) + rom_offset)
+                        f.write(map)
+                    if ability == 51:  # Dark Friar
+                        f.seek(int("8eb60", 16) + rom_offset)
+                        f.write(map)
+                    if ability == 52:  # Aura Barrier
+                        f.seek(int("8eb62", 16) + rom_offset)
+                        f.write(map)
+                    if ability == 53:  # Earthquaker
+                        f.seek(int("8eb64", 16) + rom_offset)
+                        f.write(map)
+        print("ROM: items done")
         # Special code for 2-item event in Dao
         item1 = self.item_locations[125][3]
         item2 = self.item_locations[126][3]
         f.seek(int("8fde0", 16) + rom_offset)
         f.write(b"\xd3" + self.item_text_short[item1] + b"\xcb")
         f.write(self.item_text_short[item2] + b"\xcf\xce")
+        print("ROM: Dao items done")
 
         # Write in-game spoilers
         i = 0
@@ -1114,7 +1096,7 @@ class World:
             if i < len(self.spoilers):
                 f.write(self.spoilers[i])
                 i += 1
-
+        print("ROM: spoilers done")
         # Enemizer
         if self.enemizer != "None":
             # "Fix" Ankor Wat Gorgons so they don't fall from the ceiling
@@ -1153,41 +1135,40 @@ class World:
         if "Open Mode" in self.variant:
             switch_str.append(b"\x02\xcc\x11\x02\xcc\x14\x02\xcc\x1f\x02\xcc\x2a\x02\xcc\x41")
 
-        if self.enemizer != "None" and self.enemizer != "Limited":
-            switch_str.append(b"\x02\xcc\xa0\x02\xcc\xa1")
+        if switch_str:
+            f.seek(int("bfe3b", 16) + rom_offset)
+            for x in switch_str:
+                f.write(x)
+            f.write(b"\x02\xe0")
+        print("ROM: switches done")
+        # Swapped exits -- COMMENTED OUT FOR NOW***********************
+        if False:
+            for exit in self.exits:
+                if self.exits[exit][1] > 0:
+                    to_exit = self.exits[exit][1]
+                    map_str = self.exits[to_exit][9]
+                    if self.exits[exit][8] != "":
+                        f.seek(int(self.exits[exit][8], 16) + rom_offset)
+                        f.write(map_str)
+                    else:
+                        map_id = map_str[0:1]
+                        xcoord = int.to_bytes(int.from_bytes(map_str[1:3], byteorder="little") // 16, 2, byteorder='little')
+                        ycoord = int.to_bytes(int.from_bytes(map_str[3:5], byteorder="little") // 16, 2, byteorder='little')
+                        facedir = map_str[5:6]
+                        camera = map_str[6:8]
+                        # print(map_id,xcoord,ycoord,facedir,camera)
 
-        f.seek(int("1ffb0", 16) + rom_offset)
-        for x in switch_str:
-            f.write(x)
-        f.write(b"\x6b")
-
-        # Swapped exits
-        for exit in self.exits:
-            if self.exits[exit][1] > 0:
-                to_exit = self.exits[exit][1]
-                map_str = self.exits[to_exit][9]
-                if self.exits[exit][8] != "":
-                    f.seek(int(self.exits[exit][8], 16) + rom_offset)
-                    f.write(map_str)
-                else:
-                    map_id = map_str[0:1]
-                    xcoord = int.to_bytes(int.from_bytes(map_str[1:3], byteorder="little") // 16, 2, byteorder='little')
-                    ycoord = int.to_bytes(int.from_bytes(map_str[3:5], byteorder="little") // 16, 2, byteorder='little')
-                    facedir = map_str[5:6]
-                    camera = map_str[6:8]
-                    # print(map_id,xcoord,ycoord,facedir,camera)
-
-                    f.seek(int(self.exits_detailed[exit][0], 16) + rom_offset)
-                    f.write(map_id)
-                    f.seek(int(self.exits_detailed[exit][1], 16) + rom_offset)
-                    f.write(xcoord)
-                    f.seek(int(self.exits_detailed[exit][2], 16) + rom_offset)
-                    f.write(ycoord)
-                    if self.exits_detailed[exit][3] != "":
-                        f.seek(int(self.exits_detailed[exit][3], 16) + rom_offset)
-                        f.write(facedir)
-                    f.seek(int(self.exits_detailed[exit][4], 16) + rom_offset)
-                    f.write(camera)
+                        f.seek(int(self.exits_detailed[exit][0], 16) + rom_offset)
+                        f.write(map_id)
+                        f.seek(int(self.exits_detailed[exit][1], 16) + rom_offset)
+                        f.write(xcoord)
+                        f.seek(int(self.exits_detailed[exit][2], 16) + rom_offset)
+                        f.write(ycoord)
+                        if self.exits_detailed[exit][3] != "":
+                            f.seek(int(self.exits_detailed[exit][3], 16) + rom_offset)
+                            f.write(facedir)
+                        f.seek(int(self.exits_detailed[exit][4], 16) + rom_offset)
+                        f.write(camera)
 
         # print "ROM successfully created"
 
@@ -1471,13 +1452,9 @@ class World:
         if settings.open_mode:
             self.variant.append("Open Mode")
 
-        if settings.z3:
-            self.variant.append("Z3 Mode")
-
         self.firebird = settings.firebird
         self.start_loc = 10
-#        self.level = settings.level.value
-        self.difficulty = settings.difficulty.value
+        self.mode = settings.difficulty.value
         self.kara = kara
         self.gem = gem
         self.incatile = incatile
@@ -1538,11 +1515,11 @@ class World:
             38: [1, 1, b"\x26", "Father's Journal", False, 2],
             39: [1, 1, b"\x27", "Crystal Ring", False, 1],
             40: [1, 1, b"\x28", "Apple", True, 1],
-            41: [3, 1, b"\x87", "HP Upgrade", False, 3],
-            42: [1, 1, b"\x89", "DEF Upgrade", False, 3],
-            43: [2, 1, b"\x88", "STR Upgrade", False, 3],
-            44: [1, 1, b"\x8a", "Psycho Dash Upgrade", False, 3],
-            45: [2, 1, b"\x8b", "Dark Friar Upgrade", False, 3],
+            41: [3, 1, b"\x29", "HP Jewel", False, 3],
+            42: [1, 1, b"\x2a", "DEF Jewel", False, 3],
+            43: [2, 1, b"\x2b", "STR Jewel", False, 3],
+            44: [1, 1, b"\x2c", "Light Jewel", False, 3],
+            45: [2, 1, b"\x2d", "Dark Jewel", False, 3],
             46: [1, 1, b"\x2e", "2 Red Jewels", False, 3],
             47: [1, 1, b"\x2f", "3 Red Jewels", False, 3],
 
@@ -1565,34 +1542,34 @@ class World:
             75: [1, 3, "", "Mystic Statue 6", False, 2],
 
             # Event Switches
-            200: [0, 4, "", "Kara Released", False, 1]
-            201: [0, 4, "", "Itory: Got Lilly", False, 1]
-            202: [0, 4, "", "Moon Tribe: Healed Spirits", False, 1]
-            203: [0, 4, "", "Inca: Beat Castoth", False, 1]
-            204: [0, 4, "", "Freejia: Found Laborer", False, 1]
-            205: [0, 4, "", "Neil's: Memory Restored", False, 1]
-            206: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1]
-            207: [0, 4, "", "Sky Garden: Map 82 NE Switch", False, 1]
-            208: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1]
-            209: [0, 4, "", "Sky Garden: Map 84 Switch", False, 1]
-            210: [0, 4, "", "Seaside: Fountain Purified", False, 1]
-            211: [0, 4, "", "Mu: Water Lowered 1", False, 1]
-#            212: [0, 4, "", "Mu: Water Lowered 2", False, 1]
-            213: [0, 4, "", "Angel: Puzzle Complete", False, 1]
-            214: [0, 4, "", "Mt Kress: Drops Used 1", False, 1]
-            215: [0, 4, "", "Mt Kress: Drops Used 2", False, 1]
-            216: [0, 4, "", "Mt Kress: Drops Used 3", False, 1]
-            217: [0, 4, "", "Pyramid: Hieroglyphs Placed", False, 1]
-            218: [0, 4, "", "Babel: Castoth Defeated", False, 1]
-            219: [0, 4, "", "Babel: Viper Defeated", False, 1]
-            220: [0, 4, "", "Babel: Vampires Defeated", False, 1]
-            221: [0, 4, "", "Babel: Sand Fanger Defeated", False, 1]
-            222: [0, 4, "", "Babel: Mummy Queen Defeated", False, 1]
-            223: [0, 4, "", "Mansion: Solid Arm Defeated", False, 1]
+            200: [0, 4, "", "Kara Released", False, 1],
+            201: [0, 4, "", "Itory: Got Lilly", False, 1],
+            202: [0, 4, "", "Moon Tribe: Healed Spirits", False, 1],
+            203: [0, 4, "", "Inca: Beat Castoth", False, 1],
+            204: [0, 4, "", "Freejia: Found Laborer", False, 1],
+            205: [0, 4, "", "Neil's: Memory Restored", False, 1],
+            206: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1],
+            207: [0, 4, "", "Sky Garden: Map 82 NE Switch", False, 1],
+            208: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1],
+            209: [0, 4, "", "Sky Garden: Map 84 Switch", False, 1],
+            210: [0, 4, "", "Seaside: Fountain Purified", False, 1],
+            211: [0, 4, "", "Mu: Water Lowered 1", False, 1],
+#            212: [0, 4, "", "Mu: Water Lowered 2", False, 1],
+            213: [0, 4, "", "Angel: Puzzle Complete", False, 1],
+            214: [0, 4, "", "Mt Kress: Drops Used 1", False, 1],
+            215: [0, 4, "", "Mt Kress: Drops Used 2", False, 1],
+            216: [0, 4, "", "Mt Kress: Drops Used 3", False, 1],
+            217: [0, 4, "", "Pyramid: Hieroglyphs Placed", False, 1],
+            218: [0, 4, "", "Babel: Castoth Defeated", False, 1],
+            219: [0, 4, "", "Babel: Viper Defeated", False, 1],
+            220: [0, 4, "", "Babel: Vampires Defeated", False, 1],
+            221: [0, 4, "", "Babel: Sand Fanger Defeated", False, 1],
+            222: [0, 4, "", "Babel: Mummy Queen Defeated", False, 1],
+            223: [0, 4, "", "Mansion: Solid Arm Defeated", False, 1],
 
             # Misc
-            300: [0, 5, "", "Freedan Access", False, 1]
-            301: [0, 5, "", "Glitches", False, 1]
+            300: [0, 5, "", "Freedan Access", False, 1],
+            301: [0, 5, "", "Glitches", False, 1],
             302: [0, 5, "", "Early Firebird", False, 1]
         }
 
@@ -1829,33 +1806,33 @@ class World:
             153: [479, 3, False, 0, [70, 71, 72, 73, 74], "", "", "", "", "Babel Prize                         "],
 
             # Event Switches
-            201: [ 56, 1, True, 201, [], "", "", "", "", "Lilly                         "]
-            202: [ 61, 1, True, 202, [], "", "", "", "", "Moon Tribe: Spirits Healed     "]
-            203: [ 97, 1, True, 203, [], "", "", "", "", "Inca: Castoth defeated     "]
-            204: [122, 1, True, 204, [], "", "", "", "", "Freejia: Found Laborer     "]
-            205: [161, 1, True, 205, [], "", "", "", "", "Neil's Memory Restored     "]
-            206: [187, 1, True, 206, [], "", "", "", "", "Sky Garden: Map 82 NW Switch     "]
-            207: [189, 1, True, 207, [], "", "", "", "", "Sky Garden: Map 82 NE Switch     "]
-            208: [188, 1, True, 208, [], "", "", "", "", "Sky Garden: Map 82 SE Switch     "]
-            209: [197, 1, True, 209, [], "", "", "", "", "Sky Garden: Map 84 Switch     "]
-            210: [208, 1, True, 210, [], "", "", "", "", "Seaside: Fountain Purified     "]
-            211: [245, 1, True, 211, [], "", "", "", "", "Mu: Water Lowered 1     "]
-            212: [246, 1, True, 211, [], "", "", "", "", "Mu: Water Lowered 2     "]
-            213: [274, 1, True, 213, [], "", "", "", "", "Angel: Puzzle Complete     "]
-            214: [346, 1, True, 214, [], "", "", "", "", "Mt Kress: Drops used 1     "]
-            215: [347, 1, True, 215, [], "", "", "", "", "Mt Kress: Drops used 2     "]
-            216: [348, 1, True, 216, [], "", "", "", "", "Mt Kress: Drops used 3     "]
-            217: [449, 1, True, 217, [], "", "", "", "", "Pyramid: Hieroglyphs placed     "]
-            218: [474, 1, True, 218, [], "", "", "", "", "Babel: Castoth defeated     "]
-            219: [475, 1, True, 219, [], "", "", "", "", "Babel: Viper defeated     "]
-            220: [476, 1, True, 220, [], "", "", "", "", "Babel: Vampires defeated     "]
-            221: [477, 1, True, 221, [], "", "", "", "", "Babel: Sand Fanger defeated     "]
-            222: [478, 1, True, 222, [], "", "", "", "", "Babel: Mummy Queen defeated     "]
-            223: [482, 1, True, 223, [], "", "", "", "", "Mansion: Solid Arm defeated     "]
+            201: [ 56, 1, True, 201, [], "", "", "", "", "Lilly                               "],
+            202: [ 61, 1, True, 202, [], "", "", "", "", "Moon Tribe: Spirits Healed          "],
+            203: [ 97, 1, True, 203, [], "", "", "", "", "Inca: Castoth defeated              "],
+            204: [122, 1, True, 204, [], "", "", "", "", "Freejia: Found Laborer              "],
+            205: [161, 1, True, 205, [], "", "", "", "", "Neil's Memory Restored              "],
+            206: [187, 1, True, 206, [], "", "", "", "", "Sky Garden: Map 82 NW Switch        "],
+            207: [189, 1, True, 207, [], "", "", "", "", "Sky Garden: Map 82 NE Switch        "],
+            208: [188, 1, True, 208, [], "", "", "", "", "Sky Garden: Map 82 SE Switch        "],
+            209: [197, 1, True, 209, [], "", "", "", "", "Sky Garden: Map 84 Switch           "],
+            210: [208, 1, True, 210, [], "", "", "", "", "Seaside: Fountain Purified          "],
+            211: [245, 1, True, 211, [], "", "", "", "", "Mu: Water Lowered 1                 "],
+            212: [246, 1, True, 211, [], "", "", "", "", "Mu: Water Lowered 2                 "],
+            213: [274, 1, True, 213, [], "", "", "", "", "Angel: Puzzle Complete              "],
+            214: [346, 1, True, 214, [], "", "", "", "", "Mt Kress: Drops used 1              "],
+            215: [347, 1, True, 215, [], "", "", "", "", "Mt Kress: Drops used 2              "],
+            216: [348, 1, True, 216, [], "", "", "", "", "Mt Kress: Drops used 3              "],
+            217: [449, 1, True, 217, [], "", "", "", "", "Pyramid: Hieroglyphs placed         "],
+            218: [474, 1, True, 218, [], "", "", "", "", "Babel: Castoth defeated             "],
+            219: [475, 1, True, 219, [], "", "", "", "", "Babel: Viper defeated               "],
+            220: [476, 1, True, 220, [], "", "", "", "", "Babel: Vampires defeated            "],
+            221: [477, 1, True, 221, [], "", "", "", "", "Babel: Sand Fanger defeated         "],
+            222: [478, 1, True, 222, [], "", "", "", "", "Babel: Mummy Queen defeated         "],
+            223: [482, 1, True, 223, [], "", "", "", "", "Mansion: Solid Arm defeated         "],
 
             # Misc
-            301: [0, 1, True, 0, [], "", "", "", "", "Glitches                         "]
-            302: [0, 1, True, 0, [], "", "", "", "", "Early Firebird                         "]
+            301: [0, 1, True, 0, [], "", "", "", "", "Glitches                                "],
+            302: [0, 1, True, 0, [], "", "", "", "", "Early Firebird                          "]
         }
 
         # World graph is initially populated only with "free" edges
@@ -2322,8 +2299,8 @@ class World:
             482: [False, [], "Jeweler's Mansion: Solid Arm", []],
 
             # Game End
-            490: [False, [], "Kara Released", []]
-            491: [False, [], "Firebird", []]
+            490: [False, [], "Kara Released", []],
+            491: [False, [], "Firebird", []],
             492: [False, [], "Dark Gaia", []]
         }
 
@@ -3441,11 +3418,11 @@ class World:
             38: b"\xd3\xd6\x1d\x45\x80\xa4\x87\x84\xa2\x0e\xa3\xac\x49\x8e\xa5\xa2\x8d\x80\x8b\x4f\xac",
             39: b"\xd3\xd6\x1d\xa4\x87\x84\xac\x42\xa2\xa9\xa3\xa4\x80\x8b\xac\x62\x88\x8d\x86\x4f\xac",
             40: b"\xd3\xd6\x1d\x80\x8d\xac\x40\xa0\xa0\x8b\x84\x4f\xac\xac\xac\xac\xac\xac\xac\xac\xac",
-            41: b"\xd3\xd6\x1d\x80\x8d\xac\x47\x60\xac\xa5\xa0\x86\xa2\x80\x83\x84\x4f\xac\xac\xac\xac",
-            42: b"\xd3\xd6\x1d\x80\xac\x43\x44\x45\xac\xa5\xa0\x86\xa2\x80\x83\x84\x4f\xac\xac\xac\xac",
-            43: b"\xd3\xd6\x1d\x80\xac\x63\x64\x62\xac\xa5\xa0\x86\xa2\x80\x83\x84\x4f\xac\xac\xac\xac",
-            44: b"\xd3\xd6\x3c\x43\x80\xa3\x87\xac\x88\xa3\xac\x88\x8c\xa0\xa2\x8e\xa6\x84\x83\x4f\xac",
-            45: b"\xd3\xd6\x0c\x45\xa2\x88\x80\xa2\xac\x88\xa3\xac\x88\x8c\xa0\xa2\x8e\xa6\x84\x83\x4f",
+            41: b"\xd3\xd6\x1d\x80\x8d\xac\x47\x60\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac\xac",
+            42: b"\xd3\xd6\x1d\x80\xac\x43\x44\x45\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac\xac",
+            43: b"\xd3\xd6\x1d\x80\xac\x63\x64\x62\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac\xac",
+            44: b"\xd3\xd6\x1d\x80\xac\x4b\x88\x86\x87\xa4\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac",
+            45: b"\xd3\xd6\x1d\x80\xac\x43\x80\xa2\x8a\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac",
             46: b"\xd3\xd6\x1d\x22\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\x4f\xac\xac\xac\xac\xac",
             47: b"\xd3\xd6\x1d\x23\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\x4f\xac\xac\xac\xac\xac",
             48: "",
@@ -3460,8 +3437,7 @@ class World:
             57: "",
             58: "",
             59: "",
-            60: "",
-            61: b"\xd3\xd6\x1d\x80\xac\x47\x84\x80\xa2\xa4\xac\x60\x88\x84\x82\x84\x4f\xac\xac\xac\xac"
+            60: ""
         }
 
         # Define short item text for in-game format
@@ -3508,11 +3484,11 @@ class World:
             38: b"\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac",
             39: b"\x42\xa2\xa9\xa3\xa4\x80\x8b\xac\x62\x88\x8d\x86\xac",
             40: b"\x40\xa0\xa0\x8b\x84\xac\xac\xac\xac\xac\xac\xac\xac",
-            41: b"\x47\x60\xac\x65\xa0\x86\xa2\x80\x83\x84\xac\xac\xac",
-            42: b"\x43\x44\x45\xac\x65\xa0\x86\xa2\x80\x83\x84\xac\xac",
-            43: b"\x63\x64\x62\xac\x65\xa0\x86\xa2\x80\x83\x84\xac\xac",
-            44: b"\x43\x80\xa3\x87\xac\x65\xa0\x86\xa2\x80\x83\x84\xac",
-            45: b"\x45\xa2\x88\x80\xa2\xac\x65\xa0\x86\xa2\x80\x83\x84",
+            41: b"\x47\x60\xac\x49\x84\xa7\x84\x8b\xac\xac\xac\xac\xac",
+            42: b"\x43\x44\x45\xac\x49\x84\xa7\x84\x8b\xac\xac\xac\xac",
+            43: b"\x63\x64\x62\xac\x49\x84\xa7\x84\x8b\xac\xac\xac\xac",
+            44: b"\x4b\x88\x86\x87\xa4\xac\x49\x84\xa7\x84\x8b\xac\xac",
+            45: b"\x43\x80\xa2\x8a\xac\x49\x84\xa7\x84\x8b\xac\xac\xac",
             46: b"\x22\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\xac",
             47: b"\x23\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\xac",
             48: b"\xd6\x3c\x43\x80\xa3\x87",
@@ -3527,8 +3503,7 @@ class World:
             57: "",
             58: "",
             59: "",
-            60: "",
-            61: b"\x47\x84\x80\xa2\xa4\xac\x60\x88\x84\x82\x84\xac\xac"
+            60: ""
         }
 
         # Database of enemy groups and spritesets
@@ -3551,120 +3526,120 @@ class World:
         }
 
         # Enemy map database
-        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward[type, tier], SearchHeader,
+        # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward, SearchHeader,
         #           SpritesetOffset,EventAddrLow,EventAddrHigh,RestrictedEnemysets]}
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # For now, no one can have enemyset 10 (Ankor Wat outside)
             # Underground Tunnel
-            12: [0, 1, [0,0], b"\x0C\x00\x02\x05\x03", 4, "c867a", "c86ac", []],
-            13: [0, 1, [0,0], b"\x0D\x00\x02\x03\x03", 4, "c86ac", "c875c", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            14: [0, 1, [0,0], b"\x0E\x00\x02\x03\x03", 4, "c875c", "c8847", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Weird 4way issues
-            15: [0, 1, [0,0], b"\x0F\x00\x02\x03\x03", 4, "c8847", "c8935", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            18: [0, 1, [0,0], b"\x12\x00\x02\x03\x03", 4, "c8986", "c8aa9", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Spike balls
+            12: [0, 1, 0, b"\x0C\x00\x02\x05\x03", 4, "c867a", "c86ac", []],
+            13: [0, 1, 0, b"\x0D\x00\x02\x03\x03", 4, "c86ac", "c875c", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
+            14: [0, 1, 0, b"\x0E\x00\x02\x03\x03", 4, "c875c", "c8847", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Weird 4way issues
+            15: [0, 1, 0, b"\x0F\x00\x02\x03\x03", 4, "c8847", "c8935", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            18: [0, 1, 0, b"\x12\x00\x02\x03\x03", 4, "c8986", "c8aa9", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Spike balls
 
             # Inca Ruins
-            27: [1, 0, [0,0], b"\x1B\x00\x02\x05\x03", 4, "c8c33", "c8c87", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Moon Tribe cave
-            29: [1, 1, [0,0], b"\x1D\x00\x02\x0F\x03", 4, "c8cc4", "c8d85", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            32: [1, 1, [0,0], b"\x20\x00\x02\x08\x03", 4, "c8e16", "c8e75", []],  # Broken statue
-            33: [2, 1, [0,0], b"\x21\x00\x02\x08\x03", 4, "c8e75", "c8f57", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Floor switch
-            34: [2, 1, [0,0], b"\x22\x00\x02\x08\x03", 4, "c8f57", "c9029", []],  # Floor switch
-            35: [2, 1, [0,0], b"\x23\x00\x02\x0A\x03", 4, "c9029", "c90d5", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            37: [1, 1, [0,0], b"\x25\x00\x02\x08\x03", 4, "c90f3", "c91a0", [1]],  # Diamond block
-            38: [1, 1, [0,0], b"\x26\x00\x02\x08\x03", 4, "c91a0", "c9242", []],  # Broken statues
-            39: [1, 1, [0,0], b"\x27\x00\x02\x0A\x03", 4, "c9242", "c92f2", []],
-            40: [1, 1, [0,0], b"\x28\x00\x02\x08\x03", 4, "c92f2", "c935f", [1]],  # Falling blocks
+            27: [1, 0, 0, b"\x1B\x00\x02\x05\x03", 4, "c8c33", "c8c87", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]],  # Moon Tribe cave
+            29: [1, 1, 0, b"\x1D\x00\x02\x0F\x03", 4, "c8cc4", "c8d85", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            32: [1, 1, 0, b"\x20\x00\x02\x08\x03", 4, "c8e16", "c8e75", []],  # Broken statue
+            33: [2, 1, 0, b"\x21\x00\x02\x08\x03", 4, "c8e75", "c8f57", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Floor switch
+            34: [2, 1, 0, b"\x22\x00\x02\x08\x03", 4, "c8f57", "c9029", []],  # Floor switch
+            35: [2, 1, 0, b"\x23\x00\x02\x0A\x03", 4, "c9029", "c90d5", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
+            37: [1, 1, 0, b"\x25\x00\x02\x08\x03", 4, "c90f3", "c91a0", [1]],  # Diamond block
+            38: [1, 1, 0, b"\x26\x00\x02\x08\x03", 4, "c91a0", "c9242", []],  # Broken statues
+            39: [1, 1, 0, b"\x27\x00\x02\x0A\x03", 4, "c9242", "c92f2", []],
+            40: [1, 1, 0, b"\x28\x00\x02\x08\x03", 4, "c92f2", "c935f", [1]],  # Falling blocks
 
             # Diamond Mine
-            61: [3, 2, [0,0], b"\x3D\x00\x02\x08\x03", 4, "c9836", "c98b7", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            62: [3, 2, [0,0], b"\x3E\x00\x02\x08\x03", 4, "c98b7", "c991a", []],
-            63: [3, 2, [0,0], b"\x3F\x00\x02\x05\x03", 4, "c991a", "c9a41", []],
-            64: [3, 2, [0,0], b"\x40\x00\x02\x08\x03", 4, "c9a41", "c9a95", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Trapped laborer (??)
-            65: [3, 2, [0,0], b"\x41\x00\x02\x00\x03", 4, "c9a95", "c9b39", [0, 2, 3, 4, 5, 11]],  # Stationary Grundit
-            69: [3, 2, [0,0], b"\x45\x00\x02\x08\x03", 4, "c9ba1", "c9bf4", []],
-            70: [3, 2, [0,0], b"\x46\x00\x02\x08\x03", 4, "c9bf4", "c9c5c", [3, 13]],
+            61: [3, 2, 0, b"\x3D\x00\x02\x08\x03", 4, "c9836", "c98b7", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            62: [3, 2, 0, b"\x3E\x00\x02\x08\x03", 4, "c98b7", "c991a", []],
+            63: [3, 2, 0, b"\x3F\x00\x02\x05\x03", 4, "c991a", "c9a41", []],
+            64: [3, 2, 0, b"\x40\x00\x02\x08\x03", 4, "c9a41", "c9a95", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Trapped laborer (??)
+            65: [3, 2, 0, b"\x41\x00\x02\x00\x03", 4, "c9a95", "c9b39", [0, 2, 3, 4, 5, 11]],  # Stationary Grundit
+            69: [3, 2, 0, b"\x45\x00\x02\x08\x03", 4, "c9ba1", "c9bf4", []],
+            70: [3, 2, 0, b"\x46\x00\x02\x08\x03", 4, "c9bf4", "c9c5c", [3, 13]],
 
             # Sky Garden
-            77: [4, 2, [0,0], b"\x4D\x00\x02\x12\x03", 4, "c9db3", "c9e92", []],
-            78: [5, 2, [0,0], b"\x4E\x00\x02\x10\x03", 4, "c9e92", "c9f53", []],
-            79: [4, 2, [0,0], b"\x4F\x00\x02\x12\x03", 4, "c9f53", "ca01a", [4, 5]],
-            80: [5, 2, [0,0], b"\x50\x00\x02\x10\x03", 4, "ca01a", "ca0cb", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            81: [4, 2, [0,0], b"\x51\x00\x02\x12\x03", 4, "ca0cb", "ca192", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            82: [5, 2, [0,0], b"\x52\x00\x02\x10\x03", 4, "ca192", "ca247", [4, 5]],
-            83: [4, 2, [0,0], b"\x53\x00\x02\x12\x03", 4, "ca247", "ca335", [4, 5]],
-            84: [5, 2, [0,0], b"\x54\x00\x02\x12\x03", 4, "ca335", "ca43b", [4, 5]],
+            77: [4, 2, 0, b"\x4D\x00\x02\x12\x03", 4, "c9db3", "c9e92", []],
+            78: [5, 2, 0, b"\x4E\x00\x02\x10\x03", 4, "c9e92", "c9f53", []],
+            79: [4, 2, 0, b"\x4F\x00\x02\x12\x03", 4, "c9f53", "ca01a", [4, 5]],
+            80: [5, 2, 0, b"\x50\x00\x02\x10\x03", 4, "ca01a", "ca0cb", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            81: [4, 2, 0, b"\x51\x00\x02\x12\x03", 4, "ca0cb", "ca192", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            82: [5, 2, 0, b"\x52\x00\x02\x10\x03", 4, "ca192", "ca247", [4, 5]],
+            83: [4, 2, 0, b"\x53\x00\x02\x12\x03", 4, "ca247", "ca335", [4, 5]],
+            84: [5, 2, 0, b"\x54\x00\x02\x12\x03", 4, "ca335", "ca43b", [4, 5]],
 
             # Mu
             #            92: [6,0,0,b"\x5C\x00\x02\x15\x03",4,[]],  # Seaside Palace
-            95: [6, 3, [0,0], b"\x5F\x00\x02\x14\x03", 4, "ca71b", "ca7ed", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            96: [6, 3, [0,0], b"\x60\x00\x02\x14\x03", 4, "ca7ed", "ca934", [6]],
-            97: [6, 3, [0,0], b"\x61\x00\x02\x14\x03", 4, "ca934", "caa7b", [6]],
-            98: [6, 3, [0,0], b"\x62\x00\x02\x14\x03", 4, "caa7b", "cab28", []],
-            100: [6, 3, [0,0], b"\x64\x00\x02\x14\x03", 4, "cab4b", "cabd4", []],
-            101: [6, 3, [0,0], b"\x65\x00\x02\x14\x03", 4, "cabd4", "cacc3", [6]],
+            95: [6, 3, 0, b"\x5F\x00\x02\x14\x03", 4, "ca71b", "ca7ed", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            96: [6, 3, 0, b"\x60\x00\x02\x14\x03", 4, "ca7ed", "ca934", [6]],
+            97: [6, 3, 0, b"\x61\x00\x02\x14\x03", 4, "ca934", "caa7b", [6]],
+            98: [6, 3, 0, b"\x62\x00\x02\x14\x03", 4, "caa7b", "cab28", []],
+            100: [6, 3, 0, b"\x64\x00\x02\x14\x03", 4, "cab4b", "cabd4", []],
+            101: [6, 3, 0, b"\x65\x00\x02\x14\x03", 4, "cabd4", "cacc3", [6]],
 
             # Angel Dungeon
-            109: [7, 3, [0,0], b"\x6D\x00\x02\x16\x03", 4, "caf6e", "cb04b", [7, 8, 9, 10]],  # Add 10's back in once flies are fixed
-            110: [7, 3, [0,0], b"\x6E\x00\x02\x18\x03", 4, "cb04b", "cb13e", [7, 8, 9, 10]],
-            111: [7, 3, [0,0], b"\x6F\x00\x02\x1B\x03", 4, "cb13e", "cb1ae", [7, 8, 9, 10]],
-            112: [7, 3, [0,0], b"\x70\x00\x02\x16\x03", 4, "cb1ae", "cb258", [7, 8, 9, 10]],
-            113: [7, 3, [0,0], b"\x71\x00\x02\x18\x03", 4, "cb258", "cb29e", [7, 8, 9, 10]],
-            114: [7, 3, [0,0], b"\x72\x00\x02\x18\x03", 4, "cb29e", "cb355", [7, 8, 9, 10]],
+            109: [7, 3, 0, b"\x6D\x00\x02\x16\x03", 4, "caf6e", "cb04b", [2, 7, 8, 9, 10, 11]],  # Add 10's back in once flies are fixed
+            110: [7, 3, 0, b"\x6E\x00\x02\x18\x03", 4, "cb04b", "cb13e", [2, 7, 8, 9, 10, 11]],
+            111: [7, 3, 0, b"\x6F\x00\x02\x1B\x03", 4, "cb13e", "cb1ae", [2, 7, 8, 9, 10, 11]],
+            112: [7, 3, 0, b"\x70\x00\x02\x16\x03", 4, "cb1ae", "cb258", [2, 7, 8, 9, 10, 11]],
+            113: [7, 3, 0, b"\x71\x00\x02\x18\x03", 4, "cb258", "cb29e", [2, 7, 8, 9, 10, 11]],
+            114: [7, 3, 0, b"\x72\x00\x02\x18\x03", 4, "cb29e", "cb355", [2, 7, 8, 9, 10, 11]],
 
             # Great Wall
-            130: [8, 4, [0,0], b"\x82\x00\x02\x1D\x03", 4, "cb6c1", "cb845", [8, 9, 10]],  # Add 10's back in once flies are fixed
-            131: [8, 4, [0,0], b"\x83\x00\x02\x1D\x03", 4, "cb845", "cb966", [7, 8, 9, 10]],
-            133: [8, 4, [0,0], b"\x85\x00\x02\x1D\x03", 4, "cb97d", "cbb18", [8, 9, 10]],
-            134: [8, 4, [0,0], b"\x86\x00\x02\x1D\x03", 4, "cbb18", "cbb87", [7, 8, 9, 10]],
-            135: [8, 4, [0,0], b"\x87\x00\x02\x1D\x03", 4, "cbb87", "cbc3b", [8]],
-            136: [8, 4, [0,0], b"\x88\x00\x02\x1D\x03", 4, "cbc3b", "cbd0a", [7, 8, 9]],
+            130: [8, 4, 0, b"\x82\x00\x02\x1D\x03", 4, "cb6c1", "cb845", [2, 8, 9, 10, 11]],  # Add 10's back in once flies are fixed
+            131: [8, 4, 0, b"\x83\x00\x02\x1D\x03", 4, "cb845", "cb966", [2, 7, 8, 9, 10, 11]],
+            133: [8, 4, 0, b"\x85\x00\x02\x1D\x03", 4, "cb97d", "cbb18", [2, 8, 9, 10, 11]],
+            134: [8, 4, 0, b"\x86\x00\x02\x1D\x03", 4, "cbb18", "cbb87", [2, 7, 8, 9, 10, 11]],
+            135: [8, 4, 0, b"\x87\x00\x02\x1D\x03", 4, "cbb87", "cbc3b", [2, 8, 9]],
+            136: [8, 4, 0, b"\x88\x00\x02\x1D\x03", 4, "cbc3b", "cbd0a", [2, 7, 8, 9, 11]],
 
             # Mt Temple
-            160: [9, 4, [0,0], b"\xA0\x00\x02\x20\x03", 4, "cc18c", "cc21c", []],
-            161: [9, 4, [0,0], b"\xA1\x00\x02\x20\x03", 4, "cc21c", "cc335", [7, 8, 9, 10]],
-            162: [9, 4, [0,0], b"\xA2\x00\x02\x20\x03", 4, "cc335", "cc3df", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
-            163: [9, 4, [0,0], b"\xA3\x00\x02\x20\x03", 4, "cc3df", "cc4f7", []],
-            164: [9, 4, [0,0], b"\xA4\x00\x02\x20\x03", 4, "cc4f7", "cc5f8", [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13]],
-            165: [9, 4, [0,0], b"\xA5\x00\x02\x20\x03", 4, "cc5f8", "cc703", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
-            166: [9, 4, [0,0], b"\xA6\x00\x02\x20\x03", 4, "cc703", "cc7a1", []],
-            167: [9, 4, [0,0], b"\xA7\x00\x02\x20\x03", 4, "cc7a1", "cc9a3", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            168: [9, 4, [0,0], b"\xA8\x00\x02\x20\x03", 4, "cc9a3", "cca02", [7, 8, 9, 10]],
+            160: [9, 4, 0, b"\xA0\x00\x02\x20\x03", 4, "cc18c", "cc21c", []],
+            161: [9, 4, 0, b"\xA1\x00\x02\x20\x03", 4, "cc21c", "cc335", []],
+            162: [9, 4, 0, b"\xA2\x00\x02\x20\x03", 4, "cc335", "cc3df", []],
+            163: [9, 4, 0, b"\xA3\x00\x02\x20\x03", 4, "cc3df", "cc4f7", []],
+            164: [9, 4, 0, b"\xA4\x00\x02\x20\x03", 4, "cc4f7", "cc5f8", [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13]],
+            165: [9, 4, 0, b"\xA5\x00\x02\x20\x03", 4, "cc5f8", "cc703", []],
+            166: [9, 4, 0, b"\xA6\x00\x02\x20\x03", 4, "cc703", "cc7a1", []],
+            167: [9, 4, 0, b"\xA7\x00\x02\x20\x03", 4, "cc7a1", "cc9a3", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
+            168: [9, 4, 0, b"\xA8\x00\x02\x20\x03", 4, "cc9a3", "cca02", []],
 
             # Ankor Wat
-            176: [10, 6, [0,0], b"\xB0\x00\x02\x2C\x03", 4, "ccb1b", "ccbd8", []],
-            177: [11, 6, [0,0], b"\xB1\x00\x02\x08\x03", 4, "ccbd8", "ccca5", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            178: [11, 6, [0,0], b"\xB2\x00\x02\x08\x03", 4, "ccca5", "ccd26", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
-            179: [11, 6, [0,0], b"\xB3\x00\x02\x08\x03", 4, "ccd26", "ccd83", []],
-            180: [11, 6, [0,0], b"\xB4\x00\x02\x08\x03", 4, "ccd83", "ccdd7", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
-            181: [11, 6, [0,0], b"\xB5\x00\x02\x08\x03", 4, "ccdd7", "cce7b", []],
-            182: [10, 6, [0,0], b"\xB6\x00\x02\x2C\x03", 4, "cce7b", "cd005", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            183: [11, 6, [0,0], b"\xB7\x00\x02\x08\x03", 4, "cd005", "cd092", []],  # Earthquaker Golem
-            184: [11, 6, [0,0], b"\xB8\x00\x02\x08\x03", 4, "cd092", "cd0df", [0, 1, 3, 4, 5, 7, 8, 9, 11, 13]],
-            185: [11, 6, [0,0], b"\xB9\x00\x02\x08\x03", 4, "cd0df", "cd137", []],
-            186: [10, 6, [0,0], b"\xBA\x00\x02\x2C\x03", 4, "cd137", "cd197", []],
-            187: [11, 6, [0,0], b"\xBB\x00\x02\x08\x03", 4, "cd197", "cd1f4", []],
-            188: [11, 6, [0,0], b"\xBC\x00\x02\x24\x03", 4, "cd1f4", "cd29a", []],
-            189: [11, 6, [0,0], b"\xBD\x00\x02\x08\x03", 4, "cd29a", "cd339", []],
-            190: [11, 6, [0,0], b"\xBE\x00\x02\x08\x03", 4, "cd339", "cd392", []],
+            176: [10, 6, 0, b"\xB0\x00\x02\x2C\x03", 4, "ccb1b", "ccbd8", []],
+            177: [11, 6, 0, b"\xB1\x00\x02\x08\x03", 4, "ccbd8", "ccca5", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
+            178: [11, 6, 0, b"\xB2\x00\x02\x08\x03", 4, "ccca5", "ccd26", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
+            179: [11, 6, 0, b"\xB3\x00\x02\x08\x03", 4, "ccd26", "ccd83", []],
+            180: [11, 6, 0, b"\xB4\x00\x02\x08\x03", 4, "ccd83", "ccdd7", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
+            181: [11, 6, 0, b"\xB5\x00\x02\x08\x03", 4, "ccdd7", "cce7b", []],
+            182: [10, 6, 0, b"\xB6\x00\x02\x2C\x03", 4, "cce7b", "cd005", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
+            183: [11, 6, 0, b"\xB7\x00\x02\x08\x03", 4, "cd005", "cd092", []],  # Earthquaker Golem
+            184: [11, 6, 0, b"\xB8\x00\x02\x08\x03", 4, "cd092", "cd0df", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
+            185: [11, 6, 0, b"\xB9\x00\x02\x08\x03", 4, "cd0df", "cd137", []],
+            186: [10, 6, 0, b"\xBA\x00\x02\x2C\x03", 4, "cd137", "cd197", []],
+            187: [11, 6, 0, b"\xBB\x00\x02\x08\x03", 4, "cd197", "cd1f4", []],
+            188: [11, 6, 0, b"\xBC\x00\x02\x24\x03", 4, "cd1f4", "cd29a", []],
+            189: [11, 6, 0, b"\xBD\x00\x02\x08\x03", 4, "cd29a", "cd339", []],
+            190: [11, 6, 0, b"\xBE\x00\x02\x08\x03", 4, "cd339", "cd392", []],
 
             # Pyramid
-            204: [12, 5, [0,0], b"\xCC\x00\x02\x08\x03", 4, "cd539", "cd58c", []],
-            206: [12, 5, [0,0], b"\xCE\x00\x02\x08\x03", 4, "cd5c6", "cd650", []],
-            207: [12, 5, [0,0], b"\xCF\x00\x02\x08\x03", 4, "cd650", "cd6f3", []],
-            208: [12, 5, [0,0], b"\xD0\x00\x02\x08\x03", 4, "cd6f3", "cd752", []],
-            209: [12, 5, [0,0], b"\xD1\x00\x02\x08\x03", 4, "cd752", "cd81b", []],
-            210: [12, 5, [0,0], b"\xD2\x00\x02\x08\x03", 4, "cd81b", "cd8f1", []],
-            211: [12, 5, [0,0], b"\xD3\x00\x02\x08\x03", 4, "cd8f1", "cd9a1", []],
-            212: [12, 5, [0,0], b"\xD4\x00\x02\x08\x03", 4, "cd9a1", "cda80", []],
-            213: [12, 5, [0,0], b"\xD5\x00\x02\x08\x03", 4, "cda80", "cdb4b", []],
-            214: [12, 5, [0,0], b"\xD6\x00\x02\x26\x03", 4, "cdb4b", "cdc1e", []],
-            215: [12, 5, [0,0], b"\xD7\x00\x02\x28\x03", 4, "cdc1e", "cdcfd", [0, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]],
-            216: [12, 5, [0,0], b"\xD8\x00\x02\x08\x03", 4, "cdcfd", "cde4f", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            217: [12, 5, [0,0], b"\xD9\x00\x02\x26\x03", 4, "cde4f", "cdf3c", []],
-            219: [12, 5, [0,0], b"\xDB\x00\x02\x26\x03", 4, "cdf76", "ce010", [0, 4, 5, 8, 9, 11, 12]],  #Spike elevators
+            204: [12, 5, 0, b"\xCC\x00\x02\x08\x03", 4, "cd539", "cd58c", []],
+            206: [12, 5, 0, b"\xCE\x00\x02\x08\x03", 4, "cd5c6", "cd650", []],
+            207: [12, 5, 0, b"\xCF\x00\x02\x08\x03", 4, "cd650", "cd6f3", []],
+            208: [12, 5, 0, b"\xD0\x00\x02\x08\x03", 4, "cd6f3", "cd752", []],
+            209: [12, 5, 0, b"\xD1\x00\x02\x08\x03", 4, "cd752", "cd81b", []],
+            210: [12, 5, 0, b"\xD2\x00\x02\x08\x03", 4, "cd81b", "cd8f1", []],
+            211: [12, 5, 0, b"\xD3\x00\x02\x08\x03", 4, "cd8f1", "cd9a1", []],
+            212: [12, 5, 0, b"\xD4\x00\x02\x08\x03", 4, "cd9a1", "cda80", []],
+            213: [12, 5, 0, b"\xD5\x00\x02\x08\x03", 4, "cda80", "cdb4b", []],
+            214: [12, 5, 0, b"\xD6\x00\x02\x26\x03", 4, "cdb4b", "cdc1e", []],
+            215: [12, 5, 0, b"\xD7\x00\x02\x28\x03", 4, "cdc1e", "cdcfd", [0, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]],
+            216: [12, 5, 0, b"\xD8\x00\x02\x08\x03", 4, "cdcfd", "cde4f", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
+            217: [12, 5, 0, b"\xD9\x00\x02\x26\x03", 4, "cde4f", "cdf3c", []],
+            219: [12, 5, 0, b"\xDB\x00\x02\x26\x03", 4, "cdf76", "ce010", []],
 
             # Jeweler's Mansion
-            233: [13, 0, [0,0], b"\xE9\x00\x02\x22\x03", 4, "ce224", "ce3a6", [0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]]
+            233: [13, 0, 0, b"\xE9\x00\x02\x22\x03", 4, "ce224", "ce3a6", [0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]]
 
         }
 

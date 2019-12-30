@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.5.1"
+VERSION = "2.8.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -26,14 +26,8 @@ GEMS_NORMAL = 40
 GEMS_HARD = 45
 GEMS_EXTREME = 50
 
-GEMS_Z3_EASY = 24
-GEMS_Z3_NORMAL = 28
-GEMS_Z3_HARD = 31
-GEMS_Z3_EXTREME = 34
-
 INV_FULL = b"\x5c\x8e\xc9\x80"
 FORCE_CHANGE = b"\x22\x30\xfd\x88"
-CLEAR_ENEMIES = b"\x22\x9B\xFF\x81"
 
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
@@ -111,7 +105,6 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.boss_shuffle, "b")
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
-    filename += getSwitch(settings.z3, "z3")
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
     filename += "_" + str(settings.seed)
@@ -147,13 +140,7 @@ class Randomizer:
 
         random.seed(settings.seed)
         statues_required = self.__get_required_statues__(settings)
-
-        ##########################################################################
-        #                          Global functions/misc
-        ##########################################################################
-        # Write code for clearing enemy tally data
-        patch.seek(int("1ff9b", 16) + rom_offset)
-        patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
+        mode = settings.difficulty.value
 
         ##########################################################################
         #                             Early Firebird
@@ -168,22 +155,22 @@ class Randomizer:
             # Change firebird logic
             # Requires Shadow's form, Crystal Ring (switch #$3e) and Kara rescued (switch #$8a)
             patch.seek(int("2cd07", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc0\xf0")
+            patch.write(b"\x4c\xc0\xf0\xea\xea\xea")
             patch.seek(int("2cd88", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc1\xf0")
+            patch.write(b"\x4c\xf0\xf0\xea\xea\xea")
             patch.seek(int("2ce06", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc2\xf0")
+            patch.write(b"\x4c\x20\xf1\xea\xea\xea")
             patch.seek(int("2ce84", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc3\xf0")
+            patch.write(b"\x4c\x50\xf1\xea\xea\xea")
 
             # Load firebird assets into every map
             patch.seek(int("3e03a", 16) + rom_offset)
             patch.write(b"\x80\x00")
             patch.seek(int("eaf0", 16) + rom_offset)
-            patch.write(b"\x22\x28\xf8\x82\xea")
-            patch.seek(0x02f828 + rom_offset)
-            patch.write(b"\x02\x3b\x71\x36\xf8\x82\xa9\x00\x10\x04\x12\x6b")
-            patch.seek(0x02f834 + rom_offset)
+            patch.write(b"\x20\xa0\xf4\xea\xea")
+            patch.seek(int("f4a0", 16) + rom_offset)
+            patch.write(b"\x02\x3b\x71\xb2\xf4\x80\xa9\x00\x10\x04\x12\x60")
+            patch.seek(int("f4b0", 16) + rom_offset)
             patch.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
 
         ##########################################################################
@@ -219,26 +206,6 @@ class Randomizer:
         # print binascii.hexlify(hash_final)
         patch.seek(int("1da57", 16) + rom_offset)
         patch.write(hash_final)
-
-        ##########################################################################
-        #                     Add level choice to intro screen
-        ##########################################################################
-        # Update menu logic
-        patch.seek(int("be43f", 16) + rom_offset)  # Level defaults to Intermediate
-        patch.write(b"\xA9\x01\x00\x9C\x8E\x0D")
-        patch.seek(0x0be4ae + rom_offset)          # 3 difficulty levels available
-        patch.write(b"\x03")
-        patch.seek(0x0be7b5 + rom_offset)          # --- and on the other menu too
-        patch.write(b"\x03")
-        patch.seek(int("bf5d2", 16) + rom_offset)  # Change "Sound" to "Level"
-        patch.write(b"\x4b\x84\xa6\x84\x8b")
-        patch.seek(0x0bf55a + rom_offset)          # --- and on the other menu too
-        patch.write(b"\x4b\x84\xa6\x84\x8b")
-        patch.seek(int("bf667", 16) + rom_offset)  # Insert level text pointers
-        patch.write(b"\xC0\xFC\xCD\xFC\xDA\xFC\xE7\xFC")
-        patch.seek(int("bfcc0", 16) + rom_offset)  # Insert level name text
-        patch.write(b"\x41\x84\x86\x88\x8d\x8d\x84\xa2\xac\xac\xac\xac\xca\x48\x8d\xa4\x84\xa2\x8c\x84\x83\x88\x80\xa4\x84\xca")
-        patch.write(b"\x40\x83\xa6\x80\x8d\x82\x84\x83\xac\xac\xac\xac\xca\x44\xa8\xa0\x84\xa2\xa4\xac\xac\xac\xac\xac\xac\xca")
 
         ##########################################################################
         #                           Negate useless switches
@@ -282,8 +249,6 @@ class Randomizer:
         patch.write(b"\x10")
         patch.seek(int("7d7b1", 16) + rom_offset)  # Switch 159 - Mt. Kress on map
         patch.write(b"\x10")
-        patch.seek(int("8f0a1", 16) + rom_offset)  # Switch 247 - first Freedan
-        patch.write(b"\x10")
 
         ##########################################################################
         #                     Initialize map header dataset
@@ -293,17 +258,17 @@ class Randomizer:
         f_mapdata.write(f_mapdata_orig.read())
         f_mapdata_orig.close
 
-        # Insert tutorial map in Beginner mode
-#        if settings.level.value == 0:
-        f_mapdata.seek(0)
-        addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
-        f_mapdata.seek(addr)
-        f_mapdata.write(b"\x00\x09")
+        # Insert tutorial map in Easy mode
+        if mode == 0:
+            f_mapdata.seek(0)
+            addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
+            f_mapdata.seek(addr)
+            f_mapdata.write(b"\x00\x09")
 
-        f_mapdata.seek(0)
-        addr = f_mapdata.read().find(b"\x00\x09\x00\x02\x08")
-        f_mapdata.seek(addr)
-        f_mapdata.write(b"\x00\x07")
+            f_mapdata.seek(0)
+            addr = f_mapdata.read().find(b"\x00\x09\x00\x02\x08")
+            f_mapdata.seek(addr)
+            f_mapdata.write(b"\x00\x07")
 
         ##########################################################################
         #                        Update treasure chest data
@@ -321,69 +286,12 @@ class Randomizer:
         f_acquisition.close
 
         ##########################################################################
-        #                         Update GiveItem Routine
-        #             Allows status upgrades to be granted as items
-        ##########################################################################
-        # Disable nested cop commands
-        patch.seek(int("3f016", 16) + rom_offset)
-        patch.write(b"\xea\xea\xea")
-        patch.seek(int("3f03c", 16) + rom_offset)
-        patch.write(b"\xea\xea\xea")
-        patch.seek(int("3f05b", 16) + rom_offset)
-        patch.write(b"\xea\xea\xea")
-
-        # Write DEF and STR upgrade item scripts, also includes scripts for Z3 mode
-        f_statupgrades = open(BIN_PATH + "03f77b_statupgrades.bin", "rb")
-        patch.seek(int("3f77b", 16) + rom_offset)
-        patch.write(f_statupgrades.read())
-        f_statupgrades.close
-
-        # Allow upgrade items to use chest opening text table
-        # Starts at index #$30
-        patch.seek(int("3efb3", 16) + rom_offset)
-        patch.write(b"\x20\x95\xf7")  # Pointer to initialization script
-        patch.write(b"\x0A\xDA\xAA\xfc\x7b\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
-        patch.write(b"\xEE\x16\x0B\x80\x03\xEE\x1C\x0B\x60")  # Logic for Dash and Friar Upgrades
-#        patch.seek(int("3f765", 16) + rom_offset)
-#        patch.write(b"\x0c\xf0\x32\xf0\x51\xf0\xe9\xef\xed\xef\xf1\xef\xca\xef\x0c\xf0\x32\xf0\x51\xf0\xc0\xef\xc5\xef\xa0\xff") # Subroutine pointers
-#        patch.write(b"\x48\xE9\x57\x8D\xB8\x0D\x68\x38\xE9\x80\x60")  # Initialization script
-        patch.seek(int("3efe6", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f00a", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f030", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f04f", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f06e", 16) + rom_offset)
-        patch.write(b"\x60")
-
-        # Write Heart Piece logic
-        patch.seek(int("3ffa0", 16) + rom_offset)
-        patch.write(b"\x48\xAD\x24\x0B\x89\x02\xF0\x13\xAD\x1E\x0A\x89\x80\xD0\x07\x09\x80")
-        patch.write(b"\x8D\x1E\x0A\x80\x09\x49\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x60")
-
-        # Treasure chest text: "Already maxed out!"
-        patch.seek(int("1ffed", 16) + rom_offset)
-        patch.write(b"\x40\x8B\xA2\x84\x80\x83\xA9\xAC\x8C\x80\xA8\x84\x83\xAC\x8E\xA5\xA4\x4F\xCA")
-
-        # Update pointers for Friar upgrade and Heart Piece
-#        patch.seek(int("3efc6", 16) + rom_offset)
-#        patch.write(b"\x27")
-#        patch.seek(int("3efc9", 16) + rom_offset)
-#        patch.write(b"\x2a")
-
-        # Insert logic for Dash and Friar upgrades
-#        patch.seek(int("3efe9", 16) + rom_offset)
-#        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
-
-        ##########################################################################
         #                            Update item events
         #    Adds new items that increase HP, DEF, STR and improve abilities
         ##########################################################################
         # Add pointers for new items @38491
         patch.seek(int("38491", 16) + rom_offset)
-        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5e\x88\x90\x9d\xd0\x9d\xa0\xff")
+        patch.write(b"\x6f\x9f\x91\x9f\x1d\x88\x3a\x88\x5f\x88\x90\x9d\xd0\x9d")
 
         # Add start menu descriptions for new items
         f_startmenu = open(BIN_PATH + "01dabf_startmenu.bin", "rb")
@@ -395,18 +303,10 @@ class Randomizer:
         patch.write(f_itemdesc.read())
         f_itemdesc.close
 
-        # Write sprites for multi-jewel items
-        f_multijewel = open(BIN_PATH + "108ea3_multijewel.bin", "rb")
-        patch.seek(int("108ea3", 16) + rom_offset)
-        patch.write(f_multijewel.read())
-        f_multijewel.close
-
-        # Update sprite pointers for new items (placeholder bag of gold for obselete items)
-        # New sprite pointers at 108376, overwrites flaming sphere
+        # Update sprites for new items - first new item starts @108052, 7 new items
+        # Points all items to unused sprite for item 4c ("76 83" in address table)
         patch.seek(int("108052", 16) + rom_offset)
-        patch.write(b"\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x76\x83\x76\x83\x9c\x81")
-        patch.seek(int("108376", 16) + rom_offset)
-        patch.write(b"\x07\x00\xa3\x8e\x07\x00\xc5\x8e\xff\xff")
+        patch.write(b"\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83")
 
         # Update item removal restriction flags
         patch.seek(int("1e12a", 16) + rom_offset)
@@ -489,6 +389,7 @@ class Randomizer:
             patch.write(qt_encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
             patch.write(qt_encode("She will give you the option to face the final boss and beat the game. Good luck, and have fun!") + b"\xc0")
 
+
         patch.seek(int("3f800", 16) + rom_offset)
         patch.write(b"\xce" + qt_encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
         patch.write(qt_encode("As you gain more items, you will be able to visit other continents and access more locations.|"))
@@ -504,10 +405,12 @@ class Randomizer:
         patch.write(b"\xce" + qt_encode("WHAT IF I'M STUCK?      There are a lot of item locations in this game! It's easy to get stuck.|"))
         patch.write(qt_encode("Here are some resources that might help you:|"))
         patch.write(qt_encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
-        patch.write(qt_encode("- EmoTracker            Download the IoGR package. Includes a map tracker!|"))
         patch.write(qt_encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-        patch.write(qt_encode("- Map House             Enter the east-most house in South Cape to check your collection rate.|"))
-        patch.write(qt_encode("- Spoiler Log           Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
+        if mode == 0:
+            patch.write(qt_encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
+        else:
+            patch.write(qt_encode("- In-Game Tracker       (Easy mode only)|"))
+        patch.write(qt_encode("- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
 
         # Modify Lance's Letter
         # Prepare it to spoil Kara location
@@ -558,28 +461,24 @@ class Randomizer:
         patch.write(f_item28.read())
         f_item28.close
 
+        # Update herb HP fill based on difficulty
+        patch.seek(int("3889f", 16) + rom_offset)
+        if mode == 0:  # Easy mode = full HP
+            patch.write(b"\x28")
+        elif mode == 2:  # Hard mode = fill 4 HP
+            patch.write(b"\x04")
+        elif mode == 3:  # Extreme mode = fill 2 HP
+            patch.write(b"\x02")
 
-#        patch.seek(int("39f91", 16) + rom_offset)
-#        patch.write(qt_encode("Already maxed out!", True))
-
-        # Write Piece of Heart item
-#        patch.seek(int("3ffa0", 16) + rom_offset)
-#        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
-#        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
-#        patch.write(qt_encode("You got a heart piece!", True))
-
-        # Update HP fill for herbs and HP jewels based on level
-        patch.seek(int("3889e", 16) + rom_offset)
-        patch.write(b"\x20\x50\xfe")
-        patch.seek(int("3fe50", 16) + rom_offset)
-        patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x02\x00\x80\x0D")
-        patch.write(b"\xA9\x04\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x60\xff\xff")
-        patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x60")
+        # Update HP jewel HP fill based on difficulty
+        patch.seek(int("39f7a", 16) + rom_offset)
+        if mode == 0:  # Easy mode = full HP
+            patch.write(b"\x28")
 
         # Change item functionality for game variants
-        patch.seek(int("3ff00", 16) + rom_offset)
+        patch.seek(int("3fce0", 16) + rom_offset)
         patch.write(qt_encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.", True))
-        patch.seek(int("3ff50", 16) + rom_offset)
+        patch.seek(int("3fd30", 16) + rom_offset)
         patch.write(qt_encode("As the Jewel disappears, Will feels his strength draining!", True))
 
         f_rjm = open(BIN_PATH + "03fd70_rjm.bin", "rb")
@@ -587,63 +486,12 @@ class Randomizer:
         patch.write(f_rjm.read())
         f_rjm.close
 
-        ##########################################################################
-        #                           Special Settings
-        ##########################################################################
-        # Z3 Mode - write subroutines to available space
-        patch.seek(int("3faee", 16) + rom_offset)     # DEF halves damage subroutine
-        patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
-#        patch.seek(int("fd00", 16) + rom_offset)     # Boss STR/DEF upgrades
-#        patch.write(z3_str)
-#        patch.seek(int("3ff90", 16) + rom_offset)     # Item HP upgrades
-#        patch.write(b"\x18\xA9\x03\xCD\x24\x0B\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x60")
-#        patch.seek(int("3ffe0", 16) + rom_offset)     # Item STR/DEF upgrades
-#        patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60")  #\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60") used to be for DEF
-
-        if settings.z3:
-            # Start with 6 HP
-            patch.seek(int("8068", 16) + rom_offset)
-            patch.write(b"\x06")
-
-            # Double damage on jump slash
-            patch.seek(int("2cf58", 16) + rom_offset)
-            patch.write(b"\xAD\xDE\x0A")
-
-            # Each DEF upgrade halves damage received
-            patch.seek(int("3c464", 16) + rom_offset)
-            patch.write(b"\x20\xEE\xFA")
-
-            # Update herb/HP upgrade fill values
-            patch.seek(int("3fe5c", 16) + rom_offset)  # Expert #$08
-            patch.write(b"\x08")
-            patch.seek(int("3fe61", 16) + rom_offset)  # Advanced #$0E
-            patch.write(b"\x0E")
-            patch.seek(int("3fe66", 16) + rom_offset)  # Intermediate #$28
-            patch.write(b"\x28")
-
-            # Call item upgrade subroutines
-            patch.seek(int("3f01c", 16) + rom_offset)  # HP upgrade
-            patch.write(b"\x20\xa1\xf7")
-            patch.seek(int("3f042", 16) + rom_offset)  # STR upgrade
-            patch.write(b"\x20\xc1\xf7")
-            patch.seek(int("3f061", 16) + rom_offset)  # DEF upgrade
-            patch.write(b"\x20\xe3\xf7")
-
         # In OHKO, the HP Jewels do nothing, and start @1HP
         if settings.ohko:
-            patch.seek(int("8068", 16) + rom_offset)  # Start 1 HP
+            patch.seek(int("8068", 16) + rom_offset)
             patch.write(b"\x01")
-            patch.seek(int("3f7b1", 16) + rom_offset) # HP upgrade
-            patch.write(b"\x00")
-            patch.seek(int("3f7b7", 16) + rom_offset) # HP upgrade
-            patch.write(b"\x00")
-            patch.seek(int("3ffbc", 16) + rom_offset) # heart piece
-            patch.write(b"\x60")
-#            patch.seek(int("39f71", 16) + rom_offset)
-#            patch.write(b"\x00\xff\x02\xd5\x29\x60")
-            # Also, herbs suck
-            patch.seek(int("388e9", 16) + rom_offset)
-            patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
+            patch.seek(int("39f71", 16) + rom_offset)
+            patch.write(b"\xe0\xfc\x02\xd5\x29\x60")
         # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
         elif settings.red_jewel_madness:
             # Start @ 40 HP
@@ -658,6 +506,7 @@ class Randomizer:
             # 3 Red Jewels (item #$2f) removes 3 HP when used
             patch.seek(int("39dd9", 16) + rom_offset)
             patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
+
 
         ##########################################################################
         #                  Update overworld map movement scripts
@@ -731,12 +580,6 @@ class Randomizer:
         patch.write(f_switches.read())
         f_switches.close
 
-        # Write room reward initialization routine
-        f_roominit = open(BIN_PATH + "00f49a_roominit.bin", "rb")
-        patch.seek(int("f49a", 16) + rom_offset)
-        patch.write(f_roominit.read())
-        f_roominit.close
-
         ##########################################################################
         #                         Modify South Cape events
         ##########################################################################
@@ -783,22 +626,22 @@ class Randomizer:
         # patch.write(b"\xA9\x28\x00\x8D\xCA\x0A\x8D\xCE\x0A\x8D\xDC\x0A\x8D\xDE\x0A\x02\xBF\x4C\x92\x6B")
         # patch.write(qt_encode("Max stats baby!",True))
 
-        # Turns house in South Cape into item-tracking overworld map (Beginner only)
-#        if settings.level.value == 0:
-        patch.seek(int("18480", 16) + rom_offset)
-        patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
-        patch.seek(int("1854e", 16) + rom_offset)
-        patch.write(b"\x00\x3e\x40\x02")
-        patch.seek(int("c846c", 16) + rom_offset)
-        patch.write(b"\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
+        # Turns house in South Cape into item-tracking overworld map (Easy only)
+        if mode == 0:
+            patch.seek(int("18480", 16) + rom_offset)
+            patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
+            patch.seek(int("1854e", 16) + rom_offset)
+            patch.write(b"\x00\x3e\x40\x02")
+            patch.seek(int("c846c", 16) + rom_offset)
+            patch.write(b"\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
 
-        f_collectioncheck = open(BIN_PATH + "06dd30_collectioncheck.bin", "rb")
-        patch.seek(int("6dd30", 16) + rom_offset)
-        patch.write(f_collectioncheck.read())
-        f_collectioncheck.close
-#        else:
-#            patch.seek(int("491ed", 16) + rom_offset)
-#            patch.write(qt_encode("This room is a lot cooler in Beginner mode.", True))
+            f_collectioncheck = open(BIN_PATH + "06dd30_collectioncheck.bin", "rb")
+            patch.seek(int("6dd30", 16) + rom_offset)
+            patch.write(f_collectioncheck.read())
+            f_collectioncheck.close
+        else:
+            patch.seek(int("491ed", 16) + rom_offset)
+            patch.write(qt_encode("This room is a lot cooler in Easy mode.", True))
 
         ##########################################################################
         #                       Modify Edward's Castle events
@@ -920,12 +763,10 @@ class Randomizer:
         patch.write(b"\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b")
         patch.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
 
-        # Adjust timer for enemizer
+        # Adjust timer by mode
         timer = 20
-#        if settings.level.value == 0:
-#            timer += 5
-#        elif settings.level.value >= 3:
-#            timer -= 5
+        if mode == 0:
+            timer += 5
         if settings.enemizer.value != Enemizer.NONE.value:
             timer += 5
             if settings.enemizer.value != Enemizer.LIMITED.value:
@@ -1108,14 +949,6 @@ class Randomizer:
         patch.write(f_nazca.read())
         f_nazca.close
 
-        # Put a Moon Tribe where the warp point is
-        patch.seek(int("5f2f1", 16) + rom_offset)
-        patch.write(b"\x10\x80\x0B")
-        patch.seek(int("5f30c", 16) + rom_offset)
-        patch.write(b"\x02\xC0\xAD\xE6\x80\xF5")
-        patch.seek(int("c9d29", 16) + rom_offset)
-        patch.write(b"\x1D\x2C")
-
         # Allow exit to world map
         patch.seek(int("5e80c", 16) + rom_offset)
         patch.write(b"\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
@@ -1131,12 +964,12 @@ class Randomizer:
 
         # Instant form change & warp to Seaside Palace if Viper is defeated
         patch.seek(int("ace9b", 16) + rom_offset)
-        patch.write(b"\x4c\x99\xff")
+        patch.write(b"\x4c\x82\xff")
         patch.seek(int("acecb", 16) + rom_offset)
         patch.write(b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
 
-        f_viperchange = open(BIN_PATH + "0aff99_viperchange.bin", "rb")
-        patch.seek(int("aff99", 16) + rom_offset)
+        f_viperchange = open(BIN_PATH + "0aff82_viperchange.bin", "rb")
+        patch.seek(int("aff82", 16) + rom_offset)
         patch.write(f_viperchange.read())
         f_viperchange.close
 
@@ -1237,8 +1070,6 @@ class Randomizer:
         patch.write(b"\x65\xb8\x00\x80\x02\x03\x00\x44")
         patch.seek(int("69c62", 16) + rom_offset)
         patch.write(b"\x67\x78\x01\xd0\x01\x80\x01\x22")
-        patch.seek(int("afa51", 16) + rom_offset)
-        patch.write(b"\x67\x78\x01\xd0\x01\x80\x01\x22")
         patch.seek(int("6a4c9", 16) + rom_offset)
         patch.write(b"\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b")
 
@@ -1268,8 +1099,8 @@ class Randomizer:
         # Entering this area clears your enemy defeat count and forces change to Will
         patch.seek(int("6bff7", 16) + rom_offset)
         patch.write(b"\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b")
-        #patch.write(b"\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6")
-        patch.write(CLEAR_ENEMIES + FORCE_CHANGE + b"\x02\xE0")
+        patch.write(b"\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6")
+        patch.write(FORCE_CHANGE + b"\x02\xE0")
 
         # Insert new arrangement for map 109, takes out rock to prevent spin dash softlock
         f_angelmap = open(BIN_PATH + "1a5a37_angelmap.bin", "rb")
@@ -1357,16 +1188,6 @@ class Randomizer:
         patch.seek(int("19c84", 16) + rom_offset)
         patch.write(b"\x82\x10\x00\x90\x00\x07\x00\x18")
 
-        # Spawn Fanger off-screen so we can't cheese hits off it with Earthquaker
-        patch.seek(0x0cbd2f + rom_offset)
-        patch.write(b"\x40")
-
-        # Make Fanger's detection areas cover the arena, in case player moves during quake
-        patch.seek(0x0b81a0 + rom_offset)
-        patch.write(b"\x01\x19\x3f\x3f")
-        patch.seek(0x0b81b7 + rom_offset)
-        patch.write(b"\x01\x2c\x3f\x3f")
-
         ##########################################################################
         #                            Modify Euro events
         ##########################################################################
@@ -1385,10 +1206,14 @@ class Randomizer:
         patch.write(qt_encode("A moose once bit my sister.", True))
 
         # Neil in Euro
+        f_euroneil = open(BIN_PATH + "07e398_euroneil.bin", "rb")
+        patch.seek(int("7e398", 16) + rom_offset)
+        patch.write(f_euroneil.read())
+        f_euroneil.close
         patch.seek(int("7e37f", 16) + rom_offset)
         patch.write(b"\x14\x00")
-        patch.seek(int("7e392", 16) + rom_offset)
-        patch.write(b"\x5C\xBE\xD8\x85")
+        patch.seek(int("7e394", 16) + rom_offset)
+        patch.write(b"\x10\x00")
 
         # Hidden house replaces STR upgrade with item acquisition
         f_euroitem = open(BIN_PATH + "07e517_euroitem.bin", "rb")
@@ -1399,10 +1224,6 @@ class Randomizer:
         # Speed up store line
         patch.seek(int("7d5e1", 16) + rom_offset)
         patch.write(b"\x00\x01")
-
-        # Simplify Ann logic
-        patch.seek(int("7df43", 16) + rom_offset)
-        patch.write(b"\x80\x0a")
 
         # Change vendor event, allows for only one item acquisition
         # Note: this cannibalizes the following event
@@ -1492,10 +1313,10 @@ class Randomizer:
         f_snakegame.close
 
         # Neil in Dao
-        patch.seek(int("8a5bf", 16) + rom_offset)
-        patch.write(b"\x10")
-        patch.seek(int("8a5f1", 16) + rom_offset)
-        patch.write(b"\x14\x01\xFE\xA5\x02\xD0\x14\x01\xFE\xA5\x02\xE0\x6B\x5C\xBE\xD8\x85")
+        f_daoneil = open(BIN_PATH + "08a5bd_daoneil.bin", "rb")
+        patch.seek(int("8a5bd", 16) + rom_offset)
+        patch.write(f_daoneil.read())
+        f_daoneil.close
         patch.seek(int("8a5b3", 16) + rom_offset)
         patch.write(b"\x14\x00")
 
@@ -1503,8 +1324,8 @@ class Randomizer:
         patch.seek(int("8b16d", 16) + rom_offset)
         patch.write(b"\x4c\x50\xfe")
         patch.seek(int("8fe50", 16) + rom_offset)
-        patch.write(b"\x02\xBF\x78\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE\x02\xBF\x9A\xFE\x6B")
-        patch.write(b"\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x22\x9B\xFF\x81\x9C\xD4\x0A\x02\xC5")
+        patch.write(b"\x02\xBF\x71\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE")
+        patch.write(b"\x02\xBF\x93\xFE\x6B\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x02\xC5")
         patch.write(b"\xd3" + qt_encode("Go to Natives' Village?") + b"\xcb\xac")
         patch.write(qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
         patch.write(b"\xce" + qt_encode("Come back anytime!") + b"\xc0")
@@ -1594,7 +1415,7 @@ class Randomizer:
         patch.seek(int("9999b", 16) + rom_offset)
         patch.write(b"\x4c\xd0\xf6")
         patch.seek(int("9f6d0", 16) + rom_offset)
-        patch.write(CLEAR_ENEMIES + b"\x02\xd0\xdc\x00\xa0\x99\x02\xd0\x3e\x00\xa0\x99\x02\xd0\xb4\x01\x9a\x99\x4c\xa0\x99")
+        patch.write(b"\x02\xd0\xdc\x00\xa0\x99\x02\xd0\x3e\x00\xa0\x99\x02\xd0\xb4\x01\x9a\x99\x4c\xa0\x99")
         patch.seek(int("999aa", 16) + rom_offset)
         patch.write(b"\x4c\xf0\xf6")
         patch.seek(int("9f6f0", 16) + rom_offset)
@@ -1632,12 +1453,6 @@ class Randomizer:
         patch.write(qt_encode("I'd tell you my story, but I'd hate to Babylon.|Thank you! I'm here all week!"))
         patch.write(b"\xcb\xac\xd6\x42\xcb\xac")
         patch.write(qt_encode("Go to Dao") + b"\xca")
-
-        # Dao spirit forces form change
-        patch.seek(int("98045", 16) + rom_offset)
-        patch.write(b"\x20\xc0\xf6")
-        patch.seek(int("9f6c0", 16) + rom_offset)
-        patch.write(b"\x8D\x48\x06" + CLEAR_ENEMIES + FORCE_CHANGE + b"\x60")
 
         # Fun with other text
         patch.seek(int("99866", 16) + rom_offset)
@@ -1701,49 +1516,38 @@ class Randomizer:
         patch.seek(int("bde16", 16) + rom_offset)
         patch.write(qt_encode("Shh... here,") + b"\xCB" + qt_encode("have some bacon.") + str_endpause)
 
-        # Test for infinite death loop
-        patch.seek(int("bd32b", 16) + rom_offset)
-        patch.write(b"\x4c\xe0\xff")
-        f_infdeath = open(BIN_PATH + "0bfe40_infdeath.bin", "rb")
-        patch.seek(int("bfe40", 16) + rom_offset)
-        patch.write(f_infdeath.read())
-        f_infdeath.close
-
         # Thank the playtesters
         patch.seek(int("be056", 16) + rom_offset)
-        patch.write(b"\x74\xfa")
-        patch.seek(int("bfa74", 16) + rom_offset)
+        patch.write(b"\x80\xfa")
+        patch.seek(int("bfa80", 16) + rom_offset)
         patch.write(b"\xD3\xD2\x00\xD5\x00" + qt_encode("Contributors and Testers:") + b"\xCB")
-        patch.write(qt_encode("-Alchemic -Atlas") + b"\xCB")
-        patch.write(qt_encode("-ChaozJoe -BOWIEtheHERO") + b"\xCB")
-        patch.write(qt_encode("-HirosofT -BubbaSWalter") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Alchemic  -Austin21300") + b"\xCB")
+        patch.write(qt_encode("-Atlas     -BonzaiBier") + b"\xCB")
+        patch.write(qt_encode("-ChaozJoe  -BOWIEtheHERO") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Austin21300 -DerTolleIgel") + b"\xCB")
-        patch.write(qt_encode("-djtifaheart -DoodSF") + b"\xCB")
-        patch.write(qt_encode("-Neomatamune -Eppy37") + b"\xCB")
-        patch.write(qt_encode("-SmashManiac -Lassic") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-DoodSF    -BubbaSWalter") + b"\xCB")
+        patch.write(qt_encode("-Eppy37    -Crazyhaze") + b"\xCB")
+        patch.write(qt_encode("-Lassic    -DerTolleIgel") + b"\xCB")
+        patch.write(qt_encode("-Le Hulk   -djtifaheart") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-BonzaiBier -GliitchWiitch") + b"\xCB")
-        patch.write(qt_encode("-Keypaladin -LeHulk") + b"\xCB")
-        patch.write(qt_encode("-QueenAnneB -Mikan") + b"\xCB")
-        patch.write(qt_encode("-stevehacks -Nemo") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Mikan     -GliitchWiitch") + b"\xCB")
+        patch.write(qt_encode("-Mr Freet  -Keypaladin") + b"\xCB")
+        patch.write(qt_encode("-NYRambler -Neomatamune") + b"\xCB")
+        patch.write(qt_encode("-Plan      -Pozzum Senpai") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Crazyhaze -Plan") + b"\xCB")
-        patch.write(qt_encode("-NYRambler -PozzumSenpai") + b"\xCB")
-        patch.write(qt_encode("-wildfang1 -roeya") + b"\xCB")
-        patch.write(qt_encode("-ZekeStarr -Skipsy") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-roeya     -Skipsy") + b"\xCB")
+        patch.write(qt_encode("-Scheris   -SmashManiac") + b"\xCB")
+        patch.write(qt_encode("-SDiezal   -solarcell007") + b"\xCB")
+        patch.write(qt_encode("-Skarsnik  -steve hacks") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-MrFreet -solarcell007") + b"\xCB")
-        patch.write(qt_encode("-Scheris -Sye990") + b"\xCB")
-        patch.write(qt_encode("-SDiezal -Tymekeeper") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Sye990    -Tymekeeper") + b"\xCB")
+        patch.write(qt_encode("-Tsurana   -Veetorp") + b"\xCB")
+        patch.write(qt_encode("-Volor     -Verallix") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Skarsnik -Veetorp") + b"\xCB")
-        patch.write(qt_encode("-Verallix -Volor") + b"\xCB")
-        patch.write(qt_encode("-Voranthe -wormsofcan") + b"\xC9\xB4\xCE")
-
-        patch.write(qt_encode("-Tsurana -xIceblue") + b"\xCB")
-        patch.write(qt_encode("-Wilddin -ZockerStu") + b"\xCB")
-        patch.write(qt_encode("-Xyrcord -Z4t0x") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Voranthe  -wormsofcan") + b"\xCB")
+        patch.write(qt_encode("-Wilddin   -Xyrcord") + b"\xCB")
+        patch.write(qt_encode("-xIceblue  -ZockerStu") + b"\xCB")
+        patch.write(qt_encode("-Z4t0x") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
         patch.write(b"\xCB" + qt_encode("     This was so fun!"))
@@ -1970,21 +1774,19 @@ class Randomizer:
         patch.write(f_roomrewards.read())
         f_roomrewards.close
 
-        # HP room rewards become +3 (non-Z3 mode only)
-        if not settings.z3:
-            # Room-clearing rewards
-            patch.seek(int("e041", 16) + rom_offset)
-            patch.write(b"\x03")
+        # Make room-clearing HP rewards grant +3 HP each
+        patch.seek(int("e041", 16) + rom_offset)
+        patch.write(b"\x03")
 
-            # Boss rewards
-            patch.seek(int("c381", 16) + rom_offset)
-            patch.write(b"\x20\x90\xf4")
-            patch.seek(int("f490", 16) + rom_offset)
-            patch.write(b"\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
+        # Make boss rewards also grant +3 HP per unclaimed reward
+        patch.seek(int("c381", 16) + rom_offset)
+        patch.write(b"\x20\x90\xf4")
+        patch.seek(int("f490", 16) + rom_offset)
+        patch.write(b"\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
 
         # Change boss room ranges
         patch.seek(int("c31a", 16) + rom_offset)
-        patch.write(b"\x67\x5A\x74\x00\x8A\x82\xA9\x00\xDD\xCC\xDD\x00\xF6\xB0\xBF\x00")
+        patch.write(b"\x67\x5A\x73\x00\x8A\x82\xA8\x00\xDD\xCC\xDD\x00\xF6\xB0\xBF\x00")
         # patch.write(b"\xEA\xB0\xBF\x00")   # If Solid Arm ever grants Babel rewards
 
         # Add boss reward events to Babel and Jeweler Mansion
@@ -2003,10 +1805,7 @@ class Randomizer:
 
         # Change start menu "FORCE" text
         patch.seek(int("1ff70", 16) + rom_offset)
-        if settings.z3:
-            patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x48\x50\x00")  # "+1HP"
-        else:
-            patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x00")  # "+3HP"
+        patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x00")  # "+3HP"
         patch.seek(int("1ff80", 16) + rom_offset)
         patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x53\x54\x52\x00")  # "+1STR"
         patch.seek(int("1ff90", 16) + rom_offset)
@@ -2015,52 +1814,20 @@ class Randomizer:
         ##########################################################################
         #                        Balance Enemy Stats
         ##########################################################################
-        # Write Intermediate stat table to vanilla location for legacy code
-        if settings.z3:
-            f_legacystats = open(BIN_PATH + "01abf0_enemies_z3.bin", "rb")
-        else:
-            f_legacystats = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
-        patch.seek(int("1abf0", 16) + rom_offset)
-        patch.write(f_legacystats.read())
-        f_legacystats.close
+        # Determine enemy stats, by difficulty
+        if mode == 0:
+            f_enemies = open(BIN_PATH + "01abf0_enemieseasy.bin", "rb")
+        elif mode == 1:
+            f_enemies = open(BIN_PATH + "01abf0_enemiesnormal.bin", "rb")
+        elif mode == 2:
+            f_enemies = open(BIN_PATH + "01abf0_enemieshard.bin", "rb")
+        elif mode == 3:
+            f_enemies = open(BIN_PATH + "01abf0_enemiesextreme.bin", "rb")
 
-        # Write enemy stat tables to memory, by Level
-        if settings.z3:
-            f_enemystats = open(BIN_PATH + "02f130_enemystats_z3.bin", "rb")
-        else:
-            f_enemystats = open(BIN_PATH + "02f130_enemystats.bin", "rb")
-        patch.seek(int("2f130", 16) + rom_offset)
-        patch.write(f_enemystats.read())
-        f_enemystats.close
-
-        # Rewrite enemy lookup routines to reference new tables
-        patch.seek(int("3d003", 16) + rom_offset)   # HP
-        patch.write(b"\x20\x80\xfe")
-        patch.seek(int("3fe80", 16) + rom_offset)
-        patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x00\x00\x82\xFA\x60")       # HP
-        patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x01\x00\x82\xFA\x60")       # STR
-        patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x02\x00\x82\xFA\x60")       # DEF
-        patch.write(b"\xA8\x20\xAD\xFE\xDA\xBB\xBF\x03\x00\x82\xFA\x6B")   # GEM, inconsistent APIs are a problem for future Bagu
-        # Fix hardcoded stat block pointers
-        patch.write(b"\xC0\x00\xB0\xB0\x0C\x98\xF0\x09\x38\xE9\xF0\xAB\x18\x20\xd0\xfe\xA8\x60")
-        patch.seek(0x03be52 + rom_offset)
-        patch.write(b"\x82")
-        patch.seek(0x03bfba + rom_offset)   # HP
-        patch.write(b"\x20\x80\xfe")
-        patch.seek(0x03bfc3 + rom_offset)   # DEF
-        patch.write(b"\x20\x96\xfe")
-        patch.seek(0x03c45d + rom_offset)   # STR
-        patch.write(b"\x20\x8b\xfe")
-        patch.seek(0x00dadd + rom_offset)   # GEM
-        patch.write(b"\x22\xa1\xfe\x83")
-        patch.seek(0x00dc07 + rom_offset)   # GEM
-        patch.write(b"\x22\xa1\xfe\x83")
-        patch.seek(int("3fed0", 16) + rom_offset)
-        patch.write(b"\x48\xAD\x24\x0B\xF0\x18\x3A\xF0\x0F\x3A\xF0\x06\x68\x69\x70\xF6\x80\x10")
-        patch.write(b"\x68\x69\xB0\xF4\x80\x0A\x68\x69\xF0\xF2\x80\x04\x68\x69\x30\xF1\x60")
-        patch.seek(int("3cffb", 16) + rom_offset)
-        patch.write(b"\x20\xd0\xfe")
-
+        if mode < 4:
+            patch.seek(int("1abf0", 16) + rom_offset)
+            patch.write(f_enemies.read())
+            f_enemies.close
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -2213,97 +1980,47 @@ class Randomizer:
         #                          Randomize Snake Game
         ##########################################################################
         # Randomize snake game duration/goal
-        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
+        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By difficulty (mode)
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
-        snake_target = []
-        snake_target.append(int(snake_timer * snakes_per_sec[0] * snake_adj))
-        snake_target.append(int(snake_timer * snakes_per_sec[1] * snake_adj))
-        snake_target.append(int(snake_timer * snakes_per_sec[2] * snake_adj))
-        snake_target.append(int(snake_timer * snakes_per_sec[3] * snake_adj))
+        snake_target = int(snake_timer * snakes_per_sec[mode] * snake_adj)
 
         snake_frames_str = format((60 * snake_timer) % 256, "02x") + format(int((60 * snake_timer) / 256), "02x")
-        snake_target_str = []
-        snake_target_str.append(format(int(snake_target[0] / 10), "x") + format(snake_target[0] % 10, "x"))
-        snake_target_str.append(format(int(snake_target[1] / 10), "x") + format(snake_target[1] % 10, "x"))
-        snake_target_str.append(format(int(snake_target[2] / 10), "x") + format(snake_target[2] % 10, "x"))
-        snake_target_str.append(format(int(snake_target[3] / 10), "x") + format(snake_target[3] % 10, "x"))
+        snake_target_str = format(int(snake_target / 10), "x") + format(snake_target % 10, "x")
 
         # Update snake game logic with new values
         patch.seek(int("8afe6", 16) + rom_offset)   # Timer, in frames (vanilla b"\x10\x0e")
         patch.write(binascii.unhexlify(snake_frames_str))
-        patch.seek(int("8ff50", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
-        patch.write(binascii.unhexlify(snake_target_str[0]))
-        patch.write(b"\x00")
-        patch.write(binascii.unhexlify(snake_target_str[1]))
-        patch.write(b"\x00")
-        patch.write(binascii.unhexlify(snake_target_str[2]))
-        patch.write(b"\x00")
-        patch.write(binascii.unhexlify(snake_target_str[3]))
-        patch.write(b"\x00")
-
-        patch.seek(int("8aff3", 16) + rom_offset)
-        patch.write(b"\x4c\x58\xff")
-        patch.seek(int("8ff58", 16) + rom_offset)
-        patch.write(b"\xDA\xAD\x24\x0B\x0A\xAA\xAD\xAC\x0A\xDF\x50\xFF\x88\xFA\x4C\xF9\xAF")
+        patch.seek(int("8aff7", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
+        patch.write(binascii.unhexlify(snake_target_str))
 
         # Update text to reflect changes
-        patch.seek(int("8aeb9", 16) + rom_offset)
-        patch.write(b"\x4c\x20\xaf")
-        patch.seek(int("8af20", 16) + rom_offset)
-        patch.write(b"\xAD\x24\x0B\xF0\x18\x3A\xF0\x0F\x3A\xF0\x06\x02\xBF\x28\xFF\x80\x10")
-        patch.write(b"\x02\xBF\x00\xFF\x80\x0A\x02\xBF\xD8\xFE\x80\x04\x02\xBF\xB0\xFE\x4C\xBD\xAE")
-
-        patch.seek(int("8feb0", 16) + rom_offset)
-        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[0]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
-        patch.seek(int("8fed8", 16) + rom_offset)
-        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[1]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
-        patch.seek(int("8ff00", 16) + rom_offset)
-        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[2]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
-        patch.seek(int("8ff28", 16) + rom_offset)
-        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[3]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
+        patch.seek(int("8af2e", 16) + rom_offset)
+        patch.write(qt_encode("Hit " + str(snake_target) + " snakes in " + str(snake_timer) + " seconds."))
+        patch.write(b"\xcb\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac")
 
         ##########################################################################
         #                    Randomize Jeweler Reward amounts
         ##########################################################################
         # Randomize jeweler reward values
         gem = []
-        if settings.z3:
-            gem.append(random.randint(1, 2))
-            gem.append(random.randint(3, 4))
-            gem.append(random.randint(5, 7))
-            gem.append(random.randint(8, 11))
-            gem.append(random.randint(12, 17))
-            gem.append(random.randint(18, 23))
-            gem.append(random.randint(24, 34))
+        gem.append(random.randint(1, 3))
+        gem.append(random.randint(4, 6))
+        gem.append(random.randint(7, 9))
+        gem.append(random.randint(10, 14))
+        gem.append(random.randint(16, 24))
+        gem.append(random.randint(26, 34))
+        gem.append(random.randint(36, 50))
 
-            if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-                if settings.difficulty.value == 0:
-                    gem[6] = GEMS_Z3_EASY
-                elif settings.difficulty.value == 1:
-                    gem[6] = GEMS_Z3_NORMAL
-                elif settings.difficulty.value == 2:
-                    gem[6] = GEMS_Z3_HARD
-                elif settings.difficulty.value == 3:
-                    gem[6] = GEM_Z3S_EXTREME
-        else:
-            gem.append(random.randint(1, 3))
-            gem.append(random.randint(4, 6))
-            gem.append(random.randint(7, 9))
-            gem.append(random.randint(10, 14))
-            gem.append(random.randint(16, 24))
-            gem.append(random.randint(26, 34))
-            gem.append(random.randint(36, 50))
-
-            if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-                if settings.difficulty.value == 0:
-                    gem[6] = GEMS_EASY
-                elif settings.difficulty.value == 1:
-                    gem[6] = GEMS_NORMAL
-                elif settings.difficulty.value == 2:
-                    gem[6] = GEMS_HARD
-                elif settings.difficulty.value == 3:
-                    gem[6] = GEMS_EXTREME
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+            if mode == 0:
+                gem[6] = GEMS_EASY
+            elif mode == 1:
+                gem[6] = GEMS_NORMAL
+            elif mode == 2:
+                gem[6] = GEMS_HARD
+            elif mode == 3:
+                gem[6] = GEMS_EXTREME
 
         gem_str = []
 
@@ -2358,15 +2075,10 @@ class Randomizer:
         patch.seek(int("8d297", 16) + rom_offset)
         patch.write(binascii.unhexlify(gem_str[2]))
 
-        if int(gem_str[3]) < 10:
-            gem_str[3] = format(2, "x") + format(gem[3] % 10, "x")
-            patch.seek(int("8d2aa", 16) + rom_offset)
-            patch.write(b"\xac" + binascii.unhexlify(gem_str[3]))
-        else:
-            gem_str[3] = format(2, "x") + format(int(gem[3] / 10), "x")
-            gem_str[3] = gem_str[3] + format(2, "x") + format(gem[3] % 10, "x")
-            patch.seek(int("8d2aa", 16) + rom_offset)
-            patch.write(binascii.unhexlify(gem_str[3]))
+        gem_str[3] = format(2, "x") + format(int(gem[3] / 10), "x")
+        gem_str[3] = gem_str[3] + format(2, "x") + format(gem[3] % 10, "x")
+        patch.seek(int("8d2aa", 16) + rom_offset)
+        patch.write(binascii.unhexlify(gem_str[3]))
 
         gem_str[4] = format(2, "x") + format(int(gem[4] / 10), "x")
         gem_str[4] = gem_str[4] + format(2, "x") + format(gem[4] % 10, "x")
@@ -2521,7 +2233,7 @@ class Randomizer:
         boss_order = [1,2,3,4,5,6,7]
         if settings.boss_shuffle:
             # Determine statue order for shuffle
-            if settings.difficulty.value >= 3:
+            if mode == 3:
                 random.shuffle(boss_order)
             else:
                 boss_order.remove(5)
@@ -2556,8 +2268,8 @@ class Randomizer:
                         music_header_addrs[i].append(addr)
                 i += 1
 
-            # Patch music headers into new dungeons (beginner and intermediate modes)
-            if settings.difficulty.value <= 1:
+            # Patch music headers into new dungeons (easy and normal modes)
+            if mode <= 1:
                 i = 0
                 while i < 5:
                     boss = boss_order[i]
@@ -2918,7 +2630,7 @@ class Randomizer:
             b"\x2d\x43\x84\x80\xa4\x87\xac\x88\xa3\xac\xa4\x87\x84\xac\xa7\x88\xa3\x87\xac\x8e\x85\xcb\xa3\x8e\x8c\x84\x2b\xac\xa4\x87\x84\xac\xa2\x84\x8b\x88\x84\x85\xac\x8e\x85\xac\x8c\x80\x8d\xa9\x2b\xcb\x80\x8d\x83\xac\xa4\x87\x84\xac\x84\x8d\x83\xac\x8e\x85\xac\x80\x8b\x8b\x2a\x2e\xcb\xac\xac\x6d\x4B\xa5\x82\x88\xa5\xa3\xac\x40\x8d\x8d\x80\x84\xa5\xa3\xac\x63\x84\x8d\x84\x82\x80\xc0")
         death_list.append(
             b"\x2d\x43\x84\x80\xa4\x87\xac\xa7\x88\x8b\x8b\xac\x81\x84\xac\x80\xac\x86\xa2\x84\x80\xa4\xcb\xa2\x84\x8b\x88\x84\x85\x2a\xac\x4D\x8e\xac\x8c\x8e\xa2\x84\xcb\x88\x8d\xa4\x84\xa2\xa6\x88\x84\xa7\xa3\x2a\x2e\xcb\xac\xac\x6d\x4A\x80\xa4\x87\x80\xa2\x88\x8d\x84\xac\x47\x84\xa0\x81\xa5\xa2\x8d\xc0\xc0")
-        if settings.difficulty.value >= 3:
+        if mode == 3:
             death_list.append(b"\x2d\x46\x88\xa4\xac\x86\xa5\x83\xac\xa3\x82\xa2\xa5\x81\x2a\x2e\xcb\xac\xac\x6d\x41\x80\x86\xa5\xc0")
 
         # Will death text
@@ -2926,14 +2638,40 @@ class Randomizer:
         patch.write(death_list[random.randint(0, len(death_list) - 1)])
         # patch.write(death_list[0])
 
-        # Standardize text, check for infinite death loop
-        patch.seek(int("d7a2", 16) + rom_offset)
-        patch.write(b"\xAD\xCA\x0A\xF0\x06\x02\xBF\xC2\xD7\x80\x0D\x02\xBF\xF0\xFD\x80\x07")
+        # Change Fredan and Shadow death pointers
+        patch.seek(int("d7b2", 16) + rom_offset)
+        patch.write(b"\xc2\xd7")
+        patch.seek(int("d7b8", 16) + rom_offset)
+        patch.write(b"\xc2\xd7")
 
-        f_pi = open(BIN_PATH + "00fdf0_pi.bin", "rb")
-        patch.seek(int("fdf0", 16) + rom_offset)
-        patch.write(f_pi.read())
-        f_pi.close()
+        ##########################################################################
+        #                          Have fun with final text
+        ##########################################################################
+        superhero_list = []
+        superhero_list.append(qt_encode("I must go, my people need me!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("     Up, up, and away!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       Up and atom!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("  It's clobberin' time!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       For Asgard!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    Back in a flash!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("      I am GROOT!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("Wonder Twin powers activate!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    Titans together!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       HULK SMASH!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("        Flame on!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    I have the power!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("        Shazam!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("     Bite me, fanboy.") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("  Hi-yo Silver... away!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("Here I come to save the day!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    Teen Titans, Go!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       Cowabunga!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       SPOOOOON!!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("There better be bacon when I get there...") + b"\xc3\x00\xc0")
+
+        # Assign final text box
+        patch.seek(int("98ebe", 16) + rom_offset)
+        patch.write(superhero_list[random.randint(0, len(superhero_list) - 1)])
 
         ##########################################################################
         #                   Randomize item and ability placement
@@ -2995,383 +2733,221 @@ class Randomizer:
 
         room_offsets = ["6d95e", "6d98a", "6d9b4", "6d9de"]  # ROM addrs for cursor capture, by room
         coord_offsets = [3, 8, 15, 20]  # Offsets for xmin, xmax, ymin, ymax
-        changes = [list(range(11)), list(range(9)), list(range(5)), list(range(7))]
-        random.shuffle(changes[0])
-        random.shuffle(changes[1])
-        random.shuffle(changes[2])
-        random.shuffle(changes[3])
-        #idx_diff = [10,3,1,1]  #testing#########
-        idx_diff = [changes[0].pop(0),changes[1].pop(0),changes[2].pop(0),changes[3].pop(0)]
-
-        # Will's hair can't be changed in both rooms
-        for i in range(4):
-            if 0 in changes[i]:
-                changes[i].remove(0)
-
-        # Set changes for both rooms (higher difficulties only)
-        other_changes = [[],[],[],[]]
-        if settings.difficulty.value >= 2:
-            i = 0
-            while i < 4:
-                other_changes[i] = changes[i][:settings.difficulty.value-1]
-                i += 1
-
-        #print(idx_diff)
-        #print(other_changes)
+        changes = [random.randint(1, 11), random.randint(1, 9), random.randint(1, 5), random.randint(1, 7)]
+        #changes = [10,3,1,1]  #testing#########
 
         # Set change for Room 1
-        if idx_diff[0] == 0:  # Will's hair
-            patch.seek(int("6dd06", 16) + rom_offset)
-            patch.write(b"\x5d")
-            coords = [b"\xa0\x01", b"\xc0\x01", b"\xb0\x00", b"\xd0\x00"]
-
-        if idx_diff[0] == 1 or 1 in other_changes[0]:  # Change right vase to light (vanilla)
+        if changes[0] == 1:  # Change right vase to light (vanilla)
             f_ishtarmap.seek(int("17b", 16))
             f_ishtarmap.write(b"\x7b")
             f_ishtarmap.seek(int("18b", 16))
             f_ishtarmap.write(b"\x84")
-            if idx_diff[0] == 1:
-                coords = [b"\xB0\x01", b"\xC0\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("7b", 16))
-                f_ishtarmap.write(b"\x7b")
-                f_ishtarmap.seek(int("8b", 16))
-                f_ishtarmap.write(b"\x84")
+            coords = [b"\xB0\x01", b"\xC0\x01", b"\x70\x00", b"\x90\x00"]
 
-        if idx_diff[0] == 2 or 2 in other_changes[0]:  # Change middle vase to light
+        elif changes[0] == 2:  # Change middle vase to light
             f_ishtarmap.seek(int("175", 16))
             f_ishtarmap.write(b"\x7b")
             f_ishtarmap.seek(int("185", 16))
             f_ishtarmap.write(b"\x84")
-            if idx_diff[0] == 2:
-                coords = [b"\x50\x01", b"\x60\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("75", 16))
-                f_ishtarmap.write(b"\x7b")
-                f_ishtarmap.seek(int("85", 16))
-                f_ishtarmap.write(b"\x84")
+            coords = [b"\x50\x01", b"\x60\x01", b"\x70\x00", b"\x90\x00"]
 
-        if idx_diff[0] == 3 or 3 in other_changes[0]:  # Change left vase to dark
+        elif changes[0] == 3:  # Change left vase to dark
             f_ishtarmap.seek(int("174", 16))
             f_ishtarmap.write(b"\x83")
             f_ishtarmap.seek(int("184", 16))
             f_ishtarmap.write(b"\x87")
-            if idx_diff[0] == 3:
-                coords = [b"\x40\x01", b"\x50\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("74", 16))
-                f_ishtarmap.write(b"\x83")
-                f_ishtarmap.seek(int("84", 16))
-                f_ishtarmap.write(b"\x87")
+            coords = [b"\x40\x01", b"\x50\x01", b"\x70\x00", b"\x90\x00"]
 
-        if idx_diff[0] == 4 or 4 in other_changes[0]:  # Change left shelf to empty
+        elif changes[0] == 4:  # Change left shelf to empty
             f_ishtarmap.seek(int("165", 16))
             f_ishtarmap.write(b"\x74")
-            if idx_diff[0] == 4:
-                coords = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("65", 16))
-                f_ishtarmap.write(b"\x74")
+            coords = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
 
-        if idx_diff[0] == 5 or 5 in other_changes[0]:  # Change left shelf to books
+        elif changes[0] == 5:  # Change left shelf to books
             f_ishtarmap.seek(int("165", 16))
             f_ishtarmap.write(b"\x76")
-            if idx_diff[0] == 5:
-                coords = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("65", 16))
-                f_ishtarmap.write(b"\x76")
+            coords = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
 
-        if idx_diff[0] == 6 or 6 in other_changes[0]:  # Change right shelf to jar
+        elif changes[0] == 6:  # Change right shelf to jar
             f_ishtarmap.seek(int("166", 16))
             f_ishtarmap.write(b"\x75")
-            if idx_diff[0] == 6:
-                coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("66", 16))
-                f_ishtarmap.write(b"\x75")
+            coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
 
-        if idx_diff[0] == 7 or 7 in other_changes[0]:  # Change right shelf to empty
+        elif changes[0] == 7:  # Change right shelf to empty
             f_ishtarmap.seek(int("166", 16))
             f_ishtarmap.write(b"\x74")
-            if idx_diff[0] == 7:
-                coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("66", 16))
-                f_ishtarmap.write(b"\x74")
+            coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
 
-        if idx_diff[0] == 8 or 8 in other_changes[0]:  # Remove left sconce
+        elif changes[0] == 8:  # Remove left sconce
             f_ishtarmap.seek(int("157", 16))
             f_ishtarmap.write(b"\x12\x12")
             f_ishtarmap.seek(int("167", 16))
             f_ishtarmap.write(b"\x1a\x1a")
-            if idx_diff[0] == 8:
-                coords = [b"\x70\x01", b"\x90\x01", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("57", 16))
-                f_ishtarmap.write(b"\x12\x12")
-                f_ishtarmap.seek(int("67", 16))
-                f_ishtarmap.write(b"\x1a\x1a")
+            coords = [b"\x70\x01", b"\x90\x01", b"\x50\x00", b"\x70\x00"]
 
-        if idx_diff[0] == 9 or 9 in other_changes[0]:  # Remove right sconce
+        elif changes[0] == 9:  # Remove right sconce
             f_ishtarmap.seek(int("15a", 16))
             f_ishtarmap.write(b"\x12\x12")
             f_ishtarmap.seek(int("16a", 16))
             f_ishtarmap.write(b"\x1a\x1a")
-            if idx_diff[0] == 9:
-                coords = [b"\xa0\x01", b"\xc0\x01", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("5a", 16))
-                f_ishtarmap.write(b"\x12\x12")
-                f_ishtarmap.seek(int("6a", 16))
-                f_ishtarmap.write(b"\x1a\x1a")
+            coords = [b"\xa0\x01", b"\xc0\x01", b"\x50\x00", b"\x70\x00"]
 
-        if idx_diff[0] == 10 or 10 in other_changes[0]:  # Shift right vase
+        elif changes[0] == 10:  # Shift right vase
             f_ishtarmap.seek(int("17a", 16))
             f_ishtarmap.write(b"\x83\x22")
             f_ishtarmap.seek(int("18a", 16))
             f_ishtarmap.write(b"\x87\x13")
-            if idx_diff[0] == 10:
-                coords = [b"\xa0\x01", b"\xb0\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("7a", 16))
-                f_ishtarmap.write(b"\x83\x22")
-                f_ishtarmap.seek(int("8a", 16))
-                f_ishtarmap.write(b"\x87\x13")
+            coords = [b"\xa0\x01", b"\xb0\x01", b"\x70\x00", b"\x90\x00"]
+
+        elif changes[0] == 11:  # Will's hair
+            patch.seek(int("6dd06", 16) + rom_offset)
+            patch.write(b"\x5d")
+            coords = [b"\xa0\x01", b"\xc0\x01", b"\xb0\x00", b"\xd0\x00"]
 
         # Update cursor check ranges for Room 1
         for i in range(4):
             patch.seek(int(room_offsets[0], 16) + coord_offsets[i] + rom_offset)
             patch.write(coords[i])
 
-
         # Set change for Room 2
-        if idx_diff[1] == 0 or 0 in other_changes[1]:  # Will's hair
-            patch.seek(int("6dd0e", 16) + rom_offset)
-            patch.write(b"\x5d")
-            coords = [b"\x90\x03", b"\xb0\x03", b"\xa0\x00", b"\xc0\x00"]
-
-        if idx_diff[1] == 1:  # Change both vases to light (vanilla)
+        if changes[1] == 1:  # Change both vases to light (vanilla)
             f_ishtarmap.seek(int("3a3", 16))
             f_ishtarmap.write(b"\x7c\x7c")
             f_ishtarmap.seek(int("3b3", 16))
             f_ishtarmap.write(b"\x84\x84")
             coords = [b"\x30\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        if idx_diff[1] == 2 or 2 in other_changes[1]:  # Change left vase to light
+        if changes[1] == 2:  # Change left vase to light
             f_ishtarmap.seek(int("3a3", 16))
             f_ishtarmap.write(b"\x7c")
             f_ishtarmap.seek(int("3b3", 16))
             f_ishtarmap.write(b"\x84")
-            if idx_diff[1] == 2:
-                coords = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2a3", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("2b3", 16))
-                f_ishtarmap.write(b"\x84")
+            coords = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        if idx_diff[1] == 3 or 3 in other_changes[1]:  # Change right vase to light
+        if changes[1] == 3:  # Change right vase to light
             f_ishtarmap.seek(int("3a4", 16))
             f_ishtarmap.write(b"\x7c")
             f_ishtarmap.seek(int("3b4", 16))
             f_ishtarmap.write(b"\x84")
-            if idx_diff[1] == 3:
-                coords = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2a4", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("2b4", 16))
-                f_ishtarmap.write(b"\x84")
+            coords = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        if idx_diff[1] == 4 or 4 in other_changes[1]:  # Remove rock
+        elif changes[1] == 4:  # Remove rock
             f_ishtarmap.seek(int("3bd", 16))
             f_ishtarmap.write(b"\x73")
-            if idx_diff[1] == 4:
-                coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2bd", 16))
-                f_ishtarmap.write(b"\x73")
+            coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
 
-        if idx_diff[1] == 5 or 5 in other_changes[1]:  # Add round table
+        elif changes[1] == 5:  # Add round table
             f_ishtarmap.seek(int("395", 16))
             f_ishtarmap.write(b"\x7d\x7e")
             f_ishtarmap.seek(int("3a5", 16))
             f_ishtarmap.write(b"\x85\x86")
             f_ishtarmap.seek(int("3b5", 16))
             f_ishtarmap.write(b"\x8d\x8e")
-            if idx_diff[1] == 5:
-                coords = [b"\x50\x03", b"\x70\x03", b"\x90\x00", b"\xb0\x00"]
-            else:
-                f_ishtarmap.seek(int("295", 16))
-                f_ishtarmap.write(b"\x7d\x7e")
-                f_ishtarmap.seek(int("2a5", 16))
-                f_ishtarmap.write(b"\x85\x86")
-                f_ishtarmap.seek(int("2b5", 16))
-                f_ishtarmap.write(b"\x8d\x8e")
+            coords = [b"\x50\x03", b"\x70\x03", b"\x90\x00", b"\xb0\x00"]
 
-        if idx_diff[1] == 6 or 6 in other_changes[1]:  # Add sconce
+        elif changes[1] == 6:  # Add sconce
             f_ishtarmap.seek(int("357", 16))
             f_ishtarmap.write(b"\x88\x89")
             f_ishtarmap.seek(int("367", 16))
             f_ishtarmap.write(b"\x90\x91")
-            if idx_diff[1] == 6:
-                coords = [b"\x70\x03", b"\x90\x03", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("257", 16))
-                f_ishtarmap.write(b"\x88\x89")
-                f_ishtarmap.seek(int("267", 16))
-                f_ishtarmap.write(b"\x90\x91")
+            coords = [b"\x70\x03", b"\x90\x03", b"\x50\x00", b"\x70\x00"]
 
-        if idx_diff[1] == 7 or 7 in other_changes[1]:  # Add rock
+        elif changes[1] == 7:  # Add rock
             f_ishtarmap.seek(int("3b2", 16))
             f_ishtarmap.write(b"\x77")
-            if idx_diff[1] == 7:
-                coords = [b"\x20\x03", b"\x30\x03", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2b2", 16))
-                f_ishtarmap.write(b"\x77")
+            coords = [b"\x20\x03", b"\x30\x03", b"\xb0\x00", b"\xc0\x00"]
 
-        if idx_diff[1] == 8 or 8 in other_changes[1]:  # Put moss on rock
+        elif changes[1] == 8:  # Will's hair
+            patch.seek(int("6dd0e", 16) + rom_offset)
+            patch.write(b"\x5d")
+            coords = [b"\x90\x03", b"\xb0\x03", b"\xa0\x00", b"\xc0\x00"]
+
+        elif changes[1] == 9:  # Put moss on rock
             f_ishtarmap.seek(int("3bd", 16))
             f_ishtarmap.write(b"\x8f")
-            if idx_diff[1] == 8:
-                coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2bd", 16))
-                f_ishtarmap.write(b"\x8f")
+            coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
 
         # Update cursor check ranges for Room 2
         for i in range(4):
             patch.seek(int(room_offsets[1], 16) + coord_offsets[i] + rom_offset)
             patch.write(coords[i])
 
-
         # Set change for Room 3
         # Check for chest contents, only change map if contents are the same
-        same_chest = (self.w.item_locations[80][3] == self.w.item_locations[81][3])
-
-        if (same_chest and idx_diff[2] == 0):  # Will's hair
-            patch.seek(int("6dd16", 16) + rom_offset)
-            patch.write(b"\x5d")
-            coords = [b"\x90\x05", b"\xb0\x05", b"\xa0\x00", b"\xc0\x00"]
-
-        if (same_chest and idx_diff[2] == 1) or 1 in other_changes[2]:  # Remove rock
-            f_ishtarmap.seek(int("5bd", 16))
-            f_ishtarmap.write(b"\x73")
-            if (same_chest and idx_diff[2] == 1):
-                coords = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("4bd", 16))
+        if self.w.item_locations[80][3] == self.w.item_locations[81][3]:
+            if changes[2] == 1:  # Remove rock
+                f_ishtarmap.seek(int("5bd", 16))
                 f_ishtarmap.write(b"\x73")
-
-        if (same_chest and idx_diff[2] == 2) or 2 in other_changes[2]:  # Add rock
-            f_ishtarmap.seek(int("5b2", 16))
-            f_ishtarmap.write(b"\x77")
-            if (same_chest and idx_diff[2] == 2):
-                coords = [b"\x20\x05", b"\x30\x05", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("4b2", 16))
-                f_ishtarmap.write(b"\x77")
-
-        if (same_chest and idx_diff[2] == 3) or 3 in other_changes[2]:  # Add sconce
-            f_ishtarmap.seek(int("557", 16))
-            f_ishtarmap.write(b"\x88\x89")
-            f_ishtarmap.seek(int("567", 16))
-            f_ishtarmap.write(b"\x90\x91")
-            if (same_chest and idx_diff[2] == 3):
-                coords = [b"\x70\x05", b"\x90\x05", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("457", 16))
-                f_ishtarmap.write(b"\x88\x89")
-                f_ishtarmap.seek(int("467", 16))
-                f_ishtarmap.write(b"\x90\x91")
-
-        if (same_chest and idx_diff[2] == 4) or 4 in other_changes[2]:  # Moss rock
-            f_ishtarmap.seek(int("5bd", 16))
-            f_ishtarmap.write(b"\x8f")
-            if (same_chest and idx_diff[2] == 4):
                 coords = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("4bd", 16))
-                f_ishtarmap.write(b"\x8f")
 
-        # Update cursor check ranges for Room 3 (only if chest contents different)
-        if same_chest:
+            elif changes[2] == 2:  # Add rock
+                f_ishtarmap.seek(int("5b2", 16))
+                f_ishtarmap.write(b"\x77")
+                coords = [b"\x20\x05", b"\x30\x05", b"\xb0\x00", b"\xc0\x00"]
+
+            elif changes[2] == 3:  # Add sconce
+                f_ishtarmap.seek(int("557", 16))
+                f_ishtarmap.write(b"\x88\x89")
+                f_ishtarmap.seek(int("567", 16))
+                f_ishtarmap.write(b"\x90\x91")
+                coords = [b"\x70\x05", b"\x90\x05", b"\x50\x00", b"\x70\x00"]
+
+            elif changes[2] == 4:  # Will's hair
+                patch.seek(int("6dd16", 16) + rom_offset)
+                patch.write(b"\x5d")
+                coords = [b"\x90\x05", b"\xb0\x05", b"\xa0\x00", b"\xc0\x00"]
+
+            if changes[2] == 5:  # Moss rock
+                f_ishtarmap.seek(int("5bd", 16))
+                f_ishtarmap.write(b"\x8f")
+                coords = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
+
+            # Update cursor check ranges for Room 3 (only if chest contents different)
             for i in range(4):
                 patch.seek(int(room_offsets[2], 16) + coord_offsets[i] + rom_offset)
                 patch.write(coords[i])
 
-
         # Set change for Room 4
-        if idx_diff[3] == 0:  # Will's hair (vanilla)
+        if changes[3] == 1:  # Will's hair (vanilla)
             patch.seek(int("6dd1e", 16) + rom_offset)
             patch.write(b"\x5d")
 
-        if idx_diff[3] == 1 or 1 in other_changes[3]:  # Remove rock
-            f_ishtarmap.seek(int("7bd", 16))
-            f_ishtarmap.write(b"\x73")
-            if idx_diff[3] == 1:
-                coords = [b"\xd0\x07", b"\xe0\x07", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6bd", 16))
+        else:
+            if changes[3] == 2:  # Remove rock
+                f_ishtarmap.seek(int("7bd", 16))
                 f_ishtarmap.write(b"\x73")
-
-        if idx_diff[3] == 2 or 2 in other_changes[3]:  # Add rock
-            f_ishtarmap.seek(int("7b2", 16))
-            f_ishtarmap.write(b"\x77")
-            if idx_diff[3] == 2:
-                coords = [b"\x20\x07", b"\x30\x07", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6b2", 16))
-                f_ishtarmap.write(b"\x77")
-
-        if idx_diff[3] == 3 or 3 in other_changes[3]:  # Add vase L
-            f_ishtarmap.seek(int("7a3", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("7b3", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[3] == 3:
-                coords = [b"\x30\x07", b"\x40\x07", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6a3", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("6b3", 16))
-                f_ishtarmap.write(b"\x84")
-
-        if idx_diff[3] == 4 or 4 in other_changes[3]:  # Add vase R
-            f_ishtarmap.seek(int("7ac", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("7bc", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[3] == 4:
-                coords = [b"\xc0\x07", b"\xd0\x07", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6ac", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("6bc", 16))
-                f_ishtarmap.write(b"\x84")
-
-        if idx_diff[3] == 5 or 5 in other_changes[3]:  # Crease in floor
-            f_ishtarmap.seek(int("7b4", 16))
-            f_ishtarmap.write(b"\x69\x6a")
-            if idx_diff[3] == 5:
-                coords = [b"\x40\x07", b"\x60\x07", b"\xb0\x00", b"\xc8\x00"]
-            else:
-                f_ishtarmap.seek(int("6b4", 16))
-                f_ishtarmap.write(b"\x69\x6a")
-
-        if idx_diff[3] == 6 or 6 in other_changes[3]:  # Moss rock
-            f_ishtarmap.seek(int("7bd", 16))
-            f_ishtarmap.write(b"\x8f")
-            if idx_diff[3] == 6:
                 coords = [b"\xd0\x07", b"\xe0\x07", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6bd", 16))
-                f_ishtarmap.write(b"\x8f")
 
-        # Update cursor check ranges for Room 3 (only if not hair)
-        if idx_diff[3] != 0:
+            elif changes[3] == 3:  # Add rock
+                f_ishtarmap.seek(int("7b2", 16))
+                f_ishtarmap.write(b"\x77")
+                coords = [b"\x20\x07", b"\x30\x07", b"\xb0\x00", b"\xc0\x00"]
+
+            elif changes[3] == 4:  # Add vase L
+                f_ishtarmap.seek(int("7a3", 16))
+                f_ishtarmap.write(b"\x7c")
+                f_ishtarmap.seek(int("7b3", 16))
+                f_ishtarmap.write(b"\x84")
+                coords = [b"\x30\x07", b"\x40\x07", b"\xa0\x00", b"\xc0\x00"]
+
+            elif changes[3] == 5:  # Add vase R
+                f_ishtarmap.seek(int("7ac", 16))
+                f_ishtarmap.write(b"\x7c")
+                f_ishtarmap.seek(int("7bc", 16))
+                f_ishtarmap.write(b"\x84")
+                coords = [b"\xc0\x07", b"\xd0\x07", b"\xa0\x00", b"\xc0\x00"]
+
+            elif changes[3] == 6:  # Crease in floor
+                f_ishtarmap.seek(int("7b4", 16))
+                f_ishtarmap.write(b"\x69\x6a")
+                coords = [b"\x40\x07", b"\x60\x07", b"\xb0\x00", b"\xc8\x00"]
+
+            if changes[3] == 7:  # Moss rock
+                f_ishtarmap.seek(int("7bd", 16))
+                f_ishtarmap.write(b"\x8f")
+                coords = [b"\xd0\x07", b"\xe0\x07", b"\xb0\x00", b"\xc0\x00"]
+
+            # Update cursor check ranges for Room 3 (only if not hair)
             for i in range(4):
                 patch.seek(int(room_offsets[3], 16) + coord_offsets[i] + rom_offset)
                 patch.write(coords[i])
@@ -3398,55 +2974,16 @@ class Randomizer:
         #                                   Plugins
         ##########################################################################
         # Apocalypse Gaia
+
         if self.w.goal == "Apocalypse Gaia":
             patch.seek(int("98de4",16)+rom_offset)
             patch.write(b"\x80") # Respawn in space
             for pluginfilename in os.listdir(AG_PLUGIN_PATH):
                 if pluginfilename[-4:] == ".bin":
                     f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
-                    patch.seek(int(pluginfilename[:6],16) + rom_offset)
+                    patch.seek(int(pluginfilename[:6],16)+rom_offset)
                     patch.write(f_plugin.read())
                     f_plugin.close
-
-        ##########################################################################
-        #                          Have fun with final text
-        ##########################################################################
-        superhero_list = []
-        superhero_list.append(qt_encode("I must go, my people need me!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("     Up, up, and away!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       Up and atom!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("  It's clobberin' time!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       For Asgard!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("   It's morphin' time!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    Back in a flash!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("      I am GROOT!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       VALHALLA!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       Go Joes!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("Wonder Twin powers activate!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    Titans together!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       HULK SMASH!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("        Flame on!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("        By Crom!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       Excelsior!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("Great Caesar's ghost!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("      Odin's beard!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    I have the power!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("   Avengers assemble!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("To the Bat-pole, Robin!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("        Shazam!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("     Bite me, fanboy.") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("  Hi-yo Silver... away!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("Here I come to save the day!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("By the hoary hosts of Hoggoth!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    Teen Titans, Go!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       Cowabunga!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       SPOOOOON!!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("There better be bacon when I get there...") + b"\xc3\x00\xc0")
-
-        # Assign final text box
-        rand_idx = random.randint(0, len(superhero_list) - 1)
-        patch.seek(int("98ebe", 16) + rom_offset)
-        patch.write(superhero_list[rand_idx])
 
         ##########################################################################
         #                Finalize map headers and return patch data
