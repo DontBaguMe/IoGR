@@ -187,41 +187,44 @@ class World:
             elif not self.exits[x][1] and not self.exits[x][3]:
                 exit_list.append(x)
 
-        # List all graph regions
-        region_list = []
-        for x in self.graph:
-            region_list.append(x)
-
         # Shuffle lists
         random.shuffle(exit_list)
-        random.shuffle(region_list)
 
         solved = False
+        origin_exits = []
+        dest_exits = []
         while not solved:
             items = self.traverse()
-            while region_list:
-                region = region_list.pop(0)
-                if not self.graph[region][0]:    # If graph region is inaccessible
-                    print("mapping to region: ", region)
-                    found_exit = False
-                    for exit in self.exits:
-                        if not found_exit and not self.exits[exit][1]:
-                            if self.exits[exit][5] == region:
-                                print("Found a potential exit: ", exit)
-                                origin = self.exits[exit][4]
-                                if self.graph[origin][0]:
-                                    found_exit = True
-                                    exit_origin = exit_list.pop(0)
-                                    self.exits[exit_origin][1] = exit
-                                    self.exits[exit][1] = exit_origin
-                                    self.graph[region][0] = True
-                                    print("mapped exit: ", exit, exit_origin)
-                    if found_exit:
-                        items = self.traverse()
-                    else:
-                        region_list.append(region)
+            found_origin_exit = False
+            found_dest_exit = False
+            for exit in self.exits:
+                origin = self.exits[exit][4]
+                dest = self.exits[exit][5]
+                if not found_origin_exit and exit not in origin_exits and self.graph[origin][0]:
+                    found_origin_exit = True
+                    origin_exit = exit
+                if not found_dest_exit and exit not in dest_exits and not self.graph[dest][0]:
+                    found_dest_exit = True
+                    dest_exit = exit
+            if found_origin_exit and found_dest_exit:
+                origin_exits.append(origin_exit)
+                dest_exits.append(dest_exit)
+                origin = self.exits[origin_exit][4]
+                dest = self.exits[dest_exit][5]
+                self.exits[origin_exit][1] = dest_exit
+                self.graph[origin][1].append(dest)
+            elif not found_origin_exit:
+                print("Oops, ran out of room")
+                # Make room in available exits
+                solved = True
+            else:
+                solved = True
 
         print("Done!")
+        i = 0
+        while i < len(origin_exits):
+            print(self.exits[origin_exits[i]][11], " - ", self.exits[dest_exits[i]][11])
+            i += 1
 
         # Re-initialize world graph
         self.graph = graph_copy
@@ -2539,31 +2542,31 @@ class World:
         #           ROM_Location, DestString, OverworldFlag, DungeonFlag, PassageFlag, Name]}
         self.exits = {
             # Bosses
-            1:  [ 2, 0, "Boss", 0,  78,  97, "18872", b"\x29\x78\x00\xC0\x00\x00\x00\x11", False, False, False, "Castoth entrance (in)"],
-            2:  [ 1, 0, "Boss", 1,   0,   0, "189e4", b"\x1E\x68\x00\x00\x01\x03\x00\x24", False, False, False, "Castoth entrance (out)"],
-            3:  [ 0, 0, "Boss", 0, 105, 102, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", False, False,  True, "Diamond Coast passage (Gold Ship)"],
+            1:  [ 2, 0, "Boss", 0,  78,  97, "18872", b"\x29\x78\x00\xC0\x00\x00\x00\x11", False,  True, False, "Castoth entrance (in)"],
+            2:  [ 1, 0, "Boss", 1,   0,   0, "189e4", b"\x1E\x68\x00\x00\x01\x03\x00\x24", False,  True, False, "Castoth entrance (out)"],
+            3:  [ 0, 0, "Boss", 0, 105, 102, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", False,  True,  True, "Diamond Coast passage (Gold Ship)"],
 
-            4:  [ 5, 0, "Boss", 0, 171, 197, "18e20", b"\x55\x70\x00\xE0\x01\x00\x00\x22", False, False, False, "Viper entrance (in)"],
-            5:  [ 4, 0, "Boss", 1,   0,   0, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", False, False, False, "Viper entrance (out)"],
-            6:  [ 0, 0, "Boss", 0, 197, 200, "acece", b"\x5A\x90\x00\x70\x00\x83\x00\x14", False, False,  True, "Seaside Palace passage (Viper)"],
+            4:  [ 5, 0, "Boss", 0, 171, 197, "18e20", b"\x55\x70\x00\xE0\x01\x00\x00\x22", False,  True, False, "Viper entrance (in)"],
+            5:  [ 4, 0, "Boss", 1,   0,   0, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", False,  True, False, "Viper entrance (out)"],
+            6:  [ 0, 0, "Boss", 0, 197, 200, "acece", b"\x5A\x90\x00\x70\x00\x83\x00\x14", False,  True,  True, "Seaside Palace passage (Viper)"],
 
-            7:  [ 8, 0, "Boss", 0, 238, 241, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", False, False, False, "Vampires entrance (in)"],
-            8:  [ 7, 0, "Boss", 1,   0,   0, "193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", False, False, False, "Vampires entrance (out)"],
-            9:  [ 0, 0, "Boss", 0, 242, 210, "193ea", b"\x5f\x80\x00\x50\x00\x83\x00\x44", False, False, False, "Vampires exit"],
+            7:  [ 8, 0, "Boss", 0, 238, 241, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", False,  True, False, "Vampires entrance (in)"],
+            8:  [ 7, 0, "Boss", 1,   0,   0, "193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", False,  True, False, "Vampires entrance (out)"],
+            9:  [ 0, 0, "Boss", 0, 242, 210, "193ea", b"\x5f\x80\x00\x50\x00\x83\x00\x44", False,  True, False, "Vampires exit"],
 
-            10: [11, 0, "Boss", 0, 301, 302, "19c2a", b"\x8A\x50\x00\x90\x00\x87\x00\x33", False, False, False, "Sand Fanger entrance (in)"],
-            11: [10, 0, "Boss", 1,   0,   0, "19c78", b"\x88\xE0\x03\x90\x00\x06\x00\x14", False, False, False, "Sand Fanger entrance (out)"],
-            12: [ 0, 0, "Boss", 0, 303, 290, "19c84", b"\x82\x10\x00\x90\x00\x87\x00\x18", False, False, False, "Sand Fanger exit"],
+            10: [11, 0, "Boss", 0, 301, 302, "19c2a", b"\x8A\x50\x00\x90\x00\x87\x00\x33", False,  True, False, "Sand Fanger entrance (in)"],
+            11: [10, 0, "Boss", 1,   0,   0, "19c78", b"\x88\xE0\x03\x90\x00\x06\x00\x14", False,  True, False, "Sand Fanger entrance (out)"],
+            12: [ 0, 0, "Boss", 0, 303, 290, "19c84", b"\x82\x10\x00\x90\x00\x87\x00\x18", False,  True, False, "Sand Fanger exit"],
 
-            13: [ 0, 0, "Boss", 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", False, False, False, "Mummy Queen entrance"],
-            14: [ 0, 0, "Boss", 0, 448, 410,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", False, False, False, "Mummy Queen exit"],     # This one's dumb
+            13: [ 0, 0, "Boss", 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", False,  True, False, "Mummy Queen entrance"],
+            14: [ 0, 0, "Boss", 0, 448, 410,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", False,  True, False, "Mummy Queen exit"],     # This one's dumb
 
-            15: [16, 0, "Boss", 0, 470, 471, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", False, False, False, "Babel entrance (in)"],
-            16: [15, 0, "Boss", 1,   0,   0, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", False, False, False, "Babel entrance (out)"],
-            17: [ 0, 0, "Boss", 0, 472, 400, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", False, False,  True, "Dao passage (Babel)"],
+            15: [16, 0, "Boss", 0, 470, 471, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", False,  True, False, "Babel entrance (in)"],
+            16: [15, 0, "Boss", 1,   0,   0, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", False,  True, False, "Babel entrance (out)"],
+            17: [ 0, 0, "Boss", 0, 472, 400, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", False,  True,  True, "Dao passage (Babel)"],
 
-            18: [ 0, 0, "Boss", 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", False, False, False, "Solid Arm entrance"],
-            19: [ 0, 0, "Boss", 0, 482, 472, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", False, False,  True, "Babel passage (Solid Arm)"],
+            18: [ 0, 0, "Boss", 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", False,  True, False, "Solid Arm entrance"],
+            19: [ 0, 0, "Boss", 0, 482, 472, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", False,  True,  True, "Babel passage (Solid Arm)"],
 
             # Passage Menus
             20: [0, 0, "Place", 0, 15,  20, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Seth: Passage 1 (South Cape)"],
