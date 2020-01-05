@@ -2605,7 +2605,7 @@ class World:
             # Edward's
             50: [51, 0, "Place", 0, 10, 30, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Edward's entrance"],
             51: [50, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Edward's exit"],
-            52: [ 0, 0, "Room",  0, 30, 32, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Prison entrance (king)"],
+            52: [ 0, 0, "Room",  0, 30, 32, "4cfce", b"\x06\x58\x00\xC0\x01\x00\x10\x21", False, False, False, "Prison entrance (king)"],
             53: [54, 0, "Area",  0, 31, 48, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (in)"],
             54: [53, 0, "Area",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (out)"],
             55: [56, 0, "Area",  0, 33, 40, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel entrance (in)"],
@@ -2775,7 +2775,7 @@ class World:
             # Nazca
             260: [261, 0, "Place", 0,  11, 162, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Nazca entrance"],
             261: [260, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Nazca exit"],
-            262: [263, 0, "Place", 0, 162, 170, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Nazca: Sky Garden entrance"],
+            262: [263, 0, "Place", 0, 162, 170, "5e6a2", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False,  True, False, "Nazca: Sky Garden entrance"],
             263: [262, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Nazca: Sky Garden exit"],
 
             # Sky Garden
