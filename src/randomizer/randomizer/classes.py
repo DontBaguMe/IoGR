@@ -162,6 +162,22 @@ class World:
                 self.graph[origin][1].append(dest)
 
     # Entrance randomizer
+    def shuffle_overworld(self):
+        overworld_exits = []
+        for exit in self.exits:
+            if self.exits[exit][8] and self.exits[exit][3]:
+                overworld_exits.append(exit)
+
+        overworld_exits_new = overworld_exits[:]
+        random.shuffle(overworld_exits_new)
+
+        i = 0
+        for exit in overworld_exits_new:
+            old_exit = overworld_exits[i]
+            self.exits[exit][1] = old_exit
+            i += 1
+
+    # Entrance randomizer
     def shuffle_exits(self):
         # Make a clean copy of world graph for later replacement
         graph_copy = self.graph.copy()
@@ -2544,11 +2560,11 @@ class World:
             # Bosses
             1:  [ 2, 0, "Boss", 0,  78,  97, "18872", b"\x29\x78\x00\xC0\x00\x00\x00\x11", False,  True, False, "Castoth entrance (in)"],
             2:  [ 1, 0, "Boss", 1,   0,   0, "189e4", b"\x1E\x68\x00\x00\x01\x03\x00\x24", False,  True, False, "Castoth entrance (out)"],
-            3:  [ 0, 0, "Boss", 0, 105, 102, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", False,  True,  True, "Diamond Coast passage (Gold Ship)"],
+            3:  [ 0, 0, "Boss", 0, 105, 102, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", False,  True, False, "Diamond Coast passage (Gold Ship)"],
 
             4:  [ 5, 0, "Boss", 0, 171, 197, "18e20", b"\x55\x70\x00\xE0\x01\x00\x00\x22", False,  True, False, "Viper entrance (in)"],
             5:  [ 4, 0, "Boss", 1,   0,   0, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", False,  True, False, "Viper entrance (out)"],
-            6:  [ 0, 0, "Boss", 0, 197, 200, "acece", b"\x5A\x90\x00\x70\x00\x83\x00\x14", False,  True,  True, "Seaside Palace passage (Viper)"],
+            6:  [ 0, 0, "Boss", 0, 197, 200, "acece", b"\x5A\x90\x00\x70\x00\x83\x00\x14", False,  True, False, "Seaside Palace passage (Viper)"],
 
             7:  [ 8, 0, "Boss", 0, 238, 241, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", False,  True, False, "Vampires entrance (in)"],
             8:  [ 7, 0, "Boss", 1,   0,   0, "193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", False,  True, False, "Vampires entrance (out)"],
@@ -2558,31 +2574,78 @@ class World:
             11: [10, 0, "Boss", 1,   0,   0, "19c78", b"\x88\xE0\x03\x90\x00\x06\x00\x14", False,  True, False, "Sand Fanger entrance (out)"],
             12: [ 0, 0, "Boss", 0, 303, 290, "19c84", b"\x82\x10\x00\x90\x00\x87\x00\x18", False,  True, False, "Sand Fanger exit"],
 
-            13: [ 0, 0, "Boss", 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", False,  True, False, "Mummy Queen entrance"],
-            14: [ 0, 0, "Boss", 0, 448, 410,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", False,  True, False, "Mummy Queen exit"],     # This one's dumb
+            13: [14, 0, "Boss", 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", False,  True, False, "Mummy Queen entrance"],
+            14: [13, 0, "Boss", 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", False,  True, False, "Mummy Queen exit (fake)"],
+            15: [ 0, 0, "Boss", 0, 448, 410,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", False,  True, False, "Mummy Queen exit"],     # This one's dumb
 
-            15: [16, 0, "Boss", 0, 470, 471, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", False,  True, False, "Babel entrance (in)"],
-            16: [15, 0, "Boss", 1,   0,   0, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", False,  True, False, "Babel entrance (out)"],
-            17: [ 0, 0, "Boss", 0, 472, 400, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", False,  True,  True, "Dao passage (Babel)"],
+            16: [17, 0, "Boss", 0, 470, 471, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", False,  True, False, "Babel entrance (in)"],
+            17: [16, 0, "Boss", 1,   0,   0, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", False,  True, False, "Babel entrance (out)"],
+            18: [ 0, 0, "Boss", 0, 472, 400, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", False,  True, False, "Dao passage (Babel)"],
 
-            18: [ 0, 0, "Boss", 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", False,  True, False, "Solid Arm entrance"],
-            19: [ 0, 0, "Boss", 0, 482, 472, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", False,  True,  True, "Babel passage (Solid Arm)"],
+            19: [20, 0, "Boss", 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", False,  True, False, "Solid Arm entrance"],
+            20: [19, 0, "Boss", 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", False,  True, False, "Solid Arm exit (fake)"],
+            21: [ 0, 0, "Boss", 0, 482, 472, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", False,  True, False, "Babel passage (Solid Arm)"],
+
+            # Overworld Menus
+            30:  [ 31, 0, "Place", 0, 10, 20, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "South Cape entrance"],
+            31:  [ 30, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "South Cape exit"],
+            50:  [ 51, 0, "Place", 0, 10, 30, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Edward's entrance"],
+            51:  [ 50, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Edward's exit"],
+            80:  [ 81, 0, "Place", 0, 10, 50, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Itory entrance"],
+            81:  [ 80, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Itory exit"],
+            100: [101, 0, "Place", 0, 10, 60, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Moon Tribe entrance"],
+            101: [100, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Moon Tribe exit"],
+            110: [111, 0, "Place", 0, 10, 64, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Inca entrance"],
+            111: [110, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Inca exit"],
+
+            170: [171, 0, "Place", 0,  11, 102, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Diamond Coast entrance"],
+            171: [170, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Diamond Coast exit"],
+            180: [181, 0, "Place", 0,  11, 110, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Freejia entrance"],
+            181: [180, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Freejia exit"],
+            220: [221, 0, "Place", 0,  11, 133, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Diamond Mine entrance"],
+            221: [220, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Diamond Mine exit"],
+            250: [251, 0, "Place", 0,  11, 160, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Neil's entrance"],
+            251: [250, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Neil's exit"],
+            260: [261, 0, "Place", 0,  11, 162, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Nazca entrance"],
+            261: [260, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Nazca exit"],
+
+            380: [381, 0, "Place", 0,  12, 250, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Angel Village entrance"],
+            381: [380, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Angel Village exit"],
+            440: [441, 0, "Place", 0,  12, 280, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Watermia entrance"],
+            441: [440, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Watermia exit"],
+            460: [461, 0, "Place", 0,  12, 290, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Great Wall entrance"],
+            461: [460, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Great Wall exit"],
+
+            480: [481, 0, "Place", 0,  13, 310, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Euro entrance"],
+            481: [480, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Euro exit"],
+            520: [521, 0, "Place", 0,  13, 330, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Mt. Kress entrance"],
+            521: [520, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Mt. Kress exit"],
+            550: [551, 0, "Place", 0,  13, 350, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Native's Village entrance"],
+            551: [550, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Native's Village exit"],
+            560: [561, 0, "Place", 0,  13, 360, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Ankor Wat entrance"],
+            561: [560, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Ankor Wat exit"],
+
+            610: [611, 0, "Place", 0,  14, 400, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Dao entrance"],
+            611: [610, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Dao exit"],
+            630: [631, 0, "Place", 0,  14, 410, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Pyramid entrance"],
+            631: [630, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Pyramid exit W"],
+            632: [630, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Pyramid exit E"],
 
             # Passage Menus
             20: [0, 0, "Place", 0, 15,  20, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Seth: Passage 1 (South Cape)"],
             21: [0, 0, "Place", 0, 15, 102, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Seth: Passage 2 (Diamond Coast)"],
             22: [0, 0, "Place", 0, 15, 280, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Seth: Passage 3 (Watermia)"],
+
             23: [0, 0, "Place", 0, 16,  60, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Moon Tribe: Passage 1 (Moon Tribe)"],
             24: [0, 0, "Place", 0, 16, 162, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Moon Tribe: Passage 2 (Nazca)"],
             25: [0, 0, "Place", 0, 16, 199, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Moon Tribe: Passage 3 (Seaside Palace)"],
+
             26: [0, 0, "Place", 0, 17, 160, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Neil: Passage 1 (Neil's)"],
             27: [0, 0, "Place", 0, 17, 314, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Neil: Passage 2 (Euro)"],
             28: [0, 0, "Place", 0, 17, 402, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Neil: Passage 3 (Dao)"],
             29: [0, 0, "Place", 0, 17, 460, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Neil: Passage 4 (Babel)"],
 
             # South Cape
-            30: [31, 0, "Place", 0, 10, 20, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "South Cape entrance"],
-            31: [30, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "South Cape exit"],
             32: [33, 0, "Room",  0, 20, 22, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "South Cape: School main (in)"],
             33: [32, 0, "Room",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "South Cape: School main (out)"],
             34: [35, 0, "Room",  0, 21, 22, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "South Cape: School roof (in)"],
@@ -2603,8 +2666,6 @@ class World:
             49: [48, 0, "Room",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "South Cape: Seaside Cave (out)"],
 
             # Edward's
-            50: [51, 0, "Place", 0, 10, 30, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Edward's entrance"],
-            51: [50, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Edward's exit"],
             52: [ 0, 0, "Room",  0, 30, 32, "4cfce", b"\x06\x58\x00\xC0\x01\x00\x10\x21", False, False, False, "Prison entrance (king)"],
             53: [54, 0, "Area",  0, 31, 48, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (in)"],
             54: [53, 0, "Area",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (out)"],
@@ -2628,8 +2689,6 @@ class World:
             73: [72, 0, "Room", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel: Map 19 to Map 18"],
 
             # Itory
-            80: [81, 0, "Place", 0, 10, 50, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Itory entrance"],
-            81: [80, 0, "Place", 1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Itory exit"],
             82: [83, 0, "Room",  0, 51, 53, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Itory: West House (in)"],
             83: [82, 0, "Room",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Itory: West House (out)"],
             84: [85, 0, "Room",  0, 51, 54, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Itory: North House (in)"],
@@ -2644,15 +2703,11 @@ class World:
             93: [92, 0, "Room",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Itory Cave Hidden Room (out)"],
 
             # Moon Tribe
-            100: [101, 0, "Place", 0, 10,  60, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Moon Tribe entrance"],
-            101: [100, 0, "Place", 1,  0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Moon Tribe exit"],
             102: [103, 0, "Room",  0, 60,  62, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Moon Tribe Cave (in)"],
             103: [102, 0, "Room",  1,  0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Moon Tribe Cave (out)"],
             104: [  0, 0, "Place", 0, 61, 170, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True,  True, "Moon Tribe: Sky Garden passage"],
 
             # Inca
-            110: [111, 0, "Place", 0, 10,  64, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Inca entrance"],
-            111: [110, 0, "Place", 1,  0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Inca exit"],
             112: [113, 0, "Place", 0, 64,  70, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Inca Ruins entrance (in)"],
             113: [112, 0, "Place", 1,  0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Inca Ruins entrance (out)"],
             114: [  0, 0, "Place", 0, 65, 102, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Inca: Diamond Coast passage"],
@@ -2695,18 +2750,14 @@ class World:
             154: [  0, 0, "Place", 0, 98, 100, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True,  True, "Gold Ship entrance"],
 
             # Gold Ship
-            160: [161, 0, "Room",  0, 100, 101, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Gold Ship Interior (in)"],
-            161: [160, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Gold Ship Interior (out)"],
+            160: [161, 0, "Room",  0, 100, 101, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Gold Ship Interior (in)"],
+            161: [160, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Gold Ship Interior (out)"],
 
             # Diamond Coast
-            170: [171, 0, "Place", 0,  11, 102, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Diamond Coast entrance"],
-            171: [170, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Diamond Coast exit"],
             172: [173, 0, "Room",  0, 102, 104, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Coast House (in)"],
             173: [172, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Coast House (out)"],
 
             # Freejia
-            180: [181, 0, "Place", 0,  11, 110, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Freejia entrance"],
-            181: [180, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Freejia exit"],
             182: [183, 0, "Room",  0, 110, 116, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Freejia: West House (in)"],
             183: [182, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Freejia: West House (out)"],
             184: [185, 0, "Room",  0, 110, 117, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Freejia: 2-story House (in)"],
@@ -2739,8 +2790,6 @@ class World:
             211: [210, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Freejia: Labor Market (out)"],
 
             # Diamond Mine
-            220: [221, 0, "Place", 0,  11, 133, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Diamond Mine entrance"],
-            221: [220, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Diamond Mine exit"],
             222: [223, 0, "Room",  0, 133, 134, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Diamond Mine: Map 62 to Map 63"],
             223: [222, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Diamond Mine: Map 63 to Map 62"],
             224: [225, 0, "Room",  0, 135, 140, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Diamond Mine: Map 63 to Map 66"],
@@ -2768,13 +2817,7 @@ class World:
             246: [247, 0, "Room",  0, 147, 150, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Diamond Mine: Map 68 to Map 71"],
             247: [246, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Diamond Mine: Map 71 to Map 68"],
 
-            # Neil's Cottage
-            250: [251, 0, "Place", 0,  11, 160, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Neil's entrance"],
-            251: [250, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Neil's exit"],
-
             # Nazca
-            260: [261, 0, "Place", 0,  11, 162, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Nazca entrance"],
-            261: [260, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Nazca exit"],
             262: [263, 0, "Place", 0, 162, 170, "5e6a2", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False,  True, False, "Nazca: Sky Garden entrance"],
             263: [262, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Nazca: Sky Garden exit"],
 
@@ -2876,8 +2919,6 @@ class World:
             369: [368, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Mu: Map 102 to Map 101"],
 
             # Angel Village
-            380: [381, 0, "Place", 0,  12, 250, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Angel Village entrance"],
-            381: [380, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Angel Village exit"],
             382: [383, 0, "Room",  0, 250, 209, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Angel: Mu Passage (in)"],
             383: [382, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Angel: Mu Passage (out)"],
             384: [385, 0, "Room",  0, 250, 251, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Angel: Underground entrance (in)"],
@@ -2922,8 +2963,6 @@ class World:
             429: [428, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Ishtar: Puzzle room (out)"],
 
             # Watermia
-            440: [441, 0, "Place", 0,  12, 280, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Watermia entrance"],
-            441: [440, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Watermia exit"],
             442: [443, 0, "Room",  0, 280, 283, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Watermia: DS House (in)"],
             443: [442, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Watermia: DS House (out)"],
             444: [445, 0, "Room",  0, 280, 284, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Watermia: Gambling House (in)"],
@@ -2941,8 +2980,6 @@ class World:
             456: [510, 0, "Place", 0, 281,  15, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Watermia: Bridgeman"],
 
             # Great Wall
-            460: [461, 0, "Place", 0,  12, 290, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Great Wall entrance"],
-            461: [460, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Great Wall exit"],
             462: [463, 0, "Room",  0, 290, 291, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Great Wall: Map 130 to Map 131"],
             463: [462, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Great Wall: Map 131 to Map 130"],
             464: [465, 0, "Room",  0, 293, 294, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Great Wall: Map 131 to Map 133"],
@@ -2955,8 +2992,6 @@ class World:
             471: [470, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Great Wall: Map 136 to Map 135"],
 
             # Euro
-            480: [481, 0, "Place", 0,  13, 310, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Euro entrance"],
-            481: [480, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Euro exit"],
             482: [483, 0, "Room",  0, 310, 312, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Rolek Company (in)"],
             483: [482, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Rolek Company (out)"],
             484: [485, 0, "Room",  0, 310, 313, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: West House (in)"],
@@ -2987,8 +3022,6 @@ class World:
             509: [508, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Euro: Dark Space House (out)"],
 
             # Mt. Kress
-            520: [521, 0, "Place", 0,  13, 330, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Mt. Kress entrance"],
-            521: [520, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Mt. Kress exit"],
             522: [523, 0, "Room",  0, 330, 331, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Mt. Kress: Map 160 to Map 161"],
             523: [522, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Mt. Kress: Map 161 to Map 160"],
             524: [525, 0, "Room",  0, 332, 333, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Mt. Kress: Map 161 to Map 162 (W)"],
@@ -3013,8 +3046,6 @@ class World:
             543: [542, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Mt. Kress: Map 169 to Map 168"],
 
             # Native's Village
-            550: [551, 0, "Place", 0,  13, 350, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Native's Village entrance"],
-            551: [550, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Native's Village exit"],
             552: [553, 0, "Room",  0, 350, 352, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Native's Village: West House (in)"],
             553: [552, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Native's Village: West House (out)"],
             554: [555, 0, "Room",  0, 350, 353, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Native's Village: House w/Statues (in)"],
@@ -3023,8 +3054,6 @@ class World:
             557: [556, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False,  True, "Dao: Natives' Passage"],
 
             # Ankor Wat
-            560: [561, 0, "Place", 0,  13, 360, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Ankor Wat entrance"],
-            561: [560, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Ankor Wat exit"],
             562: [563, 0, "Room",  0, 360, 361, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Ankor Wat: Map 176 to Map 177"],
             563: [562, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Ankor Wat: Map 177 to Map 176"],
             564: [565, 0, "Room",  0, 361, 363, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Ankor Wat: Map 177 to Map 178"],
@@ -3071,8 +3100,6 @@ class World:
             605: [  0, 0, "Room",  0, 389, 388, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Ankor Wat: Map 190 to Map 189 (drop)"],
 
             # Dao
-            610: [611, 0, "Place", 0,  14, 400, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Dao entrance"],
-            611: [610, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True, False, False, "Dao exit"],
             612: [613, 0, "Room",  0, 400, 401, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Dao: NW House (in)"],
             613: [612, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Dao: NW House (out)"],
             614: [615, 0, "Room",  0, 400, 402, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Dao: Neil's House (in)"],
@@ -3087,9 +3114,6 @@ class World:
             623: [622, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False, False, False, "Dao: SE House (out)"],
 
             # Pyramid
-            630: [631, 0, "Place", 0,  14, 410, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Pyramid entrance"],
-            631: [630, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Pyramid exit W"],
-            632: [630, 0, "Place", 1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff",  True,  True, False, "Pyramid exit E"],
             634: [635, 0, "Room",  0, 410, 415, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Pyramid: Map 204 to Map 205"],
             635: [634, 0, "Room",  1,   0,   0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Pyramid: Map 205 to Map 204"],
             636: [637, 0, "Room",  0, 413, 416, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Pyramid: Map 204 to Map 206"],  # Room 1
