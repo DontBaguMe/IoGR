@@ -968,8 +968,8 @@ class Randomizer:
         patch.seek(int("acecb", 16) + rom_offset)
         patch.write(b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
 
-        f_viperchange = open(BIN_PATH + "0aff82_viperchange.bin", "rb")
-        patch.seek(int("aff82", 16) + rom_offset)
+        f_viperchange = open(BIN_PATH + "0aff99_viperchange.bin", "rb")
+        patch.seek(int("aff99", 16) + rom_offset)
         patch.write(f_viperchange.read())
         f_viperchange.close
 
