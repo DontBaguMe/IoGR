@@ -145,7 +145,7 @@ def generate_ROM():
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get())#, get_level(), get_sprite())
+            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), mute_music.get())#, get_level(), get_sprite())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -301,6 +301,7 @@ tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=15, column=0, sticky
 tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=16, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Generate graph").grid(row=17, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Race seed").grid(row=18, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Mute Music").grid(row=19, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
@@ -358,6 +359,9 @@ graph_viz_toggle.set(0)
 race_mode_toggle = tkinter.IntVar(root)
 race_mode_toggle.set(0)
 
+mute_music = tkinter.IntVar(root)
+mute_music.set(0)
+
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
@@ -395,6 +399,7 @@ overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_s
 entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=16, column=1)
 graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=17, column=1)
 race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
+mute_music_checkbox = tkinter.Checkbutton(mainframe, variable=mute_music, onvalue=1, offvalue=0).grid(row=19, column=1)
 #sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 

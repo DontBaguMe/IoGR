@@ -324,6 +324,58 @@ class Randomizer:
         f_mapdata.seek(addr)
         f_mapdata.write(b"\x00\x07")
 
+        # Remove music headers if background music is muted
+        if settings.mute_music == 1:
+            music_headers = [b"\x11\x02\x00\x43\xc4\x97", #
+                            b"\x11\x03\x00\xfc\x1c\xd4", #
+                            b"\x11\x03\x02\xfc\x1c\xd4", #
+                            b"\x11\x04\x00\x90\x42\xd4", #
+                            b"\x11\x04\x00\xb7\x49\xdb", #
+                            b"\x11\x05\x00\x8d\x33\xd5", #
+                            b"\x11\x06\x00\x90\x42\xd4", #
+                            b"\x11\x06\x00\xb7\x49\xdb", #
+                            b"\x11\x06\x01\x90\x42\xd4", #
+                            b"\x11\x07\x00\x0f\x67\xd4", #
+                            b"\x11\x08\x00\xda\x71\xd3", #
+                            b"\x11\x09\x00\x00\x00\xd2", #
+                            b"\x11\x0a\x00\x17\x30\xd4", #
+                            b"\x11\x0b\x00\x07\x70\xcd", #
+                            b"\x11\x0c\x00\xa0\x71\xd0", #
+                            b"\x11\x0e\x00\x37\x60\xd8", #
+                            b"\x11\x0f\x00\xae\x73\xd2", #
+                            b"\x11\x10\x00\x00\x00\xcc", #
+                            b"\x11\x12\x00\x29\x73\xD5", #
+                            b"\x11\x13\x00\x93\x17\xd2", #
+                            b"\x11\x14\x00\x33\x12\xd1", #
+                            b"\x11\x14\x00\x66\xd2\x99", #
+                            b"\x11\x16\x00\x53\x35\xd6", #
+                            #b"\x11\x17\x00\x6b\x4f\xdd", #???
+                            b"\x11\x18\x00\xfc\x57\xdd", #
+                            b"\x11\x19\x00\x12\x6c\xde", # Lola's Melody
+                            b"\x11\x1a\x00\x33\x6b\xde", # Inca Melody
+                            b"\x11\x1c\x00\x9c\xf3\x95", #
+                            b"\x11\x1d\x00\x9c\xf3\x95", #
+                            #b"\x11\x1d\x00\xcb\x2b\xdf", # Waterfall sounds
+                            b"\x11\x1e\x00\x6e\x2a\xde"] # Memory Melody
+
+            silent_header = b"\x11\x1b\x00\x1d\x2a\xdf"
+
+            header_addrs = []
+            for header in music_headers:
+                done = False
+                addr = 0
+                while not done:
+                    f_mapdata.seek(0)
+                    addr = f_mapdata.read().find(header, addr + 1)
+                    if addr < 0:
+                        done = True
+                    else:
+                        header_addrs.append(addr)
+
+            for header_addr in header_addrs:
+                f_mapdata.seek(header_addr)
+                f_mapdata.write(silent_header)
+
         ##########################################################################
         #                        Update treasure chest data
         ##########################################################################

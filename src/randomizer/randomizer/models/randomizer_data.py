@@ -16,7 +16,7 @@ class RandomizerData:
                  start_location: StartLocation = StartLocation.SOUTH_CAPE, firebird: bool = False, ohko: bool = False,
                  red_jewel_madness: bool = False, allow_glitches: bool = False, boss_shuffle: bool = False,
                  open_mode: bool = False, z3: bool = False, overworld_shuffle: bool = False, entrance_shuffle: EntranceShuffle = EntranceShuffle.NONE, race_mode: bool = False,
-                 dungeon_shuffle: bool = False):
+                 dungeon_shuffle: bool = False, mute_music: bool = False):
         self.seed = seed
         self.difficulty = difficulty
 #        self.level = level
@@ -37,3 +37,4 @@ class RandomizerData:
         self.overworld_shuffle = overworld_shuffle
         self.entrance_shuffle = entrance_shuffle
         self.race_mode = race_mode
+        self.mute_music = mute_music
