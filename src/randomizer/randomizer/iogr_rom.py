@@ -349,7 +349,7 @@ class Randomizer:
                             b"\x11\x14\x00\x33\x12\xd1", #
                             b"\x11\x14\x00\x66\xd2\x99", #
                             b"\x11\x16\x00\x53\x35\xd6", #
-                            #b"\x11\x17\x00\x6b\x4f\xdd", #???
+                            b"\x11\x17\x00\x6b\x4f\xdd", #???
                             b"\x11\x18\x00\xfc\x57\xdd", #
                             b"\x11\x19\x00\x12\x6c\xde", # Lola's Melody
                             b"\x11\x1a\x00\x33\x6b\xde", # Inca Melody
@@ -358,7 +358,7 @@ class Randomizer:
                             #b"\x11\x1d\x00\xcb\x2b\xdf", # Waterfall sounds
                             b"\x11\x1e\x00\x6e\x2a\xde"] # Memory Melody
 
-            silent_header = b"\x11\x1b\x00\x1d\x2a\xdf"
+            #silent_header = b"\x11\x1b\x00\x1d\x2a\xdf"
 
             header_addrs = []
             for header in music_headers:
@@ -373,8 +373,10 @@ class Randomizer:
                         header_addrs.append(addr)
 
             for header_addr in header_addrs:
-                f_mapdata.seek(header_addr)
-                f_mapdata.write(silent_header)
+                f_mapdata.seek(header_addr+1)
+                f_mapdata.write(b"\x1b")
+                f_mapdata.seek(header_addr+3)
+                f_mapdata.write(b"\x1d\x2a\xdf")
 
         ##########################################################################
         #                        Update treasure chest data
