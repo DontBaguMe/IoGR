@@ -789,7 +789,7 @@ class World:
                 goal = False
                 print("ERROR: Inventory capacity exceeded")
             else:
-                goal = ((self.goal == "Dark Gaia" and self.graph[70][0]) or
+                goal = (("Gaia" in self.goal and self.graph[70][0]) or
                         (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
 
             # Get list of new progression options
@@ -1372,10 +1372,14 @@ class World:
         for x in self.statues:
             self.dungeons_req.append(self.boss_order[x-1])
 
-        if settings.goal.value == Goal.DARK_GAIA.value:
-            self.goal = "Dark Gaia"
-        else:
+        gaia_coinflip = random.randint(0, 1)
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
             self.goal = "Red Jewel Hunt"
+        elif settings.goal.value == Goal.APO_GAIA.value or (settings.goal.value == Goal.RANDOM_GAIA.value and gaia_coinflip):
+            self.goal = "Apocalypse Gaia"
+        else:
+            self.goal = "Dark Gaia"
+
 
         if settings.logic.value == Logic.COMPLETABLE.value:
             self.logic_mode = "Completable"
@@ -2373,7 +2377,7 @@ class World:
             131: [8, 4, 0, b"\x83\x00\x02\x1D\x03", 4, "cb845", "cb966", [2, 7, 8, 9, 10, 11]],
             133: [8, 4, 0, b"\x85\x00\x02\x1D\x03", 4, "cb97d", "cbb18", [2, 8, 9, 10, 11]],
             134: [8, 4, 0, b"\x86\x00\x02\x1D\x03", 4, "cbb18", "cbb87", [2, 7, 8, 9, 10, 11]],
-            135: [8, 4, 0, b"\x87\x00\x02\x1D\x03", 4, "cbb87", "cbc3b", [2, 8, 9]],
+            135: [8, 4, 0, b"\x87\x00\x02\x1D\x03", 4, "cbb87", "cbc3b", [8]],
             136: [8, 4, 0, b"\x88\x00\x02\x1D\x03", 4, "cbc3b", "cbd0a", [2, 7, 8, 9, 11]],
 
             # Mt Temple

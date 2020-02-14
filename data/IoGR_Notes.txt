@@ -1,3 +1,45 @@
+WALKTHROUGH
+- SW CONTINENT
+14 16 25 09 17 02 19 07 08 03 04
+SOUTH CAPE (4 items, 1 DS, 0 hint)
+ITORY (2 items, 1 DS, 1 hint)
+EDWARD'S CASTLE (3 items, 1 DS, 1 hint)
+UNDERGROUND TUNNEL (4 items, 1 DS, 0 hint)
+MOON TRIBE (1 items, 0 DS, 0 hint)
+INCA (6 items, 3 DS, 0 hint)
+
+- SE CONTINENT
+14 0d 0f 0b 0c 0e 0e 0e 0e
+DIAMOND COAST (1 items, 0 DS, 1 hint)
+FREEJIA (5 items, 1 DS, 0 hint)
+DIAMOND MINE (6 items, 3 DS, 0 hint)
+NEIL'S (0 items, 0 DS, 0 hint)
+NAZCA/SKY GARDEN (8 items, 4 DS, 0 hint)
+
+- NE CONTINENT
+14 10 11 12 12 13 13 18
+SEASIDE PALACE (5 items, 1 DS, 0 hint)
+MU (7 items, 2 DS, 0 hint)
+ANGEL VILLAGE (1 items, 1 DS, 0 hint)
+ANGEL DUNGEON (5 items, 0 DS, 1 hint)
+WATERMIA (4 items, 1 DS, 1 hint)
+GREAT WALL (4 items, 3 DS, 0 hint)
+
+- N CONTINENT
+14 28 1d 0a 1a 1a 1a 1c 
+EURO (7 items, 1 DS, 1 hint)
+NATIVES' (2 items, 1 DS, 0 hint)
+MT KRESS (5 items, 3 DS, 0 hint)
+ANKOR WAT (7 items, 3 DS, 1 hint)
+
+- NW CONTINENT + BABEL + MANSION
+24 26 1e 1f 20 21 22 23 27
+DAO (4 items, 1 DS, 1 hint)
+PYRAMID (12 items, 2 DS, 0 hint)
+BABEL (2 items, 2 DS, 1 hint)
+MANSION (1 items, 0 DS, 0 hint)
+
+
 CHECKSUM
 https://codes-sources.commentcamarche.net/source/26284-snes-calculer-fixer-le-checksum-lire-editer-le-header-d-une-rom-super-famicom-super-nintendo-super-nes
 

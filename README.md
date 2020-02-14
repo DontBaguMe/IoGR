@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v2.6.0) - <a href="https://www.iogr.app/">Play Now!</a>
+## The Illusion of Gaia Randomizer (v2.8.0) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
@@ -39,7 +39,11 @@ There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficu
 - In-Game Spoilers: Hints have been removed in Extreme mode.
 
 #### Goal
-This allows you to choose a game mode, whether Dark Gaia or Red Jewel Hunt (see below).
+This allows you to choose a game mode. There are currently four goals available (see below for more details):
+- Dark Gaia: Rescue Kara, find and use the Aura, collect required Mystic Statues (if any), and defeat Dark Gaia on the Comet to beat the game.
+- Red Jewel Hunt: Beat the game by collecting a number of Red Jewels and turning them into the Jeweler (see below).
+- Apocalypse Gaia: Same as Dark Gaia, except you'll face the true final boss hidden in the game code!  Shoutouts to Raeven0 for uncovering and reprogramming this masterpiece. (Very hard)
+- Random Gaia: Same as Dark Gaia, except there's a 50/50 chance you'll face Apocalypse Gaia instead.  In Random Gaia seeds, you'll know whom you're facing in the text box that appears after you merge forms with Kara: 1) if it's Dark Gaia, you'll get a random quote as normal; 2) if it's Apocalypse Gaia, the quote will read "Apocalypse Now!"
 
 #### Statues
 You can choose the number of Mystic Statues required to complete Dark Gaia seeds, or make the number random. This parameter is ignored for Red Jewel Hunts.
@@ -82,8 +86,8 @@ This feature will be implemented in a future version.
 ### Beating the Game
 There are currently two modes (goals) for completing the game:
 
-#### Dark Gaia
-In this mode, you must find the Magic Dust and use it to free Kara from her portrait.  You must then unite with her to defeat Dark Gaia, a process which requires you to have Shadow's form unlocked (by obtaining and using the Aura) as well as a certain number of the game's six Mystic Statues.
+#### Dark Gaia / Apocalypse Gaia / Random Gaia
+In these modes, you must find the Magic Dust and use it to free Kara from her portrait.  You must then unite with her to defeat the final boss (either Dark Gaia or Apocalypse Gaia), a process which requires you to have Shadow's form unlocked (by obtaining and using the Aura) as well as a certain number of the game's six Mystic Statues.
 
 Kara's portrait can be found in one of the five minor dungeons, specified below.  The location of Kara's portrait will be contained in Lance's Letter.
 - Edward's Underground Tunnel

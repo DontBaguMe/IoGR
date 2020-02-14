@@ -45,6 +45,10 @@ def generate_ROM():
         g = goal.get()
         if g == "Dark Gaia":
             return Goal.DARK_GAIA
+        if g == "Apocalypse Gaia":
+            return Goal.APO_GAIA
+        if g == "Random Gaia":
+            return Goal.RANDOM_GAIA
         if g == "Red Jewel Hunt":
             return Goal.RED_JEWEL_HUNT
 
@@ -150,8 +154,8 @@ def diff_help():
 
 def goal_help():
     lines = ["Goal determines the required conditions to beat the game:", "",
-             "DARK GAIA:", " - Collect the required Mystic Statues (if any)", " - Rescue Kara from her portrait using the Magic Dust",
-             " - Acquire and use the Aura to gain Shadow's form", " - Talk to Gaia in any Dark Space to face and defeat Dark Gaia", "",
+             "[DARK/APOCALYPSE/RANDOM] GAIA:", " - Collect the required Mystic Statues (if any)", " - Rescue Kara from her portrait using the Magic Dust",
+             " - Acquire and use the Aura to gain Shadow's form", " - Talk to Gaia in any Dark Space to face and defeat the Gaia of your choice", "",
              "RED JEWEL HUNT:", "Collect the appropriate number of Red Jewels, by difficulty, and turn them into the Jeweler:",
              " - Easy: 35 Red Jewels", " - Normal: 40 Red Jewels", " - Hard/Extreme: 50 Red Jewels"]
     tkinter.messagebox.showinfo("Goal", "\n".join(lines))
@@ -227,7 +231,7 @@ diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
 difficulty.set("Normal")
 
 goal = tkinter.StringVar(root)
-goal_choices = ["Dark Gaia", "Red Jewel Hunt"]
+goal_choices = ["Dark Gaia", "Apocalypse Gaia", "Random Gaia", "Red Jewel Hunt"]
 goal.set("Dark Gaia")
 
 logic = tkinter.StringVar(root)
@@ -262,7 +266,7 @@ enemizer.set("None")
 
 statues = tkinter.StringVar(root)
 statue_choices = ["0", "1", "2", "3", "4", "5", "6", "Random"]
-statues.set("Random")
+statues.set("4")
 
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)

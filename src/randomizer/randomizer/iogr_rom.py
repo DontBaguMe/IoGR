@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.6.1"
+VERSION = "2.9.2"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -31,6 +31,7 @@ FORCE_CHANGE = b"\x22\x30\xfd\x88"
 
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
+AG_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "AG" + os.path.sep
 
 
 def __get_data_file__(data_filename: str) -> BinaryIO:
@@ -52,6 +53,10 @@ def generate_filename(settings: RandomizerData, extension: str):
     def getGoal(goal, statues):
         if goal.value is Goal.DARK_GAIA.value:
             return "_DG" + statues[0]
+        if goal.value is Goal.APO_GAIA.value:
+            return "_AG" + statues[0]
+        if goal.value is Goal.RANDOM_GAIA.value:
+            return "_RG" + statues[0]
         if goal.value is Goal.RED_JEWEL_HUNT.value:
             return "_RJ"
 
@@ -360,7 +365,12 @@ class Randomizer:
         patch.write(b"\xce" + qt_encode("He closed the journal.") + b"\xc0")
 
         patch.seek(int("3f210", 16) + rom_offset)
-        if settings.goal.value == Goal.DARK_GAIA.value:
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+            patch.write(b"\xce" + qt_encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
+            patch.write(qt_encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
+            patch.write(qt_encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
+            patch.write(qt_encode("Happy hunting!") + b"\xc0")
+        else:
             patch.write(b"\xce" + qt_encode("BEATING THE GAME:       You must do three things to beat the game:|"))
             patch.write(qt_encode("1. RESCUE KARA         Kara is trapped in a painting! You need Magic Dust to free her.|"))
             patch.write(qt_encode("She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|"))
@@ -377,12 +387,8 @@ class Randomizer:
             patch.write(qt_encode("STATUE 6: BABEL TOWER   You need the Aura and the Crystal Ring to get in.|"))
             patch.write(qt_encode("Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|"))
             patch.write(qt_encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
-            patch.write(qt_encode("She will give you the option to face Dark Gaia and beat the game. Good luck, and have fun!") + b"\xc0")
-        elif settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-            patch.write(b"\xce" + qt_encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
-            patch.write(qt_encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
-            patch.write(qt_encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
-            patch.write(qt_encode("Happy hunting!") + b"\xc0")
+            patch.write(qt_encode("She will give you the option to face the final boss and beat the game. Good luck, and have fun!") + b"\xc0")
+
 
         patch.seek(int("3f800", 16) + rom_offset)
         patch.write(b"\xce" + qt_encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
@@ -780,8 +786,8 @@ class Randomizer:
         patch.write(FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
 
         # Put Gold Ship captain at Inca entrance
-        patch.seek(int("c8c9c", 16) + rom_offset)
-        patch.write(b"\x19\x1c\x00\x4e\x85\x85\x00")
+#        patch.seek(int("c8c9c", 16) + rom_offset)
+#        patch.write(b"\x19\x1c\x00\x4e\x85\x85\x00")
 
         ##########################################################################
         #                          Modify Gold Ship events
@@ -958,12 +964,12 @@ class Randomizer:
 
         # Instant form change & warp to Seaside Palace if Viper is defeated
         patch.seek(int("ace9b", 16) + rom_offset)
-        patch.write(b"\x4c\x90\xfd")
+        patch.write(b"\x4c\x99\xff")
         patch.seek(int("acecb", 16) + rom_offset)
         patch.write(b"\x01\x02\x26\x5a\x90\x00\x70\x00\x83\x00\x14\x02\xc1\x6b")
 
-        f_viperchange = open(BIN_PATH + "0afd90_viperchange.bin", "rb")
-        patch.seek(int("afd90", 16) + rom_offset)
+        f_viperchange = open(BIN_PATH + "0aff99_viperchange.bin", "rb")
+        patch.seek(int("aff99", 16) + rom_offset)
         patch.write(f_viperchange.read())
         f_viperchange.close
 
@@ -1517,17 +1523,17 @@ class Randomizer:
         patch.write(b"\xD3\xD2\x00\xD5\x00" + qt_encode("Contributors and Testers:") + b"\xCB")
         patch.write(qt_encode("-Alchemic  -Austin21300") + b"\xCB")
         patch.write(qt_encode("-Atlas     -BonzaiBier") + b"\xCB")
-        patch.write(qt_encode("-Crazyhaze -BOWIEtheHERO") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-ChaozJoe  -BOWIEtheHERO") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-DoodSF    -BubbaSWalter") + b"\xCB")
-        patch.write(qt_encode("-Eppy37    -DerTolleIgel") + b"\xCB")
-        patch.write(qt_encode("-Lassic    -djtifaheart") + b"\xCB")
-        patch.write(qt_encode("-Le Hulk   -GliitchWiitch") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Eppy37    -Crazyhaze") + b"\xCB")
+        patch.write(qt_encode("-Lassic    -DerTolleIgel") + b"\xCB")
+        patch.write(qt_encode("-Le Hulk   -djtifaheart") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Mikan     -Keypaladin") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet  -Neomatamune") + b"\xCB")
-        patch.write(qt_encode("-NYRambler -Pozzum Senpai") + b"\xCB")
-        patch.write(qt_encode("-Plan") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Mikan     -GliitchWiitch") + b"\xCB")
+        patch.write(qt_encode("-Mr Freet  -Keypaladin") + b"\xCB")
+        patch.write(qt_encode("-NYRambler -Neomatamune") + b"\xCB")
+        patch.write(qt_encode("-Plan      -Pozzum Senpai") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-roeya     -Skipsy") + b"\xCB")
         patch.write(qt_encode("-Scheris   -SmashManiac") + b"\xCB")
@@ -1780,7 +1786,7 @@ class Randomizer:
 
         # Change boss room ranges
         patch.seek(int("c31a", 16) + rom_offset)
-        patch.write(b"\x67\x5A\x73\x00\x8A\x82\xA8\x00\xDD\xCC\xDD\x00\xF6\xB0\xBF\x00")
+        patch.write(b"\x67\x5A\x74\x00\x8A\x82\xA9\x00\xDD\xCC\xDD\x00\xF6\xB0\xBF\x00")
         # patch.write(b"\xEA\xB0\xBF\x00")   # If Solid Arm ever grants Babel rewards
 
         # Add boss reward events to Babel and Jeweler Mansion
@@ -2183,7 +2189,7 @@ class Randomizer:
             i += 1
 
         # Can't face Dark Gaia in Red Jewel hunts
-        if settings.goal.value != Goal.DARK_GAIA.value:
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
             patch.seek(int("8dd0d", 16) + rom_offset)
             patch.write(b"\x10\x01")
 
@@ -2281,22 +2287,6 @@ class Randomizer:
                 else:
                     f_mapdata.seek(addr)
                     f_mapdata.write(dungeon_music[boss_order[6]-1])
-
-        # Change conditions for ship captain @ Inca
-        inca_boss = boss_order[0]
-        patch.seek(int("584ab", 16) + rom_offset)
-        if inca_boss == 2:
-            patch.write(b"\xf9\x00")
-        elif inca_boss == 3:
-            patch.write(b"\xfa\x00")
-        elif inca_boss == 4:
-            patch.write(b"\xfb\x00")
-        elif inca_boss == 5:
-            patch.write(b"\xfc\x00")
-        elif inca_boss == 6:
-            patch.write(b"\x70\x01")
-        elif inca_boss == 7:
-            patch.write(b"\xf6\x00")
 
         # Change conditions and text for Pyramid boss portal
         pyramid_boss = boss_order[4]
@@ -2655,35 +2645,6 @@ class Randomizer:
         patch.write(b"\xc2\xd7")
 
         ##########################################################################
-        #                          Have fun with final text
-        ##########################################################################
-        superhero_list = []
-        superhero_list.append(qt_encode("I must go, my people need me!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("     Up, up, and away!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       Up and atom!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("  It's clobberin' time!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       For Asgard!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    Back in a flash!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("      I am GROOT!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("Wonder Twin powers activate!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    Titans together!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       HULK SMASH!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("        Flame on!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    I have the power!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("        Shazam!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("     Bite me, fanboy.") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("  Hi-yo Silver... away!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("Here I come to save the day!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("    Teen Titans, Go!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       Cowabunga!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("       SPOOOOON!!") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("There better be bacon when I get there...") + b"\xc3\x00\xc0")
-
-        # Assign final text box
-        patch.seek(int("98ebe", 16) + rom_offset)
-        patch.write(superhero_list[random.randint(0, len(superhero_list) - 1)])
-
-        ##########################################################################
         #                   Randomize item and ability placement
         ##########################################################################
         done = False
@@ -2979,6 +2940,55 @@ class Randomizer:
         # Direct map arrangement pointer to new data - NO LONGER NECESSARY
         # patch.seek(int("d977e",16)+rom_offset)
         # patch.write(b"\x00\x41")
+
+        ##########################################################################
+        #                                   Plugins
+        ##########################################################################
+        # Apocalypse Gaia
+
+        if self.w.goal == "Apocalypse Gaia":
+            patch.seek(int("98de4",16)+rom_offset)
+            patch.write(b"\x80") # Respawn in space
+            for pluginfilename in os.listdir(AG_PLUGIN_PATH):
+                if pluginfilename[-4:] == ".bin":
+                    f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
+                    patch.seek(int(pluginfilename[:6],16)+rom_offset)
+                    patch.write(f_plugin.read())
+                    f_plugin.close
+
+        ##########################################################################
+        #                          Have fun with final text
+        ##########################################################################
+        superhero_list = []
+        superhero_list.append(qt_encode("I must go, my people need me!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("     Up, up, and away!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       Up and atom!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("  It's clobberin' time!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       For Asgard!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    Back in a flash!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("      I am GROOT!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("Wonder Twin powers activate!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    Titans together!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       HULK SMASH!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("        Flame on!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    I have the power!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("        Shazam!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("     Bite me, fanboy.") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("  Hi-yo Silver... away!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("Here I come to save the day!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("    Teen Titans, Go!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       Cowabunga!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       SPOOOOON!!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("There better be bacon when I get there...") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("     Apocalypse Now!") + b"\xc3\x00\xc0")
+
+        # Assign final text box
+        rand_idx = random.randint(0, len(superhero_list) - 1)
+        patch.seek(int("98ebe", 16) + rom_offset)
+        if self.w.goal == "Apocalypse Gaia" and settings.goal.value == Goal.RANDOM_GAIA.value:
+            patch.write(qt_encode("    Apocalypse Now!") + b"\xc3\x00\xc0")
+        else:
+            patch.write(superhero_list[rand_idx])
 
         ##########################################################################
         #                Finalize map headers and return patch data
