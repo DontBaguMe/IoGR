@@ -32,6 +32,7 @@ FORCE_CHANGE = b"\x22\x30\xfd\x88"
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
 AG_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "AG" + os.path.sep
+SPRITE_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "sprites" + os.path.sep
 
 
 def __get_data_file__(data_filename: str) -> BinaryIO:
@@ -2945,14 +2946,26 @@ class Randomizer:
         #                                   Plugins
         ##########################################################################
         # Apocalypse Gaia
-
         if self.w.goal == "Apocalypse Gaia":
             patch.seek(int("98de4",16)+rom_offset)
             patch.write(b"\x80") # Respawn in space
             for pluginfilename in os.listdir(AG_PLUGIN_PATH):
                 if pluginfilename[-4:] == ".bin":
                     f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
-                    patch.seek(int(pluginfilename[:6],16)+rom_offset)
+                    patch.seek(int(pluginfilename[:6],16) + rom_offset)
+                    patch.write(f_plugin.read())
+                    f_plugin.close
+
+        # Custom sprite
+        if True:
+            sprite_path = SPRITE_PLUGIN_PATH + "bagu" + os.path.sep
+            print(sprite_path)
+            print(AG_PLUGIN_PATH)
+            print(SPRITE_PLUGIN_PATH)
+            for pluginfilename in os.listdir(sprite_path):
+                if pluginfilename[-4:] == ".bin":
+                    f_plugin = open(sprite_path + pluginfilename, "rb")
+                    patch.seek(int(pluginfilename[:6],16) + rom_offset)
                     patch.write(f_plugin.read())
                     f_plugin.close
 

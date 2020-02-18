@@ -14,7 +14,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_data={'': [
         'bin/*.bin',
-        'bin/plugins/**/*.bin'
+        'bin/plugins/**/*.bin',
+        'bin/plugins/**/**/*.bin'
     ]},
     install_requires=['bitstring'],
     python_requires='>=3.7'
