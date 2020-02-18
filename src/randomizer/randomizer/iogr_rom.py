@@ -2959,9 +2959,6 @@ class Randomizer:
         # Custom sprite
         if True:
             sprite_path = SPRITE_PLUGIN_PATH + "bagu" + os.path.sep
-            print(sprite_path)
-            print(AG_PLUGIN_PATH)
-            print(SPRITE_PLUGIN_PATH)
             for pluginfilename in os.listdir(sprite_path):
                 if pluginfilename[-4:] == ".bin":
                     f_plugin = open(sprite_path + pluginfilename, "rb")
