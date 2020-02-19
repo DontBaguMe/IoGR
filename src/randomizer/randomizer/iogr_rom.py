@@ -14,7 +14,7 @@ from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 from .models.enums.sprites import Sprite
 
-VERSION = "2.9.2"
+VERSION = "3.0.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
