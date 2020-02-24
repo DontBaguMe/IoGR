@@ -14,7 +14,7 @@ from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 from .models.enums.sprites import Sprite
 
-VERSION = "3.0.1"
+VERSION = "3.0.2"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -2958,8 +2958,9 @@ class Randomizer:
                     f_plugin.close
 
         # Custom sprite
-        if settings.sprite.value != Sprite.WILL.value:
-            sprite_path = SPRITE_PLUGIN_PATH + settings.sprite.value + os.path.sep
+        custom_sprite_value = settings.sprite.value.lower()
+        if custom_sprite_value != Sprite.WILL.value:
+            sprite_path = SPRITE_PLUGIN_PATH + custom_sprite_value + os.path.sep
             for pluginfilename in os.listdir(sprite_path):
                 if pluginfilename[-4:] == ".bin":
                     f_plugin = open(sprite_path + pluginfilename, "rb")
