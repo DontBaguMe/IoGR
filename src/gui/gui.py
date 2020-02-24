@@ -90,13 +90,13 @@ def generate_ROM():
         if sp == "Will":
             return Sprite.WILL
         if sp == "Bagu":
-            return StartLocation.BAGU
+            return Sprite.BAGU
         if sp == "Freet":
-            return StartLocation.FREET
+            return Sprite.FREET
         if sp == "Solar":
-            return StartLocation.SOLAR
+            return Sprite.SOLAR
         if sp == "Sye":
-            return StartLocation.SYE
+            return Sprite.SYE
 
     if not seed_str.isdigit():
         tkinter.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
