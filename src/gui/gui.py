@@ -93,6 +93,8 @@ def generate_ROM():
             return Sprite.BAGU
         if sp == "Freet":
             return Sprite.FREET
+        if sp == "Invisible":
+            return Sprite.INVISIBLE
         if sp == "Solar":
             return Sprite.SOLAR
         if sp == "Sye":
@@ -279,7 +281,7 @@ enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
 sprite = tkinter.StringVar(root)
-sprite_choices = ["Will", "Bagu", "Freet", "Solar", "Sye"]
+sprite_choices = ["Will", "Bagu", "Freet", "Invisible", "Solar", "Sye"]
 sprite.set("Will")
 
 statues = tkinter.StringVar(root)
