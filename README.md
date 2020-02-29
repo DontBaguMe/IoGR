@@ -5,7 +5,7 @@ This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
-<a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
+<a href="https://www.youtube.com/watch?v=JobLH53Q1sM">Watch a Video Tutorial (UPDATED!)</a>
 
 The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 
