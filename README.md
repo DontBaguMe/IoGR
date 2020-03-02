@@ -42,7 +42,7 @@ There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficu
 This allows you to choose a game mode. There are currently four goals available (see below for more details):
 - Dark Gaia: Rescue Kara, find and use the Aura, collect required Mystic Statues (if any), and defeat Dark Gaia on the Comet to beat the game.
 - Red Jewel Hunt: Beat the game by collecting a number of Red Jewels and turning them into the Jeweler (see below).
-- Apocalypse Gaia: Same as Dark Gaia, except you'll face the true final boss hidden in the game code!  Shoutouts to Raeven0 for uncovering and reprogramming this masterpiece. (Very hard)
+- Apocalypse Gaia: Same as Dark Gaia, except you'll face the true final boss hidden in the game code!  Shoutouts to Raeven0 for uncovering and reprogramming this masterpiece. (Very hard) NOTE: This fight has five phases -- the first two are identical to the vanilla Dark Gaia fight, and phases 3-5 are new.  Once you hit Phase 3, you set a checkpoint where if you die: 1) you return to the beginning of Phase 3 with full health, and 2) you regain any herbs you had at the beginning of that phase.
 - Random Gaia: Same as Dark Gaia, except there's a 50/50 chance you'll face Apocalypse Gaia instead.  In Random Gaia seeds, you'll know whom you're facing in the text box that appears after you merge forms with Kara: 1) if it's Dark Gaia, you'll get a random quote as normal; 2) if it's Apocalypse Gaia, the quote will read "Apocalypse Now!"
 
 #### Statues
