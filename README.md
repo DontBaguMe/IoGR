@@ -196,6 +196,15 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - The spirits in Babel Tower can warp you back to the bottom of the tower, allowing you to escape if you cannot defeat one of the bosses.
 - You can talk to the NPC in front of the school in South Cape for an in-game tutorial.
 
+#### Inventory Management Tips
+With only sixteen slots available for items, inventory management is a significant meta aspect of this randomizer.  Below are some tips to help you manage your inventory space.  Logic will never grant you access to more key items than you can carry and/or get rid of.
+
+- The following items can be used immediately upon acquisition, upon which they disappear: Red Jewels (including "2 Red Jewels" and "3 Red Jewels"), herbs, status upgrades ("HP Jewels", "DEF Jewels" "STR Jewels", "Light Jewels" and "Dark Jewels"), Lola's Letter, Black Glasses, and Crystal Ring
+
+- The following items can be removed from inventory at any time: herbs, Lance's Letter, Rama Statues (if Mystic Statue 3 is not required), Father's Journal and Hieroglyphs (if Mystic Statue 5 is not required)
+
+- If you have access to the Pyramid, you can drop off any Hieroglyphs in the slots even if you don't have Father's Journal.  You can gain back placed hieroglyphs either by swapping them with a different hieroglyph from you inventory, or by filling in the slots completely in the wrong order.
+
 #### Misc. Notes and Strategies
 - Sky Garden: The Dark Space in the SW room does not in fact require Dark Friar to access. You can stand below the switch as Freedan and reach it easily with his sword. Also, you can use Aura Barrier to complete the NW room instead of Dark Friar.
 
