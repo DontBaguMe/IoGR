@@ -157,13 +157,13 @@ class Randomizer:
             # Change firebird logic
             # Requires Shadow's form, Crystal Ring (switch #$3e) and Kara rescued (switch #$8a)
             patch.seek(int("2cd07", 16) + rom_offset)
-            patch.write(b"\x4c\xc0\xf0\xea\xea\xea")
+            patch.write(b"\xa0\x00\x00\x4c\xc0\xf0")
             patch.seek(int("2cd88", 16) + rom_offset)
-            patch.write(b"\x4c\xf0\xf0\xea\xea\xea")
+            patch.write(b"\xa0\x00\x00\x4c\xc1\xf0")
             patch.seek(int("2ce06", 16) + rom_offset)
-            patch.write(b"\x4c\x20\xf1\xea\xea\xea")
+            patch.write(b"\xa0\x00\x00\x4c\xc2\xf0")
             patch.seek(int("2ce84", 16) + rom_offset)
-            patch.write(b"\x4c\x50\xf1\xea\xea\xea")
+            patch.write(b"\xa0\x00\x00\x4c\xc3\xf0")
 
             # Load firebird assets into every map
             patch.seek(int("3e03a", 16) + rom_offset)
