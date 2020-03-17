@@ -1548,8 +1548,8 @@ class Randomizer:
 
         patch.write(qt_encode("-Voranthe  -wormsofcan") + b"\xCB")
         patch.write(qt_encode("-Wilddin   -Xyrcord") + b"\xCB")
-        patch.write(qt_encode("-xIceblue  -ZockerStu") + b"\xCB")
-        patch.write(qt_encode("-Z4t0x") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-xIceblue  -Zeke Starr") + b"\xCB")
+        patch.write(qt_encode("-Z4t0x     -ZockerStu") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
         patch.write(b"\xCB" + qt_encode("     This was so fun!"))
