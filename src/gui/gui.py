@@ -10,6 +10,7 @@ from randomizer.models.enums.difficulty import Difficulty
 from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.logic import Logic
+from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
@@ -93,6 +94,8 @@ def generate_ROM():
             return Sprite.BAGU
         if sp == "Freet":
             return Sprite.FREET
+        if sp == "Invisible":
+            return Sprite.INVISIBLE
         if sp == "Solar":
             return Sprite.SOLAR
         if sp == "Sye":
@@ -105,7 +108,7 @@ def generate_ROM():
     try:
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), sprite.get())
+            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), get_sprite())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -279,7 +282,7 @@ enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
 sprite = tkinter.StringVar(root)
-sprite_choices = ["Will", "Bagu", "Freet", "Solar", "Sye"]
+sprite_choices = ["Will", "Bagu", "Freet", "Invisible", "Solar", "Sye"]
 sprite.set("Will")
 
 statues = tkinter.StringVar(root)
