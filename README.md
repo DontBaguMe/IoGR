@@ -1,13 +1,26 @@
-## The Illusion of Gaia Randomizer (v3.0.1) - <a href="https://www.iogr.app/">Play Now!</a>
+## The Illusion of Gaia Randomizer (v3.0) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
 
 <a href="https://discord.gg/KfZ4VeD">Join the Community on Discord</a>
 
-<a href="https://www.youtube.com/watch?v=Y55btoDfuDw&list=PLe2Rz7BOWk02gsG4MnXT5D_76omVT8Q7k">Watch a Video Tutorial</a>
+<a href="https://www.youtube.com/watch?v=JobLH53Q1sM">Watch a Video Tutorial (UPDATED!)</a>
 
 The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
+
+### Contents
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#randomizer-settings">Randomizer Settings</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#beating-the-game">How to Beat the Game</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#features">Features:</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#overworld-movement">Overworld Movement</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#room-rewards-and-stat-upgrades">Room Rewards and Stat Upgrades</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#in-game-hints">In-Game Hints</a>
+- <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#other-features">Other Features</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Frequently Asked Questions</a>
 
 ### Creating a Randomized ROM
 Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting "Generate ROM" will allow you to download a randomized ROM (as well as a spoiler log).  The original file will remain intact.
@@ -29,7 +42,7 @@ There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficu
 This allows you to choose a game mode. There are currently four goals available (see below for more details):
 - Dark Gaia: Rescue Kara, find and use the Aura, collect required Mystic Statues (if any), and defeat Dark Gaia on the Comet to beat the game.
 - Red Jewel Hunt: Beat the game by collecting a number of Red Jewels and turning them into the Jeweler (see below).
-- Apocalypse Gaia: Same as Dark Gaia, except you'll face the true final boss hidden in the game code!  Shoutouts to Raeven0 for uncovering and reprogramming this masterpiece. (Very hard)
+- Apocalypse Gaia: Same as Dark Gaia, except you'll face the true final boss hidden in the game code!  Shoutouts to Raeven0 for uncovering and reprogramming this masterpiece. (Very hard) NOTE: This fight has five phases -- the first two are identical to the vanilla Dark Gaia fight, and phases 3-5 are new.  Once you hit Phase 3, you set a checkpoint where if you die: 1) you return to the beginning of Phase 3 with full health, and 2) you regain any herbs you had at the beginning of that phase.
 - Random Gaia: Same as Dark Gaia, except there's a 50/50 chance you'll face Apocalypse Gaia instead.  In Random Gaia seeds, you'll know whom you're facing in the text box that appears after you merge forms with Kara: 1) if it's Dark Gaia, you'll get a random quote as normal; 2) if it's Apocalypse Gaia, the quote will read "Apocalypse Now!"
 
 #### Statues
@@ -63,10 +76,12 @@ Note: Non-enemy sprites in dungeons have been largely removed in every enemizer 
 - Balanced: Enemies can appear in any dungeon, but they will retain the stats of the enemies they replace, making each dungeon's difficulty relatively balanced to vanilla levels.
 - Full: Enemies can appear in any dungeon and retain their vanilla stats.
 - Insane: Enemeies can appear in any dungeon. Furthermore, enemy stats have been shuffled, so early enemies can have the stats of later enemies, and vice versa.
-- Boss Shuffle: In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. For Easy and Normal difficulties, each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. Solid Arm will only be included in the shuffle for Extreme difficulty.
+- Boss Shuffle (in development!): In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. For Easy and Normal difficulties, each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. Solid Arm will only be included in the shuffle for Extreme difficulty.
 
 #### Entrance Randomizer (coming soon!)
 This feature will be implemented in a future version.
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### Beating the Game
 There are currently two modes (goals) for completing the game:
@@ -94,6 +109,8 @@ Once you rescue Kara, unlock Shadow's form, and earn the applicable Statues (if 
 
 #### Red Jewel Hunt
 For this mode, the sole objective is to collect the required number of Red Jewels as quickly as possible and turn them into the Jeweler.  The number of Red Jewels required is 35 for Easy, 40 for Normal, 45 for Hard, and 50 for Extreme.  Turning these into the Jeweler and speaking with him allows you to beat the game.
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### Features
 
@@ -179,6 +196,15 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - The spirits in Babel Tower can warp you back to the bottom of the tower, allowing you to escape if you cannot defeat one of the bosses.
 - You can talk to the NPC in front of the school in South Cape for an in-game tutorial.
 
+#### Inventory Management Tips
+With only sixteen slots available for items, inventory management is a significant meta aspect of this randomizer.  Below are some tips to help you manage your inventory space.  Logic will never grant you access to more key items than you can carry and/or get rid of.
+
+- The following items can be used immediately upon acquisition, upon which they disappear: Red Jewels (including "2 Red Jewels" and "3 Red Jewels"), herbs, status upgrades ("HP Jewels", "DEF Jewels" "STR Jewels", "Light Jewels" and "Dark Jewels"), Lola's Letter, Black Glasses, and Crystal Ring
+
+- The following items can be removed from inventory at any time: herbs, Lance's Letter, Rama Statues (if Mystic Statue 3 is not required), Father's Journal and Hieroglyphs (if Mystic Statue 5 is not required)
+
+- If you have access to the Pyramid, you can drop off any Hieroglyphs in the slots even if you don't have Father's Journal.  You can gain back placed hieroglyphs either by swapping them with a different hieroglyph from you inventory, or by filling in the slots completely in the wrong order.
+
 #### Misc. Notes and Strategies
 - Sky Garden: The Dark Space in the SW room does not in fact require Dark Friar to access. You can stand below the switch as Freedan and reach it easily with his sword. Also, you can use Aura Barrier to complete the NW room instead of Dark Friar.
 
@@ -190,6 +216,8 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 
 - Pyramid: Room 3 (the "killer 6" room) can be done with Fredan if you have Dark Friar.  Some might find this form to be helpful to survive in this area, especially if you have upgraded Dark Friar and/or Aura Barrier.  Similarly, Room 5 can be completed with Freedan if you have the Earthquaker ability by using that ability from the various platforms in this area.  (Tiles will fall from the ceiling, allowing you to progress.)
 
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
+
 ### EmoTracker
 The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is available for download. Furthermore, you can access a beta version of the autotracker by joining the <a href="https://discord.gg/KfZ4VeD">Discord</a> and referring to the #tracker channel.
 
@@ -200,6 +228,8 @@ The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is av
 ### Known Bugs and Quirks
 If you have an issue with the randomizer, please join our
 <a href="https://discord.gg/KfZ4VeD">Discord</a> and report your issue in the #bugs channel.
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### FAQ
 #### Can special abilities be found in any Dark Space?
@@ -274,6 +304,10 @@ The Crystal Ring is one of the items you need to pass the force field at the bas
 #### Why is the game so mean to me?
 #blamebagu
 
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
+
 ### Support the Dev
 No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a
 <a href="https://www.patreon.com/dontbagume">patron.</a>
+
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
