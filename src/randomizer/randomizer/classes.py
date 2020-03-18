@@ -191,20 +191,28 @@ class World:
                     self.graph[origin][1].append(dest)
 
         # Map passages and internal dungeon exits to graph and list all available exits
-        exit_list = []
+        exits_coupled = []
+        exits_uncoupled = []
         passages = [10,11,12,13,14,15,16,17]
         for x in self.exits:
-            if self.exits[x][4] in passages or self.exits[x][5] in passages or (
-                    self.exits[x][9] and self.exits[x][2] == "Room"):
-                origin = self.exits[x][4]
-                dest = self.exits[x][5]
-                if dest not in self.graph[origin][1]:
-                    self.graph[origin][1].append(dest)
+            if self.exits[x][3] == 0:
+                if self.exits[x][2] != "Room" or not self.exits[x][9]:  # No interior dungeon exits
+                    self.exits[x][1] = -1   # Mark exit for shuffling
+                    if self.exits[x][0] == 0:
+                        exits_uncoupled.append(x)
+                    else:
+                        exits_coupled.append(x)
+                else:
+                    origin = self.exits[x][4]
+                    dest = self.exits[x][5]
+                    if dest not in self.graph[origin][1]:
+                        self.graph[origin][1].append(dest)
             elif not self.exits[x][1] and not self.exits[x][3]:
                 exit_list.append(x)
 
         # Shuffle lists
-        random.shuffle(exit_list)
+        random.shuffle(exits_coupled)
+        random.shuffle(exits_uncoupled)
 
         solved = False
         origin_exits = []
@@ -214,8 +222,20 @@ class World:
             found_origin_exit = False
             found_dest_exit = False
             for exit in self.exits:
-                origin = self.exits[exit][4]
-                dest = self.exits[exit][5]
+                if self.exits[exit][1] == -1 and not found_origin_exit:
+                    origin = self.exits[exit][4]
+                    #dest = self.exits[exit][5]
+                    if self.graph[origin][0] and exit not in origin_exits:
+                        found_origin_exit = True
+                        origin_exit = exit
+                        if self.exits[exit][0] == 0:
+                            exit_coupled = False
+                        else:
+                            exit_coupled = True
+            if found_origin_exit:
+
+
+
                 if not found_origin_exit and exit not in origin_exits and self.graph[origin][0]:
                     found_origin_exit = True
                     origin_exit = exit
@@ -2667,10 +2687,10 @@ class World:
 
             # Edward's
             52: [ 0, 0, "Room",  0, 30, 32, "4cfce", b"\x06\x58\x00\xC0\x01\x00\x10\x21", False, False, False, "Prison entrance (king)"],
-            53: [54, 0, "Area",  0, 31, 48, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (in)"],
-            54: [53, 0, "Area",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (out)"],
-            55: [56, 0, "Area",  0, 33, 40, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel entrance (in)"],
-            56: [55, 0, "Area",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel entrance (out)"],
+            53: [54, 0, "Place",  0, 31, 48, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (in)"],
+            54: [53, 0, "Place",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel back entrance (out)"],
+            55: [56, 0, "Place",  0, 33, 40, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel entrance (in)"],
+            56: [55, 0, "Place",  1,  0,  0, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel entrance (out)"],
 
             # Tunnel
             60: [61, 0, "Room", 0, 40, 41, "fffff", b"\xff\xff\xff\xff\xff\xff\xff\xff", False,  True, False, "Tunnel: Map 12 to Map 13"],
