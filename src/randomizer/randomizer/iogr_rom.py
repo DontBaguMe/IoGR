@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "2.9.2"
+VERSION = "2.9.3"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1546,8 +1546,8 @@ class Randomizer:
 
         patch.write(qt_encode("-Voranthe  -wormsofcan") + b"\xCB")
         patch.write(qt_encode("-Wilddin   -Xyrcord") + b"\xCB")
-        patch.write(qt_encode("-xIceblue  -ZockerStu") + b"\xCB")
-        patch.write(qt_encode("-Z4t0x") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-xIceblue  -Zeke Starr") + b"\xCB")
+        patch.write(qt_encode("-Z4t0x     -ZockerStu") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
         patch.write(b"\xCB" + qt_encode("     This was so fun!"))
