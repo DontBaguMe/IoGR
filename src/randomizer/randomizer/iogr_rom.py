@@ -107,6 +107,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
+    filename += getSwitch(settings.race_mode, 'race')
     filename += "_" + str(settings.seed)
     filename += "."
     filename += extension

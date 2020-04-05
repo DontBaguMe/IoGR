@@ -380,7 +380,7 @@ class World:
                     elif self.item_pool[item][1] == 2:
                         probability *= float(self.item_pool[item][0]) / float((sum_abilities - j))
                         j += 1
-                    if item in self.required_items:
+                    if item in self.required_items and not self.race_mode:
                         probability *= PROGRESS_ADJ[self.mode]
             probabilities.append([probability, current_prereq])
             sum_prob += probability
@@ -405,6 +405,14 @@ class World:
         maps.pop(0)
         return maps
 
+    def distribute_rewards(self, maps, map_indexes, _rewards):
+        for area in maps:
+            for map_index in map_indexes:
+                map = area[map_index]
+                reward = _rewards.pop(0)
+                if "OHKO" not in self.variant or reward > 1:  # No HP rewards for OHKO
+                    self.maps[map][2] = reward
+
     # Randomize map-clearing rewards
     def map_rewards(self):
         maps = self.get_maps()
@@ -415,33 +423,38 @@ class World:
 
         boss_rewards = 4 - self.mode
 
-        rewards = []  # Total rewards by mode (HP/STR/DEF)
-        if self.mode == 0:  # Easy: 10/7/7
-            rewards += [1] * 10
-            rewards += [2] * 7
-            rewards += [3] * 7
-        elif self.mode == 1:  # Normal: 10/4/4
-            rewards += [1] * 10
-            rewards += [2] * 4
-            rewards += [3] * 4
-        elif self.mode == 2:  # Hard: 8/2/2
-            rewards += [1] * 8
-            rewards += [2] * 2
-            rewards += [3] * 2
-        elif self.mode == 3:  # Extreme: 6/0/0
-            rewards += [1] * 6
-
-        random.shuffle(rewards)
-
+        rewards = []
         # Add in rewards, where applicable, by difficulty
-        for area in maps:
-            i = 0
-            while i < boss_rewards:
-                map = area[i]
-                reward = rewards.pop(0)
-                if "OHKO" not in self.variant or reward > 1:  # No HP rewards for OHKO
-                    self.maps[map][2] = reward
-                i += 1
+        for i in range(boss_rewards):
+            difficulty_rewards = []
+            # Each loop add 1 more reward to the pool of each region
+            # Each loop lower the difficulty by 1 level
+            if i == 0:  # Extreme: 6/0/0
+                difficulty_rewards += [1] * 6
+            elif i == 1:  # Hard: 8/2/2
+                difficulty_rewards += [1] * 2
+                difficulty_rewards += [2] * 2
+                difficulty_rewards += [3] * 2
+            elif i == 2:  # Normal: 10/4/4
+                difficulty_rewards += [1] * 2
+                difficulty_rewards += [2] * 2
+                difficulty_rewards += [3] * 2
+            elif i == 3:  # Easy: 10/7/7
+                difficulty_rewards += [2] * 3
+                difficulty_rewards += [3] * 3
+
+            if self.race_mode:
+                # In case of a race setting, we distribute each difficulty rewards at a time
+                random.shuffle(difficulty_rewards)
+                self.distribute_rewards(maps, [i], difficulty_rewards)
+            else:
+                # Else we just pool the rewards together
+                rewards.extend(difficulty_rewards)
+
+        if not self.race_mode:
+            # And outside of race settings we distribute all rewards at one time
+            random.shuffle(rewards)
+            self.distribute_rewards(maps, range(boss_rewards), rewards)
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
@@ -498,8 +511,8 @@ class World:
             self.item_pool[35][4] = True
             self.item_pool[38][4] = True
 
-        # Solid Arm can only be required in Extreme
-        if self.mode != 3:
+        # Solid Arm can only be required in Extreme non race
+        if self.mode != 3 or self.race_mode:
             self.graph[82][1].remove(67)
 
         # Random start location
@@ -543,7 +556,12 @@ class World:
             self.item_pool[37][0] = 0  # Lola's Letter
 
             # Add in alternate items, by difficulty
-            if self.mode == 0:
+            if self.mode == 3 or self.race_mode:
+                self.item_pool[0][0]  += 5  # Nothing
+                self.item_pool[6][0]  += 0  # Herb
+                self.item_pool[42][0] += 0  # DEF Jewel
+                self.item_pool[43][0] += 0  # STR Jewel
+            elif self.mode == 0:
                 self.item_pool[0][0]  += 0  # Nothing
                 self.item_pool[6][0]  += 1  # Herb
                 self.item_pool[42][0] += 2  # DEF Jewel
@@ -558,11 +576,6 @@ class World:
                 self.item_pool[6][0]  += 1  # Herb
                 self.item_pool[42][0] += 1  # DEF Jewel
                 self.item_pool[43][0] += 1  # STR Jewel
-            elif self.mode == 3:
-                self.item_pool[0][0]  += 5  # Nothing
-                self.item_pool[6][0]  += 0  # Herb
-                self.item_pool[42][0] += 0  # DEF Jewel
-                self.item_pool[43][0] += 0  # STR Jewel
 
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
@@ -731,9 +744,6 @@ class World:
 
         random.seed(self.seed + seed_adj)
 
-        # Assign map rewards
-        self.map_rewards()
-
         # Initialize and shuffle location list
         item_locations = self.list_item_locations()
         random.shuffle(item_locations)
@@ -749,12 +759,12 @@ class World:
         non_prog_items += self.list_item_pool(0, [], 3)
 
         # For Easy mode
-        if self.logic_mode == "Chaos" or self.mode > 2:
+        if self.logic_mode == "Chaos" or self.mode > 2 or self.race_mode:
             non_prog_items += self.list_item_pool(2)
         elif self.mode == 0:
-            non_prog_items += [52]
+            non_prog_items += self.list_item_pool(0, [52], 0)
         elif self.mode == 1:
-            non_prog_items += [49, 50, 52, 53]
+            non_prog_items += self.list_item_pool(0, [49, 50, 52, 53], 0)
 
         random.shuffle(non_prog_items)
         self.random_fill(non_prog_items, item_locations)
@@ -850,6 +860,9 @@ class World:
 
         junk_items = self.list_item_pool()
         self.random_fill(junk_items, item_locations, False)
+
+        # Assign map rewards
+        self.map_rewards()
 
         placement_log = self.placement_log[:]
         random.shuffle(placement_log)
@@ -1366,6 +1379,7 @@ class World:
     def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
 
         self.seed = settings.seed
+        self.race_mode = settings.race_mode
         self.statues = statues
         self.boss_order = boss_order
         self.dungeons_req = []
