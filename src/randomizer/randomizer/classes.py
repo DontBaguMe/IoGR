@@ -933,6 +933,47 @@ class World:
             items.append({"location": location_name, "name": item_name})
 
         spoiler["items"] = items
+
+        stat_upgrades = []
+        upgrade_name = {
+            1: "HP",
+            2: "ATK",
+            3: "DEF"
+        }
+        regions = {
+            "Underground Tunnel": [12, 13, 14, 15, 18],
+            "Inca Ruins": [27, 29, 32, 33, 34, 35, 37, 38, 39, 40],
+            "Diamond Mine": [61, 62, 63, 64, 65, 69, 70],
+            "Sky Garden": [77, 78, 79, 80, 81, 82, 83, 84],
+            "Mu": [92, 95, 96, 97, 98, 100, 101],
+            "Angel Dungeon": [109, 110, 111, 112, 113, 114],
+            "Great Wall": [130, 131, 133, 134, 135, 136],
+            "Mt Temple": [160, 161, 162, 163, 164, 165, 166, 167, 168],
+            "Ankor Wat": [176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190],
+            "Pyramid": [204, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 219],
+            "Jeweler's Mansion": [233]
+        }
+        region_upgrades = dict()
+
+        def get_map_region(map_index):
+            for region, maps in regions.items():
+                if map_index in maps:
+                    return region
+            return "Unknown"
+
+        for map in self.maps:
+            local_upgrade = self.maps[map][2]
+            local_region = get_map_region(map)
+            if local_upgrade:
+                if local_region not in region_upgrades:
+                    region_upgrades[local_region] = [upgrade_name[local_upgrade]]
+                else:
+                    region_upgrades[local_region].append(upgrade_name[local_upgrade])
+
+        for region, upgrades in region_upgrades.items():
+            stat_upgrades.append({"region": region, "stats": upgrades})
+
+        spoiler["stat_upgrades"] = stat_upgrades
         self.spoiler = spoiler
 
     def print_enemy_locations(self, filepath, offset=0):
