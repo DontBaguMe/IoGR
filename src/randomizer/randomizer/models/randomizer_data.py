@@ -30,3 +30,32 @@ class RandomizerData:
         self.dungeon_shuffle = dungeon_shuffle
         self.open_mode = open_mode
         self.race_mode = race_mode
+
+    def hashable_str(self):
+
+        def getSwitch(switch, param):
+            if switch:
+                return "_" + param
+            return ""
+
+        base_str = 'IoGR'
+        if self.race_mode:
+            base_str += "_Race"
+        else:
+            base_str += f"_{self.difficulty.name}"
+
+        base_str += f"_{self.goal.name}"
+        if self.goal != Goal.RED_JEWEL_HUNT:
+            base_str += f"_{self.statues[0]}"
+        base_str += f"_{self.logic.name}"
+        base_str += f"_{self.start_location.name}"
+        base_str += f"_{self.enemizer.name}"
+        base_str += getSwitch(self.open_mode, "OPEN")
+        base_str += getSwitch(self.boss_shuffle, "BOSS")
+        base_str += getSwitch(self.firebird, "FIREBIRD")
+        base_str += getSwitch(self.ohko, "OHKO")
+        base_str += getSwitch(self.allow_glitches, "GLITCHES")
+        base_str += getSwitch(self.red_jewel_madness, "JEWELS")
+        base_str += f"_{self.seed}"
+
+        return base_str

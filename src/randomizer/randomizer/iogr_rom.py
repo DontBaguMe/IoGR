@@ -181,11 +181,22 @@ class Randomizer:
         patch.seek(int("ffd1", 16) + rom_offset)
         patch.write(b"\x52\x41\x4E\x44\x4F")
 
-        # Put randomizer hash code on start screen
         patch.seek(int("1da4c", 16) + rom_offset)
-        patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
+        # Put randomizer hash code on start screen
+        if settings.race_mode:
+            if settings.difficulty == Difficulty.EASY:
+                patch.write(b"\x90\x90\x90\x90\x90\x90\x45\x41\x53\x59\x90")
+            elif settings.difficulty == Difficulty.NORMAL:
+                patch.write(b"\x90\x90\x90\x90\x4E\x4F\x52\x4D\x41\x4C\x90")
+            elif settings.difficulty == Difficulty.HARD:
+                patch.write(b"\x90\x90\x90\x90\x90\x90\x48\x41\x52\x44\x90")
+            elif settings.difficulty == Difficulty.EXTREME:
+                patch.write(b"\x90\x90\x90\x45\x58\x54\x52\x45\x4D\x45\x90")
+        else:
+            patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
-        hash_str = filename
+        # Use a settings based hashable string
+        hash_str = settings.hashable_str()
         h = hashlib.sha256()
         h.update(hash_str.encode())
         hash = h.digest()
