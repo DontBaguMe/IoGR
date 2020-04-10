@@ -307,7 +307,7 @@ The Crystal Ring is one of the items you need to pass the force field at the bas
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### Support the Dev
-No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider becoming a
-<a href="https://www.patreon.com/dontbagume">patron.</a>
+No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider subscribing to 
+<a href="https://www.twitch.tv/dontbagume">my channel on Twitch Twich.</a>
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
