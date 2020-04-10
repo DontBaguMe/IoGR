@@ -9,6 +9,7 @@ from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.logic import Logic
 from randomizer.models.enums.start_location import StartLocation
+from randomizer.models.enums.sprites import Sprite
 from randomizer.models.randomizer_data import RandomizerData
 from randomizer.iogr_rom import Randomizer, generate_filename
 
@@ -29,6 +30,8 @@ parser.add_argument('--overworld-shuffle', dest="overworld_shuffle", type=bool, 
 parser.add_argument('--dungeon-shuffle', dest="dungeon_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--open-mode', dest="open_mode", type=bool, required=False, default=False)
 parser.add_argument('--race-mode', dest="race_mode", type=bool, required=False, default=False)
+parser.add_argument('--sprite', dest="sprite", type=Sprite, required=False, default=Sprite.WILL)
+
 
 modeParser = parser.add_mutually_exclusive_group(required=False)
 modeParser.add_argument('--ohko', dest="ohko", action='store_true')
@@ -57,6 +60,7 @@ def main(argv):
                               open_mode=args.open_mode,
                               overworld_shuffle=args.overworld_shuffle,
                               dungeon_shuffle=args.dungeon_shuffle,
+                              sprinte=args.sprite,
                               race_mode=args.race_mode)
 
     rom_filename = generate_filename(settings, "sfc")

@@ -10,6 +10,7 @@ from randomizer.models.enums.difficulty import Difficulty
 from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.logic import Logic
+from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
@@ -86,6 +87,21 @@ def generate_ROM():
         if g == "Forced Unsafe":
             return StartLocation.FORCED_UNSAFE
 
+    def get_sprite():
+        sp = sprite.get()
+        if sp == "Will":
+            return Sprite.WILL
+        if sp == "Bagu":
+            return Sprite.BAGU
+        if sp == "Freet":
+            return Sprite.FREET
+        if sp == "Invisible":
+            return Sprite.INVISIBLE
+        if sp == "Solar":
+            return Sprite.SOLAR
+        if sp == "Sye":
+            return Sprite.SYE
+
     if not seed_str.isdigit():
         tkinter.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
         return
@@ -106,6 +122,7 @@ def generate_ROM():
                                   allow_glitches=glitches.get(),
                                   boss_shuffle=boss_shuffle.get(),
                                   open_mode=open_mode.get(),
+                                  sprite=get_sprite(),
                                   race_mode=race_mode.get())
 
         rom_filename = generate_filename(settings, "sfc")
@@ -241,6 +258,7 @@ tkinter.Label(mainframe, text="Allow Glitches").grid(row=12, column=0, sticky=tk
 tkinter.Label(mainframe, text="Boss Shuffle").grid(row=13, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Open Mode").grid(row=14, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Race Mode").grid(row=15, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Sprite").grid(row=16, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -286,6 +304,10 @@ enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
+sprite = tkinter.StringVar(root)
+sprite_choices = ["Will", "Bagu", "Freet", "Invisible", "Solar", "Sye"]
+sprite.set("Will")
+
 statues = tkinter.StringVar(root)
 statue_choices = ["0", "1", "2", "3", "4", "5", "6", "Random"]
 statues.set("4")
@@ -311,6 +333,7 @@ glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1,
 boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=13, column=1)
 open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
 race_mode_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode, onvalue=1, offvalue=0).grid(row=15, column=1)
+sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=16, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(mainframe, text='Generate Seed', command=generate_seed).grid(row=1, column=2)
