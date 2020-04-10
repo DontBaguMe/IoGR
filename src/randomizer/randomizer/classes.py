@@ -744,6 +744,12 @@ class World:
 
         random.seed(self.seed + seed_adj)
 
+        # Add a call to random for race mode to make it impossible to use a seed number to generate a spoiler for a race rom
+        # 1004 is a magic number chosen the 10th of April
+        if self.race_mode:
+            for _ in range(1004):
+                random.randint(1, 10)
+
         # Initialize and shuffle location list
         item_locations = self.list_item_locations()
         random.shuffle(item_locations)
