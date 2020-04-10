@@ -97,6 +97,7 @@ def generate_filename(settings: RandomizerData, extension: str):
 
     filename = "IoGR_v" + VERSION
     filename += getDifficulty(settings.difficulty)
+    filename += getDifficulty(settings.combat_difficulty)
     filename += getGoal(settings.goal, settings.statues)
     filename += getLogic(settings.logic)
     filename += getStartingLocation(settings.start_location)
@@ -141,7 +142,8 @@ class Randomizer:
 
         random.seed(settings.seed)
         statues_required = self.__get_required_statues__(settings)
-        mode = settings.difficulty.value
+        logic_difficulty = settings.difficulty.value
+        combat_difficulty = settings.combat_difficulty.value
 
         ##########################################################################
         #                             Early Firebird
@@ -182,16 +184,15 @@ class Randomizer:
         patch.write(b"\x52\x41\x4E\x44\x4F")
 
         patch.seek(int("1da4c", 16) + rom_offset)
-        # Put randomizer hash code on start screen
-        if settings.race_mode:
-            if settings.difficulty == Difficulty.EASY:
-                patch.write(b"\x90\x90\x90\x90\x90\x90\x45\x41\x53\x59\x90")
-            elif settings.difficulty == Difficulty.NORMAL:
-                patch.write(b"\x90\x90\x90\x90\x4E\x4F\x52\x4D\x41\x4C\x90")
-            elif settings.difficulty == Difficulty.HARD:
-                patch.write(b"\x90\x90\x90\x90\x90\x90\x48\x41\x52\x44\x90")
-            elif settings.difficulty == Difficulty.EXTREME:
-                patch.write(b"\x90\x90\x90\x45\x58\x54\x52\x45\x4D\x45\x90")
+        # put combat difficulty before hash on screen
+        if settings.combat_difficulty == Difficulty.EASY:
+            patch.write(b"\x90\x90\x90\x90\x90\x90\x45\x41\x53\x59\x90")
+        elif settings.combat_difficulty == Difficulty.NORMAL:
+            patch.write(b"\x90\x90\x90\x90\x4E\x4F\x52\x4D\x41\x4C\x90")
+        elif settings.combat_difficulty == Difficulty.HARD:
+            patch.write(b"\x90\x90\x90\x90\x90\x90\x48\x41\x52\x44\x90")
+        elif settings.combat_difficulty == Difficulty.EXTREME:
+            patch.write(b"\x90\x90\x90\x45\x58\x54\x52\x45\x4D\x45\x90")
         else:
             patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
@@ -271,7 +272,7 @@ class Randomizer:
         f_mapdata_orig.close
 
         # Insert tutorial map in Easy mode
-        if mode == 0:
+        if logic_difficulty == 0:
             f_mapdata.seek(0)
             addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
             f_mapdata.seek(addr)
@@ -418,7 +419,7 @@ class Randomizer:
         patch.write(qt_encode("Here are some resources that might help you:|"))
         patch.write(qt_encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
         patch.write(qt_encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-        if mode == 0:
+        if logic_difficulty == 0:
             patch.write(qt_encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
         else:
             patch.write(qt_encode("- In-Game Tracker       (Easy mode only)|"))
@@ -475,16 +476,16 @@ class Randomizer:
 
         # Update herb HP fill based on difficulty
         patch.seek(int("3889f", 16) + rom_offset)
-        if mode == 0:  # Easy mode = full HP
+        if combat_difficulty == 0:  # Easy mode = full HP
             patch.write(b"\x28")
-        elif mode == 2:  # Hard mode = fill 4 HP
+        elif combat_difficulty == 2:  # Hard mode = fill 4 HP
             patch.write(b"\x04")
-        elif mode == 3:  # Extreme mode = fill 2 HP
+        elif combat_difficulty == 3:  # Extreme mode = fill 2 HP
             patch.write(b"\x02")
 
         # Update HP jewel HP fill based on difficulty
         patch.seek(int("39f7a", 16) + rom_offset)
-        if mode == 0:  # Easy mode = full HP
+        if combat_difficulty == 0:  # Easy mode = full HP
             patch.write(b"\x28")
 
         # Change item functionality for game variants
@@ -639,7 +640,7 @@ class Randomizer:
         # patch.write(qt_encode("Max stats baby!",True))
 
         # Turns house in South Cape into item-tracking overworld map (Easy only)
-        if mode == 0:
+        if logic_difficulty == 0:
             patch.seek(int("18480", 16) + rom_offset)
             patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
             patch.seek(int("1854e", 16) + rom_offset)
@@ -777,7 +778,7 @@ class Randomizer:
 
         # Adjust timer by mode
         timer = 20
-        if mode == 0:
+        if combat_difficulty == 0:
             timer += 5
         if settings.enemizer.value != Enemizer.NONE.value:
             timer += 5
@@ -1827,16 +1828,16 @@ class Randomizer:
         #                        Balance Enemy Stats
         ##########################################################################
         # Determine enemy stats, by difficulty
-        if mode == 0:
+        if combat_difficulty == 0:
             f_enemies = open(BIN_PATH + "01abf0_enemieseasy.bin", "rb")
-        elif mode == 1:
+        elif combat_difficulty == 1:
             f_enemies = open(BIN_PATH + "01abf0_enemiesnormal.bin", "rb")
-        elif mode == 2:
+        elif combat_difficulty == 2:
             f_enemies = open(BIN_PATH + "01abf0_enemieshard.bin", "rb")
-        elif mode == 3:
+        elif combat_difficulty == 3:
             f_enemies = open(BIN_PATH + "01abf0_enemiesextreme.bin", "rb")
 
-        if mode < 4:
+        if combat_difficulty < 4:
             patch.seek(int("1abf0", 16) + rom_offset)
             patch.write(f_enemies.read())
             f_enemies.close
@@ -1994,8 +1995,8 @@ class Randomizer:
         # Randomize snake game duration/goal
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By difficulty (mode)
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
-        snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
-        snake_target = int(snake_timer * snakes_per_sec[mode] * snake_adj)
+        snake_timer = 5 * random.randint(2, 12)             # Timer between 10 and 60 sec (inc 5)
+        snake_target = int(snake_timer * snakes_per_sec[combat_difficulty] * snake_adj)
 
         snake_frames_str = format((60 * snake_timer) % 256, "02x") + format(int((60 * snake_timer) / 256), "02x")
         snake_target_str = format(int(snake_target / 10), "x") + format(snake_target % 10, "x")
@@ -2025,13 +2026,13 @@ class Randomizer:
         gem.append(random.randint(36, 50))
 
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-            if mode == 0:
+            if logic_difficulty == 0:
                 gem[6] = GEMS_EASY
-            elif mode == 1:
+            elif logic_difficulty == 1:
                 gem[6] = GEMS_NORMAL
-            elif mode == 2:
+            elif logic_difficulty == 2:
                 gem[6] = GEMS_HARD
-            elif mode == 3:
+            elif logic_difficulty == 3:
                 gem[6] = GEMS_EXTREME
 
         gem_str = []
@@ -2245,7 +2246,7 @@ class Randomizer:
         boss_order = [1,2,3,4,5,6,7]
         if settings.boss_shuffle:
             # Determine statue order for shuffle
-            if mode == 3:
+            if logic_difficulty == 3:
                 random.shuffle(boss_order)
             else:
                 boss_order.remove(5)
@@ -2281,7 +2282,7 @@ class Randomizer:
                 i += 1
 
             # Patch music headers into new dungeons (easy and normal modes)
-            if mode <= 1:
+            if logic_difficulty <= 1:
                 i = 0
                 while i < 5:
                     boss = boss_order[i]
@@ -2642,7 +2643,7 @@ class Randomizer:
             b"\x2d\x43\x84\x80\xa4\x87\xac\x88\xa3\xac\xa4\x87\x84\xac\xa7\x88\xa3\x87\xac\x8e\x85\xcb\xa3\x8e\x8c\x84\x2b\xac\xa4\x87\x84\xac\xa2\x84\x8b\x88\x84\x85\xac\x8e\x85\xac\x8c\x80\x8d\xa9\x2b\xcb\x80\x8d\x83\xac\xa4\x87\x84\xac\x84\x8d\x83\xac\x8e\x85\xac\x80\x8b\x8b\x2a\x2e\xcb\xac\xac\x6d\x4B\xa5\x82\x88\xa5\xa3\xac\x40\x8d\x8d\x80\x84\xa5\xa3\xac\x63\x84\x8d\x84\x82\x80\xc0")
         death_list.append(
             b"\x2d\x43\x84\x80\xa4\x87\xac\xa7\x88\x8b\x8b\xac\x81\x84\xac\x80\xac\x86\xa2\x84\x80\xa4\xcb\xa2\x84\x8b\x88\x84\x85\x2a\xac\x4D\x8e\xac\x8c\x8e\xa2\x84\xcb\x88\x8d\xa4\x84\xa2\xa6\x88\x84\xa7\xa3\x2a\x2e\xcb\xac\xac\x6d\x4A\x80\xa4\x87\x80\xa2\x88\x8d\x84\xac\x47\x84\xa0\x81\xa5\xa2\x8d\xc0\xc0")
-        if mode == 3:
+        if combat_difficulty == 3:
             death_list.append(b"\x2d\x46\x88\xa4\xac\x86\xa5\x83\xac\xa3\x82\xa2\xa5\x81\x2a\x2e\xcb\xac\xac\x6d\x41\x80\x86\xa5\xc0")
 
         # Will death text

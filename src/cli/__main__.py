@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser(description="Generate a randomly seeded ROM")
 parser.add_argument('-p', '--path', dest="path", type=str, required=True)
 parser.add_argument('-s', '--seed', dest="seed", type=int, required=False, default=random.randint(0, 999999999))
 parser.add_argument('-d', '--difficulty', dest="difficulty", type=Difficulty, required=False, default=Difficulty.NORMAL)
+parser.add_argument('-c', '--combat_difficulty', dest="combat_difficulty", type=Difficulty, required=False, default=Difficulty.NORMAL)
 parser.add_argument('-g', '--goal', dest="goal", type=Goal, required=False, default=Goal.DARK_GAIA)
 parser.add_argument('-l', '--logic', dest="logic", type=Logic, required=False, default=Logic.COMPLETABLE)
 parser.add_argument('-e', '--enemizer', dest="enemizer", type=Enemizer, required=False, default=Enemizer.NONE)
@@ -40,8 +41,23 @@ parser.set_defaults(red_jewel_madness=False)
 def main(argv):
     args = parser.parse_args(argv)
 
-    settings = RandomizerData(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.enemizer, args.start, args.firebird, args.ohko, args.red_jewel_madness,
-                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.overworld_shuffle, args.dungeon_shuffle, args.race_mode)
+    settings = RandomizerData(seed=args.seed,
+                              difficulty=args.difficulty,
+                              combat_difficulty=args.combat_difficulty,
+                              goal=args.goal,
+                              logic=args.logic,
+                              statues=args.statues,
+                              enemizer=args.enemizer,
+                              start_location=args.start,
+                              firebird=args.firebird,
+                              ohko=args.ohko,
+                              red_jewel_madness=args.red_jewel_madness,
+                              allow_glitches=args.allow_glitches,
+                              boss_shuffle=args.boss_shuffle,
+                              open_mode=args.open_mode,
+                              overworld_shuffle=args.overworld_shuffle,
+                              dungeon_shuffle=args.dungeon_shuffle,
+                              race_mode=args.race_mode)
 
     rom_filename = generate_filename(settings, "sfc")
     spoiler_filename = generate_filename(settings, "json")

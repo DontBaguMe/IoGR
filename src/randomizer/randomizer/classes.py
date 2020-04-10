@@ -380,8 +380,8 @@ class World:
                     elif self.item_pool[item][1] == 2:
                         probability *= float(self.item_pool[item][0]) / float((sum_abilities - j))
                         j += 1
-                    if item in self.required_items and not self.race_mode:
-                        probability *= PROGRESS_ADJ[self.mode]
+                    if item in self.required_items:
+                        probability *= PROGRESS_ADJ[self.logic_difficulty]
             probabilities.append([probability, current_prereq])
             sum_prob += probability
             sum_edges += 1
@@ -421,7 +421,7 @@ class World:
         for area in maps:
             random.shuffle(area)
 
-        boss_rewards = 4 - self.mode
+        boss_rewards = 4 - self.combat_difficulty
 
         rewards = []
         # Add in rewards, where applicable, by difficulty
@@ -512,7 +512,7 @@ class World:
             self.item_pool[38][4] = True
 
         # Solid Arm can only be required in Extreme non race
-        if self.mode != 3 or self.race_mode:
+        if self.logic_difficulty != 3:
             self.graph[82][1].remove(67)
 
         # Random start location
@@ -555,23 +555,23 @@ class World:
             self.item_pool[25][0] = 0  # Teapot
             self.item_pool[37][0] = 0  # Lola's Letter
 
-            # Add in alternate items, by difficulty
-            if self.mode == 3 or self.race_mode:
+            # Add in alternate items, by logic difficulty
+            if self.logic_difficulty == 3:
                 self.item_pool[0][0]  += 5  # Nothing
                 self.item_pool[6][0]  += 0  # Herb
                 self.item_pool[42][0] += 0  # DEF Jewel
                 self.item_pool[43][0] += 0  # STR Jewel
-            elif self.mode == 0:
+            elif self.logic_difficulty == 0:
                 self.item_pool[0][0]  += 0  # Nothing
                 self.item_pool[6][0]  += 1  # Herb
                 self.item_pool[42][0] += 2  # DEF Jewel
                 self.item_pool[43][0] += 2  # STR Jewel
-            elif self.mode == 1:
+            elif self.logic_difficulty == 1:
                 self.item_pool[0][0]  += 1  # Nothing
                 self.item_pool[6][0]  += 2  # Herb
                 self.item_pool[42][0] += 1  # DEF Jewel
                 self.item_pool[43][0] += 1  # STR Jewel
-            elif self.mode == 2:
+            elif self.logic_difficulty == 2:
                 self.item_pool[0][0]  += 2  # Nothing
                 self.item_pool[6][0]  += 1  # Herb
                 self.item_pool[42][0] += 1  # DEF Jewel
@@ -759,11 +759,11 @@ class World:
         non_prog_items += self.list_item_pool(0, [], 3)
 
         # For Easy mode
-        if self.logic_mode == "Chaos" or self.mode > 2 or self.race_mode:
+        if self.logic_mode == "Chaos" or self.logic_difficulty > 2:
             non_prog_items += self.list_item_pool(2)
-        elif self.mode == 0:
+        elif self.logic_difficulty == 0:
             non_prog_items += self.list_item_pool(0, [52], 0)
-        elif self.mode == 1:
+        elif self.logic_difficulty == 1:
             non_prog_items += self.list_item_pool(0, [49, 50, 52, 53], 0)
 
         random.shuffle(non_prog_items)
@@ -883,7 +883,7 @@ class World:
                     spoiler_str = b"\xd3" + self.location_text[location] + b"\xac\x87\x80\xa3\xcb"
                     spoiler_str += self.item_text_short[item] + b"\xc0"
                     # No in-game spoilers in Extreme mode
-                    if self.mode == 3:
+                    if self.logic_difficulty == 3:
                         spoiler_str = b"\xd3\x8d\x88\x82\x84\xac\xa4\xa2\xa9\xac\x83\x8e\x83\x8e\x8d\x86\x8e\x4f\xc0"
                     self.spoilers.append(spoiler_str)
                     # print item, location
@@ -900,80 +900,99 @@ class World:
             kara_txt = "Mt. Kress"
         elif self.kara == 5:
             kara_txt = "Ankor Wat"
+        else:
+            kara_txt = "Unknown"
 
-        if self.mode == 0:
+        if self.logic_difficulty == 0:
             mode_txt = "Easy"
-        elif self.mode == 1:
+        elif self.logic_difficulty == 1:
             mode_txt = "Normal"
-        elif self.mode == 2:
+        elif self.logic_difficulty == 2:
             mode_txt = "Hard"
-        elif self.mode == 3:
+        elif self.logic_difficulty == 3:
             mode_txt = "Extreme"
+        else:
+            mode_txt = "Unknown"
+
+        if self.combat_difficulty == 0:
+            combat_txt = "Easy"
+        if self.combat_difficulty == 1:
+            combat_txt = "Normal"
+        elif self.combat_difficulty == 2:
+            combat_txt = "Hard"
+        elif self.combat_difficulty == 3:
+            combat_txt = "Extreme"
+        else:
+            combat_txt = "Unknown"
 
         spoiler = dict()
         spoiler["version"] = version
         spoiler["seed"] = str(self.seed)
         spoiler["date"] = str(datetime.utcfromtimestamp(time.time()))
         spoiler["goal"] = str(self.goal)
-        spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
         spoiler["logic"] = str(self.logic_mode)
-        spoiler["difficulty"] = str(mode_txt)
-        spoiler["statues_required"] = self.statues
-        spoiler["boss_order"] = self.boss_order
-        spoiler["kara_location"] = kara_txt
-        spoiler["jeweler_amounts"] = self.gem
-        spoiler["inca_tiles"] = self.incatile
-        spoiler["hieroglyph_order"] = self.hieroglyphs
+        spoiler["logic_difficulty"] = str(mode_txt)
+        spoiler["combat_difficulty"] = str(combat_txt)
+        if self.race_mode:
+            spoiler["race_mode"] = "True"
+        else:
+            spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
+            spoiler["statues_required"] = self.statues
+            spoiler["boss_order"] = self.boss_order
+            spoiler["kara_location"] = kara_txt
+            spoiler["jeweler_amounts"] = self.gem
+            spoiler["inca_tiles"] = self.incatile
+            spoiler["hieroglyph_order"] = self.hieroglyphs
 
-        items = []
-        for x in self.item_locations:
-            item = self.item_locations[x][3]
-            location_name = self.item_locations[x][9].strip()
-            item_name = self.item_pool[item][3]
-            items.append({"location": location_name, "name": item_name})
+            items = []
+            for x in self.item_locations:
+                item = self.item_locations[x][3]
+                location_name = self.item_locations[x][9].strip()
+                item_name = self.item_pool[item][3]
+                items.append({"location": location_name, "name": item_name})
 
-        spoiler["items"] = items
+            spoiler["items"] = items
 
-        stat_upgrades = []
-        upgrade_name = {
-            1: "HP",
-            2: "ATK",
-            3: "DEF"
-        }
-        regions = {
-            "Underground Tunnel": [12, 13, 14, 15, 18],
-            "Inca Ruins": [27, 29, 32, 33, 34, 35, 37, 38, 39, 40],
-            "Diamond Mine": [61, 62, 63, 64, 65, 69, 70],
-            "Sky Garden": [77, 78, 79, 80, 81, 82, 83, 84],
-            "Mu": [92, 95, 96, 97, 98, 100, 101],
-            "Angel Dungeon": [109, 110, 111, 112, 113, 114],
-            "Great Wall": [130, 131, 133, 134, 135, 136],
-            "Mt Temple": [160, 161, 162, 163, 164, 165, 166, 167, 168],
-            "Ankor Wat": [176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190],
-            "Pyramid": [204, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 219],
-            "Jeweler's Mansion": [233]
-        }
-        region_upgrades = dict()
+            stat_upgrades = []
+            upgrade_name = {
+                1: "HP",
+                2: "ATK",
+                3: "DEF"
+            }
+            regions = {
+                "Underground Tunnel": [12, 13, 14, 15, 18],
+                "Inca Ruins": [27, 29, 32, 33, 34, 35, 37, 38, 39, 40],
+                "Diamond Mine": [61, 62, 63, 64, 65, 69, 70],
+                "Sky Garden": [77, 78, 79, 80, 81, 82, 83, 84],
+                "Mu": [92, 95, 96, 97, 98, 100, 101],
+                "Angel Dungeon": [109, 110, 111, 112, 113, 114],
+                "Great Wall": [130, 131, 133, 134, 135, 136],
+                "Mt Temple": [160, 161, 162, 163, 164, 165, 166, 167, 168],
+                "Ankor Wat": [176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190],
+                "Pyramid": [204, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 219],
+                "Jeweler's Mansion": [233]
+            }
+            region_upgrades = dict()
 
-        def get_map_region(map_index):
-            for region, maps in regions.items():
-                if map_index in maps:
-                    return region
-            return "Unknown"
+            def get_map_region(map_index):
+                for region, maps in regions.items():
+                    if map_index in maps:
+                        return region
+                return "Unknown"
 
-        for map in self.maps:
-            local_upgrade = self.maps[map][2]
-            local_region = get_map_region(map)
-            if local_upgrade:
-                if local_region not in region_upgrades:
-                    region_upgrades[local_region] = [upgrade_name[local_upgrade]]
-                else:
-                    region_upgrades[local_region].append(upgrade_name[local_upgrade])
+            for map in self.maps:
+                local_upgrade = self.maps[map][2]
+                local_region = get_map_region(map)
+                if local_upgrade:
+                    if local_region not in region_upgrades:
+                        region_upgrades[local_region] = [upgrade_name[local_upgrade]]
+                    else:
+                        region_upgrades[local_region].append(upgrade_name[local_upgrade])
 
-        for region, upgrades in region_upgrades.items():
-            stat_upgrades.append({"region": region, "stats": upgrades})
+            for region, upgrades in region_upgrades.items():
+                stat_upgrades.append({"region": region, "stats": upgrades})
 
-        spoiler["stat_upgrades"] = stat_upgrades
+            spoiler["stat_upgrades"] = stat_upgrades
         self.spoiler = spoiler
 
     def print_enemy_locations(self, filepath, offset=0):
@@ -1481,7 +1500,8 @@ class World:
 
         self.firebird = settings.firebird
         self.start_loc = 10
-        self.mode = settings.difficulty.value
+        self.logic_difficulty = settings.difficulty.value
+        self.combat_difficulty = settings.combat_difficulty.value
         self.kara = kara
         self.gem = gem
         self.incatile = incatile

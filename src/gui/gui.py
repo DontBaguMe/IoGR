@@ -29,17 +29,18 @@ def generate_seed():
 def generate_ROM():
     rompath = ROM.get()
     seed_str = seed.get()
+    difficulty_map = dict(Easy=Difficulty.EASY,
+                          Normal=Difficulty.NORMAL,
+                          Hard=Difficulty.HARD,
+                          Extreme=Difficulty.EXTREME)
 
     def get_difficulty():
         d = difficulty.get()
-        if d == "Easy":
-            return Difficulty.EASY
-        if d == "Normal":
-            return Difficulty.NORMAL
-        if d == "Hard":
-            return Difficulty.HARD
-        if d == "Extreme":
-            return Difficulty.EXTREME
+        return difficulty_map.get(d)
+
+    def get_combat_difficulty():
+        d = combat_difficulty.get()
+        return difficulty_map.get(d)
 
     def get_goal():
         g = goal.get()
@@ -91,8 +92,21 @@ def generate_ROM():
 
     try:
         seed_int = int(seed_str)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), race_mode=race_mode.get())
+        settings = RandomizerData(seed=seed_int,
+                                  difficulty=get_difficulty(),
+                                  combat_difficulty=get_combat_difficulty(),
+                                  goal=get_goal(),
+                                  logic=get_logic(),
+                                  statues=statues.get(),
+                                  enemizer=get_enemizer(),
+                                  start_location=get_start_location(),
+                                  firebird=firebird.get(),
+                                  ohko=ohko.get(),
+                                  red_jewel_madness=red_jewel_madness.get(),
+                                  allow_glitches=glitches.get(),
+                                  boss_shuffle=boss_shuffle.get(),
+                                  open_mode=open_mode.get(),
+                                  race_mode=race_mode.get())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -214,22 +228,26 @@ mainframe.pack(pady=20, padx=20)
 tkinter.Label(mainframe, text="ROM File").grid(row=0, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Seed").grid(row=1, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Difficulty").grid(row=2, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Goal").grid(row=3, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Logic").grid(row=4, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Early Firebird").grid(row=5, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Start Location").grid(row=6, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="One Hit KO").grid(row=7, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Red Jewel Madness").grid(row=8, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=9, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Race Mode").grid(row=14, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Combat Difficulty").grid(row=3, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Goal").grid(row=4, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Logic").grid(row=5, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Early Firebird").grid(row=6, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Start Location").grid(row=7, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="One Hit KO").grid(row=8, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Red Jewel Madness").grid(row=9, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=10, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Statues").grid(row=11, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Allow Glitches").grid(row=12, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Boss Shuffle").grid(row=13, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Open Mode").grid(row=14, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Race Mode").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
 difficulty.set("Normal")
+
+combat_difficulty = tkinter.StringVar(root)
+combat_difficulty.set("Normal")
 
 goal = tkinter.StringVar(root)
 goal_choices = ["Dark Gaia", "Apocalypse Gaia", "Random Gaia", "Red Jewel Hunt"]
@@ -280,29 +298,30 @@ seed.grid(row=1, column=1)
 seed.insert(10, random.randint(0, 999999))
 
 diff_menu = tkinter.OptionMenu(mainframe, difficulty, *diff_choices).grid(row=2, column=1)
-goal_menu = tkinter.OptionMenu(mainframe, goal, *goal_choices).grid(row=3, column=1)
-logic_menu = tkinter.OptionMenu(mainframe, logic, *logic_choices).grid(row=4, column=1)
-firebird_checkbox = tkinter.Checkbutton(mainframe, variable=firebird, onvalue=1, offvalue=0).grid(row=5, column=1)
-start_menu = tkinter.OptionMenu(mainframe, start, *start_choices).grid(row=6, column=1)
-ohko_checkbox = tkinter.Checkbutton(mainframe, variable=ohko, onvalue=1, offvalue=0).grid(row=7, column=1)
-rjm_checkbox = tkinter.Checkbutton(mainframe, variable=red_jewel_madness, onvalue=1, offvalue=0).grid(row=8, column=1)
-enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(row=9, column=1)
-statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=10, column=1)
-glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=11, column=1)
-boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=12, column=1)
-open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
-race_mode_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
+combat_diff_menu = tkinter.OptionMenu(mainframe, combat_difficulty, *diff_choices).grid(row=3, column=1)
+goal_menu = tkinter.OptionMenu(mainframe, goal, *goal_choices).grid(row=4, column=1)
+logic_menu = tkinter.OptionMenu(mainframe, logic, *logic_choices).grid(row=5, column=1)
+firebird_checkbox = tkinter.Checkbutton(mainframe, variable=firebird, onvalue=1, offvalue=0).grid(row=6, column=1)
+start_menu = tkinter.OptionMenu(mainframe, start, *start_choices).grid(row=7, column=1)
+ohko_checkbox = tkinter.Checkbutton(mainframe, variable=ohko, onvalue=1, offvalue=0).grid(row=8, column=1)
+rjm_checkbox = tkinter.Checkbutton(mainframe, variable=red_jewel_madness, onvalue=1, offvalue=0).grid(row=9, column=1)
+enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(row=10, column=1)
+statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=11, column=1)
+glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=12, column=1)
+boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=13, column=1)
+open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
+race_mode_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode, onvalue=1, offvalue=0).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(mainframe, text='Generate Seed', command=generate_seed).grid(row=1, column=2)
 tkinter.Button(mainframe, text='Generate ROM', command=generate_ROM).grid(row=10, column=2)
 
 tkinter.Button(mainframe, text='?', command=diff_help).grid(row=2, column=2)
-tkinter.Button(mainframe, text='?', command=goal_help).grid(row=3, column=2)
-tkinter.Button(mainframe, text='?', command=logic_help).grid(row=4, column=2)
-tkinter.Button(mainframe, text='?', command=firebird_help).grid(row=5, column=2)
-tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
-tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
+tkinter.Button(mainframe, text='?', command=goal_help).grid(row=4, column=2)
+tkinter.Button(mainframe, text='?', command=logic_help).grid(row=5, column=2)
+tkinter.Button(mainframe, text='?', command=firebird_help).grid(row=6, column=2)
+tkinter.Button(mainframe, text='?', command=start_help).grid(row=7, column=2)
+tkinter.Button(mainframe, text='?', command=variant_help).grid(row=8, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
 
 root.mainloop()
