@@ -405,43 +405,34 @@ class World:
         maps.pop(0)
         return maps
 
-    # Randomize map-clearing rewards
+    # Set number of room clear rewards
     def map_rewards(self):
-        maps = self.get_maps()
-        # print maps
-
-        for area in maps:
-            random.shuffle(area)
-
-        boss_rewards = 4 - self.mode
-
-        rewards = []  # Total rewards by mode (HP/STR/DEF)
+        num_room_reward_slots = 24
+        self.item_pool[0][0] = 2 + num_room_reward_slots  # i.e. 2 "nothings" + some possibly-empty room clears
+        room_clear_locations = {idx : dat for idx,dat in self.item_locations.items() if idx > 0xff}
+        reduced_item_locations = {idx : dat for idx,dat in self.item_locations.items() if idx <= 0xff}
+        reduced_item_locations.append(random.sample(room_clear_locations,num_room_reward_slots))
+        self.item_locations = reduced_item_locations
         if self.mode == 0:  # Easy: 10/7/7
-            rewards += [1] * 10
-            rewards += [2] * 7
-            rewards += [3] * 7
+            self.item_pool[0x80][0] = 10
+            self.item_pool[0x81][0] = 7
+            self.item_pool[0x82][0] = 7
+            self.item_pool[0][0] -= 24
         elif self.mode == 1:  # Normal: 10/4/4
-            rewards += [1] * 10
-            rewards += [2] * 4
-            rewards += [3] * 4
+            self.item_pool[0x80][0] = 10
+            self.item_pool[0x81][0] = 4
+            self.item_pool[0x82][0] = 4
+            self.item_pool[0][0] -= 18
         elif self.mode == 2:  # Hard: 8/2/2
-            rewards += [1] * 8
-            rewards += [2] * 2
-            rewards += [3] * 2
+            self.item_pool[0x80][0] = 8
+            self.item_pool[0x81][0] = 2
+            self.item_pool[0x82][0] = 2
+            self.item_pool[0][0] -= 12
         elif self.mode == 3:  # Extreme: 6/0/0
-            rewards += [1] * 6
-
-        random.shuffle(rewards)
-
-        # Add in rewards, where applicable, by difficulty
-        for area in maps:
-            i = 0
-            while i < boss_rewards:
-                map = area[i]
-                reward = rewards.pop(0)
-                if "OHKO" not in self.variant or reward > 1:  # No HP rewards for OHKO
-                    self.maps[map][2] = reward
-                i += 1
+            self.item_pool[0x80][0] = 6
+            self.item_pool[0x81][0] = 0
+            self.item_pool[0x82][0] = 0
+            self.item_pool[0][0] -= 6
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
@@ -731,11 +722,9 @@ class World:
 
         random.seed(self.seed + seed_adj)
 
-        # Assign map rewards
-        self.map_rewards()
-
-        # Initialize and shuffle location list
+        # Initialize and shuffle locations and map reward slots
         item_locations = self.list_item_locations()
+        map_rewards(self)
         random.shuffle(item_locations)
 
         # Fill the Mustic Statues
@@ -969,19 +958,7 @@ class World:
 
     # Modifies game ROM to reflect the current state of the World
     def write_to_rom(self, f, rom_offset=0):
-        # Room-clearing rewards
-        for map in self.maps:
-            reward = self.maps[map][2]
-            if reward > 0:
-                f.seek(int("1aade", 16) + map + rom_offset)
-                if reward == 1:
-                    f.write(b"\x01")
-                elif reward == 2:
-                    f.write(b"\x02")
-                elif reward == 3:
-                    f.write(b"\x03")
-
-        # Items and abilities
+        # Items, abilities, room-clearing rewards
         for x in self.item_locations:
             type = self.item_locations[x][1]
 
@@ -1445,7 +1422,7 @@ class World:
         #                  ROM Code, Name, TakesInventorySpace,
         #                  ProgressionType (1=unlocks new locations,2=quest item,3=no progression)] }
         self.item_pool = {
-            0: [2, 1, b"\x00", "Nothing", False, 3],
+            0: [86, 1, b"\x00", "Nothing", False, 3],
             1: [45, 1, b"\x01", "Red Jewel", False, 1],
             2: [1, 1, b"\x02", "Prison Key", True, 1],
             3: [1, 1, b"\x03", "Inca Statue A", True, 1],
@@ -1505,7 +1482,10 @@ class World:
             57: [1, 3, "", "Mystic Statue 4", False, 2],
             58: [1, 3, "", "Mystic Statue 5", False, 2],
             59: [1, 3, "", "Mystic Statue 6", False, 2],
-            60: [0, 2, "", "Nothing", False, 3]
+            60: [0, 2, "", "Nothing", False, 3],
+            0x80: [0, 1, b"\x80", "HP Jewel X", False, 3],
+            0x81: [0, 1, b"\x81", "STR Jewel X", False, 3],
+            0x82: [0, 1, b"\x82", "DEF Jewel X", False, 3]
         }
 
         # Define Item/Ability/Statue locations
@@ -1533,9 +1513,14 @@ class World:
 
             13: [8, 1, False, 0, [], "4d32f", "4d4b1", "", "", "Edward's Prison: Hamlet             "],  # text 4d5f4?
             14: [8, 2, False, 0, [51, 52, 53], "c8637", "", "", b"\x0b", "Edward's Prison: Dark Space         "],
-
+            
+            0x10c: [9, 1, False, 0, [], "1aaea", "", "", "", "Underground Tunnel: $0c (Intro hall)"],
+            0x10d: [9, 1, False, 0, [], "1aaeb", "", "", "", "Underground Tunnel: $0d (Room 1)"],
+            0x10e: [9, 1, False, 0, [], "1aaec", "", "", "", "Underground Tunnel: $0e (Room 2)"],
+            0x10f: [9, 1, False, 0, [], "1aaed", "", "", "", "Underground Tunnel: $0f (Spear room)"],
             15: [9, 1, False, 0, [2], "1AFA9", "", "", "", "Underground Tunnel: Spike's Chest   "],
             16: [9, 1, False, 0, [2], "1AFAE", "", "", "", "Underground Tunnel: Small Room Chest"],
+            0x112: [10, 1, False, 0, [], "1aaf0", "", "", "", "Underground Tunnel: $12 (Final combat room)"],
             17: [10, 1, False, 0, [2], "1AFB3", "", "", "", "Underground Tunnel: Ribber's Chest  "],
             18: [10, 1, False, 0, [], "F61D", "F62D", "F643", "", "Underground Tunnel: Barrels         "],
             19: [10, 2, True, 0, [], "c8aa2", "Unsafe", b"\xA0\x00\xD0\x04\x83\x00\x74", b"\x12",
@@ -1549,6 +1534,8 @@ class World:
             23: [73, 1, False, 0, [], "4fae1", "4faf9", "4fb16", "", "Moon Tribe: Cave                    "],
 
             24: [15, 1, False, 0, [], "1AFB8", "", "", "", "Inca Ruins: Diamond-Block Chest     "],
+            0x125: [15, 1, False, 0, [], "1ab03", "", "", "", "Inca Ruins: $25 (Diamond Block room)"],
+            0x127: [15, 1, False, 0, [], "1ab05", "", "", "", "Inca Ruins: $27 (West of DB room)"],
             25: [16, 1, False, 0, [7], "1AFC2", "", "", "", "Inca Ruins: Broken Statues Chest    "],
             26: [16, 1, False, 0, [7], "1AFBD", "", "", "", "Inca Ruins: Stone Lord Chest        "],
             27: [16, 1, False, 0, [7], "1AFC6", "", "", "", "Inca Ruins: Slugger Chest           "],
@@ -1557,6 +1544,13 @@ class World:
                  "Inca Ruins: Dark Space 1            "],  # Always open
             30: [16, 2, False, 0, [], "c923b", "Unsafe", b"\xC0\x01\x50\x01\x83\x00\x32", b"\x26",
                  "Inca Ruins: Dark Space 2            "],
+            0x11d: [16, 1, False, 0, [], "1aafb", "", "", "", "Inca Ruins: $1d (Exterior)"],
+            0x120: [16, 1, False, 0, [], "1aafe", "", "", "", "Inca Ruins: $20 (Small slug room)"],
+            0x121: [16, 1, False, 0, [], "1aaff", "", "", "", "Inca Ruins: $21 (N/S ramp room)"],
+            0x122: [16, 1, False, 0, [], "1ab00", "", "", "", "Inca Ruins: $22 (Before golden tile room)"],
+            0x123: [16, 1, False, 0, [], "1ab01", "", "", "", "Inca Ruins: $23 (E/W ramp room)"],
+            0x126: [16, 1, False, 0, [], "1ab04", "", "", "", "Inca Ruins: $26 (Divided room)"],
+            0x128: [16, 1, False, 0, [], "1ab06", "", "", "", "Inca Ruins: $28 (Hall before Wind Melody)"],
             31: [17, 2, False, 0, [], "c8db8", "", "", b"\x1e", "Inca Ruins: Final Dark Space        "],
 
             32: [19, 1, False, 0, [3, 4, 7, 8], "5965e", "5966e", "", "", "Gold Ship: Seth                     "],
@@ -1572,9 +1566,16 @@ class World:
                  "Freejia: Dark Space                 "],
 
             40: [22, 1, False, 0, [], "1AFD0", "", "", "", "Diamond Mine: Chest                 "],
+            0x13e: [22, 1, False, 0, [], "1ab1c", "", "", "", "Diamond Mine: $3e (Entrance)"],
+            0x13f: [22, 1, False, 0, [], "1ab1d", "", "", "", "Diamond Mine: $3f (Room after entrance)"],
+            0x140: [22, 1, False, 0, [], "1ab1e", "", "", "", "Diamond Mine: $40 (Spiral cave-in room)"],
+            0x13d: [22, 1, False, 0, [], "1ab1b", "", "", "", "Diamond Mine: $3d (Tunnel to hidden DS)"],
             41: [23, 1, False, 0, [], "5d7e4", "5d819", "5d830", "", "Diamond Mine: Trapped Laborer       "],
             42: [24, 1, False, 0, [], "aa777", "aa85c", "", "", "Diamond Mine: Laborer w/Elevator Key"],  # text1 was aa811
+            0x141: [24, 1, False, 0, [], "1ab1f", "", "", "", "Diamond Mine: $41 (Friar required room)"],
             43: [25, 1, False, 0, [15], "5d4d2", "5d4eb", "5d506", "", "Diamond Mine: Morgue                "],
+            0x145: [25, 1, False, 0, [], "1ab23", "", "", "", "Diamond Mine: $45 (Morgue)"],
+            0x146: [25, 1, False, 0, [], "1ab24", "", "", "", "Diamond Mine: $46 (Other Mine Key room)"],
             44: [25, 1, False, 0, [15], "aa757", "aa7ef", "", "", "Diamond Mine: Laborer w/Mine Key    "],  # text1 was aa7b4
             45: [26, 1, False, 0, [11, 12, 15], "5d2b0", "5d2da", "", "", "Diamond Mine: Sam                   "],
             46: [22, 2, False, 0, [], "c9a87", "Unsafe", b"\xb0\x01\x70\x01\x83\x00\x32", b"\x40",
@@ -1586,11 +1587,19 @@ class World:
             49: [29, 1, False, 0, [], "1AFDD", "", "", "", "Sky Garden: (NE) Platform Chest     "],
             50: [29, 1, False, 0, [], "1AFD9", "", "", "", "Sky Garden: (NE) Blue Cyber Chest   "],
             51: [29, 1, False, 0, [], "1AFD5", "", "", "", "Sky Garden: (NE) Statue Chest       "],
+            0x14d: [29, 1, False, 0, [], "1ab2b", "", "", "", "Sky Garden: $4d (NE Top)"],
+            0x14e: [29, 1, False, 0, [], "1ab2c", "", "", "", "Sky Garden: $4e (NE Bot)"],
             52: [30, 1, False, 0, [], "1AFE2", "", "", "", "Sky Garden: (SE) Dark Side Chest    "],
+            0x14f: [30, 1, False, 0, [], "1ab2d", "", "", "", "Sky Garden: $4f (SE Top)"],
+            0x150: [30, 1, False, 0, [], "1ab2e", "", "", "", "Sky Garden: $50 (SE Bot)"],
             53: [31, 1, False, 0, [], "1AFE7", "", "", "", "Sky Garden: (SW) Ramp Chest         "],
             54: [29, 1, False, 0, [], "1AFEC", "", "", "", "Sky Garden: (SW) Dark Side Chest    "],
+            0x151: [31, 1, False, 0, [], "1ab2f", "", "", "", "Sky Garden: $51 (SW Top)"],
+            0x152: [31, 1, False, 0, [], "1ab30", "", "", "", "Sky Garden: $52 (SW Bot)"],
             55: [72, 1, False, 0, [], "1AFF1", "", "", "", "Sky Garden: (NW) Top Chest          "],
             56: [72, 1, False, 0, [], "1AFF5", "", "", "", "Sky Garden: (NW) Bottom Chest       "],
+            0x153: [72, 1, False, 0, [], "1ab31", "", "", "", "Sky Garden: $53 (NW Top)"],
+            0x154: [72, 1, False, 0, [], "1ab32", "", "", "", "Sky Garden: $54 (NW Bot)"],
             57: [29, 2, False, 0, [51, 52, 53], "c9d63", "Unsafe", b"\x90\x00\x70\x00\x83\x00\x22", b"\x4c",
                  "Sky Garden: Dark Space (Foyer)      "],
             58: [29, 2, False, 0, [], "ca505", "Unsafe", b"\x70\x00\xa0\x00\x83\x00\x11", b"\x56",
@@ -1614,12 +1623,24 @@ class World:
             71: [40, 1, False, 0, [18], "1B00D", "", "", "", "Mu: Chest s/o Hope Room 2           "],
             72: [40, 1, False, 0, [18], "1B009", "", "", "", "Mu: Rama Chest N                    "],
             73: [40, 1, False, 0, [18], "1B016", "", "", "", "Mu: Rama Chest E                    "],
+            0x15f: [40, 1, False, 0, [], "1ab3d", "", "", "", "Mu: $5f (NW)"],
+            0x160: [40, 1, False, 0, [], "1ab3e", "", "", "", "Mu: $60 (NE)"],
+            0x161: [40, 1, False, 0, [], "1ab3f", "", "", "", "Mu: $61 (E)"],
+            0x162: [40, 1, False, 0, [], "1ab40", "", "", "", "Mu: $62 (W)"],
+            0x164: [40, 1, False, 0, [], "1ab41", "", "", "", "Mu: $64 (SW)"],
+            0x165: [40, 1, False, 0, [], "1ab42", "", "", "", "Mu: $65 (SE)"],
             74: [38, 2, True, 0, [], "ca92d", "", "", b"\x60", "Mu: Open Dark Space                 "],  # Always open
             75: [71, 2, False, 0, [], "caa99", "", "", b"\x62", "Mu: Slider Dark Space               "],
 
             76: [42, 1, False, 0, [], "F81D", "F82D", "F843", "", "Angel Village: Dance Hall           "],
             77: [42, 2, False, 0, [51, 52, 53], "caf67", "Safe", b"\x90\x01\xb0\x00\x83\x01\x12", b"\x6c",
                  "Angel Village: Dark Space           "],
+            0x16d: [42, 1, False, 0, [], "1ab4b", "", "", "", "Angel Dungeon: $6d (Entry hall)"],
+            0x16e: [42, 1, False, 0, [], "1ab4c", "", "", "", "Angel Dungeon: $6e (Second room)"],
+            0x16f: [42, 1, False, 0, [], "1ab4d", "", "", "", "Angel Dungeon: $6f (Dark room)"],
+            0x170: [42, 1, False, 0, [], "1ab4e", "", "", "", "Angel Dungeon: $70 (Water room)"],
+            0x171: [42, 1, False, 0, [], "1ab4f", "", "", "", "Angel Dungeon: $71 (Wind tunnel)"],
+            0x172: [42, 1, False, 0, [], "1ab50", "", "", "", "Angel Dungeon: $72 (Long room)"],
 
             78: [43, 1, False, 0, [], "1B020", "", "", "", "Angel Dungeon: Slider Chest         "],
             79: [43, 1, False, 0, [], "F89D", "F8AD", "F8C3", "", "Angel Dungeon: Ishtar's Room        "],
@@ -1639,11 +1660,17 @@ class World:
             90: [45, 1, False, 0, [], "7b625", "7b631", "", "", "Great Wall: Necklace 2              "],
             91: [45, 1, False, 0, [], "1B033", "", "", "", "Great Wall: Chest 1                 "],
             92: [45, 1, False, 0, [], "1B038", "", "", "", "Great Wall: Chest 2                 "],
+            0x182: [45, 1, False, 0, [], "1ab60", "", "", "", "Great Wall: $82 (Entrance)"],
+            0x183: [45, 1, False, 0, [], "1ab61", "", "", "", "Great Wall: $83 (Room 2, long drop)"],
+            0x185: [45, 1, False, 0, [], "1ab63", "", "", "", "Great Wall: $85 (Room 3, ramps)"],
+            0x186: [45, 1, False, 0, [], "1ab64", "", "", "", "Great Wall: $86 (Room 4, Spin Dash)"],
             93: [80, 2, False, 0, [], "cbb11", "Unsafe", b"\x60\x00\xc0\x02\x83\x20\x38", b"\x85",
                  "Great Wall: Archer Dark Space       "],
             94: [80, 2, True, 0, [], "cbb80", "Unsafe", b"\x50\x01\x80\x04\x83\x00\x63", b"\x86",
                  "Great Wall: Platform Dark Space     "],  # Always open
             95: [46, 2, False, 0, [51], "cbc60", "", "", b"\x88", "Great Wall: Appearing Dark Space    "],
+            0x187: [46, 1, False, 0, [], "1ab65", "", "", "", "Great Wall: $87 (Room 5, Friar test)"],
+            0x188: [46, 1, False, 0, [], "1ab66", "", "", "", "Great Wall: $88 (Room 6, Spin Dash test)"],
 
             96: [48, 1, False, 0, [], "FA1D", "FA2D", "FA43", "", "Euro: Alley                         "],
             97: [48, 1, False, 0, [], "7c0b3", "7c0f3", "", "", "Euro: Apple Vendor                  "],
@@ -1655,28 +1682,52 @@ class World:
             103: [48, 2, False, 0, [51, 52, 53], "cc0b0", "Safe", b"\xb0\x00\xb0\x00\x83\x00\x11", b"\x99",
                   "Euro: Dark Space                    "],
 
+            0x1a0: [48, 1, False, 0, [], "1ab7e", "", "", "", "Mt. Temple: $a0 (Entrance)"],
             104: [50, 1, False, 0, [], "1B03D", "", "", "", "Mt. Temple: Red Jewel Chest         "],
             105: [50, 1, False, 0, [], "1B042", "", "", "", "Mt. Temple: Drops Chest 1           "],
+            0x1a1: [50, 1, False, 0, [], "1ab7f", "", "", "", "Mt. Temple: $a1 (Room 2)"],
+            0x1a3: [50, 1, False, 0, [], "1ab81", "", "", "", "Mt. Temple: $a3 (East from Room 3)"],
             106: [51, 1, False, 0, [], "1B047", "", "", "", "Mt. Temple: Drops Chest 2           "],
+            0x1a2: [51, 1, False, 0, [], "1ab80", "", "", "", "Mt. Temple: $a2 (Room 3)"],
             107: [52, 1, False, 0, [], "1B04C", "", "", "", "Mt. Temple: Drops Chest 3           "],
+            0x1a4: [53, 1, False, 0, [], "1ab82", "", "", "", "Mt. Temple: $a4"],
+            0x1a5: [53, 1, False, 0, [], "1ab83", "", "", "", "Mt. Temple: $a5"],
+            0x1a6: [53, 1, False, 0, [], "1ab84", "", "", "", "Mt. Temple: $a6"],
+            0x1a8: [53, 1, False, 0, [], "1ab86", "", "", "", "Mt. Temple: $a8"],
             108: [53, 1, False, 0, [26], "1B051", "", "", "", "Mt. Temple: Final Chest             "],
             109: [50, 2, False, 0, [50], "cc24f", "Unsafe", b"\xf0\x01\x10\x03\x83\x00\x44", b"\xa1",
                   "Mt. Temple: Dark Space 1            "],
             110: [50, 2, False, 0, [50], "cc419", "Unsafe", b"\xc0\x07\xc0\x00\x83\x00\x28", b"\xa3",
                   "Mt. Temple: Dark Space 2            "],
             111: [52, 2, False, 0, [50], "cc7b8", "", "", b"\xa7", "Mt. Temple: Dark Space 3            "],
+            0x1a7: [52, 1, False, 0, [], "1ab85", "", "", "", "Mt. Temple: $a7"],
 
             112: [54, 1, False, 0, [], "FB1D", "FB2D", "FB43", "", "Natives' Village: Statue Room       "],
             113: [55, 1, False, 0, [29], "893af", "8942a", "", "", "Natives' Village: Statue            "],
             114: [54, 2, False, 0, [51, 52, 53], "cca37", "Safe", b"\xc0\x01\x50\x00\x83\x00\x22", b"\xac",
                   "Natives' Village: Dark Space        "],
-
+            
+            0x1b0: [54, 1, False, 0, [], "1ab8e", "", "", "", "Angkor Wat: $b0 (Exterior)"],
             115: [56, 1, False, 0, [], "1B056", "", "", "", "Ankor Wat: Ramp Chest               "],
             116: [57, 1, False, 0, [], "1B05B", "", "", "", "Ankor Wat: Flyover Chest            "],
+            0x1b1: [57, 1, False, 0, [], "1ab8f", "", "", "", "Angkor Wat: $b1 (Passage-Outside, south)"],
+            0x1b2: [57, 1, False, 0, [], "1ab90", "", "", "", "Angkor Wat: $b2 (Passage-Outside, east)"],
+            0x1b3: [57, 1, False, 0, [], "1ab91", "", "", "", "Angkor Wat: $b3 (Passage-Outside, north)"],
+            0x1b4: [57, 1, False, 0, [], "1ab92", "", "", "", "Angkor Wat: $b4 (Passage-Outside, pit)"],
+            0x1b5: [57, 1, False, 0, [], "1ab93", "", "", "", "Angkor Wat: $b5 (Passage-Outside, west)"],
             117: [59, 1, False, 0, [], "1B060", "", "", "", "Ankor Wat: U-Turn Chest             "],
             118: [60, 1, False, 0, [28], "1B065", "", "", "", "Ankor Wat: Drop Down Chest          "],
             119: [60, 1, False, 0, [28], "1B06A", "", "", "", "Ankor Wat: Forgotten Chest          "],
+            0x1b7: [60, 1, False, 0, [], "1ab95", "", "", "", "Angkor Wat: $b7 (Passage-Inside, south)"],
+            0x1b8: [60, 1, False, 0, [], "1ab96", "", "", "", "Angkor Wat: $b8 (Passage-Inside, east)"],
+            0x1b9: [60, 1, False, 0, [], "1ab97", "", "", "", "Angkor Wat: $b9 (Passage-Inside, west)"],
+            0x1ba: [60, 1, False, 0, [], "1ab98", "", "", "", "Angkor Wat: $ba (Road to Main Hall)"],
+            0x1bb: [60, 1, False, 0, [], "1ab99", "", "", "", "Angkor Wat: $bb (Main Hall 1F)"],
+            0x1bc: [60, 1, False, 0, [], "1ab9a", "", "", "", "Angkor Wat: $bc (Main Hall 2F)"],
+            0x1bd: [60, 1, False, 0, [], "1ab9b", "", "", "", "Angkor Wat: $bd (Main Hall 3F)"],
+            0x1be: [60, 1, False, 0, [], "1ab9c", "", "", "", "Angkor Wat: $be (Main Hall 4F)"],
             120: [59, 1, False, 0, [], "89fa3", "89fbb", "", "", "Ankor Wat: Glasses Location         "],  # slow text @89fdc
+            0x1b6: [59, 1, False, 0, [], "1ab94", "", "", "", "Angkor Wat: $b6 (Garden)"],
             121: [60, 1, False, 0, [28], "89adc", "89af1", "89b07", "", "Ankor Wat: Spirit                   "],  # item was 89b0d, text was 89e2e
             122: [76, 2, True, 0, [49, 50], "cce92", "Unsafe", b"\x20\x04\x30\x03\x83\x00\x46", b"\xb6",
                   "Ankor Wat: Garden Dark Space        "],  # Always open
@@ -1692,17 +1743,31 @@ class World:
                   "Dao: Dark Space                     "],
 
             130: [62, 1, False, 0, [], "8dcb7", "8e66c", "8e800", "", "Pyramid: Dark Space Top             "],  # text2 was 8e800
+            0x1cc: [62, 1, False, 0, [], "1abaa", "", "", "", "Pyramid: $cc (Top)"],
             131: [63, 1, False, 0, [36], "FC1D", "FC2D", "FC43", "", "Pyramid: Under Stairs               "],
             132: [64, 1, False, 0, [36], "8c7b2", "8c7c9", "", "", "Pyramid: Hieroglyph 1               "],
+            0x1ce: [64, 1, False, 0, [], "1abac", "", "", "", "Pyramid: $ce (Room 1A)"],
+            0x1cf: [64, 1, False, 0, [], "1abad", "", "", "", "Pyramid: $cf (Room 1B)"],
             133: [63, 1, False, 0, [36], "1B06F", "", "", "", "Pyramid: Room 2 Chest               "],
             134: [63, 1, False, 0, [36], "8c879", "8c88c", "", "", "Pyramid: Hieroglyph 2               "],
+            0x1d1: [63, 1, False, 0, [], "1abaf", "", "", "", "Pyramid: $d0 (Room 2A)"],
+            0x1d0: [63, 1, False, 0, [], "1abae", "", "", "", "Pyramid: $d1 (Room 2B)"],
             135: [64, 1, False, 0, [36], "1B079", "", "", "", "Pyramid: Room 3 Chest               "],
             136: [78, 1, False, 0, [36], "8c921", "8c934", "", "", "Pyramid: Hieroglyph 3               "],
+            0x1d6: [78, 1, False, 0, [], "1abb4", "", "", "", "Pyramid: $d6 (Room 3A)"],
+            0x1d7: [78, 1, False, 0, [], "1abb5", "", "", "", "Pyramid: $d7 (Room 3B)"],
             137: [64, 1, False, 0, [36], "1B07E", "", "", "", "Pyramid: Room 4 Chest               "],
             138: [64, 1, False, 0, [36], "8c9c9", "8c9dc", "", "", "Pyramid: Hieroglyph 4               "],
+            0x1d8: [64, 1, False, 0, [], "1abb6", "", "", "", "Pyramid: $d8 (Room 4A)"],
+            0x1d9: [64, 1, False, 0, [], "1abb7", "", "", "", "Pyramid: $d9 (Room 4B)"],
+            0x1db: [64, 1, False, 0, [], "1abb9", "", "", "", "Pyramid: $db (Room 4C)"],
             139: [63, 1, False, 0, [36], "1B074", "", "", "", "Pyramid: Room 5 Chest               "],
             140: [79, 1, False, 0, [36], "8ca71", "8ca84", "", "", "Pyramid: Hieroglyph 5               "],
+            0x1d4: [79, 1, False, 0, [], "1abb2", "", "", "", "Pyramid: $d4 (Room 5A)"],
+            0x1d5: [79, 1, False, 0, [], "1abb3", "", "", "", "Pyramid: $d5 (Room 5B)"],
             141: [77, 1, False, 0, [36], "8cb19", "8cb2c", "", "", "Pyramid: Hieroglyph 6               "],
+            0x1d2: [77, 1, False, 0, [], "1abb0", "", "", "", "Pyramid: $d2 (Room 6A)"],
+            0x1d3: [77, 1, False, 0, [], "1abb1", "", "", "", "Pyramid: $d3 (Room 6B)"],
             142: [77, 2, True, 0, [], "cd570", "Unsafe", b"\xc0\x01\x90\x03\x83\x00\x44", b"\xcc",
                   "Pyramid: Dark Space Bottom          "],  # Always open
 
@@ -1714,6 +1779,7 @@ class World:
                   "Babel: Dark Space Top               "],
 
             147: [81, 1, False, 0, [], "1B083", "", "", "", "Jeweler's Mansion: Chest            "],
+            0x1e9: [82, 1, False, 0, [], "1abc7", "", "", "", "Jeweler's Mansion, $e9"],
 
             148: [18, 3, False, 0, [55, 56, 57, 58, 59], "", "", "", "", "Castoth Prize                       "],
             149: [32, 3, False, 0, [54, 56, 57, 58, 59], "", "", "", "", "Viper Prize                         "],
@@ -2002,6 +2068,11 @@ class World:
             17: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
             18: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
             19: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
+            0x10c: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
+            0x10d: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
+            0x10e: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
+            0x10f: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
+            0x112: b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x64\xa5\x8d\x8d\x84\x8b",  # "Edward's Tunnel"
 
             20: b"\x48\xa4\x8e\xa2\xa9",  # "Itory"
             21: b"\x48\xa4\x8e\xa2\xa9",  # "Itory"
@@ -2017,6 +2088,15 @@ class World:
             29: b"\x48\x8d\x82\x80",  # "Inca"
             30: b"\x48\x8d\x82\x80",  # "Inca"
             31: b"\x48\x8d\x82\x80",  # "Inca"
+            0x125: b"\x48\x8d\x82\x80",  # "Inca"
+            0x127: b"\x48\x8d\x82\x80",  # "Inca"
+            0x11d: b"\x48\x8d\x82\x80",  # "Inca"
+            0x120: b"\x48\x8d\x82\x80",  # "Inca"
+            0x121: b"\x48\x8d\x82\x80",  # "Inca"
+            0x122: b"\x48\x8d\x82\x80",  # "Inca"
+            0x123: b"\x48\x8d\x82\x80",  # "Inca"
+            0x126: b"\x48\x8d\x82\x80",  # "Inca"
+            0x128: b"\x48\x8d\x82\x80",  # "Inca"
 
             32: b"\x46\x8e\x8b\x83\xac\x63\x87\x88\xa0",  # "Gold Ship"
 
@@ -2038,6 +2118,13 @@ class World:
             46: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
             47: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
             48: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
+            0x13e: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
+            0x13f: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
+            0x140: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
+            0x13d: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
+            0x141: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
+            0x145: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
+            0x146: b"\xd6\x0e\x4c\x88\x8d\x84",  # "Diamond Mine"
 
             49: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
             50: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
@@ -2051,6 +2138,14 @@ class World:
             58: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
             59: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
             60: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x14d: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x14e: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x14f: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x150: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x151: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x152: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x153: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
+            0x154: b"\x63\x8a\xa9\xac\x46\x80\xa2\x83\x84\x8d",  # "Sky Garden"
 
             61: b"\xd7\x32\xd7\x93",  # "Seaside Palace"
             62: b"\xd7\x32\xd7\x93",  # "Seaside Palace"
@@ -2068,6 +2163,12 @@ class World:
             73: b"\x4c\xa5",  # "Mu"
             74: b"\x4c\xa5",  # "Mu"
             75: b"\x4c\xa5",  # "Mu"
+            0x15f: b"\x4c\xa5",  # "Mu"
+            0x160: b"\x4c\xa5",  # "Mu"
+            0x161: b"\x4c\xa5",  # "Mu"
+            0x162: b"\x4c\xa5",  # "Mu"
+            0x164: b"\x4c\xa5",  # "Mu"
+            0x165: b"\x4c\xa5",  # "Mu"
 
             76: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
             77: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
@@ -2076,6 +2177,12 @@ class World:
             80: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
             81: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
             82: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
+            0x16d: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
+            0x16e: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
+            0x16f: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
+            0x170: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
+            0x171: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
+            0x172: b"\xd6\x01\x66\x88\x8b\x8b\x80\x86\x84",  # "Angel Village"
 
             83: b"\x67\x80\xa4\x84\xa2\x8c\x88\x80",  # "Watermia"
             84: b"\x67\x80\xa4\x84\xa2\x8c\x88\x80",  # "Watermia"
@@ -2091,6 +2198,12 @@ class World:
             93: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
             94: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
             95: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
+            0x182: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
+            0x183: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
+            0x185: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
+            0x186: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
+            0x187: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
+            0x188: b"\xd6\x16\x67\x80\x8b\x8b",  # "Great Wall"
 
             96: b"\x44\xa5\xa2\x8e",  # "Euro"
             97: b"\x44\xa5\xa2\x8e",  # "Euro"
@@ -2109,6 +2222,15 @@ class World:
             109: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
             110: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
             111: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a0: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a1: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a3: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a2: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a4: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a5: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a6: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a8: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
+            0x1a7: b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3",  # "Mt. Kress"
 
             112: b"\xd7\x21\x66\x88\x8b\x8b\x80\x86\x84",  # "Native Village"
             113: b"\x63\xa4\x80\xa4\xa5\x84",  # "Statue"
@@ -2124,6 +2246,21 @@ class World:
             122: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
             123: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
             124: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b0: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b1: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b2: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b3: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b4: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b5: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b7: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b8: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b9: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1ba: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1bb: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1bc: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1bd: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1be: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
+            0x1b6: b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4",  # "Ankor Wat"
 
             125: b"\x43\x80\x8e",  # "Dao"
             126: b"\x43\x80\x8e",  # "Dao"
@@ -2144,6 +2281,20 @@ class World:
             140: b"\xd6\x3f",  # "Pyramid"
             141: b"\xd6\x3f",  # "Pyramid"
             142: b"\xd6\x3f",  # "Pyramid"
+            0x1cc: b"\xd6\x3f",  # "Pyramid"
+            0x1ce: b"\xd6\x3f",  # "Pyramid"
+            0x1cf: b"\xd6\x3f",  # "Pyramid"
+            0x1d1: b"\xd6\x3f",  # "Pyramid"
+            0x1d0: b"\xd6\x3f",  # "Pyramid"
+            0x1d6: b"\xd6\x3f",  # "Pyramid"
+            0x1d7: b"\xd6\x3f",  # "Pyramid"
+            0x1d8: b"\xd6\x3f",  # "Pyramid"
+            0x1d9: b"\xd6\x3f",  # "Pyramid"
+            0x1db: b"\xd6\x3f",  # "Pyramid"
+            0x1d4: b"\xd6\x3f",  # "Pyramid"
+            0x1d5: b"\xd6\x3f",  # "Pyramid"
+            0x1d2: b"\xd6\x3f",  # "Pyramid"
+            0x1d3: b"\xd6\x3f",  # "Pyramid"
 
             143: b"\x41\x80\x81\x84\x8b",  # "Babel"
             144: b"\x41\x80\x81\x84\x8b",  # "Babel"
@@ -2151,6 +2302,7 @@ class World:
             146: b"\x41\x80\x81\x84\x8b",  # "Babel"
 
             147: b"\x49\x84\xa7\x84\x8b\x84\xa2\x0e\xa3\xac\x4c\x80\x8d\xa3\x88\x8e\x8d",  # "Jeweler's Mansion"
+            0x1e9: b"\x49\x84\xa7\x84\x8b\x84\xa2\x0e\xa3\xac\x4c\x80\x8d\xa3\x88\x8e\x8d",  # "Jeweler's Mansion"
 
             148: "",  # "Castoth"
             149: "",  # "Viper"

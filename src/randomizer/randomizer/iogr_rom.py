@@ -1768,7 +1768,7 @@ class Randomizer:
         patch.write(b"\xe0\x6b")
 
         ##########################################################################
-        #                Prepare Room/Boss Rewards for Randomization
+        #             Integrate room reward system with item system
         ##########################################################################
         # Remove existing rewards
         f_roomrewards = open(BIN_PATH + "01aade_roomrewards.bin", "rb")
@@ -1776,15 +1776,39 @@ class Randomizer:
         patch.write(f_roomrewards.read())
         f_roomrewards.close
 
-        # Make room-clearing HP rewards grant +3 HP each
-        patch.seek(int("e041", 16) + rom_offset)
-        patch.write(b"\x03")
+        # Support giving jewels as items
+        f_giveitemsuccess = open(BIN_PATH + "02a753_giveitemsuccess.bin", "rb")
+        patch.seek(0x02a753 + rom_offset)
+        patch.write(f_giveitemsuccess.read())
+        f_giveitemsuccess.close
+        # Support giving items as jewels
+        f_roomclearitem = open(BIN_PATH + "00e02d_roomclearitem.bin", "rb")
+        patch.seek(0x00e02d + rom_offset)
+        patch.write(f_roomclearitem.read())
+        f_roomclearitem.close
+        # Boss rewards code must support new jewel IDs
+        patch.seek(0x00c356 + rom_offset)
+        patch.write(b"\x30")  # bmi instead of bne
+        patch.seek(0x00c362 + rom_offset)
+        patch.write(b"\x29\x7f\x00")  # and #$007f instead of #$00ff
+        patch.seek(0x00c37e + rom_offset)  # restructure to give +3HP for HP jewels
+        patch.write(b"F0\x0B\x3A\xF0\x04\xEE\xDC\x0A\x60\xEE\xDE\x0A\x60\xEE\xCA\x0A\xEE\xCA\x0A\xEE\xCA\x0A\xC2\x20\x60")
+        # Room rewards code must support new jewel IDs
+        f_roomclearrewarder = open(BIN_PATH + "00dd87_roomclearrewarder.bin", "rb")
+        patch.seek(0x00dd87 + rom_offset)
+        patch.write(f_roomclearrewarder.read())
+        f_roomclearrewarder.close
 
-        # Make boss rewards also grant +3 HP per unclaimed reward
-        patch.seek(int("c381", 16) + rom_offset)
-        patch.write(b"\x20\x90\xf4")
-        patch.seek(int("f490", 16) + rom_offset)
-        patch.write(b"\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
+        # Stat jewels return pointers to their get-item text
+        patch.seek(0x03f02d + rom_offset)
+        patch.write(b"\xa0\xb0\xff")
+        patch.seek(0x03f04c + rom_offset)
+        patch.write(b"\xa0\xb5\xff")
+        patch.seek(0x03f06b + rom_offset)
+        patch.write(b"\xa0\xba\xff")
+        # Get-item text must start in bank $81 but can jump elsewhere
+        patch.seek(0x01ffb0 + rom_offset)
+        patch.write(b"\xCD\x8A\xE0\x80\xCA\xCD\xB1\xE0\x80\xCA\xCD\xDC\xE0\x80\xCA")
 
         # Change boss room ranges
         patch.seek(int("c31a", 16) + rom_offset)
@@ -1798,12 +1822,13 @@ class Randomizer:
         patch.write(b"\x00\x01\x01\xBB\xC2\x80\x00\xFF\xCA")
 
         # Black Glasses allow you to "see" which upgrades are available
-        f_startmenu = open(BIN_PATH + "03fdc0_startmenu.bin", "rb")
-        patch.seek(int("3fdc0", 16) + rom_offset)
-        patch.write(f_startmenu.read())
-        f_startmenu.close
-        patch.seek(int("381d6", 16) + rom_offset)
-        patch.write(b"\x4C\xC0\xFD")
+        # Temporarily broken until I disassemble it to support new jewel IDs
+        #f_startmenu = open(BIN_PATH + "03fdc0_startmenu.bin", "rb")
+        #patch.seek(int("3fdc0", 16) + rom_offset)
+        #patch.write(f_startmenu.read())
+        #f_startmenu.close
+        #patch.seek(int("381d6", 16) + rom_offset)
+        #patch.write(b"\x4C\xC0\xFD")
 
         # Change start menu "FORCE" text
         patch.seek(int("1ff70", 16) + rom_offset)
@@ -1812,6 +1837,8 @@ class Randomizer:
         patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x53\x54\x52\x00")  # "+1STR"
         patch.seek(int("1ff90", 16) + rom_offset)
         patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x44\x45\x46\x00")  # "+1DEF"
+        patch.seek(0x01ffa0 + rom_offset)
+        patch.write(b"\x01\xC6\x01\x03\x14\x20\x49\x54\x45\x4d\x00")  # " ITEM"
 
         ##########################################################################
         #                        Balance Enemy Stats
