@@ -412,13 +412,14 @@ class World:
 
         # Some rooms may be unclearable if enemized, so don't put room clear rewards in them
         forbidden_item_locations = []
-        if self.enemizer != "None":
+        if self.room_clear_items == 1 and self.enemizer != "None":
             forbidden_item_locations = [0x141, 0x16d, 0x16e, 0x16f, 0x170, 0x172,
                 0x182, 0x183, 0x185, 0x186, 0x187, 0x188,
                 0x1a0, 0x1a1, 0x1a2, 0x1a3, 0x1a4, 0x1a5, 0x1a6, 0x1a7, 0x1a8,
                 0x1b1, 0x1b2, 0x1b3, 0x1b5, 0x1b6, 0x1b7, 0x1b8, 0x1b9, 0x1bb, 0x1bc, 0x1bd, 0x1be
                 ]
 
+        # Allowed item locations are all regular item locations plus num_room_reward_slots rooms
         room_clear_locations = {idx : dat for idx,dat in self.item_locations.items() if idx > 0xff and idx not in forbidden_item_locations}
         reduced_item_locations = {idx : dat for idx,dat in self.item_locations.items() if idx <= 0xff}
         reduced_item_locations.update({idx:room_clear_locations[idx] for idx in random.sample(room_clear_locations.keys(),num_room_reward_slots)})
@@ -443,6 +444,12 @@ class World:
             self.item_pool[0x81][0] = 0
             self.item_pool[0x82][0] = 0
             self.item_pool[0][0] -= 6
+
+        # If room clears can't grant items, enforce this by preventing HP/STR/DEF from spawning in regular item locations
+        if self.room_clear_items == 0:
+            for loc in self.item_locations:
+                if loc <= 0xff:
+                    self.item_locations[loc][4].extend([0x80,0x81,0x82])
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
@@ -987,8 +994,8 @@ class World:
                 # Write item code to memory
                 if item_code:
                     f.seek(int(item_addr, 16) + rom_offset)
-                    if x > 0xff and item_code == 0:
-                        f.write(b"\xff")    # room-reward $ff counts as an item but gives Nothing
+                    if self.room_clear_rewards == 1 and x > 0xff and item_code == 0:
+                        f.write(b"\xff")    # if room clear items are enabled and a room gets a Nothing, make it a Dud instead
                     else:
                         f.write(item_code)
 
