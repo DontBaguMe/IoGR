@@ -1770,6 +1770,7 @@ class Randomizer:
         ##########################################################################
         #             Integrate room reward system with item system
         ##########################################################################
+
         # Remove existing rewards
         f_roomrewards = open(BIN_PATH + "01aade_roomrewards.bin", "rb")
         patch.seek(int("1aade", 16) + rom_offset)
@@ -1786,13 +1787,20 @@ class Randomizer:
         patch.seek(0x00e02d + rom_offset)
         patch.write(f_roomclearitem.read())
         f_roomclearitem.close
+        # Make LR_GiveItemAOrSec compatible with cop #$D4
+        patch.seek(0x03f00c + rom_offset)
+        patch.write(b"\xa9\x80\x1c\xec\x09\xa9\x25\x8d\xf9\x06\xea\xea\xea")
+        patch.seek(0x03f032 + rom_offset)
+        patch.write(b"\xa9\x80\x1c\xec\x09\xa9\x25\x8d\xf9\x06\xea\xea\xea")
+        patch.seek(0x03f051 + rom_offset)
+        patch.write(b"\xa9\x80\x1c\xec\x09\xa9\x25\x8d\xf9\x06\xea\xea\xea")
         # Boss rewards code must support new jewel IDs
         patch.seek(0x00c356 + rom_offset)
         patch.write(b"\x30")  # bmi instead of bne
         patch.seek(0x00c362 + rom_offset)
         patch.write(b"\x29\x7f\x00")  # and #$007f instead of #$00ff
         patch.seek(0x00c37e + rom_offset)  # restructure to give +3HP for HP jewels
-        patch.write(b"F0\x0B\x3A\xF0\x04\xEE\xDC\x0A\x60\xEE\xDE\x0A\x60\xEE\xCA\x0A\xEE\xCA\x0A\xEE\xCA\x0A\xC2\x20\x60")
+        patch.write(b"\xF0\x0B\x3A\xF0\x04\xEE\xDC\x0A\x60\xEE\xDE\x0A\x60\xEE\xCA\x0A\xEE\xCA\x0A\xEE\xCA\x0A\xC2\x20\x60")
         # Room rewards code must support new jewel IDs
         f_roomclearrewarder = open(BIN_PATH + "00dd87_roomclearrewarder.bin", "rb")
         patch.seek(0x00dd87 + rom_offset)
@@ -1806,6 +1814,9 @@ class Randomizer:
         patch.write(b"\xa0\xb5\xff")
         patch.seek(0x03f06b + rom_offset)
         patch.write(b"\xa0\xba\xff")
+        # Reduce delay time after item text
+        patch.seek(0x01ff29 + rom_offset)
+        patch.write(b"\xc8\xca")
         # Get-item text must start in bank $81 but can jump elsewhere
         patch.seek(0x01ffb0 + rom_offset)
         patch.write(b"\xCD\x8A\xE0\x80\xCA\xCD\xB1\xE0\x80\xCA\xCD\xDC\xE0\x80\xCA")
