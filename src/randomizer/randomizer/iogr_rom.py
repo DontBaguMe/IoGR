@@ -1842,21 +1842,23 @@ class Randomizer:
         patch.seek(int("3fdc0", 16) + rom_offset)
         patch.write(f_startmenu.read())
         f_startmenu.close
-        patch.seek(int("381d6", 16) + rom_offset)
-        patch.write(b"\x20\xC0\xFD\x4C\x48\x82")
+        f_startmenu = open(BIN_PATH + "0381ca_basicforcebox.bin", "rb")
+        patch.seek(int("381ca", 16) + rom_offset)
+        patch.write(f_startmenu.read())
+        f_startmenu.close
 
         # Change start menu "FORCE" text
         patch.seek(int("1ff70", 16) + rom_offset)
-        patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x40\x00")  # "+3HP "
+        patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x60\x00")  # "+3HP "
         patch.seek(int("1ff80", 16) + rom_offset)
         patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x53\x54\x52\x00")  # "+1STR"
         patch.seek(int("1ff90", 16) + rom_offset)
         patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x44\x45\x46\x00")  # "+1DEF"
         patch.seek(0x01ffa0 + rom_offset)
-        patch.write(b"\x01\xC6\x01\x03\x14\x40\x49\x54\x45\x4d\x00")  # " ITEM"
+        patch.write(b"\x01\xC6\x01\x03\x14\x49\x54\x45\x4d\x60\x00")  # "ITEM "
         patch.write(b"\x01\xC6\x01\x03\x14\x4a\x45\x57\x45\x4c\x00")  # "JEWEL"
-        patch.write(b"\x01\xC6\x01\x03\x14\x40\x48\x45\x52\x42\x00")  # " HERB"
-        patch.write(b"\x01\xC6\x01\x03\x14\x40\x40\x44\x55\x44\x00")  # "  DUD"
+        patch.write(b"\x01\xC6\x01\x03\x14\x48\x45\x52\x42\x60\x00")  # "HERB "
+        patch.write(b"\x01\xC6\x01\x03\x14\x44\x55\x44\x60\x60\x00")  # "DUD  "
 
         ##########################################################################
         #                        Balance Enemy Stats

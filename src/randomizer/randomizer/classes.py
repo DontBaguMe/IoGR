@@ -442,7 +442,7 @@ class World:
                 0x1b1, 0x1b2, 0x1b3, 0x1b5, 0x1b6, 0x1b7, 0x1b8, 0x1b9, 0x1bb, 0x1bc, 0x1bd, 0x1be
                 ]
 
-        # Allowed item locations are all regular item locations plus num_room_reward_slots rooms
+        # Allowed locations are all regular item locations plus num_room_reward_slots rooms
         room_clear_locations = {idx : dat for idx,dat in self.item_locations.items() if idx > 0xff and idx not in forbidden_item_locations}
         reduced_item_locations = {idx : dat for idx,dat in self.item_locations.items() if idx <= 0xff}
         reduced_item_locations.update({idx:room_clear_locations[idx] for idx in random.sample(room_clear_locations.keys(),num_room_reward_slots)})
@@ -804,6 +804,7 @@ class World:
         item_list = self.list_item_pool()
         random.shuffle(item_list)
 
+        # Improve performance when we're not granting room-clear items by removing room-clear locations
         if self.room_clear_items == 0:
             item_locations_filtered = []
             for loc in item_locations:
