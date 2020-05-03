@@ -134,7 +134,8 @@ class World:
             region = self.item_locations[x][0]
             type = self.item_locations[x][1]
             if self.graph[region][0] and not self.item_locations[x][2]:
-                locations[type - 1].append(x)
+                if self.room_clear_items != 0 or type-1 or x < 0xff:# check for room rewards to not be counted as valid item location outside of room_clear_item mode
+                    locations[type - 1].append(x)
         return locations
 
     # Zeroes out accessible flags for all world regions
