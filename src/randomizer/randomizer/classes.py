@@ -28,6 +28,7 @@ class World:
         self.item_locations[location][3] = item
 
         self.placement_log.append([item, location])
+        # print("Placed item ",item," at ",location)
 
         return True
 
@@ -45,6 +46,8 @@ class World:
         for x in self.placement_log:
             if x[1] == location:
                 self.placement_log.remove(x)
+
+        # print("Removed item ",item," from ",location)
 
         return item
 
@@ -147,7 +150,7 @@ class World:
         items = start_items[:]
         while to_visit:
             origin = to_visit.pop(0)
-            # print "Visiting ",origin
+            # print("Visiting ",origin)
 
             if not self.graph[origin][0]:
                 self.graph[origin][0] = True
@@ -231,6 +234,7 @@ class World:
 
     # Place list of items into random accessible locations
     def forward_fill(self, items=[], item_locations=[]):
+        # print("Filling locs ",item_locations," with items ",items)
         if not items:
             return True
         elif not item_locations:
@@ -242,6 +246,9 @@ class World:
         item = to_place.pop(0)
         item_type = self.item_pool[item][1]
 
+        # print("Popped item ",item,"; still waiting on ",to_place)
+        # print("Placing ",len(to_place)+1," items in ",len(to_fill)," locations...")
+
         for dest in to_fill:
             region = self.item_locations[dest][0]
             location_type = self.item_locations[dest][1]
@@ -249,16 +256,27 @@ class World:
             restrictions = self.item_locations[dest][4]
             if self.graph[region][0] and not filled and self.item_pool[item][0] > 0:
                 if item_type == location_type and item not in restrictions:
-                    # print "Placing item: ", item, dest
+                    # print("Placing item ",item," at ",dest)
                     if self.fill_item(item, dest):
                         to_fill_new = to_fill[:]
                         to_fill_new.remove(dest)
                         if self.forward_fill(to_place, to_fill_new):
-                            # print "Filled ",dest," with ",item
+                            # print("Placed item ",item," at ",dest)
                             # self.placement_log.append([item,dest])
                             return True
                         else:
+                            # print("Bad state, must remove ",item," from ",dest)
                             item = self.unfill_item(dest)
+            #        else:
+            #            print("Can't place ",item," at ",dest," (full or invalid)")
+            #    else:
+            #        print("Can't place ",item," at ",dest," (restricted)")
+            #elif filled:
+            #    print("Can't place ",item," at ",dest," (filled)")
+            #elif self.item_pool[item][0] <= 0:
+            #    print("Can't place ",item," at ",dest," (pool contains ",self.item_pool[item][0]," < 0)")
+            #else:
+            #    print("Can't place ",item," at ",dest," (region was ",self.graph[region],")")
 
         return False
 
@@ -292,6 +310,7 @@ class World:
         prereq_list = []
 
         for x in self.logic:
+            # print("Using logic element ",x,"...")
             origin = self.logic[x][0]
             dest = self.logic[x][1]
             if self.graph[origin][0] and not self.graph[dest][0]:
@@ -366,13 +385,16 @@ class World:
         probabilities = []
 
         while progression:
+            # print("Normalizing progression list ",progression)
             current_prereq = progression.pop(0)
             prereqs = current_prereq[:]
             probability = 1.0
             i = 0
             j = 0
             while prereqs:
+                # print("Prereq queue: ",prereqs)
                 item = prereqs.pop(0)
+                # print("Checking item ",item)
                 if item in all_items:
                     if self.item_pool[item][1] == 1:
                         probability *= float(self.item_pool[item][0]) / float((sum_items - i))
@@ -385,10 +407,12 @@ class World:
             probabilities.append([probability, current_prereq])
             sum_prob += probability
             sum_edges += 1
+            # print("Prereq OK; moving on...")
 
         prob_adj = 100.0 / sum_prob
         rolling_sum = 0
         for x in probabilities:
+            # print("Normalizing ",x," out of ",probabilities)
             x[0] = x[0] * prob_adj + rolling_sum
             rolling_sum = x[0]
 
@@ -408,7 +432,6 @@ class World:
     # Set number of room clear rewards and pick reward locations
     def map_rewards(self):
         num_room_reward_slots = 24
-        self.item_pool[0][0] = 2 + num_room_reward_slots  # i.e. 2 "nothings" + some possibly-empty room clears
 
         # Some rooms may be unclearable if enemized, so don't put room clear rewards in them
         forbidden_item_locations = []
@@ -428,28 +451,34 @@ class World:
             self.item_pool[0x80][0] = 10
             self.item_pool[0x81][0] = 7
             self.item_pool[0x82][0] = 7
-            self.item_pool[0][0] -= 24
+            if self.room_clear_items > 0:
+                self.item_pool[0][0] += (num_room_reward_slots - 24)
         elif self.mode == 1:  # Normal: 10/4/4
             self.item_pool[0x80][0] = 10
             self.item_pool[0x81][0] = 4
             self.item_pool[0x82][0] = 4
-            self.item_pool[0][0] -= 18
+            if self.room_clear_items > 0:
+                self.item_pool[0][0] += (num_room_reward_slots - 18)
         elif self.mode == 2:  # Hard: 8/2/2
             self.item_pool[0x80][0] = 8
             self.item_pool[0x81][0] = 2
             self.item_pool[0x82][0] = 2
-            self.item_pool[0][0] -= 12
+            if self.room_clear_items > 0:
+                self.item_pool[0][0] += (num_room_reward_slots - 12)
         elif self.mode == 3:  # Extreme: 6/0/0
             self.item_pool[0x80][0] = 6
             self.item_pool[0x81][0] = 0
             self.item_pool[0x82][0] = 0
-            self.item_pool[0][0] -= 6
+            if self.room_clear_items > 0:
+                self.item_pool[0][0] += (num_room_reward_slots - 6)
 
-        # If room clears can't grant items, enforce this by preventing HP/STR/DEF from spawning in regular item locations
+        # If room clears can't grant items, add restrictions to item locations and remove duds
         if self.room_clear_items == 0:
             for loc in self.item_locations:
                 if loc <= 0xff:
                     self.item_locations[loc][4].extend([0x80,0x81,0x82])
+                else:
+                    self.item_locations[loc][4].extend(range(0,0x7f))
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
@@ -743,6 +772,7 @@ class World:
         self.map_rewards()
         item_locations = self.list_item_locations()
         random.shuffle(item_locations)
+        # print("After initialization, self.item_locations = ",self.item_locations)
 
         # Fill the Mustic Statues
         self.fill_statues()
@@ -764,13 +794,24 @@ class World:
 
         random.shuffle(non_prog_items)
         self.random_fill(non_prog_items, item_locations)
+        # print("After placing non-prog items, self.item_locations = ",self.item_locations)
 
         # Check if ability placement affects logic
         self.check_logic()
+        # print("After non-prog logic check, self.item_locations = ",self.item_locations)
 
         # List and shuffle remaining key items
         item_list = self.list_item_pool()
         random.shuffle(item_list)
+
+        if self.room_clear_items == 0:
+            item_locations_filtered = []
+            for loc in item_locations:
+                if loc < 0xff:
+                    item_locations_filtered.append(loc)
+            item_locations = item_locations_filtered
+        # print("Key item list is ",item_list)
+        # print("Locations are ",item_locations)
 
         inventory = []
 
@@ -788,7 +829,7 @@ class World:
                 return False
 
             start_items = self.traverse()
-            # print "We found these: ",start_items
+            # print("At cycle ",cycle," starting with: ",start_items)
 
             inv_size = len(self.get_inventory(start_items))
             if inv_size > MAX_INVENTORY:
@@ -799,18 +840,22 @@ class World:
                         (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
 
             # Get list of new progression options
+            # print("Getting progression options...")
             progression_list = self.progression_list(start_items)
+            # print("Done getting progression options.")
 
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
             # print done, progression_list
 
             if not done and progression_list == -1:  # No empty locations available
+                # print("No free loc for prog item; making room...")
                 removed = self.make_room(item_locations)
                 if not removed:
                     print("ERROR: Could not remove non-progression item")
                     return False
                 progression_list = []
             elif not done and progression_list == -2:  # All new locations have too many inventory items
+                # print("No free inventory space for prog item; making room...")
                 removed = self.make_room(item_locations, True)
                 if not removed:
                     print("ERROR: Could not remove inventory item")
@@ -829,14 +874,17 @@ class World:
 
             if not done and progression_list:
                 # Determine next progression items to add to accessible locations
+                # print("Trying to add prog option from: ",progression_list)
                 progression_mc = self.monte_carlo(progression_list)
                 progress = False
                 while not progress:
                     key = random.uniform(0, 100)
-                    # print key
+                    # print("...with key ",key)
                     items = []
                     for x in progression_mc:
+                        # print("Considering ",x)
                         if key <= x[0] and not items:
+                            # print("Accepted ",x)
                             items = x[1]
 
                     if not items:
@@ -844,7 +892,7 @@ class World:
                         # done = True
                     elif self.forward_fill(items, item_locations):
                         progress = True
-                        # print "We made progress!",items
+                        # print("Monte Carlo progress: ",items)
                         # print self.graph
 
             # print goal, done
@@ -994,7 +1042,7 @@ class World:
                 # Write item code to memory
                 if item_code:
                     f.seek(int(item_addr, 16) + rom_offset)
-                    if self.room_clear_rewards == 1 and x > 0xff and item_code == 0:
+                    if self.room_clear_items == 1 and x > 0xff and item_code == 0:
                         f.write(b"\xff")    # if room clear items are enabled and a room gets a Nothing, make it a Dud instead
                     else:
                         f.write(item_code)
@@ -1443,7 +1491,7 @@ class World:
         #                  ROM Code, Name, TakesInventorySpace,
         #                  ProgressionType (1=unlocks new locations,2=quest item,3=no progression)] }
         self.item_pool = {
-            0: [86, 1, b"\x00", "Nothing", False, 3],
+            0: [2, 1, b"\x00", "Nothing", False, 3],
             1: [45, 1, b"\x01", "Red Jewel", False, 1],
             2: [1, 1, b"\x02", "Prison Key", True, 1],
             3: [1, 1, b"\x03", "Inca Statue A", True, 1],

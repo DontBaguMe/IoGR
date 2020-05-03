@@ -109,6 +109,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
+    filename += getSwitch(settings.room_clear_items, "rci")
     filename += "_" + str(settings.seed)
     filename += "."
     filename += extension
@@ -1809,17 +1810,21 @@ class Randomizer:
 
         # Stat jewels return pointers to their get-item text
         patch.seek(0x03f02d + rom_offset)
-        patch.write(b"\xa0\xb0\xff")
+        patch.write(b"\xa0\x7b\xff")
         patch.seek(0x03f04c + rom_offset)
-        patch.write(b"\xa0\xb5\xff")
+        patch.write(b"\xa0\x8b\xff")
         patch.seek(0x03f06b + rom_offset)
-        patch.write(b"\xa0\xba\xff")
+        patch.write(b"\xa0\x9b\xff")
         # Reduce delay time after item text
         patch.seek(0x01ff29 + rom_offset)
         patch.write(b"\xc9\x10\xc8\xca")
         # Get-item text must start in bank $81 but can jump elsewhere
-        patch.seek(0x01ffb0 + rom_offset)
-        patch.write(b"\xCD\x8A\xE0\x80\xCA\xCD\xB1\xE0\x80\xCA\xCD\xDC\xE0\x80\xCA")
+        patch.seek(0x01ff7b + rom_offset)
+        patch.write(b"\xCD\x8A\xE0\x80\xCA")
+        patch.seek(0x01ff8b + rom_offset)
+        patch.write(b"\xCD\xB1\xE0\x80\xCA")
+        patch.seek(0x01ff9b + rom_offset)
+        patch.write(b"\xCD\xDC\xE0\x80\xCA")
 
         # Change boss room ranges
         patch.seek(int("c31a", 16) + rom_offset)
