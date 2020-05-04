@@ -1850,7 +1850,6 @@ class World:
                   "Babel: Dark Space Top               "],
 
             147: [81, 1, False, 0, [], "1B083", "", "", "", "Jeweler's Mansion: Chest            "],
-            0x1e9: [82, 1, False, 0, [], "1abc7", "", "", "", "Jeweler's Mansion, $e9"],
 
             148: [18, 3, False, 0, [55, 56, 57, 58, 59], "", "", "", "", "Castoth Prize                       "],
             149: [32, 3, False, 0, [54, 56, 57, 58, 59], "", "", "", "", "Viper Prize                         "],
