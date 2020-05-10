@@ -1791,7 +1791,7 @@ class Randomizer:
         # Make LR_GiveItemAOrSec compatible with cop #$D4
         patch.seek(0x03f00c + rom_offset)
         patch.write(b"\xa9\x80\x1c\xec\x09\xa9\x25\x8d\xf9\x06")
-        patch.write(b"\xa9\xca\x0a\x18\x69\x03\x8d\xca\x0a\x8d\x22\x0b\x4c\x2d\xf0")  # and HP-up gives +3
+        patch.write(b"\xad\xca\x0a\x18\x69\x03\x8d\xca\x0a\x8d\x22\x0b\x4c\x2d\xf0")  # and HP-up gives +3
         patch.seek(0x03f032 + rom_offset)
         patch.write(b"\xa9\x80\x1c\xec\x09\xa9\x25\x8d\xf9\x06\xea\xea\xea")
         patch.seek(0x03f051 + rom_offset)
