@@ -12,9 +12,8 @@ from .models.enums.goal import Goal
 from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
-from .models.enums.sprites import Sprite
 
-VERSION = "3.0.4"
+VERSION = "3.0.5"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -33,7 +32,6 @@ FORCE_CHANGE = b"\x22\x30\xfd\x88"
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
 AG_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "AG" + os.path.sep
-SPRITE_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "sprites" + os.path.sep
 
 
 def __get_data_file__(data_filename: str) -> BinaryIO:
@@ -2953,17 +2951,6 @@ class Randomizer:
             for pluginfilename in os.listdir(AG_PLUGIN_PATH):
                 if pluginfilename[-4:] == ".bin":
                     f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
-                    patch.seek(int(pluginfilename[:6],16) + rom_offset)
-                    patch.write(f_plugin.read())
-                    f_plugin.close
-
-        # Custom sprite
-        custom_sprite_value = settings.sprite.value.lower()
-        if custom_sprite_value != Sprite.WILL.value:
-            sprite_path = SPRITE_PLUGIN_PATH + custom_sprite_value + os.path.sep
-            for pluginfilename in os.listdir(sprite_path):
-                if pluginfilename[-4:] == ".bin":
-                    f_plugin = open(sprite_path + pluginfilename, "rb")
                     patch.seek(int(pluginfilename[:6],16) + rom_offset)
                     patch.write(f_plugin.read())
                     f_plugin.close
