@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.0.5"
+VERSION = "3.1.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1516,6 +1516,14 @@ class Randomizer:
         patch.seek(int("bde16", 16) + rom_offset)
         patch.write(qt_encode("Shh... here,") + b"\xCB" + qt_encode("have some bacon.") + str_endpause)
 
+        # Test for infinite death loop
+        patch.seek(int("bd32b", 16) + rom_offset)
+        patch.write(b"\x4c\xe0\xff")
+        f_infdeath = open(BIN_PATH + "0bfe40_infdeath.bin", "rb")
+        patch.seek(int("bfe40", 16) + rom_offset)
+        patch.write(f_infdeath.read())
+        f_infdeath.close
+
         # Thank the playtesters
         patch.seek(int("be056", 16) + rom_offset)
         patch.write(b"\x80\xfa")
@@ -1531,22 +1539,23 @@ class Randomizer:
         patch.write(qt_encode("-Le Hulk   -djtifaheart") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-Mikan     -GliitchWiitch") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet  -Keypaladin") + b"\xCB")
-        patch.write(qt_encode("-NYRambler -Neomatamune") + b"\xCB")
-        patch.write(qt_encode("-Plan      -Pozzum Senpai") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Mr Freet  -Hiro-sofT") + b"\xCB")
+        patch.write(qt_encode("-NYRambler -Keypaladin") + b"\xCB")
+        patch.write(qt_encode("-Plan      -Neomatamune") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-roeya     -Skipsy") + b"\xCB")
-        patch.write(qt_encode("-Scheris   -SmashManiac") + b"\xCB")
-        patch.write(qt_encode("-SDiezal   -solarcell007") + b"\xCB")
-        patch.write(qt_encode("-Skarsnik  -steve hacks") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-roeya     -Pozzum Senpai") + b"\xCB")
+        patch.write(qt_encode("-Scheris   -Skipsy") + b"\xCB")
+        patch.write(qt_encode("-SDiezal   -SmashManiac") + b"\xCB")
+        patch.write(qt_encode("-Skarsnik  -solarcell007") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Sye990    -Tymekeeper") + b"\xCB")
-        patch.write(qt_encode("-Tsurana   -Veetorp") + b"\xCB")
-        patch.write(qt_encode("-Volor     -Verallix") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Sye990    -steve hacks") + b"\xCB")
+        patch.write(qt_encode("-Tsurana   -Tymekeeper") + b"\xCB")
+        patch.write(qt_encode("-Verallix  -Veetorp") + b"\xCB")
+        patch.write(qt_encode("-Volor     -Voranthe") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Voranthe  -wormsofcan") + b"\xCB")
-        patch.write(qt_encode("-Wilddin   -Xyrcord") + b"\xCB")
-        patch.write(qt_encode("-xIceblue  -Zeke Starr") + b"\xCB")
+        patch.write(qt_encode("-Wilddin   -wild_fang1") + b"\xCB")
+        patch.write(qt_encode("-xIceblue  -wormsofcan") + b"\xCB")
+        patch.write(qt_encode("-Xyrcord   -Zeke Starr") + b"\xCB")
         patch.write(qt_encode("-Z4t0x     -ZockerStu") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
