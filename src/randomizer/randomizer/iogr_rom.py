@@ -1553,7 +1553,7 @@ class Randomizer:
         patch.write(qt_encode("-Verallix  -Veetorp") + b"\xCB")
         patch.write(qt_encode("-Volor     -Voranthe") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Wilddin   -wild_fang1") + b"\xCB")
+        patch.write(qt_encode("-Wilddin   -wild-fang1") + b"\xCB")
         patch.write(qt_encode("-xIceblue  -wormsofcan") + b"\xCB")
         patch.write(qt_encode("-Xyrcord   -Zeke Starr") + b"\xCB")
         patch.write(qt_encode("-Z4t0x     -ZockerStu") + b"\xC9\xB4\xCE")
