@@ -10,7 +10,7 @@ from .models.enums.logic import Logic
 from .models.randomizer_data import RandomizerData
 
 MAX_INVENTORY = 15
-PROGRESS_ADJ = [1.5, 1.25, 1, 1]  # Required items are more likely to be placed in easier modes
+PROGRESS_ADJ = [1.5, 1.25, 1, 0.75]  # Required items are more likely to be placed in easier modes
 MAX_CYCLES = 100
 INACCESSIBLE = 100
 
@@ -381,7 +381,7 @@ class World:
                         probability *= float(self.item_pool[item][0]) / float((sum_abilities - j))
                         j += 1
                     if item in self.required_items:
-                        probability *= PROGRESS_ADJ[self.mode]
+                        probability *= PROGRESS_ADJ[self.difficulty]
             probabilities.append([probability, current_prereq])
             sum_prob += probability
             sum_edges += 1
@@ -413,27 +413,34 @@ class World:
         for area in maps:
             random.shuffle(area)
 
-        boss_rewards = 4 - self.mode
+        boss_rewards = 4
 
-        rewards = []  # Total rewards by mode (HP/STR/DEF)
-        if self.mode == 0:  # Easy: 10/7/7
+        rewards = []    # Total rewards by type (HP/STR/DEF)
+                        # Fill in gaps with 0s to ensure consistent placement across player levels
+        if self.level == 0:  # Beginner: 10/7/7
             rewards += [1] * 10
             rewards += [2] * 7
             rewards += [3] * 7
-        elif self.mode == 1:  # Normal: 10/4/4
+        elif self.level == 1:  # Intermediate: 10/4/4
             rewards += [1] * 10
             rewards += [2] * 4
+            rewards += [0] * 3
             rewards += [3] * 4
-        elif self.mode == 2:  # Hard: 8/2/2
+            rewards += [0] * 3
+        elif self.level == 2:  # Advanced: 8/2/2
             rewards += [1] * 8
+            rewards += [0] * 2
             rewards += [2] * 2
+            rewards += [0] * 5
             rewards += [3] * 2
-        elif self.mode == 3:  # Extreme: 6/0/0
+            rewards += [0] * 5
+        elif self.level == 3:  # Expert: 6/0/0
             rewards += [1] * 6
+            rewards += [0] * 18
 
         random.shuffle(rewards)
 
-        # Add in rewards, where applicable, by difficulty
+        # Allocate rewards to maps
         for area in maps:
             i = 0
             while i < boss_rewards:
@@ -498,8 +505,8 @@ class World:
             self.item_pool[35][4] = True
             self.item_pool[38][4] = True
 
-        # Solid Arm can only be required in Extreme
-        if self.mode != 3:
+        # Solid Arm can only be required in Expert
+        if self.difficulty != 3:
             self.graph[82][1].remove(67)
 
         # Random start location
@@ -543,22 +550,22 @@ class World:
             self.item_pool[37][0] = 0  # Lola's Letter
 
             # Add in alternate items, by difficulty
-            if self.mode == 0:
+            if self.difficulty == 0:
                 self.item_pool[0][0]  += 0  # Nothing
                 self.item_pool[6][0]  += 1  # Herb
                 self.item_pool[42][0] += 2  # DEF Jewel
                 self.item_pool[43][0] += 2  # STR Jewel
-            elif self.mode == 1:
+            elif self.difficulty == 1:
                 self.item_pool[0][0]  += 1  # Nothing
                 self.item_pool[6][0]  += 2  # Herb
                 self.item_pool[42][0] += 1  # DEF Jewel
                 self.item_pool[43][0] += 1  # STR Jewel
-            elif self.mode == 2:
+            elif self.difficulty == 2:
                 self.item_pool[0][0]  += 2  # Nothing
                 self.item_pool[6][0]  += 1  # Herb
                 self.item_pool[42][0] += 1  # DEF Jewel
                 self.item_pool[43][0] += 1  # STR Jewel
-            elif self.mode == 3:
+            elif self.difficulty == 3:
                 self.item_pool[0][0]  += 5  # Nothing
                 self.item_pool[6][0]  += 0  # Herb
                 self.item_pool[42][0] += 0  # DEF Jewel
@@ -749,11 +756,11 @@ class World:
         non_prog_items += self.list_item_pool(0, [], 3)
 
         # For Easy mode
-        if self.logic_mode == "Chaos" or self.mode > 2:
+        if self.logic_mode == "Chaos" or self.difficulty > 2:
             non_prog_items += self.list_item_pool(2)
-        elif self.mode == 0:
+        elif self.difficulty == 0:
             non_prog_items += [52]
-        elif self.mode == 1:
+        elif self.difficulty == 1:
             non_prog_items += [49, 50, 52, 53]
 
         random.shuffle(non_prog_items)
@@ -869,8 +876,8 @@ class World:
                 if item in self.required_items or item in self.good_items or location in self.trolly_locations:
                     spoiler_str = b"\xd3" + self.location_text[location] + b"\xac\x87\x80\xa3\xcb"
                     spoiler_str += self.item_text_short[item] + b"\xc0"
-                    # No in-game spoilers in Extreme mode
-                    if self.mode == 3:
+                    # No in-game spoilers in Expert mode
+                    if self.difficulty >= 3:
                         spoiler_str = b"\xd3\x8d\x88\x82\x84\xac\xa4\xa2\xa9\xac\x83\x8e\x83\x8e\x8d\x86\x8e\x4f\xc0"
                     self.spoilers.append(spoiler_str)
                     # print item, location
@@ -888,14 +895,14 @@ class World:
         elif self.kara == 5:
             kara_txt = "Ankor Wat"
 
-        if self.mode == 0:
-            mode_txt = "Easy"
-        elif self.mode == 1:
-            mode_txt = "Normal"
-        elif self.mode == 2:
-            mode_txt = "Hard"
-        elif self.mode == 3:
-            mode_txt = "Extreme"
+        if self.difficulty == 0:
+            difficulty_txt = "Easy"
+        elif self.difficulty == 1:
+            difficulty_txt = "Normal"
+        elif self.difficulty == 2:
+            difficulty_txt = "Hard"
+        elif self.difficulty == 3:
+            difficulty_txt = "Extreme"
 
         spoiler = dict()
         spoiler["version"] = version
@@ -904,7 +911,7 @@ class World:
         spoiler["goal"] = str(self.goal)
         spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
         spoiler["logic"] = str(self.logic_mode)
-        spoiler["difficulty"] = str(mode_txt)
+        spoiler["difficulty"] = str(difficulty_txt)
         spoiler["statues_required"] = self.statues
         spoiler["boss_order"] = self.boss_order
         spoiler["kara_location"] = kara_txt
@@ -1426,7 +1433,8 @@ class World:
 
         self.firebird = settings.firebird
         self.start_loc = 10
-        self.mode = settings.difficulty.value
+        self.level = settings.level.value
+        self.difficulty = settings.difficulty.value
         self.kara = kara
         self.gem = gem
         self.incatile = incatile
