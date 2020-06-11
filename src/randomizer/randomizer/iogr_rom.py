@@ -2654,11 +2654,14 @@ class Randomizer:
         patch.write(death_list[random.randint(0, len(death_list) - 1)])
         # patch.write(death_list[0])
 
-        # Change Fredan and Shadow death pointers
-        patch.seek(int("d7b2", 16) + rom_offset)
-        patch.write(b"\xc2\xd7")
-        patch.seek(int("d7b8", 16) + rom_offset)
-        patch.write(b"\xc2\xd7")
+        # Standardize text, check for infinite death loop
+        patch.seek(int("d7a2", 16) + rom_offset)
+        patch.write(b"\xAD\xCA\x0A\xF0\x06\x02\xBF\xC2\xD7\x80\x0D\x02\xBF\xF0\xFD\x80\x07")
+
+        f_pi = open(BIN_PATH + "00fdf0_pi.bin", "rb")
+        patch.seek(int("fdf0", 16) + rom_offset)
+        patch.write(f_pi.read())
+        f_pi.close()
 
         ##########################################################################
         #                   Randomize item and ability placement
