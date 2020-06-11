@@ -608,6 +608,13 @@ class World:
             for x in ds_unlock:
                 self.item_locations[x][2] = False
 
+        # Red Jewel Hunts change the graph
+        if self.goal == "Red Jewel Hunt":
+            self.logic[24][1] = 70
+            self.logic[25][1] = 70
+            self.logic[26][1] = 70
+            self.logic[27][1] = 70
+
         # Change graph logic depending on Kara's location
         if self.kara == 1:
             self.logic[150][2][0][1] = 1
@@ -796,8 +803,7 @@ class World:
                 goal = False
                 print("ERROR: Inventory capacity exceeded")
             else:
-                goal = (("Gaia" in self.goal and self.graph[70][0]) or
-                        (self.goal == "Red Jewel Hunt" and self.graph[68][0]))
+                goal = self.graph[70][0]
 
             # Get list of new progression options
             progression_list = self.progression_list(start_items)
