@@ -11,7 +11,7 @@ from randomizer.models.enums.level import Level
 from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.logic import Logic
-from randomizer.models.enums.sprites import Sprite
+#from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
@@ -120,7 +120,7 @@ def generate_ROM():
     try:
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), get_level(), get_sprite())
+            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), get_level())#, get_sprite())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -253,7 +253,7 @@ tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W
 tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
+#tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
@@ -325,7 +325,7 @@ statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=
 glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=11, column=1)
 boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=12, column=1)
 open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
-sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
+#sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
 level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
