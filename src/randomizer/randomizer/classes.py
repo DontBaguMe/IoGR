@@ -417,24 +417,24 @@ class World:
 
         rewards = []    # Total rewards by type (HP/STR/DEF)
                         # Fill in gaps with 0s to ensure consistent placement across player levels
-        if self.level == 0:  # Beginner: 10/7/7
+        if self.difficulty == 0:  # Beginner: 10/7/7
             rewards += [1] * 10
             rewards += [2] * 7
             rewards += [3] * 7
-        elif self.level == 1:  # Intermediate: 10/4/4
+        elif self.difficulty == 1:  # Intermediate: 10/4/4
             rewards += [1] * 10
             rewards += [2] * 4
             rewards += [0] * 3
             rewards += [3] * 4
             rewards += [0] * 3
-        elif self.level == 2:  # Advanced: 8/2/2
+        elif self.difficulty == 2:  # Advanced: 8/2/2
             rewards += [1] * 8
             rewards += [0] * 2
             rewards += [2] * 2
             rewards += [0] * 5
             rewards += [3] * 2
             rewards += [0] * 5
-        elif self.level == 3:  # Expert: 6/0/0
+        elif self.difficulty == 3:  # Expert: 6/0/0
             rewards += [1] * 6
             rewards += [0] * 18
 
@@ -1439,7 +1439,7 @@ class World:
 
         self.firebird = settings.firebird
         self.start_loc = 10
-        self.level = settings.level.value
+#        self.level = settings.level.value
         self.difficulty = settings.difficulty.value
         self.kara = kara
         self.gem = gem

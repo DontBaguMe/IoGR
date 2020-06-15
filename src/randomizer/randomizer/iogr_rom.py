@@ -181,15 +181,15 @@ class Randomizer:
 
         # Put randomizer hash code on start screen
         patch.seek(int("1da4c", 16) + rom_offset)
-        #patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
-        if settings.level.value == 0:
-            patch.write(b"\x90\x42\x45\x47\x49\x4E\x4E\x45\x52\x90\x90")
-        elif settings.level.value == 1:
-            patch.write(b"\x90\x90\x49\x4E\x54\x45\x52\x4D\x90\x90\x90")
-        elif settings.level.value == 2:
-            patch.write(b"\x90\x41\x44\x56\x41\x4E\x43\x45\x44\x90\x90")
-        elif settings.level.value == 3:
-            patch.write(b"\x90\x90\x45\x58\x50\x45\x52\x54\x90\x90\x90")
+        patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
+#        if settings.level.value == 0:
+#            patch.write(b"\x90\x42\x45\x47\x49\x4E\x4E\x45\x52\x90\x90")
+#        elif settings.level.value == 1:
+#            patch.write(b"\x90\x90\x49\x4E\x54\x45\x52\x4D\x90\x90\x90")
+#        elif settings.level.value == 2:
+#            patch.write(b"\x90\x41\x44\x56\x41\x4E\x43\x45\x44\x90\x90")
+#        elif settings.level.value == 3:
+#            patch.write(b"\x90\x90\x45\x58\x50\x45\x52\x54\x90\x90\x90")
 
         hash_str = filename
         h = hashlib.sha256()
@@ -266,7 +266,7 @@ class Randomizer:
         f_mapdata_orig.close
 
         # Insert tutorial map in Beginner mode
-        if settings.level.value == 0:
+        if settings.difficulty.value == 0:
             f_mapdata.seek(0)
             addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
             f_mapdata.seek(addr)
@@ -413,7 +413,7 @@ class Randomizer:
         patch.write(qt_encode("Here are some resources that might help you:|"))
         patch.write(qt_encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
         patch.write(qt_encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-        if settings.level.value == 0:
+        if settings.difficulty.value == 0:
             patch.write(qt_encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
         else:
             patch.write(qt_encode("- In-Game Tracker       (Beginner only)|"))
@@ -470,14 +470,14 @@ class Randomizer:
 
         # Update herb HP fill based on level
         patch.seek(int("3889f", 16) + rom_offset)
-        if settings.level.value == 0:  # Beginner = full HP
+        if settings.difficulty.value == 0:  # Beginner = full HP
             patch.write(b"\x28")
             # Also, HP jewels restore full health
             patch.seek(int("39f7a", 16) + rom_offset)
             patch.write(b"\x28")
-        elif settings.level.value == 2:  # Advanced = fill 4 HP
+        elif settings.difficulty.value == 2:  # Advanced = fill 4 HP
             patch.write(b"\x04")
-        elif settings.level.value == 3:  # Expert = fill 2 HP
+        elif settings.difficulty.value == 3:  # Expert = fill 2 HP
             patch.write(b"\x02")
 
         # Change item functionality for game variants
@@ -585,6 +585,10 @@ class Randomizer:
         patch.write(f_switches.read())
         f_switches.close
 
+        # Hardcode audio to stereo (makes room for Player Level)
+        patch.seek(int("be67c", 16) + rom_offset)
+        patch.write(b"\xa9\x00\x00")
+
         ##########################################################################
         #                         Modify South Cape events
         ##########################################################################
@@ -632,7 +636,7 @@ class Randomizer:
         # patch.write(qt_encode("Max stats baby!",True))
 
         # Turns house in South Cape into item-tracking overworld map (Beginner only)
-        if settings.level.value == 0:
+        if settings.difficulty.value == 0:
             patch.seek(int("18480", 16) + rom_offset)
             patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
             patch.seek(int("1854e", 16) + rom_offset)
@@ -770,9 +774,9 @@ class Randomizer:
 
         # Adjust timer by level
         timer = 20
-        if settings.level.value == 0:
+        if settings.difficulty.value == 0:
             timer += 5
-        elif settings.level.value >= 3:
+        elif settings.difficulty.value >= 3:
             timer -= 5
         if settings.enemizer.value != Enemizer.NONE.value:
             timer += 5
@@ -1231,6 +1235,10 @@ class Randomizer:
         # Speed up store line
         patch.seek(int("7d5e1", 16) + rom_offset)
         patch.write(b"\x00\x01")
+
+        # Simplify Ann logic
+        patch.seek(int("7df43", 16) + rom_offset)
+        patch.write(b"\x80\x0a")
 
         # Change vendor event, allows for only one item acquisition
         # Note: this cannibalizes the following event
@@ -1831,16 +1839,16 @@ class Randomizer:
         #                        Balance Enemy Stats
         ##########################################################################
         # Determine enemy stats, by level
-        if settings.level.value == 0:
+        if settings.difficulty.value == 0:
             f_enemies = open(BIN_PATH + "01abf0_enemiesbeginner.bin", "rb")
-        elif settings.level.value == 1:
+        elif settings.difficulty.value == 1:
             f_enemies = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
-        elif settings.level.value == 2:
+        elif settings.difficulty.value == 2:
             f_enemies = open(BIN_PATH + "01abf0_enemiesadvanced.bin", "rb")
-        elif settings.level.value == 3:
+        elif settings.difficulty.value == 3:
             f_enemies = open(BIN_PATH + "01abf0_enemiesexpert.bin", "rb")
 
-        if settings.level.value < 4:
+        if settings.difficulty.value < 4:
             patch.seek(int("1abf0", 16) + rom_offset)
             patch.write(f_enemies.read())
             f_enemies.close
@@ -1999,7 +2007,7 @@ class Randomizer:
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
-        snake_target = int(snake_timer * snakes_per_sec[settings.level.value] * snake_adj)
+        snake_target = int(snake_timer * snakes_per_sec[settings.difficulty.value] * snake_adj)
 
         snake_frames_str = format((60 * snake_timer) % 256, "02x") + format(int((60 * snake_timer) / 256), "02x")
         snake_target_str = format(int(snake_target / 10), "x") + format(snake_target % 10, "x")
