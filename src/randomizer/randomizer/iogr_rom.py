@@ -181,15 +181,7 @@ class Randomizer:
 
         # Put randomizer hash code on start screen
         patch.seek(int("1da4c", 16) + rom_offset)
-        #patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
-        if settings.level.value == 0:
-            patch.write(b"\x90\x42\x45\x47\x49\x4E\x4E\x45\x52\x90\x90")
-        elif settings.level.value == 1:
-            patch.write(b"\x90\x90\x49\x4E\x54\x45\x52\x4D\x90\x90\x90")
-        elif settings.level.value == 2:
-            patch.write(b"\x90\x41\x44\x56\x41\x4E\x43\x45\x44\x90\x90")
-        elif settings.level.value == 3:
-            patch.write(b"\x90\x90\x45\x58\x50\x45\x52\x54\x90\x90\x90")
+        patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
 
         hash_str = filename
         h = hashlib.sha256()
@@ -266,7 +258,8 @@ class Randomizer:
         f_mapdata_orig.close
 
         # Insert tutorial map in Beginner mode
-        if settings.level.value == 0:
+#        if settings.level.value == 0:
+        if True:
             f_mapdata.seek(0)
             addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
             f_mapdata.seek(addr)
@@ -412,11 +405,9 @@ class Randomizer:
         patch.write(b"\xce" + qt_encode("WHAT IF I'M STUCK?      There are a lot of item locations in this game! It's easy to get stuck.|"))
         patch.write(qt_encode("Here are some resources that might help you:|"))
         patch.write(qt_encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
+        patch.write(qt_encode("- EmoTracker            Download the IoGR package. Includes a map tracker!|"))
         patch.write(qt_encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-        if settings.level.value == 0:
-            patch.write(qt_encode("- In-Game Tracker       Enter the east-most house in South Cape to check your collection rate.|"))
-        else:
-            patch.write(qt_encode("- In-Game Tracker       (Beginner only)|"))
+        patch.write(qt_encode("- Map House (beginner)  Enter the east-most house in South Cape to check your collection rate.|"))
         patch.write(qt_encode("- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
 
         # Modify Lance's Letter
@@ -468,17 +459,13 @@ class Randomizer:
         patch.write(f_item28.read())
         f_item28.close
 
-        # Update herb HP fill based on level
-        patch.seek(int("3889f", 16) + rom_offset)
-        if settings.level.value == 0:  # Beginner = full HP
-            patch.write(b"\x28")
-            # Also, HP jewels restore full health
-            patch.seek(int("39f7a", 16) + rom_offset)
-            patch.write(b"\x28")
-        elif settings.level.value == 2:  # Advanced = fill 4 HP
-            patch.write(b"\x04")
-        elif settings.level.value == 3:  # Expert = fill 2 HP
-            patch.write(b"\x02")
+        # Update HP fill for herbs and HP jewels based on level
+        patch.seek(int("3889e", 16) + rom_offset)
+        patch.write(b"\x4c\x50\xfe")
+        patch.seek(int("3fe50", 16) + rom_offset)
+        patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x02\x00\x80\x0D")
+        patch.write(b"\xA9\x04\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x4C\xA1\x88")
+        patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x4C\x7C\x9F")
 
         # Change item functionality for game variants
         patch.seek(int("3fce0", 16) + rom_offset)
@@ -585,6 +572,12 @@ class Randomizer:
         patch.write(f_switches.read())
         f_switches.close
 
+        # Write room reward initialization routine
+        f_roominit = open(BIN_PATH + "00f49a_roominit.bin", "rb")
+        patch.seek(int("f49a", 16) + rom_offset)
+        patch.write(f_roominit.read())
+        f_roominit.close
+
         ##########################################################################
         #                         Modify South Cape events
         ##########################################################################
@@ -632,7 +625,8 @@ class Randomizer:
         # patch.write(qt_encode("Max stats baby!",True))
 
         # Turns house in South Cape into item-tracking overworld map (Beginner only)
-        if settings.level.value == 0:
+#        if settings.level.value == 0:
+        if True:
             patch.seek(int("18480", 16) + rom_offset)
             patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
             patch.seek(int("1854e", 16) + rom_offset)
@@ -770,14 +764,14 @@ class Randomizer:
 
         # Adjust timer by level
         timer = 20
-        if settings.level.value == 0:
-            timer += 5
-        elif settings.level.value >= 3:
-            timer -= 5
-        if settings.enemizer.value != Enemizer.NONE.value:
-            timer += 5
-            if settings.enemizer.value != Enemizer.LIMITED.value:
-                timer += 5
+#        if settings.level.value == 0:
+#            timer += 5
+#        elif settings.level.value >= 3:
+#            timer -= 5
+#        if settings.enemizer.value != Enemizer.NONE.value:
+#            timer += 5
+#            if settings.enemizer.value != Enemizer.LIMITED.value:
+#                timer += 5
         patch.seek(int("4f8b8", 16) + rom_offset)
         patch.write(binascii.unhexlify(str(timer)))
 
@@ -1831,19 +1825,19 @@ class Randomizer:
         #                        Balance Enemy Stats
         ##########################################################################
         # Determine enemy stats, by level
-        if settings.level.value == 0:
+#        if settings.level.value == 0:
+        if True:
             f_enemies = open(BIN_PATH + "01abf0_enemiesbeginner.bin", "rb")
-        elif settings.level.value == 1:
-            f_enemies = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
-        elif settings.level.value == 2:
-            f_enemies = open(BIN_PATH + "01abf0_enemiesadvanced.bin", "rb")
-        elif settings.level.value == 3:
-            f_enemies = open(BIN_PATH + "01abf0_enemiesexpert.bin", "rb")
+#        elif settings.level.value == 1:
+#            f_enemies = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
+#        elif settings.level.value == 2:
+#            f_enemies = open(BIN_PATH + "01abf0_enemiesadvanced.bin", "rb")
+#        elif settings.level.value == 3:
+#            f_enemies = open(BIN_PATH + "01abf0_enemiesexpert.bin", "rb")
 
-        if settings.level.value < 4:
-            patch.seek(int("1abf0", 16) + rom_offset)
-            patch.write(f_enemies.read())
-            f_enemies.close
+        patch.seek(int("1abf0", 16) + rom_offset)
+        patch.write(f_enemies.read())
+        f_enemies.close
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -1996,10 +1990,10 @@ class Randomizer:
         #                          Randomize Snake Game
         ##########################################################################
         # Randomize snake game duration/goal
-        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
+        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By difficulty
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
-        snake_target = int(snake_timer * snakes_per_sec[settings.level.value] * snake_adj)
+        snake_target = int(snake_timer * snakes_per_sec[settings.difficulty.value] * snake_adj)   # BY LEVEL???
 
         snake_frames_str = format((60 * snake_timer) % 256, "02x") + format(int((60 * snake_timer) / 256), "02x")
         snake_target_str = format(int(snake_target / 10), "x") + format(snake_target % 10, "x")
