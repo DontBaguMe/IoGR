@@ -168,6 +168,12 @@ $7E0B1C         - Dark Friar status:
                 - #$02: Explodes when attack button pressed
 
 $7E0B22         - ???? Set when you get Jeweler's 2nd reward
+$7E0B22         - Sound setting:
+		- #$00 = stereo
+		- #$01 = mono
+$7E0B24         - Controller setting:
+		- #$00 = Type 1
+		- #$01 = Type 2
 
 $7E7000-$7EA??? - GRAPHIC DATA DECOMPRESSION: Buffer for decompressed graphic data
 $7E8200-$7E82?? - HDMA table for cloud scrolling (in item menu)
