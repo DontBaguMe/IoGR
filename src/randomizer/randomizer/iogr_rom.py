@@ -207,6 +207,20 @@ class Randomizer:
         patch.write(hash_final)
 
         ##########################################################################
+        #                     Add level choice to intro screen
+        ##########################################################################
+        # Update menu logic
+        patch.seek(int("be43f", 16) + rom_offset)  # Level defaults to Intermediate
+        patch.write(b"\xA9\x01\x00\x9C\x8E\x0D")
+        patch.seek(int("bf5d2", 16) + rom_offset)  # Change "Sound" to "Level"
+        patch.write(b"\x4b\x84\xa6\x84\x8b")
+        patch.seek(int("bf667", 16) + rom_offset)  # Insert level text pointers
+        patch.write(b"\xC0\xFC\xCD\xFC\xDA\xFC\xE7\xFC")
+        patch.seek(int("bfcc0", 16) + rom_offset)  # Insert level name text
+        patch.write(b"\x41\x84\x86\x88\x8d\x8d\x84\xa2\xac\xac\xac\xac\xca\x48\x8d\xa4\x84\xa2\x8c\x84\x83\x88\x80\xa4\x84\xca")
+        patch.write(b"\x40\x83\xa6\x80\x8d\x82\x84\x83\xac\xac\xac\xac\xca\x44\xa8\xa0\x84\xa2\xa4\xac\xac\xac\xac\xac\xac\xca")
+
+        ##########################################################################
         #                           Negate useless switches
         #                 Frees up switches for the randomizer's use
         ##########################################################################
@@ -1528,34 +1542,34 @@ class Randomizer:
         patch.write(b"\x80\xfa")
         patch.seek(int("bfa80", 16) + rom_offset)
         patch.write(b"\xD3\xD2\x00\xD5\x00" + qt_encode("Contributors and Testers:") + b"\xCB")
-        patch.write(qt_encode("-Alchemic  -Austin21300") + b"\xCB")
-        patch.write(qt_encode("-Atlas     -BonzaiBier") + b"\xCB")
-        patch.write(qt_encode("-ChaozJoe  -BOWIEtheHERO") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Alchemic -Atlas") + b"\xCB")
+        patch.write(qt_encode("-ChaozJoe -BOWIEtheHERO") + b"\xCB")
+        patch.write(qt_encode("-HirosofT -BubbaSWalter") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-DoodSF    -BubbaSWalter") + b"\xCB")
-        patch.write(qt_encode("-Eppy37    -Crazyhaze") + b"\xCB")
-        patch.write(qt_encode("-Lassic    -DerTolleIgel") + b"\xCB")
-        patch.write(qt_encode("-Le Hulk   -djtifaheart") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Austin21300 -DerTolleIgel") + b"\xCB")
+        patch.write(qt_encode("-djtifaheart -DoodSF") + b"\xCB")
+        patch.write(qt_encode("-Neomatamune -Eppy37") + b"\xCB")
+        patch.write(qt_encode("-SmashManiac -Lassic") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Mikan     -GliitchWiitch") + b"\xCB")
-        patch.write(qt_encode("-Mr Freet  -Hiro-sofT") + b"\xCB")
-        patch.write(qt_encode("-NYRambler -Keypaladin") + b"\xCB")
-        patch.write(qt_encode("-Plan      -Neomatamune") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-BonzaiBier -GliitchWiitch") + b"\xCB")
+        patch.write(qt_encode("-Keypaladin -LeHulk") + b"\xCB")
+        patch.write(qt_encode("-stevehacks -Mikan") + b"\xCB")
+        patch.write(qt_encode("-Tymekeeper -Plan") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-roeya     -Pozzum Senpai") + b"\xCB")
-        patch.write(qt_encode("-Scheris   -Skipsy") + b"\xCB")
-        patch.write(qt_encode("-SDiezal   -SmashManiac") + b"\xCB")
-        patch.write(qt_encode("-Skarsnik  -solarcell007") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Crazyhaze -PozzumSenpai") + b"\xCB")
+        patch.write(qt_encode("-NYRambler -roeya") + b"\xCB")
+        patch.write(qt_encode("-wildfang1 -Skipsy") + b"\xCB")
+        patch.write(qt_encode("-ZekeStarr -solarcell007") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Sye990    -steve hacks") + b"\xCB")
-        patch.write(qt_encode("-Tsurana   -Tymekeeper") + b"\xCB")
-        patch.write(qt_encode("-Verallix  -Veetorp") + b"\xCB")
-        patch.write(qt_encode("-Volor     -Voranthe") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-MrFreet -Sye990") + b"\xCB")
+        patch.write(qt_encode("-Scheris -Veetorp") + b"\xCB")
+        patch.write(qt_encode("-SDiezal -Volor") + b"\xCB")
+        patch.write(qt_encode("-Tsurana -Wilddin") + b"\xC9\xB4\xCE")
 
-        patch.write(qt_encode("-Wilddin   -wild-fang1") + b"\xCB")
-        patch.write(qt_encode("-xIceblue  -wormsofcan") + b"\xCB")
-        patch.write(qt_encode("-Xyrcord   -Zeke Starr") + b"\xCB")
-        patch.write(qt_encode("-Z4t0x     -ZockerStu") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Skarsnik -wormsofcan") + b"\xCB")
+        patch.write(qt_encode("-Verallix -Xyrcord") + b"\xCB")
+        patch.write(qt_encode("-Voranthe -Z4t0x") + b"\xCB")
+        patch.write(qt_encode("-xIceblue -ZockerStu") + b"\xC9\xB4\xCE")
 
         patch.write(b"\xCB" + qt_encode("  Thank you all so much!"))
         patch.write(b"\xCB" + qt_encode("     This was so fun!"))
