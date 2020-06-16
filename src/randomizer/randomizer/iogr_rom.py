@@ -259,16 +259,15 @@ class Randomizer:
 
         # Insert tutorial map in Beginner mode
 #        if settings.level.value == 0:
-        if True:
-            f_mapdata.seek(0)
-            addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
-            f_mapdata.seek(addr)
-            f_mapdata.write(b"\x00\x09")
+        f_mapdata.seek(0)
+        addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
+        f_mapdata.seek(addr)
+        f_mapdata.write(b"\x00\x09")
 
-            f_mapdata.seek(0)
-            addr = f_mapdata.read().find(b"\x00\x09\x00\x02\x08")
-            f_mapdata.seek(addr)
-            f_mapdata.write(b"\x00\x07")
+        f_mapdata.seek(0)
+        addr = f_mapdata.read().find(b"\x00\x09\x00\x02\x08")
+        f_mapdata.seek(addr)
+        f_mapdata.write(b"\x00\x07")
 
         ##########################################################################
         #                        Update treasure chest data
@@ -407,8 +406,8 @@ class Randomizer:
         patch.write(qt_encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
         patch.write(qt_encode("- EmoTracker            Download the IoGR package. Includes a map tracker!|"))
         patch.write(qt_encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-        patch.write(qt_encode("- Map House (beginner)  Enter the east-most house in South Cape to check your collection rate.|"))
-        patch.write(qt_encode("- Check the Spoiler Log Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
+        patch.write(qt_encode("- Map House             Enter the east-most house in South Cape to check your collection rate.|"))
+        patch.write(qt_encode("- Spoiler Log           Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
 
         # Modify Lance's Letter
         # Prepare it to spoil Kara location
@@ -626,21 +625,20 @@ class Randomizer:
 
         # Turns house in South Cape into item-tracking overworld map (Beginner only)
 #        if settings.level.value == 0:
-        if True:
-            patch.seek(int("18480", 16) + rom_offset)
-            patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
-            patch.seek(int("1854e", 16) + rom_offset)
-            patch.write(b"\x00\x3e\x40\x02")
-            patch.seek(int("c846c", 16) + rom_offset)
-            patch.write(b"\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
+        patch.seek(int("18480", 16) + rom_offset)
+        patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
+        patch.seek(int("1854e", 16) + rom_offset)
+        patch.write(b"\x00\x3e\x40\x02")
+        patch.seek(int("c846c", 16) + rom_offset)
+        patch.write(b"\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
 
-            f_collectioncheck = open(BIN_PATH + "06dd30_collectioncheck.bin", "rb")
-            patch.seek(int("6dd30", 16) + rom_offset)
-            patch.write(f_collectioncheck.read())
-            f_collectioncheck.close
-        else:
-            patch.seek(int("491ed", 16) + rom_offset)
-            patch.write(qt_encode("This room is a lot cooler in Beginner mode.", True))
+        f_collectioncheck = open(BIN_PATH + "06dd30_collectioncheck.bin", "rb")
+        patch.seek(int("6dd30", 16) + rom_offset)
+        patch.write(f_collectioncheck.read())
+        f_collectioncheck.close
+#        else:
+#            patch.seek(int("491ed", 16) + rom_offset)
+#            patch.write(qt_encode("This room is a lot cooler in Beginner mode.", True))
 
         ##########################################################################
         #                       Modify Edward's Castle events
@@ -762,16 +760,16 @@ class Randomizer:
         patch.write(b"\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b")
         patch.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
 
-        # Adjust timer by level
+        # Adjust timer for enemizer
         timer = 20
 #        if settings.level.value == 0:
 #            timer += 5
 #        elif settings.level.value >= 3:
 #            timer -= 5
-#        if settings.enemizer.value != Enemizer.NONE.value:
-#            timer += 5
-#            if settings.enemizer.value != Enemizer.LIMITED.value:
-#                timer += 5
+        if settings.enemizer.value != Enemizer.NONE.value:
+            timer += 5
+            if settings.enemizer.value != Enemizer.LIMITED.value:
+                timer += 5
         patch.seek(int("4f8b8", 16) + rom_offset)
         patch.write(binascii.unhexlify(str(timer)))
 
@@ -1824,20 +1822,10 @@ class Randomizer:
         ##########################################################################
         #                        Balance Enemy Stats
         ##########################################################################
-        # Determine enemy stats, by level
-#        if settings.level.value == 0:
-        if True:
-            f_enemies = open(BIN_PATH + "01abf0_enemiesbeginner.bin", "rb")
-#        elif settings.level.value == 1:
-#            f_enemies = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
-#        elif settings.level.value == 2:
-#            f_enemies = open(BIN_PATH + "01abf0_enemiesadvanced.bin", "rb")
-#        elif settings.level.value == 3:
-#            f_enemies = open(BIN_PATH + "01abf0_enemiesexpert.bin", "rb")
-
-        patch.seek(int("1abf0", 16) + rom_offset)
-        patch.write(f_enemies.read())
-        f_enemies.close
+        f_enemystats = open(BIN_PATH + "02f130_enemystats.bin", "rb")
+        patch.seek(int("2f130", 16) + rom_offset)
+        patch.write(f_enemystats.read())
+        f_enemystats.close
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -1990,24 +1978,55 @@ class Randomizer:
         #                          Randomize Snake Game
         ##########################################################################
         # Randomize snake game duration/goal
-        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By difficulty
+        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
-        snake_target = int(snake_timer * snakes_per_sec[settings.difficulty.value] * snake_adj)   # BY LEVEL???
+        snake_target = []
+        snake_target.append(int(snake_timer * snakes_per_sec[0] * snake_adj))
+        snake_target.append(int(snake_timer * snakes_per_sec[1] * snake_adj))
+        snake_target.append(int(snake_timer * snakes_per_sec[2] * snake_adj))
+        snake_target.append(int(snake_timer * snakes_per_sec[3] * snake_adj))
 
         snake_frames_str = format((60 * snake_timer) % 256, "02x") + format(int((60 * snake_timer) / 256), "02x")
-        snake_target_str = format(int(snake_target / 10), "x") + format(snake_target % 10, "x")
+        snake_target_str = []
+        snake_target_str.append(format(int(snake_target[0] / 10), "x") + format(snake_target[0] % 10, "x"))
+        snake_target_str.append(format(int(snake_target[1] / 10), "x") + format(snake_target[1] % 10, "x"))
+        snake_target_str.append(format(int(snake_target[2] / 10), "x") + format(snake_target[2] % 10, "x"))
+        snake_target_str.append(format(int(snake_target[3] / 10), "x") + format(snake_target[3] % 10, "x"))
 
         # Update snake game logic with new values
         patch.seek(int("8afe6", 16) + rom_offset)   # Timer, in frames (vanilla b"\x10\x0e")
         patch.write(binascii.unhexlify(snake_frames_str))
-        patch.seek(int("8aff7", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
-        patch.write(binascii.unhexlify(snake_target_str))
+        patch.seek(int("8fdc0", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
+        patch.write(binascii.unhexlify(snake_target_str[0]))
+        patch.write(b"\x00")
+        patch.write(binascii.unhexlify(snake_target_str[1]))
+        patch.write(b"\x00")
+        patch.write(binascii.unhexlify(snake_target_str[2]))
+        patch.write(b"\x00")
+        patch.write(binascii.unhexlify(snake_target_str[3]))
+        patch.write(b"\x00")
+
+        patch.seek(int("8aff3", 16) + rom_offset)
+        patch.write(b"\x4c\xc8\xfd")
+        patch.seek(int("8fdc8", 16) + rom_offset)
+        patch.write(b"\xDA\xAD\x24\x0B\x0A\xAB\xAD\xAC\x0A\xDF\xC0\xFD\x88\xFA\x4C\xF9\xAF")
 
         # Update text to reflect changes
-        patch.seek(int("8af2e", 16) + rom_offset)
-        patch.write(qt_encode("Hit " + str(snake_target) + " snakes in " + str(snake_timer) + " seconds."))
-        patch.write(b"\xcb\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac")
+        patch.seek(int("8aeb9", 16) + rom_offset)
+        patch.write(b"\x4c\x20\xaf")
+        patch.seek(int("8af20", 16) + rom_offset)
+        patch.write(b"\xAD\x24\x0B\xF0\x18\x3A\xF0\x0F\x3A\xF0\x06\x02\xBF\x28\xFF\x80\x10")
+        patch.write(b"\x02\xBF\x00\xFF\x80\x0A\x02\xBF\xD8\xFE\x80\x04\x02\xBF\xB0\xFE\x4C\xBD\xAE")
+
+        patch.seek(int("8feb0", 16) + rom_offset)
+        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[0]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
+        patch.seek(int("8fed8", 16) + rom_offset)
+        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[1]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
+        patch.seek(int("8ff00", 16) + rom_offset)
+        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[2]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
+        patch.seek(int("8ff28", 16) + rom_offset)
+        patch.write(b"\xCE" + qt_encode("Hit " + str(snake_target[3]) + " snakes in " + str(snake_timer) + " seconds. Go!") + b"\xC0")
 
         ##########################################################################
         #                    Randomize Jeweler Reward amounts
