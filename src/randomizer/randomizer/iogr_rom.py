@@ -509,6 +509,9 @@ class Randomizer:
             patch.write(b"\x01")
             patch.seek(int("39f71", 16) + rom_offset)
             patch.write(b"\xe0\xfc\x02\xd5\x29\x60")
+            # Also, herbs suck
+            patch.seek(int("388e9", 16) + rom_offset)
+            patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
         # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
         elif settings.red_jewel_madness:
             # Start @ 40 HP
