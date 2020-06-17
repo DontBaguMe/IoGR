@@ -1836,10 +1836,22 @@ class Randomizer:
         ##########################################################################
         #                        Balance Enemy Stats
         ##########################################################################
+        # Write enemy stat tables to memory, by Level
         f_enemystats = open(BIN_PATH + "02f130_enemystats.bin", "rb")
         patch.seek(int("2f130", 16) + rom_offset)
         patch.write(f_enemystats.read())
         f_enemystats.close
+
+        # Rewrite enemy lookup routines to reference new tables
+        patch.seek(int("3cffb", 16) + rom_offset)
+        patch.write(b"\x20\x90\xfe")
+        patch.seek(int("3fe90", 16) + rom_offset)
+        patch.write(b"\x48\xAD\x24\x0B\xF0\x18\x3A\xF0\x0F\x3A\xF0\x06\x68\x69\x70\xF6\x80\x10")
+        patch.write(b"\x68\x69\xB0\xF4\x80\x0A\x68\x69\xF0\xF2\x80\x04\x68\x69\x30\xF1\x60")
+        patch.seek(int("3d003", 16) + rom_offset)
+        patch.write(b"\x20\x80\xfe")
+        patch.seek(int("3fe80", 16) + rom_offset)
+        patch.write(b"\xDA\xBB\xBF\x00\x00\x82\xFA\x60")
 
         ##########################################################################
         #                            Randomize Inca tile
