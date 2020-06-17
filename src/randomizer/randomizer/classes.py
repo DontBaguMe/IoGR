@@ -1121,11 +1121,13 @@ class World:
         if "Open Mode" in self.variant:
             switch_str.append(b"\x02\xcc\x11\x02\xcc\x14\x02\xcc\x1f\x02\xcc\x2a\x02\xcc\x41")
 
-        if switch_str:
-            f.seek(int("bfe3b", 16) + rom_offset)
-            for x in switch_str:
-                f.write(x)
-            f.write(b"\x02\xe0")
+        if self.enemizer != "None" and self.enemizer != "Limited":
+            switch_str.append(b"\x02\xcc\xa0\x02\xcc\xa1")
+
+        f.seek(int("1ffb0", 16) + rom_offset)
+        for x in switch_str:
+            f.write(x)
+        f.write(b"\x6b")
 
         # Swapped exits
         for exit in self.exits:

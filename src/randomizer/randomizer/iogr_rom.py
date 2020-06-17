@@ -28,6 +28,7 @@ GEMS_EXTREME = 50
 
 INV_FULL = b"\x5c\x8e\xc9\x80"
 FORCE_CHANGE = b"\x22\x30\xfd\x88"
+CLEAR_ENEMIES = b"\x22\x9B\xFF\x81"
 
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
@@ -140,6 +141,17 @@ class Randomizer:
 
         random.seed(settings.seed)
         statues_required = self.__get_required_statues__(settings)
+
+        ##########################################################################
+        #                          Global functions/misc
+        ##########################################################################
+        # Write code for clearing enemy tally data
+        patch.seek(int("1ff9b", 16) + rom_offset)
+        patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
+
+        # Clear space for additional switches, if any
+        patch.seek(int("1ffb0", 16) + rom_offset)
+        patch.write(b"\x00" * 80)
 
         ##########################################################################
         #                             Early Firebird
@@ -1110,8 +1122,8 @@ class Randomizer:
         # Entering this area clears your enemy defeat count and forces change to Will
         patch.seek(int("6bff7", 16) + rom_offset)
         patch.write(b"\x00\x00\x30\x02\x40\x01\x0F\x01\xC0\x6b")
-        patch.write(b"\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6")
-        patch.write(FORCE_CHANGE + b"\x02\xE0")
+        #patch.write(b"\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6")
+        patch.write(CLEAR_ENEMIES + FORCE_CHANGE + b"\x02\xE0")
 
         # Insert new arrangement for map 109, takes out rock to prevent spin dash softlock
         f_angelmap = open(BIN_PATH + "1a5a37_angelmap.bin", "rb")
@@ -1430,7 +1442,7 @@ class Randomizer:
         patch.seek(int("9999b", 16) + rom_offset)
         patch.write(b"\x4c\xd0\xf6")
         patch.seek(int("9f6d0", 16) + rom_offset)
-        patch.write(b"\x02\xd0\xdc\x00\xa0\x99\x02\xd0\x3e\x00\xa0\x99\x02\xd0\xb4\x01\x9a\x99\x4c\xa0\x99")
+        patch.write(CLEAR_ENEMIES + b"\x02\xd0\xdc\x00\xa0\x99\x02\xd0\x3e\x00\xa0\x99\x02\xd0\xb4\x01\x9a\x99\x4c\xa0\x99")
         patch.seek(int("999aa", 16) + rom_offset)
         patch.write(b"\x4c\xf0\xf6")
         patch.seek(int("9f6f0", 16) + rom_offset)
