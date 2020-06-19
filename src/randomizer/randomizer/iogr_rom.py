@@ -178,10 +178,10 @@ class Randomizer:
             patch.seek(int("3e03a", 16) + rom_offset)
             patch.write(b"\x80\x00")
             patch.seek(int("eaf0", 16) + rom_offset)
-            patch.write(b"\x20\xa0\xf4\xea\xea")
-            patch.seek(int("f4a0", 16) + rom_offset)
-            patch.write(b"\x02\x3b\x71\xb2\xf4\x80\xa9\x00\x10\x04\x12\x60")
-            patch.seek(int("f4b0", 16) + rom_offset)
+            patch.write(b"\x22\x28\xf8\x82\xea")
+            patch.seek(0x02f828 + rom_offset)
+            patch.write(b"\x02\x3b\x71\x36\xf8\x82\xa9\x00\x10\x04\x12\x6b")
+            patch.seek(0x02f834 + rom_offset)
             patch.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
 
         ##########################################################################
@@ -224,7 +224,13 @@ class Randomizer:
         # Update menu logic
         patch.seek(int("be43f", 16) + rom_offset)  # Level defaults to Intermediate
         patch.write(b"\xA9\x01\x00\x9C\x8E\x0D")
+        patch.seek(0x0be4ae + rom_offset)          # 3 difficulty levels available
+        patch.write(b"\x03")
+        patch.seek(0x0be7b5 + rom_offset)          # --- and on the other menu too
+        patch.write(b"\x03")
         patch.seek(int("bf5d2", 16) + rom_offset)  # Change "Sound" to "Level"
+        patch.write(b"\x4b\x84\xa6\x84\x8b")
+        patch.seek(0x0bf55a + rom_offset)          # --- and on the other menu too
         patch.write(b"\x4b\x84\xa6\x84\x8b")
         patch.seek(int("bf667", 16) + rom_offset)  # Insert level text pointers
         patch.write(b"\xC0\xFC\xCD\xFC\xDA\xFC\xE7\xFC")
@@ -1860,14 +1866,28 @@ class Randomizer:
 
         # Rewrite enemy lookup routines to reference new tables
         patch.seek(int("3cffb", 16) + rom_offset)
-        patch.write(b"\x20\x90\xfe")
-        patch.seek(int("3fe90", 16) + rom_offset)
+        patch.write(b"\x20\xa1\xfe")
+        patch.seek(int("3fea1", 16) + rom_offset)
         patch.write(b"\x48\xAD\x24\x0B\xF0\x18\x3A\xF0\x0F\x3A\xF0\x06\x68\x69\x70\xF6\x80\x10")
         patch.write(b"\x68\x69\xB0\xF4\x80\x0A\x68\x69\xF0\xF2\x80\x04\x68\x69\x30\xF1\x60")
         patch.seek(int("3d003", 16) + rom_offset)
         patch.write(b"\x20\x80\xfe")
         patch.seek(int("3fe80", 16) + rom_offset)
         patch.write(b"\xDA\xBB\xBF\x00\x00\x82\xFA\x60")
+        patch.write(b"\xDA\xBB\xBF\x01\x00\x82\xFA\x60")
+        patch.write(b"\xDA\xBB\xBF\x02\x00\x82\xFA\x60")
+        patch.write(b"\xDA\xA8\xBB\xBF\x03\x00\x82\xFA\x6B")   # inconsistent APIs are a problem for future Bagu
+        patch.seek(0x03be52 + rom_offset)
+        patch.write(b"\x82")
+        patch.seek(0x03bfba + rom_offset)
+        patch.write(b"\x20\x80\xfe")
+        patch.seek(0x03bfc3 + rom_offset)
+        patch.write(b"\x20\x90\xfe")
+        patch.seek(0x03c45d + rom_offset)
+        patch.write(b"\x20\x88\xfe")
+        patch.seek(0x00dc07 + rom_offset)
+        patch.write(b"\x22\x98\xfe\x83")
+        
 
         ##########################################################################
         #                            Randomize Inca tile
