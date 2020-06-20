@@ -108,7 +108,7 @@ def generate_ROM():
     try:
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), get_sprite())
+            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), get_sprite(), debug.get())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -191,6 +191,11 @@ def firebird_help():
     tkinter.messagebox.showinfo("Firebird", "\n".join(lines))
 
 
+def debug_help():
+    lines = ["Start the game with a debugging tool in your inventory."]
+    tkinter.messagebox.showinfo("Debug", "\n".join(lines))
+
+
 def variant_help():
     lines = ["The following variants are currently available:", "", "OHKO:", " - Player starts with 1 HP", " - All HP upgrades are removed or negated"]
     tkinter.messagebox.showinfo("Variants", "\n".join(lines))
@@ -242,6 +247,7 @@ tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tk
 tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Debug Mode").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -257,6 +263,9 @@ logic.set("Completable")
 
 firebird = tkinter.IntVar(root)
 firebird.set(0)
+
+debug = tkinter.IntVar(root)
+debug.set(0)
 
 start = tkinter.StringVar(root)
 start_choices = ["South Cape", "Safe", "Unsafe", "Forced Unsafe"]
@@ -309,6 +318,7 @@ glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1,
 boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=12, column=1)
 open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
 sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
+debug_checkbox = tkinter.Checkbutton(mainframe, variable=debug, onvalue=1, offvalue=0).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(mainframe, text='Generate Seed', command=generate_seed).grid(row=1, column=2)
@@ -321,5 +331,6 @@ tkinter.Button(mainframe, text='?', command=firebird_help).grid(row=5, column=2)
 tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
 tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
+tkinter.Button(mainframe, text='?', command=debug_help).grid(row=15, column=2)
 
 root.mainloop()

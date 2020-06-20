@@ -1425,6 +1425,7 @@ class World:
             self.variant.append("Open Mode")
 
         self.firebird = settings.firebird
+        self.debug = settings.debug
         self.start_loc = 10
         self.mode = settings.difficulty.value
         self.kara = kara

@@ -29,6 +29,7 @@ parser.add_argument('--overworld-shuffle', dest="overworld_shuffle", type=bool, 
 parser.add_argument('--dungeon-shuffle', dest="dungeon_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--open-mode', dest="open_mode", type=bool, required=False, default=False)
 parser.add_argument('--sprite', dest="sprite", type=Sprite, required=False, default=Sprite.WILL)
+parser.add_argument('--debug', dest="debug", type=bool, required=False, default=False)
 
 modeParser = parser.add_mutually_exclusive_group(required=False)
 modeParser.add_argument('--ohko', dest="ohko", action='store_true')

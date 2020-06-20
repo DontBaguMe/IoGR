@@ -34,6 +34,7 @@ OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep +
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
 AG_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "AG" + os.path.sep
 SPRITE_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "sprites" + os.path.sep
+DEBUG_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "debug" + os.path.sep
 
 
 def __get_data_file__(data_filename: str) -> BinaryIO:
@@ -2953,6 +2954,15 @@ class Randomizer:
             for pluginfilename in os.listdir(AG_PLUGIN_PATH):
                 if pluginfilename[-4:] == ".bin":
                     f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
+                    patch.seek(int(pluginfilename[:6],16) + rom_offset)
+                    patch.write(f_plugin.read())
+                    f_plugin.close
+        
+        # Blue Journal becomes debugging tool
+        if settings.debug == 1:
+            for pluginfilename in os.listdir(DEBUG_PLUGIN_PATH):
+                if pluginfilename[-4:] == ".bin":
+                    f_plugin = open(DEBUG_PLUGIN_PATH + pluginfilename, "rb")
                     patch.seek(int(pluginfilename[:6],16) + rom_offset)
                     patch.write(f_plugin.read())
                     f_plugin.close
