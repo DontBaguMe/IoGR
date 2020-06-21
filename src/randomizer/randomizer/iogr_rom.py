@@ -2075,7 +2075,7 @@ class Randomizer:
         patch.seek(int("8aff3", 16) + rom_offset)
         patch.write(b"\x4c\xc8\xfd")
         patch.seek(int("8fdc8", 16) + rom_offset)
-        patch.write(b"\xDA\xAD\x24\x0B\x0A\xAB\xAD\xAC\x0A\xDF\xC0\xFD\x88\xFA\x4C\xF9\xAF")
+        patch.write(b"\xDA\xAD\x24\x0B\x0A\xAA\xAD\xAC\x0A\xDF\xC0\xFD\x88\xFA\x4C\xF9\xAF")
 
         # Update text to reflect changes
         patch.seek(int("8aeb9", 16) + rom_offset)
