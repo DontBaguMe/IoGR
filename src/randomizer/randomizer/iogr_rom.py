@@ -2062,7 +2062,7 @@ class Randomizer:
         # Update snake game logic with new values
         patch.seek(int("8afe6", 16) + rom_offset)   # Timer, in frames (vanilla b"\x10\x0e")
         patch.write(binascii.unhexlify(snake_frames_str))
-        patch.seek(int("8fdc0", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
+        patch.seek(int("8ff50", 16) + rom_offset)   # Snake target BCD (vanilla b"\x51")
         patch.write(binascii.unhexlify(snake_target_str[0]))
         patch.write(b"\x00")
         patch.write(binascii.unhexlify(snake_target_str[1]))
@@ -2073,9 +2073,9 @@ class Randomizer:
         patch.write(b"\x00")
 
         patch.seek(int("8aff3", 16) + rom_offset)
-        patch.write(b"\x4c\xc8\xfd")
-        patch.seek(int("8fdc8", 16) + rom_offset)
-        patch.write(b"\xDA\xAD\x24\x0B\x0A\xAA\xAD\xAC\x0A\xDF\xC0\xFD\x88\xFA\x4C\xF9\xAF")
+        patch.write(b"\x4c\x58\xff")
+        patch.seek(int("8ff58", 16) + rom_offset)
+        patch.write(b"\xDA\xAD\x24\x0B\x0A\xAA\xAD\xAC\x0A\xDF\x50\xFF\x88\xFA\x4C\xF9\xAF")
 
         # Update text to reflect changes
         patch.seek(int("8aeb9", 16) + rom_offset)
