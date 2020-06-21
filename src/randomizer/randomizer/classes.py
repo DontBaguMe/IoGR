@@ -1550,9 +1550,9 @@ class World:
             13: [8, 1, False, 0, [], "4d32f", "4d4b1", "", "", "Edward's Prison: Hamlet             "],  # text 4d5f4?
             14: [8, 2, False, 0, [51, 52, 53], "c8637", "", "", b"\x0b", "Edward's Prison: Dark Space         "],
 
-            15: [9, 1, False, 0, [2], "1AFA9", "", "", "", "Underground Tunnel: Spike's Chest   "],
-            16: [9, 1, False, 0, [2], "1AFAE", "", "", "", "Underground Tunnel: Small Room Chest"],
-            17: [10, 1, False, 0, [2], "1AFB3", "", "", "", "Underground Tunnel: Ribber's Chest  "],
+            15: [9, 1, False, 0, [], "1AFA9", "", "", "", "Underground Tunnel: Spike's Chest   "],
+            16: [9, 1, False, 0, [], "1AFAE", "", "", "", "Underground Tunnel: Small Room Chest"],
+            17: [10, 1, False, 0, [], "1AFB3", "", "", "", "Underground Tunnel: Ribber's Chest  "],
             18: [10, 1, False, 0, [], "F61D", "F62D", "F643", "", "Underground Tunnel: Barrels         "],
             19: [10, 2, True, 0, [], "c8aa2", "Unsafe", b"\xA0\x00\xD0\x04\x83\x00\x74", b"\x12",
                  "Underground Tunnel: Dark Space      "],  # Always open
@@ -1565,10 +1565,10 @@ class World:
             23: [73, 1, False, 0, [], "4fae1", "4faf9", "4fb16", "", "Moon Tribe: Cave                    "],
 
             24: [15, 1, False, 0, [], "1AFB8", "", "", "", "Inca Ruins: Diamond-Block Chest     "],
-            25: [16, 1, False, 0, [7], "1AFC2", "", "", "", "Inca Ruins: Broken Statues Chest    "],
-            26: [16, 1, False, 0, [7], "1AFBD", "", "", "", "Inca Ruins: Stone Lord Chest        "],
-            27: [16, 1, False, 0, [7], "1AFC6", "", "", "", "Inca Ruins: Slugger Chest           "],
-            28: [16, 1, False, 0, [7], "9c5bd", "9c614", "9c637", "", "Inca Ruins: Singing Statue          "],
+            25: [83, 1, False, 0, [], "1AFC2", "", "", "", "Inca Ruins: Broken Statues Chest    "],
+            26: [16, 1, False, 0, [], "1AFBD", "", "", "", "Inca Ruins: Stone Lord Chest        "],
+            27: [16, 1, False, 0, [], "1AFC6", "", "", "", "Inca Ruins: Slugger Chest           "],
+            28: [16, 1, False, 0, [], "9c5bd", "9c614", "9c637", "", "Inca Ruins: Singing Statue          "],
             29: [16, 2, True, 0, [], "c9302", "Unsafe", b"\x10\x01\x90\x00\x83\x00\x32", b"\x28",
                  "Inca Ruins: Dark Space 1            "],  # Always open
             30: [16, 2, False, 0, [], "c923b", "Unsafe", b"\xC0\x01\x50\x01\x83\x00\x32", b"\x26",
@@ -1766,6 +1766,7 @@ class World:
             73: [False, [], "Moon Tribe Cave", []],
             15: [False, [0, 7, 14], "Inca Ruins", [7]],
             16: [False, [15], "Inca Ruins - Behind Diamond Tile & Psycho Dash", [8]],
+            83: [False, [15], "Inca Ruins - Broken Statue Maze", []],
             17: [False, [], "Inca Ruins - Behind Wind Melody", [3, 4]],
             18: [False, [19], "Inca Ruins - Castoth", []],
             19: [False, [20], "Gold Ship", []],
@@ -1898,6 +1899,9 @@ class World:
             58: [15, 16, [[7, 1], [48, 1]]],  # Inca Ruins w/ Tile and Psycho Dash
             59: [15, 16, [[7, 1], [49, 1]]],  # Inca Ruins w/ Tile and Psycho Slide
             60: [15, 16, [[7, 1], [50, 1]]],  # Inca Ruins w/ Tile and Spin Dash
+            156: [16, 83, [[48, 1]]],  # Inca Ruins w/ Psycho Dash (maze)
+            157: [16, 83, [[49, 1]]],  # Inca Ruins w/ Psycho Slide (maze)
+            158: [16, 83, [[50, 1]]],  # Inca Ruins w/ Spin Dash (maze)
             61: [16, 17, [[8, 1]]],  # Inca Ruins w/ Wind Melody
             62: [17, 18, [[3, 1], [4, 1]]],  # Inca Ruins w/ Inca Statues
             63: [14, 73, [[48, 1]]],  # Moon Tribe Cave w/ Psycho Dash
