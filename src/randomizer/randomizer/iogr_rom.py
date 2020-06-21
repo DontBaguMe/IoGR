@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.2.2"
+VERSION = "3.3.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1890,7 +1890,7 @@ class Randomizer:
         patch.write(b"\x20\x88\xfe")
         patch.seek(0x00dc07 + rom_offset)
         patch.write(b"\x22\x98\xfe\x83")
-        
+
 
         ##########################################################################
         #                            Randomize Inca tile
