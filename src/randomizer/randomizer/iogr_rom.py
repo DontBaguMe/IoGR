@@ -1875,7 +1875,8 @@ class Randomizer:
         patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x01\x00\x82\xFA\x60")       # STR
         patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x02\x00\x82\xFA\x60")       # DEF
         patch.write(b"\xA8\x20\xAD\xFE\xDA\xBB\xBF\x03\x00\x82\xFA\x6B")   # GEM, inconsistent APIs are a problem for future Bagu
-        patch.write(b"\xC0\x00\xB0\xB0\x0C\x98\xF0\x09\x38\xE9\xF0\xAB\x18\x69\x30\xF1\xA8\x60")   # Fix hardcoded stat block pointers
+        # Fix hardcoded stat block pointers
+        patch.write(b"\xC0\x00\xB0\xB0\x0C\x98\xF0\x09\x38\xE9\xF0\xAB\x18\x20\xd0\xfe\xA8\x60")
         patch.seek(0x03be52 + rom_offset)
         patch.write(b"\x82")
         patch.seek(0x03bfba + rom_offset)   # HP
