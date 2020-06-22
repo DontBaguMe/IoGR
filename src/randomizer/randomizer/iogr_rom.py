@@ -1868,28 +1868,29 @@ class Randomizer:
         f_enemystats.close
 
         # Rewrite enemy lookup routines to reference new tables
-        patch.seek(int("3cffb", 16) + rom_offset)
-        patch.write(b"\x20\xa1\xfe")
-        patch.seek(int("3fea1", 16) + rom_offset)
-        patch.write(b"\x48\xAD\x24\x0B\xF0\x18\x3A\xF0\x0F\x3A\xF0\x06\x68\x69\x70\xF6\x80\x10")
-        patch.write(b"\x68\x69\xB0\xF4\x80\x0A\x68\x69\xF0\xF2\x80\x04\x68\x69\x30\xF1\x60")
-        patch.seek(int("3d003", 16) + rom_offset)
+        patch.seek(int("3d003", 16) + rom_offset)   # HP
         patch.write(b"\x20\x80\xfe")
         patch.seek(int("3fe80", 16) + rom_offset)
-        patch.write(b"\xDA\xBB\xBF\x00\x00\x82\xFA\x60")
-        patch.write(b"\xDA\xBB\xBF\x01\x00\x82\xFA\x60")
-        patch.write(b"\xDA\xBB\xBF\x02\x00\x82\xFA\x60")
-        patch.write(b"\xDA\xA8\xBB\xBF\x03\x00\x82\xFA\x6B")   # inconsistent APIs are a problem for future Bagu
+        patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x00\x00\x82\xFA\x60")       # HP
+        patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x01\x00\x82\xFA\x60")       # STR
+        patch.write(b"\x20\xAD\xFE\xDA\xBB\xBF\x02\x00\x82\xFA\x60")       # DEF
+        patch.write(b"\xA8\x20\xAD\xFE\xDA\xBB\xBF\x03\x00\x82\xFA\x6B")   # GEM, inconsistent APIs are a problem for future Bagu
+        patch.write(b"\xC0\x00\xB0\xB0\x0C\x98\xF0\x09\x38\xE9\xF0\xAB\x18\x69\x30\xF1\xA8\x60")   # Fix hardcoded stat block pointers
         patch.seek(0x03be52 + rom_offset)
         patch.write(b"\x82")
-        patch.seek(0x03bfba + rom_offset)
+        patch.seek(0x03bfba + rom_offset)   # HP
         patch.write(b"\x20\x80\xfe")
-        patch.seek(0x03bfc3 + rom_offset)
-        patch.write(b"\x20\x90\xfe")
-        patch.seek(0x03c45d + rom_offset)
-        patch.write(b"\x20\x88\xfe")
-        patch.seek(0x00dc07 + rom_offset)
-        patch.write(b"\x22\x98\xfe\x83")
+        patch.seek(0x03bfc3 + rom_offset)   # DEF
+        patch.write(b"\x20\x96\xfe")
+        patch.seek(0x03c45d + rom_offset)   # STR
+        patch.write(b"\x20\x8b\xfe")
+        patch.seek(0x00dc07 + rom_offset)   # GEM
+        patch.write(b"\x22\xa1\xfe\x83")
+        patch.seek(int("3fed0", 16) + rom_offset)
+        patch.write(b"\x48\xAD\x24\x0B\xF0\x18\x3A\xF0\x0F\x3A\xF0\x06\x68\x69\x70\xF6\x80\x10")
+        patch.write(b"\x68\x69\xB0\xF4\x80\x0A\x68\x69\xF0\xF2\x80\x04\x68\x69\x30\xF1\x60")
+        patch.seek(int("3cffb", 16) + rom_offset)
+        patch.write(b"\x20\xd0\xfe")
 
 
         ##########################################################################
