@@ -499,7 +499,7 @@ class Randomizer:
         patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x4C\x7C\x9F")
 
         # Change item functionality for game variants
-        patch.seek(int("3fce0", 16) + rom_offset)
+        patch.seek(int("3ff00", 16) + rom_offset)
         patch.write(qt_encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.", True))
         patch.seek(int("3ff50", 16) + rom_offset)
         patch.write(qt_encode("As the Jewel disappears, Will feels his strength draining!", True))
