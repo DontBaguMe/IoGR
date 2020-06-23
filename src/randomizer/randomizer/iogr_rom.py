@@ -501,7 +501,7 @@ class Randomizer:
         # Change item functionality for game variants
         patch.seek(int("3fce0", 16) + rom_offset)
         patch.write(qt_encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.", True))
-        patch.seek(int("3fd30", 16) + rom_offset)
+        patch.seek(int("3ff50", 16) + rom_offset)
         patch.write(qt_encode("As the Jewel disappears, Will feels his strength draining!", True))
 
         f_rjm = open(BIN_PATH + "03fd70_rjm.bin", "rb")
@@ -514,7 +514,7 @@ class Randomizer:
             patch.seek(int("8068", 16) + rom_offset)
             patch.write(b"\x01")
             patch.seek(int("39f71", 16) + rom_offset)
-            patch.write(b"\xe0\xfc\x02\xd5\x29\x60")
+            patch.write(b"\x00\xff\x02\xd5\x29\x60")
             # Also, herbs suck
             patch.seek(int("388e9", 16) + rom_offset)
             patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
