@@ -427,6 +427,10 @@ class World:
             rewards_tier3 = [0,0,2,2,3,3]    # Intermediate: 10/4/4
             rewards_tier4 = [2,2,2,3,3,3]    # Beginner: 10/7/7
 
+        random.shuffle(rewards_tier1)
+        random.shuffle(rewards_tier2)
+        random.shuffle(rewards_tier3)
+        random.shuffle(rewards_tier4)
 
         # Allocate rewards to maps
         for area in maps:
