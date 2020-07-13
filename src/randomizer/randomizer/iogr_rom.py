@@ -1863,6 +1863,12 @@ class Randomizer:
         ##########################################################################
         #                        Balance Enemy Stats
         ##########################################################################
+        # Write Intermediate stat table to vanilla location for legacy code
+        f_legacystats = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
+        patch.seek(int("1abf0", 16) + rom_offset)
+        patch.write(f_legacystats.read())
+        f_legacystats.close
+
         # Write enemy stat tables to memory, by Level
         f_enemystats = open(BIN_PATH + "02f130_enemystats.bin", "rb")
         patch.seek(int("2f130", 16) + rom_offset)
