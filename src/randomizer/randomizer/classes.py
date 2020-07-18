@@ -416,16 +416,31 @@ class World:
         boss_rewards = 4
 
         # Total rewards by type, by level (HP/STR/DEF)
-        if "OHKO" not in self.variant:
+        if "Z3 Mode" in self.variant:
+            rewards_tier1 = [1] * 6    # Expert: 6 HP
+            rewards_tier2 = [1] * 6    # Advanced: 12 HP
+            rewards_tier3 = [1] * 6    # Intermediate: 18 HP
+            rewards_tier4 = []         # Beginner: 18 HP
+        else:  # Remove all HP upgrades
             rewards_tier1 = [1,1,1,1,1,1]    # Expert: 6/0/0
             rewards_tier2 = [1,1,2,2,3,3]    # Advanced: 8/2/2
             rewards_tier3 = [1,1,2,2,3,3]    # Intermediate: 10/4/4
             rewards_tier4 = [2,2,2,3,3,3]    # Beginner: 10/7/7
-        else:  # Remove all HP upgrades
-            rewards_tier1 = [0,0,0,0,0,0]    # Expert: 6/0/0
-            rewards_tier2 = [0,0,2,2,3,3]    # Advanced: 8/2/2
-            rewards_tier3 = [0,0,2,2,3,3]    # Intermediate: 10/4/4
-            rewards_tier4 = [2,2,2,3,3,3]    # Beginner: 10/7/7
+
+        # Remove HP upgrades in OHKO
+        if "OHKO" in self.variant:
+            for n, i in enumerate(rewards_tier1):
+                if i == 1:
+                    rewards_tier1[n] = 0
+            for n, i in enumerate(rewards_tier2):
+                if i == 1:
+                    rewards_tier2[n] = 0
+            for n, i in enumerate(rewards_tier3):
+                if i == 1:
+                    rewards_tier3[n] = 0
+            for n, i in enumerate(rewards_tier4):
+                if i == 1:
+                    rewards_tier4[n] = 0
 
         random.shuffle(rewards_tier1)
         random.shuffle(rewards_tier2)
@@ -438,7 +453,10 @@ class World:
             self.maps[area[0]][2] = [rewards_tier1.pop(0),1]
             self.maps[area[1]][2] = [rewards_tier2.pop(0),2]
             self.maps[area[2]][2] = [rewards_tier3.pop(0),3]
-            self.maps[area[3]][2] = [rewards_tier4.pop(0),4]
+            if rewards_tier4:
+                self.maps[area[3]][2] = [rewards_tier4.pop(0),4]
+            else:
+                self.maps[area[3]][2] = [0,4]
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
@@ -516,6 +534,15 @@ class World:
             self.graph[61][1].append(62)          # Pyramid: No ability required**************
             self.item_locations[142][2] = False   # Pyramid: Bottom DS has abilities
 
+        # Zelda 3 Mode
+        if "Z3 Mode" in self.variant:
+            # Update item pool
+            self.item_pool[1][0] = 33  # Red Jewels
+            self.item_pool[41][0] = 4  # HP Jewels
+            self.item_pool[42][0] = 2  # DEF Jewels
+            self.item_pool[43][0] = 4  # STR Jewels
+            self.item_pool[61][0] = 8  # HP Pieces
+
         # Open Mode
         if "Open Mode" in self.variant:
             # Update graph logic
@@ -538,28 +565,30 @@ class World:
             self.item_pool[24][0] = 0  # Will
             self.item_pool[25][0] = 0  # Teapot
             self.item_pool[37][0] = 0  # Lola's Letter
+            self.item_pool[6][0] += 4  # Herbs
+            self.item_pool[0][0] += 1  # Nothing
 
             # Add in alternate items, by difficulty
-            if self.difficulty == 0:
-                self.item_pool[0][0]  += 0  # Nothing
-                self.item_pool[6][0]  += 1  # Herb
-                self.item_pool[42][0] += 2  # DEF Jewel
-                self.item_pool[43][0] += 2  # STR Jewel
-            elif self.difficulty == 1:
-                self.item_pool[0][0]  += 1  # Nothing
-                self.item_pool[6][0]  += 2  # Herb
-                self.item_pool[42][0] += 1  # DEF Jewel
-                self.item_pool[43][0] += 1  # STR Jewel
-            elif self.difficulty == 2:
-                self.item_pool[0][0]  += 2  # Nothing
-                self.item_pool[6][0]  += 1  # Herb
-                self.item_pool[42][0] += 1  # DEF Jewel
-                self.item_pool[43][0] += 1  # STR Jewel
-            elif self.difficulty == 3:
-                self.item_pool[0][0]  += 5  # Nothing
-                self.item_pool[6][0]  += 0  # Herb
-                self.item_pool[42][0] += 0  # DEF Jewel
-                self.item_pool[43][0] += 0  # STR Jewel
+#            if self.difficulty == 0:
+#                self.item_pool[0][0]  += 0  # Nothing
+#                self.item_pool[6][0]  += 1  # Herb
+#                self.item_pool[42][0] += 2  # DEF Jewel
+#                self.item_pool[43][0] += 2  # STR Jewel
+#            elif self.difficulty == 1:
+#                self.item_pool[0][0]  += 1  # Nothing
+#                self.item_pool[6][0]  += 2  # Herb
+#                self.item_pool[42][0] += 1  # DEF Jewel
+#                self.item_pool[43][0] += 1  # STR Jewel
+#            elif self.difficulty == 2:
+#                self.item_pool[0][0]  += 2  # Nothing
+#                self.item_pool[6][0]  += 1  # Herb
+#                self.item_pool[42][0] += 1  # DEF Jewel
+#                self.item_pool[43][0] += 1  # STR Jewel
+#            elif self.difficulty == 3:
+#                self.item_pool[0][0]  += 5  # Nothing
+#                self.item_pool[6][0]  += 0  # Herb
+#                self.item_pool[42][0] += 0  # DEF Jewel
+#                self.item_pool[43][0] += 0  # STR Jewel
 
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
@@ -1443,6 +1472,9 @@ class World:
         if settings.open_mode:
             self.variant.append("Open Mode")
 
+        if settings.z3:
+            self.variant.append("Z3 Mode")
+
         self.firebird = settings.firebird
         self.start_loc = 10
 #        self.level = settings.level.value
@@ -1525,7 +1557,8 @@ class World:
             57: [1, 3, "", "Mystic Statue 4", False, 2],
             58: [1, 3, "", "Mystic Statue 5", False, 2],
             59: [1, 3, "", "Mystic Statue 6", False, 2],
-            60: [0, 2, "", "Nothing", False, 3]
+            60: [0, 2, "", "Nothing", False, 3],
+            61: [0, 1, b"\x30", "HP Piece", False, 3]
         }
 
         # Define Item/Ability/Statue locations
@@ -2247,7 +2280,8 @@ class World:
             57: "",
             58: "",
             59: "",
-            60: ""
+            60: "",
+            61: b"\xd3\xd6\x1d\x80\x8d\xac\x47\x60\xac\x60\x88\x84\x82\x84\x4f\xac\xac\xac\xac\xac\xac"
         }
 
         # Define short item text for in-game format
@@ -2313,7 +2347,8 @@ class World:
             57: "",
             58: "",
             59: "",
-            60: ""
+            60: "",
+            61: b"\x47\x60\xac\x60\x88\x84\x82\x84\xac\xac\xac\xac\xac"
         }
 
         # Database of enemy groups and spritesets
