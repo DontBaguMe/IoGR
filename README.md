@@ -70,14 +70,14 @@ There are three logic modes available to the player.
 - Zelda 3 Mode: Choosing this variant makes some significant alterations to the game, inspired by the combat system of <i>The Legend of Zelda: A Link to the Past (ALTTP)</i>.  Below are the changes made in this mode. (Where appropriate, values given by level are provided in the format Beginner/Intermediate/Advanced/Expert.)
   - You begin the game with 6 HP instead of 8 (to mirror Link's starting health).
   - 12 Red Jewels have been removed from the game and replaced with 4 HP upgrades and 8 HP Pieces.  HP upgrades add +2 HP (+1 in Expert), and HP Pieces add +1 HP (+0.5 in Advanced and Expert).
-  - Room rewards (HP only) grant +1 each.  The number of HP room upgrades available, by level, are 18/18/12/6
+  - Room rewards (HP only) grant +1 each.  The number of HP room upgrades available, by level, are 12/12/6/6
   - STR and DEF upgrades have been removed from the room/boss rewards and have been put into the item pool.
-  - The max STR upgrades you can receive by level are 4/3/2/1.
+  - The max STR upgrades you can receive by level are 3/2/1/0.
   - The max DEF upgrades you can receive by level are 2/2/1/0.
   - Jump slashes deal double damage instead of +1 damage.
   - Each STR and DEF upgrade doubles the applicable stat instead of adding +1.
   - Herbs and HP upgrades provide the following refills, by level: 40/40/14/8.
-  - Max HP available to the player, by level is 40/40/30/20.
+  - Max HP available to the player, by level is 40/40/28/23.
   - Max HP for non-boss enemies, by level, is 4/8/15/30.  Enemy damage ranges from 1 to 16, with no variance between level choices.  Non-boss enemies all have 0 DEF.
 
 #### Enemizer (beta)
