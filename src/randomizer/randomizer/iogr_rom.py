@@ -1945,7 +1945,10 @@ class Randomizer:
         #                        Balance Enemy Stats
         ##########################################################################
         # Write Intermediate stat table to vanilla location for legacy code
-        f_legacystats = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
+        if settings.z3:
+            f_legacystats = open(BIN_PATH + "01abf0_enemies_z3.bin", "rb")
+        else:
+            f_legacystats = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
         patch.seek(int("1abf0", 16) + rom_offset)
         patch.write(f_legacystats.read())
         f_legacystats.close
