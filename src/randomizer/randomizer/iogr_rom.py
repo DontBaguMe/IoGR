@@ -330,7 +330,7 @@ class Randomizer:
         ##########################################################################
         # Add pointers for new items @38491
         patch.seek(int("38491", 16) + rom_offset)
-        patch.write(b"\x6f\x9f\x91\x9f\x1d\x88\x3a\x88\x5f\x88\x90\x9d\xd0\x9d\xa1\xff")
+        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5f\x88\x90\x9d\xd0\x9d\xa0\xff")
 
         # Add start menu descriptions for new items
         f_startmenu = open(BIN_PATH + "01dabf_startmenu.bin", "rb")
@@ -497,19 +497,27 @@ class Randomizer:
         patch.write(f_item28.read())
         f_item28.close
 
+        # Write DEF and STR upgrade items
+        f_item42 = open(BIN_PATH + "03f78a_item42.bin", "rb")
+        patch.seek(int("3f78a", 16) + rom_offset)
+        patch.write(f_item42.read())
+        f_item42.close
+        patch.seek(int("39f91", 16) + rom_offset)
+        patch.write(qt_encode("Already maxed out!", True))
+
         # Write Piece of Heart item
-        patch.seek(int("3ffa1", 16) + rom_offset)
-        patch.write(b"\x02\xBF\xC1\xFF\x02\xD5\x30\xAD\x24\x0B\x89\x02\x00\xF0\x0D")
-        patch.write(b"\x02\xD0\xF7\x01\xBA\xFF\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x60")
-        patch.write(qt_encode("You got a piece of heart!", True))
+        patch.seek(int("3ffa0", 16) + rom_offset)
+        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
+        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
+        patch.write(qt_encode("You got a heart piece!", True))
 
         # Update HP fill for herbs and HP jewels based on level
         patch.seek(int("3889e", 16) + rom_offset)
-        patch.write(b"\x4c\x50\xfe")
+        patch.write(b"\x20\x50\xfe")
         patch.seek(int("3fe50", 16) + rom_offset)
         patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x02\x00\x80\x0D")
-        patch.write(b"\xA9\x04\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x4C\xA1\x88")
-        patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x4C\x7C\x9F")
+        patch.write(b"\xA9\x04\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x60\xff\xff")
+        patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x60")
 
         # Change item functionality for game variants
         patch.seek(int("3ff00", 16) + rom_offset)
@@ -529,8 +537,7 @@ class Randomizer:
 #        patch.seek(int("fd00", 16) + rom_offset)     # Boss STR/DEF upgrades
 #        patch.write(z3_str)
         patch.seek(int("3ff90", 16) + rom_offset)     # Item HP upgrades
-        patch.write(b"\x48\xA9\x03\x00\xCD\x24\x0D\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x68\x60")
-
+        patch.write(b"\xA9\x03\x00\xCD\x24\x0B\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x60")
         patch.seek(int("3ffe0", 16) + rom_offset)     # Item STR/DEF upgrades
         patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60")
 
@@ -545,6 +552,14 @@ class Randomizer:
             patch.seek(int("2cf58", 16) + rom_offset)
             patch.write(b"\xAD\xDE\x0A")
 
+            # Update herb/HP upgrade fill values
+            patch.seek(int("3fe5c", 16) + rom_offset)  # Expert #$08
+            patch.write(b"\x08")
+            patch.seek(int("3fe61", 16) + rom_offset)  # Advanced #$0E
+            patch.write(b"\x0E")
+            patch.seek(int("3fe66", 16) + rom_offset)  # Intermediate #$28
+            patch.write(b"\x28")
+
             # Double STR and DEF with each room upgrade
             patch.seek(int("E08E", 16) + rom_offset)
             patch.write(b"\x0A\xEA\xEA")
@@ -557,13 +572,19 @@ class Randomizer:
 #            patch.seek(int("C390", 16) + rom_offset)
 #            patch.write(b"\x20\x0A\xFD")
 
+            # Set max DEF and STR values, by level
+            patch.seek(int("3f78a", 16) + rom_offset)  # DEF limits 4/4/2/1
+            patch.write(b"\x04\x00\x04\x00\x02\x00\x01\x00")
+            patch.seek(int("3f7c5", 16) + rom_offset)  # STR limits 16/8/4/2
+            patch.write(b"\x10\x00\x08\x00\x04\x00\x02\x00")
+
             # Call item upgrade subroutines
-            patch.seek(int("38821", 16) + rom_offset)
-            patch.write(b"\x20\xE0\xFF")
-            patch.seek(int("39F73", 16) + rom_offset)
+            patch.seek(int("39F73", 16) + rom_offset)  # HP Jewel
+            patch.write(b"\x20\x90\xFF\x20\x50\xFE")
+            patch.seek(int("3f7a5", 16) + rom_offset)  # DEF Jewel
             patch.write(b"\x20\xEA\xFF")
-            patch.seek(int("39F95", 16) + rom_offset)
-            patch.write(b"\x20\x90\xFF")
+            patch.seek(int("3f7e0", 16) + rom_offset)  # STR Jewel
+            patch.write(b"\x20\xE0\xFF")
 
         # In OHKO, the HP Jewels do nothing, and start @1HP
         if settings.ohko:
