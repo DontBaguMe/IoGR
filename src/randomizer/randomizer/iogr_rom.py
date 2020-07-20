@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.4.0"
+VERSION = "3.4.1"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -26,10 +26,10 @@ GEMS_NORMAL = 40
 GEMS_HARD = 45
 GEMS_EXTREME = 50
 
-GEMS_Z3_EASY = 26
-GEMS_Z3_NORMAL = 30
-GEMS_Z3_HARD = 34
-GEMS_Z3_EXTREME = 38
+GEMS_Z3_EASY = 24
+GEMS_Z3_NORMAL = 28
+GEMS_Z3_HARD = 31
+GEMS_Z3_EXTREME = 34
 
 INV_FULL = b"\x5c\x8e\xc9\x80"
 FORCE_CHANGE = b"\x22\x30\xfd\x88"
@@ -575,8 +575,8 @@ class Randomizer:
             # Set max DEF and STR values, by level
             patch.seek(int("3f78a", 16) + rom_offset)  # DEF limits 4/4/2/1
             patch.write(b"\x04\x00\x04\x00\x02\x00\x01\x00")
-            patch.seek(int("3f7c5", 16) + rom_offset)  # STR limits 16/8/4/2
-            patch.write(b"\x10\x00\x08\x00\x04\x00\x02\x00")
+            patch.seek(int("3f7c5", 16) + rom_offset)  # STR limits 8/4/2/1
+            patch.write(b"\x08\x00\x04\x00\x02\x00\x01\x00")
 
             # Call item upgrade subroutines
             patch.seek(int("39F73", 16) + rom_offset)  # HP Jewel
@@ -1932,7 +1932,10 @@ class Randomizer:
 
         # Change start menu "FORCE" text
         patch.seek(int("1ff70", 16) + rom_offset)
-        patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x00")  # "+3HP"
+        if settings.z3:
+            patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x48\x50\x00")  # "+1HP"
+        else:
+            patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x00")  # "+3HP"
         patch.seek(int("1ff80", 16) + rom_offset)
         patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x53\x54\x52\x00")  # "+1STR"
         patch.seek(int("1ff90", 16) + rom_offset)
@@ -2194,9 +2197,9 @@ class Randomizer:
             gem.append(random.randint(3, 4))
             gem.append(random.randint(5, 7))
             gem.append(random.randint(8, 11))
-            gem.append(random.randint(12, 18))
-            gem.append(random.randint(19, 25))
-            gem.append(random.randint(26, 38))
+            gem.append(random.randint(12, 17))
+            gem.append(random.randint(18, 23))
+            gem.append(random.randint(24, 34))
 
             if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
                 if settings.difficulty.value == 0:
@@ -2279,10 +2282,15 @@ class Randomizer:
         patch.seek(int("8d297", 16) + rom_offset)
         patch.write(binascii.unhexlify(gem_str[2]))
 
-        gem_str[3] = format(2, "x") + format(int(gem[3] / 10), "x")
-        gem_str[3] = gem_str[3] + format(2, "x") + format(gem[3] % 10, "x")
-        patch.seek(int("8d2aa", 16) + rom_offset)
-        patch.write(binascii.unhexlify(gem_str[3]))
+        if int(gem_str[3]) < 10:
+            gem_str[3] = format(2, "x") + format(gem[3] % 10, "x")
+            patch.seek(int("8d2aa", 16) + rom_offset)
+            patch.write(b"\xac" + binascii.unhexlify(gem_str[3]))
+        else:
+            gem_str[3] = format(2, "x") + format(int(gem[3] / 10), "x")
+            gem_str[3] = gem_str[3] + format(2, "x") + format(gem[3] % 10, "x")
+            patch.seek(int("8d2aa", 16) + rom_offset)
+            patch.write(binascii.unhexlify(gem_str[3]))
 
         gem_str[4] = format(2, "x") + format(int(gem[4] / 10), "x")
         gem_str[4] = gem_str[4] + format(2, "x") + format(gem[4] % 10, "x")
@@ -3171,8 +3179,10 @@ class Randomizer:
         superhero_list.append(qt_encode("       Up and atom!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("  It's clobberin' time!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       For Asgard!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("   It's morphin' time!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("    Back in a flash!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("      I am GROOT!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       VALHALLA!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("Wonder Twin powers activate!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("    Titans together!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       HULK SMASH!") + b"\xc3\x00\xc0")

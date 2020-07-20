@@ -537,11 +537,11 @@ class World:
         # Zelda 3 Mode
         if "Z3 Mode" in self.variant:
             # Update item pool
-            self.item_pool[1][0] = 33  # Red Jewels
-            self.item_pool[41][0] = 4  # HP Jewels
+            self.item_pool[1][0] = 29  # Red Jewels
+            self.item_pool[41][0] = 5  # HP Jewels
             self.item_pool[42][0] = 2  # DEF Jewels
-            self.item_pool[43][0] = 4  # STR Jewels
-            self.item_pool[61][0] = 8  # HP Pieces
+            self.item_pool[43][0] = 3  # STR Jewels
+            self.item_pool[61][0] = 12  # HP Pieces
 
         # Open Mode
         if "Open Mode" in self.variant:
