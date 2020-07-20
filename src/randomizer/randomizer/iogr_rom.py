@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.4.3"
+VERSION = "3.4.4"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -536,21 +536,27 @@ class Randomizer:
         # Z3 Mode - write subroutines to available space
 #        patch.seek(int("fd00", 16) + rom_offset)     # Boss STR/DEF upgrades
 #        patch.write(z3_str)
+        patch.seek(int("3faee", 16) + rom_offset)     # Item STR/DEF upgrades
+        patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
         patch.seek(int("3ff90", 16) + rom_offset)     # Item HP upgrades
         patch.write(b"\xA9\x03\x00\xCD\x24\x0B\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x60")
         patch.seek(int("3ffe0", 16) + rom_offset)     # Item STR/DEF upgrades
-        patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60")
+        patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60")  #\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60") used to be for DEF
 
         if settings.z3:
-            # Start with 6 HP and 1 DEF
+            # Start with 6 HP
             patch.seek(int("8068", 16) + rom_offset)
             patch.write(b"\x06")
-            patch.seek(int("8077", 16) + rom_offset)
-            patch.write(b"\x01")
+#            patch.seek(int("8077", 16) + rom_offset)  # Used to start with 1 DEF
+#            patch.write(b"\x01")
 
             # Double damage on jump slash
             patch.seek(int("2cf58", 16) + rom_offset)
             patch.write(b"\xAD\xDE\x0A")
+
+            # Each DEF upgrade halves damage
+            patch.seek(int("3c464", 16) + rom_offset)
+            patch.write(b"\x20\xEE\xFA")
 
             # Update herb/HP upgrade fill values
             patch.seek(int("3fe5c", 16) + rom_offset)  # Expert #$08
@@ -561,10 +567,10 @@ class Randomizer:
             patch.write(b"\x28")
 
             # Double STR and DEF with each room upgrade
-            patch.seek(int("E08E", 16) + rom_offset)
-            patch.write(b"\x0A\xEA\xEA")
-            patch.seek(int("E0D9", 16) + rom_offset)
-            patch.write(b"\x0A\xEA\xEA")
+#            patch.seek(int("E08E", 16) + rom_offset)
+#            patch.write(b"\x0A\xEA\xEA")
+#            patch.seek(int("E0D9", 16) + rom_offset)
+#            patch.write(b"\x0A\xEA\xEA")
 
             # Call boss upgrade subroutines
 #            patch.seek(int("C388", 16) + rom_offset)
@@ -574,15 +580,15 @@ class Randomizer:
 
             # Set max DEF and STR values, by level
             patch.seek(int("3f78a", 16) + rom_offset)  # DEF limits 4/4/2/1
-            patch.write(b"\x04\x00\x04\x00\x02\x00\x01\x00")
+            patch.write(b"\x02\x00\x02\x00\x01\x00\x00\x00")
             patch.seek(int("3f7c5", 16) + rom_offset)  # STR limits 8/4/2/1
             patch.write(b"\x08\x00\x04\x00\x02\x00\x01\x00")
 
             # Call item upgrade subroutines
             patch.seek(int("39F73", 16) + rom_offset)  # HP Jewel
             patch.write(b"\x20\x90\xFF\x20\x50\xFE")
-            patch.seek(int("3f7a5", 16) + rom_offset)  # DEF Jewel
-            patch.write(b"\x20\xEA\xFF")
+#            patch.seek(int("3f7a5", 16) + rom_offset)  # DEF Jewel
+#            patch.write(b"\x20\xEA\xFF")
             patch.seek(int("3f7e0", 16) + rom_offset)  # STR Jewel
             patch.write(b"\x20\xE0\xFF")
 
