@@ -1,1 +1,0 @@
-pip uninstall iog-randomizer -y; pip install dist/randomizer/iog_randomizer-3.3.6-py3-none-any.whl --user; python src/gui/gui.py
