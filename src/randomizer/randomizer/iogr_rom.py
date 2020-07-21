@@ -330,7 +330,7 @@ class Randomizer:
         ##########################################################################
         # Add pointers for new items @38491
         patch.seek(int("38491", 16) + rom_offset)
-        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5f\x88\x90\x9d\xd0\x9d\xa0\xff")
+        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5e\x88\x90\x9d\xd0\x9d\xa0\xff")
 
         # Add start menu descriptions for new items
         f_startmenu = open(BIN_PATH + "01dabf_startmenu.bin", "rb")
@@ -350,6 +350,20 @@ class Randomizer:
         # Update item removal restriction flags
         patch.seek(int("1e12a", 16) + rom_offset)
         patch.write(b"\x9f\xff\x97\x37\xb0\x01")
+
+        # Modify cop $d4 to accommodate status upgrades
+        patch.seek(int("3f016", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+        patch.seek(int("3f03c", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+        patch.seek(int("3f05b", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+        patch.seek(int("3efe9", 16) + rom_offset)
+        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0")
+        patch.seek(int("3efc9", 16) + rom_offset)
+        patch.write(b"\xa0\xff")
+        patch.seek(int("3ffa0", 16) + rom_offset)
+        patch.write(b"\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB3\xFF\x02\xCC\xF7\x80\x06\x02\xCE\xF7\x4C\x0C\xF0\x4C\x7D\xF0")
 
         # Write STR, Psycho Dash, and Dark Friar upgrade items
         # Replaces code for item 05 - Inca Melody @3881d
@@ -506,10 +520,10 @@ class Randomizer:
         patch.write(qt_encode("Already maxed out!", True))
 
         # Write Piece of Heart item
-        patch.seek(int("3ffa0", 16) + rom_offset)
-        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
-        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
-        patch.write(qt_encode("You got a heart piece!", True))
+#        patch.seek(int("3ffa0", 16) + rom_offset)
+#        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
+#        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
+#        patch.write(qt_encode("You got a heart piece!", True))
 
         # Update HP fill for herbs and HP jewels based on level
         patch.seek(int("3889e", 16) + rom_offset)
