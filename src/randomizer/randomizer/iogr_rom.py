@@ -376,10 +376,18 @@ class Randomizer:
         patch.write(f_itemdesc.read())
         f_itemdesc.close
 
-        # Update sprites for new items - first new item starts @108052, 7 new items
-        # Points all items to unused sprite for item 4c ("76 83" in address table)
+        # Write sprites for multi-jewel items
+        f_multijewel = open(BIN_PATH + "108ea3_multijewel.bin", "rb")
+        patch.seek(int("108ea3", 16) + rom_offset)
+        patch.write(f_multijewel.read())
+        f_multijewel.close
+
+        # Update sprite pointers for new items (placeholder bag of gold for obselete items)
+        # New sprite pointers at 108376, overwrites flaming sphere
         patch.seek(int("108052", 16) + rom_offset)
-        patch.write(b"\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83")
+        patch.write(b"\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x76\x83\x76\x83\x9c\x81")
+        patch.seek(int("108376", 16) + rom_offset)
+        patch.write(b"\x07\x00\xa3\x8e\x07\x00\xc5\x8e\xff\xff")
 
         # Update item removal restriction flags
         patch.seek(int("1e12a", 16) + rom_offset)
