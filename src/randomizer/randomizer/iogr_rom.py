@@ -310,8 +310,23 @@ class Randomizer:
         f_mapdata.write(b"\x00\x07")
 
         ##########################################################################
-        #                        Update GiveItem Rouine
-        #            Allows status upgrades to be granted as items
+        #                        Update treasure chest data
+        ##########################################################################
+        # Remove fanfares from treasure chests
+        f_chests = open(BIN_PATH + "01afa6_chests.bin", "rb")
+        patch.seek(int("1afa6", 16) + rom_offset)
+        patch.write(f_chests.read())
+        f_chests.close
+
+        # Update item acquisition messages and add messages for new items (29-2f)
+        f_acquisition = open(BIN_PATH + "01fd24_acquisition.bin", "rb")
+        patch.seek(int("1fd24", 16) + rom_offset)
+        patch.write(f_acquisition.read())
+        f_acquisition.close
+
+        ##########################################################################
+        #                         Update GiveItem Routine
+        #             Allows status upgrades to be granted as items
         ##########################################################################
         # Disable nested cop commands
         patch.seek(int("3f016", 16) + rom_offset)
@@ -328,35 +343,20 @@ class Randomizer:
         patch.seek(int("3f77f", 16) + rom_offset)
         patch.write(b"\x48\xE9\x50\x8D\xB8\x0D\x68\x38\xE9\x80\x60")
 
-        # Insert logic for Dash and Friar upgrades
-        patch.seek(int("3efe9", 16) + rom_offset)
-        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
-
         # Update pointers for Friar upgrade and Heart Piece
         patch.seek(int("3efc6", 16) + rom_offset)
         patch.write(b"\x27")
         patch.seek(int("3efc9", 16) + rom_offset)
         patch.write(b"\x2a")
 
+        # Insert logic for Dash and Friar upgrades
+        patch.seek(int("3efe9", 16) + rom_offset)
+        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
+
         # Write Heart Piece logic
         patch.seek(int("3ffa0", 16) + rom_offset)
         patch.write(b"\x48\xAD\x24\x0B\x89\x02\xF0\x11\xAD\x1E\x0A\x89\x80\xD0\x07\x09\x80")
         patch.write(b"\x8D\x1E\x0A\x80\x09\xE9\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x4C\x7D\xF0")
-
-        ##########################################################################
-        #                        Update treasure chest data
-        ##########################################################################
-        # Remove fanfares from treasure chests
-        f_chests = open(BIN_PATH + "01afa6_chests.bin", "rb")
-        patch.seek(int("1afa6", 16) + rom_offset)
-        patch.write(f_chests.read())
-        f_chests.close
-
-        # Update item acquisition messages and add messages for new items (29-2f)
-        f_acquisition = open(BIN_PATH + "01fd24_acquisition.bin", "rb")
-        patch.seek(int("1fd24", 16) + rom_offset)
-        patch.write(f_acquisition.read())
-        f_acquisition.close
 
         ##########################################################################
         #                            Update item events
