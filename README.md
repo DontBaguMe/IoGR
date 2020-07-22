@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v3.2) - <a href="https://www.iogr.app/">Play Now!</a>
+## The Illusion of Gaia Randomizer (v3.3) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
@@ -33,10 +33,19 @@ This is a non-negative integer value that initializes the randomization algorith
 
 #### Difficulty
 There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficulty chosen affects the following game mechanics:
-- Enemies: Enemies scale in strength with each difficulty mode.
-- Room Rewards: The number of room-clearing rewards available to the player is affected by difficulty (see below).
 - Item and Ability Placement: Easy and Normal modes both include a slight bias toward making required items and abilities available to the player earlier on.
 - In-Game Spoilers: Hints have been removed in Extreme mode.
+- Boss Logic: Solid Arm can be required for Extreme seeds.
+- Boss Shuffle: In Extreme, dungeons keep their vanilla music so you don't know which boss is at the end.  Solid Arm is included in Boss Shuffle in Extreme, but not other modes
+- Red Jewel Hunt: The number of Red Jewels required to beat the game, by difficulty, is 35/40/45/50
+- Open World: The items that replace the five travel items are more favorable in easier difficulties.
+
+#### Level
+You choose your level from the start menu when you create a new game file.  Level does not affect game logic or item placement, so if desired players could race the same seed at varying levels.  There are four level settings: Beginner, Intermediate, Advanced, and Expert. The level chosen affects the following game mechanics:
+- Enemies: Enemies scale in strength with each level.
+- Room Rewards: The number of room-clearing rewards available to the player is affected by difficulty (see below).
+- Herbs:  By level, the number of HP restored by herbs are full/8/4/2
+- Snake Game: The number of snakes required will increase at harder difficulties.
 
 #### Goal
 This allows you to choose a game mode. There are currently four goals available (see below for more details):
