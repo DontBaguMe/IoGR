@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.4.4"
+VERSION = "3.4.5"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -325,12 +325,46 @@ class Randomizer:
         f_acquisition.close
 
         ##########################################################################
+        #                         Update GiveItem Routine
+        #             Allows status upgrades to be granted as items
+        ##########################################################################
+        # Disable nested cop commands
+        patch.seek(int("3f016", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+        patch.seek(int("3f03c", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+        patch.seek(int("3f05b", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+
+        # Allow upgrade items to use chest opening text table
+        # Starts at index #$30
+        patch.seek(int("3efb3", 16) + rom_offset)
+        patch.write(b"\x20\x7f\xf7")
+        patch.seek(int("3f77f", 16) + rom_offset)
+        patch.write(b"\x48\xE9\x50\x8D\xB8\x0D\x68\x38\xE9\x80\x60")
+
+        # Update pointers for Friar upgrade and Heart Piece
+        patch.seek(int("3efc6", 16) + rom_offset)
+        patch.write(b"\x27")
+        patch.seek(int("3efc9", 16) + rom_offset)
+        patch.write(b"\x2a")
+
+        # Insert logic for Dash and Friar upgrades
+        patch.seek(int("3efe9", 16) + rom_offset)
+        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
+
+        # Write Heart Piece logic
+        patch.seek(int("3ffa0", 16) + rom_offset)
+        patch.write(b"\x48\xAD\x24\x0B\x89\x02\xF0\x13\xAD\x1E\x0A\x89\x80\xD0\x07\x09\x80")
+        patch.write(b"\x8D\x1E\x0A\x80\x09\xE9\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x4C\x7D\xF0")
+
+        ##########################################################################
         #                            Update item events
         #    Adds new items that increase HP, DEF, STR and improve abilities
         ##########################################################################
         # Add pointers for new items @38491
         patch.seek(int("38491", 16) + rom_offset)
-        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5f\x88\x90\x9d\xd0\x9d\xa0\xff")
+        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5e\x88\x90\x9d\xd0\x9d\xa0\xff")
 
         # Add start menu descriptions for new items
         f_startmenu = open(BIN_PATH + "01dabf_startmenu.bin", "rb")
@@ -342,10 +376,18 @@ class Randomizer:
         patch.write(f_itemdesc.read())
         f_itemdesc.close
 
-        # Update sprites for new items - first new item starts @108052, 7 new items
-        # Points all items to unused sprite for item 4c ("76 83" in address table)
+        # Write sprites for multi-jewel items
+        f_multijewel = open(BIN_PATH + "108ea3_multijewel.bin", "rb")
+        patch.seek(int("108ea3", 16) + rom_offset)
+        patch.write(f_multijewel.read())
+        f_multijewel.close
+
+        # Update sprite pointers for new items (placeholder bag of gold for obselete items)
+        # New sprite pointers at 108376, overwrites flaming sphere
         patch.seek(int("108052", 16) + rom_offset)
-        patch.write(b"\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83")
+        patch.write(b"\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x76\x83\x76\x83\x9c\x81")
+        patch.seek(int("108376", 16) + rom_offset)
+        patch.write(b"\x07\x00\xa3\x8e\x07\x00\xc5\x8e\xff\xff")
 
         # Update item removal restriction flags
         patch.seek(int("1e12a", 16) + rom_offset)
@@ -506,10 +548,10 @@ class Randomizer:
         patch.write(qt_encode("Already maxed out!", True))
 
         # Write Piece of Heart item
-        patch.seek(int("3ffa0", 16) + rom_offset)
-        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
-        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
-        patch.write(qt_encode("You got a heart piece!", True))
+#        patch.seek(int("3ffa0", 16) + rom_offset)
+#        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
+#        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
+#        patch.write(qt_encode("You got a heart piece!", True))
 
         # Update HP fill for herbs and HP jewels based on level
         patch.seek(int("3889e", 16) + rom_offset)
