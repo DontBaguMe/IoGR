@@ -339,24 +339,37 @@ class Randomizer:
         # Allow upgrade items to use chest opening text table
         # Starts at index #$30
         patch.seek(int("3efb3", 16) + rom_offset)
-        patch.write(b"\x20\x7f\xf7")
-        patch.seek(int("3f77f", 16) + rom_offset)
-        patch.write(b"\x48\xE9\x50\x8D\xB8\x0D\x68\x38\xE9\x80\x60")
-
-        # Update pointers for Friar upgrade and Heart Piece
-        patch.seek(int("3efc6", 16) + rom_offset)
-        patch.write(b"\x27")
-        patch.seek(int("3efc9", 16) + rom_offset)
-        patch.write(b"\x2a")
-
-        # Insert logic for Dash and Friar upgrades
-        patch.seek(int("3efe9", 16) + rom_offset)
-        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
+        patch.write(b"\x20\x7f\xf7")  # Pointer to initialization script
+        patch.write(b"\x0A\xDA\xAA\xfc\x65\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
+        patch.write(b"\xEE\x16\x0B\x80\x03\xEE\x1C\x0B\x60")  # Logic for Dash and Friar Upgrades
+        patch.seek(int("3f765", 16) + rom_offset)
+        patch.write(b"\x0c\xf0\x32\xf0\x51\xf0\xe9\xef\xed\xef\xf1\xef\xca\xef\x0c\xf0\x32\xf0\x51\xf0\xc0\xef\xc5\xef\xa0\xff") # Subroutine pointers
+        patch.write(b"\x48\xE9\x57\x8D\xB8\x0D\x68\x38\xE9\x80\x60")  # Initialization script
+        patch.seek(int("3efe6", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f00a", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f030", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f04f", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f06e", 16) + rom_offset)
+        patch.write(b"\x60")
 
         # Write Heart Piece logic
         patch.seek(int("3ffa0", 16) + rom_offset)
         patch.write(b"\x48\xAD\x24\x0B\x89\x02\xF0\x13\xAD\x1E\x0A\x89\x80\xD0\x07\x09\x80")
-        patch.write(b"\x8D\x1E\x0A\x80\x09\xE9\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x4C\x7D\xF0")
+        patch.write(b"\x8D\x1E\x0A\x80\x09\xE9\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x60")
+
+        # Update pointers for Friar upgrade and Heart Piece
+#        patch.seek(int("3efc6", 16) + rom_offset)
+#        patch.write(b"\x27")
+#        patch.seek(int("3efc9", 16) + rom_offset)
+#        patch.write(b"\x2a")
+
+        # Insert logic for Dash and Friar upgrades
+#        patch.seek(int("3efe9", 16) + rom_offset)
+#        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
 
         ##########################################################################
         #                            Update item events

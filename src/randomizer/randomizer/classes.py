@@ -1538,11 +1538,11 @@ class World:
             38: [1, 1, b"\x26", "Father's Journal", False, 2],
             39: [1, 1, b"\x27", "Crystal Ring", False, 1],
             40: [1, 1, b"\x28", "Apple", True, 1],
-            41: [3, 1, b"\x80", "HP Upgrade", False, 3],
-            42: [1, 1, b"\x82", "DEF Upgrade", False, 3],
-            43: [2, 1, b"\x81", "STR Upgrade", False, 3],
-            44: [1, 1, b"\x83", "Psycho Dash Upgrade", False, 3],
-            45: [2, 1, b"\x84", "Dark Friar Upgrade", False, 3],
+            41: [3, 1, b"\x87", "HP Upgrade", False, 3],
+            42: [1, 1, b"\x89", "DEF Upgrade", False, 3],
+            43: [2, 1, b"\x88", "STR Upgrade", False, 3],
+            44: [1, 1, b"\x8a", "Psycho Dash Upgrade", False, 3],
+            45: [2, 1, b"\x8b", "Dark Friar Upgrade", False, 3],
             46: [1, 1, b"\x2e", "2 Red Jewels", False, 3],
             47: [1, 1, b"\x2f", "3 Red Jewels", False, 3],
             48: [1, 2, "", "Psycho Dash", False, 1],
@@ -1558,7 +1558,7 @@ class World:
             58: [1, 3, "", "Mystic Statue 5", False, 2],
             59: [1, 3, "", "Mystic Statue 6", False, 2],
             60: [0, 2, "", "Nothing", False, 3],
-            61: [0, 1, b"\x85", "Heart Piece", False, 3]
+            61: [0, 1, b"\x8c", "Heart Piece", False, 3]
         }
 
         # Define Item/Ability/Statue locations
