@@ -155,10 +155,6 @@ class Randomizer:
         patch.seek(int("1ff9b", 16) + rom_offset)
         patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
 
-        # Clear space for additional switches, if any
-        patch.seek(int("1ffb0", 16) + rom_offset)
-        patch.write(b"\x00" * 80)
-
         ##########################################################################
         #                             Early Firebird
         ##########################################################################
@@ -336,15 +332,21 @@ class Randomizer:
         patch.seek(int("3f05b", 16) + rom_offset)
         patch.write(b"\xea\xea\xea")
 
+        # Write DEF and STR upgrade item scripts, also includes scripts for Z3 mode
+        f_statupgrades = open(BIN_PATH + "03f77b_statupgrades.bin", "rb")
+        patch.seek(int("3f77b", 16) + rom_offset)
+        patch.write(f_statupgrades.read())
+        f_statupgrades.close
+
         # Allow upgrade items to use chest opening text table
         # Starts at index #$30
         patch.seek(int("3efb3", 16) + rom_offset)
-        patch.write(b"\x20\x7f\xf7")  # Pointer to initialization script
-        patch.write(b"\x0A\xDA\xAA\xfc\x65\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
+        patch.write(b"\x20\x95\xf7")  # Pointer to initialization script
+        patch.write(b"\x0A\xDA\xAA\xfc\x7b\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
         patch.write(b"\xEE\x16\x0B\x80\x03\xEE\x1C\x0B\x60")  # Logic for Dash and Friar Upgrades
-        patch.seek(int("3f765", 16) + rom_offset)
-        patch.write(b"\x0c\xf0\x32\xf0\x51\xf0\xe9\xef\xed\xef\xf1\xef\xca\xef\x0c\xf0\x32\xf0\x51\xf0\xc0\xef\xc5\xef\xa0\xff") # Subroutine pointers
-        patch.write(b"\x48\xE9\x57\x8D\xB8\x0D\x68\x38\xE9\x80\x60")  # Initialization script
+#        patch.seek(int("3f765", 16) + rom_offset)
+#        patch.write(b"\x0c\xf0\x32\xf0\x51\xf0\xe9\xef\xed\xef\xf1\xef\xca\xef\x0c\xf0\x32\xf0\x51\xf0\xc0\xef\xc5\xef\xa0\xff") # Subroutine pointers
+#        patch.write(b"\x48\xE9\x57\x8D\xB8\x0D\x68\x38\xE9\x80\x60")  # Initialization script
         patch.seek(int("3efe6", 16) + rom_offset)
         patch.write(b"\x60")
         patch.seek(int("3f00a", 16) + rom_offset)
@@ -359,7 +361,11 @@ class Randomizer:
         # Write Heart Piece logic
         patch.seek(int("3ffa0", 16) + rom_offset)
         patch.write(b"\x48\xAD\x24\x0B\x89\x02\xF0\x13\xAD\x1E\x0A\x89\x80\xD0\x07\x09\x80")
-        patch.write(b"\x8D\x1E\x0A\x80\x09\xE9\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x60")
+        patch.write(b"\x8D\x1E\x0A\x80\x09\x49\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x60")
+
+        # Treasure chest text: "Already maxed out!"
+        patch.seek(int("1ffed", 16) + rom_offset)
+        patch.write(b"\x40\x8B\xA2\x84\x80\x83\xA9\xAC\x8C\x80\xA8\x84\x83\xAC\x8E\xA5\xA4\x4F\xCA")
 
         # Update pointers for Friar upgrade and Heart Piece
 #        patch.seek(int("3efc6", 16) + rom_offset)
@@ -552,13 +558,9 @@ class Randomizer:
         patch.write(f_item28.read())
         f_item28.close
 
-        # Write DEF and STR upgrade items
-        f_item42 = open(BIN_PATH + "03f78a_item42.bin", "rb")
-        patch.seek(int("3f78a", 16) + rom_offset)
-        patch.write(f_item42.read())
-        f_item42.close
-        patch.seek(int("39f91", 16) + rom_offset)
-        patch.write(qt_encode("Already maxed out!", True))
+
+#        patch.seek(int("39f91", 16) + rom_offset)
+#        patch.write(qt_encode("Already maxed out!", True))
 
         # Write Piece of Heart item
 #        patch.seek(int("3ffa0", 16) + rom_offset)
@@ -589,27 +591,25 @@ class Randomizer:
         #                           Special Settings
         ##########################################################################
         # Z3 Mode - write subroutines to available space
+        patch.seek(int("3faee", 16) + rom_offset)     # DEF halves damage subroutine
+        patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
 #        patch.seek(int("fd00", 16) + rom_offset)     # Boss STR/DEF upgrades
 #        patch.write(z3_str)
-        patch.seek(int("3faee", 16) + rom_offset)     # Item STR/DEF upgrades
-        patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
-        patch.seek(int("3ff90", 16) + rom_offset)     # Item HP upgrades
-        patch.write(b"\xA9\x03\x00\xCD\x24\x0B\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x60")
-        patch.seek(int("3ffe0", 16) + rom_offset)     # Item STR/DEF upgrades
-        patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60")  #\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60") used to be for DEF
+#        patch.seek(int("3ff90", 16) + rom_offset)     # Item HP upgrades
+#        patch.write(b"\x18\xA9\x03\xCD\x24\x0B\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x60")
+#        patch.seek(int("3ffe0", 16) + rom_offset)     # Item STR/DEF upgrades
+#        patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60")  #\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60") used to be for DEF
 
         if settings.z3:
             # Start with 6 HP
             patch.seek(int("8068", 16) + rom_offset)
             patch.write(b"\x06")
-#            patch.seek(int("8077", 16) + rom_offset)  # Used to start with 1 DEF
-#            patch.write(b"\x01")
 
             # Double damage on jump slash
             patch.seek(int("2cf58", 16) + rom_offset)
             patch.write(b"\xAD\xDE\x0A")
 
-            # Each DEF upgrade halves damage
+            # Each DEF upgrade halves damage received
             patch.seek(int("3c464", 16) + rom_offset)
             patch.write(b"\x20\xEE\xFA")
 
@@ -621,38 +621,26 @@ class Randomizer:
             patch.seek(int("3fe66", 16) + rom_offset)  # Intermediate #$28
             patch.write(b"\x28")
 
-            # Double STR and DEF with each room upgrade
-#            patch.seek(int("E08E", 16) + rom_offset)
-#            patch.write(b"\x0A\xEA\xEA")
-#            patch.seek(int("E0D9", 16) + rom_offset)
-#            patch.write(b"\x0A\xEA\xEA")
-
-            # Call boss upgrade subroutines
-#            patch.seek(int("C388", 16) + rom_offset)
-#            patch.write(b"\x20\x00\xFD")
-#            patch.seek(int("C390", 16) + rom_offset)
-#            patch.write(b"\x20\x0A\xFD")
-
-            # Set max DEF and STR values, by level
-            patch.seek(int("3f78a", 16) + rom_offset)  # DEF limits 4/4/2/1
-            patch.write(b"\x02\x00\x02\x00\x01\x00\x00\x00")
-            patch.seek(int("3f7c5", 16) + rom_offset)  # STR limits 8/4/2/1
-            patch.write(b"\x08\x00\x04\x00\x02\x00\x01\x00")
-
             # Call item upgrade subroutines
-            patch.seek(int("39F73", 16) + rom_offset)  # HP Jewel
-            patch.write(b"\x20\x90\xFF\x20\x50\xFE")
-#            patch.seek(int("3f7a5", 16) + rom_offset)  # DEF Jewel
-#            patch.write(b"\x20\xEA\xFF")
-            patch.seek(int("3f7e0", 16) + rom_offset)  # STR Jewel
-            patch.write(b"\x20\xE0\xFF")
+            patch.seek(int("3f01c", 16) + rom_offset)  # HP upgrade
+            patch.write(b"\x20\xa1\xf7")
+            patch.seek(int("3f042", 16) + rom_offset)  # STR upgrade
+            patch.write(b"\x20\xc1\xf7")
+            patch.seek(int("3f061", 16) + rom_offset)  # DEF upgrade
+            patch.write(b"\x20\xe3\xf7")
 
         # In OHKO, the HP Jewels do nothing, and start @1HP
         if settings.ohko:
-            patch.seek(int("8068", 16) + rom_offset)
+            patch.seek(int("8068", 16) + rom_offset)  # Start 1 HP
             patch.write(b"\x01")
-            patch.seek(int("39f71", 16) + rom_offset)
-            patch.write(b"\x00\xff\x02\xd5\x29\x60")
+            patch.seek(int("3f7b1", 16) + rom_offset) # HP upgrade
+            patch.write(b"\x00")
+            patch.seek(int("3f7b7", 16) + rom_offset) # HP upgrade
+            patch.write(b"\x00")
+            patch.seek(int("3ffbc", 16) + rom_offset) # heart piece
+            patch.write(b"\x60")
+#            patch.seek(int("39f71", 16) + rom_offset)
+#            patch.write(b"\x00\xff\x02\xd5\x29\x60")
             # Also, herbs suck
             patch.seek(int("388e9", 16) + rom_offset)
             patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
