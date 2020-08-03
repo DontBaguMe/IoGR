@@ -416,16 +416,31 @@ class World:
         boss_rewards = 4
 
         # Total rewards by type, by level (HP/STR/DEF)
-        if "OHKO" not in self.variant:
+        if "Z3 Mode" in self.variant:
+            rewards_tier1 = [1] * 6    # Expert: 6 HP
+            rewards_tier2 = [1] * 6    # Advanced: 12 HP
+            rewards_tier3 = [1] * 6    # Intermediate: 18 HP
+            rewards_tier4 = []         # Beginner: 18 HP
+        else:  # Remove all HP upgrades
             rewards_tier1 = [1,1,1,1,1,1]    # Expert: 6/0/0
             rewards_tier2 = [1,1,2,2,3,3]    # Advanced: 8/2/2
             rewards_tier3 = [1,1,2,2,3,3]    # Intermediate: 10/4/4
             rewards_tier4 = [2,2,2,3,3,3]    # Beginner: 10/7/7
-        else:  # Remove all HP upgrades
-            rewards_tier1 = [0,0,0,0,0,0]    # Expert: 6/0/0
-            rewards_tier2 = [0,0,2,2,3,3]    # Advanced: 8/2/2
-            rewards_tier3 = [0,0,2,2,3,3]    # Intermediate: 10/4/4
-            rewards_tier4 = [2,2,2,3,3,3]    # Beginner: 10/7/7
+
+        # Remove HP upgrades in OHKO
+        if "OHKO" in self.variant:
+            for n, i in enumerate(rewards_tier1):
+                if i == 1:
+                    rewards_tier1[n] = 0
+            for n, i in enumerate(rewards_tier2):
+                if i == 1:
+                    rewards_tier2[n] = 0
+            for n, i in enumerate(rewards_tier3):
+                if i == 1:
+                    rewards_tier3[n] = 0
+            for n, i in enumerate(rewards_tier4):
+                if i == 1:
+                    rewards_tier4[n] = 0
 
         random.shuffle(rewards_tier1)
         random.shuffle(rewards_tier2)
@@ -438,7 +453,10 @@ class World:
             self.maps[area[0]][2] = [rewards_tier1.pop(0),1]
             self.maps[area[1]][2] = [rewards_tier2.pop(0),2]
             self.maps[area[2]][2] = [rewards_tier3.pop(0),3]
-            self.maps[area[3]][2] = [rewards_tier4.pop(0),4]
+            if rewards_tier4:
+                self.maps[area[3]][2] = [rewards_tier4.pop(0),4]
+            else:
+                self.maps[area[3]][2] = [0,4]
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
@@ -516,6 +534,15 @@ class World:
             self.graph[61][1].append(62)          # Pyramid: No ability required**************
             self.item_locations[142][2] = False   # Pyramid: Bottom DS has abilities
 
+        # Zelda 3 Mode
+        if "Z3 Mode" in self.variant:
+            # Update item pool
+            self.item_pool[1][0] = 29  # Red Jewels
+            self.item_pool[41][0] = 5  # HP Jewels
+            self.item_pool[42][0] = 2  # DEF Jewels
+            self.item_pool[43][0] = 3  # STR Jewels
+            self.item_pool[61][0] = 12  # HP Pieces
+
         # Open Mode
         if "Open Mode" in self.variant:
             # Update graph logic
@@ -538,28 +565,30 @@ class World:
             self.item_pool[24][0] = 0  # Will
             self.item_pool[25][0] = 0  # Teapot
             self.item_pool[37][0] = 0  # Lola's Letter
+            self.item_pool[6][0] += 4  # Herbs
+            self.item_pool[0][0] += 1  # Nothing
 
             # Add in alternate items, by difficulty
-            if self.difficulty == 0:
-                self.item_pool[0][0]  += 0  # Nothing
-                self.item_pool[6][0]  += 1  # Herb
-                self.item_pool[42][0] += 2  # DEF Jewel
-                self.item_pool[43][0] += 2  # STR Jewel
-            elif self.difficulty == 1:
-                self.item_pool[0][0]  += 1  # Nothing
-                self.item_pool[6][0]  += 2  # Herb
-                self.item_pool[42][0] += 1  # DEF Jewel
-                self.item_pool[43][0] += 1  # STR Jewel
-            elif self.difficulty == 2:
-                self.item_pool[0][0]  += 2  # Nothing
-                self.item_pool[6][0]  += 1  # Herb
-                self.item_pool[42][0] += 1  # DEF Jewel
-                self.item_pool[43][0] += 1  # STR Jewel
-            elif self.difficulty == 3:
-                self.item_pool[0][0]  += 5  # Nothing
-                self.item_pool[6][0]  += 0  # Herb
-                self.item_pool[42][0] += 0  # DEF Jewel
-                self.item_pool[43][0] += 0  # STR Jewel
+#            if self.difficulty == 0:
+#                self.item_pool[0][0]  += 0  # Nothing
+#                self.item_pool[6][0]  += 1  # Herb
+#                self.item_pool[42][0] += 2  # DEF Jewel
+#                self.item_pool[43][0] += 2  # STR Jewel
+#            elif self.difficulty == 1:
+#                self.item_pool[0][0]  += 1  # Nothing
+#                self.item_pool[6][0]  += 2  # Herb
+#                self.item_pool[42][0] += 1  # DEF Jewel
+#                self.item_pool[43][0] += 1  # STR Jewel
+#            elif self.difficulty == 2:
+#                self.item_pool[0][0]  += 2  # Nothing
+#                self.item_pool[6][0]  += 1  # Herb
+#                self.item_pool[42][0] += 1  # DEF Jewel
+#                self.item_pool[43][0] += 1  # STR Jewel
+#            elif self.difficulty == 3:
+#                self.item_pool[0][0]  += 5  # Nothing
+#                self.item_pool[6][0]  += 0  # Herb
+#                self.item_pool[42][0] += 0  # DEF Jewel
+#                self.item_pool[43][0] += 0  # STR Jewel
 
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
@@ -1443,6 +1472,9 @@ class World:
         if settings.open_mode:
             self.variant.append("Open Mode")
 
+        if settings.z3:
+            self.variant.append("Z3 Mode")
+
         self.firebird = settings.firebird
         self.start_loc = 10
 #        self.level = settings.level.value
@@ -1506,11 +1538,11 @@ class World:
             38: [1, 1, b"\x26", "Father's Journal", False, 2],
             39: [1, 1, b"\x27", "Crystal Ring", False, 1],
             40: [1, 1, b"\x28", "Apple", True, 1],
-            41: [3, 1, b"\x29", "HP Jewel", False, 3],
-            42: [1, 1, b"\x2a", "DEF Jewel", False, 3],
-            43: [2, 1, b"\x2b", "STR Jewel", False, 3],
-            44: [1, 1, b"\x2c", "Light Jewel", False, 3],
-            45: [2, 1, b"\x2d", "Dark Jewel", False, 3],
+            41: [3, 1, b"\x87", "HP Upgrade", False, 3],
+            42: [1, 1, b"\x89", "DEF Upgrade", False, 3],
+            43: [2, 1, b"\x88", "STR Upgrade", False, 3],
+            44: [1, 1, b"\x8a", "Psycho Dash Upgrade", False, 3],
+            45: [2, 1, b"\x8b", "Dark Friar Upgrade", False, 3],
             46: [1, 1, b"\x2e", "2 Red Jewels", False, 3],
             47: [1, 1, b"\x2f", "3 Red Jewels", False, 3],
             48: [1, 2, "", "Psycho Dash", False, 1],
@@ -1525,7 +1557,8 @@ class World:
             57: [1, 3, "", "Mystic Statue 4", False, 2],
             58: [1, 3, "", "Mystic Statue 5", False, 2],
             59: [1, 3, "", "Mystic Statue 6", False, 2],
-            60: [0, 2, "", "Nothing", False, 3]
+            60: [0, 2, "", "Nothing", False, 3],
+            61: [0, 1, b"\x8c", "Heart Piece", False, 3]
         }
 
         # Define Item/Ability/Statue locations
@@ -2228,11 +2261,11 @@ class World:
             38: b"\xd3\xd6\x1d\x45\x80\xa4\x87\x84\xa2\x0e\xa3\xac\x49\x8e\xa5\xa2\x8d\x80\x8b\x4f\xac",
             39: b"\xd3\xd6\x1d\xa4\x87\x84\xac\x42\xa2\xa9\xa3\xa4\x80\x8b\xac\x62\x88\x8d\x86\x4f\xac",
             40: b"\xd3\xd6\x1d\x80\x8d\xac\x40\xa0\xa0\x8b\x84\x4f\xac\xac\xac\xac\xac\xac\xac\xac\xac",
-            41: b"\xd3\xd6\x1d\x80\x8d\xac\x47\x60\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac\xac",
-            42: b"\xd3\xd6\x1d\x80\xac\x43\x44\x45\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac\xac",
-            43: b"\xd3\xd6\x1d\x80\xac\x63\x64\x62\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac\xac",
-            44: b"\xd3\xd6\x1d\x80\xac\x4b\x88\x86\x87\xa4\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac",
-            45: b"\xd3\xd6\x1d\x80\xac\x43\x80\xa2\x8a\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac\xac",
+            41: b"\xd3\xd6\x1d\x80\x8d\xac\x47\x60\xac\xa5\xa0\x86\xa2\x80\x83\x84\x4f\xac\xac\xac\xac",
+            42: b"\xd3\xd6\x1d\x80\xac\x43\x44\x45\xac\xa5\xa0\x86\xa2\x80\x83\x84\x4f\xac\xac\xac\xac",
+            43: b"\xd3\xd6\x1d\x80\xac\x63\x64\x62\xac\xa5\xa0\x86\xa2\x80\x83\x84\x4f\xac\xac\xac\xac",
+            44: b"\xd3\xd6\x3c\x43\x80\xa3\x87\xac\x88\xa3\xac\x88\x8c\xa0\xa2\x8e\xa6\x84\x83\x4f\xac",
+            45: b"\xd3\xd6\x0c\x45\xa2\x88\x80\xa2\xac\x88\xa3\xac\x88\x8c\xa0\xa2\x8e\xa6\x84\x83\x4f",
             46: b"\xd3\xd6\x1d\x22\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\x4f\xac\xac\xac\xac\xac",
             47: b"\xd3\xd6\x1d\x23\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\x4f\xac\xac\xac\xac\xac",
             48: "",
@@ -2247,7 +2280,8 @@ class World:
             57: "",
             58: "",
             59: "",
-            60: ""
+            60: "",
+            61: b"\xd3\xd6\x1d\x80\xac\x47\x84\x80\xa2\xa4\xac\x60\x88\x84\x82\x84\x4f\xac\xac\xac\xac"
         }
 
         # Define short item text for in-game format
@@ -2294,11 +2328,11 @@ class World:
             38: b"\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac",
             39: b"\x42\xa2\xa9\xa3\xa4\x80\x8b\xac\x62\x88\x8d\x86\xac",
             40: b"\x40\xa0\xa0\x8b\x84\xac\xac\xac\xac\xac\xac\xac\xac",
-            41: b"\x47\x60\xac\x49\x84\xa7\x84\x8b\xac\xac\xac\xac\xac",
-            42: b"\x43\x44\x45\xac\x49\x84\xa7\x84\x8b\xac\xac\xac\xac",
-            43: b"\x63\x64\x62\xac\x49\x84\xa7\x84\x8b\xac\xac\xac\xac",
-            44: b"\x4b\x88\x86\x87\xa4\xac\x49\x84\xa7\x84\x8b\xac\xac",
-            45: b"\x43\x80\xa2\x8a\xac\x49\x84\xa7\x84\x8b\xac\xac\xac",
+            41: b"\x47\x60\xac\x65\xa0\x86\xa2\x80\x83\x84\xac\xac\xac",
+            42: b"\x43\x44\x45\xac\x65\xa0\x86\xa2\x80\x83\x84\xac\xac",
+            43: b"\x63\x64\x62\xac\x65\xa0\x86\xa2\x80\x83\x84\xac\xac",
+            44: b"\x43\x80\xa3\x87\xac\x65\xa0\x86\xa2\x80\x83\x84\xac",
+            45: b"\x45\xa2\x88\x80\xa2\xac\x65\xa0\x86\xa2\x80\x83\x84",
             46: b"\x22\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\xac",
             47: b"\x23\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\xa3\xac",
             48: b"\xd6\x3c\x43\x80\xa3\x87",
@@ -2313,7 +2347,8 @@ class World:
             57: "",
             58: "",
             59: "",
-            60: ""
+            60: "",
+            61: b"\x47\x84\x80\xa2\xa4\xac\x60\x88\x84\x82\x84\xac\xac"
         }
 
         # Database of enemy groups and spritesets

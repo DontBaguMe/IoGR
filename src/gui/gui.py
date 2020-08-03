@@ -120,7 +120,7 @@ def generate_ROM():
     try:
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get())#, get_level(), get_sprite())
+            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get())#, get_level(), get_sprite())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -253,6 +253,7 @@ tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W
 tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Z3 Mode").grid(row=14, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
@@ -294,6 +295,9 @@ boss_shuffle.set(0)
 open_mode = tkinter.IntVar(root)
 open_mode.set(0)
 
+z3_mode = tkinter.IntVar(root)
+z3_mode.set(0)
+
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
@@ -325,6 +329,7 @@ statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=
 glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=11, column=1)
 boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=12, column=1)
 open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
+z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
 #sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 

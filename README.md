@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v3.2) - <a href="https://www.iogr.app/">Play Now!</a>
+## The Illusion of Gaia Randomizer (v3.4) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
@@ -67,6 +67,18 @@ There are three logic modes available to the player.
 - OHKO (One Hit Knockout): You start the game with 1 HP and will never gain an HP upgrade, so each hit kills you automatically.
 - Red Jewel Madness: You start the game with 40 HP (max) and lose 1 HP for every Red Jewel you turn into the Jeweler. If you reach 0 total HP, you will be caught in an infinite death loop. Note: Gaining an HP upgrade when you're at or near 40 HP may result in lost upgrades, as any HP value above 40 is ignored.
 - Early Firebird: In this mode, you gain access to the Firebird attack when 1) you rescure Kara, 2) you equip the Crystal Ring, and 3) you're in Shadow's form.
+- Zelda 3 Mode: Choosing this variant makes some significant alterations to the game, inspired by the combat system of <i>The Legend of Zelda: A Link to the Past (ALTTP)</i>.  Below are the changes made in this mode. (Where appropriate, values given by level are provided in the format Beginner/Intermediate/Advanced/Expert.)
+  - You begin the game with 6 HP instead of 8 (to mirror Link's starting health).
+  - 12 Red Jewels have been removed from the game and replaced with 4 HP upgrades and 8 HP Pieces.  HP upgrades add +2 HP (+1 in Expert), and HP Pieces add +1 HP (+0.5 in Advanced and Expert).
+  - Room rewards (HP only) grant +1 each.  The number of HP room upgrades available, by level, are 12/12/6/6
+  - STR and DEF upgrades have been removed from the room/boss rewards and have been put into the item pool.
+  - The max STR upgrades you can receive by level are 3/2/1/0.
+  - The max DEF upgrades you can receive by level are 2/2/1/0.
+  - Jump slashes deal double damage instead of +1 damage.
+  - Each STR and DEF upgrade doubles the applicable stat instead of adding +1.
+  - Herbs and HP upgrades provide the following refills, by level: 40/40/14/8.
+  - Max HP available to the player, by level is 40/40/28/23.
+  - Non-boss enemy stats are not shuffled between level choices. Max HP for non-boss enemies is capped to 8, and they all have 0 DEF.  Enemy damage ranges from 1 to 16.
 
 #### Enemizer (beta)
 The enemizer is (and likely will forever be) in beta, so play at your own risk. Graphical glitches abound, and some seeds may be incompletable due to enemy placement. Please report any game-breaking situations in the Discord.

@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.3.6"
+VERSION = "3.4.6"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -25,6 +25,11 @@ GEMS_EASY = 35
 GEMS_NORMAL = 40
 GEMS_HARD = 45
 GEMS_EXTREME = 50
+
+GEMS_Z3_EASY = 24
+GEMS_Z3_NORMAL = 28
+GEMS_Z3_HARD = 31
+GEMS_Z3_EXTREME = 34
 
 INV_FULL = b"\x5c\x8e\xc9\x80"
 FORCE_CHANGE = b"\x22\x30\xfd\x88"
@@ -106,6 +111,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.boss_shuffle, "b")
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
+    filename += getSwitch(settings.z3, "z3")
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
     filename += "_" + str(settings.seed)
@@ -148,10 +154,6 @@ class Randomizer:
         # Write code for clearing enemy tally data
         patch.seek(int("1ff9b", 16) + rom_offset)
         patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
-
-        # Clear space for additional switches, if any
-        patch.seek(int("1ffb0", 16) + rom_offset)
-        patch.write(b"\x00" * 80)
 
         ##########################################################################
         #                             Early Firebird
@@ -280,6 +282,8 @@ class Randomizer:
         patch.write(b"\x10")
         patch.seek(int("7d7b1", 16) + rom_offset)  # Switch 159 - Mt. Kress on map
         patch.write(b"\x10")
+        patch.seek(int("8f0a1", 16) + rom_offset)  # Switch 247 - first Freedan
+        patch.write(b"\x10")
 
         ##########################################################################
         #                     Initialize map header dataset
@@ -317,12 +321,69 @@ class Randomizer:
         f_acquisition.close
 
         ##########################################################################
+        #                         Update GiveItem Routine
+        #             Allows status upgrades to be granted as items
+        ##########################################################################
+        # Disable nested cop commands
+        patch.seek(int("3f016", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+        patch.seek(int("3f03c", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+        patch.seek(int("3f05b", 16) + rom_offset)
+        patch.write(b"\xea\xea\xea")
+
+        # Write DEF and STR upgrade item scripts, also includes scripts for Z3 mode
+        f_statupgrades = open(BIN_PATH + "03f77b_statupgrades.bin", "rb")
+        patch.seek(int("3f77b", 16) + rom_offset)
+        patch.write(f_statupgrades.read())
+        f_statupgrades.close
+
+        # Allow upgrade items to use chest opening text table
+        # Starts at index #$30
+        patch.seek(int("3efb3", 16) + rom_offset)
+        patch.write(b"\x20\x95\xf7")  # Pointer to initialization script
+        patch.write(b"\x0A\xDA\xAA\xfc\x7b\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
+        patch.write(b"\xEE\x16\x0B\x80\x03\xEE\x1C\x0B\x60")  # Logic for Dash and Friar Upgrades
+#        patch.seek(int("3f765", 16) + rom_offset)
+#        patch.write(b"\x0c\xf0\x32\xf0\x51\xf0\xe9\xef\xed\xef\xf1\xef\xca\xef\x0c\xf0\x32\xf0\x51\xf0\xc0\xef\xc5\xef\xa0\xff") # Subroutine pointers
+#        patch.write(b"\x48\xE9\x57\x8D\xB8\x0D\x68\x38\xE9\x80\x60")  # Initialization script
+        patch.seek(int("3efe6", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f00a", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f030", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f04f", 16) + rom_offset)
+        patch.write(b"\x60")
+        patch.seek(int("3f06e", 16) + rom_offset)
+        patch.write(b"\x60")
+
+        # Write Heart Piece logic
+        patch.seek(int("3ffa0", 16) + rom_offset)
+        patch.write(b"\x48\xAD\x24\x0B\x89\x02\xF0\x13\xAD\x1E\x0A\x89\x80\xD0\x07\x09\x80")
+        patch.write(b"\x8D\x1E\x0A\x80\x09\x49\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x60")
+
+        # Treasure chest text: "Already maxed out!"
+        patch.seek(int("1ffed", 16) + rom_offset)
+        patch.write(b"\x40\x8B\xA2\x84\x80\x83\xA9\xAC\x8C\x80\xA8\x84\x83\xAC\x8E\xA5\xA4\x4F\xCA")
+
+        # Update pointers for Friar upgrade and Heart Piece
+#        patch.seek(int("3efc6", 16) + rom_offset)
+#        patch.write(b"\x27")
+#        patch.seek(int("3efc9", 16) + rom_offset)
+#        patch.write(b"\x2a")
+
+        # Insert logic for Dash and Friar upgrades
+#        patch.seek(int("3efe9", 16) + rom_offset)
+#        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
+
+        ##########################################################################
         #                            Update item events
         #    Adds new items that increase HP, DEF, STR and improve abilities
         ##########################################################################
         # Add pointers for new items @38491
         patch.seek(int("38491", 16) + rom_offset)
-        patch.write(b"\x6f\x9f\x91\x9f\x1d\x88\x3a\x88\x5f\x88\x90\x9d\xd0\x9d")
+        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5e\x88\x90\x9d\xd0\x9d\xa0\xff")
 
         # Add start menu descriptions for new items
         f_startmenu = open(BIN_PATH + "01dabf_startmenu.bin", "rb")
@@ -334,10 +395,18 @@ class Randomizer:
         patch.write(f_itemdesc.read())
         f_itemdesc.close
 
-        # Update sprites for new items - first new item starts @108052, 7 new items
-        # Points all items to unused sprite for item 4c ("76 83" in address table)
+        # Write sprites for multi-jewel items
+        f_multijewel = open(BIN_PATH + "108ea3_multijewel.bin", "rb")
+        patch.seek(int("108ea3", 16) + rom_offset)
+        patch.write(f_multijewel.read())
+        f_multijewel.close
+
+        # Update sprite pointers for new items (placeholder bag of gold for obselete items)
+        # New sprite pointers at 108376, overwrites flaming sphere
         patch.seek(int("108052", 16) + rom_offset)
-        patch.write(b"\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83\x76\x83")
+        patch.write(b"\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x76\x83\x76\x83\x9c\x81")
+        patch.seek(int("108376", 16) + rom_offset)
+        patch.write(b"\x07\x00\xa3\x8e\x07\x00\xc5\x8e\xff\xff")
 
         # Update item removal restriction flags
         patch.seek(int("1e12a", 16) + rom_offset)
@@ -420,7 +489,6 @@ class Randomizer:
             patch.write(qt_encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
             patch.write(qt_encode("She will give you the option to face the final boss and beat the game. Good luck, and have fun!") + b"\xc0")
 
-
         patch.seek(int("3f800", 16) + rom_offset)
         patch.write(b"\xce" + qt_encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
         patch.write(qt_encode("As you gain more items, you will be able to visit other continents and access more locations.|"))
@@ -490,13 +558,23 @@ class Randomizer:
         patch.write(f_item28.read())
         f_item28.close
 
+
+#        patch.seek(int("39f91", 16) + rom_offset)
+#        patch.write(qt_encode("Already maxed out!", True))
+
+        # Write Piece of Heart item
+#        patch.seek(int("3ffa0", 16) + rom_offset)
+#        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
+#        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
+#        patch.write(qt_encode("You got a heart piece!", True))
+
         # Update HP fill for herbs and HP jewels based on level
         patch.seek(int("3889e", 16) + rom_offset)
-        patch.write(b"\x4c\x50\xfe")
+        patch.write(b"\x20\x50\xfe")
         patch.seek(int("3fe50", 16) + rom_offset)
         patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x02\x00\x80\x0D")
-        patch.write(b"\xA9\x04\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x4C\xA1\x88")
-        patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x4C\x7C\x9F")
+        patch.write(b"\xA9\x04\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x60\xff\xff")
+        patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x60")
 
         # Change item functionality for game variants
         patch.seek(int("3ff00", 16) + rom_offset)
@@ -509,12 +587,60 @@ class Randomizer:
         patch.write(f_rjm.read())
         f_rjm.close
 
+        ##########################################################################
+        #                           Special Settings
+        ##########################################################################
+        # Z3 Mode - write subroutines to available space
+        patch.seek(int("3faee", 16) + rom_offset)     # DEF halves damage subroutine
+        patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
+#        patch.seek(int("fd00", 16) + rom_offset)     # Boss STR/DEF upgrades
+#        patch.write(z3_str)
+#        patch.seek(int("3ff90", 16) + rom_offset)     # Item HP upgrades
+#        patch.write(b"\x18\xA9\x03\xCD\x24\x0B\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x60")
+#        patch.seek(int("3ffe0", 16) + rom_offset)     # Item STR/DEF upgrades
+#        patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60")  #\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60") used to be for DEF
+
+        if settings.z3:
+            # Start with 6 HP
+            patch.seek(int("8068", 16) + rom_offset)
+            patch.write(b"\x06")
+
+            # Double damage on jump slash
+            patch.seek(int("2cf58", 16) + rom_offset)
+            patch.write(b"\xAD\xDE\x0A")
+
+            # Each DEF upgrade halves damage received
+            patch.seek(int("3c464", 16) + rom_offset)
+            patch.write(b"\x20\xEE\xFA")
+
+            # Update herb/HP upgrade fill values
+            patch.seek(int("3fe5c", 16) + rom_offset)  # Expert #$08
+            patch.write(b"\x08")
+            patch.seek(int("3fe61", 16) + rom_offset)  # Advanced #$0E
+            patch.write(b"\x0E")
+            patch.seek(int("3fe66", 16) + rom_offset)  # Intermediate #$28
+            patch.write(b"\x28")
+
+            # Call item upgrade subroutines
+            patch.seek(int("3f01c", 16) + rom_offset)  # HP upgrade
+            patch.write(b"\x20\xa1\xf7")
+            patch.seek(int("3f042", 16) + rom_offset)  # STR upgrade
+            patch.write(b"\x20\xc1\xf7")
+            patch.seek(int("3f061", 16) + rom_offset)  # DEF upgrade
+            patch.write(b"\x20\xe3\xf7")
+
         # In OHKO, the HP Jewels do nothing, and start @1HP
         if settings.ohko:
-            patch.seek(int("8068", 16) + rom_offset)
+            patch.seek(int("8068", 16) + rom_offset)  # Start 1 HP
             patch.write(b"\x01")
-            patch.seek(int("39f71", 16) + rom_offset)
-            patch.write(b"\x00\xff\x02\xd5\x29\x60")
+            patch.seek(int("3f7b1", 16) + rom_offset) # HP upgrade
+            patch.write(b"\x00")
+            patch.seek(int("3f7b7", 16) + rom_offset) # HP upgrade
+            patch.write(b"\x00")
+            patch.seek(int("3ffbc", 16) + rom_offset) # heart piece
+            patch.write(b"\x60")
+#            patch.seek(int("39f71", 16) + rom_offset)
+#            patch.write(b"\x00\xff\x02\xd5\x29\x60")
             # Also, herbs suck
             patch.seek(int("388e9", 16) + rom_offset)
             patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
@@ -532,7 +658,6 @@ class Randomizer:
             # 3 Red Jewels (item #$2f) removes 3 HP when used
             patch.seek(int("39dd9", 16) + rom_offset)
             patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
-
 
         ##########################################################################
         #                  Update overworld map movement scripts
@@ -1823,15 +1948,17 @@ class Randomizer:
         patch.write(f_roomrewards.read())
         f_roomrewards.close
 
-        # Make room-clearing HP rewards grant +3 HP each
-        patch.seek(int("e041", 16) + rom_offset)
-        patch.write(b"\x03")
+        # HP room rewards become +3 (non-Z3 mode only)
+        if not settings.z3:
+            # Room-clearing rewards
+            patch.seek(int("e041", 16) + rom_offset)
+            patch.write(b"\x03")
 
-        # Make boss rewards also grant +3 HP per unclaimed reward
-        patch.seek(int("c381", 16) + rom_offset)
-        patch.write(b"\x20\x90\xf4")
-        patch.seek(int("f490", 16) + rom_offset)
-        patch.write(b"\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
+            # Boss rewards
+            patch.seek(int("c381", 16) + rom_offset)
+            patch.write(b"\x20\x90\xf4")
+            patch.seek(int("f490", 16) + rom_offset)
+            patch.write(b"\xee\xca\x0a\xee\xca\x0a\xee\xca\x0a\x60")
 
         # Change boss room ranges
         patch.seek(int("c31a", 16) + rom_offset)
@@ -1854,7 +1981,10 @@ class Randomizer:
 
         # Change start menu "FORCE" text
         patch.seek(int("1ff70", 16) + rom_offset)
-        patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x00")  # "+3HP"
+        if settings.z3:
+            patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x48\x50\x00")  # "+1HP"
+        else:
+            patch.write(b"\x01\xC6\x01\x03\x14\x2D\x33\x48\x50\x00")  # "+3HP"
         patch.seek(int("1ff80", 16) + rom_offset)
         patch.write(b"\x01\xC6\x01\x03\x14\x2D\x31\x53\x54\x52\x00")  # "+1STR"
         patch.seek(int("1ff90", 16) + rom_offset)
@@ -1864,13 +1994,19 @@ class Randomizer:
         #                        Balance Enemy Stats
         ##########################################################################
         # Write Intermediate stat table to vanilla location for legacy code
-        f_legacystats = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
+        if settings.z3:
+            f_legacystats = open(BIN_PATH + "01abf0_enemies_z3.bin", "rb")
+        else:
+            f_legacystats = open(BIN_PATH + "01abf0_enemiesintermediate.bin", "rb")
         patch.seek(int("1abf0", 16) + rom_offset)
         patch.write(f_legacystats.read())
         f_legacystats.close
 
         # Write enemy stat tables to memory, by Level
-        f_enemystats = open(BIN_PATH + "02f130_enemystats.bin", "rb")
+        if settings.z3:
+            f_enemystats = open(BIN_PATH + "02f130_enemystats_z3.bin", "rb")
+        else:
+            f_enemystats = open(BIN_PATH + "02f130_enemystats.bin", "rb")
         patch.seek(int("2f130", 16) + rom_offset)
         patch.write(f_enemystats.read())
         f_enemystats.close
@@ -2108,23 +2244,42 @@ class Randomizer:
         ##########################################################################
         # Randomize jeweler reward values
         gem = []
-        gem.append(random.randint(1, 3))
-        gem.append(random.randint(4, 6))
-        gem.append(random.randint(7, 9))
-        gem.append(random.randint(10, 14))
-        gem.append(random.randint(16, 24))
-        gem.append(random.randint(26, 34))
-        gem.append(random.randint(36, 50))
+        if settings.z3:
+            gem.append(random.randint(1, 2))
+            gem.append(random.randint(3, 4))
+            gem.append(random.randint(5, 7))
+            gem.append(random.randint(8, 11))
+            gem.append(random.randint(12, 17))
+            gem.append(random.randint(18, 23))
+            gem.append(random.randint(24, 34))
 
-        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-            if settings.difficulty.value == 0:
-                gem[6] = GEMS_EASY
-            elif settings.difficulty.value == 1:
-                gem[6] = GEMS_NORMAL
-            elif settings.difficulty.value == 2:
-                gem[6] = GEMS_HARD
-            elif settings.difficulty.value == 3:
-                gem[6] = GEMS_EXTREME
+            if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+                if settings.difficulty.value == 0:
+                    gem[6] = GEMS_Z3_EASY
+                elif settings.difficulty.value == 1:
+                    gem[6] = GEMS_Z3_NORMAL
+                elif settings.difficulty.value == 2:
+                    gem[6] = GEMS_Z3_HARD
+                elif settings.difficulty.value == 3:
+                    gem[6] = GEM_Z3S_EXTREME
+        else:
+            gem.append(random.randint(1, 3))
+            gem.append(random.randint(4, 6))
+            gem.append(random.randint(7, 9))
+            gem.append(random.randint(10, 14))
+            gem.append(random.randint(16, 24))
+            gem.append(random.randint(26, 34))
+            gem.append(random.randint(36, 50))
+
+            if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+                if settings.difficulty.value == 0:
+                    gem[6] = GEMS_EASY
+                elif settings.difficulty.value == 1:
+                    gem[6] = GEMS_NORMAL
+                elif settings.difficulty.value == 2:
+                    gem[6] = GEMS_HARD
+                elif settings.difficulty.value == 3:
+                    gem[6] = GEMS_EXTREME
 
         gem_str = []
 
@@ -2179,10 +2334,15 @@ class Randomizer:
         patch.seek(int("8d297", 16) + rom_offset)
         patch.write(binascii.unhexlify(gem_str[2]))
 
-        gem_str[3] = format(2, "x") + format(int(gem[3] / 10), "x")
-        gem_str[3] = gem_str[3] + format(2, "x") + format(gem[3] % 10, "x")
-        patch.seek(int("8d2aa", 16) + rom_offset)
-        patch.write(binascii.unhexlify(gem_str[3]))
+        if int(gem_str[3]) < 10:
+            gem_str[3] = format(2, "x") + format(gem[3] % 10, "x")
+            patch.seek(int("8d2aa", 16) + rom_offset)
+            patch.write(b"\xac" + binascii.unhexlify(gem_str[3]))
+        else:
+            gem_str[3] = format(2, "x") + format(int(gem[3] / 10), "x")
+            gem_str[3] = gem_str[3] + format(2, "x") + format(gem[3] % 10, "x")
+            patch.seek(int("8d2aa", 16) + rom_offset)
+            patch.write(binascii.unhexlify(gem_str[3]))
 
         gem_str[4] = format(2, "x") + format(int(gem[4] / 10), "x")
         gem_str[4] = gem_str[4] + format(2, "x") + format(gem[4] % 10, "x")
@@ -3071,8 +3231,10 @@ class Randomizer:
         superhero_list.append(qt_encode("       Up and atom!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("  It's clobberin' time!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       For Asgard!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("   It's morphin' time!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("    Back in a flash!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("      I am GROOT!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       VALHALLA!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("Wonder Twin powers activate!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("    Titans together!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       HULK SMASH!") + b"\xc3\x00\xc0")
