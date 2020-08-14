@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.4.6"
+VERSION = "3.4.7"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -2029,6 +2029,8 @@ class Randomizer:
         patch.write(b"\x20\x96\xfe")
         patch.seek(0x03c45d + rom_offset)   # STR
         patch.write(b"\x20\x8b\xfe")
+        patch.seek(0x00dadd + rom_offset)   # GEM
+        patch.write(b"\x22\xa1\xfe\x83")
         patch.seek(0x00dc07 + rom_offset)   # GEM
         patch.write(b"\x22\xa1\xfe\x83")
         patch.seek(int("3fed0", 16) + rom_offset)
