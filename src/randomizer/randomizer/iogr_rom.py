@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.4.7"
+VERSION = "3.4.8"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1346,11 +1346,11 @@ class Randomizer:
         # Exit after Sand Fanger takes you back to start
         patch.seek(int("19c84", 16) + rom_offset)
         patch.write(b"\x82\x10\x00\x90\x00\x07\x00\x18")
-        
+
         # Spawn Fanger off-screen so we can't cheese hits off it with Earthquaker
         patch.seek(0x0cbd2f + rom_offset)
         patch.write(b"\x40")
-        
+
         # Make Fanger's detection areas cover the arena, in case player moves during quake
         patch.seek(0x0b81a0 + rom_offset)
         patch.write(b"\x01\x19\x3f\x3f")
