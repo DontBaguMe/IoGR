@@ -87,7 +87,7 @@ There are three logic modes available to the player.
   - Each STR and DEF upgrade doubles the applicable stat instead of adding +1.
   - Herbs and HP upgrades provide the following refills, by level: 40/40/14/8.
   - Max HP available to the player, by level is 40/40/28/23.
-  - Non-boss enemy stats are not shuffled between level choices. Max HP for non-boss enemies is capped to 8, and they all have 0 DEF.  Enemy damage ranges from 1 to 16.
+  - Non-boss enemy stats are not shuffled between level choices. All non-bosses have 0 DEF.  Enemy damage ranges from 1 to 16.  (These values correspond to the enemies in A Link to the Past.)
 
 #### Enemizer (beta)
 The enemizer is (and likely will forever be) in beta, so play at your own risk. Graphical glitches abound, and some seeds may be incompletable due to enemy placement. Please report any game-breaking situations in the Discord.
