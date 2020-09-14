@@ -9,7 +9,6 @@ from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.logic import Logic
 from randomizer.models.enums.start_location import StartLocation
-from randomizer.models.enums.sprites import Sprite
 from randomizer.models.randomizer_data import RandomizerData
 from randomizer.iogr_rom import Randomizer, generate_filename
 
@@ -20,6 +19,8 @@ parser.add_argument('-d', '--difficulty', dest="difficulty", type=Difficulty, re
 parser.add_argument('-g', '--goal', dest="goal", type=Goal, required=False, default=Goal.DARK_GAIA)
 parser.add_argument('-l', '--logic', dest="logic", type=Logic, required=False, default=Logic.COMPLETABLE)
 parser.add_argument('-e', '--enemizer', dest="enemizer", type=Enemizer, required=False, default=Enemizer.NONE)
+parser.add_argument('-z', '--z3', dest="z3", type=bool, required=False, default=False)
+parser.add_argument('-r', '--race', dest="race", type=bool, required=False, default=False)
 parser.add_argument('--start-pos', dest="start", type=StartLocation, required=False, default=StartLocation.SOUTH_CAPE)
 parser.add_argument('--statues', dest="statues", type=str, required=False, default="4")
 parser.add_argument('--firebird', dest="firebird", type=bool, required=False, default=False)
@@ -28,7 +29,6 @@ parser.add_argument('--boss-shuffle', dest="boss_shuffle", type=bool, required=F
 parser.add_argument('--overworld-shuffle', dest="overworld_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--dungeon-shuffle', dest="dungeon_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--open-mode', dest="open_mode", type=bool, required=False, default=False)
-parser.add_argument('--sprite', dest="sprite", type=Sprite, required=False, default=Sprite.WILL)
 
 modeParser = parser.add_mutually_exclusive_group(required=False)
 modeParser.add_argument('--ohko', dest="ohko", action='store_true')
@@ -40,16 +40,16 @@ parser.set_defaults(red_jewel_madness=False)
 
 def main(argv):
     args = parser.parse_args(argv)
-
     settings = RandomizerData(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.enemizer, args.start, args.firebird, args.ohko, args.red_jewel_madness,
-                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.sprite, args.overworld_shuffle, args.dungeon_shuffle)
+                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.z3, args.overworld_shuffle, args.dungeon_shuffle)
 
     rom_filename = generate_filename(settings, "sfc")
     spoiler_filename = generate_filename(settings, "json")
 
     randomizer = Randomizer(args.path)
     patch = randomizer.generate_rom(rom_filename, settings)
-    spoiler = randomizer.generate_spoiler()
+    if not args.race:
+        spoiler = randomizer.generate_spoiler()
 
     write_patch(patch, rom_filename, args.path)
     write_spoiler(spoiler, spoiler_filename, args.path)
