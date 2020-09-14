@@ -13,9 +13,9 @@ from randomizer.models.randomizer_data import RandomizerData
 from randomizer.iogr_rom import Randomizer, generate_filename
 
 parser = argparse.ArgumentParser(description="Generate a randomly seeded ROM")
-parser.add_argument('-p', '--path', dest="path", type=str, required=True)
-parser.add_argument('-s', '--seed', dest="seed", type=int, required=False, default=random.randint(0, 999999999))
-parser.add_argument('-d', '--difficulty', dest="difficulty", type=Difficulty, required=False, default=Difficulty.NORMAL)
+parser.add_argument('-p', '--path', dest="path", type=str, required=True, help="Path to the base ROM file")
+parser.add_argument('-s', '--seed', dest="seed", type=int, required=False, default=random.randint(0, 999999999), help="A seed number, must be a valid integer")
+parser.add_argument('-d', '--difficulty', dest="difficulty", type=Difficulty, required=False, default=Difficulty.NORMAL, help="Decreases rewards and increases enemy scaling")
 parser.add_argument('-g', '--goal', dest="goal", type=Goal, required=False, default=Goal.DARK_GAIA)
 parser.add_argument('-l', '--logic', dest="logic", type=Logic, required=False, default=Logic.COMPLETABLE)
 parser.add_argument('-e', '--enemizer', dest="enemizer", type=Enemizer, required=False, default=Enemizer.NONE)
@@ -25,7 +25,7 @@ parser.add_argument('--start-pos', dest="start", type=StartLocation, required=Fa
 parser.add_argument('--statues', dest="statues", type=str, required=False, default="4")
 parser.add_argument('--firebird', dest="firebird", type=bool, required=False, default=False)
 parser.add_argument('--allow-glitches', dest="allow_glitches", type=bool, required=False, default=False)
-parser.add_argument('--boss-shuffle', dest="boss_shuffle", type=bool, required=False, default=False)
+parser.add_argument('--boss-shuffle', dest="boss_shuffle", type=bool, required=False, default=False, help="Randomizes where bosses are placed (this will most likely softlock your game, use at own risk)")
 parser.add_argument('--overworld-shuffle', dest="overworld_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--dungeon-shuffle', dest="dungeon_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--open-mode', dest="open_mode", type=bool, required=False, default=False)

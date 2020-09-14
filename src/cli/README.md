@@ -27,6 +27,6 @@ This randomizer is only compatible with the US version of the Illusion of Gaia R
 ||--open-mode|NO|0, 1|0|Entire world is open at the start of the game|
 ||--firebird|NO|0, 1|0|Allow for early Firebird|
 ||--allow-glitches|NO|0, 1|0|Allow glitches to be (possibly) required to beat the game|
-||--boss-shuffle|NO|0, 1|0|Randomizes where bosses are placed|
+||--boss-shuffle|NO|0, 1|0|Randomizes where bosses are placed (this will most likely softlock your game, use at own risk)|
 ||--overworld-shuffle|NO|0, 1|0|Not Yet Implemented|
 ||--dungeon-shuffle|NO|0, 1|0|Not Yet Implemented|
