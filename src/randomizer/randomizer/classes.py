@@ -552,7 +552,6 @@ class World:
             self.graph[27][1] += [48,61,66] # Memory Melody
             self.graph[48][1] += [27,61,66]
             self.graph[61][1] += [27,48,66]
-            self.graph[66][1] += [27,48,61]
             self.graph[14][1] += [29]       # Teapot
             self.graph[29][1] += [14,33]
             self.graph[44][1] += [48]       # Will
@@ -1782,7 +1781,7 @@ class World:
         self.graph = {
             -1: [False, [0], "Game Start", []],
 
-            0: [False, [7, 14, 15, 74], "South Cape", [9]],
+            0: [False, [7, 11, 14, 15, 74], "South Cape", []],
 
             74: [False, [], "Jeweler Access", []],
             1: [False, [], "Jeweler Reward 1", []],
@@ -1796,6 +1795,7 @@ class World:
             8: [False, [], "Edward's Prison", [2]],
             9: [False, [], "Underground Tunnel - Behind Prison Key", []],
             10: [False, [7, 9], "Underground Tunnel - Behind Lilly", []],
+            11: [False, [0, 7, 14, 15], "Itory Village Entrance", [9]],
             12: [False, [0, 7, 14, 15], "Itory Village", [23]],
             13: [False, [], "Itory Cave", []],
             75: [False, [], "Got Lilly", []],
@@ -1850,10 +1850,10 @@ class World:
             54: [False, [48, 56], "Natives' Village", [10, 29]],
             55: [False, [], "Natives' Village - Statue Item", []],
             56: [False, [48, 54], "Ankor Wat", []],
-            76: [False, [56], "Ankor Wat - Garden", []],
             57: [False, [56, 76], "Ankor Wat - Behind Psycho Slide & Spin Dash", []],
+            76: [False, [56], "Ankor Wat - Garden", []],
             58: [False, [], "Ankor Wat - Behind Dark Friar", []],
-            59: [False, [56], "Ankor Wat - Behind Earthquaker", []],
+            59: [False, [76], "Ankor Wat - Behind Earthquaker", []],
             60: [False, [76], "Ankor Wat - Behind Black Glasses", []],
 
             61: [False, [54, 74], "Dao", []],
@@ -1925,7 +1925,7 @@ class World:
             43: [54, 61, [[10, 1]]],  # Natives' to Dao w/ Large Roast
 
             # SW Continent
-            50: [0, 12, [[9, 1]]],  # Cape to Itory w/ Lola's Melody
+            50: [11, 12, [[9, 1]]],  # Itory Access w/ Lola's Melody
             51: [8, 9, [[2, 1]]],  # Prison to Tunnel w/ Prison Key
             52: [75, 10, [[2, 1]]],  # Tunnel Progression w/ Lilly
             53: [12, 13, [[48, 1]]],  # Itory Cave w/ Psycho Dash
@@ -1986,11 +1986,11 @@ class World:
             115: [50, 48, [[50, 1]]],  # Mt. Temple to Euro w/ Spin
             116: [54, 55, [[29, 1]]],  # Natives' Village Progression w/ Flower
             117: [56, 57, [[49, 1], [50, 1]]],  # Ankor Wat Progression w/ Slide and Spin
-            118: [57, 58, [[51, 1]]],  # Ankor Wat Progression w/ Dark Friar
-            119: [57, 58, [[36, 1]]],  # Ankor Wat Progression w/ Aura
-            120: [57, 59, [[53, 1]]],  # Ankor Wat Progression w/ Earthquaker
-            121: [57, 59, [[51, 1], [45, 2]]],  # Ankor Wat Progression w/ upgraded Friar
-            122: [59, 60, [[28, 1], [49, 1]]],  # Ankor Wat Progression w/ Black Glasses
+            118: [76, 58, [[51, 1]]],  # Ankor Wat Progression w/ Dark Friar
+            119: [76, 58, [[36, 1]]],  # Ankor Wat Progression w/ Aura
+            120: [76, 59, [[53, 1]]],  # Ankor Wat Progression w/ Earthquaker
+            121: [76, 59, [[51, 1], [45, 2]]],  # Ankor Wat Progression w/ upgraded Friar
+            122: [59, 60, [[28, 1], [49, 1]]],  # Ankor Wat Progression w/ Black Glasses and Slider
 
             # NW Continent
             130: [61, 62, [[49, 1]]],  # Pyramid foyer w/ Slide
