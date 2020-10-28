@@ -3247,28 +3247,32 @@ class Randomizer:
         superhero_list.append(qt_encode("    Back in a flash!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("      I am GROOT!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       VALHALLA!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       Go Joes!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("Wonder Twin powers activate!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("    Titans together!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       HULK SMASH!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("        Flame on!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("        By Crom!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("       Excelsior!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("Great Caesar's ghost!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("      Odin's beard!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("    I have the power!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("   Avengers assemble!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("To the Bat-pole, Robin!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("        Shazam!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("     Bite me, fanboy.") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("  Hi-yo Silver... away!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("Here I come to save the day!") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode("By the hoary hosts of Hoggoth!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("    Teen Titans, Go!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       Cowabunga!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       SPOOOOON!!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("There better be bacon when I get there...") + b"\xc3\x00\xc0")
-        superhero_list.append(qt_encode("     Apocalypse Now!") + b"\xc3\x00\xc0")
 
         # Assign final text box
         rand_idx = random.randint(0, len(superhero_list) - 1)
         patch.seek(int("98ebe", 16) + rom_offset)
-        if self.w.goal == "Apocalypse Gaia" and settings.goal.value == Goal.RANDOM_GAIA.value:
-            patch.write(qt_encode("    Apocalypse Now!") + b"\xc3\x00\xc0")
-        else:
-            patch.write(superhero_list[rand_idx])
+        patch.write(superhero_list[rand_idx])
 
         ##########################################################################
         #                Finalize map headers and return patch data
