@@ -1237,6 +1237,8 @@ class Randomizer:
         patch.write(b"\x65\xb8\x00\x80\x02\x03\x00\x44")
         patch.seek(int("69c62", 16) + rom_offset)
         patch.write(b"\x67\x78\x01\xd0\x01\x80\x01\x22")
+        patch.seek(int("afa51", 16) + rom_offset)
+        patch.write(b"\x67\x78\x01\xd0\x01\x80\x01\x22")
         patch.seek(int("6a4c9", 16) + rom_offset)
         patch.write(b"\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b")
 
