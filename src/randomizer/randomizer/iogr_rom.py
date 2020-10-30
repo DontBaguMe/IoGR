@@ -1375,10 +1375,8 @@ class Randomizer:
         patch.write(qt_encode("A moose once bit my sister.", True))
 
         # Neil in Euro
-        f_euroneil = open(BIN_PATH + "07e398_euroneil.bin", "rb")
         patch.seek(int("7e398", 16) + rom_offset)
-        patch.write(f_euroneil.read())
-        f_euroneil.close
+        patch.write(b"\x02\xD0\x14\x01\xA1\xE3\x02\xE0\x5C\xBE\xD8\x85")
         patch.seek(int("7e37f", 16) + rom_offset)
         patch.write(b"\x14\x00")
         patch.seek(int("7e394", 16) + rom_offset)
@@ -1486,10 +1484,10 @@ class Randomizer:
         f_snakegame.close
 
         # Neil in Dao
-        f_daoneil = open(BIN_PATH + "08a5bd_daoneil.bin", "rb")
-        patch.seek(int("8a5bd", 16) + rom_offset)
-        patch.write(f_daoneil.read())
-        f_daoneil.close
+        patch.seek(int("8a5bf", 16) + rom_offset)
+        patch.write(b"\x10")
+        patch.seek(int("8a5f1", 16) + rom_offset)
+        patch.write(b"\x14\x01\xFE\xA5\x02\xD0\x14\x01\xFE\xA5\x02\xE0\x6B\x5C\xBE\xD8\x85")
         patch.seek(int("8a5b3", 16) + rom_offset)
         patch.write(b"\x14\x00")
 
@@ -1497,8 +1495,8 @@ class Randomizer:
         patch.seek(int("8b16d", 16) + rom_offset)
         patch.write(b"\x4c\x50\xfe")
         patch.seek(int("8fe50", 16) + rom_offset)
-        patch.write(b"\x02\xBF\x71\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE")
-        patch.write(b"\x02\xBF\x93\xFE\x6B\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x02\xC5")
+        patch.write(b"\x02\xBF\x78\xFE\x02\xBE\x02\x01\x5A\xFE\x60\xFE\x60\xFE\x65\xFE\x02\xBF\x9A\xFE\x6B")
+        patch.write(b"\x02\x26\xAC\xC0\x01\xD0\x01\x06\x00\x22\x22\x9B\xFF\x81\x9C\xD4\x0A\x02\xC5")
         patch.write(b"\xd3" + qt_encode("Go to Natives' Village?") + b"\xcb\xac")
         patch.write(qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
         patch.write(b"\xce" + qt_encode("Come back anytime!") + b"\xc0")
@@ -1626,6 +1624,12 @@ class Randomizer:
         patch.write(qt_encode("I'd tell you my story, but I'd hate to Babylon.|Thank you! I'm here all week!"))
         patch.write(b"\xcb\xac\xd6\x42\xcb\xac")
         patch.write(qt_encode("Go to Dao") + b"\xca")
+
+        # Dao spirit forces form change
+        patch.seek(int("98045", 16) + rom_offset)
+        patch.write(b"\x20\xc0\xf6")
+        patch.seek(int("9f6c0", 16) + rom_offset)
+        patch.write(b"\x8D\x48\x06" + CLEAR_ENEMIES + FORCE_CHANGE + b"\x60")
 
         # Fun with other text
         patch.seek(int("99866", 16) + rom_offset)
