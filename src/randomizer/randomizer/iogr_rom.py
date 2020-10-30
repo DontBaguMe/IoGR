@@ -1108,6 +1108,14 @@ class Randomizer:
         patch.write(f_nazca.read())
         f_nazca.close
 
+        # Put a Moon Tribe where the warp point is
+        patch.seek(int("5f2f1", 16) + rom_offset)
+        patch.write(b"\x10\x80\x0B")
+        patch.seek(int("5f30c", 16) + rom_offset)
+        patch.write(b"\x02\xC0\xAD\xE6\x80\xF5")
+        patch.seek(int("c9d29", 16) + rom_offset)
+        patch.write(b"\x1D\x2C")
+
         # Allow exit to world map
         patch.seek(int("5e80c", 16) + rom_offset)
         patch.write(b"\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
