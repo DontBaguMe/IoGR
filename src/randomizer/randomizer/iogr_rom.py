@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.5.0"
+VERSION = "3.5.1"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1385,12 +1385,10 @@ class Randomizer:
         patch.write(qt_encode("A moose once bit my sister.", True))
 
         # Neil in Euro
-        patch.seek(int("7e398", 16) + rom_offset)
-        patch.write(b"\x02\xD0\x14\x01\xA1\xE3\x02\xE0\x5C\xBE\xD8\x85")
         patch.seek(int("7e37f", 16) + rom_offset)
         patch.write(b"\x14\x00")
-        patch.seek(int("7e394", 16) + rom_offset)
-        patch.write(b"\x10\x00")
+        patch.seek(int("7e392", 16) + rom_offset)
+        patch.write(b"\x5C\xBE\xD8\x85")
 
         # Hidden house replaces STR upgrade with item acquisition
         f_euroitem = open(BIN_PATH + "07e517_euroitem.bin", "rb")
@@ -3002,7 +3000,7 @@ class Randomizer:
         random.shuffle(changes[1])
         random.shuffle(changes[2])
         random.shuffle(changes[3])
-        #changes = [10,3,1,1]  #testing#########
+        #idx_diff = [10,3,1,1]  #testing#########
         idx_diff = [changes[0].pop(0),changes[1].pop(0),changes[2].pop(0),changes[3].pop(0)]
 
         # Will's hair can't be changed in both rooms
@@ -3017,6 +3015,9 @@ class Randomizer:
             while i < 4:
                 other_changes[i] = changes[i][:settings.difficulty.value-1]
                 i += 1
+
+        #print(idx_diff)
+        #print(other_changes)
 
         # Set change for Room 1
         if idx_diff[0] == 0:  # Will's hair
@@ -3234,7 +3235,7 @@ class Randomizer:
         if idx_diff[1] == 8 or 8 in other_changes[1]:  # Put moss on rock
             f_ishtarmap.seek(int("3bd", 16))
             f_ishtarmap.write(b"\x8f")
-            if idx_diff[1] == 0:
+            if idx_diff[1] == 8:
                 coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
             else:
                 f_ishtarmap.seek(int("2bd", 16))
@@ -3289,7 +3290,7 @@ class Randomizer:
         if (same_chest and idx_diff[2] == 4) or 4 in other_changes[2]:  # Moss rock
             f_ishtarmap.seek(int("5bd", 16))
             f_ishtarmap.write(b"\x8f")
-            if (same_chest and idx_diff[2] == 0):
+            if (same_chest and idx_diff[2] == 4):
                 coords = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
             else:
                 f_ishtarmap.seek(int("4bd", 16))
