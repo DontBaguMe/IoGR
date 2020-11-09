@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.5.1"
+VERSION = "3.6.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2

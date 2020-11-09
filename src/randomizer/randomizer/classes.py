@@ -12,7 +12,7 @@ from .models.randomizer_data import RandomizerData
 MAX_INVENTORY = 15
 PROGRESS_ADJ = [1.5, 1.25, 1, 0.75]  # Required items are more likely to be placed in easier modes
 MAX_CYCLES = 100
-INACCESSIBLE = 100
+INACCESSIBLE = 1000
 
 
 class World:
@@ -808,6 +808,7 @@ class World:
 
         # while self.unaccessible_locations(item_locations):
         while not done:
+            #print(cycle)
             cycle += 1
             if cycle > MAX_CYCLES:
                 print("ERROR: Max cycles exceeded")
@@ -827,7 +828,7 @@ class World:
             progression_list = self.progression_list(start_items)
 
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
-            # print done, progression_list
+            #print done, progression_list
 
             if not done and progression_list == -1:  # No empty locations available
                 removed = self.make_room(item_locations)
@@ -1492,7 +1493,7 @@ class World:
         self.map_patches = []
 
         # Initialize item pool, considers special attacks as "items"
-        # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue),
+        # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue,4=other),
         #                  ROM Code, Name, TakesInventorySpace,
         #                  ProgressionType (1=unlocks new locations,2=quest item,3=no progression)] }
         self.item_pool = {
@@ -1557,11 +1558,14 @@ class World:
             58: [1, 3, "", "Mystic Statue 5", False, 2],
             59: [1, 3, "", "Mystic Statue 6", False, 2],
             60: [0, 2, "", "Nothing", False, 3],
-            61: [0, 1, b"\x8c", "Heart Piece", False, 3]
+            61: [0, 1, b"\x8c", "Heart Piece", False, 3],
+            62: [0, 4, "", "Got Lilly", False, 1],
+            63: [0, 4, "", "Freed Moon Tribe", False, 1],
+            64: [0, 4, "", "Restored Neil's Memory", False, 1]
         }
 
         # Define Item/Ability/Statue locations
-        # Format: { ID: [Region, Type (1=item,2=ability,3=statue), Filled Flag,
+        # Format: { ID: [Region, Type (1=item,2=ability,3=statue,4=other), Filled Flag,
         #                Filled Item, Restricted Items, Item Addr, Text Addr, Text2 Addr,
         #                Special (map# or inventory addr), Name, Swapped Flag]}
         #         (For random start, [6]=Type, [7]=XY_spawn_data)
@@ -1772,7 +1776,11 @@ class World:
             150: [41, 3, False, 0, [54, 55, 57, 58, 59], "", "", "", "", "Vampires Prize                      "],
             151: [47, 3, False, 0, [54, 55, 56, 58, 59], "", "", "", "", "Sand Fanger Prize                   "],
             152: [65, 3, False, 0, [54, 55, 56, 57, 59], "", "", "", "", "Mummy Queen Prize                   "],
-            153: [67, 3, False, 0, [54, 55, 56, 57, 58], "", "", "", "", "Babel Prize                         "]
+            153: [67, 3, False, 0, [54, 55, 56, 57, 58], "", "", "", "", "Babel Prize                         "],
+
+            154: [75, 4, True, 62, [], "", "", "", "", "Got Lilly                           "],
+            155: [84, 4, True, 63, [], "", "", "", "", "Released Moon Tribe                 "],
+            156: [85, 4, True, 64, [], "", "", "", "", "Restored Neil's Memory              "]
         }
 
         # World graph is initially populated only with "free" edges
@@ -1781,8 +1789,7 @@ class World:
         self.graph = {
             -1: [False, [0], "Game Start", []],
 
-            0: [False, [7, 11, 14, 15, 74], "South Cape", []],
-
+            # Jeweler rewards
             74: [False, [], "Jeweler Access", []],
             1: [False, [], "Jeweler Reward 1", []],
             2: [False, [], "Jeweler Reward 2", []],
@@ -1791,32 +1798,49 @@ class World:
             5: [False, [], "Jeweler Reward 5", []],
             6: [False, [], "Jeweler Reward 6", []],
 
-            7: [False, [0, 8, 14, 15], "Edward's Castle", []],
+            # Overworld Menus
+            100: [False, [0, 7, 11, 14, 15], "SW Overworld Menu", []],
+            101: [False, [20, 21, 22, 27, 28], "SE Overworld Menu", []],
+            102: [False, [42, 44, 45], "NE Overworld Menu", []],
+            103: [False, [48, 50, 54, 56], "N Overworld Menu", []],
+            104: [False, [61, 62], "NW Overworld Menu", []],
+
+            # Passage Menus
+            105: [False, [0, 20, 44], "Seth Passage Menu", []],
+            106: [False, [14, 33], "Moon Tribe Passage Menu", []],
+            107: [False, [27, 48, 61, 66], "Neil Passage Menu", []],
+            108: [False, [44, 48], "Kruk Passage", []],
+            109: [False, [54, 61], "Roast Passage", []],
+
+            0: [False, [74, 100], "South Cape", []],
+            7: [False, [8, 100], "Edward's Castle", []],
             8: [False, [], "Edward's Prison", [2]],
             9: [False, [], "Underground Tunnel - Behind Prison Key", []],
             10: [False, [7, 9], "Underground Tunnel - Behind Lilly", []],
-            11: [False, [0, 7, 14, 15], "Itory Village Entrance", [9]],
-            12: [False, [0, 7, 14, 15], "Itory Village", [23]],
+            11: [False, [100], "Itory Village Entrance", [9]],
+            12: [False, [11], "Itory Village", [23]],
             13: [False, [], "Itory Cave", []],
             75: [False, [], "Got Lilly", []],
-            14: [False, [0, 7, 15], "Moon Tribe", [25]],
+            14: [False, [100], "Moon Tribe", [25]],
+            84: [False, [], "Released Moon Tribe", []],
             73: [False, [], "Moon Tribe Cave", []],
-            15: [False, [0, 7, 14], "Inca Ruins", [7]],
+            15: [False, [100], "Inca Ruins", [7]],
             16: [False, [15], "Inca Ruins - Behind Diamond Tile & Psycho Dash", [8]],
             83: [False, [15], "Inca Ruins - Broken Statue Maze", []],
             17: [False, [], "Inca Ruins - Behind Wind Melody", [3, 4]],
             18: [False, [19], "Inca Ruins - Castoth", []],
             19: [False, [20], "Gold Ship", []],
 
-            20: [False, [21, 22, 27, 28], "Diamond Coast", []],
-            21: [False, [20, 22, 27, 28, 74], "Freejia", []],
-            22: [False, [20, 21, 27, 28], "Diamond Mine", [15]],
+            20: [False, [101], "Diamond Coast", []],
+            21: [False, [74, 101], "Freejia", []],
+            22: [False, [101], "Diamond Mine", [15]],
             23: [False, [], "Diamond Mine - Behind Psycho Dash", []],
             24: [False, [], "Diamond Mine - Behind Dark Friar", []],
             25: [False, [], "Diamond Mine - Behind Elevator Key", [11, 12]],
             26: [False, [], "Diamond Mine - Behind Mine Keys", []],
-            27: [False, [20, 21, 22, 28], "Neil's Cottage", [13]],
-            28: [False, [20, 21, 22, 27, 29], "Nazca Plain", []],
+            27: [False, [101], "Neil's Cottage", [13]],
+            85: [False, [], "Restored Neil's Memory", []],
+            28: [False, [29, 101], "Nazca Plain", []],
             29: [False, [28], "Sky Garden", [14, 14, 14, 14]],
             30: [False, [72], "Sky Garden - Behind Dark Friar", []],
             72: [False, [], "Sky Garden - Behind Friar or Barrier", []],
@@ -1833,31 +1857,31 @@ class World:
             39: [False, [], "Mu - Behind Psycho Slide", []],
             40: [False, [], "Mu - Behind Hope Statue 2", [19, 19]],
             41: [False, [37], "Mu - Vampires", []],
-            42: [False, [36, 44, 45, 74], "Angel Village", []],
+            42: [False, [36, 74, 102], "Angel Village", []],
             43: [False, [], "Angel Village Dungeon", []],
-            44: [False, [42, 45, 74], "Watermia", [24]],
-            45: [False, [42, 44, 45, 80], "Great Wall", []],
+            44: [False, [74, 102], "Watermia", [24]],
+            45: [False, [80, 102], "Great Wall", []],
             80: [False, [], "Great Wall - Behind Ramp", []],
             46: [False, [], "Great Wall - Behind Dark Friar", []],
             47: [False, [45], "Great Wall - Sand Fanger", []],
 
-            48: [False, [54, 56, 74], "Euro", [24, 40]],
+            48: [False, [74, 103], "Euro", [24, 40]],
             49: [False, [], "Euro - Ann's Item", []],
-            50: [False, [], "Mt. Temple", [26]],
+            50: [False, [103], "Mt. Temple", [26]],
             51: [False, [], "Mt. Temple - Behind Drops 1", [26]],
             52: [False, [], "Mt. Temple - Behind Drops 2", [26]],
             53: [False, [], "Mt. Temple - Behind Drops 3", []],
-            54: [False, [48, 56], "Natives' Village", [10, 29]],
+            54: [False, [103], "Natives' Village", [10, 29]],
             55: [False, [], "Natives' Village - Statue Item", []],
-            56: [False, [48, 54], "Ankor Wat", []],
+            56: [False, [103], "Ankor Wat", []],
             57: [False, [56, 76], "Ankor Wat - Behind Psycho Slide & Spin Dash", []],
             76: [False, [56], "Ankor Wat - Garden", []],
             58: [False, [], "Ankor Wat - Behind Dark Friar", []],
             59: [False, [76], "Ankor Wat - Behind Earthquaker", []],
             60: [False, [76], "Ankor Wat - Behind Black Glasses", []],
 
-            61: [False, [54, 74], "Dao", []],
-            62: [False, [61], "Pyramid", [30, 31, 32, 33, 34, 35, 38]],
+            61: [False, [74, 104], "Dao", []],
+            62: [False, [104], "Pyramid", [30, 31, 32, 33, 34, 35, 38]],
             77: [False, [62], "Pyramid - Bottom Level", []],
             63: [False, [77, 78, 79], "Pyramid - Behind Aura", []],
             64: [False, [77], "Pyramid - Behind Spin Dash", []],
@@ -1909,30 +1933,27 @@ class World:
             27: [6, 68, [[1, gem[6] - 5], [46, 1], [47, 1]]],
 
             # Inter-Continental Travel
-            30: [0, 20, [[37, 1]]],  # Cape to Coast w/ Lola's Letter
-            31: [0, 44, [[37, 1]]],  # Cape to Watermia w/ Lola's Letter
-            32: [20, 0, [[37, 1]]],  # Coast to Cape w/ Lola's Letter
-            33: [20, 44, [[37, 1]]],  # Coast to Watermia w/ Lola's Letter
-            34: [44, 0, [[37, 1]]],  # Watermia to Cape w/ Lola's Letter
-            35: [44, 20, [[37, 1]]],  # Watermia to Coast w/ Lola's Letter
-            36: [27, 48, [[13, 1]]],  # Neil's to Euro w/ Memory Melody
-            37: [27, 61, [[13, 1]]],  # Neil's to Dao w/ Memory Melody
-            38: [27, 66, [[13, 1]]],  # Neil's to Babel w/ Memory Melody
-            39: [14, 29, [[25, 1]]],  # Moon Tribe to Sky Garden w/ Teapot
-            40: [14, 33, [[25, 1]]],  # Moon Tribe to Seaside Palace w/ Teapot
-            41: [44, 48, [[24, 1]]],  # Watermia to Euro w/ Will
-            42: [48, 44, [[24, 1]]],  # Euro to Watermia w/ Will
-            43: [54, 61, [[10, 1]]],  # Natives' to Dao w/ Large Roast
+            30: [ 0, 105, [[37, 1]]],  # Cape to Seth w/ Lola's Letter
+            31: [20, 105, [[37, 1]]],  # Coast to Seth w/ Lola's Letter
+            32: [44, 105, [[37, 1]]],  # Watermia to Seth w/ Lola's Letter
+            34: [27, 107, [[64, 1]]],  # Neil's to Neil Menu w/ Restored Memory
+            35: [48, 107, [[64, 1]]],  # Euro to Neil Menu w/ Restored Memory
+            36: [61, 107, [[64, 1]]],  # Dao to Neil Menu w/ Restored Memory
+            40: [29, 106, [[63, 1]]],  # Sky Garden to Moon Tribe menu w/ Freed Moon Tribe
+            41: [44, 108, [[24, 1]]],  # Watermia to Kruks w/ Will
+            42: [48, 108, [[24, 1]]],  # Euro to Kruks w/ Will
+            43: [54, 109, [[10, 1]]],  # Natives' to Passage w/ Large Roast
 
             # SW Continent
             50: [11, 12, [[9, 1]]],  # Itory Access w/ Lola's Melody
             51: [8, 9, [[2, 1]]],  # Prison to Tunnel w/ Prison Key
-            52: [75, 10, [[2, 1]]],  # Tunnel Progression w/ Lilly
+            52: [9, 10, [[62, 1]]],  # Tunnel Progression w/ Lilly
             53: [12, 13, [[48, 1]]],  # Itory Cave w/ Psycho Dash
             54: [12, 13, [[49, 1]]],  # Itory Cave w/ Psycho Slide
             55: [12, 13, [[50, 1]]],  # Itory Cave w/ Spin Dash
             56: [12, 75, [[23, 1]]],  # Get Lilly w/ Necklace
             57: [14, 29, [[25, 1]]],  # Moon Tribe to Sky Garden w/ Teapot
+            57: [14, 84, [[25, 1]]],  # Moon Tribe to Released w/ Teapot
             58: [15, 16, [[7, 1], [48, 1]]],  # Inca Ruins w/ Tile and Psycho Dash
             59: [15, 16, [[7, 1], [49, 1]]],  # Inca Ruins w/ Tile and Psycho Slide
             60: [15, 16, [[7, 1], [50, 1]]],  # Inca Ruins w/ Tile and Spin Dash
@@ -1953,17 +1974,17 @@ class World:
             74: [22, 24, [[50, 1]]],  # Diamond Mine Progression w/ Spin Dash
             75: [22, 25, [[15, 1]]],  # Diamond Mine Progression w/ Elevator Key
             76: [25, 26, [[11, 1], [12, 1]]],  # Diamond Mine Progression w/ Mine Keys
-            77: [29, 30, [[51, 1]]],  # Sky Garden Progression w/ Dark Friar
-            78: [29, 72, [[52, 1]]],  # Sky Garden Progression w/ Aura Barrier
-            79: [29, 32, [[14, 4]]],  # Sky Garden Progression w/ Crystal Balls
-            80: [29, 31, [[48, 1]]],  # Sky Garden Progression w/ Psycho Dash
-            81: [29, 31, [[49, 1]]],  # Sky Garden Progression w/ Psycho Slide
-            82: [29, 31, [[50, 1]]],  # Sky Garden Progression w/ Spin Dash
+            77: [27, 85, [[13, 1]]],  # Neil's to Neil w/ Memory Melody
+            78: [29, 30, [[51, 1]]],  # Sky Garden Progression w/ Dark Friar
+            79: [29, 72, [[52, 1]]],  # Sky Garden Progression w/ Aura Barrier
+            80: [29, 32, [[14, 4]]],  # Sky Garden Progression w/ Crystal Balls
+            81: [29, 31, [[48, 1]]],  # Sky Garden Progression w/ Psycho Dash
+            82: [29, 31, [[49, 1]]],  # Sky Garden Progression w/ Psycho Slide
+            83: [29, 31, [[50, 1]]],  # Sky Garden Progression w/ Spin Dash
 
             # NE Continent
             90: [33, 34, [[17, 1]]],  # Seaside Progression w/ Purity Stone
-            91: [33, 35, [[9, 1], [16, 1], [23, 1], [37, 1]]],
-            # Seaside Progression w/ Lilly
+            91: [33, 35, [[62, 1]]],  # Seaside Progression w/ Lilly
             92: [33, 36, [[16, 1]]],  # Seaside to Mu w/ Mu Key
             93: [36, 33, [[16, 1]]],  # Mu to Seaside w/ Mu Key
             94: [37, 38, [[18, 1]]],  # Mu Progression w/ Statue of Hope 1
@@ -2697,6 +2718,68 @@ class World:
 
             # Jeweler's Mansion (nothing)
 
+        }
+
+        # Database of overworld menus
+        # FORMAT: { ID: [FromRegion, ToRegion, ROM_EntranceData, ROM_MenuID, Name]}
+        self.overworld_menus = {
+            # SW Continent "\x01"
+            1:  [100,  0, "3b95b", "0cafd", "SW Destination 1 (South Cape)"],
+            2:  [100,  7, "3b96b", "0cb26", "SW Destination 2 (Edward's)"],
+            3:  [100, 11, "3b97b", "0cb5b", "SW Destination 3 (Itory)"],
+            4:  [100, 14, "3b98b", "4f45a", "SW Destination 4 (Moon Tribe)"],
+            5:  [100, 15, "3b99b", "0cb74", "SW Destination 5 (Inca)"],
+
+            # SE Continent "\x07"
+            6:  [101, 20, "3b9ab", "5aab7", "SE Destination 1 (Diamond Coast)"],
+            7:  [101, 21, "3b9bb", "0cba3", "SE Destination 2 (Freejia)"],
+            8:  [101, 22, "3b9cb", "0cbbc", "SE Destination 3 (Diamond Mine)"],
+            9:  [101, 27, "3b9db", "5e31e", "SE Destination 4 (Neil's)"],
+            10: [101, 28, "3b9eb", "5e812", "SE Destination 5 (Nazca)"],
+
+            # NE Continent "\x0a"
+            11: [102, 42, "3ba1b", "0cbeb", "NE Destination 1 (Angel Village)"],
+            12: [102, 44, "3ba2b", "0cc30", "NE Destination 2 (Watermia)"],
+            13: [102, 45, "3ba3b", "0cc49", "NE Destination 3 (Great Wall)"],
+
+            # N Continent "\x0f"
+            14: [103, 48, "3ba4b", "0cc8e", "N Destination 1 (Euro)"],
+            15: [103, 50, "3ba5b", "0cca7", "N Destination 2 (Mt. Temple)"],
+            16: [103, 54, "3ba6b", "0ccec", "N Destination 3 (Native's Village)"],
+            17: [103, 56, "3ba7b", "0cd05", "N Destination 4 (Ankor Wat)"],
+
+            # NW Continent Overworld "\x16"
+            18: [104, 61, "3ba8b", "0cd24", "NW Destination 1 (Dao)"],
+            19: [104, 62, "3ba9b", "0cd55", "NW Destination 2 (Pyramid)"]
+        }
+
+
+        # Database of passage menus
+        # FORMAT: { ID: [FromRegion, ToRegion, ROM_EntranceData, ROM_MenuID, Name]}
+        self.passage_menus = {
+            # Seth Passage Menu
+            20: [0, 0, 0, 15,  20, "-----", b"", False, False,  True, "Seth: Passage 1 (South Cape)"],
+            21: [0, 0, 0, 15, 102, "-----", b"", False, False,  True, "Seth: Passage 2 (Diamond Coast)"],
+            22: [0, 0, 0, 15, 280, "-----", b"", False, False,  True, "Seth: Passage 3 (Watermia)"],
+
+            # Moon Tribe Passage Menu
+            23: [0, 0, 0, 16,  60, "-----", b"", False, False,  True, "Moon Tribe: Passage 1 (Moon Tribe)"],
+            24: [0, 0, 0, 16, 162, "-----", b"", False, False,  True, "Moon Tribe: Passage 2 (Nazca)"],
+            25: [0, 0, 0, 16, 199, "-----", b"", False, False,  True, "Moon Tribe: Passage 3 (Seaside Palace)"],
+
+            # Neil Passage Menu
+            26: [0, 0, 0, 17, 160, "-----", b"", False, False,  True, "Neil: Passage 1 (Neil's)"],
+            27: [0, 0, 0, 17, 314, "-----", b"", False, False,  True, "Neil: Passage 2 (Euro)"],
+            28: [0, 0, 0, 17, 402, "-----", b"", False, False,  True, "Neil: Passage 3 (Dao)"],
+            29: [0, 0, 0, 17, 460, "-----", b"", False, False,  True, "Neil: Passage 4 (Babel)"],
+
+            # Watermia/Euro Passage
+            26: [0, 0, 0, 17, 160, "-----", b"", False, False,  True, "Neil: Passage 1 (Neil's)"],
+            27: [0, 0, 0, 17, 314, "-----", b"", False, False,  True, "Neil: Passage 2 (Euro)"],
+
+            # Natives/Dao Passage
+            26: [0, 0, 0, 17, 160, "-----", b"", False, False,  True, "Neil: Passage 1 (Neil's)"],
+            27: [0, 0, 0, 17, 314, "-----", b"", False, False,  True, "Neil: Passage 2 (Euro)"]
         }
 
 
