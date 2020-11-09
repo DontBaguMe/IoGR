@@ -1270,6 +1270,30 @@ class World:
             # return 93   # TESTING!
             return locations[random.randint(0, len(locations) - 1)]
 
+
+    # Shuffle travel destinations
+    def shuffle_overworld(self):
+        new_continents = [[],[],[],[],[]]
+
+        # Ensure each continent has at least one travel location
+        destination_list = [1,4,5,6,9,10,12,14,16,18]
+        random.shuffle(destination_list)
+        for continent in new_continents:
+        	continent.append(destination_list.pop(0))
+
+        # Randomly assign the rest of the locations
+        destination_list += [2,3,7,8,11,13,15,17,19]
+        random.shuffle(destination_list)
+        new_continents[0] += destination_list[:4]
+        new_continents[1] += destination_list[4:8]
+        new_continents[2] += destination_list[8:10]
+        new_continents[3] += destination_list[10:13]
+        new_continents[4] += destination_list[-1:]
+        for continent in new_continents:
+        	random.shuffle(continent)
+        return
+
+
     # Shuffle enemies in ROM
     def enemize(self, f, rom_offset=0):
         f.seek(0)
@@ -2721,36 +2745,36 @@ class World:
         }
 
         # Database of overworld menus
-        # FORMAT: { ID: [FromRegion, ToRegion, ROM_EntranceData, ROM_MenuID, Name]}
+        # FORMAT: { ID: [Menu_ID, FromRegion, ToRegion, ROM_EntranceData, ROM_TextLoc, MenuText, Name]}
         self.overworld_menus = {
             # SW Continent "\x01"
-            1:  [100,  0, "3b95b", "0cafd", "SW Destination 1 (South Cape)"],
-            2:  [100,  7, "3b96b", "0cb26", "SW Destination 2 (Edward's)"],
-            3:  [100, 11, "3b97b", "0cb5b", "SW Destination 3 (Itory)"],
-            4:  [100, 14, "3b98b", "4f45a", "SW Destination 4 (Moon Tribe)"],
-            5:  [100, 15, "3b99b", "0cb74", "SW Destination 5 (Inca)"],
+            1:  [b"\x01", 100,  0, "3b95b", "0cafd", "3b590", "\x63\x8e\xa5\xa4\x87\xac\x42\x80\xa0\x84\xac", "SW Destination 1 (South Cape)"],
+            2:  [b"\x01", 100,  7, "3b96b", "0cb26", "3b5a9", "\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\xac\xac", "SW Destination 2 (Edward's)"],
+            3:  [b"\x01", 100, 11, "3b97b", "0cb5b", "3b5b5", "\x48\xa4\x8e\xa2\xa9\xac\xac\xac\xac\xac\xac", "SW Destination 3 (Itory)"],
+            4:  [b"\x01", 100, 14, "3b98b", "4f45a", "3b5c2", "\x4c\x8e\x8e\x8d\xac\x64\xa2\x88\x81\x84\xac", "SW Destination 4 (Moon Tribe)"],
+            5:  [b"\x01", 100, 15, "3b99b", "0cb74", "3b59c", "\x48\x8d\x82\x80\xac\xac\xac\xac\xac\xac\xac", "SW Destination 5 (Inca)"],
 
             # SE Continent "\x07"
-            6:  [101, 20, "3b9ab", "5aab7", "SE Destination 1 (Diamond Coast)"],
-            7:  [101, 21, "3b9bb", "0cba3", "SE Destination 2 (Freejia)"],
-            8:  [101, 22, "3b9cb", "0cbbc", "SE Destination 3 (Diamond Mine)"],
-            9:  [101, 27, "3b9db", "5e31e", "SE Destination 4 (Neil's)"],
-            10: [101, 28, "3b9eb", "5e812", "SE Destination 5 (Nazca)"],
+            6:  [b"\x07", 101, 20, "3b9ab", "5aab7", "3b5ef", "\x43\x2a\xac\x42\x8e\x80\xa3\xa4\xac\xac\xac", "SE Destination 1 (Diamond Coast)"],
+            7:  [b"\x07", 101, 21, "3b9bb", "0cba3", "3b5e3", "\x45\xa2\x84\x84\x89\x88\x80\xac\xac\xac\xac", "SE Destination 2 (Freejia)"],
+            8:  [b"\x07", 101, 22, "3b9cb", "0cbbc", "3b608", "\x43\x2a\xac\x4c\x88\x8d\x84\xac\xac\xac\xac", "SE Destination 3 (Diamond Mine)"],
+            9:  [b"\x07", 101, 27, "3b9db", "5e31e", "3b615", "\x4d\x84\x88\x8b\x0e\xa3\xac\xac\xac\xac\xac", "SE Destination 4 (Neil's)"],
+            10: [b"\x07", 101, 28, "3b9eb", "5e812", "3b5fc", "\x4d\x80\xaa\x82\x80\xac\xac\xac\xac\xac\xac", "SE Destination 5 (Nazca)"],
 
             # NE Continent "\x0a"
-            11: [102, 42, "3ba1b", "0cbeb", "NE Destination 1 (Angel Village)"],
-            12: [102, 44, "3ba2b", "0cc30", "NE Destination 2 (Watermia)"],
-            13: [102, 45, "3ba3b", "0cc49", "NE Destination 3 (Great Wall)"],
+            11: [b"\x0a", 102, 42, "3ba1b", "0cbeb", "3b642", "\x40\x8d\x86\x84\x8b\xac\x66\x88\x8b\x2a\xac", "NE Destination 1 (Angel Village)"],
+            12: [b"\x0a", 102, 44, "3ba2b", "0cc30", "3b636", "\x67\x80\xa4\x84\xa2\x8c\x88\x80\xac\xac\xac", "NE Destination 2 (Watermia)"],
+            13: [b"\x0a", 102, 45, "3ba3b", "0cc49", "3b64f", "\x46\xa2\x84\x80\xa4\xac\x67\x80\x8b\x8b\xac", "NE Destination 3 (Great Wall)"],
 
             # N Continent "\x0f"
-            14: [103, 48, "3ba4b", "0cc8e", "N Destination 1 (Euro)"],
-            15: [103, 50, "3ba5b", "0cca7", "N Destination 2 (Mt. Temple)"],
-            16: [103, 54, "3ba6b", "0ccec", "N Destination 3 (Native's Village)"],
-            17: [103, 56, "3ba7b", "0cd05", "N Destination 4 (Ankor Wat)"],
+            14: [b"\x0f", 103, 48, "3ba4b", "0cc8e", "3b660", "\x44\xa5\xa2\x8e\xac\xac\xac\xac\xac\xac\xac", "N Destination 1 (Euro)"],
+            15: [b"\x0f", 103, 50, "3ba5b", "0cca7", "3b66c", "\x4c\xa4\x2a\xac\x64\x84\x8c\xa0\x8b\x84\xac", "N Destination 2 (Mt. Temple)"],
+            16: [b"\x0f", 103, 54, "3ba6b", "0ccec", "3b679", "\x4d\x80\xa4\x88\xa6\x84\xac\x66\x88\x8b\x2a", "N Destination 3 (Native's Village)"],
+            17: [b"\x0f", 103, 56, "3ba7b", "0cd05", "3b685", "\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4\xac\xac", "N Destination 4 (Ankor Wat)"],
 
             # NW Continent Overworld "\x16"
-            18: [104, 61, "3ba8b", "0cd24", "NW Destination 1 (Dao)"],
-            19: [104, 62, "3ba9b", "0cd55", "NW Destination 2 (Pyramid)"]
+            18: [b"\x16", 104, 61, "3ba8b", "0cd24", "3b696", "\x43\x80\x8e\xac\xac\xac\xac\xac\xac\xac\xac", "NW Destination 1 (Dao)"],
+            19: [b"\x16", 104, 62, "3ba9b", "0cd55", "3b6a3", "\x60\xa9\xa2\x80\x8c\x88\x83\xac\xac\xac\xac", "NW Destination 2 (Pyramid)"]
         }
 
 
