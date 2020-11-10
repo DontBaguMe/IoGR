@@ -526,6 +526,16 @@ class World:
         if "Overworld Shuffle" in self.variant:
             self.shuffle_overworld()
 
+            # Update graph logic
+            for entry in self.overworld_menus:
+                # Prepare ROM edits
+                new_entry = self.overworld_menus[entry][0]
+                self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
+                self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
+                self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
+
+            print(self.graph)
+
         # Allow glitches
         if "Allow Glitches" in self.variant:
             self.graph[14][1].append(73)          # Moon Tribe: No ability required**************
@@ -1158,6 +1168,7 @@ class World:
 
             ow_patch_data = []
             for entry in self.overworld_menus:
+                # Prepare ROM edits
                 new_entry = self.overworld_menus[entry][0]
                 f.seek(int(self.overworld_menus[new_entry][4], 16) + rom_offset)
                 ow_patch_data.append([self.overworld_menus[entry][4], f.read(8)])
@@ -1165,7 +1176,6 @@ class World:
                 ow_patch_data.append([self.overworld_menus[entry][6], f.read(11)])
                 ow_patch_data.append([self.overworld_menus[new_entry][5], self.overworld_menus[entry][1]])
 
-                self.graph[self.overworld_menus[entry][2]].append(self.overworld_menus[new_entry][3])
 
             for x in ow_patch_data:
                 f.seek(int(x[0], 16) + rom_offset)
