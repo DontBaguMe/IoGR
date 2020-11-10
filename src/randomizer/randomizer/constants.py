@@ -1,5 +1,5 @@
 class Constants:
-    INACCESSIBLE = 100
+    INACCESSIBLE = 1000
     MAX_CYCLES = 100
     MAX_INVENTORY = 15
 

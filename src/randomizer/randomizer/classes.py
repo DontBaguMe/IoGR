@@ -522,6 +522,10 @@ class World:
             self.start_loc = self.random_start()
             self.graph[-1][1] = [self.item_locations[self.start_loc][0]]
 
+        # Overworld shuffle
+        if "Overworld Shuffle" in self.variant:
+            self.shuffle_overworld()
+
         # Allow glitches
         if "Allow Glitches" in self.variant:
             self.graph[14][1].append(73)          # Moon Tribe: No ability required**************
@@ -1144,6 +1148,29 @@ class World:
             f.seek(int("8de1f", 16) + rom_offset)
             f.write(map_name + b"\x0D\xCB\xAC\x4D\x8E\xCB\xAC\x69\x84\xA3\xCA")
 
+        # Overworld shuffle
+        if "Overworld Shuffle" in self.variant:
+            self.graph[100][1].clear()
+            self.graph[101][1].clear()
+            self.graph[102][1].clear()
+            self.graph[103][1].clear()
+            self.graph[104][1].clear()
+
+            ow_patch_data = []
+            for entry in self.overworld_menus:
+                new_entry = self.overworld_menus[entry][0]
+                f.seek(int(self.overworld_menus[new_entry][4], 16) + rom_offset)
+                ow_patch_data.append([self.overworld_menus[entry][4], f.read(8)])
+                f.seek(int(self.overworld_menus[new_entry][6], 16) + rom_offset)
+                ow_patch_data.append([self.overworld_menus[entry][6], f.read(11)])
+                ow_patch_data.append([self.overworld_menus[new_entry][5], self.overworld_menus[entry][1]])
+
+                self.graph[self.overworld_menus[entry][2]].append(self.overworld_menus[new_entry][3])
+
+            for x in ow_patch_data:
+                f.seek(int(x[0], 16) + rom_offset)
+                f.write(x[1])
+
         # Check for additional switches that need to be set
         switch_str = []
         if self.start_loc == 30:  # Inca ramp can hardlock you
@@ -1291,6 +1318,27 @@ class World:
         new_continents[4] += destination_list[-1:]
         for continent in new_continents:
         	random.shuffle(continent)
+
+        self.overworld_menus[1][0] = new_continents[0][0]
+        self.overworld_menus[2][0] = new_continents[0][1]
+        self.overworld_menus[3][0] = new_continents[0][2]
+        self.overworld_menus[4][0] = new_continents[0][3]
+        self.overworld_menus[5][0] = new_continents[0][4]
+        self.overworld_menus[6][0] = new_continents[1][0]
+        self.overworld_menus[7][0] = new_continents[1][1]
+        self.overworld_menus[8][0] = new_continents[1][2]
+        self.overworld_menus[9][0] = new_continents[1][3]
+        self.overworld_menus[10][0] = new_continents[1][4]
+        self.overworld_menus[11][0] = new_continents[2][0]
+        self.overworld_menus[12][0] = new_continents[2][1]
+        self.overworld_menus[13][0] = new_continents[2][2]
+        self.overworld_menus[14][0] = new_continents[3][0]
+        self.overworld_menus[15][0] = new_continents[3][1]
+        self.overworld_menus[16][0] = new_continents[3][2]
+        self.overworld_menus[17][0] = new_continents[3][3]
+        self.overworld_menus[18][0] = new_continents[4][0]
+        self.overworld_menus[19][0] = new_continents[4][1]
+
         return
 
 
@@ -1492,6 +1540,9 @@ class World:
 
         if settings.boss_shuffle:
             self.variant.append("Boss Shuffle")
+
+        if settings.overworld_shuffle:
+            self.variant.append("Overworld Shuffle")
 
         if settings.open_mode:
             self.variant.append("Open Mode")
@@ -2745,36 +2796,36 @@ class World:
         }
 
         # Database of overworld menus
-        # FORMAT: { ID: [Menu_ID, FromRegion, ToRegion, ROM_EntranceData, ROM_TextLoc, MenuText, Name]}
+        # FORMAT: { ID: [ShuffleID (0=no shuffle), Menu_ID, FromRegion, ToRegion, ROM_EntranceData, ROM_TextLoc, MenuText, Name]}
         self.overworld_menus = {
             # SW Continent "\x01"
-            1:  [b"\x01", 100,  0, "3b95b", "0cafd", "3b590", "\x63\x8e\xa5\xa4\x87\xac\x42\x80\xa0\x84\xac", "SW Destination 1 (South Cape)"],
-            2:  [b"\x01", 100,  7, "3b96b", "0cb26", "3b5a9", "\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\xac\xac", "SW Destination 2 (Edward's)"],
-            3:  [b"\x01", 100, 11, "3b97b", "0cb5b", "3b5b5", "\x48\xa4\x8e\xa2\xa9\xac\xac\xac\xac\xac\xac", "SW Destination 3 (Itory)"],
-            4:  [b"\x01", 100, 14, "3b98b", "4f45a", "3b5c2", "\x4c\x8e\x8e\x8d\xac\x64\xa2\x88\x81\x84\xac", "SW Destination 4 (Moon Tribe)"],
-            5:  [b"\x01", 100, 15, "3b99b", "0cb74", "3b59c", "\x48\x8d\x82\x80\xac\xac\xac\xac\xac\xac\xac", "SW Destination 5 (Inca)"],
+            1:  [0, b"\x01", 100,  0, "3b95b", "0cafd", "3b590", "SW Destination 1 (South Cape)"],
+            2:  [0, b"\x01", 100,  7, "3b96b", "0cb26", "3b5a9", "SW Destination 2 (Edward's)"],
+            3:  [0, b"\x01", 100, 11, "3b97b", "0cb5b", "3b5b5", "SW Destination 3 (Itory)"],
+            4:  [0, b"\x01", 100, 14, "3b98b", "4f45a", "3b5c2", "SW Destination 4 (Moon Tribe)"],
+            5:  [0, b"\x01", 100, 15, "3b99b", "0cb74", "3b59c", "SW Destination 5 (Inca)"],
 
             # SE Continent "\x07"
-            6:  [b"\x07", 101, 20, "3b9ab", "5aab7", "3b5ef", "\x43\x2a\xac\x42\x8e\x80\xa3\xa4\xac\xac\xac", "SE Destination 1 (Diamond Coast)"],
-            7:  [b"\x07", 101, 21, "3b9bb", "0cba3", "3b5e3", "\x45\xa2\x84\x84\x89\x88\x80\xac\xac\xac\xac", "SE Destination 2 (Freejia)"],
-            8:  [b"\x07", 101, 22, "3b9cb", "0cbbc", "3b608", "\x43\x2a\xac\x4c\x88\x8d\x84\xac\xac\xac\xac", "SE Destination 3 (Diamond Mine)"],
-            9:  [b"\x07", 101, 27, "3b9db", "5e31e", "3b615", "\x4d\x84\x88\x8b\x0e\xa3\xac\xac\xac\xac\xac", "SE Destination 4 (Neil's)"],
-            10: [b"\x07", 101, 28, "3b9eb", "5e812", "3b5fc", "\x4d\x80\xaa\x82\x80\xac\xac\xac\xac\xac\xac", "SE Destination 5 (Nazca)"],
+            6:  [0, b"\x07", 101, 20, "3b9ab", "5aab7", "3b5ef", "SE Destination 1 (Diamond Coast)"],
+            7:  [0, b"\x07", 101, 21, "3b9bb", "0cba3", "3b5e3", "SE Destination 2 (Freejia)"],
+            8:  [0, b"\x07", 101, 22, "3b9cb", "0cbbc", "3b608", "SE Destination 3 (Diamond Mine)"],
+            9:  [0, b"\x07", 101, 27, "3b9db", "5e31e", "3b615", "SE Destination 4 (Neil's)"],
+            10: [0, b"\x07", 101, 28, "3b9eb", "5e812", "3b5fc", "SE Destination 5 (Nazca)"],
 
             # NE Continent "\x0a"
-            11: [b"\x0a", 102, 42, "3ba1b", "0cbeb", "3b642", "\x40\x8d\x86\x84\x8b\xac\x66\x88\x8b\x2a\xac", "NE Destination 1 (Angel Village)"],
-            12: [b"\x0a", 102, 44, "3ba2b", "0cc30", "3b636", "\x67\x80\xa4\x84\xa2\x8c\x88\x80\xac\xac\xac", "NE Destination 2 (Watermia)"],
-            13: [b"\x0a", 102, 45, "3ba3b", "0cc49", "3b64f", "\x46\xa2\x84\x80\xa4\xac\x67\x80\x8b\x8b\xac", "NE Destination 3 (Great Wall)"],
+            11: [0, b"\x0a", 102, 42, "3ba1b", "0cbeb", "3b642", "NE Destination 1 (Angel Village)"],
+            12: [0, b"\x0a", 102, 44, "3ba2b", "0cc30", "3b636", "NE Destination 2 (Watermia)"],
+            13: [0, b"\x0a", 102, 45, "3ba3b", "0cc49", "3b64f", "NE Destination 3 (Great Wall)"],
 
             # N Continent "\x0f"
-            14: [b"\x0f", 103, 48, "3ba4b", "0cc8e", "3b660", "\x44\xa5\xa2\x8e\xac\xac\xac\xac\xac\xac\xac", "N Destination 1 (Euro)"],
-            15: [b"\x0f", 103, 50, "3ba5b", "0cca7", "3b66c", "\x4c\xa4\x2a\xac\x64\x84\x8c\xa0\x8b\x84\xac", "N Destination 2 (Mt. Temple)"],
-            16: [b"\x0f", 103, 54, "3ba6b", "0ccec", "3b679", "\x4d\x80\xa4\x88\xa6\x84\xac\x66\x88\x8b\x2a", "N Destination 3 (Native's Village)"],
-            17: [b"\x0f", 103, 56, "3ba7b", "0cd05", "3b685", "\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4\xac\xac", "N Destination 4 (Ankor Wat)"],
+            14: [0, b"\x0f", 103, 48, "3ba4b", "0cc8e", "3b660", "N Destination 1 (Euro)"],
+            15: [0, b"\x0f", 103, 50, "3ba5b", "0cca7", "3b66c", "N Destination 2 (Mt. Temple)"],
+            16: [0, b"\x0f", 103, 54, "3ba6b", "0ccec", "3b679", "N Destination 3 (Native's Village)"],
+            17: [0, b"\x0f", 103, 56, "3ba7b", "0cd05", "3b685", "N Destination 4 (Ankor Wat)"],
 
             # NW Continent Overworld "\x16"
-            18: [b"\x16", 104, 61, "3ba8b", "0cd24", "3b696", "\x43\x80\x8e\xac\xac\xac\xac\xac\xac\xac\xac", "NW Destination 1 (Dao)"],
-            19: [b"\x16", 104, 62, "3ba9b", "0cd55", "3b6a3", "\x60\xa9\xa2\x80\x8c\x88\x83\xac\xac\xac\xac", "NW Destination 2 (Pyramid)"]
+            18: [0, b"\x16", 104, 61, "3ba8b", "0cd24", "3b696", "NW Destination 1 (Dao)"],
+            19: [0, b"\x16", 104, 62, "3ba9b", "0cd55", "3b6a3", "NW Destination 2 (Pyramid)"]
         }
 
 

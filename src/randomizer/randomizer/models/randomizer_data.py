@@ -32,3 +32,4 @@ class RandomizerData:
         self.dungeon_shuffle = dungeon_shuffle
         self.open_mode = open_mode
         self.z3 = z3
+        self.overworld_shuffle = overworld_shuffle

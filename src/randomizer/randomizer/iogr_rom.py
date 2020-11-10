@@ -108,6 +108,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getStartingLocation(settings.start_location)
     filename += getEnemizer(settings.enemizer)
     filename += getSwitch(settings.open_mode, "o")
+    filename += getSwitch(settings.overworld_shuffle, "w")
     filename += getSwitch(settings.boss_shuffle, "b")
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
