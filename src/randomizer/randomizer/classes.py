@@ -964,8 +964,17 @@ class World:
             location_name = self.item_locations[x][9].strip()
             item_name = self.item_pool[item][3]
             items.append({"location": location_name, "name": item_name})
-
         spoiler["items"] = items
+
+        if "Overworld Shuffle" in self.variant:
+            overworld_links = []
+            for continent_id, continent_data in self.overworld_menus.items():
+                continent_name = self.graph[continent_data[2]][2]
+                print("Region ID:",self.overworld_menus[continent_data[0]][3])
+                region_name = self.graph[self.overworld_menus[continent_data[0]][3]][2]
+                overworld_links.append({"continent": continent_name, "region": region_name})
+            spoiler["overworld_entrances"] = overworld_links
+
         self.spoiler = spoiler
 
     def print_enemy_locations(self, filepath, offset=0):
