@@ -527,6 +527,12 @@ class World:
             self.shuffle_overworld()
 
             # Update graph logic
+            self.graph[100][1].clear()
+            self.graph[101][1].clear()
+            self.graph[102][1].clear()
+            self.graph[103][1].clear()
+            self.graph[104][1].clear()
+
             for entry in self.overworld_menus:
                 # Prepare ROM edits
                 new_entry = self.overworld_menus[entry][0]
@@ -560,17 +566,17 @@ class World:
         # Open Mode
         if "Open Mode" in self.variant:
             # Update graph logic
-            self.graph[0][1] += [20,44]     # Lola's Letter
-            self.graph[20][1] += [0,44]
-            self.graph[44][1] += [0,20]
-            self.graph[27][1] += [48,61,66] # Memory Melody
-            self.graph[48][1] += [27,61,66]
-            self.graph[61][1] += [27,48,66]
-            self.graph[14][1] += [29]       # Teapot
-            self.graph[29][1] += [14,33]
-            self.graph[44][1] += [48]       # Will
-            self.graph[48][1] += [44]
-            self.graph[54][1] += [61]       # Roast
+            self.graph[0][1].append(105)     # Lola's Letter
+            self.graph[20][1].append(105)
+            self.graph[44][1].append(105)
+            self.graph[27][1].append(107)    # Memory Melody
+            self.graph[48][1].append(107)
+            self.graph[61][1].append(107)
+            self.graph[14][1].append(29)     # Teapot
+            self.graph[29][1].append(106)
+            self.graph[44][1].append(108)    # Will
+            self.graph[48][1].append(108)
+            self.graph[54][1].append(109)    # Roast
 
             # Remove travel items from pool
             self.item_pool[10][0] = 0  # Large Roast
@@ -714,13 +720,13 @@ class World:
     # Update item placement logic after abilities are placed
     def check_logic(self):
         abilities = [48, 49, 50, 51, 52, 53]
-        inaccessible = []
+        inaccessible_ls = []
 
         # Check for abilities in critical Dark Spaces
         if self.item_locations[19][3] in abilities:  # Underground Tunnel
-            inaccessible += [17, 18]
+            inaccessible_ls += [17, 18]
         if self.item_locations[29][3] in abilities:  # Inca Ruins
-            inaccessible += [26, 27, 30, 31, 32]
+            inaccessible_ls += [26, 27, 30, 31, 32]
             self.graph[18][1].remove(19)
         if (self.item_locations[46][3] in abilities and  # Diamond Mine
                 self.item_locations[47][3] in abilities and
@@ -729,21 +735,21 @@ class World:
         if (self.item_locations[58][3] in abilities and  # Sky Garden
                 self.item_locations[59][3] in abilities and
                 self.item_locations[60][3] in abilities):
-            del self.logic[77]
+            del self.logic[78]
         if self.item_locations[94][3] in abilities:  # Great Wall
             self.graph[200] = [False, [], "Great Wall - Behind Slider or Spin", []]
             self.logic[200] = [45, 200, [[49, 1]]]
             self.logic[201] = [45, 200, [[50, 1]]]
             self.item_locations[93][0] = 200
             if self.item_locations[93][3] in abilities:
-                inaccessible += [95]
+                inaccessible_ls += [95]
         if self.item_locations[122][3] in abilities:  # Ankor Wat
-            inaccessible += [117, 118, 119, 120, 121]
+            inaccessible_ls += [117, 118, 119, 120, 121]
         #        if self.item_locations[142][3] in abilities:        # Pyramid
-        #            inaccessible += [133,134,136,139,140]
+        #            inaccessible_ls += [133,134,136,139,140]
 
-        # Change graph node for inaccessible locations
-        for x in inaccessible:
+        # Change graph node for inaccessible_ls locations
+        for x in inaccessible_ls:
             self.item_locations[x][0] = INACCESSIBLE
 
     # Simulate inventory
@@ -1160,12 +1166,6 @@ class World:
 
         # Overworld shuffle
         if "Overworld Shuffle" in self.variant:
-            self.graph[100][1].clear()
-            self.graph[101][1].clear()
-            self.graph[102][1].clear()
-            self.graph[103][1].clear()
-            self.graph[104][1].clear()
-
             ow_patch_data = []
             for entry in self.overworld_menus:
                 # Prepare ROM edits
@@ -1175,7 +1175,6 @@ class World:
                 f.seek(int(self.overworld_menus[new_entry][6], 16) + rom_offset)
                 ow_patch_data.append([self.overworld_menus[entry][6], f.read(11)])
                 ow_patch_data.append([self.overworld_menus[new_entry][5], self.overworld_menus[entry][1]])
-
 
             for x in ow_patch_data:
                 f.seek(int(x[0], 16) + rom_offset)
@@ -2038,18 +2037,18 @@ class World:
             55: [12, 13, [[50, 1]]],  # Itory Cave w/ Spin Dash
             56: [12, 75, [[23, 1]]],  # Get Lilly w/ Necklace
             57: [14, 29, [[25, 1]]],  # Moon Tribe to Sky Garden w/ Teapot
-            57: [14, 84, [[25, 1]]],  # Moon Tribe to Released w/ Teapot
-            58: [15, 16, [[7, 1], [48, 1]]],  # Inca Ruins w/ Tile and Psycho Dash
-            59: [15, 16, [[7, 1], [49, 1]]],  # Inca Ruins w/ Tile and Psycho Slide
-            60: [15, 16, [[7, 1], [50, 1]]],  # Inca Ruins w/ Tile and Spin Dash
-            156: [16, 83, [[48, 1]]],  # Inca Ruins w/ Psycho Dash (maze)
-            157: [16, 83, [[49, 1]]],  # Inca Ruins w/ Psycho Slide (maze)
-            158: [16, 83, [[50, 1]]],  # Inca Ruins w/ Spin Dash (maze)
-            61: [16, 17, [[8, 1]]],  # Inca Ruins w/ Wind Melody
-            62: [17, 18, [[3, 1], [4, 1]]],  # Inca Ruins w/ Inca Statues
-            63: [14, 73, [[48, 1]]],  # Moon Tribe Cave w/ Psycho Dash
-            64: [14, 73, [[49, 1]]],  # Moon Tribe Cave w/ Psycho Slider
-            65: [14, 73, [[50, 1]]],  # Moon Tribe Cave w/ Spin Dash
+            58: [14, 84, [[25, 1]]],  # Moon Tribe to Released w/ Teapot
+            59: [15, 16, [[7, 1], [48, 1]]],  # Inca Ruins w/ Tile and Psycho Dash
+            60: [15, 16, [[7, 1], [49, 1]]],  # Inca Ruins w/ Tile and Psycho Slide
+            61: [15, 16, [[7, 1], [50, 1]]],  # Inca Ruins w/ Tile and Spin Dash
+            62: [16, 83, [[48, 1]]],  # Inca Ruins w/ Psycho Dash (maze)
+            63: [16, 83, [[49, 1]]],  # Inca Ruins w/ Psycho Slide (maze)
+            64: [16, 83, [[50, 1]]],  # Inca Ruins w/ Spin Dash (maze)
+            65: [16, 17, [[8, 1]]],  # Inca Ruins w/ Wind Melody
+            66: [17, 18, [[3, 1], [4, 1]]],  # Inca Ruins w/ Inca Statues
+            67: [14, 73, [[48, 1]]],  # Moon Tribe Cave w/ Psycho Dash
+            68: [14, 73, [[49, 1]]],  # Moon Tribe Cave w/ Psycho Slider
+            69: [14, 73, [[50, 1]]],  # Moon Tribe Cave w/ Spin Dash
 
             # SE Continent
             70: [22, 23, [[48, 1]]],  # Diamond Mine Progression w/ Psycho Dash
