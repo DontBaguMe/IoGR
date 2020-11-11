@@ -540,9 +540,14 @@ class World:
 
             # Add new overworld to the graph
             for entry in self.overworld_menus:
-                # Prepare ROM edits
                 new_target_region = self.overworld_menus[self.overworld_menus[entry][0]][3]
+                old_map_region = self.overworld_menus[self.overworld_menus[entry][0]][2]
                 map_region = self.overworld_menus[entry][2]
+                for _, logic_data in self.logic.items():
+                    if old_map_region == logic_data[0] and new_target_region == logic_data[1]:
+                        logic_data[0] = map_region
+                    if old_map_region == logic_data[1] and new_target_region == logic_data[0]:
+                        logic_data[1] = map_region
                 self.graph[map_region][1].append(new_target_region)
                 self.graph[new_target_region][1].append(map_region)
 
@@ -1903,7 +1908,7 @@ class World:
 
             # Passage Menus
             105: [False, [0, 20, 44], "Seth Passage Menu", []],
-            106: [False, [14, 33], "Moon Tribe Passage Menu", []],
+            106: [False, [14, 29, 33], "Moon Tribe Passage Menu", []],
             107: [False, [27, 48, 61, 66], "Neil Passage Menu", []],
             108: [False, [44, 48], "Kruk Passage", []],
             109: [False, [54, 61], "Roast Passage", []],
@@ -2096,11 +2101,11 @@ class World:
 
             # N Continent
             110: [48, 49, [[40, 1]]],  # Ann item w/ Apple
-            111: [48, 50, [[50, 1]]],  # Euro to Mt. Temple w/ Spin Dash
+            111: [103, 50, [[50, 1]]],  # Continent to Mt. Temple w/ Spin Dash
             112: [50, 51, [[26, 1]]],  # Mt. Temple Progression w/ Drops 1
             113: [51, 52, [[26, 2]]],  # Mt. Temple Progression w/ Drops 2
             114: [52, 53, [[26, 3]]],  # Mt. Temple Progression w/ Drops 3
-            115: [50, 48, [[50, 1]]],  # Mt. Temple to Euro w/ Spin
+            115: [50, 103, [[50, 1]]],  # Mt. Temple to Continent w/ Spin
             116: [54, 55, [[29, 1]]],  # Natives' Village Progression w/ Flower
             117: [56, 57, [[49, 1], [50, 1]]],  # Ankor Wat Progression w/ Slide and Spin
             118: [76, 58, [[51, 1]]],  # Ankor Wat Progression w/ Dark Friar
@@ -2110,8 +2115,8 @@ class World:
             122: [59, 60, [[28, 1], [49, 1]]],  # Ankor Wat Progression w/ Black Glasses and Slider
 
             # NW Continent
-            130: [61, 62, [[49, 1]]],  # Pyramid foyer w/ Slide
-            131: [61, 62, [[50, 1]]],  # Pyramid foyer w/ Spin
+            130: [104, 62, [[49, 1]]],  # Pyramid foyer w/ Slide
+            131: [104, 62, [[50, 1]]],  # Pyramid foyer w/ Spin
             132: [62, 63, [[36, 1]]],  # Pyramid Progression w/ Aura
             133: [77, 78, [[51, 1]]],  # Pyramid Progression w/ Dark Friar
             134: [77, 79, [[53, 1]]],  # Pyramid Progression w/ Earthquaker
