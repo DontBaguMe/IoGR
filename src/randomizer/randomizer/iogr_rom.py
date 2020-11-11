@@ -1,4 +1,4 @@
-import binascii, hashlib, logging, os, random, tempfile, json, copy
+import binascii, hashlib, logging, os, random, tempfile, json, copy, graphviz
 from typing import BinaryIO
 
 from .patch import Patch
@@ -3485,6 +3485,9 @@ class Randomizer:
 
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)
+
+    def generate_graph_visualization(self) -> graphviz.Digraph:
+        return self.w.graph_viz
 
     def __get_required_statues__(self, settings: RandomizerData) -> int:
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:

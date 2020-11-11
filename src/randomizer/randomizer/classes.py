@@ -2,6 +2,7 @@ import copy
 import time
 from datetime import datetime
 import binascii
+import graphviz
 import random
 
 from .models.enums.start_location import StartLocation
@@ -1251,6 +1252,54 @@ class World:
             spoiler["overworld_entrances"] = overworld_links
 
         self.spoiler = spoiler
+        #self.complete_graph_visualization()
+
+    def initiate_graph_visualization(self):
+        graph = self.graph_viz
+
+        graph.attr('node', shape='box')
+        for region_id, region_data in self.graph.items():
+            node_name = f"region_{region_id}"
+            node_content = region_data[2]
+            graph.node(node_name, node_content)
+
+        for region_id, region_data in self.graph.items():
+            node_name = f"region_{region_id}"
+            for accessible_region_id in region_data[1]:
+                accessible_node_name = f"region_{accessible_region_id}"
+                graph.edge(node_name, accessible_node_name)
+
+        for _, logic_data in self.logic.items():
+            needed_items = logic_data[2]
+            enough_items = True
+            for item_id, quantity in needed_items:
+                existing_quantity = self.item_pool[item_id][0]
+                for _, location_data in self.item_locations.items():
+                    if location_data[2] and item_id == location_data[3]:
+                        existing_quantity += 1
+                if existing_quantity < quantity:
+                    enough_items = False
+                    break
+            if not enough_items:
+                continue
+            start_name = f"region_{logic_data[0]}"
+            dest_name = f"region_{logic_data[1]}"
+            graph.edge(start_name, dest_name)
+
+    def complete_graph_visualization(self):
+        graph = self.graph_viz
+
+        graph.attr('node', shape='record')
+        for itemloc_id, itemloc_data in self.item_locations.items():
+            # Add Item_location_nodes
+            location_node_name = f"itemloc_{itemloc_id}"
+            item_name = self.item_pool[itemloc_data[3]][3]
+            location_name = itemloc_data[9]
+            location_region = itemloc_data[0]
+            region_node_name = f"region_{location_region}"
+            node_content = "{"+f"<name>{location_name}|{item_name}"+"}"
+            graph.node(location_node_name, node_content)
+            graph.edge(region_node_name, f"{location_node_name}:name")
 
     def print_enemy_locations(self, filepath, offset=0):
         f = open(filepath, "r+b")
@@ -4300,3 +4349,6 @@ class World:
         self.exits_detailed = {
             14: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
         }
+
+        self.graph_viz = graphviz.Digraph()
+        self.initiate_graph_visualization()

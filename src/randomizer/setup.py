@@ -17,6 +17,6 @@ setuptools.setup(
         'bin/plugins/**/*.bin',
         'bin/plugins/**/**/*.bin'
     ]},
-    install_requires=['bitstring'],
+    install_requires=['bitstring', 'graphviz'],
     python_requires='>=3.7'
 )

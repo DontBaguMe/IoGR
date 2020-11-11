@@ -135,14 +135,17 @@ def generate_ROM():
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
+        graph_viz_filename = generate_filename(settings, "png")
 
         randomizer = Randomizer(rompath)
 
         patch = randomizer.generate_rom(rom_filename, settings)
         spoiler = randomizer.generate_spoiler()
+        graph_viz = randomizer.generate_graph_visualization()
 
         write_patch(patch, rompath, rom_filename)
         write_spoiler(spoiler, spoiler_filename, rompath)
+        write_graph_viz(graph_viz, graph_viz_filename, rompath)
 
         tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
@@ -157,6 +160,13 @@ def write_spoiler(spoiler, filename, rom_path):
     f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w+")
     f.write(spoiler)
     f.close()
+
+
+def write_graph_viz(graph_viz, filename, rom_path):
+    import os
+    if "Graphviz" in os.environ['PATH']:
+        graph_viz.format = 'png'
+        graph_viz.render(os.path.dirname(rom_path) + os.path.sep + filename, view="False")
 
 
 def sort_patch(val):
