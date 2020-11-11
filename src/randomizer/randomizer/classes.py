@@ -526,21 +526,25 @@ class World:
         if "Overworld Shuffle" in self.variant:
             self.shuffle_overworld()
 
-            # Update graph logic
+            # Remove old overworld from the graph
+            for i in self.graph:
+                for j in range(100, 105):
+                    if j in self.graph[i][1]:
+                        self.graph[i][1].remove(j)
+
             self.graph[100][1].clear()
             self.graph[101][1].clear()
             self.graph[102][1].clear()
             self.graph[103][1].clear()
             self.graph[104][1].clear()
 
+            # Add new overworld to the graph
             for entry in self.overworld_menus:
                 # Prepare ROM edits
-                new_entry = self.overworld_menus[entry][0]
-                self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
-                self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
-                self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
-
-            print(self.graph)
+                new_target_region = self.overworld_menus[self.overworld_menus[entry][0]][3]
+                map_region = self.overworld_menus[entry][2]
+                self.graph[map_region][1].append(new_target_region)
+                self.graph[new_target_region][1].append(map_region)
 
         # Allow glitches
         if "Allow Glitches" in self.variant:
@@ -976,7 +980,6 @@ class World:
             overworld_links = []
             for continent_id, continent_data in self.overworld_menus.items():
                 continent_name = self.graph[continent_data[2]][2]
-                print("Region ID:",self.overworld_menus[continent_data[0]][3])
                 region_name = self.graph[self.overworld_menus[continent_data[0]][3]][2]
                 overworld_links.append({"continent": continent_name, "region": region_name})
             spoiler["overworld_entrances"] = overworld_links
