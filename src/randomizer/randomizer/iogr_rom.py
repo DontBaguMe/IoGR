@@ -1526,6 +1526,10 @@ class Randomizer:
         patch.seek(int("9f6b0", 16) + rom_offset)
         patch.write(b"\x02\xd0\xf6\x01\xd1\x80\x02\xd1\x79\x01\x01\xd1\x80\x02\xe0")
 
+        # Force single overworld map exit
+        patch.seek(int("cd12", 16) + rom_offset)
+        patch.write(b"\x80\x04")
+
         ##########################################################################
         #                           Modify Pyramid events
         ##########################################################################
