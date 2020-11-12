@@ -2943,7 +2943,7 @@ class Randomizer:
         seed_adj = 0
         self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
-            if seed_adj > 10:
+            if seed_adj > 3:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
             self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)

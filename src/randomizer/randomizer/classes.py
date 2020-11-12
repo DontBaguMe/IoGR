@@ -527,10 +527,10 @@ class World:
             self.shuffle_overworld()
 
             # Remove old overworld from the graph
-            for i in self.graph:
-                for j in range(100, 105):
-                    if j in self.graph[i][1]:
-                        self.graph[i][1].remove(j)
+#            for i in self.graph:
+#                for j in range(100, 105):
+#                    if j in self.graph[i][1]:
+#                        self.graph[i][1].remove(j)
 
             self.graph[100][1].clear()
             self.graph[101][1].clear()
@@ -540,16 +540,23 @@ class World:
 
             # Add new overworld to the graph
             for entry in self.overworld_menus:
-                new_target_region = self.overworld_menus[self.overworld_menus[entry][0]][3]
-                old_map_region = self.overworld_menus[self.overworld_menus[entry][0]][2]
-                map_region = self.overworld_menus[entry][2]
-                for _, logic_data in self.logic.items():
-                    if old_map_region == logic_data[0] and new_target_region == logic_data[1]:
-                        logic_data[0] = map_region
-                    if old_map_region == logic_data[1] and new_target_region == logic_data[0]:
-                        logic_data[1] = map_region
-                self.graph[map_region][1].append(new_target_region)
-                self.graph[new_target_region][1].append(map_region)
+                new_entry = self.overworld_menus[entry][0]
+                self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
+                self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
+                self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
+
+            #print(self.graph)
+
+#                new_target_region = self.overworld_menus[self.overworld_menus[entry][0]][3]
+#                old_map_region = self.overworld_menus[self.overworld_menus[entry][0]][2]
+#                map_region = self.overworld_menus[entry][2]
+#                for _, logic_data in self.logic.items():
+#                    if old_map_region == logic_data[0] and new_target_region == logic_data[1]:
+#                        logic_data[0] = map_region
+#                    if old_map_region == logic_data[1] and new_target_region == logic_data[0]:
+#                        logic_data[1] = map_region
+#                self.graph[map_region][1].append(new_target_region)
+#                self.graph[new_target_region][1].append(map_region)
 
         # Allow glitches
         if "Allow Glitches" in self.variant:
@@ -841,10 +848,12 @@ class World:
             cycle += 1
             if cycle > MAX_CYCLES:
                 print("ERROR: Max cycles exceeded")
+                #print(self.graph)
+                #print(self.overworld_menus)
                 return False
 
             start_items = self.traverse()
-            # print "We found these: ",start_items
+            #print("We found these: ",start_items)
 
             inv_size = len(self.get_inventory(start_items))
             if inv_size > MAX_INVENTORY:
@@ -857,7 +866,7 @@ class World:
             progression_list = self.progression_list(start_items)
 
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
-            #print done, progression_list
+            #print(done, progression_list)
 
             if not done and progression_list == -1:  # No empty locations available
                 removed = self.make_room(item_locations)
@@ -901,6 +910,12 @@ class World:
                         progress = True
                         # print "We made progress!",items
                         # print self.graph
+                    else:
+                        removed = self.make_room(item_locations)
+                        if not removed:
+                            print("ERROR: Could not remove non-progression item")
+                            return False
+
 
             # print goal, done
 
@@ -1329,13 +1344,13 @@ class World:
         new_continents = [[],[],[],[],[]]
 
         # Ensure each continent has at least one travel location
-        destination_list = [1,4,5,6,9,10,12,14,16,18]
+        destination_list = [1,6,10,12,14,16,18]
         random.shuffle(destination_list)
         for continent in new_continents:
         	continent.append(destination_list.pop(0))
 
         # Randomly assign the rest of the locations
-        destination_list += [2,3,7,8,11,13,15,17,19]
+        destination_list += [2,3,4,5,7,8,9,11,13,15,17,19]
         random.shuffle(destination_list)
         new_continents[0] += destination_list[:4]
         new_continents[1] += destination_list[4:8]
@@ -1364,6 +1379,8 @@ class World:
         self.overworld_menus[17][0] = new_continents[3][3]
         self.overworld_menus[18][0] = new_continents[4][0]
         self.overworld_menus[19][0] = new_continents[4][1]
+
+        #print(self.overworld_menus)
 
         return
 
