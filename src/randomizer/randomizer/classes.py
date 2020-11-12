@@ -1812,14 +1812,14 @@ class World:
             103: [48, 2, False, 0, [51, 52, 53], "cc0b0", "Safe", b"\xb0\x00\xb0\x00\x83\x00\x11", b"\x99",
                   "Euro: Dark Space                    "],
 
-            104: [50, 1, False, 0, [], "1B03D", "", "", "", "Mt. Temple: Red Jewel Chest         "],
-            105: [50, 1, False, 0, [], "1B042", "", "", "", "Mt. Temple: Drops Chest 1           "],
+            104: [86, 1, False, 0, [], "1B03D", "", "", "", "Mt. Temple: Red Jewel Chest         "],
+            105: [86, 1, False, 0, [], "1B042", "", "", "", "Mt. Temple: Drops Chest 1           "],
             106: [51, 1, False, 0, [], "1B047", "", "", "", "Mt. Temple: Drops Chest 2           "],
             107: [52, 1, False, 0, [], "1B04C", "", "", "", "Mt. Temple: Drops Chest 3           "],
             108: [53, 1, False, 0, [26], "1B051", "", "", "", "Mt. Temple: Final Chest             "],
-            109: [50, 2, False, 0, [50], "cc24f", "Unsafe", b"\xf0\x01\x10\x03\x83\x00\x44", b"\xa1",
+            109: [86, 2, False, 0, [50], "cc24f", "Unsafe", b"\xf0\x01\x10\x03\x83\x00\x44", b"\xa1",
                   "Mt. Temple: Dark Space 1            "],
-            110: [50, 2, False, 0, [50], "cc419", "Unsafe", b"\xc0\x07\xc0\x00\x83\x00\x28", b"\xa3",
+            110: [86, 2, False, 0, [50], "cc419", "Unsafe", b"\xc0\x07\xc0\x00\x83\x00\x28", b"\xa3",
                   "Mt. Temple: Dark Space 2            "],
             111: [52, 2, False, 0, [50], "cc7b8", "", "", b"\xa7", "Mt. Temple: Dark Space 3            "],
 
@@ -1848,18 +1848,18 @@ class World:
             129: [61, 2, False, 0, [51, 52, 53], "cd3d0", "Safe", b"\x20\x00\x80\x00\x83\x00\x23", b"\xc3",
                   "Dao: Dark Space                     "],
 
-            130: [62, 1, False, 0, [], "8dcb7", "8e66c", "8e800", "", "Pyramid: Dark Space Top             "],  # text2 was 8e800
+            130: [87, 1, False, 0, [], "8dcb7", "8e66c", "8e800", "", "Pyramid: Dark Space Top             "],  # text2 was 8e800
             131: [63, 1, False, 0, [36], "FC1D", "FC2D", "FC43", "", "Pyramid: Under Stairs               "],
-            132: [64, 1, False, 0, [36], "8c7b2", "8c7c9", "", "", "Pyramid: Hieroglyph 1               "],
-            133: [63, 1, False, 0, [36], "1B06F", "", "", "", "Pyramid: Room 2 Chest               "],
-            134: [63, 1, False, 0, [36], "8c879", "8c88c", "", "", "Pyramid: Hieroglyph 2               "],
-            135: [64, 1, False, 0, [36], "1B079", "", "", "", "Pyramid: Room 3 Chest               "],
-            136: [78, 1, False, 0, [36], "8c921", "8c934", "", "", "Pyramid: Hieroglyph 3               "],
-            137: [64, 1, False, 0, [36], "1B07E", "", "", "", "Pyramid: Room 4 Chest               "],
-            138: [64, 1, False, 0, [36], "8c9c9", "8c9dc", "", "", "Pyramid: Hieroglyph 4               "],
+            132: [64, 1, False, 0, [], "8c7b2", "8c7c9", "", "", "Pyramid: Hieroglyph 1               "],
+            133: [77, 1, False, 0, [], "1B06F", "", "", "", "Pyramid: Room 2 Chest               "],
+            134: [77, 1, False, 0, [], "8c879", "8c88c", "", "", "Pyramid: Hieroglyph 2               "],
+            135: [64, 1, False, 0, [], "1B079", "", "", "", "Pyramid: Room 3 Chest               "],
+            136: [78, 1, False, 0, [], "8c921", "8c934", "", "", "Pyramid: Hieroglyph 3               "],
+            137: [64, 1, False, 0, [], "1B07E", "", "", "", "Pyramid: Room 4 Chest               "],
+            138: [64, 1, False, 0, [], "8c9c9", "8c9dc", "", "", "Pyramid: Hieroglyph 4               "],
             139: [63, 1, False, 0, [36], "1B074", "", "", "", "Pyramid: Room 5 Chest               "],
             140: [79, 1, False, 0, [36], "8ca71", "8ca84", "", "", "Pyramid: Hieroglyph 5               "],
-            141: [77, 1, False, 0, [36], "8cb19", "8cb2c", "", "", "Pyramid: Hieroglyph 6               "],
+            141: [77, 1, False, 0, [], "8cb19", "8cb2c", "", "", "Pyramid: Hieroglyph 6               "],
             142: [77, 2, True, 0, [], "cd570", "Unsafe", b"\xc0\x01\x90\x03\x83\x00\x44", b"\xcc",
                   "Pyramid: Dark Space Bottom          "],  # Always open
 
@@ -1908,7 +1908,7 @@ class World:
 
             # Passage Menus
             105: [False, [0, 20, 44], "Seth Passage Menu", []],
-            106: [False, [14, 29, 33], "Moon Tribe Passage Menu", []],
+            106: [False, [14, 33], "Moon Tribe Passage Menu", []],
             107: [False, [27, 48, 61, 66], "Neil Passage Menu", []],
             108: [False, [44, 48], "Kruk Passage", []],
             109: [False, [54, 61], "Roast Passage", []],
@@ -1968,7 +1968,8 @@ class World:
 
             48: [False, [74, 103], "Euro", [24, 40]],
             49: [False, [], "Euro - Ann's Item", []],
-            50: [False, [103], "Mt. Temple", [26]],
+            50: [False, [103], "Mt. Temple", []],
+            86: [False, [], "Mt. Temple - Behind Spin Dash", [26]],
             51: [False, [], "Mt. Temple - Behind Drops 1", [26]],
             52: [False, [], "Mt. Temple - Behind Drops 2", [26]],
             53: [False, [], "Mt. Temple - Behind Drops 3", []],
@@ -1982,13 +1983,14 @@ class World:
             60: [False, [76], "Ankor Wat - Behind Black Glasses", []],
 
             61: [False, [74, 104], "Dao", []],
-            62: [False, [104], "Pyramid", [30, 31, 32, 33, 34, 35, 38]],
-            77: [False, [62], "Pyramid - Bottom Level", []],
-            63: [False, [77, 78, 79], "Pyramid - Behind Aura", []],
+            62: [False, [104], "Pyramid", []],
+            87: [False, [62], "Pyramid - Past Orbs", [30, 31, 32, 33, 34, 35, 38]],
+            77: [False, [87], "Pyramid - Bottom Level", []],
+            63: [False, [77, 79], "Pyramid - Behind Aura", []],
             64: [False, [77], "Pyramid - Behind Spin Dash", []],
-            78: [False, [77], "Pyramid - Behind Dark Friar", []],
+            78: [False, [77], "Pyramid - Killer 6", []],
             79: [False, [77], "Pyramid - Behind Earthquaker", []],
-            65: [False, [62], "Pyramid - Mummy Queen", [38]],
+            65: [False, [87], "Pyramid - Mummy Queen", [38]],
 
             66: [False, [], "Babel Tower", []],
             67: [False, [61], "Babel Tower - Behind Crystal Ring and Aura", []],
@@ -2101,11 +2103,11 @@ class World:
 
             # N Continent
             110: [48, 49, [[40, 1]]],  # Ann item w/ Apple
-            111: [103, 50, [[50, 1]]],  # Continent to Mt. Temple w/ Spin Dash
+            111: [50, 86, [[50, 1]]],  # Mt. Temple Progression w/ Spin Dash
             112: [50, 51, [[26, 1]]],  # Mt. Temple Progression w/ Drops 1
             113: [51, 52, [[26, 2]]],  # Mt. Temple Progression w/ Drops 2
             114: [52, 53, [[26, 3]]],  # Mt. Temple Progression w/ Drops 3
-            115: [50, 103, [[50, 1]]],  # Mt. Temple to Continent w/ Spin
+            115: [86, 50, [[50, 1]]],  # Mt. Temple Backwards Progression w/ Spin Dash
             116: [54, 55, [[29, 1]]],  # Natives' Village Progression w/ Flower
             117: [56, 57, [[49, 1], [50, 1]]],  # Ankor Wat Progression w/ Slide and Spin
             118: [76, 58, [[51, 1]]],  # Ankor Wat Progression w/ Dark Friar
@@ -2115,14 +2117,16 @@ class World:
             122: [59, 60, [[28, 1], [49, 1]]],  # Ankor Wat Progression w/ Black Glasses and Slider
 
             # NW Continent
-            130: [104, 62, [[49, 1]]],  # Pyramid foyer w/ Slide
-            131: [104, 62, [[50, 1]]],  # Pyramid foyer w/ Spin
-            132: [62, 63, [[36, 1]]],  # Pyramid Progression w/ Aura
-            133: [77, 78, [[51, 1]]],  # Pyramid Progression w/ Dark Friar
+            130: [62, 87, [[49, 1]]],  # Pyramid foyer w/ Slide
+            131: [62, 87, [[50, 1]]],  # Pyramid foyer w/ Spin
+            132: [77, 63, [[36, 1]]],  # Pyramid Progression w/ Aura
+            133: [77, 78, [[51, 1], [45, 1]]],  # Killer 6 w/ upgraded Dark Friar
             134: [77, 79, [[53, 1]]],  # Pyramid Progression w/ Earthquaker
-            135: [62, 65, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
+            135: [87, 65, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
             # Pyramid Boss w/ Hieroglyphs and Journal
             136: [77, 64, [[50, 1]]],  # Pyramid Progression w/ Spin Dash
+            137: [87, 77, [[36, 1]]],  # Pyramid Bottom Level w/ Aura
+            138: [77, 78, [[36, 1], [6, 6], [41, 2], [42, 1], [43, 1]]],  # Killer 6 w/ Aura, herbs and stat upgrades
 
             # Babel/Jeweler Mansion
             140: [66, 67, [[36, 1], [39, 1]]],  # Babel Progression w/ Aura and Crystal Ring
