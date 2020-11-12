@@ -2121,7 +2121,7 @@ class World:
             # N Continent
             110: [48, 49, [[40, 1]]],  # Ann item w/ Apple
             111: [50, 86, [[50, 1]]],  # Mt. Temple Progression w/ Spin Dash
-            112: [50, 51, [[26, 1]]],  # Mt. Temple Progression w/ Drops 1
+            112: [86, 51, [[26, 1]]],  # Mt. Temple Progression w/ Drops 1
             113: [51, 52, [[26, 2]]],  # Mt. Temple Progression w/ Drops 2
             114: [52, 53, [[26, 3]]],  # Mt. Temple Progression w/ Drops 3
             115: [86, 50, [[50, 1]]],  # Mt. Temple Backwards Progression w/ Spin Dash
