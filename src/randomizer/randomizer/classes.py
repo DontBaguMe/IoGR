@@ -954,7 +954,6 @@ class World:
         # Change logic based on which dungeons are required
         for x in self.statues:
             self.logic[406][2][x][1] = 1
-
         # Shuffle exits
         if self.entrance_shuffle != "None":
             # Always start from a Dark Space
@@ -4351,4 +4350,3 @@ class World:
         }
 
         self.graph_viz = graphviz.Digraph()
-        self.initiate_graph_visualization()
