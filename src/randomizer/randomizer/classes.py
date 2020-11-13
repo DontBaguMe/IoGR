@@ -848,8 +848,8 @@ class World:
             cycle += 1
             if cycle > MAX_CYCLES:
                 print("ERROR: Max cycles exceeded")
-                #print(self.graph)
-                #print(self.overworld_menus)
+                print(self.graph)
+                print(self.overworld_menus)
                 return False
 
             start_items = self.traverse()
@@ -1344,13 +1344,13 @@ class World:
         new_continents = [[],[],[],[],[]]
 
         # Ensure each continent has at least one travel location
-        destination_list = [1,6,10,12,14,16,18]
+        destination_list = [1,6,12,14,16,18]
         random.shuffle(destination_list)
         for continent in new_continents:
         	continent.append(destination_list.pop(0))
 
         # Randomly assign the rest of the locations
-        destination_list += [2,3,4,5,7,8,9,11,13,15,17,19]
+        destination_list += [2,3,4,5,7,8,9,10,11,13,15,17,19]
         random.shuffle(destination_list)
         new_continents[0] += destination_list[:4]
         new_continents[1] += destination_list[4:8]
@@ -1928,7 +1928,7 @@ class World:
             106: [False, [14, 33], "Moon Tribe Passage Menu", []],
             107: [False, [27, 48, 61, 66], "Neil Passage Menu", []],
             108: [False, [44, 48], "Kruk Passage", []],
-            109: [False, [54, 61], "Roast Passage", []],
+            109: [False, [61], "Roast Passage", []],
 
             0: [False, [74, 100], "South Cape", []],
             7: [False, [8, 100], "Edward's Castle", []],
@@ -1999,7 +1999,7 @@ class World:
             59: [False, [76], "Ankor Wat - Behind Earthquaker", []],
             60: [False, [76], "Ankor Wat - Behind Black Glasses", []],
 
-            61: [False, [74, 104], "Dao", []],
+            61: [False, [54, 74, 104], "Dao", []],
             62: [False, [104], "Pyramid", []],
             87: [False, [62], "Pyramid - Past Orbs", [30, 31, 32, 33, 34, 35, 38]],
             77: [False, [87], "Pyramid - Bottom Level", []],
