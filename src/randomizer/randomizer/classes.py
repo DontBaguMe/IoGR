@@ -1251,9 +1251,9 @@ class World:
             spoiler["overworld_entrances"] = overworld_links
 
         self.spoiler = spoiler
-        #self.complete_graph_visualization()
+        self.complete_graph_visualization()
 
-    def initiate_graph_visualization(self):
+    def complete_graph_visualization(self):
         graph = self.graph_viz
 
         graph.attr('node', shape='box')
@@ -1285,20 +1285,41 @@ class World:
             dest_name = f"region_{logic_data[1]}"
             graph.edge(start_name, dest_name)
 
-    def complete_graph_visualization(self):
-        graph = self.graph_viz
-
-        graph.attr('node', shape='record')
+        per_region_item_node = dict()
+        item_location_color_map = {
+            1: "yellow",
+            2: "blue",
+            3: "green",
+            4: "white"
+        }
+        graph.attr('node', shape='plaintext')
         for itemloc_id, itemloc_data in self.item_locations.items():
             # Add Item_location_nodes
-            location_node_name = f"itemloc_{itemloc_id}"
-            item_name = self.item_pool[itemloc_data[3]][3]
-            location_name = itemloc_data[9]
             location_region = itemloc_data[0]
             region_node_name = f"region_{location_region}"
-            node_content = "{"+f"<name>{location_name}|{item_name}"+"}"
-            graph.node(location_node_name, node_content)
-            graph.edge(region_node_name, f"{location_node_name}:name")
+            region_item_node_name = f"region_itemnode_{location_region}"
+            if itemloc_data[1] != 2 or itemloc_data[3] != 0:
+                if region_item_node_name not in per_region_item_node:
+                    per_region_item_node[region_item_node_name] = []
+                    graph.edge(region_node_name, f"{region_item_node_name}")
+                per_region_item_node[region_item_node_name].append((itemloc_id))
+
+        for region_item_node_name, locations_id in per_region_item_node.items():
+            node_content = "<<table border='0' cellborder='1' cellspacing='0'>"
+            for itemloc_id in locations_id:
+                itemloc_data = self.item_locations[itemloc_id]
+                item_name = self.item_pool[itemloc_data[3]][3]
+                location_name = itemloc_data[9]
+                if ":" in location_name:
+                    location_name = ":".join(location_name.split(':')[1:])
+                location_type = itemloc_data[1]
+                node_content += f"""<tr>
+<td ALIGN='left' bgcolor='{item_location_color_map[location_type]}'>{location_name.strip()}</td>
+<td align='center'>{item_name}</td>
+</tr>"""
+            node_content += "</table>>"
+            graph.node(region_item_node_name, node_content)
+
 
     def print_enemy_locations(self, filepath, offset=0):
         f = open(filepath, "r+b")
@@ -4349,4 +4370,5 @@ class World:
             14: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
         }
 
-        self.graph_viz = graphviz.Digraph()
+        self.graph_viz = graphviz.Digraph(graph_attr=[('concentrate','true'),
+                                                      ('rankdir', 'LR')], strict=True)
