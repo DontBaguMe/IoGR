@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.6.2"
+VERSION = "4.0.0"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -421,10 +421,10 @@ class Randomizer:
         f_item05.close
 
         # Modify Prison Key, now is destroyed when used
-        patch.seek(int("385d4", 16) + rom_offset)
-        patch.write(b"\x0a\x17\x0c\x18")
-        patch.seek(int("385fe", 16) + rom_offset)
-        patch.write(b"\x02\xd5\x02\x60")
+        patch.seek(int("385cf", 16) + rom_offset)
+        patch.write(b"\x13")
+        patch.seek(int("385dc", 16) + rom_offset)
+        patch.write(b"\x02\xd5\x02\xea\xea\xea")
 
         # Modify Lola's Melody, now is destroyed when used and only works in Itory
         f_item09 = open(BIN_PATH + "038bf5_item09.bin", "rb")
@@ -2945,7 +2945,7 @@ class Randomizer:
         ##########################################################################
         done = False
         seed_adj = 0
-        self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
+        #self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
             if seed_adj > 3:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
@@ -2953,7 +2953,6 @@ class Randomizer:
             self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj)
             seed_adj += 1
-
         self.w.generate_spoiler(VERSION)
         self.w.write_to_rom(patch, rom_offset)
 
