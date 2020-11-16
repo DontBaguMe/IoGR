@@ -12,6 +12,7 @@ from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.logic import Logic
 #from randomizer.models.enums.sprites import Sprite
+from randomizer.models.enums.entrance_shuffle import EntranceShuffle
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
@@ -87,6 +88,15 @@ def generate_ROM():
         if e == "Insane":
             return Enemizer.INSANE
 
+    def get_entrance_shuffle():
+        g = entrance_shuffle.get()
+        if g == "None":
+            return EntranceShuffle.NONE
+        if g == "Coupled":
+            return EntranceShuffle.COUPLED
+        if g == "Uncoupled":
+            return EntranceShuffle.UNCOUPLED
+
     def get_start_location():
         g = start.get()
         if g == "South Cape":
@@ -120,7 +130,8 @@ def generate_ROM():
     try:
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(), overworld_shuffle.get())#, get_level(), get_sprite())
+            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
+            overworld_shuffle.get(), get_entrance_shuffle())#, get_level(), get_sprite())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -224,6 +235,12 @@ def start_help():
              "FORCED UNSAFE:", " - You're guaranteed to start the game in the middle of a dungeon"]
     tkinter.messagebox.showinfo("Start Location", "\n".join(lines))
 
+def entrance_shuffle_help():
+    lines = ["This setting shuffles where doors and other exits take you.", "",
+             "COUPLED:", " - Doors and exits act normally, i.e. if you backtrack through an exit you'll return to where you entered", "",
+             "UNCOUPLED:", " - Doors and exits send you to different places, depending on which direction you go through them"]
+    tkinter.messagebox.showinfo("Start Location", "\n".join(lines))
+
 
 root = tkinter.Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
@@ -255,6 +272,7 @@ tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkin
 tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Z3 Mode").grid(row=14, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=15, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=16, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
@@ -302,6 +320,10 @@ z3_mode.set(0)
 overworld_shuffle = tkinter.IntVar(root)
 overworld_shuffle.set(0)
 
+entrance_shuffle = tkinter.StringVar(root)
+entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
+entrance_shuffle.set("None")
+
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
@@ -335,6 +357,7 @@ boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, on
 open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
 z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
 overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=15, column=1)
+entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=16, column=1)
 #sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
@@ -349,5 +372,6 @@ tkinter.Button(mainframe, text='?', command=firebird_help).grid(row=5, column=2)
 tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
 tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
+tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=16, column=2)
 
 root.mainloop()

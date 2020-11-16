@@ -10,6 +10,7 @@ from .models.randomizer_data import RandomizerData
 from .models.enums.difficulty import Difficulty
 from .models.enums.goal import Goal
 from .models.enums.logic import Logic
+from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
@@ -74,6 +75,14 @@ def generate_filename(settings: RandomizerData, extension: str):
         if logic.value == Logic.CHAOS.value:
             return "_L(x)"
 
+    def getEntranceShuffle(entrance_shuffle):
+        if entrance_shuffle.value == EntranceShuffle.COUPLED.value:
+            return "_ER"
+        if entrance_shuffle.value == EntranceShuffle.UNCOUPLED.value:
+            return "_ER(x)"
+        if entrance_shuffle.value == EntranceShuffle.NONE.value:
+            return ""
+
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
             return ""
@@ -105,6 +114,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getDifficulty(settings.difficulty)
     filename += getGoal(settings.goal, settings.statues)
     filename += getLogic(settings.logic)
+    filename += getEntranceShuffle(settings.entrance_shuffle)
     filename += getStartingLocation(settings.start_location)
     filename += getEnemizer(settings.enemizer)
     filename += getSwitch(settings.open_mode, "o")

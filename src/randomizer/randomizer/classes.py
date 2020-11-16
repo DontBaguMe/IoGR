@@ -5,6 +5,7 @@ import random
 
 from .models.enums.start_location import StartLocation
 from .models.enums.goal import Goal
+from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.logic import Logic
 from .models.randomizer_data import RandomizerData
@@ -564,7 +565,7 @@ class World:
                         self.exits[coupled_dest][1] = coupled_origin
                         if origin not in self.graph[dest][1]:
                             self.graph[dest][1].append(origin)
-                    #print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+                    print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
                 else:
                     self.exits[origin_exit][1] = 0
             cycle += 1
@@ -804,7 +805,7 @@ class World:
             self.logic[406][2][x][1] = 1
 
         # Shuffle exits
-        if True:
+        if self.entrance_shuffle != "None":
             self.shuffle_exits()
 
         # Update graph with exit data
@@ -1058,6 +1059,7 @@ class World:
         spoiler["seed"] = str(self.seed)
         spoiler["date"] = str(datetime.utcfromtimestamp(time.time()))
         spoiler["goal"] = str(self.goal)
+        spoiler["entrance_shuffle"] = str(self.entrance_shuffle)
         spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
         spoiler["logic"] = str(self.logic_mode)
         spoiler["difficulty"] = str(difficulty_txt)
@@ -1666,6 +1668,13 @@ class World:
             self.logic_mode = "Beatable"
         else:
             self.logic_mode = "Chaos"
+
+        if settings.entrance_shuffle.value == EntranceShuffle.NONE.value:
+            self.entrance_shuffle = "None"
+        elif settings.entrance_shuffle.value == EntranceShuffle.COUPLED.value:
+            self.entrance_shuffle = "Coupled"
+        elif settings.entrance_shuffle.value == EntranceShuffle.UNCOUPLED.value:
+            self.entrance_shuffle = "Uncoupled"
 
         if settings.start_location.value == StartLocation.SOUTH_CAPE.value:
             self.start_mode = "South Cape"
@@ -3848,7 +3857,7 @@ class World:
 
             # Angel Village
             382: [383, 0, 0, 250, 210, "1941e", b"", False, False, False, "Angel: Mu Passage (in)"],
-            383: [382, 0, 1,   0,   0, "", b"", False, False, False, "Angel: Mu Passage (out)"], #custom
+            383: [382, 0, 1,   0,   0, "191e2", b"", False, False, False, "Angel: Mu Passage (out)"], #custom
             384: [385, 0, 0, 250, 251, "1942a", b"", False, False, False, "Angel: Underground entrance (in)"],
             385: [384, 0, 1,   0,   0, "19446", b"", False, False, False, "Angel: Underground entrance (out)"],
             386: [387, 0, 0, 251, 252, "19452", b"", False, False, False, "Angel: Room 1 (in)"],
