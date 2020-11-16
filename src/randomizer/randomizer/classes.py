@@ -737,7 +737,6 @@ class World:
                 new_exit = self.exits[exit][1]
             else:
                 new_exit = exit
-
             # Get exit origin
             origin = self.exits[exit][3]
             if not origin and self.is_exit_coupled(exit):
@@ -1259,7 +1258,7 @@ class World:
         graph.attr('node', shape='box')
         for region_id, region_data in self.graph.items():
             node_name = f"region_{region_id}"
-            node_content = region_data[2]
+            node_content = region_data[5]
             graph.node(node_name, node_content)
 
         for region_id, region_data in self.graph.items():
@@ -1272,7 +1271,11 @@ class World:
             needed_items = logic_data[2]
             enough_items = True
             for item_id, quantity in needed_items:
-                existing_quantity = self.item_pool[item_id][0]
+                existing_quantity = 0
+                if item_id not in self.item_pool:
+                    print("Missing info about item:", item_id)
+                else:
+                    existing_quantity = self.item_pool[item_id][0]
                 for _, location_data in self.item_locations.items():
                     if location_data[2] and item_id == location_data[3]:
                         existing_quantity += 1
@@ -1319,7 +1322,6 @@ class World:
 </tr>"""
             node_content += "</table>>"
             graph.node(region_item_node_name, node_content)
-
 
     def print_enemy_locations(self, filepath, offset=0):
         f = open(filepath, "r+b")
