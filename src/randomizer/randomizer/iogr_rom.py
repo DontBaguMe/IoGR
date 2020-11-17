@@ -1067,6 +1067,14 @@ class Randomizer:
         patch.write(b"\x80\x83\xac\xa0\x84\xa2\xa3\x8e\x8d\xcb\xac\x63\x8d\x88\xa4\x82\x87\x84\xa3")
         patch.write(b"\xac\x86\x84\xa4\xac\xa3\xa4\x88\xa4\x82\x87\x84\xa3\x2b\xac\xa9\x8e\xca")
 
+        # Woman on roof can warp you to prevent softlocks
+        patch.seek(int("5b683", 16) + rom_offset) #four bytes
+        patch.write(b"\x20\xd2\xfe\xea")
+        patch.seek(int("5fed2", 16) + rom_offset)
+        patch.write(b"\x02\xBF\x95\xFF\x02\xBE\x02\x01\xDC\xFE\xE2\xFE\xE2\xFE\xE7\xFE")
+        patch.write(b"\x02\xBF\xF2\xFE\x60\x02\x26\x32\x60\x03\x70\x01\x00\x00\x45\x60\xCE\xC8\xC0")
+        patch.seek(int("5ff95", 16) + rom_offset)
+        patch.write(b"\xd3" + qt_encode("Stuck?") + b"\xcb\xac" + qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
         ##########################################################################
         #                        Modify Diamond Mine events
         ##########################################################################
