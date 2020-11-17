@@ -497,16 +497,18 @@ class World:
 
 
     # Link one exit to another
-    def link_exits(self, origin_exit, dest_exit):
+    def link_exits(self, origin_exit, dest_exit, check_connections=True):
         if origin_exit not in self.exits or dest_exit not in self.exits:
             return False
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
+        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         origin = self.exits[origin_exit][3]
         dest = self.exits[dest_exit][4]
-        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         if dest not in self.graph[origin][1]:
             self.graph[origin][1].append(dest)
+        if not check_connections:
+            return True
         if self.entrance_shuffle == "Coupled" and self.is_exit_coupled(origin_exit) and self.is_exit_coupled(dest_exit):
             self.exits[self.exits[dest_exit][0]][1] = self.exits[origin_exit][0]
             self.exits[self.exits[origin_exit][0]][2] = self.exits[dest_exit][0]
@@ -603,7 +605,8 @@ class World:
                     dest_exit = 0
                     for x in dest_exits:
                         if not dest_exit:
-                            if (coupled and self.exits[x][0]) or (not coupled and not self.exits[x][0]):
+                            if (coupled and self.exits[x][0] and self.exits[self.exits[x][0]][1] == -1) or (
+                                    not coupled and not self.exits[x][0]):
                                 origin_new = self.exits[x][3]
                                 dest_new = self.exits[x][4]
                                 direction_new = (self.graph[origin_new][2],self.graph[dest_new][2])
@@ -622,6 +625,7 @@ class World:
 
             cycle += 1
 
+        print("Round 1 finished")
         quarantine.clear()
         exits_remaining = []
         for exit in self.exits:
@@ -637,40 +641,57 @@ class World:
             direction = self.exit_direction(exit)
             found_new_exit = False
             for new_exit in exits_remaining:
-                if not found_new_exit and coupled == self.is_exit_coupled(new_exit) and direction == self.exit_direction(new_exit):
-                    found_new_exit = True
-                    self.link_exits(exit, new_exit)
+                if not found_new_exit and direction == self.exit_direction(new_exit):
+                    if (coupled and self.is_exit_coupled(new_exit) and self.exits[self.exits[new_exit][0]][1] == -1) or (
+                            not coupled and not self.is_exit_coupled(new_exit)):
+                        found_new_exit = True
+                        self.link_exits(exit, new_exit)
             if not found_new_exit:
                 quarantine.append(exit)
+        print("Round 2 finished")
 
         # Link remaining unmatching exits
         exits_remaining = quarantine[:]
         quarantine.clear()
+        random.shuffle(exits_remaining)
         while exits_remaining:
             exit = exits_remaining.pop(0)
             coupled = self.is_exit_coupled(exit)
             found_new_exit = False
             for new_exit in exits_remaining:
-                if not found_new_exit and coupled == self.is_exit_coupled(new_exit):
+                if (coupled and self.is_exit_coupled(new_exit) and self.exits[self.exits[new_exit][0]][1] == -1) or (
+                        not coupled and not self.is_exit_coupled(new_exit)):
                     found_new_exit = True
                     self.link_exits(exit, new_exit)
             if not found_new_exit:
                 quarantine.append(exit)
+        print("Round 3 finished")
 
         # Clean up whatever's left
         exits_remaining.clear()
+        dest_remaining = []
         for exit in self.exits:
             if self.exits[exit][1] == -1:
                 exits_remaining.append(exit)
+            if self.exits[exit][2] == -1:
+                dest_remaining.append(exit)
+        random.shuffle(exits_remaining)
+        random.shuffle(dest_remaining)
         while exits_remaining:
             exit1 = exits_remaining.pop(0)
-            if not exits_remaining:
-                print("WARNING: Odd number of shuffled addresses", exit1)
-                self.exits[exit1][1] = 0
-            else:
-                exit2 = exits_remaining.pop(0)
-                self.exits[exit1][1] = exit2
-                self.exits[exit2][1] = exit1
+            if self.exits[exit1][1] == -1:
+                exit2 = 0
+                while dest_remaining and not exit2:
+                    exit2 = dest_remaining.pop(0)
+                    if self.exits[exit2][2] != -1:
+                        exit2 = 0
+                if not exit2:
+                    print("WARNING: Odd number of shuffled addresses", exit1)
+                    self.exits[exit1][1] = 0
+                else:
+                    self.link_exits(exit1, exit2)
+
+        print("Round 4 finished")
 
         for exit in self.exits:
             if self.exits[exit][1] == -1:
@@ -3677,44 +3698,44 @@ class World:
             21: [ 0, 0, 0, 482, 472, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", True, True, False, "Babel passage (Solid Arm)"],
 
             # Passage Menus
-            30: [0, 0, 0, 15,  28, "", b"", False, False, False, "Seth: Passage 1 (South Cape)"],
-            31: [0, 0, 0, 15, 102, "", b"", False, False, False, "Seth: Passage 2 (Diamond Coast)"],
-            32: [0, 0, 0, 15, 280, "", b"", False, False, False, "Seth: Passage 3 (Watermia)"],
+            22: [0, 0, 0, 15,  28, "", b"", False, False, False, "Seth: Passage 1 (South Cape)"],
+            23: [0, 0, 0, 15, 102, "", b"", False, False, False, "Seth: Passage 2 (Diamond Coast)"],
+            24: [0, 0, 0, 15, 280, "", b"", False, False, False, "Seth: Passage 3 (Watermia)"],
 
-            33: [0, 0, 0, 16,  60, "", b"", False, False, False, "Moon Tribe: Passage 1 (Moon Tribe)"],
-            34: [0, 0, 0, 16, 200, "", b"", False, False, False, "Moon Tribe: Passage 2 (Seaside Palace)"],
+            25: [0, 0, 0, 16,  60, "", b"", False, False, False, "Moon Tribe: Passage 1 (Moon Tribe)"],
+            26: [0, 0, 0, 16, 200, "", b"", False, False, False, "Moon Tribe: Passage 2 (Seaside Palace)"],
 
-            35: [0, 0, 0, 17, 160, "", b"", False, False, False, "Neil: Passage 1 (Neil's)"],
-            36: [0, 0, 0, 17, 314, "", b"", False, False, False, "Neil: Passage 2 (Euro)"],
-            37: [0, 0, 0, 17, 402, "", b"", False, False, False, "Neil: Passage 3 (Dao)"],
-            38: [0, 0, 0, 17, 460, "", b"", False, False, False, "Neil: Passage 4 (Babel)"],
+            27: [0, 0, 0, 17, 160, "", b"", False, False, False, "Neil: Passage 1 (Neil's)"],
+            28: [0, 0, 0, 17, 314, "", b"", False, False, False, "Neil: Passage 2 (Euro)"],
+            29: [0, 0, 0, 17, 402, "", b"", False, False, False, "Neil: Passage 3 (Dao)"],
+            30: [0, 0, 0, 17, 460, "", b"", False, False, False, "Neil: Passage 4 (Babel)"],
 
             # South Cape
-            40: [41, 0, 0, 20, 22, "18444", b"", False, False, False, "South Cape: School main (in)"],  # Duplicate exit at 18438?
-            41: [40, 0, 1,  0,  0, "1856c", b"", False, False, False, "South Cape: School main (out)"],
-            42: [43, 0, 0, 21, 22, "18498", b"", False, False, False, "South Cape: School roof (in)"],
-            43: [42, 0, 1,  0,  0, "18560", b"", False, False, False, "South Cape: School roof (out)"],
-            44: [45, 0, 0, 20, 23, "18474", b"", False, False, False, "South Cape: Will's House (in)"],
-            45: [44, 0, 1,  0,  0, "1852a", b"", False, False, False, "South Cape: Will's House (out)"],
-            46: [47, 0, 0, 20, 24, "18480", b"", False, False, False, "South Cape: East House (in)"],
-            47: [46, 0, 1,  0,  0, "18552", b"", False, False, False, "South Cape: East House (out)"],
-            48: [49, 0, 0, 20, 27, "1845c", b"", False, False, False, "South Cape: Erik's House main (in)"],
-            49: [48, 0, 1,  0,  0, "184e8", b"", False, False, False, "South Cape: Erik's House main (out)"],
-            50: [51, 0, 0, 20, 27, "184a4", b"", False, False, False, "South Cape: Erik's House roof (in)"],
-            51: [50, 0, 1,  0,  0, "184f4", b"", False, False, False, "South Cape: Erik's House roof (out)"],
-            52: [53, 0, 0, 20, 26, "18450", b"", False, False, False, "South Cape: Lance's House (in)"],
-            53: [52, 0, 1,  0,  0, "184c0", b"", False, False, False, "South Cape: Lance's House (out)"],
-            54: [55, 0, 0, 20, 25, "18468", b"", False, False, False, "South Cape: Seth's House (in)"],
-            55: [54, 0, 1,  0,  0, "1851c", b"", False, False, False, "South Cape: Seth's House (out)"],
-            56: [57, 0, 0, 20, 28, "1848c", b"", False, False, False, "South Cape: Seaside Cave (in)"],
-            57: [56, 0, 1,  0,  0, "4be6a", b"", False, False, False, "South Cape: Seaside Cave (out)"],   #custom?
+            31: [32, 0, 0, 20, 22, "18444", b"", False, False, False, "South Cape: School main (in)"],  # Duplicate exit at 18438?
+            32: [31, 0, 1,  0,  0, "1856c", b"", False, False, False, "South Cape: School main (out)"],
+            33: [34, 0, 0, 21, 22, "18498", b"", False, False, False, "South Cape: School roof (in)"],
+            34: [33, 0, 1,  0,  0, "18560", b"", False, False, False, "South Cape: School roof (out)"],
+            35: [36, 0, 0, 20, 23, "18474", b"", False, False, False, "South Cape: Will's House (in)"],
+            36: [35, 0, 1,  0,  0, "1852a", b"", False, False, False, "South Cape: Will's House (out)"],
+            37: [38, 0, 0, 20, 24, "18480", b"", False, False, False, "South Cape: East House (in)"],
+            38: [37, 0, 1,  0,  0, "18552", b"", False, False, False, "South Cape: East House (out)"],
+            39: [40, 0, 0, 20, 27, "1845c", b"", False, False, False, "South Cape: Erik's House main (in)"],
+            40: [39, 0, 1,  0,  0, "184e8", b"", False, False, False, "South Cape: Erik's House main (out)"],
+            41: [42, 0, 0, 20, 27, "184a4", b"", False, False, False, "South Cape: Erik's House roof (in)"],
+            42: [41, 0, 1,  0,  0, "184f4", b"", False, False, False, "South Cape: Erik's House roof (out)"],
+            43: [44, 0, 0, 20, 26, "18450", b"", False, False, False, "South Cape: Lance's House (in)"],
+            44: [43, 0, 1,  0,  0, "184c0", b"", False, False, False, "South Cape: Lance's House (out)"],
+            45: [46, 0, 0, 20, 25, "18468", b"", False, False, False, "South Cape: Seth's House (in)"],
+            46: [45, 0, 1,  0,  0, "1851c", b"", False, False, False, "South Cape: Seth's House (out)"],
+            47: [48, 0, 0, 20, 28, "1848c", b"", False, False, False, "South Cape: Seaside Cave (in)"],
+            48: [47, 0, 1,  0,  0, "4be6a", b"", False, False, False, "South Cape: Seaside Cave (out)"],   #custom?
 
             # Edward's / Prison
-            60: [61, 0, 0, 31, 49, "1857c", b"", False, True, True, "Tunnel back entrance (in)"],
-            61: [60, 0, 1,  0,  0, "186f4", b"", False, True, True, "Tunnel back entrance (out)"],
-            62: [63, 0, 0, 33, 40, "1860c", b"", False, True, True, "Tunnel entrance (in)"],
-            63: [62, 0, 1,  0,  0, "18626", b"", False, True, True, "Tunnel entrance (out)"],
-            64: [ 0, 0, 0, 30, 32, "4cfce", b"\x06\x58\x00\xC0\x01\x00\x10\x21", False, False, False, "Prison entrance (king)"],
+            50: [51, 0, 0, 31, 49, "1857c", b"", False, True, True, "Tunnel back entrance (in)"],
+            51: [50, 0, 1,  0,  0, "186f4", b"", False, True, True, "Tunnel back entrance (out)"],
+            52: [53, 0, 0, 33, 40, "1860c", b"", False, True, True, "Tunnel entrance (in)"],
+            53: [52, 0, 1,  0,  0, "18626", b"", False, True, True, "Tunnel entrance (out)"],
+            54: [ 0, 0, 0, 30, 32, "4cfce", b"\x06\x58\x00\xC0\x01\x00\x10\x21", False, False, False, "Prison entrance (king)"],
 
             # Tunnel
             60: [61, 0, 0, 40, 41, "18632", b"", False,  True, False, "Tunnel: Map 12 to Map 13"],
@@ -3816,9 +3837,9 @@ class World:
             193: [192, 0, 1,   0,   0, "18c44", b"", False, False, False, "Freejia: Hotel West Room (out)"],
             194: [195, 0, 0, 119, 121, "18c38", b"", False, False, False, "Freejia: Hotel East Room (in)"],
             195: [194, 0, 1,   0,   0, "18c50", b"", False, False, False, "Freejia: Hotel East Room (out)"],
-            196: [197, 0, 0, 110, 122, "18b28", b"", False, False, False, "Freejia: Laborer House (in)"],    # might take this out?
+            196: [197, 0, 0, 110, 122, "18b34", b"", False, False, False, "Freejia: Laborer House (in)"],    # might take this out?
             197: [196, 0, 1,   0,   0, "18c78", b"", False, False, False, "Freejia: Laborer House (out)"],
-            198: [199, 0, 0, 112, 122, "18b34", b"", False, False, False, "Freejia: Laborer Roof (in)"],
+            198: [199, 0, 0, 112, 122, "18b28", b"", False, False, False, "Freejia: Laborer Roof (in)"],
             199: [198, 0, 1,   0,   0, "18c84", b"", False, False, False, "Freejia: Laborer Roof (out)"],
             200: [201, 0, 0, 110, 123, "18b40", b"", False, False, False, "Freejia: Messy House (in)"],
             201: [200, 0, 1,   0,   0, "18c92", b"", False, False, False, "Freejia: Messy House (out)"],
