@@ -763,6 +763,10 @@ class Randomizer:
         patch.seek(int("48468", 16) + rom_offset)
         patch.write(b"\x02\xBF\x79\x84\x02\xD4\x01\x75\x84\x02\xCC\xD7\x6B" + INV_FULL)
 
+        # Disable weird logic in front of Will's door
+        patch.seek(int("4bc69", 16) + rom_offset)
+        patch.write(b"\xe0")
+
         # Disable Lola Melody cutscene
         patch.seek(int("49985", 16) + rom_offset)
         patch.write(b"\x6b")
@@ -2957,7 +2961,7 @@ class Randomizer:
         seed_adj = 0
         #self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
-            if seed_adj > 3:
+            if seed_adj > 5:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
             self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
