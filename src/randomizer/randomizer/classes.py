@@ -2137,13 +2137,13 @@ class World:
             130: [62, 87, [[49, 1]]],  # Pyramid foyer w/ Slide
             131: [62, 87, [[50, 1]]],  # Pyramid foyer w/ Spin
             132: [77, 63, [[36, 1]]],  # Pyramid Progression w/ Aura
-            133: [77, 78, [[51, 1], [45, 1]]],  # Killer 6 w/ upgraded Dark Friar
+            133: [77, 78, [[51, 1], [45, 1], [6, 10], [14, 3], [41, 2], [43, 1]]],  # Killer 6 w/ upgraded Dark Friar
             134: [77, 79, [[53, 1]]],  # Pyramid Progression w/ Earthquaker
             135: [87, 65, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
             # Pyramid Boss w/ Hieroglyphs and Journal
             136: [77, 64, [[50, 1]]],  # Pyramid Progression w/ Spin Dash
             137: [87, 77, [[36, 1]]],  # Pyramid Bottom Level w/ Aura
-            138: [77, 78, [[36, 1], [6, 6], [41, 2], [42, 1], [43, 1]]],  # Killer 6 w/ Aura, herbs and stat upgrades
+            138: [77, 78, [[36, 1], [6, 10], [14, 3], [41, 2], [43, 1]]],  # Killer 6 w/ Aura, herbs, crystal balls and stat upgrades (to push back in logic)
 
             # Babel/Jeweler Mansion
             140: [66, 67, [[36, 1], [39, 1]]],  # Babel Progression w/ Aura and Crystal Ring

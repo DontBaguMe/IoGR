@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.6.2"
+VERSION = "3.6.3"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -573,8 +573,8 @@ class Randomizer:
         patch.seek(int("3889e", 16) + rom_offset)
         patch.write(b"\x20\x50\xfe")
         patch.seek(int("3fe50", 16) + rom_offset)
-        patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x02\x00\x80\x0D")
-        patch.write(b"\xA9\x04\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x60\xff\xff")
+        patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x04\x00\x80\x0D")
+        patch.write(b"\xA9\x06\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x60\xff\xff")
         patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x60")
 
         # Change item functionality for game variants
