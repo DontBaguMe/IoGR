@@ -484,6 +484,9 @@ class World:
             sister_exit = self.exits[exit][0]
             if self.exits[sister_exit][0] == exit:
                 return True
+            else:
+                print("WARNING: Exits linked incorrectly",exit,sister_exit)
+                return True
         return False
 
 
@@ -495,6 +498,16 @@ class World:
         dest = self.exits[exit][4]
         return (self.graph[origin][2],self.graph[dest][2])
 
+
+    # Get lists of unmatched origin/destination exits
+    def get_remaining_exits(self):
+        exits_remaining = [[],[]]
+        for exit in self.exits:
+            if self.exits[exit][1] == -1:
+                exits_remaining[0].append(exit)
+            if self.exits[exit][2] == -1:
+                exits_remaining[1].append(exit)
+        return exits_remaining
 
     # Link one exit to another
     def link_exits(self, origin_exit, dest_exit, check_connections=True):
@@ -517,7 +530,7 @@ class World:
             self.exits[coupled_dest][1] = coupled_origin
             self.exits[coupled_origin][2] = coupled_dest
             print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
-            if origin not in self.graph[dest][1]:
+            if origin not in self.graph[dest][1] and self.exits[coupled_dest][5]:
                 self.graph[dest][1].append(origin)
         return True
 
@@ -542,7 +555,7 @@ class World:
                 xprime = self.exits[x][0]
                 self.exits[x][3] = self.exits[xprime][4]
                 self.exits[x][4] = self.exits[xprime][3]
-            if self.exits[x][1] or not self.exits[x][5] or self.exits[x][7] or (self.exits[x][8] and not self.exits[x][9]):
+            if self.exits[x][1] or (not self.exits[x][5] and not self.exits[x][6]) or self.exits[x][7] or (self.exits[x][8] and not self.exits[x][9]):
                 origin = self.exits[x][3]
                 dest = self.exits[x][4]
                 if origin and dest:
@@ -553,7 +566,10 @@ class World:
                 self.exits[x][2] = -1
                 #print(self.exits[x][10])
 
+        # Map exits that open up the graph
+        check_direction = True
         solved = False
+        progress = False
         cycle = 1
         quarantine = []
         while not solved:# and cycle<10:
@@ -561,29 +577,23 @@ class World:
             origin_exits = []
             dest_exits = []
             items = self.traverse()
-#            for x in self.graph:
-#                if self.graph[x][0]:
-#                    print(self.graph[x][5])
+
+            # Identify exits that will open up unexplored areas
             for exit in self.exits:
                 origin = self.exits[exit][3]
                 dest = self.exits[exit][4]
-                if self.exits[exit][1] == -1:
-                    if self.graph[origin][0] and exit not in origin_exits:
-                        origin_exits.append(exit)
-                if self.exits[exit][2] == -1:
-                    if not self.graph[dest][0] and exit not in dest_exits:
-                        dest_exits.append(exit)
+                if self.exits[exit][1] == -1 and self.graph[origin][0] and exit not in origin_exits:
+                    origin_exits.append(exit)
+                if self.exits[exit][2] == -1 and not self.graph[dest][0] and exit not in dest_exits:
+                    dest_exits.append(exit)
 
             random.shuffle(origin_exits)
-            #print(cycle,len(origin_exits),len(dest_exits))
 
             if not dest_exits:
-                print("We've seen the whole world!")
                 solved = True
             elif not origin_exits:
-                print("We ran out of exits!")
-                solved = True                          # THIS IS NOT CORRECT,FIX LATER
-            #elif len(origin_exits) > 1:
+                print("ERROR: We ran out of exits!")
+                return False
             else:
                 random.shuffle(dest_exits)
                 origin_exit = 0
@@ -592,10 +602,17 @@ class World:
                     if origin_exit in quarantine:
                         origin_exit = 0
                 if not origin_exit:
-                    print("No exits left! In quarantine:")
+                    print("Emptying quarantine:")
                     for x in quarantine:
                         print(" ",self.exits[x][10])
-                    solved = True
+                    quarantine.clear()
+                    if progress:
+                        progress = False
+                    elif check_direction:
+                        check_direction = False
+                    else:
+                        print("ERROR: We ran out of exits!")
+                        return False
                 else:
                     origin = self.exits[origin_exit][3]
                     dest_old = self.exits[origin_exit][4]
@@ -611,74 +628,71 @@ class World:
                                 dest_new = self.exits[x][4]
                                 direction_new = (self.graph[origin_new][2],self.graph[dest_new][2])
                                 #print(direction,direction_new)
-                                if direction == direction_new:
+                                if not check_direction:
                                     dest_exit = x
+                                elif direction == direction_new and x != origin_exit:
+                                    dest_exit = x
+
                     if dest_exit:
+                        progress = True
                         self.link_exits(origin_exit,dest_exit)
                     else:
-                        #print("ERROR: Couldn't find a destination", origin_exit)
                         quarantine.append(origin_exit)
-                        #self.exits[origin_exit][1] = 0
-                        #if coupled:
-                        #    coupled_exit = self.exits[origin_exit][0]
-                        #    self.exits[coupled_exit][1] = 0
 
             cycle += 1
 
         print("Round 1 finished")
+
         quarantine.clear()
-        exits_remaining = []
-        for exit in self.exits:
-            if self.exits[exit][1] == -1:
-                exits_remaining.append(exit)
+        # Link remaining exits
+        check_direction = True
+        done = False
+        while not done:
+            exits_remaining = self.get_remaining_exits()
+            origin_exits = exits_remaining[0]
+            dest_exits = exits_remaining[1]
 
-        random.shuffle(exits_remaining)
+            if not origin_exits or not dest_exits:
+                done = True
+            else:
+                random.shuffle(origin_exits)
+                random.shuffle(dest_exits)
 
-        # Link matching exits
-        while exits_remaining:
-            exit = exits_remaining.pop(0)
-            coupled = self.is_exit_coupled(exit)
-            direction = self.exit_direction(exit)
-            found_new_exit = False
-            for new_exit in exits_remaining:
-                if not found_new_exit and direction == self.exit_direction(new_exit):
-                    if (coupled and self.is_exit_coupled(new_exit) and self.exits[self.exits[new_exit][0]][1] == -1) or (
-                            not coupled and not self.is_exit_coupled(new_exit)):
-                        found_new_exit = True
-                        self.link_exits(exit, new_exit)
-            if not found_new_exit:
-                quarantine.append(exit)
+                exit = 0
+                while not exit and origin_exits:
+                    exit = origin_exits.pop(0)
+                    if exit in quarantine:
+                        exit = 0
+                if not exit:
+                    print("Emptying quarantine:")
+                    for x in quarantine:
+                        print(" ",self.exits[x][10])
+                    quarantine.clear()
+                    check_direction = False
+                else:
+                    coupled = self.is_exit_coupled(exit)
+                    direction = self.exit_direction(exit)
+                    found_new_exit = False
+                    for new_exit in dest_exits:
+                        if not found_new_exit and (not check_direction or direction == self.exit_direction(new_exit)):
+                            if (coupled and self.is_exit_coupled(new_exit) and self.exits[self.exits[new_exit][0]][1] == -1) or (
+                                    not coupled and not self.is_exit_coupled(new_exit)):
+                                found_new_exit = True
+                                self.link_exits(exit, new_exit)
+                    if not found_new_exit:
+                        quarantine.append(exit)
+
         print("Round 2 finished")
 
-        # Link remaining unmatching exits
-        exits_remaining = quarantine[:]
-        quarantine.clear()
-        random.shuffle(exits_remaining)
-        while exits_remaining:
-            exit = exits_remaining.pop(0)
-            coupled = self.is_exit_coupled(exit)
-            found_new_exit = False
-            for new_exit in exits_remaining:
-                if (coupled and self.is_exit_coupled(new_exit) and self.exits[self.exits[new_exit][0]][1] == -1) or (
-                        not coupled and not self.is_exit_coupled(new_exit)):
-                    found_new_exit = True
-                    self.link_exits(exit, new_exit)
-            if not found_new_exit:
-                quarantine.append(exit)
-        print("Round 3 finished")
-
         # Clean up whatever's left
-        exits_remaining.clear()
-        dest_remaining = []
-        for exit in self.exits:
-            if self.exits[exit][1] == -1:
-                exits_remaining.append(exit)
-            if self.exits[exit][2] == -1:
-                dest_remaining.append(exit)
-        random.shuffle(exits_remaining)
-        random.shuffle(dest_remaining)
-        while exits_remaining:
-            exit1 = exits_remaining.pop(0)
+        exits_remaining = self.get_remaining_exits()
+        origin_exits = exits_remaining[0]
+        dest_exits = exits_remaining[1]
+        random.shuffle(origin_exits)
+        random.shuffle(dest_exits)
+
+        while origin_exits:
+            exit1 = origin_exits.pop(0)
             if self.exits[exit1][1] == -1:
                 exit2 = 0
                 while dest_remaining and not exit2:
@@ -691,7 +705,7 @@ class World:
                 else:
                     self.link_exits(exit1, exit2)
 
-        print("Round 4 finished")
+        print("Round 3 finished")
 
         for exit in self.exits:
             if self.exits[exit][1] == -1:
@@ -705,7 +719,7 @@ class World:
 #            i += 1
 
         # Re-initialize world graph
-        self.graph = graph_copy
+        self.graph = graph_copy.copy()
         graph_copy = None
         print("We done")
         return True
@@ -1438,7 +1452,7 @@ class World:
             #self.exits[exit][0] = exit   #TESTING ONLY
             # Prepare ROM edits
             new_exit = self.exits[exit][1]
-            if new_exit: # and exit != new_exit:
+            if new_exit and self.exits[exit][5]: # and exit != new_exit:
                 try:
                     if self.exits[new_exit][6]:
                         new_data = self.exits[new_exit][6]
@@ -1454,7 +1468,7 @@ class World:
                 f.seek(int(x[0], 16) + rom_offset)
                 f.write(x[1])
             except:
-                print("ERROR: Not a valid address", x[0])
+                print("ERROR: Not a valid address", x)
         #print("entrance shuffle done")
 
         # Check for additional switches that need to be set
@@ -2959,7 +2973,7 @@ class World:
             403: [345, 490, [[20, 2]]],                      # Rescue Kara from Mt. Temple w/ Magic Dust
             404: [391, 490, [[20, 2]]],                      # Rescue Kara from Ankor Wat w/ Magic Dust
             405: [490, 491, [[36, 1], [39, 1]]],             # Early Firebird w/ Kara, Aura and Ring
-            406: [490, 492, [[36, 1], [70, 0], [71, 0], [72, 0], [73, 0], [74, 0], [75, 0]]]
+            406: [490, 492, [[36, 1], [100, 0], [101, 0], [102, 0], [103, 0], [104, 0], [105, 0]]]
                                                              # Beat Game w/Mystic Statues and Aura
         }
 
@@ -3736,6 +3750,7 @@ class World:
             52: [53, 0, 0, 33, 40, "1860c", b"", False, True, True, "Tunnel entrance (in)"],
             53: [52, 0, 1,  0,  0, "18626", b"", False, True, True, "Tunnel entrance (out)"],
             54: [ 0, 0, 0, 30, 32, "4cfce", b"\x06\x58\x00\xC0\x01\x00\x10\x21", False, False, False, "Prison entrance (king)"],
+            #55: [54, 0, 0,  0,  2,      "", b"\x0a\xe0\x01\x60\x01\x03\x20\x34", False, False, False, "Prison exit (king), fake"],
 
             # Tunnel
             60: [61, 0, 0, 40, 41, "18632", b"", False,  True, False, "Tunnel: Map 12 to Map 13"],
@@ -3883,8 +3898,8 @@ class World:
             247: [246, 0, 1,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 71 to Map 68"],
 
             # Nazca
-            260: [  0, 0, 0, 162, 170, "5e6a2", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False, True, True, "Nazca: Sky Garden entrance"],
-            #261: [  0, 0, 1, 170,   0, "",                                 b"", False, True, False, "Nazca: Sky Garden exit"],
+            260: [ 0, 0, 0, 162, 170, "5e6a2", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False, True, True, "Nazca: Sky Garden entrance"],
+            #261: [260, 0, 1,   0,   0,  "",     b"\x4B\xe0\x01\xc0\x02\x03\x00\x44", False, True, False, "Nazca: Sky Garden exit"],
 
             # Sky Garden
             #270: [  0, 0, 0, 171,  16, "", b"", False,  True,  True, "Moon Tribe: Sky Garden passage"],
@@ -4252,8 +4267,8 @@ class World:
             709: [708, 0, 1,   0,   0, "", b"", False,  True, False, "Babel: Map 222 to Map 227"],
 
             # Jeweler's Mansion
-            720: [721, 0, 0, 8, 480, "", b"", False,  True, False, "Mansion entrance"],
-            721: [720, 0, 1, 0,   0, "", b"", False,  True, False, "Mansion exit"]
+            720: [721, 0, 0, 8, 480, "8d32a", b"", False,  True, True, "Mansion entrance"],
+            721: [720, 0, 1, 0,   0, "8fcb4", b"", False,  True, True, "Mansion exit"]
 
         }
 

@@ -1069,12 +1069,12 @@ class Randomizer:
 
         # Woman on roof can warp you to prevent softlocks
         patch.seek(int("5b683", 16) + rom_offset) #four bytes
-        patch.write(b"\x20\xd2\xfe\xea")
-        patch.seek(int("5fed2", 16) + rom_offset)
-        patch.write(b"\x02\xBF\x95\xFF\x02\xBE\x02\x01\xDC\xFE\xE2\xFE\xE2\xFE\xE7\xFE")
-        patch.write(b"\x02\xBF\xF2\xFE\x60\x02\x26\x32\x60\x03\x70\x01\x00\x00\x45\x60\xCE\xC8\xC0")
-        patch.seek(int("5ff95", 16) + rom_offset)
+        patch.write(b"\x20\xa0\xff\xea")
+        patch.seek(int("5ffa0", 16) + rom_offset)
+        patch.write(b"\x02\xBF\xC3\xFF\x02\xBE\x02\x01\xAA\xFF\xB0\xFF\xB0\xFF\xB5\xFF")
+        patch.write(b"\x02\xBF\xC0\xFF\x60\x02\x26\x32\x60\x03\x70\x01\x00\x00\x45\x60\xCE\xC8\xC0")
         patch.write(b"\xd3" + qt_encode("Stuck?") + b"\xcb\xac" + qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
+
         ##########################################################################
         #                        Modify Diamond Mine events
         ##########################################################################
