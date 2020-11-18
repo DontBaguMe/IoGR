@@ -2274,8 +2274,8 @@ class World:
             28: [False, [],      2, [1,1,b"\x00"], 0, "South Cape: Seaside Cave", []],
 
             # Edward's / Prison
-            30: [False, [10], 1, [1,2,b"\x00"], 0, "Edward's Castle: Main Area", []],
-            31: [False, [30], 1, [1,2,b"\x00"], 0, "Edward's Castle: Behind Guard", []],
+            30: [False, [10], 2, [1,2,b"\x00"], 0, "Edward's Castle: Main Area", []],
+            31: [False, [30], 2, [1,2,b"\x00"], 0, "Edward's Castle: Behind Guard", []],
             32: [False, [],   2, [1,2,b"\x00"], 0, "Edward's Prison: Will's Cell", [2]],
             33: [False, [],   2, [1,2,b"\x00"], 0, "Edward's Prison: Prison Main", [2]],
 
@@ -2311,7 +2311,7 @@ class World:
             64: [False, [60], 0, [1,4,b"\x00"], 0, "Moon Tribe: Spirits Awake", []],
 
             # Inca Ruins
-            70: [False, [],   1, [1,5,b"\x00"], 0, "Inca: Map 29 (NE)", []],
+            70: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 29 (NE)", []],
             71: [False, [],   1, [1,5,b"\x00"], 0, "Inca: Map 29 (NW)", []],
             72: [False, [73], 1, [1,5,b"\x00"], 0, "Inca: Map 29 (N)", []],
             73: [False, [],   1, [1,5,b"\x00"], 0, "Inca: Map 29 (center)", []],
@@ -2680,7 +2680,7 @@ class World:
             467: [False, [468],    2, [6,22,b"\x00"], 0, "Babel: Map 225 (SE)", []],
             468: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 225 (NE)", []],
             469: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 226 (bottom)", []],
-            470: [False, [470],    2, [6,22,b"\x00"], 0, "Babel: Map 226 (top)", []],
+            470: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 226 (top)", []],
             471: [False, [522],    2, [6,22,b"\x00"], 0, "Babel: Map 227 (bottom)", []],
             472: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 227 (top)", []],
             473: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Olman's Room", []],
@@ -3952,7 +3952,7 @@ class World:
             337: [336, 0, 1,   0,   0, "", b"", False,  True, False, "Mu: Map 99 to Map 97"],
             338: [339, 0, 0, 220, 225, "", b"", False,  True, False, "Mu: Map 97 to Map 98 (top)"],
             339: [338, 0, 1,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 97 (top)"],
-            340: [341, 0, 0, 286, 222, "", b"", False,  True, False, "Mu: Map 96 to Map 97 (middle)"],
+            340: [341, 0, 0, 218, 222, "", b"", False,  True, False, "Mu: Map 96 to Map 97 (middle)"],
             341: [340, 0, 1,   0,   0, "", b"", False,  True, False, "Mu: Map 97 to Map 96 (middle)"],
             342: [343, 0, 0, 223, 275, "", b"", False,  True, False, "Mu: Map 97 to Map 98 (middle)"],
             343: [342, 0, 1,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 97 (middle)"],
@@ -3993,7 +3993,7 @@ class World:
             388: [389, 0, 0, 251, 253, "19476", b"", False, False, False, "Angel: Room 2 (in)"],
             389: [388, 0, 1,   0,   0, "19502", b"", False, False, False, "Angel: Room 2 (out)"],
             390: [391, 0, 0, 251, 254, "1945e", b"", False, False, False, "Angel: Dance Hall (in)"],
-            391: [390, 0, 1,   0,   0, "194ea", b"", False, False, False, "Angel: Dance Hall (out)"],
+            391: [390, 0, 1,   0,   0, "1950e", b"", False, False, False, "Angel: Dance Hall (out)"],
             392: [393, 0, 0, 251, 255, "1946a", b"", False, False, False, "Angel: DS Room (in)"],
             393: [392, 0, 1,   0,   0, "194f6", b"", False, False, False, "Angel: DS Room (out)"],
 
@@ -4027,7 +4027,7 @@ class World:
             426: [427, 0, 0, 269, 272, "196e6", b"", False, False, False, "Ishtar: Ishtar's room (in)"],
             427: [426, 0, 1,   0,   0, "1970c", b"", False, False, False, "Ishtar: Ishtar's room (out)"],
             428: [429, 0, 0, 272, 274, "19718", b"", False, False, False, "Ishtar: Puzzle room (in)"],
-            429: [428, 0, 1,   0,   0, "197e2", b"", False, False, False, "Ishtar: Puzzle room (out)"],
+            429: [428, 0, 1,   0,   0, "197e6", b"", False, False, False, "Ishtar: Puzzle room (out)"],
 
             # Watermia
             440: [441, 0, 0, 280, 286, "197f4", b"", False, False, False, "Watermia: Lance House (in)"],
@@ -4238,7 +4238,7 @@ class World:
             695: [694, 0, 1,   0,   0, "", b"", False,  True, False, "Babel: Map 244 to Map 224"],
             696: [697, 0, 0, 464, 477, "", b"", False,  True, False, "Babel: Map 224 to Map 245"],  # Sand Fanger
             697: [696, 0, 1,   0,   0, "", b"", False,  True, False, "Babel: Map 245 to Map 224"],
-            698: [699, 0, 0, 464, 470, "", b"", False,  True, False, "Babel: Map 224 to Map 226"],
+            698: [699, 0, 0, 464, 469, "", b"", False,  True, False, "Babel: Map 224 to Map 226"],
             699: [698, 0, 1,   0,   0, "", b"", False,  True, False, "Babel: Map 226 to Map 224"],
             700: [701, 0, 0, 470, 471, "", b"", False,  True, False, "Babel: Map 226 to Map 227"],
             701: [700, 0, 1,   0,   0, "", b"", False,  True, False, "Babel: Map 227 to Map 226"],
