@@ -948,10 +948,14 @@ class World:
         if self.entrance_shuffle != "None":
             # Always start from a Dark Space
             self.graph[0][1] = [self.item_locations[self.start_loc][0]]
-            self.shuffle_exits()
+            if not self.shuffle_exits():
+                print("ERROR: Entrance rando failed")
+                return False
 
         # Update graph with exit data
         self.update_graph()
+
+        return True
 
     # Update item placement logic after abilities are placed
     def check_logic(self):
@@ -1016,7 +1020,9 @@ class World:
 
     # Takes a random seed and builds out a randomized world
     def randomize(self, seed_adj=0):
-        self.initialize()
+        if not self.initialize():
+            print("ERROR: Could not initialize world")
+            return False
 
         solved = False
 
