@@ -804,9 +804,10 @@ class World:
         # Random start location
         if self.start_mode != "South Cape":
             self.start_loc = self.random_start()
+        if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
-            print("Start:",self.item_locations[self.start_loc][9])
+            #print("Start:",self.item_locations[self.start_loc][9])
 
         # Overworld shuffle
         if "Overworld Shuffle" in self.variant:
@@ -964,8 +965,6 @@ class World:
             self.logic[406][2][x][1] = 1
         # Shuffle exits
         if self.entrance_shuffle != "None":
-            # Always start from a Dark Space
-            self.graph[0][1] = [self.item_locations[self.start_loc][0]]
             if not self.shuffle_exits():
                 print("ERROR: Entrance rando failed")
                 return False
@@ -1173,9 +1172,9 @@ class World:
 
             # print goal, done
 
-        print("Inaccessible: ",self.inaccessible_locations(item_locations))
+        #print("Inaccessible: ",self.inaccessible_locations(item_locations))
         for node in self.graph:
-            if not self.graph[node][0]:
+            if not self.graph[node][0] and node <600:
                 print("Can't reach ",self.graph[node][5])
 
         junk_items = self.list_item_pool()
