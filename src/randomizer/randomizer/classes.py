@@ -1287,7 +1287,7 @@ class World:
         for area_id in range(1,len(area_names)):
             node_name = f"area_{area_id}"
             node_content = area_names[area_id]
-            areas[0].append((node_name, node_content))
+            #areas[0].append((node_name, node_content))
 
         for region_id, region_data in self.graph.items():
             area = region_data[3][1]
@@ -1296,11 +1296,16 @@ class World:
             areas[area].append((node_name, node_content))
 
         for area_id, area_nodes in areas.items():
-            with graph.subgraph(name=f"cluster_{area_id}") as c:
-                c.attr(label=area_names[area_id],
-                       color="black")
-                for node_id, node_content in area_nodes:
-                    c.node(node_id, node_content)
+            for node_id, node_content in area_nodes:
+                graph.node(node_id, node_content)
+            #with graph.subgraph(name=f"cluster_{area_id}") as c:
+            #    c.attr(label=area_names[area_id],
+            #           color="black")
+            #    for node_id, node_content in area_nodes:
+            #        if area_id != 0:
+            #            c.node(node_id, node_content)
+            #        else:
+            #            graph.node(node_id,node_content)
 
         for region_id, region_data in self.graph.items():
             start_area = region_data[3][1]
@@ -1310,17 +1315,18 @@ class World:
                 end_area = self.graph[accessible_region_id][3][1]
                 end_area_name = f"area_{end_area}"
                 accessible_node_name = f"region_{accessible_region_id}"
-                if start_area != 0 and end_area != 0:
-                    if start_area != end_area:
-                        graph.edge(area_name, end_area_name)
-                    else:
-                        graph.edge(node_name, accessible_node_name)
-                elif start_area != 0:
-                    graph.edge(area_name, accessible_node_name)
-                elif end_area != 0:
-                    graph.edge(node_name, end_area_name)
-                else:
-                    graph.edge(node_name, accessible_node_name)
+                graph.edge(node_name, accessible_node_name)
+                #if start_area != 0 and end_area != 0:
+                #    if start_area != end_area:
+                #        graph.edge(area_name, end_area_name)
+                #    else:
+                #        graph.edge(node_name, accessible_node_name)
+                #elif start_area != 0:
+                #    graph.edge(area_name, accessible_node_name)
+                #elif end_area != 0:
+                #    graph.edge(node_name, end_area_name)
+                #else:
+                #    graph.edge(node_name, accessible_node_name)
 
         for _, logic_data in self.logic.items():
             needed_items = logic_data[2]
@@ -1345,17 +1351,18 @@ class World:
             end_area = self.graph[logic_data[1]][3][1]
             area_name = f"area_{start_area}"
             end_area_name = f"area_{end_area}"
-            if start_area != 0 and end_area != 0:
-                if start_area != end_area:
-                    graph.edge(area_name, end_area_name)
-                else:
-                    graph.edge(start_name, dest_name)
-            elif start_area != 0:
-                graph.edge(area_name, dest_name)
-            elif end_area != 0:
-                graph.edge(start_name, end_area_name)
-            else:
-                graph.edge(start_name, dest_name)
+            graph.edge(start_name, dest_name)
+            #if start_area != 0 and end_area != 0:
+            #    if start_area != end_area:
+            #        graph.edge(area_name, end_area_name)
+            #    else:
+            #        graph.edge(start_name, dest_name)
+            #elif start_area != 0:
+            #    graph.edge(area_name, dest_name)
+            #elif end_area != 0:
+            #    graph.edge(start_name, end_area_name)
+            #else:
+            #    graph.edge(start_name, dest_name)
 
         per_region_item_node = dict()
         item_location_color_map = {
