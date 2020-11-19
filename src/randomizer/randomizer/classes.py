@@ -637,7 +637,7 @@ class World:
                                 dest_new = self.exits[x][4]
                                 direction_new = (self.graph[origin_new][2],self.graph[dest_new][2])
                                 #print(direction,direction_new)
-                                if not check_direction:
+                                if not check_direction or not coupled:
                                     dest_exit = x
                                 elif direction == direction_new and x != origin_exit:
                                     dest_exit = x
@@ -683,7 +683,7 @@ class World:
                     direction = self.exit_direction(exit)
                     found_new_exit = False
                     for new_exit in dest_exits:
-                        if not found_new_exit and (not check_direction or direction == self.exit_direction(new_exit)):
+                        if not found_new_exit and (not check_direction or direction == self.exit_direction(new_exit) or not coupled):
                             if (coupled and self.is_exit_coupled(new_exit) and self.exits[self.exits[new_exit][0]][1] == -1) or (
                                     not coupled and not self.is_exit_coupled(new_exit)):
                                 found_new_exit = True
@@ -1965,7 +1965,7 @@ class World:
             64: [1, 2, "", "Dark Friar", False, 1],
             65: [1, 2, "", "Aura Barrier", False, 1],
             66: [1, 2, "", "Earthquaker", False, 1],
-            67: [1, 2, "", "Firebird", False, 1],
+            67: [0, 2, "", "Firebird", False, 1],
 
             # Mystic Statues
             100: [1, 3, "", "Mystic Statue 1", False, 2],
@@ -3769,9 +3769,9 @@ class World:
             # Edward's / Prison
             50: [51, 0, 0, 31, 49, "1857c", b"", False, True, True, "Tunnel back entrance (in)"],
             51: [50, 0, 0,  0,  0, "186f4", b"", False, True, True, "Tunnel back entrance (out)"],
-            52: [53, 0, 0, 33, 40, "1860c", b"", False, True, True, "Tunnel entrance (in)"],
+            52: [53, 0, 0, 33, 40, "1860c", b"\x0C\x58\x00\x50\x00\x83\x00\x12", False, True, True, "Tunnel entrance (in)"],  # set checkpoint
             53: [52, 0, 0,  0,  0, "18626", b"", False, True, True, "Tunnel entrance (out)"],
-            54: [ 0, 0, 0, 30, 32, "4cfce", b"\x06\x58\x00\xC0\x01\x00\x10\x21", False, False, False, "Prison entrance (king)"],
+            54: [ 0, 0, 0, 30, 32, "4cfce", b"", False, False, False, "Prison entrance (king)"],
             #55: [54, 0, 0,  0,  2,      "", b"\x0a\xe0\x01\x60\x01\x03\x20\x34", False, False, False, "Prison exit (king), fake"],
 
             # Tunnel
@@ -3801,13 +3801,13 @@ class World:
             87: [86, 0, 0,  0,  0, "18768", b"", False, False, False, "Itory: Lilly Back Door (out)"],
             88: [89, 0, 0, 51, 56, "18734", b"", False, False, False, "Itory Cave (in)"],
             89: [88, 0, 0,  0,  0, "18784", b"", False, False, False, "Itory Cave (out)"],
-            90: [91, 0, 0, 57, 58, "18790", b"", False, False, False, "Itory Cave Hidden Room (in)"],
+            90: [91, 0, 0, 57, 58, "18790", b"", False, False, False, "Itory Cave Hidden Room (in)"],  # always linked?
             91: [90, 0, 0,  0,  0, "1879c", b"", False, False, False, "Itory Cave Hidden Room (out)"],
 
             # Moon Tribe
             100: [101, 0, 0, 60,  61, "187b6", b"", False, False, False, "Moon Tribe Cave (in)"],
             101: [100, 0, 0,  0,   0, "187c4", b"", False, False, False, "Moon Tribe Cave (out)"],
-            102: [  0, 0, 0, 64, 170, "", b"", False,  True,  True, "Moon Tribe: Sky Garden passage"],
+            102: [  0, 0, 0, 64, 170, "9d1ea", b"", False,  True,  True, "Moon Tribe: Sky Garden passage"],
 
             # Inca
             110: [111, 0, 0, 64,  70, "187d2", b"", False, True, True, "Inca Ruins entrance (in)"],
@@ -3963,8 +3963,8 @@ class World:
             308: [307, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (W)"],
 
             # Seaside Palace
-            310: [311, 0, 0, 211, 201, "1906a", b"", False, False, False, "Seaside entrance"],
-            311: [310, 0, 0,   0,   0, "191e2", b"", False, False, False, "Seaside exit"],
+            310: [311, 0, 0, 211, 201, "69759", b"", False, False, False, "Seaside entrance"],
+            311: [310, 0, 0,   0,   0, "1906a", b"", False, False, False, "Seaside exit"],
             312: [313, 0, 0, 200, 202, "19046", b"", False, False, False, "Seaside: Area 1 NE Room (in)"],
             313: [312, 0, 0,   0,   0, "19114", b"", False, False, False, "Seaside: Area 1 NE Room (out)"],
             314: [315, 0, 0, 200, 203, "19052", b"", False, False, False, "Seaside: Area 1 NW Room (in)"],
