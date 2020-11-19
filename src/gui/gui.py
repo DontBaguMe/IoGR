@@ -135,14 +135,18 @@ def generate_ROM():
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
+        graph_viz_filename = generate_filename(settings, "png")
 
         randomizer = Randomizer(rompath)
 
         patch = randomizer.generate_rom(rom_filename, settings)
         spoiler = randomizer.generate_spoiler()
+        graph_viz = randomizer.generate_graph_visualization()
 
         write_patch(patch, rompath, rom_filename)
         write_spoiler(spoiler, spoiler_filename, rompath)
+        if graph_viz_toggle.get():
+            write_graph_viz(graph_viz, graph_viz_filename, rompath)
 
         tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
@@ -157,6 +161,13 @@ def write_spoiler(spoiler, filename, rom_path):
     f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w+")
     f.write(spoiler)
     f.close()
+
+
+def write_graph_viz(graph_viz, filename, rom_path):
+    import os
+    if "Graphviz" in os.environ['PATH']:
+        graph_viz.format = 'png'
+        graph_viz.render(os.path.dirname(rom_path) + os.path.sep + filename, view="False")
 
 
 def sort_patch(val):
@@ -273,6 +284,7 @@ tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter
 tkinter.Label(mainframe, text="Z3 Mode").grid(row=14, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=15, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=16, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Generate graph").grid(row=17, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
@@ -324,6 +336,9 @@ entrance_shuffle = tkinter.StringVar(root)
 entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
 entrance_shuffle.set("None")
 
+graph_viz_toggle = tkinter.IntVar(root)
+graph_viz_toggle.set(0)
+
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
@@ -358,6 +373,7 @@ open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=
 z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
 overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=15, column=1)
 entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=16, column=1)
+graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=17, column=1)
 #sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
