@@ -640,7 +640,7 @@ class World:
                                 #print(direction,direction_new)
                                 if not check_direction or not coupled:
                                     dest_exit = x
-                                elif direction == direction_new and x != origin_exit:
+                                elif direction == direction_new and x != origin_exit and x != self.exits[origin_exit][0]:
                                     dest_exit = x
 
                     if dest_exit:
