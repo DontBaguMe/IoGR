@@ -806,6 +806,7 @@ class World:
             self.start_loc = self.random_start()
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
+            print("Start:",self.item_locations[self.start_loc][9])
 
         # Overworld shuffle
         if "Overworld Shuffle" in self.variant:
@@ -1116,7 +1117,7 @@ class World:
 
             # Get list of new progression options
             progression_list = self.progression_list(start_items)
-#            print(progression_list)
+            #print(progression_list)
 
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
             #print(done, progression_list)
@@ -2585,8 +2586,8 @@ class World:
             150: [False, [],    2, [2,8,b"\x00"], 0, "Diamond Mine: Map 71", []],
 
             # Neil's Cottage / Nazca
-            160: [False, [11],         2, [2,9,b"\x00"], 0, "Neil's Cottage", [13]],
-            161: [False, [17,160,505], 2, [2,9,b"\x00"], 0, "Neil's Cottage: Neil", []],
+            160: [False, [11],         2, [2,9,b"\x00"],  0, "Neil's Cottage", [13]],
+            161: [False, [17,160,505], 2, [2,9,b"\x00"],  0, "Neil's Cottage: Neil", []],
             162: [False, [11],         1, [2,10,b"\x00"], 0, "Nazca Plain", []],
 
             # Sky Garden
@@ -2707,15 +2708,15 @@ class World:
             277: [False,    [], 2, [3,13,b"\x00"], 0, "Angel Dungeon: Map 115 (foyer)", []],
 
             # Watermia
-            280: [False,  [12], 1, [3,14,b"\x00"], 0, "Watermia: Main Area", [24]],
-            281: [False, [280], 0, [3,14,b"\x00"], 0, "Watermia: Bridge Man", []],
-            282: [False,    [], 2, [3,14,b"\x00"], 0, "Watermia: DS House", []],
-            283: [False,   [1], 2, [3,14,b"\x00"], 0, "Watermia: Gambling House", []],
-            284: [False,    [], 2, [3,14,b"\x00"], 0, "Watermia: West House", []],
-            285: [False,    [], 2, [3,14,b"\x00"], 0, "Watermia: East House", []],
-            286: [False,    [], 2, [3,14,b"\x00"], 0, "Watermia: Lance's House", []],
-            287: [False,    [], 2, [3,14,b"\x00"], 0, "Watermia: NW House", []],
-            288: [False, [280], 0, [3,14,b"\x00"], 0, "Watermia: Stablemaster", []],
+            280: [False,     [12], 1, [3,14,b"\x00"], 0, "Watermia: Main Area", [24]],
+            #281: [False, [15,280], 0, [3,14,b"\x00"], 0, "Watermia: Bridge Man", []],
+            282: [False,       [], 2, [3,14,b"\x00"], 0, "Watermia: DS House", []],
+            283: [False,      [1], 2, [3,14,b"\x00"], 0, "Watermia: Gambling House", []],
+            284: [False,       [], 2, [3,14,b"\x00"], 0, "Watermia: West House", []],
+            285: [False,       [], 2, [3,14,b"\x00"], 0, "Watermia: East House", []],
+            286: [False,       [], 2, [3,14,b"\x00"], 0, "Watermia: Lance's House", []],
+            287: [False,       [], 2, [3,14,b"\x00"], 0, "Watermia: NW House", []],
+            288: [False,    [280], 0, [3,14,b"\x00"], 0, "Watermia: Stablemaster", []],
 
             # Great Wall
             290: [False, [12],  2, [3,15,b"\x00"], 0, "Great Wall: Map 130", []],
@@ -2969,7 +2970,7 @@ class World:
             35: [402,  17, [[505, 1]]],  # Dao: Neil w/ Memory restored
             36: [ 60,  64, [[25, 1]]],   # Moon Tribe healed w/ Teapot
             37: [170,  16, [[502, 1]]],  # Sky Garden: Spirits w/ spirits healed
-            38: [280, 281, [[24, 1]]],   # Watermia: Stablemaster w/ Will
+            38: [280, 288, [[24, 1]]],   # Watermia: Stablemaster w/ Will
             39: [310, 311, [[24, 1]]],   # Euro: Stablemaster w/ Will
             40: [350, 351, [[10, 1]]],   # Natives': Child Guide w/ Large Roast
 
@@ -3040,6 +3041,7 @@ class World:
             149: [195, 199, [[65, 1], [600, 1]]],  # Map 84 progression w/ Aura Barrier
             150: [197, 199, [[64, 1], [600, 1]]],  # Map 84 progression w/ Dark Friar
             151: [197, 199, [[67, 1], [600, 1]]],  # Map 84 progression w/ Firebird
+            152: [170,  16, [[502, 1]]],           # Moon Tribe passage w/ spirits healed
 
             # Seaside Palace
             160: [205, 208, [[501, 1]]],   # Coffin access w/ Lilly
@@ -3910,7 +3912,7 @@ class World:
             25: [0, 0, 0, 16,  60, "", b"", False, False, False, "Moon Tribe: Passage 1 (Moon Tribe)"],
             26: [0, 0, 0, 16, 200, "", b"", False, False, False, "Moon Tribe: Passage 2 (Seaside Palace)"],
 
-            27: [0, 0, 0, 17, 160, "", b"", False, False, False, "Neil: Passage 1 (Neil's)"],
+            27: [0, 0, 0, 17, 161, "", b"", False, False, False, "Neil: Passage 1 (Neil's)"],
             28: [0, 0, 0, 17, 314, "", b"", False, False, False, "Neil: Passage 2 (Euro)"],
             29: [0, 0, 0, 17, 402, "", b"", False, False, False, "Neil: Passage 3 (Dao)"],
             30: [0, 0, 0, 17, 460, "", b"", False, False, False, "Neil: Passage 4 (Babel)"],
