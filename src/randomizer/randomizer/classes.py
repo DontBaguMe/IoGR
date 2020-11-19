@@ -2,6 +2,7 @@ import copy
 import time
 from datetime import datetime
 import binascii
+import graphviz
 import random
 
 from .models.enums.start_location import StartLocation
@@ -736,7 +737,6 @@ class World:
                 new_exit = self.exits[exit][1]
             else:
                 new_exit = exit
-
             # Get exit origin
             origin = self.exits[exit][3]
             if not origin and self.is_exit_coupled(exit):
@@ -953,7 +953,6 @@ class World:
         # Change logic based on which dungeons are required
         for x in self.statues:
             self.logic[406][2][x][1] = 1
-
         # Shuffle exits
         if self.entrance_shuffle != "None":
             # Always start from a Dark Space
@@ -1251,6 +1250,154 @@ class World:
             spoiler["overworld_entrances"] = overworld_links
 
         self.spoiler = spoiler
+        self.complete_graph_visualization()
+
+    def complete_graph_visualization(self):
+        graph = self.graph_viz
+
+        areas = dict()
+        area_names = ["Overworld",
+                      "South Cape",
+                      "Edward's Castle",
+                      "Itory Village",
+                      "Moon Tribe",
+                      "Inca Ruins",
+                      "Diamond Coast",
+                      "Freejia",
+                      "Diamond Mine",
+                      "Neil's Cottage",
+                      "Nazca Plain",
+                      "Seaside Palace",
+                      "Mu",
+                      "Angel Village",
+                      "Watermia",
+                      "Great Wall",
+                      "Euro",
+                      "Mt. Kress",
+                      "Native's Village",
+                      "Ankor Wat",
+                      "Dao",
+                      "Pyramid",
+                      "Babel",
+                      "Jeweler's Mansion"]
+        graph.attr('node', shape='box')
+        for area_id in range(len(area_names)):
+            areas[area_id] = list()
+
+        for area_id in range(1,len(area_names)):
+            node_name = f"area_{area_id}"
+            node_content = area_names[area_id]
+            #areas[0].append((node_name, node_content))
+
+        for region_id, region_data in self.graph.items():
+            area = region_data[3][1]
+            node_name = f"region_{region_id}"
+            node_content = region_data[5]
+            areas[area].append((node_name, node_content))
+
+        for area_id, area_nodes in areas.items():
+            for node_id, node_content in area_nodes:
+                graph.node(node_id, node_content)
+            #with graph.subgraph(name=f"cluster_{area_id}") as c:
+            #    c.attr(label=area_names[area_id],
+            #           color="black")
+            #    for node_id, node_content in area_nodes:
+            #        if area_id != 0:
+            #            c.node(node_id, node_content)
+            #        else:
+            #            graph.node(node_id,node_content)
+
+        for region_id, region_data in self.graph.items():
+            start_area = region_data[3][1]
+            node_name = f"region_{region_id}"
+            area_name = f"area_{start_area}"
+            for accessible_region_id in region_data[1]:
+                end_area = self.graph[accessible_region_id][3][1]
+                end_area_name = f"area_{end_area}"
+                accessible_node_name = f"region_{accessible_region_id}"
+                graph.edge(node_name, accessible_node_name)
+                #if start_area != 0 and end_area != 0:
+                #    if start_area != end_area:
+                #        graph.edge(area_name, end_area_name)
+                #    else:
+                #        graph.edge(node_name, accessible_node_name)
+                #elif start_area != 0:
+                #    graph.edge(area_name, accessible_node_name)
+                #elif end_area != 0:
+                #    graph.edge(node_name, end_area_name)
+                #else:
+                #    graph.edge(node_name, accessible_node_name)
+
+        for _, logic_data in self.logic.items():
+            needed_items = logic_data[2]
+            enough_items = True
+            for item_id, quantity in needed_items:
+                existing_quantity = 0
+                if item_id not in self.item_pool:
+                    print("Missing info about item:", item_id)
+                else:
+                    existing_quantity = self.item_pool[item_id][0]
+                for _, location_data in self.item_locations.items():
+                    if location_data[2] and item_id == location_data[3]:
+                        existing_quantity += 1
+                if existing_quantity < quantity:
+                    enough_items = False
+                    break
+            if not enough_items:
+                continue
+            start_name = f"region_{logic_data[0]}"
+            dest_name = f"region_{logic_data[1]}"
+            start_area = self.graph[logic_data[0]][3][1]
+            end_area = self.graph[logic_data[1]][3][1]
+            area_name = f"area_{start_area}"
+            end_area_name = f"area_{end_area}"
+            graph.edge(start_name, dest_name)
+            #if start_area != 0 and end_area != 0:
+            #    if start_area != end_area:
+            #        graph.edge(area_name, end_area_name)
+            #    else:
+            #        graph.edge(start_name, dest_name)
+            #elif start_area != 0:
+            #    graph.edge(area_name, dest_name)
+            #elif end_area != 0:
+            #    graph.edge(start_name, end_area_name)
+            #else:
+            #    graph.edge(start_name, dest_name)
+
+        per_region_item_node = dict()
+        item_location_color_map = {
+            1: "yellow",
+            2: "blue",
+            3: "green",
+            4: "white"
+        }
+        graph.attr('node', shape='plaintext')
+        for itemloc_id, itemloc_data in self.item_locations.items():
+            # Add Item_location_nodes
+            location_region = itemloc_data[0]
+            region_node_name = f"region_{location_region}"
+            region_item_node_name = f"region_itemnode_{location_region}"
+            if (itemloc_data[1] != 2 or itemloc_data[3] != 0) and itemloc_data[1] != 4:
+                if region_item_node_name not in per_region_item_node:
+                    per_region_item_node[region_item_node_name] = []
+                    graph.edge(region_node_name, f"{region_item_node_name}")
+                per_region_item_node[region_item_node_name].append((itemloc_id))
+
+        for region_item_node_name, locations_id in per_region_item_node.items():
+            node_content = "<<table border='0' cellborder='1' cellspacing='0'>"
+            for itemloc_id in locations_id:
+                itemloc_data = self.item_locations[itemloc_id]
+                item_name = self.item_pool[itemloc_data[3]][3]
+                location_name = itemloc_data[9]
+                if ":" in location_name:
+                    location_name = ":".join(location_name.split(':')[1:])
+                location_type = itemloc_data[1]
+                node_content += f"""<tr>
+<td ALIGN='left' bgcolor='{item_location_color_map[location_type]}'>{location_name.strip()}</td>
+<td align='center'>{item_name}</td>
+</tr>"""
+            node_content += "</table>>"
+            graph.node(region_item_node_name, node_content)
 
     def print_enemy_locations(self, filepath, offset=0):
         f = open(filepath, "r+b")
@@ -4300,3 +4447,6 @@ class World:
         self.exits_detailed = {
             14: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
         }
+
+        self.graph_viz = graphviz.Digraph(graph_attr=[('concentrate','true'),
+                                                      ('rankdir', 'TB')], strict=True)
