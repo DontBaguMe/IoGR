@@ -192,14 +192,14 @@ class World:
                 accessible.append(x)
         return accessible
 
-    # Returns full list of unaccessible locations
-    def unaccessible_locations(self, item_locations):
-        unaccessible = []
+    # Returns full list of inaccessible locations
+    def inaccessible_locations(self, item_locations):
+        inaccessible = []
         for x in item_locations:
             region = self.item_locations[x][0]
             if not self.graph[region][0]:
-                unaccessible.append(x)
-        return unaccessible
+                inaccessible.append(x)
+        return inaccessible
 
     # Fill a list of items randomly in a list of locations
     def random_fill(self, items=[], item_locations=[], accessible=True):
@@ -524,7 +524,7 @@ class World:
             return False
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
-        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+#        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         origin = self.exits[origin_exit][3]
         dest = self.exits[dest_exit][4]
         if dest not in self.graph[origin][1]:
@@ -538,7 +538,7 @@ class World:
             coupled_dest = self.exits[dest_exit][0]
             self.exits[coupled_dest][1] = coupled_origin
             self.exits[coupled_origin][2] = coupled_dest
-            print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
+#            print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
             if origin not in self.graph[dest][1] and self.exits[coupled_dest][5]:
                 self.graph[dest][1].append(origin)
         return True
@@ -611,9 +611,9 @@ class World:
                     if origin_exit in quarantine:
                         origin_exit = 0
                 if not origin_exit:
-                    print("Emptying quarantine:")
-                    for x in quarantine:
-                        print(" ",self.exits[x][10])
+#                    print("Emptying quarantine:")
+#                    for x in quarantine:
+#                        print(" ",self.exits[x][10])
                     quarantine.clear()
                     if progress:
                         progress = False
@@ -650,7 +650,7 @@ class World:
 
             cycle += 1
 
-        print("Round 1 finished")
+#        print("Round 1 finished")
 
         quarantine.clear()
         # Link remaining exits
@@ -673,9 +673,9 @@ class World:
                     if exit in quarantine:
                         exit = 0
                 if not exit:
-                    print("Emptying quarantine:")
-                    for x in quarantine:
-                        print(" ",self.exits[x][10])
+#                    print("Emptying quarantine:")
+#                    for x in quarantine:
+#                        print(" ",self.exits[x][10])
                     quarantine.clear()
                     check_direction = False
                 else:
@@ -691,7 +691,7 @@ class World:
                     if not found_new_exit:
                         quarantine.append(exit)
 
-        print("Round 2 finished")
+#        print("Round 2 finished")
 
         # Clean up whatever's left
         exits_remaining = self.get_remaining_exits()
@@ -714,7 +714,7 @@ class World:
                 else:
                     self.link_exits(exit1, exit2)
 
-        print("Round 3 finished")
+#        print("Round 3 finished")
 
         for exit in self.exits:
             if self.exits[exit][1] == -1:
@@ -723,7 +723,7 @@ class World:
 
         # Re-initialize world graph
         self.graph = copy.deepcopy(graph_copy)
-        print("We done")
+#        print("We done")
         graph_copy = None
         return True
 
@@ -742,19 +742,21 @@ class World:
             if not origin and self.is_exit_coupled(exit):
                 sister_exit = self.exits[exit][0]
                 origin = self.exits[sister_exit][4]
+                self.exits[exit][3] = origin
 
             # Get (new) exit destination
             dest = self.exits[new_exit][4]
             if not dest and self.is_exit_coupled(new_exit):
                 sister_exit = self.exits[new_exit][0]
-                dest = self.exits[sister_exit][4]
+                dest = self.exits[sister_exit][3]
+                self.exits[new_exit][4] = dest
 
             # Translate link into world graph
             if origin and dest and (dest not in self.graph[origin][1]):
                 self.graph[origin][1].append(dest)
 
-        for x in self.graph:
-            print(x,self.graph[x])
+#        for x in self.graph:
+#            print(x,self.graph[x])
 
     # Initialize World parameters
     def initialize(self):
@@ -802,7 +804,8 @@ class World:
         # Random start location
         if self.start_mode != "South Cape":
             self.start_loc = self.random_start()
-            self.graph[0][1] = [self.item_locations[self.start_loc][0]]
+            self.graph[0][1].remove(22)
+            self.graph[0][1].append(self.item_locations[self.start_loc][0])
 
         # Overworld shuffle
         if "Overworld Shuffle" in self.variant:
@@ -842,6 +845,7 @@ class World:
 
         # Allow glitches
         if "Allow Glitches" in self.variant:
+            self.graph[0][1].append(601)
             self.graph[61][1].append(62)          # Moon Tribe: No ability required
             self.graph[181][1].append(182)        # Sky Garden: Ramp glitch, cage glitch
             self.graph[181][1].append(184)
@@ -856,6 +860,10 @@ class World:
             self.item_locations[124][2] = False   # Ankor Wat: Dropdown DS has abilities
             self.graph[410][1].append(411)        # Pyramid: No ability required
             self.item_locations[142][2] = False   # Pyramid: Bottom DS can have abilities
+
+        # Early Firebird
+        if self.firebird:
+            self.graph[0][1].append(602)
 
         # Zelda 3 Mode
         if "Z3 Mode" in self.variant:
@@ -1033,9 +1041,9 @@ class World:
         if not self.initialize():
             print("ERROR: Could not initialize world")
             return False
-        for x in self.graph:
-            if self.graph[x][0]:
-                print(self.graph[x][5])
+#        for x in self.graph:
+#            if self.graph[x][0]:
+#                print(self.graph[x][5])
         solved = False
 
         random.seed(self.seed + seed_adj)
@@ -1083,7 +1091,7 @@ class World:
         goal = False
         cycle = 0
 
-        # while self.unaccessible_locations(item_locations):
+        # while self.inaccessible_locations(item_locations):
         while not done:
             #print(cycle)
             cycle += 1
@@ -1094,10 +1102,10 @@ class World:
                 return False
 
             start_items = self.traverse()
-            print("Cycle",cycle)
-            for x in self.graph:
-                if self.graph[x][0]:
-                    print(self.graph[x][5])
+#            print("Cycle",cycle)
+#            for x in self.graph:
+#                if self.graph[x][0]:
+#                    print(self.graph[x][5])
             #print("We found these: ",start_items)
 
             inv_size = len(self.get_inventory(start_items))
@@ -1109,6 +1117,7 @@ class World:
 
             # Get list of new progression options
             progression_list = self.progression_list(start_items)
+#            print(progression_list)
 
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
             #print(done, progression_list)
@@ -1164,10 +1173,10 @@ class World:
 
             # print goal, done
 
-        # print "Unaccessible: ",self.unaccessible_locations(item_locations)
-        #        for node in self.graph:
-        #            if not self.graph[node][0]:
-        #                print "Can't reach ",self.graph[node][2]
+        print("Inaccessible: ",self.inaccessible_locations(item_locations))
+        for node in self.graph:
+            if not self.graph[node][0]:
+                print("Can't reach ",self.graph[node][5])
 
         junk_items = self.list_item_pool()
         self.random_fill(junk_items, item_locations, False)
@@ -1975,11 +1984,6 @@ class World:
             104: [1, 3, "", "Mystic Statue 5", False, 2],
             105: [1, 3, "", "Mystic Statue 6", False, 2],
 
-            # Misc
-            300: [0, 5, "", "Freedan Access", False, 1],
-            301: [0, 5, "", "Glitches", False, 1],
-            302: [0, 5, "", "Early Firebird", False, 1],
-
             # Event Switches
             500: [0, 4, "", "Kara Released", False, 1],
             501: [0, 4, "", "Itory: Got Lilly", False, 1],
@@ -2004,7 +2008,12 @@ class World:
             520: [0, 4, "", "Babel: Vampires Defeated", False, 1],
             521: [0, 4, "", "Babel: Sand Fanger Defeated", False, 1],
             522: [0, 4, "", "Babel: Mummy Queen Defeated", False, 1],
-            523: [0, 4, "", "Mansion: Solid Arm Defeated", False, 1]
+            523: [0, 4, "", "Mansion: Solid Arm Defeated", False, 1],
+
+            # Misc
+            600: [0, 4, "", "Freedan Access", False, 1],
+            601: [0, 4, "", "Glitches", False, 1],
+            602: [0, 4, "", "Early Firebird", False, 1]
         }
 
         # Define Item/Ability/Statue locations
@@ -2251,7 +2260,7 @@ class World:
             509: [509, 4, True, 509, [], "", "", "", "", "Sky Garden: Map 84 Switch           "],
             510: [510, 4, True, 510, [], "", "", "", "", "Seaside: Fountain Purified          "],
             511: [511, 4, True, 511, [], "", "", "", "", "Mu: Water Lowered 1                 "],
-            512: [512, 4, True, 511, [], "", "", "", "", "Mu: Water Lowered 2                 "],
+            512: [512, 4, True, 512, [], "", "", "", "", "Mu: Water Lowered 2                 "],
             513: [513, 4, True, 513, [], "", "", "", "", "Angel: Puzzle Complete              "],
             514: [514, 4, True, 514, [], "", "", "", "", "Mt Kress: Drops used 1              "],
             515: [515, 4, True, 515, [], "", "", "", "", "Mt Kress: Drops used 2              "],
@@ -2265,8 +2274,9 @@ class World:
             523: [523, 4, True, 523, [], "", "", "", "", "Mansion: Solid Arm defeated         "],
 
             # Misc
-            601: [0, 1, True, 0, [], "", "", "", "", "Glitches                                "],
-            602: [0, 1, True, 0, [], "", "", "", "", "Early Firebird                          "]
+            600: [600, 4, True, 600, [], "", "", "", "", "Freedan Access                          "],
+            601: [601, 4, True, 601, [], "", "", "", "", "Glitches                                "],
+            602: [602, 4, True, 602, [], "", "", "", "", "Early Firebird                          "]
         }
 
         # World graph
@@ -2274,7 +2284,7 @@ class World:
         #                 Layer, RegionName, [ItemsToRemove] }
         self.graph = {
             # Game Start
-            0: [False, [22], 0, [0,0,b"\x00"], 0, "Game Start", []],
+            0: [False, [22,600], 0, [0,0,b"\x00"], 0, "Game Start", []],  # 600 shoudln't be here, fix later
 
             # Jeweler
             1: [False, [], 0, [0,0,b"\x00"], 0, "Jeweler Access", []],
@@ -2340,11 +2350,11 @@ class World:
             59: [False, [501], 0, [1,3,b"\x00"], 0, "Itory: Got Lilly", []],
 
             # Moon Tribe / Inca Entrance
-            60: [False, [10], 1, [1,4,b"\x00"], 0, "Moon Tribe: Main Area", [25]],
-            61: [False, [],   2, [1,4,b"\x00"], 0, "Moon Tribe: Cave", []],
-            62: [False, [],   2, [1,4,b"\x00"], 0, "Moon Tribe: Cave (Pedestal)", []],
-            63: [False, [10], 1, [1,5,b"\x00"], 0, "Inca: Entrance", []],
-            64: [False, [60], 0, [1,4,b"\x00"], 0, "Moon Tribe: Spirits Awake", []],
+            60: [False, [10],     1, [1,4,b"\x00"], 0, "Moon Tribe: Main Area", [25]],
+            61: [False, [],       2, [1,4,b"\x00"], 0, "Moon Tribe: Cave", []],
+            62: [False, [],       2, [1,4,b"\x00"], 0, "Moon Tribe: Cave (Pedestal)", []],
+            63: [False, [10],     1, [1,5,b"\x00"], 0, "Inca: Entrance", []],
+            64: [False, [60,502], 0, [1,4,b"\x00"], 0, "Moon Tribe: Spirits Awake", []],
 
             # Inca Ruins
             70: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 29 (NE)", []],
@@ -2359,7 +2369,7 @@ class World:
             79: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 31", []],
             80: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 32 (entrance)", []],
             81: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 32 (behind statue)", []],
-            82: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 33 (entrance)", []],
+            82: [False, [83], 2, [1,5,b"\x00"], 0, "Inca: Map 33 (entrance)", []],
             83: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 33 (over ramp)", []],      # Need to prevent softlocks here
             84: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 34", []],
             85: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 35 (entrance)", []],
@@ -2372,10 +2382,10 @@ class World:
             92: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 38 (behind statues)", []],
             93: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 38 (north section)", []],
             94: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 39", []],
-            95: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 40 (entrance)", []],
-            96: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 40 (past tiles)", []],
-            97: [False, [503],2, [1,5,b"\x00"], 0, "Inca: Boss Room", []],
-            98: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Behind Boss Room", []],
+            95: [False, [96], 2, [1,5,b"\x00"], 0, "Inca: Map 40 (entrance)", []],
+            96: [False, [95], 2, [1,5,b"\x00"], 0, "Inca: Map 40 (past tiles)", []],
+            97: [False, [98,503], 2, [1,5,b"\x00"], 0, "Inca: Boss Room", []],       # might need to add an exit for this
+            98: [False, [97],     2, [1,5,b"\x00"], 0, "Inca: Behind Boss Room", []],
 
             # Gold Ship / Diamond Coast
             100: [False, [],   1, [1,5,b"\x00"], 0, "Gold Ship: Deck", []],
@@ -2447,7 +2457,7 @@ class World:
             179: [False, [],         2, [2,10,b"\x00"], 0, "Sky Garden: Map 80 (north)", []],
             180: [False, [],         2, [2,10,b"\x00"], 0, "Sky Garden: Map 80 (south)", []],
             181: [False, [168],      2, [2,10,b"\x00"], 0, "Sky Garden: Map 81 (main)", []],
-            182: [False, [182],      2, [2,10,b"\x00"], 0, "Sky Garden: Map 81 (west)", []],
+            182: [False, [181],      2, [2,10,b"\x00"], 0, "Sky Garden: Map 81 (west)", []],
             183: [False, [],         2, [2,10,b"\x00"], 0, "Sky Garden: Map 81 (Dark Space cage)", []],
             184: [False, [183],      2, [2,10,b"\x00"], 0, "Sky Garden: Map 81 (SE platform)", []],
             185: [False, [183],      2, [2,10,b"\x00"], 0, "Sky Garden: Map 81 (SW platform)", []],
@@ -2510,10 +2520,10 @@ class World:
             238: [False, [236],      2, [3,12,b"\x00"], 1, "Mu: Map 101 (middle E)", []],
             239: [False, [],         2, [3,12,b"\x00"], 2, "Mu: Map 101 (bottom)", []],
             240: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Map 102 (pedestals)", [19, 19]],
-            241: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Map 102 (main)", []],
+            241: [False, [240,243],  2, [3,12,b"\x00"], 0, "Mu: Map 102 (statues placed)", []],  # might need an exit for this
             242: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Map 102 (statue get)", []],
-            243: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Boss Room (entryway)", []],
-            244: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Boss Room (main)", []],
+            243: [False, [244,249],  2, [3,12,b"\x00"], 0, "Mu: Boss Room (entryway)", []],    # Might need to add an exit for this?
+            244: [False, [242,243],  2, [3,12,b"\x00"], 0, "Mu: Boss Room (main)", []],
             245: [False, [212],      2, [3,12,b"\x00"], 0, "Mu: Map 95 (top, Slider exit)", []],
             246: [False, [226],      2, [3,12,b"\x00"], 0, "Mu: Map 98 (top, Slider exit)", []],
             247: [False, [511],      2, [3,12,b"\x00"], 0, "Mu: Water lowered 1", []],
@@ -2667,7 +2677,7 @@ class World:
             411: [False, [410], 2, [5,21,b"\x00"], 0, "Pyramid: Entrance (behind orbs)", []],
             412: [False, [],    2, [5,21,b"\x00"], 0, "Pyramid: Entrance (hidden platform)", []],
             413: [False, [411], 2, [5,21,b"\x00"], 0, "Pyramid: Entrance (bottom)", []],
-            414: [False, [],    2, [5,21,b"\x00"], 0, "Pyramid: Entrance (boss entrance)", []],
+            414: [False, [411], 2, [5,21,b"\x00"], 0, "Pyramid: Entrance (boss entrance)", []],
             415: [False, [],    2, [5,21,b"\x00"], 0, "Pyramid: Hieroglyph room", [30, 31, 32, 33, 34, 35, 38]],
             416: [False, [],    2, [5,21,b"\x00"], 0, "Pyramid: Map 206 (E)", []],
             417: [False, [416], 2, [5,21,b"\x00"], 0, "Pyramid: Map 206 (W)", []],
@@ -2715,7 +2725,7 @@ class World:
             466: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 225 (NW)", []],
             467: [False, [468],    2, [6,22,b"\x00"], 0, "Babel: Map 225 (SE)", []],
             468: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 225 (NE)", []],
-            469: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 226 (bottom)", []],
+            469: [False, [470],    2, [6,22,b"\x00"], 0, "Babel: Map 226 (bottom)", []],
             470: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 226 (top)", []],
             471: [False, [522],    2, [6,22,b"\x00"], 0, "Babel: Map 227 (bottom)", []],
             472: [False, [],       2, [6,22,b"\x00"], 0, "Babel: Map 227 (top)", []],
@@ -2761,7 +2771,13 @@ class World:
             520: [False, [], 0, [0,0,b"\x00"], 0, "Babel: Vampires defeated            ", []],
             521: [False, [], 0, [0,0,b"\x00"], 0, "Babel: Sand Fanger defeated         ", []],
             522: [False, [], 0, [0,0,b"\x00"], 0, "Babel: Mummy Queen defeated         ", []],
-            523: [False, [], 0, [0,0,b"\x00"], 0, "Mansion: Solid Arm defeated         ", []]
+            523: [False, [], 0, [0,0,b"\x00"], 0, "Mansion: Solid Arm defeated         ", []],
+
+            # Misc
+            600: [False, [], 0, [0,0,b"\x00"], 0, "Freedan Access                      ", []],
+            601: [False, [], 0, [0,0,b"\x00"], 0, "Glitches                            ", []],
+            602: [False, [], 0, [0,0,b"\x00"], 0, "Early Firebird                      ", []]
+
         }
 
         # Define logical paths in dynamic graph
@@ -2814,7 +2830,7 @@ class World:
             60: [32, 33, [[2, 1]]],    # Escape cell w/Prison Key
             61: [33, 32, [[2, 1]]],    # Enter cell w/Prison Key
             62: [45, 46, [[501, 1]]],  # Progression w/ Lilly
-            63: [47, 48, [[300, 1]]],  # Activate Bridge w/ Freedan
+            63: [47, 48, [[600, 1]]],  # Activate Bridge w/ Freedan
 
             # Itory
             70: [50, 51, [[9, 1]]],    # Town appears w/ Lola's Melody
@@ -2833,7 +2849,7 @@ class World:
             91:  [80, 81, [[61, 1]]],         # Map 32 progression w/ Psycho Dash
             92:  [80, 81, [[62, 1]]],         # Map 32 progression w/ Psycho Slider
             93:  [80, 81, [[63, 1]]],         # Map 32 progression w/ Spin Dash
-            94:  [85, 86, [[300, 1]]],        # Map 35 progression w/ Freedan
+            94:  [85, 86, [[600, 1]]],        # Map 35 progression w/ Freedan
             95:  [87, 88, [[8, 1]]],          # Map 36 progression w/ Wind Melody
             96:  [89, 90, [[7, 1]]],          # Map 37 progression w/ Diamond Block
             97:  [91, 92, [[61, 1]]],         # Map 38 progression w/ Psycho Dash
@@ -2851,28 +2867,32 @@ class World:
             115: [136, 137, [[62, 1]]],            # Map 64 trapped laborer w/ Psycho Slider
             116: [136, 137, [[63, 1]]],            # Map 64 trapped laborer w/ Spin Dash
             117: [138, 139, [[63, 1]]],            # Map 65 progression w/ Spin Dash
-            118: [138, 139, [[64, 1], [300, 1]]],  # Map 65 progression w/ Dark Friar
+            118: [138, 139, [[64, 1], [600, 1]]],  # Map 65 progression w/ Dark Friar
+            119: [146, 147, [[11, 1], [12, 1]]],   # Map 68 progression w/ mine keys
 
             # Sky Garden
-            130: [170, 172, [[14, 4]]],            # Boss access w/ Crystal Balls
-            131: [178, 179, [[64, 1], [300, 1]]],  # Map 79 progression w/ Dark Friar
-            132: [178, 179, [[67, 1], [300, 1]]],  # Map 79 progression w/ Firebird
-            133: [168, 183, [[506, 1]]],           # Map 81 progression w/ switch 1
-            134: [183, 184, [[507, 1]]],           # Map 81 progression w/ switch 2
-            135: [183, 185, [[61, 1]]],            # Map 81 progression w/ Psycho Dash
-            136: [183, 185, [[62, 1]]],            # Map 81 progression w/ Psycho Dash
-            137: [183, 185, [[63, 1]]],            # Map 81 progression w/ Psycho Dash
-            138: [185, 186, [[508, 1], [61, 1]]],  # Map 81 progression w/ switch 3 & Psycho Dash
-            139: [185, 186, [[508, 1], [62, 1]]],  # Map 81 progression w/ switch 3 & Psycho Slider
-            140: [185, 186, [[508, 1], [63, 1]]],  # Map 81 progression w/ switch 3 & Spin Dash
-            141: [182, 183, [[63, 1]]],            # Map 81 progression w/ Spin Dash
-            142: [182, 185, [[63, 1]]],            # Map 81 progression w/ Spin Dash
-            143: [183, 186, [[63, 1]]],            # Map 81 progression w/ Spin Dash
-            144: [188, 189, [[300, 1]]],           # Map 82 progression w/ Freedan
-            145: [188, 189, [[301, 1]]],           # Map 82 progression w/ Glitches
+            130: [170, 171, [[14, 4]]],            # Boss access w/ Crystal Balls
+            131: [177, 178, [[64, 1], [600, 1]]],  # Map 79 progression w/ Dark Friar
+            132: [177, 178, [[67, 1], [600, 1]]],  # Map 79 progression w/ Firebird
+            133: [168, 182, [[506, 1]]],           # Map 81 progression w/ switch 1
+            134: [182, 183, [[507, 1]]],           # Map 81 progression w/ switch 2
+            135: [182, 184, [[61, 1]]],            # Map 81 progression w/ Psycho Dash
+            136: [182, 184, [[62, 1]]],            # Map 81 progression w/ Psycho Dash
+            137: [182, 184, [[63, 1]]],            # Map 81 progression w/ Psycho Dash
+            138: [184, 185, [[508, 1], [61, 1]]],  # Map 81 progression w/ switch 3 & Psycho Dash
+            139: [184, 185, [[508, 1], [62, 1]]],  # Map 81 progression w/ switch 3 & Psycho Slider
+            140: [184, 185, [[508, 1], [63, 1]]],  # Map 81 progression w/ switch 3 & Spin Dash
+            141: [181, 182, [[63, 1]]],            # Map 81 progression w/ Spin Dash
+            142: [181, 184, [[63, 1]]],            # Map 81 progression w/ Spin Dash
+            143: [182, 185, [[63, 1]]],            # Map 81 progression w/ Spin Dash
+            144: [188, 189, [[600, 1]]],           # Map 82 progression w/ Freedan
+            145: [188, 189, [[601, 1]]],           # Map 82 progression w/ Glitches
             146: [192, 190, [[63, 1]]],            # Map 83 progression w/ Spin Dash
-            147: [197, 199, [[64, 1], [300, 1]]],  # Map 84 progression w/ Dark Friar
-            148: [197, 199, [[65, 1], [300, 1]]],  # Map 84 progression w/ Aura Barrier
+            147: [195, 199, [[64, 1], [600, 1]]],  # Map 84 progression w/ Dark Friar
+            148: [195, 199, [[67, 1], [600, 1]]],  # Map 84 progression w/ Firebird
+            149: [195, 199, [[65, 1], [600, 1]]],  # Map 84 progression w/ Aura Barrier
+            150: [197, 199, [[64, 1], [600, 1]]],  # Map 84 progression w/ Dark Friar
+            151: [197, 199, [[67, 1], [600, 1]]],  # Map 84 progression w/ Firebird
 
             # Seaside Palace
             160: [205, 208, [[501, 1]]],   # Coffin access w/ Lilly
@@ -2886,19 +2906,20 @@ class World:
             171: [212, 213, [[511, 1]]],                      # Map 95 progression w/ water lowered 1
             172: [213, 215, [[512, 1]]],                      # Map 95 progression w/ water lowered 2
             173: [214, 216, [[512, 1]]],                      # Map 95 progression w/ water lowered 2
-            174: [216, 218, [[511, 1]]],                      # Map 96 progression w/ water lowered 1
-            175: [222, 221, [[511, 1], [64, 1], [300, 1]]],   # Map 97 progression w/ water lowered 1 & Friar
-            176: [222, 221, [[511, 1], [67, 1], [300, 1]]],   # Map 97 progression w/ water lowered 1 & Firebird
-            177: [226, 246, [[62, 1]]],                       # Map 98 progression w/ Psycho Slider
+            174: [217, 218, [[511, 1]]],                      # Map 96 progression w/ water lowered 1
+            175: [222, 221, [[511, 1], [64, 1], [600, 1]]],   # Map 97 progression w/ water lowered 1 & Friar
+            176: [222, 221, [[511, 1], [67, 1], [600, 1]]],   # Map 97 progression w/ water lowered 1 & Firebird
+            177: [222, 221, [[511, 1], [601, 1]]],            # Map 97 progression w/ water lowered 1 & glitches
             178: [226, 227, [[511, 1]]],                      # Map 98 progression w/ water lowered 1
             179: [227, 229, [[512, 1]]],                      # Map 98 progression w/ water lowered 2
             180: [228, 230, [[512, 1]]],                      # Map 98 progression w/ water lowered 2
             181: [229, 230, [[62, 1]]],                       # Map 98 progression w/ Psycho Slider
             182: [230, 229, [[62, 1]]],                       # Map 98 progression w/ Psycho Slider
-            183: [237, 238, [[62, 1]]],                       # Map 101 progression w/ Psycho Slider
-            184: [240, 249, [[19, 2]]],                       # Map 102 progression w/ Rama Statues
-            185: [231, 247, [[18, 1]]],                       # Water lowered 1 w/ Hope Statue
-            186: [232, 248, [[18, 2]]],                       # Water lowered 2 w/ Hope Statues
+            183: [226, 246, [[62, 1]]],                       # Map 98 progression w/ Psycho Slider
+            184: [237, 238, [[62, 1]]],                       # Map 101 progression w/ Psycho Slider
+            185: [240, 241, [[19, 2]]],                       # Map 102 progression w/ Rama Statues
+            186: [231, 247, [[18, 1]]],                       # Water lowered 1 w/ Hope Statue
+            187: [232, 248, [[18, 2]]],                       # Water lowered 2 w/ Hope Statues
 
             # Angel Dungeon
             210: [263, 264, [[62, 1]]],    # Map 112 progression w/ Psycho Slider
@@ -2908,11 +2929,11 @@ class World:
             214: [272, 273, [[513, 1]]],   # Ishtar's chest w/ puzzle complete
 
             # Great Wall
-            220: [294, 295, [[301, 1]]],           # Map 133 progression w/ glitches
+            220: [294, 295, [[601, 1]]],           # Map 133 progression w/ glitches
             221: [296, 295, [[63, 1]]],            # Map 133 progression w/ Spin Dash
-            222: [296, 295, [[300, 1]]],           # Map 133 progression w/ Freedan
-            223: [298, 299, [[64, 1], [300, 1]]],  # Map 135 progression w/ Friar
-            224: [298, 299, [[67, 1], [300, 1]]],  # Map 135 progression w/ Firebird
+            222: [296, 295, [[600, 1]]],           # Map 133 progression w/ Freedan
+            223: [298, 299, [[64, 1], [600, 1]]],  # Map 135 progression w/ Friar
+            224: [298, 299, [[67, 1], [600, 1]]],  # Map 135 progression w/ Firebird
             225: [299, 298, [[64, 1], [54, 2]]],   # Map 135 progression w/ Friar III
             227: [300, 301, [[63, 1]]],            # Map 136 progression w/ Spin Dash
 
@@ -2920,43 +2941,43 @@ class World:
             230: [314, 315, [[40, 1]]],    # Ann item w/ Apple
 
             # Mt. Temple
-            240: [331, 332, [[63, 1]]],    # Map 161 progression w/ Spin Dash
-            241: [332, 331, [[63, 1]]],    # Map 161 backwards progression w/ Spin Dash
-            242: [333, 514, [[514, 1]]],   # Map 162 progression w/ Mushroom drops 1
-            243: [335, 514, [[514, 1]]],   # Map 162 progression w/ Mushroom drops 1  -- IS THIS TRUE?
-            244: [339, 515, [[515, 1]]],   # Map 162 progression w/ Mushroom drops 2
-            245: [340, 515, [[515, 1]]],   # Map 162 progression w/ Mushroom drops 2  -- IS THIS TRUE?
-            246: [340, 516, [[516, 1]]],   # Map 162 progression w/ Mushroom drops 3
-            247: [341, 516, [[516, 1]]],   # Map 162 progression w/ Mushroom drops 3  -- IS THIS TRUE?
+            240: [331, 332, [[63, 1]]],   # Map 161 progression w/ Spin Dash
+            241: [332, 331, [[63, 1]]],   # Map 161 backwards progression w/ Spin Dash
+            242: [333, 514, [[26, 1]]],   # Map 162 progression w/ Mushroom drops 1
+            243: [335, 514, [[26, 1]]],   # Map 162 progression w/ Mushroom drops 1  -- IS THIS TRUE?
+            244: [339, 515, [[26, 2]]],   # Map 162 progression w/ Mushroom drops 2
+            245: [340, 515, [[26, 2]]],   # Map 162 progression w/ Mushroom drops 2  -- IS THIS TRUE?
+            246: [340, 516, [[26, 3]]],   # Map 162 progression w/ Mushroom drops 3
+            247: [341, 516, [[26, 3]]],   # Map 162 progression w/ Mushroom drops 3  -- IS THIS TRUE?
 
             # Natives'
             250: [353, 354, [[29, 1]]],    # Statues awake w/ Gorgon Flower
 
             # Ankor Wat
-            260: [361, 362, [[64, 1], [300, 1]]],            # Map 177 progression w/ Friar
+            260: [361, 362, [[64, 1], [600, 1]]],            # Map 177 progression w/ Friar
             261: [363, 364, [[63, 1]]],                      # Map 178 progression w/ Spin Dash
             262: [364, 365, [[62, 1]]],                      # Map 178 progression w/ Psycho Slider
             263: [365, 364, [[62, 1]]],                      # Map 178 progression w/ Psycho Slider
             264: [367, 366, [[63, 1]]],                      # Map 179 progression w/ Spin Dash
             265: [369, 370, [[62, 1]]],                      # Map 181 progression w/ Psycho Slider
             266: [370, 371, [[63, 1]]],                      # Map 181 progression w/ Spin Dash
-            267: [373, 374, [[66, 1], [300, 1]]],            # Map 183 progression w/ Earthquaker
-            268: [373, 374, [[64, 1], [54, 2], [300, 1]]],   # Map 183 progression w/ upgraded Friar
-            269: [373, 374, [[64, 1], [300, 1], [301, 1]]],  # Map 183 progression w/ Friar and glitches
-            270: [373, 374, [[67, 1], [300, 1]]],            # Map 183 progression w/ Firebird       -- IS THIS TRUE?
-            271: [376, 377, [[64, 1], [300, 1]]],            # Map 184 progression w/ Friar
-            272: [376, 377, [[36, 1], [300, 1]]],            # Map 184 progression w/ Shadow
+            267: [373, 374, [[66, 1], [600, 1]]],            # Map 183 progression w/ Earthquaker
+            268: [373, 374, [[64, 1], [54, 2], [600, 1]]],   # Map 183 progression w/ upgraded Friar
+            269: [373, 374, [[64, 1], [601, 1], [600, 1]]],  # Map 183 progression w/ Friar and glitches
+            270: [373, 374, [[67, 1], [600, 1]]],            # Map 183 progression w/ Firebird       -- IS THIS TRUE?
+            271: [376, 377, [[64, 1], [600, 1]]],            # Map 184 progression w/ Friar
+            272: [376, 377, [[36, 1], [600, 1]]],            # Map 184 progression w/ Shadow
             273: [384, 385, [[28, 1], [62, 1]]],             # Map 188 progression w/ Black Glasses & Slider
             274: [385, 384, [[28, 1], [62, 1]]],             # Map 188 progression w/ Black Glasses & Slider
-            275: [384, 385, [[301, 1], [62, 1]]],            # Map 188 progression w/ glitches & Slider
-            276: [385, 384, [[301, 1], [62, 1]]],            # Map 188 progression w/ glitches & Slider
+            275: [384, 385, [[601, 1], [62, 1]]],            # Map 188 progression w/ glitches & Slider
+            276: [385, 384, [[601, 1], [62, 1]]],            # Map 188 progression w/ glitches & Slider
             277: [386, 387, [[62, 1]]],                      # Map 188 progression w/ Psycho Slider
             278: [387, 386, [[62, 1]]],                      # Map 188 progression w/ Psycho Slider
 
             # Pyramid
             290: [410, 411, [[62, 1]]],             # Map 204 progression w/ Slider
             291: [410, 411, [[63, 1]]],             # Map 204 progression w/ Spin
-            292: [410, 411, [[301, 1]]],            # Map 204 progression w/ glitches
+            292: [410, 411, [[601, 1]]],            # Map 204 progression w/ glitches
             293: [411, 412, [[36, 1]]],             # Map 204 progression w/ Aura
             294: [411, 413, [[36, 1]]],             # Map 204 progression w/ Aura
             295: [415, 449, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
@@ -2965,22 +2986,23 @@ class World:
             297: [417, 416, [[63, 1]]],             # Map 206 progression w/ Spin Dash
             298: [418, 419, [[63, 1]]],             # Map 206 progression w/ Spin Dash
             299: [419, 418, [[63, 1]]],             # Map 206 progression w/ Spin Dash
-            300: [426, 427, [[36, 1], [300, 1]]],   # Map 212 progression w/ Aura
-            301: [426, 427, [[66, 1], [300, 1]]],   # Map 212 progression w/ Earthquaker
-            302: [427, 428, [[36, 1], [300, 1]]],   # Map 212 progression w/ Aura
-            303: [427, 429, [[36, 1], [300, 1]]],   # Map 212 progression w/ Aura
-            304: [427, 429, [[66, 1], [300, 1]]],   # Map 212 progression w/ Earthquaker
+            300: [426, 427, [[36, 1], [600, 1]]],   # Map 212 progression w/ Aura
+            301: [426, 427, [[66, 1], [600, 1]]],   # Map 212 progression w/ Earthquaker
+            302: [427, 428, [[36, 1], [600, 1]]],   # Map 212 progression w/ Aura
+            303: [427, 429, [[36, 1], [600, 1]]],   # Map 212 progression w/ Aura
+            304: [427, 429, [[66, 1], [600, 1]]],   # Map 212 progression w/ Earthquaker
             305: [431, 432, [[63, 1]]],             # Map 214 progression w/ Spin Dash
-            306: [431, 434, [[36, 1], [300, 1]]],   # Map 214 progression w/ Aura
-            307: [431, 433, [[64, 1], [300, 1]]],   # Map 214 progression w/ Friar
+            306: [431, 434, [[36, 1], [600, 1]]],   # Map 214 progression w/ Aura
+            307: [431, 433, [[64, 1], [600, 1]]],   # Map 214 progression w/ Friar
             308: [438, 439, [[63, 1]]],             # Map 217 progression w/ Spin Dash
             309: [439, 438, [[63, 1]]],             # Map 217 progression w/ Spin Dash
             310: [440, 441, [[63, 1]]],             # Map 219 progression w/ Spin Dash
             311: [441, 440, [[63, 1]]],             # Map 219 progression w/ Spin Dash
             312: [435, 450, [[6, 6], [50, 2], [51, 1], [52, 1]]],
                                                     # Killer 6 w/ herbs and upgrades
-            313: [435, 450, [[64, 1], [54, 1], [300, 1]]],
+            313: [435, 450, [[64, 1], [54, 1], [600, 1]]],
                                                     # Killer 6 w/ Friar II
+            314: [411, 414, [[517, 1]]],            # Pyramid to boss w/hieroglyphs placed
 
             # Babel / Mansion
             320: [461, 462, [[36, 1], [39, 1]]],    # Map 219 progression w/ Aura and Ring
@@ -3849,7 +3871,7 @@ class World:
             151: [150, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 36 to Map 34"],
             152: [153, 0, 0, 88,  77, "", b"", False,  True, False, "Inca: Map 36 to Map 30"],
             153: [152, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 30 to Map 36"],
-            154: [  0, 0, 0, 98, 100, "", b"", False,  True,  True, "Gold Ship entrance"],
+            154: [  0, 0, 0, 98, 100, "", b"", False,  True, False, "Gold Ship entrance"],
 
             # Gold Ship
             160: [161, 0, 0, 100, 101, "", b"", False, False, False, "Gold Ship Interior (in)"],
@@ -3920,38 +3942,38 @@ class World:
             247: [246, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 71 to Map 68"],
 
             # Nazca
-            260: [ 0, 0, 0, 162, 170, "5e6a2", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False, True, True, "Nazca: Sky Garden entrance"],
-            #261: [260, 0, 0,   0,   0,  "",     b"\x4B\xe0\x01\xc0\x02\x03\x00\x44", False, True, False, "Nazca: Sky Garden exit"],
+            260: [261, 0, 0, 162, 170, "5e6a2", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False, True, True, "Nazca: Sky Garden entrance"],
+            261: [260, 0, 0,   0,   0, "5f429", b"\x4B\xe0\x01\xc0\x02\x03\x00\x44", False, True, True, "Nazca: Sky Garden exit"],
 
             # Sky Garden
             #270: [  0, 0, 0, 171,  16, "", b"", False,  True,  True, "Moon Tribe: Sky Garden passage"],
-            273: [274, 0, 0, 170, 173, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 77"],
+            273: [274, 0, 0, 170, 172, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 77"],
             274: [273, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 76"],
-            275: [276, 0, 0, 170, 177, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 79"],
+            275: [276, 0, 0, 170, 176, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 79"],
             276: [275, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 76"],
-            277: [278, 0, 0, 170, 182, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 81"],
+            277: [278, 0, 0, 170, 181, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 81"],
             278: [277, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 76"],
             279: [280, 0, 0, 170, 190, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 83"],
             280: [279, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 76"],
-            281: [282, 0, 0, 173, 176, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 78 (E)"],   # Room 1
+            281: [282, 0, 0, 172, 175, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 78 (E)"],   # Room 1
             282: [281, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (W)"],
-            283: [284, 0, 0, 176, 174, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (SE)"],
+            283: [284, 0, 0, 175, 173, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (SE)"],
             284: [283, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 78 (SW)"],
-            285: [286, 0, 0, 176, 175, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (SW)"],
+            285: [286, 0, 0, 175, 174, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (SW)"],
             286: [285, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 78 (SE)"],
-            287: [288, 0, 0, 177, 169, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 86"],       # Room 2
+            287: [288, 0, 0, 176, 169, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 86"],       # Room 2
             288: [287, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 86 to Map 79"],
-            289: [290, 0, 0, 177, 180, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (NE)"],
+            289: [290, 0, 0, 176, 179, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (NE)"],
             290: [289, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 80 to Map 79 (NW)"],
-            291: [292, 0, 0, 180, 178, "", b"", False,  True, False, "Sky Garden: Map 80 to Map 79 (N)"],
+            291: [292, 0, 0, 179, 177, "", b"", False,  True, False, "Sky Garden: Map 80 to Map 79 (N)"],
             292: [291, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (N)"],
-            293: [294, 0, 0, 179, 181, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (S)"],
+            293: [294, 0, 0, 178, 180, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (S)"],
             294: [293, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 80 to Map 79 (S)"],
-            295: [296, 0, 0, 168, 187, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (NE)"],   # Room 3
+            295: [296, 0, 0, 168, 186, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (NE)"],   # Room 3
             296: [295, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 82 to Map 81 (NW)"],
-            297: [298, 0, 0, 183, 189, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (NW)"],
+            297: [298, 0, 0, 182, 188, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (NW)"],
             298: [297, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 82 to Map 81 (NE)"],
-            299: [300, 0, 0, 185, 188, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (SE)"],
+            299: [300, 0, 0, 184, 187, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (SE)"],
             300: [299, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 82 to Map 81 (SW)"],
             301: [302, 0, 0, 191, 196, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (NW)"],   # Room 4
             302: [301, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (NE)"],
@@ -3991,7 +4013,7 @@ class World:
             339: [338, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 97 (top)"],
             340: [341, 0, 0, 218, 222, "", b"", False,  True, False, "Mu: Map 96 to Map 97 (middle)"],
             341: [340, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 97 to Map 96 (middle)"],
-            342: [343, 0, 0, 223, 275, "", b"", False,  True, False, "Mu: Map 97 to Map 98 (middle)"],
+            342: [343, 0, 0, 223, 227, "", b"", False,  True, False, "Mu: Map 97 to Map 98 (middle)"],
             343: [342, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 97 (middle)"],
 #            344: [345, 0, 0, 000, 000, "", b"", False,  True, False, "Mu: Map 95 to Map 98 (middle)"],
 #            345: [344, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 95 (middle)"],
