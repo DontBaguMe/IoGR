@@ -3084,6 +3084,7 @@ class World:
             224: [298, 299, [[67, 1], [600, 1]]],  # Map 135 progression w/ Firebird
             225: [299, 298, [[64, 1], [54, 2]]],   # Map 135 progression w/ Friar III
             227: [300, 301, [[63, 1]]],            # Map 136 progression w/ Spin Dash
+            228: [295, 294, [[63, 1]]],            # Map 133 progression w/ Spin Dash
 
             # Euro
             230: [314, 315, [[40, 1]]],    # Ann item w/ Apple
