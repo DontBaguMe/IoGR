@@ -1266,6 +1266,18 @@ class World:
                 overworld_links.append({"continent": continent_name, "region": region_name})
             spoiler["overworld_entrances"] = overworld_links
 
+        if self.entrance_shuffle != "None":
+            exit_links = []
+            for exit in self.exits:
+                exit_name = self.exits[exit][10]
+                linked_exit = self.exits[exit][1]
+                if not linked_exit:
+                    exit_linked_name = exit_name
+                else:
+                    exit_linked_name = self.exits[linked_exit][10]
+                exit_links.append({"entrance": continent_name, "exit": region_name})
+            spoiler["exit_links"] = exit_links
+
         self.spoiler = spoiler
         self.complete_graph_visualization()
 
