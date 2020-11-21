@@ -525,7 +525,7 @@ class World:
             return False
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
-#        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         origin = self.exits[origin_exit][3]
         dest = self.exits[dest_exit][4]
         if dest not in self.graph[origin][1]:
@@ -539,7 +539,7 @@ class World:
             coupled_dest = self.exits[dest_exit][0]
             self.exits[coupled_dest][1] = coupled_origin
             self.exits[coupled_origin][2] = coupled_dest
-#            print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
+            print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
             if origin not in self.graph[dest][1] and self.exits[coupled_dest][5]:
                 self.graph[dest][1].append(origin)
         return True
@@ -1173,9 +1173,17 @@ class World:
             # print goal, done
 
         #print("Inaccessible: ",self.inaccessible_locations(item_locations))
+        completed = True
         for node in self.graph:
             if not self.graph[node][0] and node <600:
                 print("Can't reach ",self.graph[node][5])
+                completed = False
+
+        if (not completed and self.logic_mode == "Completable") or (
+                not self.graph[492][0]):
+            print("ERROR: Seed failed, trying again...")
+            print("")
+            return False
 
         junk_items = self.list_item_pool()
         self.random_fill(junk_items, item_locations, False)
