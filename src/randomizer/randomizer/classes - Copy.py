@@ -525,7 +525,7 @@ class World:
             return False
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
-        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+#        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         origin = self.exits[origin_exit][3]
         dest = self.exits[dest_exit][4]
         if dest not in self.graph[origin][1]:
@@ -539,7 +539,7 @@ class World:
             coupled_dest = self.exits[dest_exit][0]
             self.exits[coupled_dest][1] = coupled_origin
             self.exits[coupled_origin][2] = coupled_dest
-            print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
+#            print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
             if origin not in self.graph[dest][1] and self.exits[coupled_dest][5]:
                 self.graph[dest][1].append(origin)
         return True
@@ -640,7 +640,7 @@ class World:
                                 #print(direction,direction_new)
                                 if not check_direction or not coupled:
                                     dest_exit = x
-                                elif direction == direction_new and x != origin_exit and x != self.exits[origin_exit][0]:
+                                elif direction == direction_new and x != origin_exit:
                                     dest_exit = x
 
                     if dest_exit:
@@ -804,10 +804,9 @@ class World:
         # Random start location
         if self.start_mode != "South Cape":
             self.start_loc = self.random_start()
-        if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
-            #print("Start:",self.item_locations[self.start_loc][9])
+            print("Start:",self.item_locations[self.start_loc][9])
 
         # Overworld shuffle
         if "Overworld Shuffle" in self.variant:
@@ -965,6 +964,8 @@ class World:
             self.logic[406][2][x][1] = 1
         # Shuffle exits
         if self.entrance_shuffle != "None":
+            # Always start from a Dark Space
+            self.graph[0][1] = [self.item_locations[self.start_loc][0]]
             if not self.shuffle_exits():
                 print("ERROR: Entrance rando failed")
                 return False
@@ -1121,49 +1122,41 @@ class World:
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
             #print(done, progression_list)
 
-            if not done and progression_list == -1:  # No empty locations available
-                removed = self.make_room(item_locations)
-                if not removed:
-                    print("ERROR: Could not remove non-progression item")
-                    return False
-                progression_list = []
-            elif not done and progression_list == -2:  # All new locations have too many inventory items
-                removed = self.make_room(item_locations, True)
-                if not removed:
-                    print("ERROR: Could not remove inventory item")
-                    return False
-                progression_list = []
+            if not done:
+                if progression_list == -1:  # No empty locations available
+                    removed = self.make_room(item_locations)
+                    if not removed:
+                        print("ERROR: Could not remove non-progression item")
+                        return False
+                    #progression_list = []
+                elif progression_list == -2:  # All new locations have too many inventory items
+                    removed = self.make_room(item_locations, True)
+                    if not removed:
+                        print("ERROR: Could not remove inventory item")
+                        return False
+                    #progression_list = []
+                else:
+                    progress = False
+                    key_tries = 0
+                    while not progress and progression_list and key_tries < 5:
+                        # Determine next progression items to add to accessible locations
+                        progression_mc = self.monte_carlo(progression_list)
+                        key = random.uniform(0, 100)
+                        key_tries += 1
+                        # print key
+                        items = []
+                        for x in progression_mc:
+                            if key <= x[0] and not items:
+                                items = x[1]
+                        if not items:
+                            print("What happened?")
+                            # done = True
+                        elif self.forward_fill(items, item_locations):
+                            progress = True
+                            # print "We made progress!",items
+                            # print self.graph
 
-            # print "To progress: ",progression_list
-
-            #            if not done and not progression_list:
-            #                #print "Gotta make room..."
-            #                removed = self.make_room(item_locations,inv_full)
-            #                if not removed:
-            #                    print "ERROR: Could not remove non-progression item"
-            #                    return False
-            #                #print "Cleared this location: ", removed
-
-            if not done and progression_list:
-                # Determine next progression items to add to accessible locations
-                progression_mc = self.monte_carlo(progression_list)
-                progress = False
-                while not progress:
-                    key = random.uniform(0, 100)
-                    # print key
-                    items = []
-                    for x in progression_mc:
-                        if key <= x[0] and not items:
-                            items = x[1]
-
-                    if not items:
-                        print("What happened?")
-                        # done = True
-                    elif self.forward_fill(items, item_locations):
-                        progress = True
-                        # print "We made progress!",items
-                        # print self.graph
-                    else:
+                    if not progress:
                         removed = self.make_room(item_locations)
                         if not removed:
                             print("ERROR: Could not remove non-progression item")
@@ -1172,18 +1165,10 @@ class World:
 
             # print goal, done
 
-        #print("Inaccessible: ",self.inaccessible_locations(item_locations))
-        completed = True
+        print("Inaccessible: ",self.inaccessible_locations(item_locations))
         for node in self.graph:
-            if not self.graph[node][0] and node <600:
+            if not self.graph[node][0]:
                 print("Can't reach ",self.graph[node][5])
-                completed = False
-
-        if (not completed and self.logic_mode == "Completable") or (
-                not self.graph[492][0]):
-            print("ERROR: Seed failed, trying again...")
-            print("")
-            return False
 
         junk_items = self.list_item_pool()
         self.random_fill(junk_items, item_locations, False)
@@ -1265,18 +1250,6 @@ class World:
                 region_name = self.graph[self.overworld_menus[continent_data[0]][3]][2]
                 overworld_links.append({"continent": continent_name, "region": region_name})
             spoiler["overworld_entrances"] = overworld_links
-
-        if self.entrance_shuffle != "None":
-            exit_links = []
-            for exit in self.exits:
-                exit_name = self.exits[exit][10]
-                linked_exit = self.exits[exit][1]
-                if not linked_exit:
-                    exit_linked_name = exit_name
-                else:
-                    exit_linked_name = self.exits[linked_exit][10]
-                exit_links.append({"entrance": exit_name, "exit": exit_linked_name})
-            spoiler["exit_links"] = exit_links
 
         self.spoiler = spoiler
         self.complete_graph_visualization()
@@ -3104,7 +3077,6 @@ class World:
             224: [298, 299, [[67, 1], [600, 1]]],  # Map 135 progression w/ Firebird
             225: [299, 298, [[64, 1], [54, 2]]],   # Map 135 progression w/ Friar III
             227: [300, 301, [[63, 1]]],            # Map 136 progression w/ Spin Dash
-            228: [295, 294, [[63, 1]]],            # Map 133 progression w/ Spin Dash
 
             # Euro
             230: [314, 315, [[40, 1]]],    # Ann item w/ Apple
