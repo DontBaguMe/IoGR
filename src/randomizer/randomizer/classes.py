@@ -4062,7 +4062,7 @@ class World:
             51: [50, 0, 0,  0,  0, "186f4", b"", False, True, True, "Tunnel back entrance (out)"],
             52: [53, 0, 0, 33, 40, "1860c", b"\x0C\x58\x00\x50\x00\x83\x00\x12", False, True, True, "Tunnel entrance (in)"],  # set checkpoint
             53: [52, 0, 0,  0,  0, "18626", b"", False, True, True, "Tunnel entrance (out)"],
-            54: [ 0, 0, 0, 30, 32, "4cfce", b"", False, False, False, "Prison entrance (king)"],
+            54: [ 0, 0, 0, 30, 32, "4c755", b"", False, False, False, "Prison entrance (king)"],
             #55: [54, 0, 0,  0,  2,      "", b"\x0a\xe0\x01\x60\x01\x03\x20\x34", False, False, False, "Prison exit (king), fake"],
 
             # Tunnel
