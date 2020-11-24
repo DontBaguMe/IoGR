@@ -137,59 +137,105 @@ class World:
                 locations[type - 1].append(x)
         return locations
 
+
+    # Returns graph node of an item location
+    def location_node(self, location_id=-1):
+        if location_id not in self.item_locations:
+            print("ERROR: Invalid item location", location_id)
+            return False
+        else:
+            return self.item_locations[location_id][0]
+
+
+    # Returns whether an item location is already filled with an item
+    def is_filled(self, location_id=-1):
+        if location_id not in self.item_locations:
+            print("ERROR: Invalid item location", location_id)
+            return False
+        else:
+            return self.item_locations[location_id][2]
+
+
+    # Zeroes out accessible flags for all world regions
+    def is_accessible(self, node_id=-1):
+        if node_id not in self.graph:
+            return False
+        elif self.graph[node_id][0]:
+            return True
+        else:
+            return False
+
+
+    # Zeroes out accessible flags for all world regions
+    def visit(self, node_id=-1):
+        if node_id not in self.graph:
+            return False
+        else:
+            self.graph[node_id][0] = True
+            return True
+
+
     # Zeroes out accessible flags for all world regions
     def unsolve(self):
         for x in self.graph:
             self.graph[x][0] = False
 
+
     # Finds all accessible locations and returns all accessible items
     def traverse(self, start_items=[]):
-        # print "Traverse:"
         self.unsolve()
-        to_visit = [0]
+        to_visit = [0]           # Initialize "to visit" list to include "game start" node
+        found_item = False
         items = start_items[:]
+        open_locations = [[],[]]
         while to_visit:
-            origin = to_visit.pop(0)
-            # print "Visiting ",origin
+            node = to_visit.pop(0)
 
-            if not self.graph[origin][0]:
-                self.graph[origin][0] = True
-                for x in self.graph[origin][1]:
-                    if x not in to_visit:
-                        to_visit.append(x)
-                found_item = False
+            # If we haven't been here yet...
+            if not self.graph[node][0]:
+                # Get the newly-accessible items and record open item/ability locations
+                self.graph[node][0] = True
                 for location in self.item_locations:
-                    if self.item_locations[location][0] == origin and self.item_locations[location][2]:
-                        items.append(self.item_locations[location][3])
-                        found_item = True
-                        # print "Found item in location: ", self.item_locations[location][3], location
-                if found_item:
-                    # print "We found an item"
-                    for y in self.graph:
-                        if self.graph[y][0] and y != origin:
-                            to_visit.append(y)
+                    if self.location_node(location) == node:
+                        if self.is_filled(location):
+                            items.append(self.item_locations[location][3])
+                            found_item = True
+                        elif self.item_locations[location][1] == 1:
+                            open_locations[0].append(location)
+                        elif self.item_locations[location][1] == 2:
+                            open_locations[1].append(location)
 
-            for edge in self.logic:
-                if self.logic[edge][0] == origin:
-                    dest = self.logic[edge][1]
-                    if not self.graph[dest][0] and dest not in to_visit:
-                        req_items = []
-                        for req in self.logic[edge][2]:
-                            i = 0
-                            while i < req[1]:
-                                req_items.append(req[0])
-                                i += 1
-                        if self.is_sublist(items, req_items):
-                            to_visit.append(dest)
+                # Queue up newly-accessible places to visit
+                for x in self.graph[node][1]:
+                    if x != node and not self.is_accessible(x) and x not in to_visit:
+                        to_visit.append(x)
 
-        return items
+            # If we've run out of places to visit, check if logic has opened up any new nodes
+            if not to_visit and found_item:
+                found_item = False
+                for edge in self.logic:
+                    origin = self.logic[edge][0]
+                    if self.is_accessible(origin):
+                        dest = self.logic[edge][1]
+                        if not self.is_accessible(dest):
+                            req_items = []
+                            for req in self.logic[edge][2]:
+                                i = 0
+                                while i < req[1]:
+                                    req_items.append(req[0])
+                                    i += 1
+                            if self.is_sublist(items, req_items):
+                                to_visit.append(dest)
+
+        inv = self.get_inventory(items)
+        return [[items,inv],open_locations]
 
     # Returns full list of accessible locations
     def accessible_locations(self, item_locations):
         accessible = []
         for x in item_locations:
             region = self.item_locations[x][0]
-            if self.graph[region][0]:
+            if self.is_accessible(region):
                 accessible.append(x)
         return accessible
 
@@ -198,7 +244,7 @@ class World:
         inaccessible = []
         for x in item_locations:
             region = self.item_locations[x][0]
-            if not self.graph[region][0]:
+            if not self.is_accessible(region):
                 inaccessible.append(x)
         return inaccessible
 
@@ -283,10 +329,18 @@ class World:
         return prereq_new
 
     # Returns list of item combinations that grant progression
-    def progression_list(self, start_items=[]):
-        open_locations = self.open_locations()
-        open_items = len(open_locations[0])
-        open_abilities = len(open_locations[1])
+    def progression_list(self, traverse_result=[]):
+        if traverse_result:
+            start_items = traverse_result[0][0]
+            inventory = traverse_result[0][1]
+            open_items = len(traverse_result[1][0])
+            open_abilities = len(traverse_result[1][1])
+        else:
+            start_items = []
+            inventory = self.get_inventory(start_items)
+            open_locations = self.open_locations()
+            open_items = len(open_locations[0])
+            open_abilities = len(open_locations[1])
 
         item_pool = self.list_item_pool(1)
         ability_pool = self.list_item_pool(2)
@@ -297,15 +351,18 @@ class World:
         for x in self.logic:
             origin = self.logic[x][0]
             dest = self.logic[x][1]
-            if self.graph[origin][0] and not self.graph[dest][0]:
-                prereq = []
+            if self.is_accessible(origin) and not self.is_accessible(dest):
+                prereq_ls = []
+                item_ct = 0
+                ability_ct = 0
                 for req in self.logic[x][2]:
                     item = req[0]
+                    ct = req[1]
                     i = 0
-                    while i < req[1]:
-                        prereq.append(item)
+                    while i < ct:
+                        prereq_ls.append(item)
                         i += 1
-                prereq = self.items_needed(prereq, start_items)
+                prereq = self.items_needed(prereq_ls, start_items)
 
                 item_prereqs = 0
                 ability_prereqs = 0
@@ -319,16 +376,7 @@ class World:
                     if item_prereqs <= open_items and ability_prereqs <= open_abilities:
                         self.graph[dest][0] = True
                         start_items_temp = start_items[:] + prereq
-                        # for req in prereq:
-                        #    if self.item_pool[req][4]:
-                        #        start_items_temp.append(req)
                         inv_temp = self.get_inventory(start_items_temp)
-                        # neg_inv_temp = negative_inventory[:]
-
-                        # for item in inv_temp:
-                        #    if item in neg_inv_temp:
-                        #        inv_temp.remove(item)
-                        #        neg_inv_temp.remove(item)
                         if len(inv_temp) <= MAX_INVENTORY:
                             prereq_list.append(prereq)
                         else:
@@ -461,9 +509,11 @@ class World:
             else:
                 self.maps[area[3]][2] = [0,4]
 
+
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
         return self.random_fill([100, 101, 102, 103, 104, 105], locations)
+
 
     def lock_dark_spaces(self, item_locations=[]):
         for set in self.dark_space_sets:
@@ -506,7 +556,10 @@ class World:
             d_type = 2
         else:
             d_type = 1
-        return (o_type,d_type)
+        if o_type == 2 and d_type == 2:
+            return (1,1)
+        else:
+            return (o_type,d_type)
 
 
     # Get lists of unmatched origin/destination exits
@@ -519,30 +572,96 @@ class World:
                 exits_remaining[1].append(exit)
         return exits_remaining
 
+    # Returns a list of the accessible origin exits that are marked for shuffling
+    def open_exits(self):
+        open_exits = []
+        for exit in self.exits:
+            origin = self.exits[exit][3]
+            if self.exits[exit][1] == -1:
+                if self.is_accessible(origin):
+                    open_exits.append(exit)
+        return open_exits
+
+
     # Link one exit to another
     def link_exits(self, origin_exit, dest_exit, check_connections=True):
-        if origin_exit not in self.exits or dest_exit not in self.exits:
+        if origin_exit not in self.exits:
+            print("ERROR: Invalid origin", origin_exit)
             return False
+        if dest_exit not in self.exits:
+            print("ERROR: Invalid destination", dest_exit)
+            return False
+        if self.exits[origin_exit][1] != -1:
+            print("WARNING: Origin already linked", origin_exit)
+        if self.exits[dest_exit][2] != -1:
+            print("WARNING: Destination already linked", dest_exit)
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
-        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         origin = self.exits[origin_exit][3]
         dest = self.exits[dest_exit][4]
-        if dest not in self.graph[origin][1]:
+#        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+        if dest not in self.graph[origin][1] and self.exits[origin_exit][5]:
             self.graph[origin][1].append(dest)
-        if not check_connections:
-            return True
-        if self.entrance_shuffle == "Coupled" and self.is_exit_coupled(origin_exit) and self.is_exit_coupled(dest_exit):
-            self.exits[self.exits[dest_exit][0]][1] = self.exits[origin_exit][0]
-            self.exits[self.exits[origin_exit][0]][2] = self.exits[dest_exit][0]
-            coupled_origin = self.exits[origin_exit][0]
-            coupled_dest = self.exits[dest_exit][0]
-            self.exits[coupled_dest][1] = coupled_origin
-            self.exits[coupled_origin][2] = coupled_dest
-            print(" ",self.exits[coupled_dest][10], "-", self.exits[coupled_origin][10])
-            if origin not in self.graph[dest][1] and self.exits[coupled_dest][5]:
-                self.graph[dest][1].append(origin)
+        if self.entrance_shuffle == "Coupled" and check_connections:
+            new_origin = self.exits[dest_exit][0]
+            new_dest = self.exits[origin_exit][0]
+            if self.exits[new_origin][1] != -1 or self.exits[new_dest][2] != -1:
+                print("WARNING: Return exit already linked:",new_origin,new_dest)
+            else:
+                self.link_exits(new_origin, new_dest, False)
         return True
+
+
+    def print_exit_log(self,exit_log=[]):
+        for origin,dest in exit_log:
+            print(self.exits[origin][10],"-",self.exits[dest][10])
+
+
+    def unquarantine(self,quarantine=[],dest_exits=[]):
+        if not quarantine or not dest_exits:
+            return []
+        dest_directions = []
+        for dest_exit in dest_exits:
+            direction = self.exit_direction(dest_exit)
+            if direction not in dest_directions:
+                dest_directions.append(direction)
+
+        unquarantined = []
+        for origin_exit in quarantine:
+            direction = self.exit_direction(origin_exit)
+            if direction in dest_directions:
+             unquarantined.append(origin_exit)
+             quarantined.remove(origin_exit)
+
+        return unquarantined
+
+
+    # Check if a new exit link would open up new exits
+    def test_exit(self,exit):
+        if self.exits[exit][2] != -1:
+            return []
+
+        dest = self.exits[exit][4]
+        if self.is_accessible(dest):
+            return []
+
+        queue = [dest]
+        new_nodes = []
+        while queue:
+            new_node = queue.pop(0)
+            new_nodes.append(new_node)
+            for x in self.graph[new_node][1]:
+                if x not in queue and x not in new_nodes and not self.is_accessible(x):
+                    queue.append(x)
+
+        new_exits = []
+        for new_exit in self.exits:
+            new_origin = self.exits[new_exit][3]
+            new_dest = self.exits[new_exit][4]
+            if new_exit != exit and new_origin in new_nodes and self.exits[new_exit][1] == -1:
+                new_exits.append(new_exit)
+
+        return new_exits
 
 
     # Entrance randomizer
@@ -560,162 +679,128 @@ class World:
                         self.graph[origin][1].append(dest)
 
         # Map passages and internal dungeon exits to graph and list all available exits
+        one_way_exits = []
         for x in self.exits:
-            if self.is_exit_coupled(x) and not self.exits[x][3]:    # Map missing O/D data for coupled exits
+            if self.is_exit_coupled(x) and (not self.exits[x][3] or not self.exits[x][4]):    # Map missing O/D data for coupled exits
                 xprime = self.exits[x][0]
                 self.exits[x][3] = self.exits[xprime][4]
                 self.exits[x][4] = self.exits[xprime][3]
             if self.exits[x][1] or (not self.exits[x][5] and not self.exits[x][6]) or self.exits[x][7] or (self.exits[x][8] and not self.exits[x][9]):
                 origin = self.exits[x][3]
                 dest = self.exits[x][4]
-                if origin and dest:
-                    if dest not in self.graph[origin][1]:
-                        self.graph[origin][1].append(dest)
-            elif self.exits[x][3] and self.exits[x][4]:
+                if dest not in self.graph[origin][1]:
+                    self.graph[origin][1].append(dest)
+            else:
                 self.exits[x][1] = -1    # Mark exit for shuffling
                 self.exits[x][2] = -1
-                #print(self.exits[x][10])
+                if not self.is_exit_coupled(x):
+                    one_way_exits.append(x)
 
-        # Map exits that open up the graph
-        check_direction = True
+        # If in Coupled mode, map one_way exits first
+        exit_log = []
+        if self.entrance_shuffle == "Coupled":
+            one_way_dest = one_way_exits[:]
+            random.shuffle(one_way_dest)
+            while one_way_exits:
+                exit1 = one_way_exits.pop()
+                exit2 = one_way_dest.pop()
+                self.link_exits(exit1, exit2, False)
+                exit_log.append([exit1,exit2])
+
+        # Map exits that open up new exits
         solved = False
-        progress = False
-        cycle = 1
-        quarantine = []
-        while not solved:# and cycle<10:
-            #print(cycle)
-            origin_exits = []
-            dest_exits = []
-            items = self.traverse()
-
-            # Identify exits that will open up unexplored areas
+        while not solved:
+            traverse_result = self.traverse()
+            progression_exits = []
             for exit in self.exits:
-                origin = self.exits[exit][3]
-                dest = self.exits[exit][4]
-                if self.exits[exit][1] == -1 and self.graph[origin][0] and exit not in origin_exits:
-                    origin_exits.append(exit)
-                if self.exits[exit][2] == -1 and not self.graph[dest][0] and exit not in dest_exits:
-                    dest_exits.append(exit)
-
-            random.shuffle(origin_exits)
-
-            if not dest_exits:
+                if self.test_exit(exit):
+                    progression_exits.append(exit)
+            if not progression_exits:
                 solved = True
-            elif not origin_exits:
-                print("ERROR: We ran out of exits!")
-                return False
             else:
-                random.shuffle(dest_exits)
+                random.shuffle(progression_exits)
+                dest_exit = progression_exits.pop(0)
+                direction = self.exit_direction(dest_exit)
+                origin_exits = self.open_exits()
                 origin_exit = 0
-                while origin_exits:
+                while not origin_exit:
                     origin_exit = origin_exits.pop(0)
-                    if origin_exit in quarantine:
+                    direction_new = self.exit_direction(origin_exit)
+                    if direction != direction_new and origin_exits:
                         origin_exit = 0
                 if not origin_exit:
-#                    print("Emptying quarantine:")
-#                    for x in quarantine:
-#                        print(" ",self.exits[x][10])
-                    quarantine.clear()
-                    if progress:
-                        progress = False
-                    elif check_direction:
-                        check_direction = False
-                    else:
-                        print("ERROR: We ran out of exits!")
-                        return False
+                    print("ERROR: Somehow this failed")
+                    return False
                 else:
-                    origin = self.exits[origin_exit][3]
-                    dest_old = self.exits[origin_exit][4]
-                    coupled = self.is_exit_coupled(origin_exit)
-                    direction = self.exit_direction(origin_exit)
+                    self.link_exits(origin_exit,dest_exit)
+                    exit_log.append([origin_exit,dest_exit])
 
-                    dest_exit = 0
-                    for x in dest_exits:
-                        if not dest_exit:
-                            if (coupled and self.exits[x][0] and self.exits[self.exits[x][0]][1] == -1) or (
-                                    not coupled and not self.exits[x][0]):
-                                origin_new = self.exits[x][3]
-                                dest_new = self.exits[x][4]
-                                direction_new = (self.graph[origin_new][2],self.graph[dest_new][2])
-                                #print(direction,direction_new)
-                                if not check_direction or not coupled:
-                                    dest_exit = x
-                                elif direction == direction_new and x != origin_exit and x != self.exits[origin_exit][0]:
-                                    dest_exit = x
-
-                    if dest_exit:
-                        progress = True
-                        self.link_exits(origin_exit,dest_exit)
-                    else:
-                        quarantine.append(origin_exit)
-
-            cycle += 1
-
-#        print("Round 1 finished")
-
-        quarantine.clear()
-        # Link remaining exits
-        check_direction = True
+        # Map the rest of the exits
         done = False
-        while not done:
-            exits_remaining = self.get_remaining_exits()
-            origin_exits = exits_remaining[0]
-            dest_exits = exits_remaining[1]
+        origin_exits = []
+        dest_exits = []
+        for exit in self.exits:
+            if self.exits[exit][1] == -1:
+                origin_exits.append(exit)
+            if self.exits[exit][2] == -1:
+                dest_exits.append(exit)
 
-            if not origin_exits or not dest_exits:
-                done = True
-            else:
-                random.shuffle(origin_exits)
-                random.shuffle(dest_exits)
-
-                exit = 0
-                while not exit and origin_exits:
-                    exit = origin_exits.pop(0)
-                    if exit in quarantine:
-                        exit = 0
-                if not exit:
-#                    print("Emptying quarantine:")
-#                    for x in quarantine:
-#                        print(" ",self.exits[x][10])
-                    quarantine.clear()
-                    check_direction = False
-                else:
-                    coupled = self.is_exit_coupled(exit)
-                    direction = self.exit_direction(exit)
-                    found_new_exit = False
-                    for new_exit in dest_exits:
-                        if not found_new_exit and (not check_direction or direction == self.exit_direction(new_exit) or not coupled):
-                            if (coupled and self.is_exit_coupled(new_exit) and self.exits[self.exits[new_exit][0]][1] == -1) or (
-                                    not coupled and not self.is_exit_coupled(new_exit)):
-                                found_new_exit = True
-                                self.link_exits(exit, new_exit)
-                    if not found_new_exit:
-                        quarantine.append(exit)
-
-#        print("Round 2 finished")
-
-        # Clean up whatever's left
-        exits_remaining = self.get_remaining_exits()
-        origin_exits = exits_remaining[0]
-        dest_exits = exits_remaining[1]
         random.shuffle(origin_exits)
         random.shuffle(dest_exits)
-
+        quarantine = []
         while origin_exits:
-            exit1 = origin_exits.pop(0)
-            if self.exits[exit1][1] == -1:
-                exit2 = 0
-                while dest_remaining and not exit2:
-                    exit2 = dest_remaining.pop(0)
-                    if self.exits[exit2][2] != -1:
-                        exit2 = 0
-                if not exit2:
-                    print("WARNING: Odd number of shuffled addresses", exit1)
-                    self.exits[exit1][1] = 0
+            if not dest_exits:
+                print("ERROR: We ran out of destination exits")
+                return False
+            origin_exit = 0
+            while not origin_exit and origin_exits:
+                origin_exit = origin_exits.pop(0)
+                if self.exits[origin_exit][1] != -1:
+                    origin_exit = 0
+            if origin_exit:
+                direction = self.exit_direction(origin_exit)
+                dest_exit = 0
+                for exit in dest_exits:
+                    if not dest_exit and self.exits[exit][2] == -1 and exit != self.exits[origin_exit][0]:
+                        direction_new = self.exit_direction(exit)
+                        if direction_new == direction:
+                            dest_exit = exit
+                if not dest_exit:
+                    quarantine.append(origin_exit)
                 else:
-                    self.link_exits(exit1, exit2)
+                    self.link_exits(origin_exit,dest_exit)
+                    exit_log.append([origin_exit,dest_exit])
 
-#        print("Round 3 finished")
+            # Clean up O/D lists
+            for exit in origin_exits:
+                if self.exits[exit][1] != -1:
+                    origin_exits.remove(exit)
+            for exit in dest_exits:
+                if self.exits[exit][2] != -1:
+                    dest_exits.remove(exit)
+
+        # Clean up anything that's left
+        while quarantine:
+            origin_exit = 0
+            while not origin_exit and quarantine:
+                origin_exit = quarantine.pop(0)
+                if self.exits[origin_exit][1] != -1:
+                    origin_exit = 0
+            if origin_exit:
+                dest_exit = 0
+                for exit in dest_exits:
+                    if not dest_exit and self.exits[exit][2] == -1 and exit != self.exits[origin_exit][0]:
+                        dest_exit = exit
+                if not dest_exit:
+                    for exit in dest_exits:
+                        if not dest_exit and self.exits[exit][2] == -1:
+                            dest_exit = exit
+                if not dest_exit:
+                    print("ERROR: I don't know what to tell you")
+                    return False
+                else:
+                    self.link_exits(origin_exit,dest_exit)
+                    exit_log.append([origin_exit,dest_exit])
 
         for exit in self.exits:
             if self.exits[exit][1] == -1:
@@ -831,19 +916,6 @@ class World:
                 self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
                 self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
                 self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
-
-            #print(self.graph)
-
-#                new_target_region = self.overworld_menus[self.overworld_menus[entry][0]][3]
-#                old_map_region = self.overworld_menus[self.overworld_menus[entry][0]][2]
-#                map_region = self.overworld_menus[entry][2]
-#                for _, logic_data in self.logic.items():
-#                    if old_map_region == logic_data[0] and new_target_region == logic_data[1]:
-#                        logic_data[0] = map_region
-#                    if old_map_region == logic_data[1] and new_target_region == logic_data[0]:
-#                        logic_data[1] = map_region
-#                self.graph[map_region][1].append(new_target_region)
-#                self.graph[new_target_region][1].append(map_region)
 
         # Allow glitches
         if "Allow Glitches" in self.variant:
@@ -1013,38 +1085,59 @@ class World:
             self.item_locations[x][0] = INACCESSIBLE
 
     # Simulate inventory
-    def get_inventory(self, start_items=[]):
-        inventory = []
-        for item in start_items:
+    def get_inventory(self, accessible_items=[]):
+        inventory_temp = []
+        for item in accessible_items:
             if self.item_pool[item][4]:
-                inventory.append(item)
+                inventory_temp.append(item)
 
         negative_inventory = []
         for node in self.graph:
-            if self.graph[node][0]:
+            if self.is_accessible(node):
                 negative_inventory += self.graph[node][6]
 
-        i = 0
-        while i < len(inventory):
-            item = inventory[i]
-            if inventory[i] in negative_inventory:
-                inventory.remove(item)
+        inventory = []
+        while inventory_temp:
+            item = inventory_temp.pop(0)
+            if item in negative_inventory:
                 negative_inventory.remove(item)
             else:
-                i += 1
+                inventory.append(item)
 
         return inventory
+
+
+    # Return list of accessible nodes
+    def list_accessible_nodes(self):
+        accessible = []
+        for x in self.graph:
+            if self.is_accessible(x):
+                accessible.append(x)
+        return accessible
+
+
+    def print_accessible_nodes(self):
+        print("Accessible nodes:")
+        for x in self.graph:
+            if self.is_accessible(x):
+                print("",self.graph[x][5])
+
+
+    def print_inaccessible_nodes(self):
+        print("Inccessible nodes:")
+        for x in self.graph:
+            if not self.is_accessible(x):
+                print("",self.graph[x][5])
+
 
     # Takes a random seed and builds out a randomized world
     def randomize(self, seed_adj=0):
         if not self.initialize():
             print("ERROR: Could not initialize world")
             return False
-#        for x in self.graph:
-#            if self.graph[x][0]:
-#                print(self.graph[x][5])
-        solved = False
+#        self.print_accessible_nodes()
 
+        solved = False
         random.seed(self.seed + seed_adj)
 
         # Assign map rewards
@@ -1064,7 +1157,7 @@ class World:
         non_prog_items = self.list_item_pool(0, [], 2)
         non_prog_items += self.list_item_pool(0, [], 3)
 
-        # For Easy mode
+        # Difficulty-specific definitions for non-progression items
         if self.logic_mode == "Chaos" or self.difficulty > 2:
             non_prog_items += self.list_item_pool(2)
         elif self.difficulty == 0:
@@ -1072,6 +1165,7 @@ class World:
         elif self.difficulty == 1:
             non_prog_items += [62, 63, 65, 66]
 
+        # Randomly place non-progression items throughout the world
         random.shuffle(non_prog_items)
         self.random_fill(non_prog_items, item_locations)
 
@@ -1082,32 +1176,29 @@ class World:
         item_list = self.list_item_pool()
         random.shuffle(item_list)
 
-        inventory = []
-
         # Forward fill progression items with Monte Carlo simulation method
-        # Continue to place progression items until all locations are accessible
+        # Continue to place progression items until all item locations are accessible
         done = False
         goal = False
         cycle = 0
-
-        # while self.inaccessible_locations(item_locations):
         while not done:
-            #print(cycle)
             cycle += 1
+#            print(cycle)
             if cycle > MAX_CYCLES:
                 print("ERROR: Max cycles exceeded")
-                print(self.graph)
+                self.print_inaccessible_nodes()
                 print(self.overworld_menus)
                 return False
 
-            start_items = self.traverse()
-#            print("Cycle",cycle)
-#            for x in self.graph:
-#                if self.graph[x][0]:
-#                    print(self.graph[x][5])
-            #print("We found these: ",start_items)
+            traverse_result = self.traverse()
+            start_items = traverse_result[0][0]
+            inventory = traverse_result[0][1]
+            open_item_locations = traverse_result[1][0]
+            open_ability_location = traverse_result[1][1]
+#            self.print_accessible_nodes()
+#            print("We found these: ",start_items)
 
-            inv_size = len(self.get_inventory(start_items))
+            inv_size = len(inventory)
             if inv_size > MAX_INVENTORY:
                 goal = False
                 print("ERROR: Inventory capacity exceeded")
@@ -1115,7 +1206,7 @@ class World:
                 goal = self.graph[192][0]
 
             # Get list of new progression options
-            progression_list = self.progression_list(start_items)
+            progression_list = self.progression_list(traverse_result)
             #print(progression_list)
 
             done = goal and (self.logic_mode != "Completable" or progression_list == -1)
@@ -1279,7 +1370,7 @@ class World:
             spoiler["exit_links"] = exit_links
 
         self.spoiler = spoiler
-        self.complete_graph_visualization()
+        #self.complete_graph_visualization()
 
     def complete_graph_visualization(self):
         graph = self.graph_viz
@@ -2487,8 +2578,8 @@ class World:
             28: [False, [],      2, [1,1,b"\x00"], 0, "South Cape: Seaside Cave", []],
 
             # Edward's / Prison
-            30: [False, [10], 2, [1,2,b"\x00"], 0, "Edward's Castle: Main Area", []],
-            31: [False, [30], 2, [1,2,b"\x00"], 0, "Edward's Castle: Behind Guard", []],
+            30: [False, [10], 1, [1,2,b"\x00"], 0, "Edward's Castle: Main Area", []],
+            31: [False, [30], 1, [1,2,b"\x00"], 0, "Edward's Castle: Behind Guard", []],
             32: [False, [],   2, [1,2,b"\x00"], 0, "Edward's Prison: Will's Cell", [2]],
             33: [False, [],   2, [1,2,b"\x00"], 0, "Edward's Prison: Prison Main", [2]],
 
@@ -2525,14 +2616,14 @@ class World:
 
             # Inca Ruins
             70: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 29 (NE)", []],
-            71: [False, [],   1, [1,5,b"\x00"], 0, "Inca: Map 29 (NW)", []],
-            72: [False, [73], 1, [1,5,b"\x00"], 0, "Inca: Map 29 (N)", []],
-            73: [False, [],   1, [1,5,b"\x00"], 0, "Inca: Map 29 (center)", []],
-            74: [False, [72], 1, [1,5,b"\x00"], 0, "Inca: Map 29 (SW)", []],
-            75: [False, [72], 1, [1,5,b"\x00"], 0, "Inca: Map 29 (SE)", []],
-            76: [False, [],   1, [1,5,b"\x00"], 0, "Inca: Map 29 (statue head)", []],
-            77: [False, [],   1, [1,5,b"\x00"], 0, "Inca: Map 30 (first area)", [3, 4]],
-            78: [False, [77], 1, [1,5,b"\x00"], 0, "Inca: Map 30 (second area)", []],
+            71: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 29 (NW)", []],
+            72: [False, [73], 2, [1,5,b"\x00"], 0, "Inca: Map 29 (N)", []],
+            73: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 29 (center)", []],
+            74: [False, [72], 2, [1,5,b"\x00"], 0, "Inca: Map 29 (SW)", []],
+            75: [False, [72], 2, [1,5,b"\x00"], 0, "Inca: Map 29 (SE)", []],
+            76: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 29 (statue head)", []],
+            77: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 30 (first area)", [3, 4]],
+            78: [False, [77], 2, [1,5,b"\x00"], 0, "Inca: Map 30 (second area)", []],
             79: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 31", []],
             80: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 32 (entrance)", []],
             81: [False, [],   2, [1,5,b"\x00"], 0, "Inca: Map 32 (behind statue)", []],
@@ -4308,8 +4399,8 @@ class World:
             501: [500, 0, 0,   0,   0, "19d58", b"", False, False, False, "Euro: Explorer's House (out)"],
             502: [  0, 0, 0, 310, 323, "19cf6", b"", False, False, False, "Euro: Store Entrance (in)"],
             #503: [502, 0, 0,   0,   0, "", b"", False, False, False, "Euro: Store Entrance (out)"], #this doesn't exist!
-            504: [505, 0, 0, 310, 324, "19d02", b"", False, False, False, "Euro: Store Exit (in)"],
-            505: [504, 0, 0,   0,   0, "19e04", b"", False, False, False, "Euro: Store Exit (out)"],
+            504: [505, 0, 0, 310, 310, "19d02", b"", False, False, False, "Euro: Store Exit (in)"],
+            505: [504, 0, 0, 324, 310, "19e04", b"", False, False, False, "Euro: Store Exit (out)"],
             506: [507, 0, 0, 314, 316, "19db4", b"", False, False, False, "Euro: Guest Room (in)"],
             507: [506, 0, 0,   0,   0, "19df6", b"", False, False, False, "Euro: Guest Room (out)"],
             508: [509, 0, 0, 310, 325, "19d1a", b"", False, False, False, "Euro: Dark Space House (in)"],
