@@ -599,13 +599,13 @@ class World:
         self.exits[dest_exit][2] = origin_exit
         origin = self.exits[origin_exit][3]
         dest = self.exits[dest_exit][4]
-        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+#        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         if dest not in self.graph[origin][1] and self.exits[origin_exit][5]:
             self.graph[origin][1].append(dest)
-        if self.entrance_shuffle == "Coupled" and check_connections:
+        if self.entrance_shuffle != "Uncoupled" and check_connections and self.is_exit_coupled(origin_exit) and self.is_exit_coupled(dest_exit):
             new_origin = self.exits[dest_exit][0]
             new_dest = self.exits[origin_exit][0]
-            if self.exits[new_origin][1] != -1 or self.exits[new_dest][2] != -1:
+            if (self.exits[new_origin][1] != -1 and new_origin > 21) or (self.exits[new_dest][2] != -1 and new_dest > 21):
                 print("WARNING: Return exit already linked:",new_origin,new_dest)
             else:
                 self.link_exits(new_origin, new_dest, False)
@@ -974,7 +974,7 @@ class World:
             boss_entrance_idx = [1,4,7,10,13,16,19]
             boss_exit_idx = [3,6,9,12,15,18,21]
             dungeon = 0
-            # print("Boss order: ",self.boss_order)
+#            print("Boss order: ",self.boss_order)
             while dungeon < 7:
                 boss = self.boss_order[dungeon]
                 entrance_old = boss_entrance_idx[dungeon]
@@ -984,6 +984,7 @@ class World:
                 self.link_exits(entrance_old,entrance_new)
                 self.link_exits(exit_old,exit_new)
                 dungeon += 1
+
 
         # Chaos mode
         if self.logic_mode == "Chaos":
@@ -1207,7 +1208,7 @@ class World:
                 goal = False
                 print("ERROR: Inventory capacity exceeded")
             else:
-                goal = self.graph[192][0]
+                goal = self.graph[492][0]
 
             # Get list of new progression options
             progression_list = self.progression_list(traverse_result)
@@ -1267,15 +1268,19 @@ class World:
 
             # print goal, done
 
+        traverse_result = self.traverse()
         #print("Inaccessible: ",self.inaccessible_locations(item_locations))
-        completed = True
-        for node in self.graph:
-            if not self.graph[node][0] and node <600:
-                print("Can't reach ",self.graph[node][5])
-                completed = False
 
-        if (not completed and self.logic_mode == "Completable") or (
-                not self.graph[492][0]):
+        if self.logic_mode == "Completable":
+            completed = True
+            for node in self.graph:
+                if not self.graph[node][0] and node <600:
+                    print("Can't reach ",self.graph[node][5])
+                    completed = False
+        else:
+            completed = self.graph[492][0]
+
+        if not completed:
             print("ERROR: Seed failed, trying again...")
             print("")
             return False
