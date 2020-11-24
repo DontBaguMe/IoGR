@@ -591,15 +591,15 @@ class World:
         if dest_exit not in self.exits:
             print("ERROR: Invalid destination", dest_exit)
             return False
-        if self.exits[origin_exit][1] != -1:
+        if self.exits[origin_exit][1] != -1 and origin_exit > 21:
             print("WARNING: Origin already linked", origin_exit)
-        if self.exits[dest_exit][2] != -1:
+        if self.exits[dest_exit][2] != -1 and dest_exit > 21:
             print("WARNING: Destination already linked", dest_exit)
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
         origin = self.exits[origin_exit][3]
         dest = self.exits[dest_exit][4]
-#        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+        print(self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
         if dest not in self.graph[origin][1] and self.exits[origin_exit][5]:
             self.graph[origin][1].append(dest)
         if self.entrance_shuffle == "Coupled" and check_connections:
@@ -977,8 +977,12 @@ class World:
             # print("Boss order: ",self.boss_order)
             while dungeon < 7:
                 boss = self.boss_order[dungeon]
-                self.exits[boss_entrance_idx[dungeon]][1] = boss_entrance_idx[boss-1]
-                self.exits[boss_exit_idx[boss-1]][1] = boss_exit_idx[dungeon]
+                entrance_old = boss_entrance_idx[dungeon]
+                entrance_new = boss_entrance_idx[boss-1]
+                exit_old = boss_exit_idx[boss-1]
+                exit_new = boss_exit_idx[dungeon]
+                self.link_exits(entrance_old,entrance_new)
+                self.link_exits(exit_old,exit_new)
                 dungeon += 1
 
         # Chaos mode
@@ -4004,7 +4008,7 @@ class World:
             12: [ 0, 0, 0, 303, 290, "19c84", b"\x82\x10\x00\x90\x00\x87\x00\x18", True, True, False, "Sand Fanger exit"],
 
             13: [14, 0, 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen entrance"],
-            14: [13, 0, 0,   0,   0, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen exit (fake)"],
+            14: [13, 0, 0,   0,   0,      "", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen exit (fake)"],
             15: [ 0, 0, 0, 448, 415,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", True, True, False, "Mummy Queen exit"],     # This one's dumb
 
             16: [17, 0, 0, 470, 471, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", True, True, False, "Babel entrance (in)"],
@@ -4012,7 +4016,7 @@ class World:
             18: [ 0, 0, 0, 472, 400, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, True, False, "Dao passage (Babel)"],
 
             19: [20, 0, 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm entrance"],
-            20: [19, 0, 0,   0,   0, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm exit (fake)"],
+            20: [19, 0, 0,   0,   0,      "", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm exit (fake)"],
             21: [ 0, 0, 0, 482, 472, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", True, True, False, "Babel passage (Solid Arm)"],
 
             # Passage Menus
