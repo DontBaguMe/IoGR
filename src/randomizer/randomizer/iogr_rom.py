@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.0.1"
+VERSION = "4.0.2"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -2972,6 +2972,8 @@ class Randomizer:
             if seed_adj > 5:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
+            elif seed_adj > 0:
+                print("Trying again... attempt ", seed_adj+1)
             self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj)
             seed_adj += 1

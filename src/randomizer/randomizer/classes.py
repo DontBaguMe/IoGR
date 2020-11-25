@@ -559,7 +559,8 @@ class World:
         if o_type == 2 and d_type == 2:
             return (1,1)
         else:
-            return (o_type,d_type)
+            #return (o_type,d_type)
+            return d_type
 
 
     # Get lists of unmatched origin/destination exits
@@ -617,25 +618,6 @@ class World:
             print(self.exits[origin][10],"-",self.exits[dest][10])
 
 
-    def unquarantine(self,quarantine=[],dest_exits=[]):
-        if not quarantine or not dest_exits:
-            return []
-        dest_directions = []
-        for dest_exit in dest_exits:
-            direction = self.exit_direction(dest_exit)
-            if direction not in dest_directions:
-                dest_directions.append(direction)
-
-        unquarantined = []
-        for origin_exit in quarantine:
-            direction = self.exit_direction(origin_exit)
-            if direction in dest_directions:
-             unquarantined.append(origin_exit)
-             quarantined.remove(origin_exit)
-
-        return unquarantined
-
-
     # Check if a new exit link would open up new exits
     def test_exit(self,exit):
         if self.exits[exit][2] != -1:
@@ -644,6 +626,11 @@ class World:
         dest = self.exits[exit][4]
         if self.is_accessible(dest):
             return []
+
+        if self.entrance_shuffle == "Uncoupled":
+            sister_exit = -1
+        else:
+            sister_exit = self.exits[exit][0]
 
         queue = [dest]
         new_nodes = []
@@ -658,7 +645,7 @@ class World:
         for new_exit in self.exits:
             new_origin = self.exits[new_exit][3]
             new_dest = self.exits[new_exit][4]
-            if new_exit != exit and new_origin in new_nodes and self.exits[new_exit][1] == -1:
+            if new_exit != exit and new_exit != sister_exit and new_origin in new_nodes and self.exits[new_exit][1] == -1:
                 new_exits.append(new_exit)
 
         return new_exits
@@ -723,7 +710,7 @@ class World:
                 direction = self.exit_direction(dest_exit)
                 origin_exits = self.open_exits()
                 origin_exit = 0
-                while not origin_exit:
+                while not origin_exit and origin_exits:
                     origin_exit = origin_exits.pop(0)
                     direction_new = self.exit_direction(origin_exit)
                     if direction != direction_new and origin_exits:
@@ -735,19 +722,23 @@ class World:
                     self.link_exits(origin_exit,dest_exit)
                     exit_log.append([origin_exit,dest_exit])
 
-        # Map the rest of the exits
-        done = False
+#        print("Progression exits done")
+
+        # Map the rest of the accessible exits
         origin_exits = []
         dest_exits = []
+        quarantine = []
+        check_direction = True
+        check_progression = True
         for exit in self.exits:
-            if self.exits[exit][1] == -1:
+            origin = self.exits[exit][3]
+            if self.exits[exit][1] == -1 and self.is_accessible(origin):
                 origin_exits.append(exit)
             if self.exits[exit][2] == -1:
                 dest_exits.append(exit)
 
         random.shuffle(origin_exits)
         random.shuffle(dest_exits)
-        quarantine = []
         while origin_exits:
             if not dest_exits:
                 print("ERROR: We ran out of destination exits")
@@ -763,7 +754,8 @@ class World:
                 for exit in dest_exits:
                     if not dest_exit and self.exits[exit][2] == -1 and exit != self.exits[origin_exit][0]:
                         direction_new = self.exit_direction(exit)
-                        if direction_new == direction:
+                        dest = self.exits[exit][4]
+                        if (direction_new == direction or not check_direction) and (not self.is_accessible(dest) or not check_progression):
                             dest_exit = exit
                 if not dest_exit:
                     quarantine.append(origin_exit)
@@ -779,22 +771,51 @@ class World:
                 if self.exits[exit][2] != -1:
                     dest_exits.remove(exit)
 
+            # If we run out of exits, drop the direction parity restriction
+            if not origin_exits and check_direction:
+                check_direction = False
+                origin_exits += quarantine
+                quarantine.clear()
+#                print("--Lifting parity restriction")
+
+            # If we run out of exits again, drop the progression restriction
+            if not origin_exits and check_progression:
+                check_progression = False
+                origin_exits += quarantine
+                quarantine.clear()
+#                print("--Lifting progression restriction")
+
+#        print("Round 2 exits done")
+
         # Clean up anything that's left
-        while quarantine:
+        traverse_result = self.traverse()
+        done = False
+        origin_exits = []
+        dest_exits = []
+        quarantine = []
+        check_self_loop = True
+        for exit in self.exits:
+            if self.exits[exit][1] == -1:
+                if self.is_accessible(self.exits[exit][3]):
+                    origin_exits.append(exit)
+                else:
+                    quarantine.append(exit)
+            if self.exits[exit][2] == -1:
+                dest_exits.append(exit)
+#        print(origin_exits,dest_exits)
+
+        while origin_exits:
             origin_exit = 0
-            while not origin_exit and quarantine:
-                origin_exit = quarantine.pop(0)
+            while not origin_exit and origin_exits:
+                origin_exit = origin_exits.pop(0)
                 if self.exits[origin_exit][1] != -1:
                     origin_exit = 0
+
             if origin_exit:
                 dest_exit = 0
                 for exit in dest_exits:
-                    if not dest_exit and self.exits[exit][2] == -1 and exit != self.exits[origin_exit][0]:
+                    if not dest_exit and self.exits[exit][2] == -1 and (exit != self.exits[origin_exit][0] or not check_self_loop):
                         dest_exit = exit
-                if not dest_exit:
-                    for exit in dest_exits:
-                        if not dest_exit and self.exits[exit][2] == -1:
-                            dest_exit = exit
                 if not dest_exit:
                     print("ERROR: I don't know what to tell you")
                     return False
@@ -802,9 +823,14 @@ class World:
                     self.link_exits(origin_exit,dest_exit)
                     exit_log.append([origin_exit,dest_exit])
 
+            if not origin_exits:
+                origin_exits += quarantine
+                quarantine.clear()
+
+#        print("Round 3 exits done")
         for exit in self.exits:
             if self.exits[exit][1] == -1:
-                print("How'd we miss this one??", exit)
+                print("How'd we miss this one??", self.exits[exit][10])
                 self.exits[exit][1] = 0
 
         # Re-initialize world graph
@@ -1163,12 +1189,12 @@ class World:
         non_prog_items += self.list_item_pool(0, [], 3)
 
         # Difficulty-specific definitions for non-progression items
-        if self.logic_mode == "Chaos" or self.difficulty > 2:
-            non_prog_items += self.list_item_pool(2)
-        elif self.difficulty == 0:
-            non_prog_items += [65]
-        elif self.difficulty == 1:
-            non_prog_items += [62, 63, 65, 66]
+#        if self.logic_mode == "Chaos" or self.difficulty > 2:
+#            non_prog_items += self.list_item_pool(2)
+#        elif self.difficulty == 0:
+#            non_prog_items += [65]
+#        elif self.difficulty == 1:
+#            non_prog_items += [62, 63, 65, 66]
 
         # Randomly place non-progression items throughout the world
         random.shuffle(non_prog_items)
@@ -1191,8 +1217,8 @@ class World:
 #            print(cycle)
             if cycle > MAX_CYCLES:
                 print("ERROR: Max cycles exceeded")
-                self.print_inaccessible_nodes()
-                print(self.overworld_menus)
+#                self.print_inaccessible_nodes()
+#                print(self.overworld_menus)
                 return False
 
             traverse_result = self.traverse()
