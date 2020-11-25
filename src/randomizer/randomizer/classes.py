@@ -2419,14 +2419,13 @@ class World:
             # Mu
             67:  [215, 1, False, 0, [], "1B012",      "", "", "", "Mu: Empty Chest 1                   "],
             68:  [218, 1, False, 0, [], "1B01B",      "", "", "", "Mu: Empty Chest 2                   "],
-            69:  [223, 1, False, 0, [], "698be", "698d2", "", "", "Mu: Hope Statue 1                   "],
-            70:  [234, 1, False, 0, [], "69966", "69975", "", "", "Mu: Hope Statue 2                   "],
-            71:  [213, 1, False, 0, [], "1B00D",      "", "", "", "Mu: Chest s/o Hope Room 2           "],
-            72:  [212, 1, False, 0, [], "1B009",      "", "", "", "Mu: Rama Chest N                    "],
-            73:  [217, 1, False, 0, [], "1B016",      "", "", "", "Mu: Rama Chest E                    "],
+            67:  [217, 1, False, 0, [], "1B012",      "", "", "", "Mu: Empty Chest 1                   "],
+            68:  [220, 1, False, 0, [], "1B01B",      "", "", "", "Mu: Empty Chest 2                   "],
+            71:  [215, 1, False, 0, [], "1B00D",      "", "", "", "Mu: Chest s/o Hope Room 2           "],
+            72:  [214, 1, False, 0, [], "1B009",      "", "", "", "Mu: Rama Chest N                    "],
+            73:  [219, 1, False, 0, [], "1B016",      "", "", "", "Mu: Rama Chest E                    "],
 
-            74:  [216, 2,  True, 0, [], "ca92d", "", "", b"\x60", "Mu: Open Dark Space                 "],  # Always open
-            75:  [226, 2, False, 0, [], "caa99", "", "", b"\x62", "Mu: Slider Dark Space               "],
+            74:  [218, 2,  True, 0, [], "ca92d", "", "", b"\x60", "Mu: Open Dark Space                 "],  # Always open
 
             # Angel Village
             76:  [254, 1, False, 0, [], "F81D", "F82D", "F843", "", "Angel Village: Dance Hall           "],

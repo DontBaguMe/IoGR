@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.0.2"
+VERSION = "4.0.3"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
