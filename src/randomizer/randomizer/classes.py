@@ -2417,15 +2417,16 @@ class World:
             66:  [200, 2, False, 0, [64, 65, 66], "ca574", "Safe", b"\xf0\x02\x90\x00\x83\x00\x64", b"\x5a", "Seaside Palace: Dark Space          "],
 
             # Mu
-            67:  [215, 1, False, 0, [], "1B012",      "", "", "", "Mu: Empty Chest 1                   "],
-            68:  [218, 1, False, 0, [], "1B01B",      "", "", "", "Mu: Empty Chest 2                   "],
             67:  [217, 1, False, 0, [], "1B012",      "", "", "", "Mu: Empty Chest 1                   "],
             68:  [220, 1, False, 0, [], "1B01B",      "", "", "", "Mu: Empty Chest 2                   "],
+            69:  [225, 1, False, 0, [], "698be", "698d2", "", "", "Mu: Hope Statue 1                   "],
+            70:  [236, 1, False, 0, [], "69966", "69975", "", "", "Mu: Hope Statue 2                   "],
             71:  [215, 1, False, 0, [], "1B00D",      "", "", "", "Mu: Chest s/o Hope Room 2           "],
             72:  [214, 1, False, 0, [], "1B009",      "", "", "", "Mu: Rama Chest N                    "],
             73:  [219, 1, False, 0, [], "1B016",      "", "", "", "Mu: Rama Chest E                    "],
 
             74:  [218, 2,  True, 0, [], "ca92d", "", "", b"\x60", "Mu: Open Dark Space                 "],  # Always open
+            75:  [228, 2, False, 0, [], "caa99", "", "", b"\x62", "Mu: Slider Dark Space               "],
 
             # Angel Village
             76:  [254, 1, False, 0, [], "F81D", "F82D", "F843", "", "Angel Village: Dance Hall           "],
@@ -3190,7 +3191,7 @@ class World:
             # Seaside Palace
             160: [205, 208, [[501, 1]]],   # Coffin access w/ Lilly
             161: [209, 510, [[17, 1]]],    # Purify fountain w/stone
-            162: [205, 206, [[510, 1]]],   # Buffy access w/ purified fountain
+            162: [200, 206, [[510, 1]]],   # Buffy access w/ purified fountain
             163: [200, 201, [[16, 1]]],    # Seaside to Mu w/ Mu key
             164: [210, 211, [[16, 1]]],    # Mu to Seaside w/ Mu key
 
