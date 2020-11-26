@@ -674,7 +674,10 @@ class World:
                 self.exits[x][4] = self.exits[xprime][3]
             if self.exits[x][1] or (not self.exits[x][5] and not self.exits[x][6]) or self.exits[x][7] or (self.exits[x][8] and not self.exits[x][9]):
                 origin = self.exits[x][3]
-                dest = self.exits[x][4]
+                if self.exits[x][1]:
+                    dest = self.exits[self.exits[x][1]][4]
+                else:
+                    dest = self.exits[x][4]
                 if dest not in self.graph[origin][1]:
                     self.graph[origin][1].append(dest)
             else:
@@ -912,37 +915,6 @@ class World:
         if self.difficulty < 3:
             self.exits[21][4] = self.exits[21][3]
 
-        # Random start location
-        if self.start_mode != "South Cape":
-            self.start_loc = self.random_start()
-        if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
-            self.graph[0][1].remove(22)
-            self.graph[0][1].append(self.item_locations[self.start_loc][0])
-            #print("Start:",self.item_locations[self.start_loc][9])
-
-        # Overworld shuffle
-        if "Overworld Shuffle" in self.variant:
-            self.shuffle_overworld()
-
-            # Remove old overworld from the graph
-#            for i in self.graph:
-#                for j in range(100, 105):
-#                    if j in self.graph[i][1]:
-#                        self.graph[i][1].remove(j)
-
-            self.graph[10][1].clear()
-            self.graph[11][1].clear()
-            self.graph[12][1].clear()
-            self.graph[13][1].clear()
-            self.graph[14][1].clear()
-
-            # Add new overworld to the graph
-            for entry in self.overworld_menus:
-                new_entry = self.overworld_menus[entry][0]
-                self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
-                self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
-                self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
-
         # Allow glitches
         if "Allow Glitches" in self.variant:
             self.graph[0][1].append(601)
@@ -994,23 +966,6 @@ class World:
             self.item_pool[37][0] = 0  # Lola's Letter
             self.item_pool[6][0] += 4  # Herbs
             self.item_pool[0][0] += 1  # Nothing
-
-        # Boss Shuffle
-        if "Boss Shuffle" in self.variant:
-            boss_entrance_idx = [1,4,7,10,13,16,19]
-            boss_exit_idx = [3,6,9,12,15,18,21]
-            dungeon = 0
-#            print("Boss order: ",self.boss_order)
-            while dungeon < 7:
-                boss = self.boss_order[dungeon]
-                entrance_old = boss_entrance_idx[dungeon]
-                entrance_new = boss_entrance_idx[boss-1]
-                exit_old = boss_exit_idx[boss-1]
-                exit_new = boss_exit_idx[dungeon]
-                self.link_exits(entrance_old,entrance_new)
-                self.link_exits(exit_old,exit_new)
-                dungeon += 1
-
 
         # Chaos mode
         if self.logic_mode == "Chaos":
@@ -1066,6 +1021,48 @@ class World:
         # Change logic based on which dungeons are required
         for x in self.statues:
             self.logic[406][2][x][1] = 1
+
+        # Random start location
+        if self.start_mode != "South Cape":
+            self.start_loc = self.random_start()
+        if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
+            self.graph[0][1].remove(22)
+            self.graph[0][1].append(self.item_locations[self.start_loc][0])
+            #print("Start:",self.item_locations[self.start_loc][9])
+
+        # Boss Shuffle
+        if "Boss Shuffle" in self.variant:
+            boss_entrance_idx = [1,4,7,10,13,16,19]
+            boss_exit_idx = [3,6,9,12,15,18,21]
+            dungeon = 0
+#            print("Boss order: ",self.boss_order)
+            while dungeon < 7:
+                boss = self.boss_order[dungeon]
+                entrance_old = boss_entrance_idx[dungeon]
+                entrance_new = boss_entrance_idx[boss-1]
+                exit_old = boss_exit_idx[boss-1]
+                exit_new = boss_exit_idx[dungeon]
+                self.link_exits(entrance_old,entrance_new)
+                self.link_exits(exit_old,exit_new)
+                dungeon += 1
+
+        # Overworld shuffle
+        if "Overworld Shuffle" in self.variant:
+            self.shuffle_overworld()
+
+            self.graph[10][1].clear()
+            self.graph[11][1].clear()
+            self.graph[12][1].clear()
+            self.graph[13][1].clear()
+            self.graph[14][1].clear()
+
+            # Add new overworld to the graph
+            for entry in self.overworld_menus:
+                new_entry = self.overworld_menus[entry][0]
+                self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
+                self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
+                self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
+
         # Shuffle exits
         if self.entrance_shuffle != "None":
             if not self.shuffle_exits():
@@ -2814,15 +2811,14 @@ class World:
             238: [False, [236],      2, [3,12,b"\x00"], 1, "Mu: Map 101 (middle E)", []],
             239: [False, [],         2, [3,12,b"\x00"], 2, "Mu: Map 101 (bottom)", []],
             240: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Map 102 (pedestals)", [19, 19]],
-            241: [False, [240,243],  2, [3,12,b"\x00"], 0, "Mu: Map 102 (statues placed)", []],  # might need an exit for this
+            241: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Map 102 (statues placed)", []],  # might need an exit for this
             242: [False, [],         2, [3,12,b"\x00"], 0, "Mu: Map 102 (statue get)", []],
-            243: [False, [244,249],  2, [3,12,b"\x00"], 0, "Mu: Boss Room (entryway)", []],    # Might need to add an exit for this?
+            243: [False, [244],      2, [3,12,b"\x00"], 0, "Mu: Boss Room (entryway)", []],    # Might need to add an exit for this?
             244: [False, [242,243],  2, [3,12,b"\x00"], 0, "Mu: Boss Room (main)", []],
             245: [False, [212],      2, [3,12,b"\x00"], 0, "Mu: Map 95 (top, Slider exit)", []],
             246: [False, [226],      2, [3,12,b"\x00"], 0, "Mu: Map 98 (top, Slider exit)", []],
             247: [False, [511],      2, [3,12,b"\x00"], 0, "Mu: Water lowered 1", []],
             248: [False, [512],      2, [3,12,b"\x00"], 0, "Mu: Water lowered 2", []],
-            249: [False, [240],      2, [3,12,b"\x00"], 0, "Mu: Map 102 (statues placed)", []],
 
             # Angel Village
             250: [False, [12], 1, [3,13,b"\x00"], 0, "Angel Village: Outside", []],
@@ -4031,7 +4027,7 @@ class World:
             5:  [ 4, 0, 0,   0,   0, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", True, True, False, "Viper entrance (out)"],
             6:  [ 0, 0, 0, 198, 200, "acece", b"\x5A\x90\x00\x70\x00\x83\x00\x14", True, True, False, "Seaside Palace passage (Viper)"],
 
-            7:  [ 8, 0, 0, 249, 243, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", True, True, False, "Vampires entrance (in)"],
+            7:  [ 8, 0, 0, 241, 243, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", True, True, False, "Vampires entrance (in)"],
             8:  [ 7, 0, 0,   0,   0, "193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", True, True, False, "Vampires entrance (out)"],
             9:  [ 0, 0, 0, 242, 212, "193ea", b"\x5f\x80\x00\x50\x00\x83\x00\x44", True, True, False, "Vampires exit"],
 
