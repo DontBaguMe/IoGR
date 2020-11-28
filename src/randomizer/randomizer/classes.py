@@ -4134,7 +4134,7 @@ class World:
             102: [  0, 0, 0, 64, 170, "9d1ea", b"", False,  True,  True, "Moon Tribe: Sky Garden passage"],
 
             # Inca
-            110: [111, 0, 0, 64,  70, "187d2", b"", False, True, True, "Inca Ruins entrance (in)"],
+            110: [111, 0, 0, 63,  70, "187d2", b"", False, True, True, "Inca Ruins entrance (in)"],
             111: [110, 0, 0,  0,   0, "187e0", b"", False, True, True, "Inca Ruins entrance (out)"],
             #114: [  0, 0, 0, 65, 102, "", b"", False, False,  True, "Inca: Diamond Coast passage"],
 
