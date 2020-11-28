@@ -182,7 +182,7 @@ class World:
 
 
     # Finds all accessible locations and returns all accessible items
-    def traverse(self, start_items=[]):
+    def traverse(self, start_items=[],print_log=False):
         self.unsolve()
         to_visit = [0]           # Initialize "to visit" list to include "game start" node
         found_item = False
@@ -190,6 +190,8 @@ class World:
         open_locations = [[],[]]
         while to_visit:
             node = to_visit.pop(0)
+            if print_log:
+                print("Visiting:",self.graph[node][5])
 
             # If we haven't been here yet...
             if not self.graph[node][0]:
@@ -209,10 +211,14 @@ class World:
                 for x in self.graph[node][1]:
                     if x != node and not self.is_accessible(x) and x not in to_visit:
                         to_visit.append(x)
+                        if print_log:
+                            print(" -Discovered:",self.graph[x][5])
 
             # If we've run out of places to visit, check if logic has opened up any new nodes
             if not to_visit and found_item:
                 found_item = False
+                if print_log:
+                    print("Ran out of places - checking logic:")
                 for edge in self.logic:
                     origin = self.logic[edge][0]
                     if self.is_accessible(origin):
@@ -226,6 +232,10 @@ class World:
                                     i += 1
                             if self.is_sublist(items, req_items):
                                 to_visit.append(dest)
+                                if print_log:
+                                    for item in req_items:
+                                        print("",self.item_pool[item][3])
+                                    print(" -Discovered:",self.graph[dest][5])
 
         inv = self.get_inventory(items)
         return [[items,inv],open_locations]
@@ -3246,7 +3256,7 @@ class World:
             250: [353, 354, [[29, 1]]],    # Statues awake w/ Gorgon Flower
 
             # Ankor Wat
-            260: [361, 362, [[64, 1], [600, 1]]],            # Map 177 progression w/ Friar
+            #260: [361, 362, [[64, 1], [600, 1]]],            # Map 177 progression w/ Friar
             261: [363, 364, [[63, 1]]],                      # Map 178 progression w/ Spin Dash
             262: [364, 365, [[62, 1]]],                      # Map 178 progression w/ Psycho Slider
             263: [365, 364, [[62, 1]]],                      # Map 178 progression w/ Psycho Slider
