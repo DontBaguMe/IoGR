@@ -157,6 +157,10 @@ class Randomizer:
         rom_offset = self.__get_offset__(patch)
 
         random.seed(settings.seed)
+        if settings.race_mode:
+            for i in range(random.randint(100, 1000)):
+                _ = random.randint(0,10000)
+
         statues_required = self.__get_required_statues__(settings)
 
         ##########################################################################
