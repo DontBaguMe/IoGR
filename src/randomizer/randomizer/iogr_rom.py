@@ -1,4 +1,4 @@
-import binascii, hashlib, logging, os, random, tempfile, json, copy
+import binascii, hashlib, logging, os, random, tempfile, json, copy, graphviz
 from typing import BinaryIO
 
 from .patch import Patch
@@ -10,10 +10,11 @@ from .models.randomizer_data import RandomizerData
 from .models.enums.difficulty import Difficulty
 from .models.enums.goal import Goal
 from .models.enums.logic import Logic
+from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.6.3"
+VERSION = "4.0.7"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -74,6 +75,14 @@ def generate_filename(settings: RandomizerData, extension: str):
         if logic.value == Logic.CHAOS.value:
             return "_L(x)"
 
+    def getEntranceShuffle(entrance_shuffle):
+        if entrance_shuffle.value == EntranceShuffle.COUPLED.value:
+            return "_ER"
+        if entrance_shuffle.value == EntranceShuffle.UNCOUPLED.value:
+            return "_ER(x)"
+        if entrance_shuffle.value == EntranceShuffle.NONE.value:
+            return ""
+
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
             return ""
@@ -105,6 +114,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getDifficulty(settings.difficulty)
     filename += getGoal(settings.goal, settings.statues)
     filename += getLogic(settings.logic)
+    filename += getEntranceShuffle(settings.entrance_shuffle)
     filename += getStartingLocation(settings.start_location)
     filename += getEnemizer(settings.enemizer)
     filename += getSwitch(settings.open_mode, "o")
@@ -147,6 +157,10 @@ class Randomizer:
         rom_offset = self.__get_offset__(patch)
 
         random.seed(settings.seed)
+        if settings.race_mode:
+            for i in range(random.randint(100, 1000)):
+                _ = random.randint(0,10000)
+
         statues_required = self.__get_required_statues__(settings)
 
         ##########################################################################
@@ -421,10 +435,10 @@ class Randomizer:
         f_item05.close
 
         # Modify Prison Key, now is destroyed when used
-        patch.seek(int("385d4", 16) + rom_offset)
-        patch.write(b"\x0a\x17\x0c\x18")
-        patch.seek(int("385fe", 16) + rom_offset)
-        patch.write(b"\x02\xd5\x02\x60")
+        patch.seek(int("385cf", 16) + rom_offset)
+        patch.write(b"\x13")
+        patch.seek(int("385dc", 16) + rom_offset)
+        patch.write(b"\x02\xd5\x02\xea\xea\xea")
 
         # Modify Lola's Melody, now is destroyed when used and only works in Itory
         f_item09 = open(BIN_PATH + "038bf5_item09.bin", "rb")
@@ -753,6 +767,10 @@ class Randomizer:
         patch.seek(int("48468", 16) + rom_offset)
         patch.write(b"\x02\xBF\x79\x84\x02\xD4\x01\x75\x84\x02\xCC\xD7\x6B" + INV_FULL)
 
+        # Disable weird logic in front of Will's door
+        patch.seek(int("4bc69", 16) + rom_offset)
+        patch.write(b"\xe0")
+
         # Disable Lola Melody cutscene
         patch.seek(int("49985", 16) + rom_offset)
         patch.write(b"\x6b")
@@ -1052,6 +1070,14 @@ class Randomizer:
         patch.write(b"\x88\xa4\x84\x8c\x2a\xcb\xac\x69\x84\xa3\x2b\xac\x48\x0e\x8c\xac\x80\xac\x81")
         patch.write(b"\x80\x83\xac\xa0\x84\xa2\xa3\x8e\x8d\xcb\xac\x63\x8d\x88\xa4\x82\x87\x84\xa3")
         patch.write(b"\xac\x86\x84\xa4\xac\xa3\xa4\x88\xa4\x82\x87\x84\xa3\x2b\xac\xa9\x8e\xca")
+
+        # Woman on roof can warp you to prevent softlocks
+        patch.seek(int("5b683", 16) + rom_offset) #four bytes
+        patch.write(b"\x20\xa0\xff\xea")
+        patch.seek(int("5ffa0", 16) + rom_offset)
+        patch.write(b"\x02\xBF\xC3\xFF\x02\xBE\x02\x01\xAA\xFF\xB0\xFF\xB0\xFF\xB5\xFF")
+        patch.write(b"\x02\xBF\xC0\xFF\x60\x02\x26\x32\x60\x03\x70\x01\x00\x00\x45\x60\xCE\xC8\xC0")
+        patch.write(b"\xd3" + qt_encode("Stuck?") + b"\xcb\xac" + qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
 
         ##########################################################################
         #                        Modify Diamond Mine events
@@ -2945,15 +2971,16 @@ class Randomizer:
         ##########################################################################
         done = False
         seed_adj = 0
-        self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
+        #self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
-            if seed_adj > 3:
+            if seed_adj > 5:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
+            elif seed_adj > 0:
+                print("Trying again... attempt ", seed_adj+1)
             self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj)
             seed_adj += 1
-
         self.w.generate_spoiler(VERSION)
         self.w.write_to_rom(patch, rom_offset)
 
@@ -3464,6 +3491,10 @@ class Randomizer:
 
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)
+
+    def generate_graph_visualization(self) -> graphviz.Digraph:
+        self.w.complete_graph_visualization()
+        return self.w.graph_viz
 
     def __get_required_statues__(self, settings: RandomizerData) -> int:
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:

@@ -41,7 +41,7 @@ parser.set_defaults(red_jewel_madness=False)
 def main(argv):
     args = parser.parse_args(argv)
     settings = RandomizerData(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.enemizer, args.start, args.firebird, args.ohko, args.red_jewel_madness,
-                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.z3, args.overworld_shuffle, args.dungeon_shuffle)
+                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.z3, args.overworld_shuffle, args.race, args.dungeon_shuffle)
 
     rom_filename = generate_filename(settings, "sfc")
     spoiler_filename = generate_filename(settings, "json")
@@ -50,9 +50,9 @@ def main(argv):
     patch = randomizer.generate_rom(rom_filename, settings)
     if not args.race:
         spoiler = randomizer.generate_spoiler()
+        write_spoiler(spoiler, spoiler_filename, args.path)
 
     write_patch(patch, rom_filename, args.path)
-    write_spoiler(spoiler, spoiler_filename, args.path)
 
 
 def write_spoiler(spoiler, filename, rom_path):
