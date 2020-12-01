@@ -3254,7 +3254,7 @@ class World:
             210: [263, 264, [[62, 1]]],    # Map 112 progression w/ Psycho Slider
             211: [265, 275, [[62, 1]]],    # Map 112 backwards progression w/ Psycho Slider
             212: [267, 268, [[62, 1]]],    # Map 114 progression w/ Psycho Slider
-            213: [269, 276, [[62, 1]]],    # Map 114 backwards progression w/ Psycho Slider
+            213: [277, 276, [[62, 1]]],    # Map 114 backwards progression w/ Psycho Slider
             214: [272, 273, [[513, 1]]],   # Ishtar's chest w/ puzzle complete
 
             # Great Wall
