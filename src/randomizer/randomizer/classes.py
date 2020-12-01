@@ -1092,9 +1092,10 @@ class World:
         # Check for abilities in critical Dark Spaces
         if self.item_locations[19][3] in abilities:  # Underground Tunnel
             inaccessible_ls += [17, 18]
+            del self.logic[63]
         if self.item_locations[29][3] in abilities:  # Inca Ruins
             inaccessible_ls += [26, 27, 30, 31, 32]
-            #self.graph[18][1].remove(19)
+            del self.logic[94]
         if (self.item_locations[46][3] in abilities and  # Diamond Mine
                 self.item_locations[47][3] in abilities and
                 self.item_locations[48][3] in abilities):
@@ -1107,16 +1108,36 @@ class World:
             del self.logic[144]
             del self.logic[147]
             del self.logic[148]
+            del self.logic[149]
+            del self.logic[150]
+            del self.logic[151]
         if self.item_locations[94][3] in abilities:  # Great Wall
             self.graph[700] = [False, [], 0, [3,15,b"\x00"], 0, "Great Wall - Behind Spin", []]
             self.logic[700] = [296, 700, [[63, 1]]]
             self.item_locations[93][0] = 700
+            del self.logic[222]
             if self.item_locations[93][3] in abilities:
                 inaccessible_ls += [95]
+                del self.logic[223]
+                del self.logic[224]
         if self.item_locations[122][3] in abilities:  # Ankor Wat
             inaccessible_ls += [117, 118, 119, 120, 121]
-        #        if self.item_locations[142][3] in abilities:        # Pyramid
-        #            inaccessible_ls += [133,134,136,139,140]
+            del self.logic[267]
+            del self.logic[268]
+            del self.logic[269]
+            del self.logic[270]
+            del self.logic[271]
+            del self.logic[272]
+        if self.item_locations[142][3] in abilities:        # Pyramid
+            inaccessible_ls += [133,134,136,139,140]
+            del self.logic[300]
+            del self.logic[301]
+            del self.logic[302]
+            del self.logic[303]
+            del self.logic[304]
+            del self.logic[306]
+            del self.logic[307]
+            del self.logic[313]
 
         # Change graph node for inaccessible_ls locations
         for x in inaccessible_ls:
