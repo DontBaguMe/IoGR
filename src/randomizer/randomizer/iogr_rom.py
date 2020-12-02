@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.4.8"
+VERSION = "3.4.9"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -1510,7 +1510,7 @@ class Randomizer:
         patch.write(b"\xe0\xfd")
         patch.seek(int("8fde0", 16) + rom_offset)
         patch.write(b"\xD3\x4b\x8e\x8b\x80\x0e\xa3\xac\x4b\x84\xa4\xa4\x84\xa2\xCB")
-        patch.write(b"\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xCF\xCE")
+        patch.write(b"\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xc9\x0a\xCF\xCE")
         patch.write(qt_encode("If you want a guide to take you to the Natives' Village, I can get one for you.") + b"\xc0")
 
         # Spirit appears only after you defeat Mummy Queen or Solid Arm
