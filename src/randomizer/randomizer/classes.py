@@ -763,6 +763,9 @@ class World:
         solved = False
 
         random.seed(self.seed + seed_adj)
+        if self.race_mode:
+            for i in range(random.randint(100, 1000)):
+                _ = random.randint(0, 10000)
 
         # Assign map rewards
         self.map_rewards()
@@ -1414,6 +1417,7 @@ class World:
     def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
 
         self.seed = settings.seed
+        self.race_mode = settings.race_mode
         self.statues = statues
         self.boss_order = boss_order
         self.dungeons_req = []
