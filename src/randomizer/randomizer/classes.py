@@ -2005,7 +2005,7 @@ class World:
             135: [62, 65, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
             # Pyramid Boss w/ Hieroglyphs and Journal
             136: [77, 64, [[50, 1]]],  # Pyramid Progression w/ Spin Dash
-            137: [63, 78, [[6, 9]]],  # Killer 6 with lots of herbs (pushes it back in progression)
+            137: [63, 78, [[6, 10]]],  # Killer 6 with lots of herbs (pushes it back in progression)
 
             # Babel/Jeweler Mansion
             140: [66, 67, [[36, 1], [39, 1]]],  # Babel Progression w/ Aura and Crystal Ring
