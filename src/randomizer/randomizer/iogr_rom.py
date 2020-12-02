@@ -13,7 +13,7 @@ from .models.enums.logic import Logic
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "3.4.8"
+VERSION = "3.4.9"
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -146,6 +146,10 @@ class Randomizer:
         rom_offset = self.__get_offset__(patch)
 
         random.seed(settings.seed)
+        if settings.race_mode:
+            for i in range(random.randint(100, 1000)):
+                _ = random.randint(0, 10000)
+
         statues_required = self.__get_required_statues__(settings)
 
         ##########################################################################
@@ -806,11 +810,15 @@ class Randomizer:
         # Shorten Edward conversation
         patch.seek(int("4c3d6", 16) + rom_offset)
         patch.write(b"\x06\xc4")
+
         f_edward = open(BIN_PATH + "04c4fb_edward.bin", "rb")
         patch.seek(int("4c4fb", 16) + rom_offset)
         patch.write(f_edward.read())
         f_edward.close
-
+        f_edward2 = open(BIN_PATH + "04c6af_edward2.bin", "rb")
+        patch.seek(int("4c6af", 16) + rom_offset)
+        patch.write(f_edward2.read())
+        f_edward2.close
         patch.seek(int("4c4fb", 16) + rom_offset)
         patch.write(b"\xd3")
 
@@ -844,10 +852,14 @@ class Randomizer:
         # Skip long cutscene in prison
         patch.seek(int("4d209", 16) + rom_offset)
         patch.write(b"\x34\xd2")
+        patch.seek(int("4d22a", 16) + rom_offset)
+        patch.write(b"\x80\x02")
         patch.seek(int("4d234", 16) + rom_offset)
-        patch.write(b"\x02\xd0\x23\x00\xcf\xd2\x02\xe0")
+        patch.write(b"\x02\xd0\x23\x00\xd6\xd2\x02\xe0")
         patch.seek(int("4d335", 16) + rom_offset)
         patch.write(b"\x6b")
+        patch.seek(int("4db15", 16) + rom_offset)
+        patch.write(b"\x02\xe0")
 
         # Move Dark Space, allows player to exit area without key
         # Set new X/Y coordinates in exit table
@@ -1073,6 +1085,12 @@ class Randomizer:
         patch.seek(int("aa77a", 16) + rom_offset)
         patch.write(b"\x6b")
 
+        # Speed up elevator
+        patch.seek(int("aa5d9", 16) + rom_offset)
+        patch.write(b"\x0f\x07")
+        patch.seek(int("aa618", 16) + rom_offset)
+        patch.write(b"\x10\x08")
+
         # Shorten morgue item get
         patch.seek(int("5d4d8", 16) + rom_offset)
         patch.write(b"\x02\xbf\xeb\xd4\x02\xe0")
@@ -1158,6 +1176,18 @@ class Randomizer:
         patch.seek(int("68b01", 16) + rom_offset)
         patch.write(b"\x6b")
 
+        # Speed up purification sequence
+        patch.seek(int("69450", 16) + rom_offset)
+        patch.write(b"\x20")
+        patch.seek(int("69456", 16) + rom_offset)
+        patch.write(b"\x04")
+        patch.seek(int("6945d", 16) + rom_offset)
+        patch.write(b"\x01")
+        patch.seek(int("6946f", 16) + rom_offset)
+        patch.write(b"\x03")
+        patch.seek(int("69486", 16) + rom_offset)
+        patch.write(b"\x80\x10")
+
         # Purification event won't softlock if you don't have Lilly
         patch.seek(int("69406", 16) + rom_offset)
         patch.write(b"\x10")
@@ -1212,7 +1242,11 @@ class Randomizer:
         patch.seek(int("69f26", 16) + rom_offset)
         patch.write(b"\x00")
 
-        # Text in Hope Room
+        # Shorten scene, text in Hope Room
+        f_mu = open(BIN_PATH + "0699dc_mu.bin", "rb")
+        patch.seek(int("699dc", 16) + rom_offset)
+        patch.write(f_mu.read())
+        f_mu.close
         patch.seek(int("69baa", 16) + rom_offset)
         patch.write(qt_encode("Hey.", True))
 
@@ -1516,7 +1550,7 @@ class Randomizer:
         patch.write(b"\xe0\xfd")
         patch.seek(int("8fde0", 16) + rom_offset)
         patch.write(b"\xD3\x4b\x8e\x8b\x80\x0e\xa3\xac\x4b\x84\xa4\xa4\x84\xa2\xCB")
-        patch.write(b"\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xCF\xCE")
+        patch.write(b"\x49\x8e\xa5\xa2\x8d\x80\x8b\xac\xac\xac\xac\xac\xac\xc9\x0a\xCF\xCE")
         patch.write(qt_encode("If you want a guide to take you to the Natives' Village, I can get one for you.") + b"\xc0")
 
         # Spirit appears only after you defeat Mummy Queen or Solid Arm
@@ -1550,6 +1584,15 @@ class Randomizer:
         patch.write(b"\x6b")
         patch.seek(int("8cb1f", 16) + rom_offset)
         patch.write(b"\x6b")
+
+        # Speed up Room 3 elevator
+        patch.seek(int("8c55b", 16) + rom_offset)
+        patch.write(b"\x20\x70\xff\xea\xea\xea")
+        patch.seek(int("8c56c", 16) + rom_offset)
+        patch.write(b"\x20\x76\xff\xea\xea\xea")
+        patch.seek(int("8ff70", 16) + rom_offset)
+        patch.write(b"\x3a\x3a\x3a\x3a\x80\x04\x1a\x1a\x1a\x1a")
+        patch.write(b"\x99\x26\x00\xc6\x26\xc6\x26\xc6\x26\xc6\x26\x60")
 
         ##########################################################################
         #                            Modify Babel events
@@ -2947,6 +2990,9 @@ class Randomizer:
                 raise RecursionError
             self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj)
+            #k6_item = self.w.item_locations[136][3]
+            #print(self.w.item_pool[k6_item][3])
+            #done = False
             seed_adj += 1
 
         self.w.generate_spoiler(VERSION)
