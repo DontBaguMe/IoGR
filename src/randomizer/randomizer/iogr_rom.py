@@ -348,8 +348,8 @@ class Randomizer:
         patch.write(b"\xea\xea\xea")
 
         # Write DEF and STR upgrade item scripts, also includes scripts for Z3 mode
-        f_statupgrades = open(BIN_PATH + "03f77b_statupgrades.bin", "rb")
-        patch.seek(int("3f77b", 16) + rom_offset)
+        f_statupgrades = open(BIN_PATH + "03f779_statupgrades.bin", "rb")
+        patch.seek(int("3f779", 16) + rom_offset)
         patch.write(f_statupgrades.read())
         f_statupgrades.close
 
@@ -357,7 +357,7 @@ class Randomizer:
         # Starts at index #$30
         patch.seek(int("3efb3", 16) + rom_offset)
         patch.write(b"\x20\x95\xf7")  # Pointer to initialization script
-        patch.write(b"\x0A\xDA\xAA\xfc\x7b\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
+        patch.write(b"\x0A\xDA\xAA\xfc\x79\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
         patch.write(b"\xEE\x16\x0B\x80\x03\xEE\x1C\x0B\x60")  # Logic for Dash and Friar Upgrades
 #        patch.seek(int("3f765", 16) + rom_offset)
 #        patch.write(b"\x0c\xf0\x32\xf0\x51\xf0\xe9\xef\xed\xef\xf1\xef\xca\xef\x0c\xf0\x32\xf0\x51\xf0\xc0\xef\xc5\xef\xa0\xff") # Subroutine pointers
@@ -373,10 +373,11 @@ class Randomizer:
         patch.seek(int("3f06e", 16) + rom_offset)
         patch.write(b"\x60")
 
-        # Write Heart Piece logic
+        # Write new logic (heart pieces, stacked herbs)
+        f_copd4 = open(BIN_PATH + "03ffa0_copd4.bin", "rb")
         patch.seek(int("3ffa0", 16) + rom_offset)
-        patch.write(b"\x48\xAD\x24\x0B\x89\x02\xF0\x13\xAD\x1E\x0A\x89\x80\xD0\x07\x09\x80")
-        patch.write(b"\x8D\x1E\x0A\x80\x09\x49\x80\x8D\x1E\x0A\x68\x4C\x0C\xF0\x68\x60")
+        patch.write(f_copd4.read())
+        f_copd4.close
 
         # Treasure chest text: "Already maxed out!"
         patch.seek(int("1ffed", 16) + rom_offset)
@@ -590,6 +591,14 @@ class Randomizer:
         patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x04\x00\x80\x0D")
         patch.write(b"\xA9\x06\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x60\xff\xff")
         patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x60")
+
+        # Stackable herb functionality, text
+        patch.seek(int("388a4", 16) + rom_offset)
+        patch.write(b"\x4c\xe7\xff")
+        patch.seek(int("3ffe7", 16) + rom_offset)
+        patch.write(b"\x38\xF8\xAD\xAA\x0A\xE9\x01\x00\x8D\xAA\x0A\xD8\xD0\x03\x20\xB2\x9F\x60")
+        patch.seek(int("388ae", 16) + rom_offset)
+        patch.write(b"\xc6\x02\x00\xaa\x0a\xac\xd6\xae\x6d\xac\xd6\xe7\x8e\x8d\x84\x0d\xac\xac")
 
         # Change item functionality for game variants
         patch.seek(int("3ff00", 16) + rom_offset)
