@@ -378,6 +378,8 @@ class Randomizer:
         patch.seek(int("3ffa0", 16) + rom_offset)
         patch.write(f_copd4.read())
         f_copd4.close
+        patch.seek(int("3ef97", 16) + rom_offset)
+        patch.write(b"\x4c\xc1\xff")
 
         # Treasure chest text: "Already maxed out!"
         patch.seek(int("1ffed", 16) + rom_offset)
