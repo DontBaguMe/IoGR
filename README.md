@@ -33,10 +33,19 @@ This is a non-negative integer value that initializes the randomization algorith
 
 #### Difficulty
 There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficulty chosen affects the following game mechanics:
-- Enemies: Enemies scale in strength with each difficulty mode.
-- Room Rewards: The number of room-clearing rewards available to the player is affected by difficulty (see below).
 - Item and Ability Placement: Easy and Normal modes both include a slight bias toward making required items and abilities available to the player earlier on.
 - In-Game Spoilers: Hints have been removed in Extreme mode.
+- Boss Logic: Solid Arm can be required for Extreme seeds.
+- Boss Shuffle: In Extreme, dungeons keep their vanilla music so you don't know which boss is at the end.  Solid Arm is included in Boss Shuffle in Extreme, but not other modes
+- Red Jewel Hunt: The number of Red Jewels required to beat the game, by difficulty, is 35/40/45/50
+- Open World: The items that replace the five travel items are more favorable in easier difficulties.
+
+#### Level
+You choose your level from the start menu when you create a new game file.  Level does not affect game logic or item placement, so if desired players could race the same seed at varying levels.  There are four level settings: Beginner, Intermediate, Advanced, and Expert. The level chosen affects the following game mechanics:
+- Enemies: Enemies scale in strength with each level.
+- Room Rewards: The number of room-clearing rewards available to the player is affected by difficulty (see below).
+- Herbs:  By level, the number of HP restored by herbs are full/8/4/2
+- Snake Game: The number of snakes required will increase at harder difficulties.
 
 #### Goal
 This allows you to choose a game mode. There are currently four goals available (see below for more details):
@@ -78,7 +87,7 @@ There are three logic modes available to the player.
   - Each STR and DEF upgrade doubles the applicable stat instead of adding +1.
   - Herbs and HP upgrades provide the following refills, by level: 40/40/14/8.
   - Max HP available to the player, by level is 40/40/28/23.
-  - Non-boss enemy stats are not shuffled between level choices. Max HP for non-boss enemies is capped to 8, and they all have 0 DEF.  Enemy damage ranges from 1 to 16.
+  - Non-boss enemy stats are not shuffled between level choices. All non-bosses have 0 DEF.  Enemy damage ranges from 1 to 16.  (These values correspond to the enemies in A Link to the Past.)
 
 #### Enemizer (beta)
 The enemizer is (and likely will forever be) in beta, so play at your own risk. Graphical glitches abound, and some seeds may be incompletable due to enemy placement. Please report any game-breaking situations in the Discord.
@@ -321,7 +330,7 @@ The Crystal Ring is one of the items you need to pass the force field at the bas
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### Support the Dev
-No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider subscribing to 
+No one does a project like this for the money -- I love this game, wanted a randomizer to exist for it, and had a blast making one.  I neither need nor expect any compensation for my work -- I hope you enjoy it, no strings attached.  However, if you feel compelled to support me for this project (or if you'd like to see more game-modding from me), I humbly invite you to consider subscribing to
 <a href="https://www.twitch.tv/dontbagume">my channel on Twitch.</a>
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
