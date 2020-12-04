@@ -1686,6 +1686,20 @@ class Randomizer:
         patch.seek(int("99a70", 16) + rom_offset)
         patch.write(qt_encode("Well, lookie there.", True))
 
+        # Speed up warp sequences
+        patch.seek(int("995a9", 16) + rom_offset)
+        patch.write(b"\x01\x00")
+        patch.seek(int("995b0", 16) + rom_offset)
+        patch.write(b"\x01\x00")
+        patch.seek(int("996ab", 16) + rom_offset)
+        patch.write(b"\x03")
+        patch.seek(int("996fd", 16) + rom_offset)
+        patch.write(b"\x10")
+        patch.seek(int("9982a", 16) + rom_offset)
+        patch.write(b"\x10")
+        patch.seek(int("99848", 16) + rom_offset)
+        patch.write(b"\x04")
+
         # Olman event no longer warps you out of the room
         patch.seek(int("98891", 16) + rom_offset)
         patch.write(b"\x02\x0b\x6b")
