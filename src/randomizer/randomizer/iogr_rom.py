@@ -585,8 +585,8 @@ class Randomizer:
 
         # Stackable herb functionality, text
         patch.seek(int("388a4", 16) + rom_offset)
-        patch.write(b"\x4c\xe7\xff")
-        patch.seek(int("3ffe7", 16) + rom_offset)
+        patch.write(b"\x4c\xe9\xff")
+        patch.seek(int("3ffe9", 16) + rom_offset)
         patch.write(b"\x38\xF8\xAD\xAA\x0A\xE9\x01\x00\x8D\xAA\x0A\xD8\xD0\x03\x20\xB2\x9F\x60")
         patch.seek(int("388ae", 16) + rom_offset)
         patch.write(b"\xc6\x02\x00\xaa\x0a\xac\xd6\xae\x6d\xac\xd6\xe7\x8e\x8d\x84\x0d\xac\xac")
