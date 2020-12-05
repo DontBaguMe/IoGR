@@ -1,4 +1,4 @@
-import binascii, hashlib, logging, os, random, tempfile, json, copy, graphviz
+import asar, binascii, hashlib, logging, os, random, tempfile, json, copy, graphviz
 from typing import BinaryIO
 
 from .patch import Patch
