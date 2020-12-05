@@ -1035,6 +1035,12 @@ class World:
         # Random start location
         if self.start_mode != "South Cape":
             self.start_loc = self.random_start()
+            if self.start_loc == 19:  # Open Lily's door when starting in Underground Tunnel
+                self.logic[62][2][0][1] = 0
+            elif self.start_loc == 30:  # Inca ramp can hardlock you
+                self.graph[83][1].append(82)
+            elif self.start_loc == 47:  # Diamond Mine behind fences
+                self.graph[131][1].append(130)
         if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
@@ -1835,7 +1841,9 @@ class World:
 
         # Check for additional switches that need to be set
         switch_str = []
-        if self.start_loc == 30:  # Inca ramp can hardlock you
+        if self.start_loc == 19:  # Open Lily's door when starting in Underground Tunnel
+            switch_str.append(b"\x02\xcd\x13\x01")
+        elif self.start_loc == 30:  # Inca ramp can hardlock you
             switch_str.append(b"\x02\xcd\x0c\x01")
         elif self.start_loc == 47:  # Diamond Mine behind fences
             switch_str.append(b"\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01")
