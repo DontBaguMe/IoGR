@@ -32,6 +32,9 @@ class World:
 
         self.placement_log.append([item, location])
 
+        if self.item_locations[location][1] == 2:
+            self.check_logic()
+
         return True
 
     # Removes an assigned item and returns it to item pool
@@ -233,8 +236,8 @@ class World:
                             if self.is_sublist(items, req_items):
                                 to_visit.append(dest)
                                 if print_log:
-                                    for item in req_items:
-                                        print("",self.item_pool[item][3])
+                                    #for item in req_items:
+                                    #    print("",self.item_pool[item][3])
                                     print(" -Discovered:",self.graph[dest][5])
 
         inv = self.get_inventory(items)
@@ -1098,52 +1101,52 @@ class World:
         # Check for abilities in critical Dark Spaces
         if self.item_locations[19][3] in abilities:  # Underground Tunnel
             inaccessible_ls += [17, 18]
-            del self.logic[63]
+            self.logic[63][2].append([600,2])
         if self.item_locations[29][3] in abilities:  # Inca Ruins
             inaccessible_ls += [26, 27, 30, 31, 32]
-            del self.logic[94]
+            self.logic[94][2].append([600,2])
         if (self.item_locations[46][3] in abilities and  # Diamond Mine
                 self.item_locations[47][3] in abilities and
                 self.item_locations[48][3] in abilities):
-            del self.logic[118]
+            self.logic[118][2].append([600,2])
         if (self.item_locations[58][3] in abilities and  # Sky Garden
                 self.item_locations[59][3] in abilities and
                 self.item_locations[60][3] in abilities):
-            del self.logic[131]
-            del self.logic[132]
-            del self.logic[144]
-            del self.logic[147]
-            del self.logic[148]
-            del self.logic[149]
-            del self.logic[150]
-            del self.logic[151]
+            self.logic[131][2].append([600,2])
+            self.logic[132][2].append([600,2])
+            self.logic[144][2].append([600,2])
+            self.logic[147][2].append([600,2])
+            self.logic[148][2].append([600,2])
+            self.logic[149][2].append([600,2])
+            self.logic[150][2].append([600,2])
+            self.logic[151][2].append([600,2])
         if self.item_locations[94][3] in abilities:  # Great Wall
             self.graph[700] = [False, [], 0, [3,15,b"\x00"], 0, "Great Wall - Behind Spin", []]
             self.logic[700] = [296, 700, [[63, 1]]]
             self.item_locations[93][0] = 700
-            del self.logic[222]
+            self.logic[222][2].append([600,2])
             if self.item_locations[93][3] in abilities:
                 inaccessible_ls += [95]
-                del self.logic[223]
-                del self.logic[224]
+                self.logic[223][2].append([600,2])
+                self.logic[224][2].append([600,2])
         if self.item_locations[122][3] in abilities:  # Ankor Wat
             inaccessible_ls += [117, 118, 119, 120, 121]
-            del self.logic[267]
-            del self.logic[268]
-            del self.logic[269]
-            del self.logic[270]
-            del self.logic[271]
-            del self.logic[272]
+            self.logic[267][2].append([600,2])
+            self.logic[268][2].append([600,2])
+            self.logic[269][2].append([600,2])
+            self.logic[270][2].append([600,2])
+            self.logic[271][2].append([600,2])
+            self.logic[272][2].append([600,2])
         if self.item_locations[142][3] in abilities:        # Pyramid
             inaccessible_ls += [133,134,136,139,140]
-            del self.logic[300]
-            del self.logic[301]
-            del self.logic[302]
-            del self.logic[303]
-            del self.logic[304]
-            del self.logic[306]
-            del self.logic[307]
-            del self.logic[313]
+            self.logic[300][2].append([600,2])
+            self.logic[301][2].append([600,2])
+            self.logic[302][2].append([600,2])
+            self.logic[303][2].append([600,2])
+            self.logic[304][2].append([600,2])
+            self.logic[306][2].append([600,2])
+            self.logic[307][2].append([600,2])
+            self.logic[313][2].append([600,2])
 
         # Change graph node for inaccessible_ls locations
         for x in inaccessible_ls:
@@ -3263,9 +3266,9 @@ class World:
 
             # Angel Dungeon
             210: [263, 264, [[62, 1]]],    # Map 112 progression w/ Psycho Slider
-            211: [265, 275, [[62, 1]]],    # Map 112 backwards progression w/ Psycho Slider
+            #211: [265, 275, [[62, 1]]],    # Map 112 backwards progression w/ Psycho Slider
             212: [267, 268, [[62, 1]]],    # Map 114 progression w/ Psycho Slider
-            213: [277, 276, [[62, 1]]],    # Map 114 backwards progression w/ Psycho Slider
+            #213: [277, 276, [[62, 1]]],    # Map 114 backwards progression w/ Psycho Slider
             214: [272, 273, [[513, 1]]],   # Ishtar's chest w/ puzzle complete
 
             # Great Wall
@@ -4479,8 +4482,8 @@ class World:
             501: [500, 0, 0,   0,   0, "19d58", b"", False, False, False, "Euro: Explorer's House (out)"],
             502: [  0, 0, 0, 310, 323, "19cf6", b"", False, False, False, "Euro: Store Entrance (in)"],
             #503: [502, 0, 0,   0,   0, "", b"", False, False, False, "Euro: Store Entrance (out)"], #this doesn't exist!
-            504: [505, 0, 0, 310, 310, "19d02", b"", False, False, False, "Euro: Store Exit (in)"],
-            505: [504, 0, 0, 324, 310, "19e04", b"", False, False, False, "Euro: Store Exit (out)"],
+            504: [505, 0, 0, 310, 324, "19d02", b"", False, False, False, "Euro: Store Exit (in)"],
+            505: [504, 0, 0,   0,   0, "19e04", b"", False, False, False, "Euro: Store Exit (out)"],
             506: [507, 0, 0, 314, 316, "19db4", b"", False, False, False, "Euro: Guest Room (in)"],
             507: [506, 0, 0,   0,   0, "19df6", b"", False, False, False, "Euro: Guest Room (out)"],
             508: [509, 0, 0, 310, 325, "19d1a", b"", False, False, False, "Euro: Dark Space House (in)"],
