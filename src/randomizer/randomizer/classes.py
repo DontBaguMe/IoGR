@@ -427,7 +427,6 @@ class World:
                                 prereq_list.append(prereq)
                             elif self.check_ds_access(dest,False,start_items_temp):     # VERY inefficient
                                 prereq_list.append(prereq)
-
                         else:
                             prereq_list.append(-1)
                         self.graph[dest][0] = False
@@ -744,14 +743,7 @@ class World:
 
 
     # Entrance randomizer
-    def shuffle_exits(self):
-        # Make a clean copy of world graph for later replacement
-        graph_copy = copy.deepcopy(self.graph)
-
-        # Assume all items and abilities
-        all_items = self.list_item_pool()
-        self.update_graph(True,True,True,all_items)
-
+    def shuffle_exits(self,print_log=False):
         # Map passages and internal dungeon exits to graph and list all available exits
         one_way_exits = []
         for x in self.exits:
@@ -759,19 +751,26 @@ class World:
                 xprime = self.exits[x][0]
                 self.exits[x][3] = self.exits[xprime][4]
                 self.exits[x][4] = self.exits[xprime][3]
-            if self.exits[x][1] or (not self.exits[x][5] and not self.exits[x][6]) or self.exits[x][7] or (self.exits[x][8] and not self.exits[x][9]):
-                origin = self.exits[x][3]
-                if self.exits[x][1]:
-                    dest = self.exits[self.exits[x][1]][4]
-                else:
-                    dest = self.exits[x][4]
-                if dest not in self.graph[origin][1]:
-                    self.graph[origin][1].append(dest)
-            else:
+#            if self.exits[x][1] or (not self.exits[x][5] and not self.exits[x][6]) or self.exits[x][7] or (self.exits[x][8] and not self.exits[x][9]):
+#                origin = self.exits[x][3]
+#                if self.exits[x][1]:
+#                    dest = self.exits[self.exits[x][1]][4]
+#                else:
+#                    dest = self.exits[x][4]
+#                if dest not in self.graph[origin][1]:
+#                    self.graph[origin][1].append(dest)
+            if not self.exits[x][1] and (self.exits[x][5] or self.exits[x][6]) and not self.exits[x][7] and (not self.exits[x][8] or self.exits[x][9]):
                 self.exits[x][1] = -1    # Mark exit for shuffling
                 self.exits[x][2] = -1
                 if not self.is_exit_coupled(x):
                     one_way_exits.append(x)
+
+        # Make a clean copy of world graph for later replacement
+        graph_copy = copy.deepcopy(self.graph)
+
+        # Assume all items and abilities
+        all_items = self.list_item_pool()
+        self.update_graph(True,True,True,all_items)
 
         # If in Coupled mode, map one_way exits first
         exit_log = []
@@ -814,39 +813,11 @@ class World:
 
 #        print("Progression exits done")
 
-        # Take care of nodes without DS access -- FIX THIS
-        ds_solved = False
-        while not ds_solved:
-            self.update_graph(False,True,True)
-            ds_origin_exits = []
-            ds_dest_exits = []
-            for exit in self.exits:
-                origin = self.exits[exit][3]
-                dest = self.exits[exit][4]
-                if self.exits[exit][1] == -1 and self.is_accessible(origin) and not self.check_ds_access(origin):
-                    ds_origin_exits.append(node)
-                if self.exits[exit][2] == -1 and not self.is_accessible(dest) and self.check_ds_access(dest):
-                    ds_dest_exits.append(node)
-
-            if need_ds_nodes:
-                node = need_ds_nodes.pop(0)
-                found_ds = False
-                for exit in self.exits:
-
         # Map the rest of the accessible exits
         origin_exits = []
         dest_exits = []
-        quarantine = []
-        check_ds_access = True
-        check_direction = True
-        check_progression = True
         for exit in self.exits:
             origin = self.exits[exit][3]
-            if not check_ds_access:
-                ds_access = True
-            else:
-                ds_access = self.check_ds_access(origin)
-
             if self.exits[exit][1] == -1 and self.is_accessible(origin):
                 origin_exits.append(exit)
             if self.exits[exit][2] == -1:
@@ -854,6 +825,12 @@ class World:
 
         random.shuffle(origin_exits)
         random.shuffle(dest_exits)
+
+        quarantine = []
+        check_ds_access = True
+        check_direction = True
+        check_progression = True
+
         while origin_exits:
             if not dest_exits:
                 print("ERROR: We ran out of destination exits")
@@ -863,6 +840,10 @@ class World:
                 origin_exit = origin_exits.pop(0)
                 if self.exits[origin_exit][1] != -1:
                     origin_exit = 0
+                elif check_ds_access and self.check_ds_access(origin):
+                    quarantine.append(origin_exit)
+                    origin_exit = 0
+
             if origin_exit:
                 direction = self.exit_direction(origin_exit)
                 dest_exit = 0
@@ -870,17 +851,15 @@ class World:
                     if not dest_exit and self.exits[exit][2] == -1 and exit != self.exits[origin_exit][0]:
                         direction_new = self.exit_direction(exit)
                         dest = self.exits[exit][4]
-                        if (direction_new == direction or not check_direction) and (
-                                not self.is_accessible(dest) or not check_progression) and (
-                                dest in new_ds_nodes or not check_ds_access):
+                        if (not check_direction or direction_new == direction) and (
+                                not check_progression or not self.is_accessible(dest)) and (
+                                not check_ds_access or self.check_ds_access(dest)):
                             dest_exit = exit
                 if not dest_exit:
                     quarantine.append(origin_exit)
                 else:
                     self.link_exits(origin_exit,dest_exit)
                     exit_log.append([origin_exit,dest_exit])
-                    if dest in new_ds_nodes:
-                        new_ds_nodes.remove(dest)
 
             # Clean up O/D lists
             for exit in origin_exits:
@@ -966,7 +945,7 @@ class World:
         if update_exits:
             for exit in self.exits:
                 # Check if exit has been shuffled
-                if self.exits[exit][1]:
+                if self.exits[exit][1] > 0:
                     new_exit = self.exits[exit][1]
                 else:
                     new_exit = exit
@@ -1169,28 +1148,28 @@ class World:
             self.item_pool[6][0] += 4  # Herbs
             self.item_pool[0][0] += 1  # Nothing
 
-        # Chaos mode
-        if self.logic_mode == "Chaos":
-            # Add "Inaccessible" node to graph
-            self.graph[INACCESSIBLE] = [False, [], 0, [0,0,0,b"\x00"], 0, "Inaccessible", []]
-
-            # Towns can have Freedan abilities
-            for x in self.item_locations:
-                if self.item_locations[x][4] == [64, 65, 66]:
-                    self.item_locations[x][4].clear()
-
+        # Chaos mode -- MAY NOT NEED THIS ANYMORE
+#        if self.logic_mode == "Chaos":
+#            # Add "Inaccessible" node to graph
+#            self.graph[INACCESSIBLE] = [False, [], 0, [0,0,0,b"\x00"], 0, "Inaccessible", [], False, [], []]
+#
+#            # Towns can have Freedan abilities
+#            for x in self.item_locations:
+#                if self.item_locations[x][4] == [64, 65, 66]:
+#                    self.item_locations[x][4].clear()
+#
             # Several locked Dark Spaces can have abilities
-            ds_unlock = [74, 94, 124, 142]
-
-            if 1 not in self.dungeons_req:  # First DS in Inca
-                ds_unlock.append(29)
-            if self.kara != 1:  # DS in Underground Tunnel
-                ds_unlock.append(19)
-            if self.kara != 5:  # DS in Ankor Wat garden
-                ds_unlock.append(122)
-
-            for x in ds_unlock:
-                self.item_locations[x][2] = False
+#            ds_unlock = [74, 94, 124, 142]
+#
+#            if 1 not in self.dungeons_req:  # First DS in Inca
+#                ds_unlock.append(29)
+#            if self.kara != 1:  # DS in Underground Tunnel
+#                ds_unlock.append(19)
+#            if self.kara != 5:  # DS in Ankor Wat garden
+#                ds_unlock.append(122)
+#
+#            for x in ds_unlock:
+#                self.item_locations[x][2] = False
 
         # Red Jewel Hunts change the graph
         if self.goal == "Red Jewel Hunt":
@@ -1446,7 +1425,7 @@ class World:
         cycle = 0
         while not done:
             cycle += 1
-            print(cycle)
+#            print(cycle)
             if cycle > MAX_CYCLES:
                 print("ERROR: Max cycles exceeded")
 #                self.print_inaccessible_nodes()
@@ -3308,7 +3287,9 @@ class World:
             # Misc
             600: [False, [], 0, [0,0,0,b"\x00"], 0, "Freedan Access                      ", [], False, [], []],
             601: [False, [], 0, [0,0,0,b"\x00"], 0, "Glitches                            ", [], False, [], []],
-            602: [False, [], 0, [0,0,0,b"\x00"], 0, "Early Firebird                      ", [], False, [], []]
+            602: [False, [], 0, [0,0,0,b"\x00"], 0, "Early Firebird                      ", [], False, [], []],
+
+            INACCESSIBLE: [False, [], 0, [0,0,0,b"\x00"], 0, "Inaccessible", [], False, [], []]
 
         }
 
