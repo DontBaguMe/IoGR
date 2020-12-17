@@ -976,12 +976,17 @@ class World:
                 if origin and dest and (origin not in self.graph[dest][8]):
                     self.graph[dest][8].append(origin)
 
+            if print_log:
+                print("Exits updated")
+
         if update_logic:
             for edge in self.logic:
                 if self.logic[edge][0] == 1:
                     self.update_edge(edge)
                 elif self.logic[edge][0] == 0 and self.check_edge(edge,items):
                     self.update_edge(edge)
+            if print_log:
+                print("Logic updated")
 
         for node in self.graph:
             for x in self.graph[node][1]:
@@ -990,6 +995,8 @@ class World:
             for y in self.graph[node][8]:
                 if node not in self.graph[y][1]:
                     self.graph[y][1].append(node)
+        if print_log:
+            print("Graph updated")
 
         if update_ds:
             # Map DS access to nodes, form change nodes take priority
@@ -1023,7 +1030,8 @@ class World:
                 if not ds_nodes and access_mode == 2:
                     access_mode = 1
                     ds_nodes += ds_nodes_temp
-
+            if print_log:
+                print("DS access updated")
         return True
 
     def update_edge(self, edge=-1):
@@ -1286,7 +1294,7 @@ class World:
             self.logic[150][0] = -1
             self.logic[151][0] = -1
         if self.item_locations[94][3] in abilities:  # Great Wall
-            self.graph[700] = [False, [], 0, [3,15,0,b"\x00"], 0, "Great Wall - Behind Spin", []]
+            self.graph[700] = [False, [], 0, [3,15,0,b"\x00"], 0, "Great Wall - Behind Spin", [], False, [], []]
             self.logic[700] = [0, 296, 700, [[63, 1]]]
             self.item_locations[93][0] = 700
             self.logic[222][3].append([600,2])
@@ -1425,7 +1433,7 @@ class World:
         cycle = 0
         while not done:
             cycle += 1
-#            print(cycle)
+            #print("Cycle",cycle)
             if cycle > MAX_CYCLES:
                 print("ERROR: Max cycles exceeded")
 #                self.print_inaccessible_nodes()
@@ -1503,8 +1511,7 @@ class World:
                             print("ERROR: Could not remove non-progression item")
                             return False
 
-
-            # print goal, done
+            #print(goal, done)
 
         traverse_result = self.traverse()
         #print("Inaccessible: ",self.inaccessible_locations(item_locations))
