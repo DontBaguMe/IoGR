@@ -204,6 +204,7 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - The first spirit in Babel Tower
 
 #### Other Features
+- Herbs stack upon acquisition, meaning no matter how many herbs you have, they will only take up one inventory space.  When you attempt to use an herb, it'll tell you how many herbs you have in the stack.
 - The location of the glowing Gold Tile in Inca Ruins has been randomized, making the Wind Melody a requirement to progress to the end of that dungeon.
 - The differences between the puzzle rooms in Ishtar's Studio in Angel Village are also random and could differ from the vanilla game.
 - The order of the hieroglyphs in the Pyramid has been shuffled, making the Father's Journal a required item to face the Mummy Queen. (You can give the Father's Journal to the guide in the hieroglyph room of the Pyramid for safe keeping.)
