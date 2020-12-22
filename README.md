@@ -44,7 +44,7 @@ There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficu
 You choose your level from the start menu when you create a new game file.  Level does not affect game logic or item placement, so if desired players could race the same seed at varying levels.  There are four level settings: Beginner, Intermediate, Advanced, and Expert. The level chosen affects the following game mechanics:
 - Enemies: Enemies scale in strength with each level.
 - Room Rewards: The number of room-clearing rewards available to the player is affected by difficulty (see below).
-- Herbs:  By level, the number of HP restored by herbs are full/8/4/2
+- Herbs:  By level, the number of HP restored by herbs are full/8/6/4
 - Snake Game: The number of snakes required will increase at harder difficulties.
 
 #### Goal
