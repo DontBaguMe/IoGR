@@ -203,6 +203,20 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - The girl with Jackal's note in Dao
 - The first spirit in Babel Tower
 
+Each hint provides either: a) the contents of a trolly location (list below), or b) the location of a required item, determined by the properties of the seed.
+
+Trolly locations include:
+- Gold ship
+- Sam
+- Buffy (NPC in Seaside Palace)
+- Coffin
+- Ann
+- Mt. Temple final chest
+- Ankor Wat final item (spirit)
+- Snake game
+- Hieroglyph 3 (Killer 6)
+- Jeweler's Mansion chest
+
 #### Other Features
 - Herbs stack upon acquisition, meaning no matter how many herbs you have, they will only take up one inventory space.  When you attempt to use an herb, it'll tell you how many herbs you have in the stack.
 - The location of the glowing Gold Tile in Inca Ruins has been randomized, making the Wind Melody a requirement to progress to the end of that dungeon.
