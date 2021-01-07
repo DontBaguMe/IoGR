@@ -765,6 +765,10 @@ class World:
                 if not self.is_exit_coupled(x):
                     one_way_exits.append(x)
 
+        # Set aside Jeweler's final exit in RJH seeds
+        if self.goal == "Red Jewel Hunt":
+            self.link_exits(720,720)
+
         # Make a clean copy of world graph for later replacement
         graph_copy = copy.deepcopy(self.graph)
 
@@ -1516,7 +1520,7 @@ class World:
         traverse_result = self.traverse()
         #print("Inaccessible: ",self.inaccessible_locations(item_locations))
 
-        if self.logic_mode == "Completable":
+        if self.logic_mode == "Completable" and self.goal != "Red Jewel Hunt":
             completed = True
             for node in self.graph:
                 if not self.graph[node][0] and node <600:
