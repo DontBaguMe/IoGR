@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v3.8) - <a href="https://www.iogr.app/">Play Now!</a>
+## The Illusion of Gaia Randomizer (v3.6) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
@@ -99,8 +99,10 @@ Note: Non-enemy sprites in dungeons have been largely removed in every enemizer 
 - Insane: Enemeies can appear in any dungeon. Furthermore, enemy stats have been shuffled, so early enemies can have the stats of later enemies, and vice versa.
 - Boss Shuffle (in development!): In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. For Easy and Normal difficulties, each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. Solid Arm will only be included in the shuffle for Extreme difficulty.
 
-#### Entrance Randomizer (coming soon!)
-This feature will be implemented in a future version.
+#### Entrance Randomizer (new feature!)
+This feature will be fully implemented in a future version.  However, there is one feature you can choose:
+
+- Overword Shuffle: This mode shuffles the 19 overworld locations among the five continents, so the locations you have access to in each continent will be different in each seed.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
@@ -203,24 +205,9 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 - The girl with Jackal's note in Dao
 - The first spirit in Babel Tower
 
-Each hint provides either: a) the contents of a trolly location (list below), or b) the location of a required item, determined by the properties of the seed.
-
-Trolly locations include:
-- Gold ship
-- Sam
-- Buffy (NPC in Seaside Palace)
-- Coffin
-- Ann
-- Mt. Temple final chest
-- Ankor Wat final item (spirit)
-- Snake game
-- Hieroglyph 3 (Killer 6)
-- Jeweler's Mansion chest
-
 #### Other Features
-- Herbs stack upon acquisition, meaning no matter how many herbs you have, they will only take up one inventory space.  When you attempt to use an herb, it'll tell you how many herbs you have in the stack.
 - The location of the glowing Gold Tile in Inca Ruins has been randomized, making the Wind Melody a requirement to progress to the end of that dungeon.
-- The differences between the puzzle rooms in Ishtar's Studio in Angel Village are also random and could differ from the vanilla game.
+- The differences between the puzzle rooms in Ishtar's Studio in Angel Village are also random and could differ from the vanilla game. In Easy and Normal, the first room will always be vanilla; in Hard and Extreme difficulties, there could be changes in the first room from vanilla. However, there will always only be one change between the two rooms.
 - The order of the hieroglyphs in the Pyramid has been shuffled, making the Father's Journal a required item to face the Mummy Queen. (You can give the Father's Journal to the guide in the hieroglyph room of the Pyramid for safe keeping.)
 - Herbs restore HP at rates that depend on the difficulty setting, either full restore (Easy), 8 HP (Normal), 4 HP (Hard), or 2 HP (Extreme).  An HP Jewel will restore your HP to full when used in Easy mode only.
 - Upon acquiring the Aura, equip it and use it to unlock Shadow's form. From then on, you can fight as Shadow in any dungeon.

@@ -3,6 +3,7 @@ import random
 from .enums.difficulty import Difficulty
 from .enums.goal import Goal
 from .enums.logic import Logic
+from .enums.entrance_shuffle import EntranceShuffle
 from .enums.enemizer import Enemizer
 from .enums.start_location import StartLocation
 #from .enums.level import Level
@@ -14,7 +15,8 @@ class RandomizerData:
                  logic: Logic = Logic.COMPLETABLE, statues: str = "4", enemizer: Enemizer = Enemizer.NONE,
                  start_location: StartLocation = StartLocation.SOUTH_CAPE, firebird: bool = False, ohko: bool = False,
                  red_jewel_madness: bool = False, allow_glitches: bool = False, boss_shuffle: bool = False,
-                 open_mode: bool = False, z3: bool = False, race_mode: bool = False, overworld_shuffle: bool = False, dungeon_shuffle: bool = False):
+                 open_mode: bool = False, z3: bool = False, overworld_shuffle: bool = False, entrance_shuffle: EntranceShuffle = EntranceShuffle.NONE, race_mode: bool = False,
+                 dungeon_shuffle: bool = False):
         self.seed = seed
         self.difficulty = difficulty
 #        self.level = level
@@ -32,4 +34,6 @@ class RandomizerData:
         self.dungeon_shuffle = dungeon_shuffle
         self.open_mode = open_mode
         self.z3 = z3
+        self.overworld_shuffle = overworld_shuffle
+        self.entrance_shuffle = entrance_shuffle
         self.race_mode = race_mode
