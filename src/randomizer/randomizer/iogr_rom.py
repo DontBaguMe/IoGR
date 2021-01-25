@@ -374,12 +374,12 @@ class Randomizer:
         patch.write(b"\x60")
 
         # Write new logic (heart pieces, stacked herbs)
-        f_copd4 = open(BIN_PATH + "03ffa0_copd4.bin", "rb")
-        patch.seek(int("3ffa0", 16) + rom_offset)
+        f_copd4 = open(BIN_PATH + "03ff90_copd4.bin", "rb")
+        patch.seek(int("3ff90", 16) + rom_offset)
         patch.write(f_copd4.read())
         f_copd4.close
         patch.seek(int("3ef97", 16) + rom_offset)
-        patch.write(b"\x4c\xc1\xff")
+        patch.write(b"\x4c\xb1\xff")
 
         # Treasure chest text: "Already maxed out!"
         patch.seek(int("1ffed", 16) + rom_offset)
@@ -596,9 +596,9 @@ class Randomizer:
 
         # Stackable herb functionality, text
         patch.seek(int("388a4", 16) + rom_offset)
-        patch.write(b"\x4c\xee\xff")
-        patch.seek(int("3ffee", 16) + rom_offset)
-        patch.write(b"\x38\xF8\xAD\xAA\x0A\xE9\x01\x00\x8D\xAA\x0A\xD8\xD0\x03\x20\xB2\x9F\x60")
+        patch.write(b"\x4c\xda\xff")
+        patch.seek(int("3ffda", 16) + rom_offset)
+        patch.write(b"\x38\xF8\xAD\xAA\x0A\xE9\x01\x00\x8D\xAA\x0A\xD8\xD0\x04\x20\xB2\x9F\x60\xa9\x00\x00\x8d\xc6\x0a\x3a\x8d\xc4\x0a\x60")
         patch.seek(int("388ae", 16) + rom_offset)
         patch.write(b"\xc6\x02\x00\xaa\x0a\xac\xd6\xae\x6d\xac\xd6\xe7\x8e\x8d\x84\x0d\xac\xac")
 
@@ -663,7 +663,7 @@ class Randomizer:
             patch.write(b"\x00")
             patch.seek(int("3f7b7", 16) + rom_offset) # HP upgrade
             patch.write(b"\x00")
-            patch.seek(int("3ffbc", 16) + rom_offset) # heart piece
+            patch.seek(int("3ffac", 16) + rom_offset) # heart piece
             patch.write(b"\x60")
 #            patch.seek(int("39f71", 16) + rom_offset)
 #            patch.write(b"\x00\xff\x02\xd5\x29\x60")
@@ -1779,8 +1779,8 @@ class Randomizer:
         patch.seek(int("bd71c", 16) + rom_offset)
         patch.write(qt_encode("    Created by") + b"\xCB" + qt_encode("       DontBaguMe") + str_endpause)
         patch.seek(int("bd74f", 16) + rom_offset)
-        patch.write(qt_encode("Additional Development By") + b"\xCB" + qt_encode("    bryon-w and Raeven0"))
-        patch.write(b"\xCB" + qt_encode("  EmoTracker by Apokalysme"))
+        patch.write(qt_encode(" Devs: Raeven0, Bryon W") + b"\xCB" + qt_encode("    and Neomatamune"))
+        patch.write(b"\xCB" + qt_encode(" EmoTracker by Apokalysme"))
         patch.write(b"\xC9\x78\xCE\xCB" + qt_encode("   Thanks to all the") + b"\xCB" + qt_encode("  amazing playtesters!") + str_endpause)
         patch.seek(int("bdee2", 16) + rom_offset)
         # patch.write(b"\xCB" + qt_encode("  Thanks RPGLimitBreak!") + str_endpause)
@@ -2160,12 +2160,6 @@ class Randomizer:
         ##########################################################################
         #                            Randomize Inca tile
         ##########################################################################
-        # Prepare file for uncompressed map data
-        f_incamapblank = open(BIN_PATH + "incamapblank.bin", "rb")
-        f_incamap = tempfile.TemporaryFile()
-        f_incamap.write(f_incamapblank.read())
-        f_incamapblank.close
-
         # Set random X/Y for new Inca tile
         inca_x = random.randint(0, 11)
         inca_y = random.randint(0, 5)
@@ -2189,24 +2183,17 @@ class Randomizer:
         column = 2 * ((inca_x + 2) % 8)
         addr = 16 * row + column
 
-        # Write single tile at new location in uncompressed data
-        f_incamap.seek(addr)
-        f_incamap.write(b"\x40\x41\x00\x00\x00\x00\x00\x00\x00")
-        f_incamap.write(b"\x00\x00\x00\x00\x00\x00\x00\x42\x43")
-        f_incamap.seek(0)
-
-        # Compress map data and write to file
-        f_incamapcomp = tempfile.TemporaryFile()
-        f_incamapcomp.write(qt_compress(f_incamap.read()))
-        f_incamapcomp.seek(0)
-        f_incamap.close
+        # Get uncompressed map data
+        f_incamapblank = open(BIN_PATH + "incamapblank.bin", "rb")
+        incamap_data = f_incamapblank.read()
+        f_incamapblank.close
 
         # Insert new compressed map data
         # patch.seek(int("1f38db",16)+rom_offset)
+        incamap_data = incamap_data[:addr] + b"\x40\x41\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x42\x43" + incamap_data[addr+18:]
         patch.seek(int("1f3ea0", 16) + rom_offset)
         patch.write(b"\x02\x02")
-        patch.write(f_incamapcomp.read())
-        f_incamapcomp.close
+        patch.write(qt_compress(incamap_data))
 
         # Direct map arrangement pointer to new data - NO LONGER NECESSARY
         # patch.seek(int("d8703",16)+rom_offset)
@@ -3088,9 +3075,10 @@ class Randomizer:
 
         # Create temporary map file
         f_ishtarmapblank = open(BIN_PATH + "ishtarmapblank.bin", "rb")
-        f_ishtarmap = tempfile.TemporaryFile()
-        f_ishtarmap.write(f_ishtarmapblank.read())
+        ishtarmapdata = f_ishtarmapblank.read()
         f_ishtarmapblank.close()
+        f_ishtarmap = tempfile.TemporaryFile()
+        f_ishtarmap.write(ishtarmapdata)
 
         room_offsets = ["6d95e", "6d98a", "6d9b4", "6d9de"]  # ROM addrs for cursor capture, by room
         coord_offsets = [3, 8, 15, 20]  # Offsets for xmin, xmax, ymin, ymax

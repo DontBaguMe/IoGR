@@ -943,6 +943,21 @@ class World:
         graph_copy = None
         return True
 
+    def initialize_ds(self):
+        # Find nodes that contain Dark Spaces
+        self.ds_locations = []
+        self.ds_nodes = []
+        self.freedan_locations = []
+        self.freedan_nodes = []
+        for x in self.item_locations:
+            if self.item_locations[x][1] == 2 or x == 130:    # Special case for Pyramid DS
+                self.ds_locations.append(x)
+                self.ds_nodes.append(self.item_locations[x][0])
+                if not self.is_sublist(self.item_locations[x][4], [64, 65, 66]) and self.item_locations[x][3] not in [61,62,63,64,65,66]:
+                    self.freedan_locations.append(x)
+                    self.freedan_nodes.append(self.item_locations[x][0])
+        return True
+
 
     # Translates logic and exits to world graph
     def update_graph(self,update_logic=True,update_ds=True,update_exits=False,items=[],print_log=False):
@@ -1004,6 +1019,7 @@ class World:
 
         if update_ds:
             # Map DS access to nodes, form change nodes take priority
+            self.initialize_ds()
             ds_nodes = self.freedan_nodes[:]
             ds_nodes_temp = self.ds_nodes[:]
             for x in ds_nodes:
@@ -1054,18 +1070,8 @@ class World:
 
     # Initialize World parameters
     def initialize(self):
-        # Find nodes that contain Dark Spaces
-        self.ds_locations = []
-        self.ds_nodes = []
-        self.freedan_locations = []
-        self.freedan_nodes = []
-        for x in self.item_locations:
-            if self.item_locations[x][1] == 2 or x == 130:    # Special case for Pyramid DS
-                self.ds_locations.append(x)
-                self.ds_nodes.append(self.item_locations[x][0])
-                if not self.is_sublist(self.item_locations[x][4], [64, 65, 66]):
-                    self.freedan_locations.append(x)
-                    self.freedan_nodes.append(self.item_locations[x][0])
+        # Initialize Dark Space information
+        self.initialize_ds()
 
         # Manage required items
         if 1 in self.dungeons_req:
