@@ -14,7 +14,10 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.2.2"
+VERSION = "4.3.0"
+
+MAX_RANDO_RETRIES = 4
+PRINT_LOG = False
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -2654,7 +2657,8 @@ class Randomizer:
                 f_mapdata.seek(0)
                 addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
                 if addr < 27:
-                    print("ERROR: Couldn't find Mansion map header")
+                    if PRINT_LOG:
+                        print("ERROR: Couldn't find Mansion map header")
                 else:
                     f_mapdata.seek(addr)
                     f_mapdata.write(dungeon_music[boss_order[6]-1])
@@ -3025,13 +3029,14 @@ class Randomizer:
         seed_adj = 0
         #self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
-            if seed_adj > 5:
+            if seed_adj > MAX_RANDO_RETRIES:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
             elif seed_adj > 0:
-                print("Trying again... attempt ", seed_adj+1)
+                if PRINT_LOG:
+                    print("Trying again... attempt", seed_adj+1)
             self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
-            done = self.w.randomize(seed_adj)
+            done = self.w.randomize(seed_adj,PRINT_LOG)
             #k6_item = self.w.item_locations[136][3]
             #print(self.w.item_pool[k6_item][3])
             #done = False
@@ -3046,7 +3051,8 @@ class Randomizer:
             f_mapdata.seek(0)
             addr = f_mapdata.read().find(map_patch[0])
             if addr < 0:
-                print("ERROR: Couldn't find header: ", binascii.hexlify(map_patch[0]))
+                if PRINT_LOG:
+                    print("ERROR: Couldn't find header: ", binascii.hexlify(map_patch[0]))
             else:
                 f_mapdata.seek(addr + map_patch[2])
                 f_mapdata.write(map_patch[1])
