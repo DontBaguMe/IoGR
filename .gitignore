@@ -36,3 +36,4 @@ iogr.spec
 
 
 pip
+logs/app.log

@@ -193,9 +193,9 @@ class World:
                 self.graph[x][9].clear()
                 self.graph[x][10] = self.graph[x][1][:]
 
-                for x in self.logic:
-                    if self.logic[x][0] == 1:
-                        self.logic[x][0] = 0
+        for x in self.logic:
+            if self.logic[x][0] == 1:
+                self.logic[x][0] = 0
 
         return True
 
@@ -421,6 +421,7 @@ class World:
         open_abilities = len(self.open_locations[1])
 
         prereq_list = [[],[],[]]    # [[available],[not enough room],[too many inventory items]]
+        ds_list = []
 
         for x in self.open_edges:
             origin = self.logic[x][1]
@@ -455,10 +456,15 @@ class World:
                         start_items_temp = self.items_collected[:] + prereq + traverse_result[1]
                         inv_temp = self.get_inventory(start_items_temp)
                         if len(inv_temp) <= MAX_INVENTORY:
-                            if self.entrance_shuffle == "None" or self.check_ds_access(dest,False):
+                            if self.entrance_shuffle == "None" or self.check_ds_access(dest,False,start_items_temp):
                                 prereq_list[0].append(prereq)
+                            else:
+                                ds_list.append(prereq)
                         else:
                             prereq_list[2].append(prereq)
+
+        if prereq_list == [[],[],[]]:
+            prereq_list[0] += ds_list
 
         return prereq_list
 
@@ -715,20 +721,34 @@ class World:
 
 
     def consider_ds_node(self,node,access_mode=1):
-        if (access_mode == 2 and not self.graph[node][7]) or (access_mode == 1 and not self.graph[node][4]):
+        if not self.graph[node][2] or (access_mode == 2 and not self.graph[node][7]) or (access_mode == 1 and not self.graph[node][4]):
             return True
         return False
 
 
     # Check if a node has Dark Space access
-    def check_ds_access(self, start_node=-1, need_freedan=False): #,items=[]
+    def check_ds_access(self, start_node=-1, need_freedan=False, items=[]):
         if start_node not in self.graph:
             return False
-        if self.graph[start_node][4] == 2 or (self.graph[start_node][4] == 1 and not need_freedan):
+        if not self.graph[start_node][2] or self.graph[start_node][4] == 2 or (self.graph[start_node][4] == 1 and not need_freedan):
             return True
-#        elif not items:
-#            return False
+        elif not items:
+            return False
         else:
+            to_visit = [start_node]
+            visited = []
+            ds_access =  False
+            while not ds_access and to_visit:
+                node = to_visit.pop(0)
+                visited.append(node)
+                if self.check_ds_access(node,need_freedan):
+                    return True
+                else:
+                    for edge in self.graph[node][12]:
+                        dest = self.logic[edge][2]
+                        if dest not in visited+to_visit and not self.logic[edge][0] and self.check_edge(edge,items,False):
+                            to_visit.append(dest)
+
             return False
 #            graph_copy = copy.deepcopy(self.graph)
 #            self.update_graph(False,True,False)
@@ -1097,12 +1117,12 @@ class World:
             origin_exits += self.graph[node][14]
 
         if print_log:
-            i = 0
-            for x in islands:
-                i += 1
-                print("Island",i,x[1],x[2])
-                for y in x[0]:
-                    print("-",self.graph[y][5])
+#            i = 0
+#            for x in islands:
+#                i += 1
+#                print("Island",i,x[1],x[2])
+#                for y in x[0]:
+#                    print("-",self.graph[y][5])
             print(" Assembling islands...")
 
         random.shuffle(islands)
@@ -1115,21 +1135,21 @@ class World:
             origin_exits_new = island[1]
             dest_exits_new = island[2]
 
-            if print_log:
-                for y in nodes_new:
-                    print("-",self.graph[y][5])
+#            if print_log:
+#                for y in nodes_new:
+#                    print("-",self.graph[y][5])
 
             if not dest_exits_new or not origin_exits_new or self.is_accessible(nodes_new[0]):
-                if print_log:
+                if print_log and False:
                     print("  NOT ELIGIBLE")
             else:
                 if (check_progression and not origin_exits_new) or (self.entrance_shuffle == "Coupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
                     quarantine.append(island)
-                    if print_log:
-                        print("  REJECTED")
+#                    if print_log:
+#                        print("  REJECTED")
                 else:
-                    if print_log:
-                        print("  ATTEMPTING...")
+#                    if print_log:
+#                        print("  ATTEMPTING...")
                     random.shuffle(origin_exits)
                     random.shuffle(dest_exits_new)
 
@@ -1838,7 +1858,7 @@ class World:
         goal = False
         cycle = 0
         place_abilities = True
-        self.items_collected = self.list_item_pool(1)
+        self.items_collected = self.list_item_pool(1)   # Assume all items for ability placement
         if print_log:
             print("Beginning ability placement...")
         while not done:
@@ -1859,6 +1879,9 @@ class World:
                 goal = self.is_accessible(492)
 
             # Get list of new progression options
+            if print_log:
+                print("Open edges:",self.open_edges)
+                print("Open locations:",self.open_locations)
             progression_result = self.progression_list()
             progression_list = progression_result[0]
             is_progression = (progression_result != [[],[],[]])
@@ -1882,8 +1905,8 @@ class World:
                     items = progression_list.pop(idx)
                     if self.forward_fill(items, item_locations, False, print_log):
                         progress = True
-                        if print_log:
-                            print("  Placed progression items successfully")
+#                        if print_log:
+#                            print("  Placed progression items successfully")
 
                 if not progress:
                     if print_log:
@@ -1905,8 +1928,9 @@ class World:
 
             if done and place_abilities:
                 self.random_fill(self.list_item_pool(2),item_locations)
-                self.reset_progress()
                 self.check_logic()
+                self.reset_progress(True)
+                self.update_graph()
 
                 place_abilities = False
                 done = False
@@ -1916,7 +1940,8 @@ class World:
 
         if print_log:
             print("Item placement complete, beginning final traversal...")
-            self.reset_progress()
+            self.reset_progress(True)
+            self.update_graph()
             self.traverse([],False,True)
 
         if self.logic_mode == "Completable" and self.goal != "Red Jewel Hunt":
@@ -3480,8 +3505,8 @@ class World:
             244: [False, [242,243],  2, [3,12,0,b"\x00"], 0, "Mu: Boss Room (main)", [], True, [], [], [], [], [], [], [], []],
             245: [False, [212],      2, [3,12,0,b"\x00"], 0, "Mu: Map 95 (top, Slider exit)", [], False, [], [], [], [], [], [], [], []],
             246: [False, [226],      2, [3,12,0,b"\x00"], 0, "Mu: Map 98 (top, Slider exit)", [], False, [], [], [], [], [], [], [], []],
-            247: [False, [511],      2, [3,12,0,b"\x00"], 0, "Mu: Water lowered 1", [], False, [], [], [], [], [], [], [], []],
-            248: [False, [512],      2, [3,12,0,b"\x00"], 0, "Mu: Water lowered 2", [], False, [], [], [], [], [], [], [], []],
+            247: [False, [511],      0, [3,12,0,b"\x00"], 0, "Mu: Water lowered 1", [], False, [], [], [], [], [], [], [], []],
+            248: [False, [512],      0, [3,12,0,b"\x00"], 0, "Mu: Water lowered 2", [], False, [], [], [], [], [], [], [], []],
 
             # Angel Village
             250: [False, [12], 1, [3,13,0,b"\x00"], 0, "Angel Village: Outside", [], True, [], [], [], [], [], [], [], []],
@@ -3547,7 +3572,7 @@ class World:
             312: [False, [],    2, [4,16,0,b"\x00"], 0, "Euro: Rolek Company", [], False, [], [], [], [], [], [], [], []],
             313: [False, [],    2, [4,16,0,b"\x00"], 0, "Euro: West House", [], False, [], [], [], [], [], [], [], []],
             314: [False, [],    2, [4,16,0,b"\x00"], 0, "Euro: Rolek Mansion", [40], False, [], [], [], [], [], [], [], []],
-            315: [False, [314], 2, [4,16,0,b"\x00"], 0, "Euro: Ann", [], False, [], [], [], [], [], [], [], []],
+            315: [False, [314], 0, [4,16,0,b"\x00"], 0, "Euro: Ann", [], False, [], [], [], [], [], [], [], []],
             316: [False, [],    2, [4,16,0,b"\x00"], 0, "Euro: Guest Room", [], False, [], [], [], [], [], [], [], []],
             317: [False, [],    2, [4,16,0,b"\x00"], 0, "Euro: Central House", [], False, [], [], [], [], [], [], [], []],
             318: [False, [1],   2, [4,16,0,b"\x00"], 0, "Euro: Jeweler House", [], False, [], [], [], [], [], [], [], []],
@@ -3685,11 +3710,11 @@ class World:
             471: [False, [522],    2, [6,22,0,b"\x00"], 0, "Babel: Map 227 (bottom)", [], False, [], [], [], [], [], [], [], []],
             472: [False, [],       2, [6,22,0,b"\x00"], 0, "Babel: Map 227 (top)", [], False, [], [], [], [], [], [], [], []],
             473: [False, [],       2, [6,22,0,b"\x00"], 0, "Babel: Olman's Room", [], False, [], [], [], [], [], [], [], []],
-            474: [False, [],       2, [6,22,0,b"\x00"], 0, "Babel: Castoth", [], False, [], [], [], [], [], [], [], []],
-            475: [False, [],       2, [6,22,0,b"\x00"], 0, "Babel: Viper", [], False, [], [], [], [], [], [], [], []],
-            476: [False, [],       2, [6,22,0,b"\x00"], 0, "Babel: Vampires", [], False, [], [], [], [], [], [], [], []],
-            477: [False, [],       2, [6,22,0,b"\x00"], 0, "Babel: Sand Fanger", [], False, [], [], [], [], [], [], [], []],
-            478: [False, [],       2, [6,22,0,b"\x00"], 0, "Babel: Mummy Queen", [], False, [], [], [], [], [], [], [], []],
+            474: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Castoth", [], False, [], [], [], [], [], [], [], []],
+            475: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Viper", [], False, [], [], [], [], [], [], [], []],
+            476: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Vampires", [], False, [], [], [], [], [], [], [], []],
+            477: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Sand Fanger", [], False, [], [], [], [], [], [], [], []],
+            478: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Mummy Queen", [], False, [], [], [], [], [], [], [], []],
             479: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Statue Get", [], False, [], [], [], [], [], [], [], []],
 
             # Jeweler's Mansion
