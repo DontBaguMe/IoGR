@@ -1906,6 +1906,8 @@ class World:
                         return False
                     if print_log:
                         print("  Couldn't place chosen progression, trying again...")
+                elif place_abilities:
+                    self.check_logic()
                     #    removed = self.make_room(item_locations)
                     #    if not removed:
                     #        if print_log:
@@ -1915,6 +1917,10 @@ class World:
                     #        print("  Couldn't place chosen progression, removed an item")
 
             if done and place_abilities:
+                if print_log:
+                    print("  Finished placing abilities")
+                    print("Beginning item placement...")
+                    
                 # Randomly place the rest of the abilities
                 non_prog_abilities = self.list_item_pool(2)
                 random.shuffle(non_prog_abilities)
@@ -1938,9 +1944,7 @@ class World:
                 self.update_graph()
                 place_abilities = False
                 done = False
-                if print_log:
-                    print("  Finished placing abilities")
-                    print("Beginning item placement...")
+
 
         if print_log:
             print("Placing junk items...")
