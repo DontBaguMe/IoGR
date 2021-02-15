@@ -324,7 +324,7 @@ class World:
         return inaccessible
 
     # Fill a list of items randomly in a list of locations
-    def random_fill(self, items=[], item_locations=[], accessible=True):
+    def random_fill(self, items=[], item_locations=[], accessible=True, print_log=False):
         if not items:
             return True
         elif not item_locations:
@@ -347,7 +347,7 @@ class World:
                     restrictions = self.item_locations[dest][4]
                     if not filled and item_type == location_type and item not in restrictions:
                         if not accessible or region != INACCESSIBLE:
-                            if self.fill_item(item, dest):
+                            if self.fill_item(item, dest, False, False, print_log):
                                 to_fill.remove(dest)
                                 placed = True
 
@@ -1840,18 +1840,6 @@ class World:
         self.fill_statues()
         self.map_rewards()
 
-        # Randomly place non-progression items and abilities
-        non_prog_items = self.list_item_pool(0, [], 2) + self.list_item_pool(0, [], 3)
-        random.shuffle(non_prog_items)
-        self.random_fill(non_prog_items, item_locations)
-
-        # Check if ability placement affects logic
-        #self.check_logic()
-
-        # List and shuffle remaining key items
-        item_list = self.list_item_pool()
-        random.shuffle(item_list)
-
         # Forward fill progression items with Monte Carlo method
         # Continue to place progression items until goal is reached
         done = False
@@ -1879,9 +1867,9 @@ class World:
                 goal = self.is_accessible(492)
 
             # Get list of new progression options
-            if print_log:
-                print("Open edges:",self.open_edges)
-                print("Open locations:",self.open_locations)
+#            if print_log:
+#                print("Open edges:",self.open_edges)
+#                print("Open locations:",self.open_locations)
             progression_result = self.progression_list()
             progression_list = progression_result[0]
             is_progression = (progression_result != [[],[],[]])
@@ -1927,11 +1915,27 @@ class World:
                     #        print("  Couldn't place chosen progression, removed an item")
 
             if done and place_abilities:
-                self.random_fill(self.list_item_pool(2),item_locations)
+                # Randomly place the rest of the abilities
+                non_prog_abilities = self.list_item_pool(2)
+                random.shuffle(non_prog_abilities)
+                self.forward_fill(non_prog_abilities,item_locations)
                 self.check_logic()
+
+                # Randomly place non-progression items and abilities
+                non_prog_items = self.list_item_pool(0, [], 2) + self.list_item_pool(0, [], 3)
+                for item in non_prog_items:
+                    if item in self.items_collected:
+                        self.items_collected.remove(item)
+                #random.shuffle(non_prog_items)
+                self.forward_fill(non_prog_items, item_locations, False, print_log)
+
+                # List and shuffle remaining key items
+                item_list = self.list_item_pool()
+                #random.shuffle(item_list)
+
+                # Reset graph, prepare for item placement
                 self.reset_progress(True)
                 self.update_graph()
-
                 place_abilities = False
                 done = False
                 if print_log:
@@ -1939,10 +1943,23 @@ class World:
                     print("Beginning item placement...")
 
         if print_log:
+            print("Placing junk items...")
+        junk_items = self.list_item_pool()
+        #random.shuffle(junk_items)
+        self.random_fill(junk_items, item_locations, False, print_log)
+
+        if print_log:
             print("Item placement complete, beginning final traversal...")
-            self.reset_progress(True)
-            self.update_graph()
-            self.traverse([],False,True)
+
+        self.reset_progress(True)
+        self.update_graph()
+        self.traverse([],False,print_log)
+
+        if print_log:
+            locked_ds = [19,29,122]
+            for x in locked_ds:
+                if self.item_locations[x][3] in [61, 62, 63, 64, 65, 66]:
+                    print("WARNING:",self.item_locations[x][9],"has an ability")
 
         if self.logic_mode == "Completable" and self.goal != "Red Jewel Hunt":
             completed = True
@@ -1959,11 +1976,6 @@ class World:
                 print("ERROR: Seed failed, trying again...")
                 print("")
             return False
-
-        if print_log:
-            print("Placing junk items...")
-        junk_items = self.list_item_pool()
-        self.random_fill(junk_items, item_locations, False)
 
         if print_log:
             print("Writing hints...")
@@ -2932,8 +2944,8 @@ class World:
             38: [1, 1, b"\x26", "Father's Journal", False, 2],
             39: [1, 1, b"\x27", "Crystal Ring", False, 1],
             40: [1, 1, b"\x28", "Apple", True, 1],
-            41: [1, 1, b"\x2e", "2 Red Jewels", False, 3],
-            42: [1, 1, b"\x2f", "3 Red Jewels", False, 3],
+            41: [1, 1, b"\x2e", "2 Red Jewels", False, 1],
+            42: [1, 1, b"\x2f", "3 Red Jewels", False, 1],
 
             # Status Upgrades
             50: [3, 1, b"\x87", "HP Upgrade", False, 3],
