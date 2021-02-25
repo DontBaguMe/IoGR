@@ -24,6 +24,19 @@ def find_ROM():
     ROM.insert(10, tkinter.filedialog.askopenfilename())
 
 
+def load_ROM():
+    try:
+        f = open("rompath.txt")
+        return f.read()
+    except:
+        return ""
+
+
+def save_ROM(rompath):
+    with open("rompath.txt","w") as f:
+        f.write(rompath)
+
+
 def generate_seed():
     seed.delete(0, tkinter.END)
     seed.insert(10, random.randint(0, 99999999))
@@ -31,6 +44,7 @@ def generate_seed():
 
 def generate_ROM():
     rompath = ROM.get()
+    save_ROM(rompath)
     seed_str = seed.get()
 
     def get_difficulty():
@@ -358,6 +372,7 @@ statues.set("4")
 
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)
+ROM.insert(0,load_ROM())
 
 seed = tkinter.Entry(mainframe)
 seed.grid(row=1, column=1)

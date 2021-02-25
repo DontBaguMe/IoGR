@@ -39,7 +39,7 @@ class World:
         self.item_locations[location][3] = item
 
         if print_log:
-            print(self.item_pool[item][3],"->",self.item_locations[location][9])
+            print("  ",self.item_pool[item][3],"->",self.item_locations[location][9])
 
         if self.is_accessible(self.item_locations[location][0]):
             self.items_collected.append(item)
@@ -57,7 +57,7 @@ class World:
 
 
     # Removes an assigned item and returns it to item pool
-    def unfill_item(self, location=-1):
+    def unfill_item(self, location=-1, print_log=False):
         if location == -1:
             return -1
         elif not self.item_locations[location][2]:
@@ -67,6 +67,9 @@ class World:
         self.item_locations[location][2] = False
         self.item_locations[location][3] = 0
         self.item_pool[item][0] += 1
+
+        if print_log:
+            print("  ",self.item_pool[item][3],"<-",self.item_locations[location][9],"removed")
 
         if self.is_accessible(self.item_locations[location][0]):
             if item in self.items_collected:
@@ -174,15 +177,6 @@ class World:
             return False
 
 
-    # Visit a node in the world graph
-    def visit(self, node_id=-1):
-        if node_id not in self.graph:
-            return False
-        else:
-            self.graph[node_id][0] = True
-            return True
-
-
     # Zeroes out accessible flags for all world regions
     def unsolve(self,reset_graph=False):
         for x in self.graph:
@@ -204,6 +198,7 @@ class World:
     def reset_progress(self,reset_graph=False):
         self.visited.clear()
         self.items_collected.clear()
+        self.item_destinations.clear()
         self.open_locations = [[],[]]
         self.open_edges = []
 
@@ -225,17 +220,13 @@ class World:
         while to_visit:
             node = to_visit.pop(0)
             visited.append(node)
-            if not test and node not in self.visited:
-                self.visited.append(node)
             if print_log:
                 print("  Visiting:",self.graph[node][5])
 
             # If we haven't been here yet...
             if not self.graph[node][0]:
                 # Get the newly-accessible items and record open item/ability locations
-                if not test:
-                    self.visit_node(node,print_log)
-                new_items += self.collect_items(node,test,print_log)
+                new_items += self.visit_node(node,test,print_log)
 
                 # Queue up newly-accessible places to visit
                 for x in self.graph[node][10]:
@@ -252,7 +243,8 @@ class World:
                     print(" Ran out of places - updating logic:")
                 for edge in open_edges:
                     dest = self.logic[edge][2]
-                    if self.check_edge(edge) and dest not in to_visit:
+                    if self.check_edge(edge,[],False) and dest not in to_visit:
+                        self.logic[edge][0] = 1
                         to_visit.append(dest)
                         if print_log:
                             print("  -Discovered:",self.graph[dest][5])
@@ -266,25 +258,27 @@ class World:
 
     # Return list of logic edges that originate in an accessible node and end in an inaccessible node
     def get_open_edges(self,nodes=[]):
-        test_edges = []
+        test_edges = self.open_edges[:]
         open_edges = []
-        for x in self.graph:
-            if self.is_accessible(x) or x in nodes:
+        for x in nodes:
+            if not self.is_accessible(x):
                 test_edges += self.graph[x][12]
         for edge in test_edges:
             origin = self.logic[edge][1]
             dest = self.logic[edge][2]
-            if not self.is_accessible(dest) and dest not in nodes:
+            if self.logic[edge][0] >= 0 and not self.is_accessible(dest) and dest not in nodes:
                 open_edges.append(edge)
         return open_edges
 
 
-    def visit_node(self,node,print_log=False):
-        if not self.graph[node][0]:
+    # Visit a node, update graph info, return new items collected
+    def visit_node(self,node,test=False,print_log=False):
+        if not test and not self.graph[node][0]:
             self.graph[node][0] = True
             self.visited.append(node)
+            self.item_destinations += self.graph[node][6]
             self.open_edges += self.graph[node][12]
-        return True
+        return self.collect_items(node,test,print_log)
 
 
     # Collect all items in given node
@@ -293,7 +287,7 @@ class World:
             return False
         items_found = []
         for location in self.graph[node][11]:
-            if self.item_locations[location][3]:
+            if self.item_locations[location][2]:
                 items_found.append(self.item_locations[location][3])
                 if not test:
                     self.items_collected.append(self.item_locations[location][3])
@@ -301,8 +295,12 @@ class World:
                     print("  -Collected:",self.item_pool[self.item_locations[location][3]][3])
             elif self.item_locations[location][1] == 1 and not test:
                 self.open_locations[0].append(location)
+                if print_log:
+                    print("  -Discovered:",self.item_locations[location][9])
             elif self.item_locations[location][1] == 2 and not test:
                 self.open_locations[1].append(location)
+                if print_log:
+                    print("  -Discovered:",self.item_locations[location][9])
         return items_found
 
     # Returns full list of accessible locations
@@ -354,7 +352,7 @@ class World:
         return True
 
     # Place list of items into random accessible locations
-    def forward_fill(self, items=[], item_locations=[], test=False, print_log=False):
+    def forward_fill(self, items=[], item_locations=[], test=False, override_restrictions=False, print_log=False):
         if not items:
             return True
         elif not item_locations:
@@ -377,7 +375,7 @@ class World:
             filled = False
             while not filled and to_fill[item_type-1]:
                 location = to_fill[item_type-1].pop(0)
-                if self.fill_item(item,location,test,False,print_log):
+                if self.fill_item(item,location,test,override_restrictions,print_log):
                     filled = True
                     filled_locations.append(location)
                     to_fill[item_type-1] += quarantine[item_type-1]
@@ -393,10 +391,20 @@ class World:
 
 
     # Convert a prerequisite to a list of items needed to fulfill it
-    def items_needed(self, prereq=[]):
-        if not prereq:
+    def items_needed(self, edge=0):
+        if not edge:
             return []
-        elif not self.items_collected:
+
+        prereq = []
+        for req in self.logic[edge][4]:
+            item = req[0]
+            ct = req[1]
+            i = 0
+            while i < ct:
+                prereq.append(item)
+                i += 1
+
+        if not self.items_collected:
             return prereq
 
         prereq_new = []
@@ -413,55 +421,38 @@ class World:
 
     # Returns list of item combinations that grant progression
     # Returns progression list in the following categories: [[available],[not enough room],[too many inventory items]]
-    def progression_list(self):
-        all_items = self.list_item_pool(1) + self.list_item_pool(2)
+    def progression_list(self,open_edges=[]):
+        if not open_edges:
+            open_edges = self.get_open_edges()
+        all_items = self.list_item_pool(1)
 
         #open_locations = self.find_open_locations()
-        open_items = len(self.open_locations[0])
-        open_abilities = len(self.open_locations[1])
+        open_locations = len(self.open_locations[0])
 
         prereq_list = [[],[],[]]    # [[available],[not enough room],[too many inventory items]]
         ds_list = []
 
-        for x in self.open_edges:
-            origin = self.logic[x][1]
-            dest = self.logic[x][2]
-            if self.logic[x][0] >= 0 and self.is_accessible(origin) and not self.is_accessible(dest):
-                prereq_ls = []
-                item_ct = 0
-                ability_ct = 0
-                for req in self.logic[x][4]:
-                    item = req[0]
-                    ct = req[1]
-                    i = 0
-                    while i < ct:
-                        prereq_ls.append(item)
-                        i += 1
-                prereq = self.items_needed(prereq_ls)
-
-                item_prereqs = 0
-                ability_prereqs = 0
-                for y in prereq:
-                    if self.item_pool[y][1] == 1:
-                        item_prereqs += 1
-                    elif self.item_pool[y][1] == 2:
-                        ability_prereqs += 1
-
-                if prereq and prereq not in prereq_list and self.is_sublist(all_items, prereq):
-                    if item_prereqs > open_items or ability_prereqs > open_abilities:
-                        prereq_list[1].append(prereq)
-                    else:
-                        traverse_result = self.traverse([dest],True)
-                        new_nodes = traverse_result[0]
-                        start_items_temp = self.items_collected[:] + prereq + traverse_result[1]
-                        inv_temp = self.get_inventory(start_items_temp)
-                        if len(inv_temp) <= MAX_INVENTORY:
-                            if self.entrance_shuffle == "None" or self.check_ds_access(dest,False,start_items_temp):
-                                prereq_list[0].append(prereq)
-                            else:
-                                ds_list.append(prereq)
+        for edge in open_edges:
+            prereq = self.items_needed(edge)
+            if prereq and prereq not in prereq_list[0] and self.is_sublist(all_items, prereq):
+                if prereq not in prereq_list[1] and not self.forward_fill(prereq,self.open_locations[0],True,self.logic_mode == "Chaos"):
+                    prereq_list[1].append(prereq)
+                elif prereq not in prereq_list[2]:
+                    dest = self.logic[edge][2]
+                    traverse_result = self.traverse([dest],True)
+                    new_nodes = traverse_result[0]
+                    start_items_temp = self.items_collected[:] + prereq + traverse_result[1]
+                    item_destinations_temp = self.item_destinations[:]
+                    for x in new_nodes:
+                        item_destinations_temp += self.graph[x][6]
+                    inv_temp = self.get_inventory(start_items_temp,item_destinations_temp)
+                    if len(inv_temp) <= MAX_INVENTORY:
+                        if self.entrance_shuffle == "None" or self.check_ds_access(dest,False,start_items_temp):
+                            prereq_list[0].append(prereq)
                         else:
-                            prereq_list[2].append(prereq)
+                            ds_list.append(prereq)
+                    else:
+                        prereq_list[2].append(prereq)
 
         if prereq_list == [[],[],[]]:
             prereq_list[0] += ds_list
@@ -474,44 +465,51 @@ class World:
     def make_room(self, progression_result, print_log=False):
         # For inventory bottlenecks, remove one inventory item and try again
         if not progression_result[1] and progression_result[2]:
-            if not self.remove_nonprog(1,0,True,print_log):
-                if print_log:
-                    print("ERROR: Could not remove an inventory item")
-                return False
-            return progression_result[2]
+            return self.remove_nonprog(1,0,True,print_log)
 
-        non_prog_locations = [[],[]]
-        open_items = len(self.open_locations[0])
-        open_abilities = len(self.open_locations[1])
-        unfilled = []
-        min_prereqs = []
-        min_item_ct = 0
-        min_ability_ct = 0
-        progression_list = progression_result[1][:]
-        while progression_list:
-            prereq = progression_list.pop(0)
-            items_needed = -open_items
-            abilities_needed = -open_abilities
-            for x in prereq:
-                if self.item_pool[x][1] == 1:
-                    items_needed += 1
-                elif self.item_pool[x][1] == 2:
-                    abilities_needed += 1
-            items_needed = max(0,items_needed)
-            abilities_needed = max(0,abilities_needed)
-            if not min_prereqs or min_item_ct+min_ability_ct > items_needed + abilities_needed:
-                min_prereqs = [prereq]
-                min_item_ct = items_needed
-                min_ability_ct = abilities_needed
-            elif min_prereqs and min_item_ct == items_needed and min_ability_ct == abilities_needed:
-                min_prereqs.append(prereq)
+        success = False
+        for node in self.visited:
+            if not success:
+                for x in self.graph[node][11]:
+                    if self.is_filled(x) and self.item_pool[self.item_locations[x][3]][5]>1:
+                        if self.unfill_item(x,print_log):
+                            success = True
+        return success
 
-        if not self.remove_nonprog(min_item_ct,min_ability_ct,False,print_log):
-            if print_log:
-                print("ERROR: Could not make room")
-            return False
 
-        return min_prereqs
+        #### THIS IS OLD, OBSELETE CODE
+#        non_prog_locations = [[],[]]
+#        open_locations = len(self.open_locations[0])
+#        open_abilities = len(self.open_locations[1])
+#        unfilled = []
+#        min_prereqs = []
+#        min_item_ct = 0
+#        min_ability_ct = 0
+#        progression_list = progression_result[1][:]
+#        while progression_list:
+#            prereq = progression_list.pop(0)
+#            items_needed = -open_locations
+#            abilities_needed = -open_abilities
+#            for x in prereq:
+#                if self.item_pool[x][1] == 1:
+#                    items_needed += 1
+#                elif self.item_pool[x][1] == 2:
+#                    abilities_needed += 1
+#            items_needed = max(0,items_needed)
+#            abilities_needed = max(0,abilities_needed)
+#            if not min_prereqs or min_item_ct+min_ability_ct > items_needed + abilities_needed:
+#                min_prereqs = [prereq]
+#                min_item_ct = items_needed
+#                min_ability_ct = abilities_needed
+#            elif min_prereqs and min_item_ct == items_needed and min_ability_ct == abilities_needed:
+#                min_prereqs.append(prereq)
+#
+#        if not self.remove_nonprog(min_item_ct,min_ability_ct,False,print_log):
+#            if print_log:
+#                print("ERROR: Could not make room")
+#            return False
+#
+#        return min_prereqs
 
     # Remove an accessible non-progression item to make room for a progression item
     def remove_nonprog(self,item_ct=0,ability_ct=0,inv=False,print_log=False):
@@ -708,8 +706,8 @@ class World:
                     ds_loc = self.ds_locations[self.ds_nodes.index(ds_node)]
                     if self.item_locations[ds_loc][2] and not self.item_locations[ds_loc][3]:
                         found_locked_ds = True
-                        if print_log:
-                            print(" -Found:",self.item_locations[ds_loc][9])
+                        #if print_log:
+                        #    print(" -Found:",self.item_locations[ds_loc][9])
                 if not found_locked_ds:
                     self.item_locations[ds_loc][2] = True
                     if self.item_locations[ds_loc][3]:
@@ -718,44 +716,6 @@ class World:
                         print(" -Locked:",self.item_locations[ds_loc][9])
 
         return True
-
-
-    def consider_ds_node(self,node,access_mode=1):
-        if not self.graph[node][2] or (access_mode == 2 and not self.graph[node][7]) or (access_mode == 1 and not self.graph[node][4]):
-            return True
-        return False
-
-
-    # Check if a node has Dark Space access
-    def check_ds_access(self, start_node=-1, need_freedan=False, items=[]):
-        if start_node not in self.graph:
-            return False
-        if not self.graph[start_node][2] or self.graph[start_node][4] == 2 or (self.graph[start_node][4] == 1 and not need_freedan):
-            return True
-        elif not items:
-            return False
-        else:
-            to_visit = [start_node]
-            visited = []
-            ds_access =  False
-            while not ds_access and to_visit:
-                node = to_visit.pop(0)
-                visited.append(node)
-                if self.check_ds_access(node,need_freedan):
-                    return True
-                else:
-                    for edge in self.graph[node][12]:
-                        dest = self.logic[edge][2]
-                        if dest not in visited+to_visit and not self.logic[edge][0] and self.check_edge(edge,items,False):
-                            to_visit.append(dest)
-
-            return False
-#            graph_copy = copy.deepcopy(self.graph)
-#            self.update_graph(False,True,False)
-#            result = self.check_ds_access(start_node, need_freedan)
-#            self.graph = graph_copy
-#            graph_copy = None
-#            return result
 
 
     # Determine an exit's direction (e.g. outside to inside)
@@ -815,12 +775,10 @@ class World:
             if print_log:
                 print("ERROR: Invalid destination (link)", dest_exit)
             return False
-        if self.exits[origin_exit][1] != -1 and origin_exit > 21:
-            if print_log:
-                print("WARNING: Origin already linked", origin_exit)
-        if self.exits[dest_exit][2] != -1 and dest_exit > 21:
-            if print_log:
-                print("WARNING: Destination already linked", dest_exit)
+        if print_log and self.exits[origin_exit][1] != -1 and origin_exit > 21:
+            print("WARNING: Origin already linked", origin_exit)
+        if print_log and self.exits[dest_exit][2] != -1 and dest_exit > 21:
+            print("WARNING: Destination already linked", dest_exit)
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
         self.exit_log.append([origin_exit,dest_exit])
@@ -832,10 +790,10 @@ class World:
             if dest not in self.graph[origin][1]:
                 self.graph[origin][1].append(dest)
             self.new_connection(origin,dest)
-        if self.entrance_shuffle != "Uncoupled" and check_connections and self.is_exit_coupled(origin_exit) and self.is_exit_coupled(dest_exit):
+        if (origin_exit <= 21 or self.entrance_shuffle != "Uncoupled") and check_connections and self.is_exit_coupled(origin_exit) and self.is_exit_coupled(dest_exit):
             new_origin = self.exits[dest_exit][0]
             new_dest = self.exits[origin_exit][0]
-            if (self.exits[new_origin][1] != -1 and new_origin > 21) or (self.exits[new_dest][2] != -1 and new_dest > 21):
+            if (new_origin > 21 and self.exits[new_origin][1] != -1) or (new_dest > 21 and self.exits[new_dest][2] != -1):
                 if print_log:
                     print("WARNING: Return exit already linked:",new_origin,new_dest)
             else:
@@ -1179,7 +1137,7 @@ class World:
 
         # Check island Dark Space access, map exits accordingly
         self.reset_progress()
-        self.initialize_ds()
+        #self.initialize_ds()
         self.update_graph(True,True,True)
 
         island_result = self.build_islands()
@@ -1288,12 +1246,13 @@ class World:
             self.graph[x][9].clear()
 
         # Find nodes that contain Dark Spaces
-        self.ds_locations = [130]          # Special case for Pyramid DS
-        self.ds_nodes = [411]
+        pyramid_ds_id = 130          # Special case for Pyramid DS
+        self.ds_locations = [pyramid_ds_id]
+        self.ds_nodes = [self.item_locations[pyramid_ds_id][0]]
         self.freedan_locations = self.ds_locations[:]
         self.freedan_nodes = self.ds_nodes[:]
         for x in self.item_locations:
-            if self.item_locations[x][1] == 2 and x != 130:
+            if self.item_locations[x][1] == 2:
                 self.ds_locations.append(x)
                 self.ds_nodes.append(self.item_locations[x][0])
                 if not self.is_sublist(self.item_locations[x][4], [64, 65, 66]) and self.item_locations[x][3] not in [61,62,63,64,65,66]:
@@ -1339,6 +1298,7 @@ class World:
             if print_log:
                 print(" Exits updated")
 
+        # Update logic edges (except those requiring Freedan access)
         if update_logic:
             for edge in self.logic:
                 if not self.logic[edge][3]:
@@ -1360,42 +1320,17 @@ class World:
             print(" Graph updated")
 
         if update_ds:
-            # Map DS access to nodes, form change nodes take priority
+            # Map DS access to nodes
             self.initialize_ds()
-            ds_nodes = self.freedan_nodes[:]
-            ds_nodes_temp = self.ds_nodes[:]
-            for x in ds_nodes:
-                ds_nodes_temp.remove(x)
 
-            access_mode = 2     # Map Freedan access first
-            visited = []
-            to_visit = []
-            while ds_nodes:
-                ds_node = ds_nodes.pop(0)
-                to_visit.append(ds_node)
-                while to_visit:
-                    node = to_visit.pop(0)
-                    visited.append(node)
-                    #if print_log:
-                    #    print("  -Visiting:",self.graph[node][5])
+            self.update_ds_access(self.ds_nodes,1)
+            for node in self.freedan_nodes:
+                self.update_ds_access([node],2,[node])
 
-                    if self.graph[node][4] < access_mode or access_mode == 2:
-                        self.graph[node][4] = access_mode
-                        if ds_node not in self.graph[node][9]:
-                            self.graph[node][9].append(ds_node)
-                        for x in self.graph[node][8]:
-                            if ds_node not in self.graph[x][9] and x not in to_visit and self.consider_ds_node(x,access_mode):
-                                to_visit.append(x)
-                                #if print_log:
-                                #    print("   -Discovered:",self.graph[x][5])
-
-                # If we're out of places, pop the next DS node
-                if not ds_nodes and access_mode == 2:
-                    access_mode = 1
-                    ds_nodes += ds_nodes_temp
             if print_log:
                 print(" DS access updated")
 
+        # Update logic requiring Freedan access
         if update_logic:
             for edge in self.logic:
                 if self.logic[edge][3]:
@@ -1403,7 +1338,78 @@ class World:
             if print_log:
                 print(" Logic updated (DS access)")
 
+        #for x in self.graph:
+        #    print(x,self.graph[x][11],self.graph[x][5])
+            #print(x,self.graph[x][4],self.graph[x][9],self.graph[x][5])
+
         return True
+
+
+    # Check whether a node's DS access data needs to be updated
+    def consider_ds_node(self,node,access_mode=1,ds_nodes=[]):
+        if access_mode == 2:
+            if not self.graph[node][2] or self.graph[node][7]:
+                return False
+            success = False
+            for x in ds_nodes:
+                if x not in self.graph[node][9]:
+                    success = True
+            return success
+
+        if not self.graph[node][4]:
+            return True
+
+        return False
+
+
+    # Check if a node has Dark Space access
+    def check_ds_access(self, start_node=-1, need_freedan=False, items=[]):
+        if start_node not in self.graph:
+            return False
+        if not self.graph[start_node][2] or self.graph[start_node][4] == 2 or (self.graph[start_node][4] == 1 and not need_freedan):
+            return True
+        elif not items:
+            return False
+        else:
+            to_visit = [start_node]
+            visited = []
+            ds_access =  False
+            while not ds_access and to_visit:
+                node = to_visit.pop(0)
+                visited.append(node)
+                if self.check_ds_access(node,need_freedan):
+                    return True
+                else:
+                    for edge in self.graph[node][12]:
+                        dest = self.logic[edge][2]
+                        if dest not in visited+to_visit and not self.logic[edge][0] and self.check_edge(edge,items,False):
+                            to_visit.append(dest)
+
+            return False
+#            graph_copy = copy.deepcopy(self.graph)
+#            self.update_graph(False,True,False)
+#            result = self.check_ds_access(start_node, need_freedan)
+#            self.graph = graph_copy
+#            graph_copy = None
+#            return result
+
+    # Update a node's DS access data - recursive for all backwards-accessible nodes
+    def update_ds_access(self,nodes=[],access_mode=1,ds_nodes=[]):
+        if not nodes:
+            return True
+
+        to_visit = []
+        for node in nodes:
+            if self.graph[node][4] < access_mode:
+                self.graph[node][4] = access_mode
+            for ds_node in ds_nodes:
+                if ds_node not in self.graph[node][9]:
+                    self.graph[node][9].append(ds_node)
+            for x in self.graph[node][8]:
+                if self.consider_ds_node(x,access_mode,ds_nodes):
+                    to_visit.append(x)
+
+        return self.update_ds_access(to_visit,access_mode,ds_nodes)
 
 
     # Check a logic edge to see if prerequisites have been met
@@ -1449,46 +1455,49 @@ class World:
 
 
     # Map a new connection (i.e. exit, logic) to graph
-    def new_connection(self, origin, dest, test=False):
+    def new_connection(self, origin, dest, test=False, print_log=False):
         if not test:
             # To/from data
             if dest not in self.graph[origin][10]:
                 self.graph[origin][10].append(dest)
             if origin not in self.graph[dest][8]:
                 self.graph[dest][8].append(origin)
+
             # Dark Space access data
             if self.graph[dest][4] > self.graph[origin][4]:
-                self.graph[origin][4] = self.graph[dest][4]
-                if self.graph[origin][7]:
-                    self.graph[origin][4] = 1
-                else:
-                    for x in self.graph[dest][9]:
-                        if x not in self.graph[origin][9]:
-                            self.graph[origin][9].append(x)
+                self.update_ds_access([origin],self.graph[dest][4],self.graph[dest][9])
+
         # Return list of newly-accessible nodes
-        new_nodes = []
         if self.is_accessible(origin) and not self.is_accessible(dest):
-            to_visit = [dest]
-            while to_visit:
-                node = to_visit.pop(0)
-                new_nodes.append(node)
-                for x in self.graph[node][10]:
-                    if x != node and x not in to_visit+new_nodes and not self.graph[x][0]:
-                        to_visit.append(x)
-        return new_nodes
+            traverse_result = self.traverse([dest],test,print_log)
+            return traverse_result[0]
+        return []
+#            to_visit = [dest]
+#            while to_visit:
+#                node = to_visit.pop(0)
+#                new_nodes.append(node)
+#                if not test:
+#                    self.visit_node(node,test,print_log)
+#                for x in self.graph[node][10]:
+#                    if x != node and x not in to_visit+new_nodes and not self.is_accessible(x):
+#                        to_visit.append(x)
+#        return new_nodes
 
 
     def restrict_edge(self, edge=-1):
-        if edge not in self.logic:
+        try:
+            self.logic[edge][0] = -1
+            return True
+        except:
             return False
-        self.logic[edge][0] = -1
 
 
     def unrestrict_edge(self, edge=-1):
-        if edge not in self.logic:
+        try:
+            self.logic[edge][0] = 0 if self.logic[edge][0] != 1 else self.logic[edge][0]
+            return True
+        except:
             return False
-        if self.logic[edge][0] != 1:
-            self.logic[edge][0] = 0
 
     # Initialize World parameters
     def initialize(self,print_log=False):
@@ -1676,7 +1685,7 @@ class World:
                 exit_old = boss_exit_idx[boss-1]
                 exit_new = boss_exit_idx[dungeon]
                 self.link_exits(entrance_old,entrance_new,print_log)
-                self.link_exits(exit_old,exit_new)
+                self.link_exits(exit_old,exit_new,print_log)
                 dungeon += 1
 
         # Overworld shuffle
@@ -1694,12 +1703,12 @@ class World:
                 return False
 
         self.reset_progress(True)
-        self.initialize_ds()
+        #self.initialize_ds()
         self.update_graph(True,True,True)
 
         # Initialize Dark Space information
         if self.logic_mode == "Completable":
-            if not self.lock_dark_spaces():
+            if not self.lock_dark_spaces(print_log):
                 if print_log:
                     print("ERROR: Could not lock Dark Spaces")
                 return False
@@ -1767,24 +1776,26 @@ class World:
             self.item_locations[x][0] = INACCESSIBLE
 
     # Simulate inventory
-    def get_inventory(self,start_items=[],new_nodes=[]):
+    def get_inventory(self,start_items=[],item_destinations=[],new_nodes=[]):
         if not start_items:
             start_items = self.items_collected[:]
+        if not item_destinations:
+            item_destinations = self.item_destinations[:]
         inventory_temp = []
         for item in start_items:
             if self.item_pool[item][4]:
                 inventory_temp.append(item)
 
-        negative_inventory = []
-        for node in self.graph:
-            if self.is_accessible(node) or node in new_nodes:
-                negative_inventory += self.graph[node][6]
+#        negative_inventory = []
+#        for node in self.graph:
+#            if self.is_accessible(node) or node in new_nodes:
+#                negative_inventory += self.graph[node][6]
 
         inventory = []
         while inventory_temp:
             item = inventory_temp.pop(0)
-            if item in negative_inventory:
-                negative_inventory.remove(item)
+            if item in item_destinations:
+                item_destinations.remove(item)
             else:
                 inventory.append(item)
 
@@ -1859,92 +1870,98 @@ class World:
                 return False
 
             self.traverse()
-            if not place_abilities and len(self.get_inventory()) > MAX_INVENTORY:
-                goal = False
-                if print_log:
-                    print("WARNING: Inventory capacity exceeded")
-            else:
-                goal = self.is_accessible(492)
 
-            # Get list of new progression options
-#            if print_log:
-#                print("Open edges:",self.open_edges)
-#                print("Open locations:",self.open_locations)
-            progression_result = self.progression_list()
-            progression_list = progression_result[0]
-            is_progression = (progression_result != [[],[],[]])
-            done = goal and (self.logic_mode != "Completable" or not is_progression)
-
-            if not is_progression and not done:
-                if print_log:
-                    print("ERROR: Couldn't progress any further")
-                return False
-
-            if not done:
-                progress = False
-                key = random.uniform(0,100)
-                while not progress and progression_list:
-                    progression_mc = self.monte_carlo(progression_list)
-                    idx = 0
-                    for x in progression_mc:
-                        if key <= x[0] and not idx:
-                            idx = x[1]
-
-                    items = progression_list.pop(idx)
-                    if self.forward_fill(items, item_locations, False, print_log):
-                        progress = True
-#                        if print_log:
-#                            print("  Placed progression items successfully")
-
-                if not progress:
-                    if print_log:
-                        print("  No suitable progression found, attempting to make room...")
-                    progression_list = self.make_room(progression_result,print_log)
-                    if not progression_list:
+            if place_abilities:
+                to_place = self.list_item_pool(2)
+                if not to_place:
+                    done = True
+                else:
+                    random.shuffle(to_place)
+                    progress = False
+                    while not progress and to_place:
+                        ability = to_place.pop(0)
+                        progress = self.forward_fill([ability],item_locations,False,self.logic_mode == "Chaos",print_log)
+                    if progress:
+                        self.check_logic()
+                    else:
                         if print_log:
-                            print("ERROR: Could not find progression")
+                            print("ERROR: Could not place any abilities")
                         return False
+
+                if done:
+                    place_abilities = False
+                    done = False
                     if print_log:
-                        print("  Couldn't place chosen progression, trying again...")
-                elif place_abilities:
-                    self.check_logic()
-                    #    removed = self.make_room(item_locations)
-                    #    if not removed:
-                    #        if print_log:
-                    #            print("ERROR: Could not remove non-progression item")
-                    #        return False
-                    #    if print_log:
-                    #        print("  Couldn't place chosen progression, removed an item")
+                        print("  Finished placing abilities")
+                        print("Beginning item placement...")
 
-            if done and place_abilities:
+                    # Randomly place non-progression items
+                    self.traverse()
+                    non_prog_items = self.list_item_pool(0, [], 2) + self.list_item_pool(0, [], 3)
+                    for item in non_prog_items:
+                        if item in self.items_collected:
+                            self.items_collected.remove(item)
+                    self.forward_fill(non_prog_items, item_locations, False, self.logic_mode == "Chaos", print_log)
+
+                    # List and shuffle remaining key items
+                    item_list = self.list_item_pool()
+                    #random.shuffle(item_list)
+
+                    # Reset graph, prepare for item placement
+                    self.reset_progress(True)
+                    self.update_graph()
+            else:
+                if len(self.get_inventory()) > MAX_INVENTORY:
+                    goal = False
+                    if print_log:
+                        print("WARNING: Inventory capacity exceeded")
+                else:
+                    goal = self.is_accessible(492)
+
+                # Get list of new progression options
+                #if print_log:
+                #    print("Open edges:",self.open_edges)
+                #    print("Open locations:",self.open_locations)
+                progression_result = self.progression_list()
                 if print_log:
-                    print("  Finished placing abilities")
-                    print("Beginning item placement...")
-                    
-                # Randomly place the rest of the abilities
-                non_prog_abilities = self.list_item_pool(2)
-                random.shuffle(non_prog_abilities)
-                self.forward_fill(non_prog_abilities,item_locations)
-                self.check_logic()
+                    print("Progression options: {")
+                    print(" ",progression_result[0])
+                    print(" ",progression_result[1])
+                    print(" ",progression_result[2],"}")
+                progression_list = progression_result[0]
+                is_progression = (progression_result != [[],[],[]])
+                done = goal and (self.logic_mode != "Completable" or not is_progression)
 
-                # Randomly place non-progression items and abilities
-                non_prog_items = self.list_item_pool(0, [], 2) + self.list_item_pool(0, [], 3)
-                for item in non_prog_items:
-                    if item in self.items_collected:
-                        self.items_collected.remove(item)
-                #random.shuffle(non_prog_items)
-                self.forward_fill(non_prog_items, item_locations, False, print_log)
+                if not done:
+                    if not is_progression:
+                        if print_log:
+                            print("ERROR: Couldn't progress any further")
+                            self.print_graph()
+                        return False
 
-                # List and shuffle remaining key items
-                item_list = self.list_item_pool()
-                #random.shuffle(item_list)
+                    progress = False
+                    key = random.uniform(0,100)
+                    while not progress and progression_list:
+                        progression_mc = self.monte_carlo(progression_list)
+                        idx = 0
+                        for x in progression_mc:
+                            if key <= x[0] and not idx:
+                                idx = x[1]
 
-                # Reset graph, prepare for item placement
-                self.reset_progress(True)
-                self.update_graph()
-                place_abilities = False
-                done = False
+                        items = progression_list.pop(idx)
+                        if self.forward_fill(items, item_locations, False, self.logic_mode == "Chaos", print_log):
+                            progress = True
+    #                        if print_log:
+    #                            print("  Placed progression items successfully")
 
+                    if not progress:
+                        if print_log:
+                            print("  No suitable progression found, attempting to make room...")
+                        if not self.make_room(progression_result,print_log):
+                            if print_log:
+                                print("ERROR: Could not find progression")
+                                self.print_graph()
+                            return False
 
         if print_log:
             print("Placing junk items...")
@@ -1977,6 +1994,7 @@ class World:
 
         if not completed:
             if print_log:
+                self.print_graph()
                 print("ERROR: Seed failed, trying again...")
                 print("")
             return False
@@ -1991,6 +2009,14 @@ class World:
             print("Randomization complete!")
 
         return True
+
+
+    def print_graph(self):
+        print("Open edges:",self.open_edges)
+        print("Open locations:",self.open_locations)
+        for node in self.graph:
+            print(node,self.graph[node])
+
 
     # Prepares dataset to give in-game spoilers
     def in_game_spoilers(self, placement_log=[]):
@@ -2898,6 +2924,7 @@ class World:
         self.map_patches = []
         self.visited = []
         self.items_collected = []
+        self.item_destinations = []
         self.open_locations = [[],[]]
         self.open_edges = []
 
@@ -3275,8 +3302,18 @@ class World:
         # World graph
         # Format: { Region ID:
         #                   Traversed_flag, [AccessibleRegions], type(0=other/misc,1=exterior,2=interior), [continentID,areaID,layer,MapID],
-        #                   DS_access(0=no_access,1=any_DS,2=form_change_DS), RegionName, [ItemsToRemove], ForceFormChange,
-        #                   [AccessibleFromNodes], [Accessible_DS_nodes], [Accessible_Nodes_w_Logic], [item_locations], [origin_logic], [dest_logic], [origin_exits], [dest_exits]}
+        #                   4: DS_access (0=no_access,1=any_DS,2=form_change_DS),
+        #                   5: RegionName,
+        #                   6: [ItemsToRemove],
+        #                   7: ForceFormChange,
+        #                   8: [AccessibleFromNodes],
+        #                   9: [Accessible_DS_nodes],
+        #                   10: [Accessible_Nodes_w_Logic],
+        #                   11: [item_locations],
+        #                   12: [origin_logic],
+        #                   13: [dest_logic],
+        #                   14: [origin_exits],
+        #                   15: [dest_exits]        }
         self.graph = {
             # Game Start
             0: [False, [22], 0, [0,0,0,b"\x00"], 0, "Game Start", [], True, [], [], [], [], [], [], [], []],
@@ -3333,16 +3370,16 @@ class World:
             49: [False, [],   2, [1,2,0,b"\x00"], 0, "Underground Tunnel: Exit", [], True, [], [], [], [], [], [], [], []],
 
             # Itory
-            50: [False, [10],  1, [1,3,0,b"\x00"], 0, "Itory: Entrance", [9], False, [], [], [], [], [], [], [], []],
-            51: [False, [50],  1, [1,3,0,b"\x00"], 0, "Itory: Main Area", [], False, [], [], [], [], [], [], [], []],
-            52: [False, [],    1, [1,3,0,b"\x00"], 0, "Itory: Lilly's Back Porch", [], False, [], [], [], [], [], [], [], []],
-            53: [False, [],    2, [1,3,0,b"\x00"], 0, "Itory: West House", [], False, [], [], [], [], [], [], [], []],
-            54: [False, [],    2, [1,3,0,b"\x00"], 0, "Itory: North House", [], False, [], [], [], [], [], [], [], []],
-            55: [False, [],    2, [1,3,0,b"\x00"], 0, "Itory: Lilly's House", [23], False, [], [], [], [], [], [], [], []],
-            56: [False, [],    2, [1,3,0,b"\x00"], 0, "Itory: Cave", [], False, [], [], [], [], [], [], [], []],
-            57: [False, [56],  2, [1,3,0,b"\x00"], 0, "Itory: Cave (behind false wall)", [], False, [], [], [], [], [], [], [], []],
-            58: [False, [],    2, [1,3,0,b"\x00"], 0, "Itory: Cave (secret room)", [], False, [], [], [], [], [], [], [], []],
-            59: [False, [501], 0, [1,3,0,b"\x00"], 0, "Itory: Got Lilly", [], False, [], [], [], [], [], [], [], []],
+            50: [False, [10],     1, [1,3,0,b"\x00"], 0, "Itory: Entrance", [9], False, [], [], [], [], [], [], [], []],
+            51: [False, [50],     1, [1,3,0,b"\x00"], 0, "Itory: Main Area", [], False, [], [], [], [], [], [], [], []],
+            52: [False, [],       1, [1,3,0,b"\x00"], 0, "Itory: Lilly's Back Porch", [], False, [], [], [], [], [], [], [], []],
+            53: [False, [],       2, [1,3,0,b"\x00"], 0, "Itory: West House", [], False, [], [], [], [], [], [], [], []],
+            54: [False, [],       2, [1,3,0,b"\x00"], 0, "Itory: North House", [], False, [], [], [], [], [], [], [], []],
+            55: [False, [],       2, [1,3,0,b"\x00"], 0, "Itory: Lilly's House", [23], False, [], [], [], [], [], [], [], []],
+            56: [False, [],       2, [1,3,0,b"\x00"], 0, "Itory: Cave", [], False, [], [], [], [], [], [], [], []],
+            57: [False, [56],     2, [1,3,0,b"\x00"], 0, "Itory: Cave (behind false wall)", [], False, [], [], [], [], [], [], [], []],
+            58: [False, [],       2, [1,3,0,b"\x00"], 0, "Itory: Cave (secret room)", [], False, [], [], [], [], [], [], [], []],
+            59: [False, [55,501], 0, [1,3,0,b"\x00"], 0, "Itory: Got Lilly", [], False, [], [], [], [], [], [], [], []],
 
             # Moon Tribe / Inca Entrance
             60: [False, [10],     1, [1,4,0,b"\x00"], 0, "Moon Tribe: Main Area", [25], False, [], [], [], [], [], [], [], []],
@@ -3352,33 +3389,33 @@ class World:
             64: [False, [60,502], 0, [1,4,0,b"\x00"], 0, "Moon Tribe: Spirits Awake", [], False, [], [], [], [], [], [], [], []],
 
             # Inca Ruins
-            70: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (NE)", [], False, [], [], [], [], [], [], [], []],
-            71: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (NW)", [], False, [], [], [], [], [], [], [], []],
-            72: [False, [73], 2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (N)", [], False, [], [], [], [], [], [], [], []],
-            73: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (center)", [], False, [], [], [], [], [], [], [], []],
-            74: [False, [72], 2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SW)", [], False, [], [], [], [], [], [], [], []],
-            75: [False, [72], 2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SE)", [], False, [], [], [], [], [], [], [], []],
-            76: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (statue head)", [], False, [], [], [], [], [], [], [], []],
-            77: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (first area)", [3, 4], False, [], [], [], [], [], [], [], []],
-            78: [False, [77], 2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (second area)", [], False, [], [], [], [], [], [], [], []],
-            79: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 31", [], False, [], [], [], [], [], [], [], []],
-            80: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 32 (entrance)", [], False, [], [], [], [], [], [], [], []],
-            81: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 32 (behind statue)", [], False, [], [], [], [], [], [], [], []],
-            82: [False, [83], 2, [1,5,0,b"\x00"], 0, "Inca: Map 33 (entrance)", [], False, [], [], [], [], [], [], [], []],
-            83: [False, [82], 2, [1,5,0,b"\x00"], 0, "Inca: Map 33 (over ramp)", [], False, [], [], [], [], [], [], [], []],      # Need to prevent softlocks here
-            84: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 34", [], False, [], [], [], [], [], [], [], []],
-            85: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 35 (entrance)", [], False, [], [], [], [], [], [], [], []],
-            86: [False, [85], 2, [1,5,0,b"\x00"], 0, "Inca: Map 35 (over ramp)", [], False, [], [], [], [], [], [], [], []],
-            87: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 36 (main)", [8], False, [], [], [], [], [], [], [], []],
-            88: [False, [87], 2, [1,5,0,b"\x00"], 0, "Inca: Map 36 (exit opened)", [], False, [], [], [], [], [], [], [], []],
-            89: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 37 (main area)", [7], False, [], [], [], [], [], [], [], []],
-            90: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 37 (tile bridge)", [], False, [], [], [], [], [], [], [], []],     # Check for potential softlock?
-            91: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 38 (south section)", [], False, [], [], [], [], [], [], [], []],
-            92: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 38 (behind statues)", [], False, [], [], [], [], [], [], [], []],
-            93: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 38 (north section)", [], False, [], [], [], [], [], [], [], []],
-            94: [False, [],   2, [1,5,0,b"\x00"], 0, "Inca: Map 39", [], False, [], [], [], [], [], [], [], []],
-            95: [False, [96], 2, [1,5,0,b"\x00"], 0, "Inca: Map 40 (entrance)", [], False, [], [], [], [], [], [], [], []],
-            96: [False, [95], 2, [1,5,0,b"\x00"], 0, "Inca: Map 40 (past tiles)", [], False, [], [], [], [], [], [], [], []],
+            70: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (NE)", [], False, [], [], [], [], [], [], [], []],
+            71: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (NW)", [], False, [], [], [], [], [], [], [], []],
+            72: [False, [70,73],  2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (N)", [], False, [], [], [], [], [], [], [], []],
+            73: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (center)", [], False, [], [], [], [], [], [], [], []],
+            74: [False, [72],     2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SW)", [], False, [], [], [], [], [], [], [], []],
+            75: [False, [72],     2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SE)", [], False, [], [], [], [], [], [], [], []],
+            76: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (statue head)", [], False, [], [], [], [], [], [], [], []],
+            77: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (first area)", [3, 4], False, [], [], [], [], [], [], [], []],
+            78: [False, [77],     2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (second area)", [], False, [], [], [], [], [], [], [], []],
+            79: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 31", [], False, [], [], [], [], [], [], [], []],
+            80: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 32 (entrance)", [], False, [], [], [], [], [], [], [], []],
+            81: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 32 (behind statue)", [], False, [], [], [], [], [], [], [], []],
+            82: [False, [83],     2, [1,5,0,b"\x00"], 0, "Inca: Map 33 (entrance)", [], False, [], [], [], [], [], [], [], []],
+            83: [False, [82],     2, [1,5,0,b"\x00"], 0, "Inca: Map 33 (over ramp)", [], False, [], [], [], [], [], [], [], []],      # Need to prevent softlocks here
+            84: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 34", [], False, [], [], [], [], [], [], [], []],
+            85: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 35 (entrance)", [], False, [], [], [], [], [], [], [], []],
+            86: [False, [85],     2, [1,5,0,b"\x00"], 0, "Inca: Map 35 (over ramp)", [], False, [], [], [], [], [], [], [], []],
+            87: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 36 (main)", [8], False, [], [], [], [], [], [], [], []],
+            88: [False, [87],     2, [1,5,0,b"\x00"], 0, "Inca: Map 36 (exit opened)", [], False, [], [], [], [], [], [], [], []],
+            89: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 37 (main area)", [7], False, [], [], [], [], [], [], [], []],
+            90: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 37 (tile bridge)", [], False, [], [], [], [], [], [], [], []],     # Check for potential softlock?
+            91: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 38 (south section)", [], False, [], [], [], [], [], [], [], []],
+            92: [False, [91],     2, [1,5,0,b"\x00"], 0, "Inca: Map 38 (behind statues)", [], False, [], [], [], [], [], [], [], []],
+            93: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 38 (north section)", [], False, [], [], [], [], [], [], [], []],
+            94: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 39", [], False, [], [], [], [], [], [], [], []],
+            95: [False, [96],     2, [1,5,0,b"\x00"], 0, "Inca: Map 40 (entrance)", [], False, [], [], [], [], [], [], [], []],
+            96: [False, [95],     2, [1,5,0,b"\x00"], 0, "Inca: Map 40 (past tiles)", [], False, [], [], [], [], [], [], [], []],
             97: [False, [98,503], 2, [1,5,0,b"\x00"], 0, "Inca: Boss Room", [], True, [], [], [], [], [], [], [], []],       # might need to add an exit for this
             98: [False, [97],     2, [1,5,0,b"\x00"], 0, "Inca: Behind Boss Room", [], False, [], [], [], [], [], [], [], []],
 
@@ -3395,7 +3432,7 @@ class World:
             112: [False, [],         1, [2,7,0,b"\x00"], 0, "Freejia: Laborer House Roof", [], False, [], [], [], [], [], [], [], []],
             113: [False, [110, 114], 1, [2,7,0,b"\x00"], 0, "Freejia: Labor Trade Roof", [], False, [], [], [], [], [], [], [], []],
             114: [False, [110, 112], 1, [2,7,0,b"\x00"], 0, "Freejia: Back Alley", [], False, [], [], [], [], [], [], [], []],
-            115: [False, [],         0, [2,7,0,b"\x00"], 0, "Freejia: Slaver", [], False, [], [], [], [], [], [], [], []],
+            115: [False, [110],      0, [2,7,0,b"\x00"], 0, "Freejia: Slaver", [], False, [], [], [], [], [], [], [], []],
             116: [False, [],         2, [2,7,0,b"\x00"], 0, "Freejia: West House", [], False, [], [], [], [], [], [], [], []],
             117: [False, [],         2, [2,7,0,b"\x00"], 0, "Freejia: 2-story House", [], False, [], [], [], [], [], [], [], []],
             118: [False, [],         2, [2,7,0,b"\x00"], 0, "Freejia: Lovers' House", [], False, [], [], [], [], [], [], [], []],
@@ -3521,8 +3558,8 @@ class World:
             244: [False, [242,243],  2, [3,12,0,b"\x00"], 0, "Mu: Boss Room (main)", [], True, [], [], [], [], [], [], [], []],
             245: [False, [212],      2, [3,12,0,b"\x00"], 0, "Mu: Map 95 (top, Slider exit)", [], False, [], [], [], [], [], [], [], []],
             246: [False, [226],      2, [3,12,0,b"\x00"], 0, "Mu: Map 98 (top, Slider exit)", [], False, [], [], [], [], [], [], [], []],
-            247: [False, [511],      0, [3,12,0,b"\x00"], 0, "Mu: Water lowered 1", [], False, [], [], [], [], [], [], [], []],
-            248: [False, [512],      0, [3,12,0,b"\x00"], 0, "Mu: Water lowered 2", [], False, [], [], [], [], [], [], [], []],
+            247: [False, [231,511],  0, [3,12,0,b"\x00"], 0, "Mu: Water lowered 1", [], False, [], [], [], [], [], [], [], []],
+            248: [False, [232,512],  0, [3,12,0,b"\x00"], 0, "Mu: Water lowered 2", [], False, [], [], [], [], [], [], [], []],
 
             # Angel Village
             250: [False, [12], 1, [3,13,0,b"\x00"], 0, "Angel Village: Outside", [], True, [], [], [], [], [], [], [], []],
@@ -3623,7 +3660,7 @@ class World:
             351: [False, [350], 0, [4,18,0,b"\x00"], 0, "Natives' Village: Child Guide", [], True, [], [], [], [], [], [], [], []],
             352: [False, [],    2, [4,18,0,b"\x00"], 0, "Natives' Village: West House", [], False, [], [], [], [], [], [], [], []],
             353: [False, [],    2, [4,18,0,b"\x00"], 0, "Natives' Village: House w/Statues", [29], False, [], [], [], [], [], [], [], []],
-            354: [False, [],    0, [4,18,0,b"\x00"], 0, "Natives' Village: Statues Awake", [], False, [], [], [], [], [], [], [], []],
+            354: [False, [353], 0, [4,18,0,b"\x00"], 0, "Natives' Village: Statues Awake", [], False, [], [], [], [], [], [], [], []],
 
             # Ankor Wat
             360: [False, [13],  2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 176", [], False, [], [], [], [], [], [], [], []],
@@ -3708,7 +3745,7 @@ class World:
             446: [False, [],        2, [5,21,0,b"\x00"], 0, "Pyramid: Hieroglyph 5", [], False, [], [], [], [], [], [], [], []],
             447: [False, [],        2, [5,21,0,b"\x00"], 0, "Pyramid: Hieroglyph 6", [], False, [], [], [], [], [], [], [], []],
             448: [False, [],        2, [5,21,0,b"\x00"], 0, "Pyramid: Boss Room", [], True, [], [], [], [], [], [], [], []],
-            449: [False, [517],     0, [5,21,0,b"\x00"], 0, "Pyramid: Hieroglyphs Placed", [], False, [], [], [], [], [], [], [], []],
+            449: [False, [415,517], 0, [5,21,0,b"\x00"], 0, "Pyramid: Hieroglyphs Placed", [], False, [], [], [], [], [], [], [], []],
             450: [False, [411],     2, [5,21,0,b"\x00"], 0, "Pyramid: Map 215 (past Killer 6)", [], False, [], [], [], [], [], [], [], []],
 
             # Babel
@@ -3731,7 +3768,7 @@ class World:
             476: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Vampires", [], False, [], [], [], [], [], [], [], []],
             477: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Sand Fanger", [], False, [], [], [], [], [], [], [], []],
             478: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Mummy Queen", [], False, [], [], [], [], [], [], [], []],
-            479: [False, [],       0, [6,22,0,b"\x00"], 0, "Babel: Statue Get", [], False, [], [], [], [], [], [], [], []],
+            479: [False, [473],    0, [6,22,0,b"\x00"], 0, "Babel: Statue Get", [], False, [], [], [], [], [], [], [], []],
 
             # Jeweler's Mansion
             480: [False, [],    2, [6,23,0,b"\x00"], 0, "Jeweler's Mansion: Main", [], False, [], [], [], [], [], [], [], []],
@@ -5309,8 +5346,8 @@ class World:
             709: [708, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 222 to Map 227"],
 
             # Jeweler's Mansion
-            720: [721, 0, 0, 8, 480, "8d32a", b"", False,  True, True, "Mansion entrance"],
-            721: [720, 0, 0, 0,   0, "8fcb4", b"", False,  True, True, "Mansion exit"]
+            720: [721, 0, 0,   8, 480, "8d32a", b"", False,  True, True, "Mansion entrance"],
+            721: [720, 0, 0, 480, 400, "8fcb4", b"", False,  True, True, "Mansion exit"]
 
         }
 
