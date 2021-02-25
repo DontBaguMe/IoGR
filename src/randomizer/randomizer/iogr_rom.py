@@ -1819,8 +1819,8 @@ class Randomizer:
 
         patch.write(qt_encode("-Austin21300 -DerTolleIgel") + b"\xCB")
         patch.write(qt_encode("-djtifaheart -DoodSF") + b"\xCB")
-        patch.write(qt_encode("-Neomatamune -Eppy37") + b"\xCB")
-        patch.write(qt_encode("-SmashManiac -Lassic") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-SmashManiac -Eppy37") + b"\xCB")
+        patch.write(qt_encode("-Tymekeeper  -Lassic") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-BonzaiBier -GliitchWiitch") + b"\xCB")
         patch.write(qt_encode("-Keypaladin -LeHulk") + b"\xCB")
@@ -1833,8 +1833,8 @@ class Randomizer:
         patch.write(qt_encode("-ZekeStarr -Skipsy") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-MrFreet -solarcell007") + b"\xCB")
-        patch.write(qt_encode("-Scheris -Sye990") + b"\xCB")
-        patch.write(qt_encode("-SDiezal -Tymekeeper") + b"\xC9\xB4\xCE")
+        patch.write(qt_encode("-Scheris -SO5Z") + b"\xCB")
+        patch.write(qt_encode("-SDiezal -Sye990") + b"\xC9\xB4\xCE")
 
         patch.write(qt_encode("-Skarsnik -Veetorp") + b"\xCB")
         patch.write(qt_encode("-Verallix -Volor") + b"\xCB")
