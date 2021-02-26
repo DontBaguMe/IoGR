@@ -1494,6 +1494,17 @@ class Randomizer:
         patch.write(b"\x02\xd4\x2d\x05\xce\x02\xcc\xf1\x02\xbf\x28\xce\x02\xe0")
         patch.write(b"\x02\xbf\x3e\xce\x6b")
 
+        # Euro shopkeeper can warp you to start in entrance shuffle (prevents softlocks)
+        if settings.entrance_shuffle.value != EntranceShuffle.NONE.value:
+            patch.seek(int("7cbba", 16) + rom_offset) #four bytes
+            patch.write(b"\x4c\x27\xe9")
+            patch.seek(int("7e927", 16) + rom_offset)
+            patch.write(b"\x02\xBF\x0A\xCC\x02\xBE\x02\x01\x31\xE9\x37\xE9\x37\xE9\x3E\xE9")
+            patch.write(b"\x02\xBF\x24\xCC\x4C\xBE\xCB\x5C\xE8\xDB\x88")
+            patch.seek(int("7cc0c", 16) + rom_offset)
+            patch.write(qt_encode("Warp to start?") + b"\xcb\xac" + qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
+            patch.write(b"\xce" + qt_encode("NO SOUP FOR YOU!") + b"\xc0")
+
         # Old men text no longer checks for Teapot
         patch.seek(int("7d60a", 16) + rom_offset)
         patch.write(b"\x14\xd6")

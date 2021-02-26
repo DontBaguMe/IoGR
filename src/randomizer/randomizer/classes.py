@@ -1034,6 +1034,9 @@ class World:
                 self.graph[self.exits[x][3]][14].append(x)
                 self.graph[self.exits[x][4]][15].append(x)
 
+        # Preserve Mu key door link
+        self.link_exits(310,310,print_log)
+
         # Set aside Jeweler's final exit in RJH seeds
         if self.goal == "Red Jewel Hunt":
             self.link_exits(720,720,print_log)
@@ -1111,7 +1114,7 @@ class World:
                     random.shuffle(origin_exits)
                     random.shuffle(dest_exits_new)
 
-                    result = self.find_exit(origin_exits,dest_exits_new,False,check_direction,True)
+                    result = self.find_exit(origin_exits,dest_exits_new,print_log,check_direction,True)
                     if not result:
                         quarantine.append(island)
                     else:
@@ -1167,7 +1170,7 @@ class World:
 
             while islands_no_ds:
                 island = islands_no_ds.pop(0)
-                result = self.find_exit(island[1],dest_exits_ds,False,check_direction)
+                result = self.find_exit(island[1],dest_exits_ds,print_log,check_direction)
                 if not result:
                     if print_log:
                         print("ERROR: Could not find Dark Space access")
@@ -1192,7 +1195,7 @@ class World:
             random.shuffle(origin_exits)
             random.shuffle(dest_exits)
             if origin_exits:
-                result = self.find_exit(origin_exits,dest_exits,False,check_direction,check_progression,True,False)
+                result = self.find_exit(origin_exits,dest_exits,print_log,check_direction,check_progression,True,False)
                 if result:
                     origin_exit = result[0]
                     dest_exit = result[1]
@@ -1203,6 +1206,8 @@ class World:
                 elif check_progression:
                     check_progression = False
                     check_direction = True
+                    if print_log:
+                        print("  Finished mapping progression exits")
                 else:
                     if print_log:
                         print("WARNING: This shouldn't happen")
@@ -1228,7 +1233,7 @@ class World:
                     print("ERROR: Entrance rando failed")
                 return False
             dest_exit = dest_exits.pop(0)
-            self.link_exits(origin_exit,dest_exit)
+            self.link_exits(origin_exit,dest_exit,print_log)
 
         # Wrap it up
 #        self.reset_progress()
@@ -4933,10 +4938,10 @@ class World:
             193: [192, 0, 0,   0,   0, "18c44", b"", False, False, False, "Freejia: Hotel West Room (out)"],
             194: [195, 0, 0, 119, 121, "18c38", b"", False, False, False, "Freejia: Hotel East Room (in)"],
             195: [194, 0, 0,   0,   0, "18c50", b"", False, False, False, "Freejia: Hotel East Room (out)"],
-            196: [197, 0, 0, 110, 122, "18b34", b"", False, False, False, "Freejia: Laborer House (in)"],    # might take this out?
-            197: [196, 0, 0,   0,   0, "18c78", b"", False, False, False, "Freejia: Laborer House (out)"],
-            198: [199, 0, 0, 112, 122, "18b28", b"", False, False, False, "Freejia: Laborer Roof (in)"],
-            199: [198, 0, 0,   0,   0, "18c84", b"", False, False, False, "Freejia: Laborer Roof (out)"],
+            196: [197, 0, 0, 110, 122, "18b28", b"", False, False, False, "Freejia: Laborer House (in)"],    # might take this out?
+            197: [196, 0, 0,   0,   0, "18c84", b"", False, False, False, "Freejia: Laborer House (out)"],
+            198: [199, 0, 0, 112, 122, "18b34", b"", False, False, False, "Freejia: Laborer Roof (in)"],
+            199: [198, 0, 0,   0,   0, "18c78", b"", False, False, False, "Freejia: Laborer Roof (out)"],
             200: [201, 0, 0, 110, 123, "18b40", b"", False, False, False, "Freejia: Messy House (in)"],
             201: [200, 0, 0,   0,   0, "18c92", b"", False, False, False, "Freejia: Messy House (out)"],
             202: [203, 0, 0, 110, 124, "18abc", b"", False, False, False, "Freejia: Erik House (in)"],
@@ -5022,7 +5027,7 @@ class World:
             308: [307, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (W)"],
 
             # Seaside Palace
-            310: [311, 0, 0, 211, 201, "69759", b"", False, False, False, "Seaside entrance"],
+            310: [311, 0, 0, 211, 201, "69759", b"", False, False, False, "Seaside entrance"],  # ALWAYS LINKED
             311: [310, 0, 0,   0,   0, "1906a", b"", False, False, False, "Seaside exit"],
             312: [313, 0, 0, 200, 202, "19046", b"", False, False, False, "Seaside: Area 1 NE Room (in)"],
             313: [312, 0, 0,   0,   0, "19114", b"", False, False, False, "Seaside: Area 1 NE Room (out)"],
