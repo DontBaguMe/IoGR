@@ -1357,6 +1357,11 @@ class Randomizer:
         patch.seek(int("6cef6", 16) + rom_offset)
         patch.write(b"\x40\x86\x80\x88\x8d\x4f\xc0")
 
+        # Reset Ishtar's puzzle upon entry (better solution than above)
+        patch.seek(int("6d8c6", 16) + rom_offset)
+        patch.write(b"\x0B\x02\x48\x3A\xD0\x03\x9C\xA6\x0A\x4C\x0C\xDA\xEA\xEA\xEA\xEA\xEA\xEA")
+        patch.write(b"\xEA\xEA\xEA\xEA\xEA\xEA\xEA\xEA\xEA\xAD\x29\x0A\x29\x01\xFE\x8D\x29\x0A")
+
         ##########################################################################
         #                           Modfy Watermia events
         ##########################################################################
@@ -3107,8 +3112,9 @@ class Randomizer:
         random.shuffle(changes[3])
         #idx_diff = [10,3,1,1]  #testing#########
         idx_diff = [changes[0].pop(0),changes[1].pop(0),changes[2].pop(0),changes[3].pop(0)]
+        coords = [[],[],[],[]]
 
-        # Will's hair can't be changed in both rooms
+        # Will's hair can only be changed in second room
         for i in range(4):
             if 0 in changes[i]:
                 changes[i].remove(0)
@@ -3116,370 +3122,374 @@ class Randomizer:
         # Set changes for both rooms (higher difficulties only)
         other_changes = [[],[],[],[]]
         if settings.difficulty.value >= 2:
-            i = 0
-            while i < 4:
+            for i in range(4):
                 other_changes[i] = changes[i][:settings.difficulty.value-1]
                 i += 1
 
         #print(idx_diff)
         #print(other_changes)
 
-        # Set change for Room 1
-        if idx_diff[0] == 0:  # Will's hair
-            patch.seek(int("6dd06", 16) + rom_offset)
-            patch.write(b"\x5d")
-            coords = [b"\xa0\x01", b"\xc0\x01", b"\xb0\x00", b"\xd0\x00"]
-
-        if idx_diff[0] == 1 or 1 in other_changes[0]:  # Change right vase to light (vanilla)
-            f_ishtarmap.seek(int("17b", 16))
-            f_ishtarmap.write(b"\x7b")
-            f_ishtarmap.seek(int("18b", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[0] == 1:
-                coords = [b"\xB0\x01", b"\xC0\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("7b", 16))
-                f_ishtarmap.write(b"\x7b")
-                f_ishtarmap.seek(int("8b", 16))
-                f_ishtarmap.write(b"\x84")
-
-        if idx_diff[0] == 2 or 2 in other_changes[0]:  # Change middle vase to light
-            f_ishtarmap.seek(int("175", 16))
-            f_ishtarmap.write(b"\x7b")
-            f_ishtarmap.seek(int("185", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[0] == 2:
-                coords = [b"\x50\x01", b"\x60\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("75", 16))
-                f_ishtarmap.write(b"\x7b")
-                f_ishtarmap.seek(int("85", 16))
-                f_ishtarmap.write(b"\x84")
-
-        if idx_diff[0] == 3 or 3 in other_changes[0]:  # Change left vase to dark
-            f_ishtarmap.seek(int("174", 16))
-            f_ishtarmap.write(b"\x83")
-            f_ishtarmap.seek(int("184", 16))
-            f_ishtarmap.write(b"\x87")
-            if idx_diff[0] == 3:
-                coords = [b"\x40\x01", b"\x50\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("74", 16))
-                f_ishtarmap.write(b"\x83")
-                f_ishtarmap.seek(int("84", 16))
-                f_ishtarmap.write(b"\x87")
-
-        if idx_diff[0] == 4 or 4 in other_changes[0]:  # Change left shelf to empty
-            f_ishtarmap.seek(int("165", 16))
-            f_ishtarmap.write(b"\x74")
-            if idx_diff[0] == 4:
-                coords = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("65", 16))
-                f_ishtarmap.write(b"\x74")
-
-        if idx_diff[0] == 5 or 5 in other_changes[0]:  # Change left shelf to books
-            f_ishtarmap.seek(int("165", 16))
-            f_ishtarmap.write(b"\x76")
-            if idx_diff[0] == 5:
-                coords = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("65", 16))
-                f_ishtarmap.write(b"\x76")
-
-        if idx_diff[0] == 6 or 6 in other_changes[0]:  # Change right shelf to jar
-            f_ishtarmap.seek(int("166", 16))
-            f_ishtarmap.write(b"\x75")
-            if idx_diff[0] == 6:
-                coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("66", 16))
-                f_ishtarmap.write(b"\x75")
-
-        if idx_diff[0] == 7 or 7 in other_changes[0]:  # Change right shelf to empty
-            f_ishtarmap.seek(int("166", 16))
-            f_ishtarmap.write(b"\x74")
-            if idx_diff[0] == 7:
-                coords = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("66", 16))
-                f_ishtarmap.write(b"\x74")
-
-        if idx_diff[0] == 8 or 8 in other_changes[0]:  # Remove left sconce
-            f_ishtarmap.seek(int("157", 16))
-            f_ishtarmap.write(b"\x12\x12")
-            f_ishtarmap.seek(int("167", 16))
-            f_ishtarmap.write(b"\x1a\x1a")
-            if idx_diff[0] == 8:
-                coords = [b"\x70\x01", b"\x90\x01", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("57", 16))
-                f_ishtarmap.write(b"\x12\x12")
-                f_ishtarmap.seek(int("67", 16))
-                f_ishtarmap.write(b"\x1a\x1a")
-
-        if idx_diff[0] == 9 or 9 in other_changes[0]:  # Remove right sconce
-            f_ishtarmap.seek(int("15a", 16))
-            f_ishtarmap.write(b"\x12\x12")
-            f_ishtarmap.seek(int("16a", 16))
-            f_ishtarmap.write(b"\x1a\x1a")
-            if idx_diff[0] == 9:
-                coords = [b"\xa0\x01", b"\xc0\x01", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("5a", 16))
-                f_ishtarmap.write(b"\x12\x12")
-                f_ishtarmap.seek(int("6a", 16))
-                f_ishtarmap.write(b"\x1a\x1a")
-
-        if idx_diff[0] == 10 or 10 in other_changes[0]:  # Shift right vase
-            f_ishtarmap.seek(int("17a", 16))
-            f_ishtarmap.write(b"\x83\x22")
-            f_ishtarmap.seek(int("18a", 16))
-            f_ishtarmap.write(b"\x87\x13")
-            if idx_diff[0] == 10:
-                coords = [b"\xa0\x01", b"\xb0\x01", b"\x70\x00", b"\x90\x00"]
-            else:
-                f_ishtarmap.seek(int("7a", 16))
-                f_ishtarmap.write(b"\x83\x22")
-                f_ishtarmap.seek(int("8a", 16))
-                f_ishtarmap.write(b"\x87\x13")
-
-        # Update cursor check ranges for Room 1
-        for i in range(4):
-            patch.seek(int(room_offsets[0], 16) + coord_offsets[i] + rom_offset)
-            patch.write(coords[i])
-
-
-        # Set change for Room 2
-        if idx_diff[1] == 0 or 0 in other_changes[1]:  # Will's hair
-            patch.seek(int("6dd0e", 16) + rom_offset)
-            patch.write(b"\x5d")
-            coords = [b"\x90\x03", b"\xb0\x03", b"\xa0\x00", b"\xc0\x00"]
-
-        if idx_diff[1] == 1:  # Change both vases to light (vanilla)
-            f_ishtarmap.seek(int("3a3", 16))
-            f_ishtarmap.write(b"\x7c\x7c")
-            f_ishtarmap.seek(int("3b3", 16))
-            f_ishtarmap.write(b"\x84\x84")
-            coords = [b"\x30\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
-
-        if idx_diff[1] == 2 or 2 in other_changes[1]:  # Change left vase to light
-            f_ishtarmap.seek(int("3a3", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("3b3", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[1] == 2:
-                coords = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2a3", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("2b3", 16))
-                f_ishtarmap.write(b"\x84")
-
-        if idx_diff[1] == 3 or 3 in other_changes[1]:  # Change right vase to light
-            f_ishtarmap.seek(int("3a4", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("3b4", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[1] == 3:
-                coords = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2a4", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("2b4", 16))
-                f_ishtarmap.write(b"\x84")
-
-        if idx_diff[1] == 4 or 4 in other_changes[1]:  # Remove rock
-            f_ishtarmap.seek(int("3bd", 16))
-            f_ishtarmap.write(b"\x73")
-            if idx_diff[1] == 4:
-                coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2bd", 16))
-                f_ishtarmap.write(b"\x73")
-
-        if idx_diff[1] == 5 or 5 in other_changes[1]:  # Add round table
-            f_ishtarmap.seek(int("395", 16))
-            f_ishtarmap.write(b"\x7d\x7e")
-            f_ishtarmap.seek(int("3a5", 16))
-            f_ishtarmap.write(b"\x85\x86")
-            f_ishtarmap.seek(int("3b5", 16))
-            f_ishtarmap.write(b"\x8d\x8e")
-            if idx_diff[1] == 5:
-                coords = [b"\x50\x03", b"\x70\x03", b"\x90\x00", b"\xb0\x00"]
-            else:
-                f_ishtarmap.seek(int("295", 16))
-                f_ishtarmap.write(b"\x7d\x7e")
-                f_ishtarmap.seek(int("2a5", 16))
-                f_ishtarmap.write(b"\x85\x86")
-                f_ishtarmap.seek(int("2b5", 16))
-                f_ishtarmap.write(b"\x8d\x8e")
-
-        if idx_diff[1] == 6 or 6 in other_changes[1]:  # Add sconce
-            f_ishtarmap.seek(int("357", 16))
-            f_ishtarmap.write(b"\x88\x89")
-            f_ishtarmap.seek(int("367", 16))
-            f_ishtarmap.write(b"\x90\x91")
-            if idx_diff[1] == 6:
-                coords = [b"\x70\x03", b"\x90\x03", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("257", 16))
-                f_ishtarmap.write(b"\x88\x89")
-                f_ishtarmap.seek(int("267", 16))
-                f_ishtarmap.write(b"\x90\x91")
-
-        if idx_diff[1] == 7 or 7 in other_changes[1]:  # Add rock
-            f_ishtarmap.seek(int("3b2", 16))
-            f_ishtarmap.write(b"\x77")
-            if idx_diff[1] == 7:
-                coords = [b"\x20\x03", b"\x30\x03", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2b2", 16))
-                f_ishtarmap.write(b"\x77")
-
-        if idx_diff[1] == 8 or 8 in other_changes[1]:  # Put moss on rock
-            f_ishtarmap.seek(int("3bd", 16))
-            f_ishtarmap.write(b"\x8f")
-            if idx_diff[1] == 8:
-                coords = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("2bd", 16))
-                f_ishtarmap.write(b"\x8f")
-
-        # Update cursor check ranges for Room 2
-        for i in range(4):
-            patch.seek(int(room_offsets[1], 16) + coord_offsets[i] + rom_offset)
-            patch.write(coords[i])
-
-
-        # Set change for Room 3
-        # Check for chest contents, only change map if contents are the same
+        # Check if chest contents in room 3 are identical
         same_chest = (self.w.item_locations[80][3] == self.w.item_locations[81][3])
 
-        if (same_chest and idx_diff[2] == 0):  # Will's hair
-            patch.seek(int("6dd16", 16) + rom_offset)
-            patch.write(b"\x5d")
-            coords = [b"\x90\x05", b"\xb0\x05", b"\xa0\x00", b"\xc0\x00"]
+        # Change loop
+        for room in range(4):
+            done = False
+            while not done:
+                if other_changes[room]:
+                    change_id = other_changes[room].pop(0)
+                else:
+                    change_id = idx_diff[room]
+                    done = True
 
-        if (same_chest and idx_diff[2] == 1) or 1 in other_changes[2]:  # Remove rock
-            f_ishtarmap.seek(int("5bd", 16))
-            f_ishtarmap.write(b"\x73")
-            if (same_chest and idx_diff[2] == 1):
-                coords = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("4bd", 16))
-                f_ishtarmap.write(b"\x73")
+                # Set change for Room 1
+                if room == 0:
+                    if change_id == 0:  # Will's hair
+                        patch.seek(int("6dd06", 16) + rom_offset)
+                        patch.write(b"\x5d")
+                        coords[room] = [b"\xa0\x01", b"\xc0\x01", b"\xb0\x00", b"\xd0\x00"]
 
-        if (same_chest and idx_diff[2] == 2) or 2 in other_changes[2]:  # Add rock
-            f_ishtarmap.seek(int("5b2", 16))
-            f_ishtarmap.write(b"\x77")
-            if (same_chest and idx_diff[2] == 2):
-                coords = [b"\x20\x05", b"\x30\x05", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("4b2", 16))
-                f_ishtarmap.write(b"\x77")
+                    elif change_id == 1:  # Change right vase to light (vanilla)
+                        f_ishtarmap.seek(int("17b", 16))
+                        f_ishtarmap.write(b"\x7b")
+                        f_ishtarmap.seek(int("18b", 16))
+                        f_ishtarmap.write(b"\x84")
+                        if done:
+                            coords[room] = [b"\xB0\x01", b"\xC0\x01", b"\x70\x00", b"\x90\x00"]
+                        else:
+                            f_ishtarmap.seek(int("7b", 16))
+                            f_ishtarmap.write(b"\x7b")
+                            f_ishtarmap.seek(int("8b", 16))
+                            f_ishtarmap.write(b"\x84")
 
-        if (same_chest and idx_diff[2] == 3) or 3 in other_changes[2]:  # Add sconce
-            f_ishtarmap.seek(int("557", 16))
-            f_ishtarmap.write(b"\x88\x89")
-            f_ishtarmap.seek(int("567", 16))
-            f_ishtarmap.write(b"\x90\x91")
-            if (same_chest and idx_diff[2] == 3):
-                coords = [b"\x70\x05", b"\x90\x05", b"\x50\x00", b"\x70\x00"]
-            else:
-                f_ishtarmap.seek(int("457", 16))
-                f_ishtarmap.write(b"\x88\x89")
-                f_ishtarmap.seek(int("467", 16))
-                f_ishtarmap.write(b"\x90\x91")
+                    elif change_id == 2:  # Change middle vase to light
+                        f_ishtarmap.seek(int("175", 16))
+                        f_ishtarmap.write(b"\x7b")
+                        f_ishtarmap.seek(int("185", 16))
+                        f_ishtarmap.write(b"\x84")
+                        if done:
+                            coords[room] = [b"\x50\x01", b"\x60\x01", b"\x70\x00", b"\x90\x00"]
+                        else:
+                            f_ishtarmap.seek(int("75", 16))
+                            f_ishtarmap.write(b"\x7b")
+                            f_ishtarmap.seek(int("85", 16))
+                            f_ishtarmap.write(b"\x84")
 
-        if (same_chest and idx_diff[2] == 4) or 4 in other_changes[2]:  # Moss rock
-            f_ishtarmap.seek(int("5bd", 16))
-            f_ishtarmap.write(b"\x8f")
-            if (same_chest and idx_diff[2] == 4):
-                coords = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("4bd", 16))
-                f_ishtarmap.write(b"\x8f")
+                    elif change_id == 3:  # Change left vase to dark
+                        f_ishtarmap.seek(int("174", 16))
+                        f_ishtarmap.write(b"\x83")
+                        f_ishtarmap.seek(int("184", 16))
+                        f_ishtarmap.write(b"\x87")
+                        if done:
+                            coords[room] = [b"\x40\x01", b"\x50\x01", b"\x70\x00", b"\x90\x00"]
+                        else:
+                            f_ishtarmap.seek(int("74", 16))
+                            f_ishtarmap.write(b"\x83")
+                            f_ishtarmap.seek(int("84", 16))
+                            f_ishtarmap.write(b"\x87")
 
-        # Update cursor check ranges for Room 3 (only if chest contents different)
-        if same_chest:
-            for i in range(4):
-                patch.seek(int(room_offsets[2], 16) + coord_offsets[i] + rom_offset)
-                patch.write(coords[i])
+                    elif change_id == 4:  # Change left shelf to empty
+                        f_ishtarmap.seek(int("165", 16))
+                        f_ishtarmap.write(b"\x74")
+                        if done:
+                            coords[room] = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
+                        else:
+                            f_ishtarmap.seek(int("65", 16))
+                            f_ishtarmap.write(b"\x74")
+
+                    elif change_id == 5:  # Change left shelf to books
+                        f_ishtarmap.seek(int("165", 16))
+                        f_ishtarmap.write(b"\x76")
+                        if done:
+                            coords[room] = [b"\x50\x01", b"\x60\x01", b"\x58\x00", b"\x70\x00"]
+                        else:
+                            f_ishtarmap.seek(int("65", 16))
+                            f_ishtarmap.write(b"\x76")
+
+                    elif change_id == 6:  # Change right shelf to jar
+                        f_ishtarmap.seek(int("166", 16))
+                        f_ishtarmap.write(b"\x75")
+                        if done:
+                            coords[room] = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
+                        else:
+                            f_ishtarmap.seek(int("66", 16))
+                            f_ishtarmap.write(b"\x75")
+
+                    elif change_id == 7:  # Change right shelf to empty
+                        f_ishtarmap.seek(int("166", 16))
+                        f_ishtarmap.write(b"\x74")
+                        if done:
+                            coords[room] = [b"\x60\x01", b"\x70\x01", b"\x58\x00", b"\x70\x00"]
+                        else:
+                            f_ishtarmap.seek(int("66", 16))
+                            f_ishtarmap.write(b"\x74")
+
+                    elif change_id == 8:  # Remove left sconce
+                        f_ishtarmap.seek(int("157", 16))
+                        f_ishtarmap.write(b"\x12\x12")
+                        f_ishtarmap.seek(int("167", 16))
+                        f_ishtarmap.write(b"\x1a\x1a")
+                        if done:
+                            coords[room] = [b"\x70\x01", b"\x90\x01", b"\x50\x00", b"\x70\x00"]
+                        else:
+                            f_ishtarmap.seek(int("57", 16))
+                            f_ishtarmap.write(b"\x12\x12")
+                            f_ishtarmap.seek(int("67", 16))
+                            f_ishtarmap.write(b"\x1a\x1a")
+
+                    elif change_id == 9:  # Remove right sconce
+                        f_ishtarmap.seek(int("15a", 16))
+                        f_ishtarmap.write(b"\x12\x12")
+                        f_ishtarmap.seek(int("16a", 16))
+                        f_ishtarmap.write(b"\x1a\x1a")
+                        if done:
+                            coords[room] = [b"\xa0\x01", b"\xc0\x01", b"\x50\x00", b"\x70\x00"]
+                        else:
+                            f_ishtarmap.seek(int("5a", 16))
+                            f_ishtarmap.write(b"\x12\x12")
+                            f_ishtarmap.seek(int("6a", 16))
+                            f_ishtarmap.write(b"\x1a\x1a")
+
+                    elif change_id == 10:  # Shift right vase
+                        f_ishtarmap.seek(int("17a", 16))
+                        f_ishtarmap.write(b"\x83\x22")
+                        f_ishtarmap.seek(int("18a", 16))
+                        f_ishtarmap.write(b"\x87\x13")
+                        if done:
+                            coords[room] = [b"\xa0\x01", b"\xb0\x01", b"\x70\x00", b"\x90\x00"]
+                        else:
+                            f_ishtarmap.seek(int("7a", 16))
+                            f_ishtarmap.write(b"\x83\x22")
+                            f_ishtarmap.seek(int("8a", 16))
+                            f_ishtarmap.write(b"\x87\x13")
 
 
-        # Set change for Room 4
-        if idx_diff[3] == 0:  # Will's hair (vanilla)
-            patch.seek(int("6dd1e", 16) + rom_offset)
-            patch.write(b"\x5d")
+                # Set change for Room 2
+                elif room == 1:
+                    if change_id == 0:  # Will's hair
+                        patch.seek(int("6dd0e", 16) + rom_offset)
+                        patch.write(b"\x5d")
+                        coords[room] = [b"\x90\x03", b"\xb0\x03", b"\xa0\x00", b"\xc0\x00"]
 
-        if idx_diff[3] == 1 or 1 in other_changes[3]:  # Remove rock
-            f_ishtarmap.seek(int("7bd", 16))
-            f_ishtarmap.write(b"\x73")
-            if idx_diff[3] == 1:
-                coords = [b"\xd0\x07", b"\xe0\x07", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6bd", 16))
-                f_ishtarmap.write(b"\x73")
+                    elif change_id == 1:  # Change both vases to light (vanilla)
+                        f_ishtarmap.seek(int("3a3", 16))
+                        f_ishtarmap.write(b"\x7c\x7c")
+                        f_ishtarmap.seek(int("3b3", 16))
+                        f_ishtarmap.write(b"\x84\x84")
+                        if done:
+                            coords[room] = [b"\x30\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("2a3", 16))
+                            f_ishtarmap.write(b"\x7c\x7c")
+                            f_ishtarmap.seek(int("2b3", 16))
+                            f_ishtarmap.write(b"\x84\x84")
 
-        if idx_diff[3] == 2 or 2 in other_changes[3]:  # Add rock
-            f_ishtarmap.seek(int("7b2", 16))
-            f_ishtarmap.write(b"\x77")
-            if idx_diff[3] == 2:
-                coords = [b"\x20\x07", b"\x30\x07", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6b2", 16))
-                f_ishtarmap.write(b"\x77")
+                    elif change_id == 2:  # Change left vase to light
+                        f_ishtarmap.seek(int("3a3", 16))
+                        f_ishtarmap.write(b"\x7c")
+                        f_ishtarmap.seek(int("3b3", 16))
+                        f_ishtarmap.write(b"\x84")
+                        if done:
+                            coords[room] = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("2a3", 16))
+                            f_ishtarmap.write(b"\x7c")
+                            f_ishtarmap.seek(int("2b3", 16))
+                            f_ishtarmap.write(b"\x84")
 
-        if idx_diff[3] == 3 or 3 in other_changes[3]:  # Add vase L
-            f_ishtarmap.seek(int("7a3", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("7b3", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[3] == 3:
-                coords = [b"\x30\x07", b"\x40\x07", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6a3", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("6b3", 16))
-                f_ishtarmap.write(b"\x84")
+                    elif change_id == 3:  # Change right vase to light
+                        f_ishtarmap.seek(int("3a4", 16))
+                        f_ishtarmap.write(b"\x7c")
+                        f_ishtarmap.seek(int("3b4", 16))
+                        f_ishtarmap.write(b"\x84")
+                        if done:
+                            coords[room] = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("2a4", 16))
+                            f_ishtarmap.write(b"\x7c")
+                            f_ishtarmap.seek(int("2b4", 16))
+                            f_ishtarmap.write(b"\x84")
 
-        if idx_diff[3] == 4 or 4 in other_changes[3]:  # Add vase R
-            f_ishtarmap.seek(int("7ac", 16))
-            f_ishtarmap.write(b"\x7c")
-            f_ishtarmap.seek(int("7bc", 16))
-            f_ishtarmap.write(b"\x84")
-            if idx_diff[3] == 4:
-                coords = [b"\xc0\x07", b"\xd0\x07", b"\xa0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6ac", 16))
-                f_ishtarmap.write(b"\x7c")
-                f_ishtarmap.seek(int("6bc", 16))
-                f_ishtarmap.write(b"\x84")
+                    elif change_id == 4:  # Remove rock
+                        f_ishtarmap.seek(int("3bd", 16))
+                        f_ishtarmap.write(b"\x73")
+                        if done:
+                            coords[room] = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("2bd", 16))
+                            f_ishtarmap.write(b"\x73")
 
-        if idx_diff[3] == 5 or 5 in other_changes[3]:  # Crease in floor
-            f_ishtarmap.seek(int("7b4", 16))
-            f_ishtarmap.write(b"\x69\x6a")
-            if idx_diff[3] == 5:
-                coords = [b"\x40\x07", b"\x60\x07", b"\xb0\x00", b"\xc8\x00"]
-            else:
-                f_ishtarmap.seek(int("6b4", 16))
-                f_ishtarmap.write(b"\x69\x6a")
+                    elif change_id == 5:  # Add round table
+                        f_ishtarmap.seek(int("395", 16))
+                        f_ishtarmap.write(b"\x7d\x7e")
+                        f_ishtarmap.seek(int("3a5", 16))
+                        f_ishtarmap.write(b"\x85\x86")
+                        f_ishtarmap.seek(int("3b5", 16))
+                        f_ishtarmap.write(b"\x8d\x8e")
+                        if done:
+                            coords[room] = [b"\x50\x03", b"\x70\x03", b"\x90\x00", b"\xb0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("295", 16))
+                            f_ishtarmap.write(b"\x7d\x7e")
+                            f_ishtarmap.seek(int("2a5", 16))
+                            f_ishtarmap.write(b"\x85\x86")
+                            f_ishtarmap.seek(int("2b5", 16))
+                            f_ishtarmap.write(b"\x8d\x8e")
 
-        if idx_diff[3] == 6 or 6 in other_changes[3]:  # Moss rock
-            f_ishtarmap.seek(int("7bd", 16))
-            f_ishtarmap.write(b"\x8f")
-            if idx_diff[3] == 6:
-                coords = [b"\xd0\x07", b"\xe0\x07", b"\xb0\x00", b"\xc0\x00"]
-            else:
-                f_ishtarmap.seek(int("6bd", 16))
-                f_ishtarmap.write(b"\x8f")
+                    elif change_id == 6:  # Add sconce
+                        f_ishtarmap.seek(int("357", 16))
+                        f_ishtarmap.write(b"\x88\x89")
+                        f_ishtarmap.seek(int("367", 16))
+                        f_ishtarmap.write(b"\x90\x91")
+                        if done:
+                            coords[room] = [b"\x70\x03", b"\x90\x03", b"\x50\x00", b"\x70\x00"]
+                        else:
+                            f_ishtarmap.seek(int("257", 16))
+                            f_ishtarmap.write(b"\x88\x89")
+                            f_ishtarmap.seek(int("267", 16))
+                            f_ishtarmap.write(b"\x90\x91")
 
-        # Update cursor check ranges for Room 3 (only if not hair)
-        if idx_diff[3] != 0:
-            for i in range(4):
-                patch.seek(int(room_offsets[3], 16) + coord_offsets[i] + rom_offset)
-                patch.write(coords[i])
+                    elif change_id == 7:  # Add rock
+                        f_ishtarmap.seek(int("3b2", 16))
+                        f_ishtarmap.write(b"\x77")
+                        if done:
+                            coords[room] = [b"\x20\x03", b"\x30\x03", b"\xb0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("2b2", 16))
+                            f_ishtarmap.write(b"\x77")
+
+                    elif change_id == 8:  # Put moss on rock
+                        f_ishtarmap.seek(int("3bd", 16))
+                        f_ishtarmap.write(b"\x8f")
+                        if done:
+                            coords[room] = [b"\xd0\x03", b"\xe0\x03", b"\xb0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("2bd", 16))
+                            f_ishtarmap.write(b"\x8f")
+
+
+                # Set change for Room 3
+                elif room == 2:
+                    if (not done or same_chest) and change_id == 0:  # Will's hair
+                        patch.seek(int("6dd16", 16) + rom_offset)
+                        patch.write(b"\x5d")
+                        coords[room] = [b"\x90\x05", b"\xb0\x05", b"\xa0\x00", b"\xc0\x00"]
+
+                    if (not done or same_chest) and change_id == 1:  # Remove rock
+                        f_ishtarmap.seek(int("5bd", 16))
+                        f_ishtarmap.write(b"\x73")
+                        if (done and same_chest):
+                            coords[room] = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
+                        elif not done:
+                            f_ishtarmap.seek(int("4bd", 16))
+                            f_ishtarmap.write(b"\x73")
+
+                    if (not done or same_chest) and change_id == 2:  # Add rock
+                        f_ishtarmap.seek(int("5b2", 16))
+                        f_ishtarmap.write(b"\x77")
+                        if (done and same_chest):
+                            coords[room] = [b"\x20\x05", b"\x30\x05", b"\xb0\x00", b"\xc0\x00"]
+                        elif not done:
+                            f_ishtarmap.seek(int("4b2", 16))
+                            f_ishtarmap.write(b"\x77")
+
+                    if (not done or same_chest) and change_id == 3:  # Add sconce
+                        f_ishtarmap.seek(int("557", 16))
+                        f_ishtarmap.write(b"\x88\x89")
+                        f_ishtarmap.seek(int("567", 16))
+                        f_ishtarmap.write(b"\x90\x91")
+                        if (done and same_chest):
+                            coords[room] = [b"\x70\x05", b"\x90\x05", b"\x50\x00", b"\x70\x00"]
+                        elif not done:
+                            f_ishtarmap.seek(int("457", 16))
+                            f_ishtarmap.write(b"\x88\x89")
+                            f_ishtarmap.seek(int("467", 16))
+                            f_ishtarmap.write(b"\x90\x91")
+
+                    if (not done or same_chest) and change_id == 4:  # Moss rock
+                        f_ishtarmap.seek(int("5bd", 16))
+                        f_ishtarmap.write(b"\x8f")
+                        if (done and same_chest):
+                            coords[room] = [b"\xd0\x05", b"\xe0\x05", b"\xb0\x00", b"\xc0\x00"]
+                        elif not done:
+                            f_ishtarmap.seek(int("4bd", 16))
+                            f_ishtarmap.write(b"\x8f")
+
+
+                # Set change for Room 4
+                elif room == 3:
+                    if change_id == 0:  # Will's hair (vanilla)
+                        patch.seek(int("6dd1e", 16) + rom_offset)
+                        patch.write(b"\x5d")
+
+                    if change_id == 1:  # Remove rock
+                        f_ishtarmap.seek(int("7bd", 16))
+                        f_ishtarmap.write(b"\x73")
+                        if done:
+                            coords[room] = [b"\xd0\x07", b"\xe0\x07", b"\xb0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("6bd", 16))
+                            f_ishtarmap.write(b"\x73")
+
+                    if change_id == 2:  # Add rock
+                        f_ishtarmap.seek(int("7b2", 16))
+                        f_ishtarmap.write(b"\x77")
+                        if done:
+                            coords[room] = [b"\x20\x07", b"\x30\x07", b"\xb0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("6b2", 16))
+                            f_ishtarmap.write(b"\x77")
+
+                    if change_id == 3:  # Add vase L
+                        f_ishtarmap.seek(int("7a3", 16))
+                        f_ishtarmap.write(b"\x7c")
+                        f_ishtarmap.seek(int("7b3", 16))
+                        f_ishtarmap.write(b"\x84")
+                        if done:
+                            coords[room] = [b"\x30\x07", b"\x40\x07", b"\xa0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("6a3", 16))
+                            f_ishtarmap.write(b"\x7c")
+                            f_ishtarmap.seek(int("6b3", 16))
+                            f_ishtarmap.write(b"\x84")
+
+                    if change_id == 4:  # Add vase R
+                        f_ishtarmap.seek(int("7ac", 16))
+                        f_ishtarmap.write(b"\x7c")
+                        f_ishtarmap.seek(int("7bc", 16))
+                        f_ishtarmap.write(b"\x84")
+                        if done:
+                            coords[room] = [b"\xc0\x07", b"\xd0\x07", b"\xa0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("6ac", 16))
+                            f_ishtarmap.write(b"\x7c")
+                            f_ishtarmap.seek(int("6bc", 16))
+                            f_ishtarmap.write(b"\x84")
+
+                    if change_id == 5:  # Crease in floor
+                        f_ishtarmap.seek(int("7b4", 16))
+                        f_ishtarmap.write(b"\x69\x6a")
+                        if done:
+                            coords[room] = [b"\x40\x07", b"\x60\x07", b"\xb0\x00", b"\xc8\x00"]
+                        else:
+                            f_ishtarmap.seek(int("6b4", 16))
+                            f_ishtarmap.write(b"\x69\x6a")
+
+                    if change_id == 6:  # Moss rock
+                        f_ishtarmap.seek(int("7bd", 16))
+                        f_ishtarmap.write(b"\x8f")
+                        if done:
+                            coords[room] = [b"\xd0\x07", b"\xe0\x07", b"\xb0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("6bd", 16))
+                            f_ishtarmap.write(b"\x8f")
+
+        # Update cursor check ranges
+        for room in range(4):
+            if coords[room]:
+                for i in range(4):
+                    patch.seek(int(room_offsets[room], 16) + coord_offsets[i] + rom_offset)
+                    patch.write(coords[room][i])
 
         # Compress map data and write to file
         f_ishtarmapcomp = tempfile.TemporaryFile()
