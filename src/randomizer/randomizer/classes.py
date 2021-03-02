@@ -906,7 +906,7 @@ class World:
                 direction_new = self.exit_direction(dest_exit)
                 if dest_exit != sister_exit and (not check_direction or direction_new == direction):
                     try_link = True
-                    if self.link_exits(origin_exit,dest_exit,print_log,True,True):
+                    if self.link_exits(origin_exit,dest_exit,print_log,self.entrance_shuffle != "Uncoupled",True):
                         if True: # or not check_ds_access or self.check_ds_access(dest):
                             done = True
                             origin_final = origin_exit
@@ -1233,7 +1233,7 @@ class World:
                     print("ERROR: Entrance rando failed")
                 return False
             dest_exit = dest_exits.pop(0)
-            self.link_exits(origin_exit,dest_exit,print_log)
+            self.link_exits(origin_exit,dest_exit,print_log,self.entrance_shuffle != "Uncoupled")
 
         # Wrap it up
 #        self.reset_progress()
@@ -5339,8 +5339,8 @@ class World:
             697: [696, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 245 to Map 224"],
             698: [699, 0, 0, 464, 469, "", b"", False,  True, False, "Babel: Map 224 to Map 226"],
             699: [698, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 226 to Map 224"],
-            700: [701, 0, 0, 470, 471, "", b"", False,  True, False, "Babel: Map 226 to Map 227"],
-            701: [700, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 227 to Map 226"],
+            #700: [701, 0, 0, 470, 471, "", b"", False,  True, False, "Babel: Map 226 to Map 227"],  #DUPLICATE W/BOSS EXITS
+            #701: [700, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 227 to Map 226"],
             702: [703, 0, 0, 471, 478, "", b"", False,  True, False, "Babel: Map 227 to Map 246"],  # Mummy Queen
             703: [702, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 246 to Map 227"],
             704: [705, 0, 0, 471, 467, "", b"", False,  True, False, "Babel: Map 227 to Map 225 (bottom)"],
