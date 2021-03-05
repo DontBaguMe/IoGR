@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.3.2"
+VERSION = "4.3.3"
 
 MAX_RANDO_RETRIES = 4
 PRINT_LOG = False
@@ -3128,6 +3128,8 @@ class Randomizer:
                     changes[room].remove(0)
                 other_changes[room] = changes[room][:settings.difficulty.value]
 
+            if PRINT_LOG:
+                print("Ishtar room",room+1,":",idx_diff[room],other_changes[room])
             done = False
             while not done:
                 if other_changes[room]:
@@ -3265,45 +3267,31 @@ class Randomizer:
                         patch.write(b"\x5d")
                         coords[room] = [b"\x90\x03", b"\xb0\x03", b"\xa0\x00", b"\xc0\x00"]
 
-                    elif change_id == 1:  # Change both vases to light (vanilla)
+                    elif change_id == 1:  # Change left vase to light
                         f_ishtarmap.seek(int("3a3", 16))
-                        f_ishtarmap.write(b"\x7c\x7c")
+                        f_ishtarmap.write(b"\x7c")
                         f_ishtarmap.seek(int("3b3", 16))
-                        f_ishtarmap.write(b"\x84\x84")
+                        f_ishtarmap.write(b"\x84")
                         if done:
-                            coords[room] = [b"\x30\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
+                            coords[room] = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
                         else:
                             f_ishtarmap.seek(int("2a3", 16))
-                            f_ishtarmap.write(b"\x7c\x7c")
+                            f_ishtarmap.write(b"\x7c")
                             f_ishtarmap.seek(int("2b3", 16))
-                            f_ishtarmap.write(b"\x84\x84")
+                            f_ishtarmap.write(b"\x84")
 
-                    elif change_id == 2:  # Change one vase to light
-                        left_vase = random.randint(0,1)
-                        if left_vase:           # Change left vase to light
-                            f_ishtarmap.seek(int("3a3", 16))
+                    elif change_id == 2:  # Change right vase to light
+                        f_ishtarmap.seek(int("3a4", 16))
+                        f_ishtarmap.write(b"\x7c")
+                        f_ishtarmap.seek(int("3b4", 16))
+                        f_ishtarmap.write(b"\x84")
+                        if done:
+                            coords[room] = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
+                        else:
+                            f_ishtarmap.seek(int("2a4", 16))
                             f_ishtarmap.write(b"\x7c")
-                            f_ishtarmap.seek(int("3b3", 16))
+                            f_ishtarmap.seek(int("2b4", 16))
                             f_ishtarmap.write(b"\x84")
-                            if done:
-                                coords[room] = [b"\x30\x03", b"\x40\x03", b"\xa0\x00", b"\xc0\x00"]
-                            else:
-                                f_ishtarmap.seek(int("2a3", 16))
-                                f_ishtarmap.write(b"\x7c")
-                                f_ishtarmap.seek(int("2b3", 16))
-                                f_ishtarmap.write(b"\x84")
-                        else:           # Change right vase to light
-                            f_ishtarmap.seek(int("3a4", 16))
-                            f_ishtarmap.write(b"\x7c")
-                            f_ishtarmap.seek(int("3b4", 16))
-                            f_ishtarmap.write(b"\x84")
-                            if done:
-                                coords[room] = [b"\x40\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
-                            else:
-                                f_ishtarmap.seek(int("2a4", 16))
-                                f_ishtarmap.write(b"\x7c")
-                                f_ishtarmap.seek(int("2b4", 16))
-                                f_ishtarmap.write(b"\x84")
 
                     elif change_id == 3:  # Remove rock
                         f_ishtarmap.seek(int("3bd", 16))
@@ -3361,6 +3349,19 @@ class Randomizer:
                         else:
                             f_ishtarmap.seek(int("2bd", 16))
                             f_ishtarmap.write(b"\x8f")
+
+#                    elif change_id == 8:  # Change both vases to light (vanilla) - DOESN'T PLAY WELL WITH OTHERS, IS IN TIME OUT
+#                        f_ishtarmap.seek(int("3a3", 16))
+#                        f_ishtarmap.write(b"\x7c\x7c")
+#                        f_ishtarmap.seek(int("3b3", 16))
+#                        f_ishtarmap.write(b"\x84\x84")
+#                        if done:
+#                            coords[room] = [b"\x30\x03", b"\x50\x03", b"\xa0\x00", b"\xc0\x00"]
+#                        else:
+#                            f_ishtarmap.seek(int("2a3", 16))
+#                            f_ishtarmap.write(b"\x7c\x7c")
+#                            f_ishtarmap.seek(int("2b3", 16))
+#                            f_ishtarmap.write(b"\x84\x84")
 
 
                 # Set change for Room 3

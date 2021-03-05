@@ -2493,6 +2493,23 @@ class World:
                     if print_log:
                         print("ERROR: exit data invalid",exit,new_exit)
 
+        for exit in self.exits_detailed:
+            new_exit = self.exits[exit][1]
+            map_str = self.exits[new_exit][6]
+            map_id = map_str[0:1]
+            xcoord = int.to_bytes(int.from_bytes(map_str[1:3], byteorder="little") // 16, 2, byteorder='little')
+            ycoord = int.to_bytes(int.from_bytes(map_str[3:5], byteorder="little") // 16, 2, byteorder='little')
+            facedir = map_str[5:6]
+            camera = map_str[6:8]
+            # print(map_id,xcoord,ycoord,facedir,camera)
+
+            er_patch_data.append([self.exits_detailed[exit][0], map_id])
+            er_patch_data.append([self.exits_detailed[exit][1], xcoord])
+            er_patch_data.append([self.exits_detailed[exit][2], ycoord])
+            if self.exits_detailed[exit][3] != "":
+                er_patch_data.append([self.exits_detailed[exit][3], facedir])
+            er_patch_data.append([self.exits_detailed[exit][4], camera])
+
         for x in er_patch_data:
             try:
                 f.seek(int(x[0], 16) + rom_offset)
@@ -5360,7 +5377,7 @@ class World:
         # Database of special map exits that don't conform to the typical "02 26" format, IDs correspond to self.exits
         # FORMAT: { ID: [MapAddr, Xaddr, Yaddr, FaceDirAddr, CameraAddr]}
         self.exits_detailed = {
-            14: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
+            15: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
         }
 
         self.graph_viz = None
