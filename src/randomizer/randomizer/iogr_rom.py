@@ -16,7 +16,7 @@ from .models.enums.start_location import StartLocation
 
 VERSION = "4.3.3"
 
-MAX_RANDO_RETRIES = 4
+MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
 
 KARA_EDWARDS = 1
