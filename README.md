@@ -39,9 +39,13 @@ Here's a quick primer on what you need to know about most randomizer seeds.
   - Will: Like the original game, you can use this to travel between Watermia (the guy tending kruks) and Euro (the guy standing near the town entrance)
   - Large Roast: Give this to a hungry kid in Natives Village and he'll guide you to Dao.
 - **Item and Ability locations have been shuffled.** Check every location and Dark Space for potential items/moves.
+
+#### Win Conditions
 - For most seeds, you must **rescue Kara** from a painting using the Magic Dust. She can show up at the end of one of the five minor dungeons (Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat).
 - For most seeds, you must **collect Mystic Statues** by beating bosses. You can find out the statues you'll need to get from the teacher in South Cape.
 - Once you free Kara, collect the needed Mystic Statues, and acquire and use the Aura, you can face Dark Gaia.  **Talk to Gaia in any Dark Space** when you've completed these conditions and she can take you to fight her.
+
+#### Tips and Tricks
 - Acquiring late-game abilities early can open up progression in unique ways. Think outside the box if you're stuck.
 - There are a couple **in-game tools** to help newcomers:
   - Talk to the guy standing in front of the school in South Cape for a guidebook. This outlines much of the information discussed above, so it's handy as a quick reference if you get stuck.
