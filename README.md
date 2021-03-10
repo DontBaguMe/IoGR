@@ -1,4 +1,4 @@
-## The Illusion of Gaia Randomizer (v3.6) - <a href="https://www.iogr.app/">Play Now!</a>
+## The Illusion of Gaia Randomizer (v4.3) - <a href="https://www.iogr.app/">Play Now!</a>
 This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Jump to the FAQ</a>
@@ -10,6 +10,8 @@ This randomizer is compatible with the US version of the Illusion of Gaia ROM.
 The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 
 ### Contents
+<a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#quick-start">Quick Start (tl;dr)</a>
+
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#randomizer-settings">Randomizer Settings</a>
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#beating-the-game">How to Beat the Game</a>
@@ -24,6 +26,26 @@ The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 
 ### Creating a Randomized ROM
 Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting "Generate ROM" will allow you to download a randomized ROM (as well as a spoiler log).  The original file will remain intact.
+
+
+### Quick Start
+Here's a quick primer on what you need to know about most randomizer seeds.
+
+#### Differences from the Original Game
+- Illusion of Gaia has been transformed into an open-world game for the randomizer. To accomplish this, **some items have different functionalities**:
+  - Lola's Letter: Acquiring AND READING this letter allows you to talk to Seth, who can take you between these three locations: South Cape (seaside cave), Diamond Coast (talk to Turbo), and Watermia (talk to the guy standing at the entrance)
+  - Teapot: Use this in the Moon Tribe Camp to heal the spirits. They will take you to the Sky Garden and, from there, can take you back to the Moon Tribe Camp, the Nazca Plain, or the Seaside Palace.
+  - Memory Melody: Play this melody for Neil in his cottage and he can take you around in his plane. He can take you to/from his cottage, his mansion in Euro, or Dao.  He can also drop you off at Babel Tower.
+  - Will: Like the original game, you can use this to travel between Watermia (the guy tending kruks) and Euro (the guy standing near the town entrance)
+  - Large Roast: Give this to a hungry kid in Natives Village and he'll guide you to Dao.
+- **Item and Ability locations have been shuffled.** Check every location and Dark Space for potential items/moves.
+- For most seeds, you must **rescue Kara** from a painting using the Magic Dust. She can show up at the end of one of the five minor dungeons (Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat).
+- For most seeds, you must **collect Mystic Statues** by beating bosses. You can find out the statues you'll need to get from the teacher in South Cape.
+- Once you free Kara, collect the needed Mystic Statues, and acquire and use the Aura, you can face Dark Gaia.  **Talk to Gaia in any Dark Space** when you've completed these conditions and she can take you to fight her.
+- Acquiring late-game abilities early can open up progression in unique ways. Think outside the box if you're stuck.
+- There are a couple **in-game tools** to help newcomers:
+  - Talk to the guy standing in front of the school in South Cape for a guidebook. This outlines much of the information discussed above, so it's handy as a quick reference if you get stuck.
+  - Enter the house to the east of Will's House in South Cape to access a world map.  When you walk over a map location, it will break down the number of items you still need to collect from that area.
 
 ### Randomizer Settings
 Below are explanations of the various settings of the randomizer.
