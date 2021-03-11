@@ -231,7 +231,7 @@ class World:
                 # Queue up newly-accessible places to visit
                 for x in self.graph[node][10]:
                     if x != node and not self.is_accessible(x) and x not in to_visit+visited:
-                        to_visit.append(x)
+                        to_visit.insert(0,x)
                         if print_log:
                             print("  -Discovered:",self.graph[x][5])
 
@@ -3143,14 +3143,15 @@ class World:
             47:  [131, 2, False, 0, [], "c98b0", "Unsafe", b"\xd0\x00\xc0\x00\x83\x00\x61", b"\x3d", "Diamond Mine: Dark Space at Wall    "],
             48:  [142, 2, False, 0, [], "c9b49",       "",                              "", b"\x42", "Diamond Mine: Dark Space behind Wall"],
 
-            49:  [173, 1, False, 0, [], "1AFDD", "", "", "", "Sky Garden: (NE) Platform Chest     "],
-            50:  [174, 1, False, 0, [], "1AFD9", "", "", "", "Sky Garden: (NE) Blue Cyber Chest   "],
-            51:  [175, 1, False, 0, [], "1AFD5", "", "", "", "Sky Garden: (NE) Statue Chest       "],
-            52:  [181, 1, False, 0, [], "1AFE2", "", "", "", "Sky Garden: (SE) Dark Side Chest    "],
-            53:  [186, 1, False, 0, [], "1AFE7", "", "", "", "Sky Garden: (SW) Ramp Chest         "],
-            54:  [187, 1, False, 0, [], "1AFEC", "", "", "", "Sky Garden: (SW) Dark Side Chest    "],
-            55:  [193, 1, False, 0, [], "1AFF1", "", "", "", "Sky Garden: (NW) Top Chest          "],
-            56:  [193, 1, False, 0, [], "1AFF5", "", "", "", "Sky Garden: (NW) Bottom Chest       "],
+            # Sky Garden
+            49:  [172, 1, False, 0, [], "1AFDD", "", "", "", "Sky Garden: (NE) Platform Chest     "],
+            50:  [173, 1, False, 0, [], "1AFD9", "", "", "", "Sky Garden: (NE) Blue Cyber Chest   "],
+            51:  [174, 1, False, 0, [], "1AFD5", "", "", "", "Sky Garden: (NE) Statue Chest       "],
+            52:  [180, 1, False, 0, [], "1AFE2", "", "", "", "Sky Garden: (SE) Dark Side Chest    "],
+            53:  [185, 1, False, 0, [], "1AFE7", "", "", "", "Sky Garden: (SW) Ramp Chest         "],
+            54:  [186, 1, False, 0, [], "1AFEC", "", "", "", "Sky Garden: (SW) Dark Side Chest    "],
+            55:  [194, 1, False, 0, [], "1AFF1", "", "", "", "Sky Garden: (NW) Top Chest          "],
+            56:  [194, 1, False, 0, [], "1AFF5", "", "", "", "Sky Garden: (NW) Bottom Chest       "],
 
             57:  [170, 2, False, 0, [64, 65, 66], "c9d63",   "Safe", b"\x90\x00\x70\x00\x83\x00\x22", b"\x4c", "Sky Garden: Dark Space (Foyer)      "],
             58:  [169, 2, False, 0,           [], "ca505", "Unsafe", b"\x70\x00\xa0\x00\x83\x00\x11", b"\x56", "Sky Garden: Dark Space (SE)         "],  # in the room
@@ -3319,7 +3320,8 @@ class World:
             # Misc
             600: [600, 4, True, 600, [], "", "", "", "", "Freedan Access                          "],
             601: [601, 4, True, 601, [], "", "", "", "", "Glitches                                "],
-            602: [602, 4, True, 602, [], "", "", "", "", "Early Firebird                          "]
+            602: [602, 4, True, 602, [], "", "", "", "", "Early Firebird                          "],
+            603: [491, 4, True,  67, [], "", "", "", "", "Firebird                                "]
         }
 
         # World graph
@@ -3417,7 +3419,7 @@ class World:
             72: [False, [70,73],  2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (N)", [], False, [], [], [], [], [], [], [], []],
             73: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (center)", [], False, [], [], [], [], [], [], [], []],
             74: [False, [72],     2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SW)", [], False, [], [], [], [], [], [], [], []],
-            75: [False, [72],     2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SE)", [], False, [], [], [], [], [], [], [], []],
+            75: [False, [72,99],  2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SE)", [], False, [], [], [], [], [], [], [], []],
             76: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (statue head)", [], False, [], [], [], [], [], [], [], []],
             77: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (first area)", [3, 4], False, [], [], [], [], [], [], [], []],
             78: [False, [77],     2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (second area)", [], False, [], [], [], [], [], [], [], []],
@@ -3441,6 +3443,7 @@ class World:
             96: [False, [95],     2, [1,5,0,b"\x00"], 0, "Inca: Map 40 (past tiles)", [], False, [], [], [], [], [], [], [], []],
             97: [False, [98,503], 2, [1,5,0,b"\x00"], 0, "Inca: Boss Room", [], True, [], [], [], [], [], [], [], []],       # might need to add an exit for this
             98: [False, [97],     2, [1,5,0,b"\x00"], 0, "Inca: Behind Boss Room", [], False, [], [], [], [], [], [], [], []],
+            99: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SE door)", [], False, [], [], [], [], [], [], [], []],
 
             # Gold Ship / Diamond Coast
             100: [False, [],   1, [1,5,0,b"\x00"], 0, "Gold Ship: Deck", [], False, [], [], [], [], [], [], [], []],
@@ -3498,6 +3501,7 @@ class World:
             162: [False, [11],         1, [2,10,0,b"\x00"], 0, "Nazca Plain", [], False, [], [], [], [], [], [], [], []],
 
             # Sky Garden
+            167: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (SE)", [], False, [], [], [], [], [], [], [], []],
             168: [False, [181],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 81 (north)", [], False, [], [], [], [], [], [], [], []],
             169: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 86 (DS Room)", [], False, [], [], [], [], [], [], [], []],
             170: [False, [],         1, [2,10,0,b"\x00"], 0, "Sky Garden: Foyer", [14, 14, 14, 14], False, [], [], [], [], [], [], [], []],
@@ -3523,8 +3527,8 @@ class World:
             190: [False, [191],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (NE)", [], False, [], [], [], [], [], [], [], []],
             191: [False, [190, 192], 2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (NW)", [], False, [], [], [], [], [], [], [], []],
             192: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (center)", [], False, [], [], [], [], [], [], [], []],
-            193: [False, [194],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (south)", [], False, [], [], [], [], [], [], [], []],
-            194: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (SE)", [], False, [], [], [], [], [], [], [], []],
+            193: [False, [194],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (SW)", [], False, [], [], [], [], [], [], [], []],
+            194: [False, [167],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (chests)", [], False, [], [], [], [], [], [], [], []],
             195: [False, [196],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 84 (main)", [], False, [], [], [], [], [], [], [], []],
             196: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 84 (NE)", [], False, [], [], [], [], [], [], [], []],
             197: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 84 (behind statue)", [], False, [], [], [], [], [], [], [], []],
@@ -3710,14 +3714,16 @@ class World:
             381: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 187 (main)", [], False, [], [], [], [], [], [], [], []],
             382: [False, [381], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 187 (chest)", [], False, [], [], [], [], [], [], [], []],
             383: [False, [381], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 187 (Dark Space)", [], False, [], [], [], [], [], [], [], []],
-            384: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 188 (N)", [], False, [], [], [], [], [], [], [], []],
-            385: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 188 (S)", [], False, [], [], [], [], [], [], [], []],
+            384: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 188 (N bright)", [], False, [], [], [], [], [], [], [], []],
+            385: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 188 (S bright)", [], False, [], [], [], [], [], [], [], []],
             386: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 189 (floor S)", [], False, [], [], [], [], [], [], [], []],
             387: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 189 (floor N)", [], False, [], [], [], [], [], [], [], []],
             388: [False, [386], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 189 (platform)", [], False, [], [], [], [], [], [], [], []],
             389: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 190 (E)", [], False, [], [], [], [], [], [], [], []],
             390: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 190 (W)", [], False, [], [], [], [], [], [], [], []],
             391: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 191", [], False, [], [], [], [], [], [], [], []],
+            392: [False, [384], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 188 (N)", [], False, [], [], [], [], [], [], [], []],
+            393: [False, [385], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 188 (S)", [], False, [], [], [], [], [], [], [], []],
 
             # Dao
             400: [False, [1,14], 1, [5,20,0,b"\x00"], 0, "Dao: Main Area", [], False, [], [], [], [], [], [], [], []],
@@ -3904,6 +3910,7 @@ class World:
             82: [0, 61, 62, False, [[63, 1]]],   # Cave challenge w/ Spin Dash
 
             # Inca / Gold Ship / Freejia
+            89:  [0,  72,  99, False, [[601, 1]]],        # Map 29 progression w/ glitches
             90:  [0,  77,  78, False, [[3, 1], [4, 1]]],  # Map 30 progression w/ Inca Statues
             91:  [0,  80,  81, False, [[61, 1]]],         # Map 32 progression w/ Psycho Dash
             92:  [0,  80,  81, False, [[62, 1]]],         # Map 32 progression w/ Psycho Slider
@@ -4015,7 +4022,7 @@ class World:
             250: [0, 353, 354, False, [[29, 1]]],    # Statues awake w/ Gorgon Flower
 
             # Ankor Wat
-            #260: [0, 361, 362,  True, [[64, 1]]],                      # Map 177 progression w/ Friar
+            260: [-1, 361, 362,  True, [[64, 1]]],                     # Map 177 progression w/ Friar
             261: [0, 363, 364, False, [[63, 1]]],                      # Map 178 progression w/ Spin Dash
             262: [0, 364, 365, False, [[62, 1]]],                      # Map 178 progression w/ Psycho Slider
             263: [0, 365, 364, False, [[62, 1]]],                      # Map 178 progression w/ Psycho Slider
@@ -4028,12 +4035,14 @@ class World:
             270: [0, 373, 374,  True, [[67, 1]]],                      # Map 183 progression w/ Firebird       -- IS THIS TRUE?
             271: [0, 376, 377,  True, [[64, 1]]],                      # Map 184 progression w/ Friar
             272: [0, 376, 377,  True, [[36, 1]]],                      # Map 184 progression w/ Shadow
-            273: [0, 384, 385, False, [[28, 1], [62, 1]]],             # Map 188 progression w/ Black Glasses & Slider
-            274: [0, 385, 384, False, [[28, 1], [62, 1]]],             # Map 188 progression w/ Black Glasses & Slider
-            275: [0, 384, 385, False, [[601, 1], [62, 1]]],            # Map 188 progression w/ glitches & Slider
-            276: [0, 385, 384, False, [[601, 1], [62, 1]]],            # Map 188 progression w/ glitches & Slider
-            277: [0, 386, 387, False, [[62, 1]]],                      # Map 188 progression w/ Psycho Slider
-            278: [0, 387, 386, False, [[62, 1]]],                      # Map 188 progression w/ Psycho Slider
+            273: [0, 384, 392, False, [[28, 1]]],                      # Map 188 progression w/ Black Glasses
+            274: [0, 385, 393, False, [[28, 1]]],                      # Map 188 progression w/ Black Glasses
+            275: [0, 384, 392, False, [[601, 1]]],                     # Map 188 progression w/ glitches
+            276: [0, 385, 393, False, [[601, 1]]],                     # Map 188 progression w/ glitches
+            277: [0, 392, 393, False, [[62, 1]]],                      # Map 188 progression w/ Slider
+            278: [0, 393, 392, False, [[62, 1]]],                      # Map 188 progression w/ Slider
+            279: [0, 386, 387, False, [[62, 1]]],                      # Map 188 progression w/ Psycho Slider
+            280: [0, 387, 386, False, [[62, 1]]],                      # Map 188 progression w/ Psycho Slider
 
             # Pyramid
             290: [0, 410, 411, False, [[62, 1]]],             # Map 204 progression w/ Slider
@@ -4077,7 +4086,7 @@ class World:
             402: [-1, 270, 490, False, [[20, 1]]],                      # Rescue Kara from Angel w/ Magic Dust
             403: [-1, 345, 490, False, [[20, 1]]],                      # Rescue Kara from Mt. Temple w/ Magic Dust
             404: [-1, 391, 490, False, [[20, 1]]],                      # Rescue Kara from Ankor Wat w/ Magic Dust
-            405: [-1, 490, 491, False, [[36, 1], [39, 1]]],             # Early Firebird w/ Kara, Aura and Ring
+            405: [0, 490, 491, False, [[36, 1], [39, 1], [602, 1]]],    # Early Firebird w/ Kara, Aura and Ring
             406: [0, 490, 492, False, [[36, 1], [100, 0], [101, 0], [102, 0], [103, 0], [104, 0], [105, 0]]]
                                                              # Beat Game w/Mystic Statues and Aura
         }
@@ -4924,8 +4933,8 @@ class World:
             143: [142, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 33 to Map 35"],
             144: [145, 0, 0, 83,  75, "", b"", False,  True, False, "Inca: Map 33 to Map 29"],
             145: [144, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 29 to Map 33"],
-            146: [147, 0, 0, 75,  84, "", b"", False,  True, False, "Inca: Map 29 to Map 34"],
-            147: [146, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 34 to Map 29"],
+            146: [147, 0, 0, 99,  84, "", b"", False,  True, False, "Inca: Map 29 to Map 34"],  # Special case to allow for Z-ladder glitch
+            147: [146, 0, 0, 84,  75, "", b"", False,  True, False, "Inca: Map 34 to Map 29"],
             148: [149, 0, 0, 84,  93, "", b"", False,  True, False, "Inca: Map 34 to Map 38"],
             149: [148, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 38 to Map 34"],
             150: [151, 0, 0, 84,  87, "", b"", False,  True, False, "Inca: Map 34 to Map 36"],
@@ -5042,7 +5051,7 @@ class World:
             304: [303, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (C)"],
             305: [306, 0, 0, 197, 193, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (SE)"],
             306: [305, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (SW)"],
-            307: [308, 0, 0, 194, 195, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (E)"],
+            307: [308, 0, 0, 167, 195, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (E)"],
             308: [307, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (W)"],
 
             # Seaside Palace
@@ -5268,7 +5277,7 @@ class World:
             589: [588, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 186 to Map 187 (E)"],
             590: [591, 0, 0, 381, 384, "", b"", False,  True, False, "Ankor Wat: Map 187 to Map 188"],
             591: [590, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187"],
-            592: [593, 0, 0, 385, 386, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 189"],
+            592: [593, 0, 0, 393, 386, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 189"],
             593: [592, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 189 to Map 188"],
             594: [595, 0, 0, 387, 389, "", b"", False,  True, False, "Ankor Wat: Map 189 to Map 190 (E)"],
             595: [594, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 190 to Map 189 (E)"],
@@ -5277,10 +5286,10 @@ class World:
             598: [599, 0, 0, 390, 391, "", b"", False,  True, False, "Ankor Wat: Map 190 to Map 191"],
             599: [598, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 191 to Map 190"],
             600: [  0, 0, 0, 366, 368, "", b"", False,  True, False, "Ankor Wat: Map 179 to Map 180 (drop)"],
-            601: [  0, 0, 0, 384, 381, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NW-L (drop)"],
-            602: [  0, 0, 0, 384, 381, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NW-R (drop)"],
-            603: [  0, 0, 0, 384, 383, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NE (drop)"],
-            604: [  0, 0, 0, 385, 382, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 SW (drop)"],
+            601: [  0, 0, 0, 392, 381, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NW-L (drop)"],
+            602: [  0, 0, 0, 392, 381, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NW-R (drop)"],
+            603: [  0, 0, 0, 392, 383, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NE (drop)"],
+            604: [  0, 0, 0, 393, 382, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 SW (drop)"],
             605: [  0, 0, 0, 389, 388, "", b"", False,  True, False, "Ankor Wat: Map 190 to Map 189 (drop)"],
 
             # Dao
