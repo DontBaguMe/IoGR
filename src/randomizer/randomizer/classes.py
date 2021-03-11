@@ -4803,17 +4803,18 @@ class World:
             11: [10, 0, 0,   0,   0, "19c78", b"\x88\xE0\x03\x90\x00\x06\x00\x14", True, True, False, "Sand Fanger entrance (out)"],
             12: [ 0, 0, 0, 303, 290, "19c84", b"\x82\x10\x00\x90\x00\x87\x00\x18", True, True, False, "Sand Fanger exit"],
 
-            13: [14, 0, 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen entrance"],
-            14: [13, 0, 0,   0,   0,      "", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen exit (fake)"],
-            15: [ 0, 0, 0, 448, 415,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", True, True, False, "Mummy Queen exit"],     # This one's dumb
+            13: [14, 0, 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen entrance (in)"],
+            14: [13, 0, 0,   0,   0,      "", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen entrance (out)"],  # fake
+            15: [ 0, 0, 0, 448, 415,      "", b"\xcd\x70\x00\x90\x00\x83\x00\x11", True, True, False, "Mummy Queen exit"],     # This one's dumb, see exits_detailed
 
             16: [17, 0, 0, 470, 471, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", True, True, False, "Babel entrance (in)"],
             17: [16, 0, 0,   0,   0, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", True, True, False, "Babel entrance (out)"],
             18: [ 0, 0, 0, 472, 400, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, True, False, "Dao passage (Babel)"],
 
-            19: [20, 0, 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm entrance"],
-            20: [19, 0, 0,   0,   0,      "", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm exit (fake)"],
-            21: [ 0, 0, 0, 482, 472, "98115", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", True, True, False, "Babel passage (Solid Arm)"],
+            19: [20, 0, 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm entrance (in)"],
+            20: [19, 0, 0,   0,   0,      "", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm entrance (out)"],  # fake
+            21: [ 0, 0, 0, 472, 400,      "", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, True, False, "Dao passage (Solid Arm)"],  # fake
+#            21: [ 0, 0, 0, 482, 472,      "", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", True, True, False, "Babel passage (Solid Arm)"],  # This one stays, @98115
 
             # Passage Menus
             22: [0, 0, 0, 15,  28, "", b"", False, False, False, "Seth: Passage 1 (South Cape)"],

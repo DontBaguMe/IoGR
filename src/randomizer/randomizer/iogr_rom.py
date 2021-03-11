@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.3.5"
+VERSION = "4.3.6"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -2625,8 +2625,9 @@ class Randomizer:
             # Determine statue order for shuffle
             if settings.difficulty.value >= 3:
                 random.shuffle(boss_order)
-                if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion)
-                    boss_order = boss_order[1:] + boss_order[:1]
+                #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
+                #    n = random.randint(1,6)
+                #    boss_order = boss_order[n:] + boss_order[:n]
             else:
                 boss_order.remove(5)
                 boss_order.remove(7)
