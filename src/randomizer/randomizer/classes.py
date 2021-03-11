@@ -3155,7 +3155,7 @@ class World:
 
             57:  [170, 2, False, 0, [64, 65, 66], "c9d63",   "Safe", b"\x90\x00\x70\x00\x83\x00\x22", b"\x4c", "Sky Garden: Dark Space (Foyer)      "],
             58:  [169, 2, False, 0,           [], "ca505", "Unsafe", b"\x70\x00\xa0\x00\x83\x00\x11", b"\x56", "Sky Garden: Dark Space (SE)         "],  # in the room
-            59:  [184, 2, False, 0,           [], "ca173",       "",                              "", b"\x51", "Sky Garden: Dark Space (SW)         "],
+            59:  [183, 2, False, 0,           [], "ca173",       "",                              "", b"\x51", "Sky Garden: Dark Space (SW)         "],
             60:  [195, 2, False, 0,           [], "ca422", "Unsafe", b"\x20\x00\x70\x00\x83\x00\x44", b"\x54", "Sky Garden: Dark Space (NW)         "],
 
             # Seaside Palace
