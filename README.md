@@ -38,6 +38,7 @@ Here's a quick primer on what you need to know about most randomizer seeds.
   - Memory Melody: Play this melody for Neil in his cottage and he can take you around in his plane. He can take you to/from his cottage, his mansion in Euro, or Dao.  He can also drop you off at Babel Tower.
   - Will: Like the original game, you can use this to travel between Watermia (the guy tending kruks) and Euro (the guy standing near the town entrance)
   - Large Roast: Give this to a hungry kid in Natives Village and he'll guide you to Dao.
+  - Necklace: Give this to Lilly in Itory Village and she'll take a ride in your pocket. You need her to progress through Edward's Tunnel and to acquire the coffin item in the Seaside Palace.
 - **Item and Ability locations have been shuffled.** Check every location and Dark Space for potential items/moves.
 
 #### Win Conditions
