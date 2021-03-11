@@ -24,27 +24,28 @@ The <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is now live!
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#faq">Frequently Asked Questions</a>
 
-### Creating a Randomized ROM
-Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting "Generate ROM" will allow you to download a randomized ROM (as well as a spoiler log).  The original file will remain intact.
-
-
 ### Quick Start
 Here's a quick primer on what you need to know about most randomizer seeds.
 
+#### Creating a Randomized ROM
+Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting "Generate ROM" will allow you to download a randomized ROM (as well as a spoiler log).  The original file will remain intact.
+
 #### Differences from the Original Game
-- Illusion of Gaia has been transformed into an open-world game for the randomizer. To accomplish this, **some items have different functionalities**:
-  - Lola's Letter: Acquiring AND READING this letter allows you to talk to Seth, who can take you between these three locations: South Cape (seaside cave), Diamond Coast (talk to Turbo), and Watermia (talk to the guy standing at the entrance)
-  - Teapot: Use this in the Moon Tribe Camp to heal the spirits. They will take you to the Sky Garden and, from there, can take you back to the Moon Tribe Camp, the Nazca Plain, or the Seaside Palace.
-  - Memory Melody: Play this melody for Neil in his cottage and he can take you around in his plane. He can take you to/from his cottage, his mansion in Euro, or Dao.  He can also drop you off at Babel Tower.
-  - Will: Like the original game, you can use this to travel between Watermia (the guy tending kruks) and Euro (the guy standing near the town entrance)
-  - Large Roast: Give this to a hungry kid in Natives Village and he'll guide you to Dao.
-  - Necklace: Give this to Lilly in Itory Village and she'll take a ride in your pocket. You need her to progress through Edward's Tunnel and to acquire the coffin item in the Seaside Palace.
-- **Item and Ability locations have been shuffled.** Check every location and Dark Space for potential items/moves.
+- Item and Ability locations have been shuffled. Check every location and Dark Space for potential items/moves.
+- Unlike the original game, only some rooms provide stat upgrades when you clear all the enemies. When you enter a dungeon room, bring up the Start menu map; if you see a pulsing Force icon on the top-left, you will receive a stat upgrade for defeating all the enemies in that room.
+- Herbs will stack in your inventory, so don't be alarmed if you know you collected more than one herb yet see only one in your inventory. They're all there.
+- Illusion of Gaia has been transformed into an open-world game for the randomizer. To accomplish this, some items have different functionalities:
+  - **Lola's Letter:** Acquiring _and reading_ this letter allows you to talk to Seth, who can take you between these three locations: South Cape (seaside cave), Diamond Coast (talk to Turbo), and Watermia (talk to the guy standing at the entrance)
+  - **Teapot:** Use this in the Moon Tribe Camp to heal the spirits. They will take you to the Sky Garden and, from there, can take you back to the Moon Tribe Camp, the Nazca Plain, or the Seaside Palace.
+  - **Memory Melody:** Play this melody for Neil in his cottage and he can take you around in his plane. He can take you to/from his cottage, his mansion in Euro, or Dao.  He can also drop you off at Babel Tower.
+  - **Will:** Like the original game, you can use this to travel between Watermia (the guy tending kruks) and Euro (the guy standing near the town entrance)
+  - **Large Roast:** Give this to a hungry kid in Natives Village and he'll guide you to Dao.
+  - **Necklace:** Give this to Lilly in Itory Village and she'll take a ride in your pocket. You need her to progress through Edward's Tunnel and to acquire the coffin item in the Seaside Palace.
 
 #### Win Conditions
 - For most seeds, you must **rescue Kara** from a painting using the Magic Dust. She can show up at the end of one of the five minor dungeons (Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat).
 - For most seeds, you must **collect Mystic Statues** by beating bosses. You can find out the statues you'll need to get from the teacher in South Cape.
-- Once you free Kara, collect the needed Mystic Statues, and acquire and use the Aura, you can face Dark Gaia.  **Talk to Gaia in any Dark Space** when you've completed these conditions and she can take you to fight her.
+- Once you free Kara, collect the needed Mystic Statues, and acquire _and use_ the Aura, you can face Dark Gaia.  **Talk to Gaia in any Dark Space** when you've completed these conditions and she can take you to fight her.
 
 #### Tips and Tricks
 - Acquiring late-game abilities early can open up progression in unique ways. Think outside the box if you're stuck.
@@ -60,50 +61,50 @@ This is a non-negative integer value that initializes the randomization algorith
 
 #### Difficulty
 There are four difficulty settings: Easy, Normal, Hard, and Extreme. The difficulty chosen affects the following game mechanics:
-- Item and Ability Placement: Easy and Normal modes both include a slight bias toward making required items and abilities available to the player earlier on.
-- In-Game Spoilers: Hints have been removed in Extreme mode.
-- Boss Logic: Solid Arm can be required for Extreme seeds.
-- Boss Shuffle: In Extreme, dungeons keep their vanilla music so you don't know which boss is at the end.  Solid Arm is included in Boss Shuffle in Extreme, but not other modes
-- Red Jewel Hunt: The number of Red Jewels required to beat the game, by difficulty, is 35/40/45/50
-- Open World: The items that replace the five travel items are more favorable in easier difficulties.
+- **Item and Ability Placement:** Easy and Normal modes both include a slight bias toward making required items and abilities available to the player earlier on.
+- **In-Game Spoilers:** Hints have been removed in Extreme mode.
+- **Boss Logic:** Solid Arm can be required for Extreme seeds.
+- **Boss Shuffle:** In Extreme, dungeons keep their vanilla music so you don't know which boss is at the end.  Solid Arm is included in Boss Shuffle in Extreme, but not other modes
+- **Red Jewel Hunt:** The number of Red Jewels required to beat the game, by difficulty, is 35/40/45/50
+- **Open World:** The items that replace the five travel items are more favorable in easier difficulties.
 
 #### Level
 You choose your level from the start menu when you create a new game file.  Level does not affect game logic or item placement, so if desired players could race the same seed at varying levels.  There are four level settings: Beginner, Intermediate, Advanced, and Expert. The level chosen affects the following game mechanics:
-- Enemies: Enemies scale in strength with each level.
-- Room Rewards: The number of room-clearing rewards available to the player is affected by difficulty (see below).
-- Herbs:  By level, the number of HP restored by herbs are full/8/6/4
-- Snake Game: The number of snakes required will increase at harder difficulties.
+- **Enemies:** Enemies scale in strength with each level.
+- **Room Rewards:** The number of room-clearing rewards available to the player is affected by difficulty (see below).
+- **Herbs:**  By level, the number of HP restored by herbs are full/8/6/4
+- **Snake Game:** The number of snakes required will increase at harder difficulties.
 
 #### Goal
 This allows you to choose a game mode. There are currently four goals available (see below for more details):
-- Dark Gaia: Rescue Kara, find and use the Aura, collect required Mystic Statues (if any), and defeat Dark Gaia on the Comet to beat the game.
-- Red Jewel Hunt: Beat the game by collecting a number of Red Jewels and turning them into the Jeweler (see below).
-- Apocalypse Gaia: Same as Dark Gaia, except you'll face the true final boss hidden in the game code!  Shoutouts to Raeven0 for uncovering and reprogramming this masterpiece. (Very hard) NOTE: This fight has five phases -- the first two are identical to the vanilla Dark Gaia fight, and phases 3-5 are new.  Once you hit Phase 3, you set a checkpoint where if you die: 1) you return to the beginning of Phase 3 with full health, and 2) you regain any herbs you had at the beginning of that phase.
-- Random Gaia: Same as Dark Gaia, except there's a 50/50 chance you'll face Apocalypse Gaia instead.  In Random Gaia seeds, you'll know whom you're facing in the text box that appears after you merge forms with Kara: 1) if it's Dark Gaia, you'll get a random quote as normal; 2) if it's Apocalypse Gaia, the quote will read "Apocalypse Now!"
+- **Dark Gaia:** Rescue Kara, find and use the Aura, collect required Mystic Statues (if any), and defeat Dark Gaia on the Comet to beat the game.
+- **Red Jewel Hunt:** Beat the game by collecting a number of Red Jewels and turning them into the Jeweler (see below).
+- **Apocalypse Gaia:** Same as Dark Gaia, except you'll face the true final boss hidden in the game code!  Shoutouts to Raeven0 for uncovering and reprogramming this masterpiece. (Very hard) NOTE: This fight has five phases -- the first two are identical to the vanilla Dark Gaia fight, and phases 3-5 are new.  Once you hit Phase 3, you set a checkpoint where if you die: 1) you return to the beginning of Phase 3 with full health, and 2) you regain any herbs you had at the beginning of that phase.
+- **Random Gaia:** Same as Dark Gaia, except there's a 50/50 chance you'll face Apocalypse Gaia instead.
 
 #### Statues
-You can choose the number of Mystic Statues required to complete Dark Gaia seeds, or make the number random. This parameter is ignored for Red Jewel Hunts.
+You can choose the number of Mystic Statues required to complete Dark Gaia seeds (0-6), or make the number random. This parameter is ignored for Red Jewel Hunts.
 
 #### Starting Location
 You can choose to have the game start you in random locations throughout the world. Gaia's "warp to start" will return you to wherever you begin the game.
-- South Cape: You start the game in the vanilla location.
-- Safe: You start the game in a random safe location (e.g. a town)
-- Unsafe: You can start the game at any random Dark Space. It can be either a safe location (town) or an unsafe location (dungeon).
-- Forced Unsafe: You will start the game in the middle of a random dungeon.
+- **South Cape:** You start the game in the vanilla location.
+- **Safe:** You start the game in a random safe location (e.g. a town)
+- **Unsafe:** You can start the game at any random Dark Space. It can be either a safe location (town) or an unsafe location (dungeon).
+- **Forced Unsafe:** You will start the game in the middle of a random dungeon.
 
 #### Logic
 There are three logic modes available to the player.
-- Completable: This logic ensures that every item and ability location is reachable, allowing every seed to be completed 100%. This tends to yield slightly longer gameplay experiences.
-- Beatable: In Beatable seeds, you are guaranteed to have access to every item and ability you need to complete your goal, though you may not have access to every item location in the game. This tends to yield slightly more streamlined seeds -- however, it could also make helpful items like status upgrades unattainable, making this mode slightly more dangerous.
-- Chaos: Ability placement restrictions have been drastically loosened in this mode -- for instance, Freedan abilities can show up in towns, and Dark Spaces that are typically reserved for form changes might contain abilities, preventing the player from completing dungeons and accessing certain item locations.  As in Beatable, Chaos mode still ensures that the player has access to all the items and locations necessary to beat the game.
+- **Completable:** This logic ensures that every item and ability location is reachable, allowing every seed to be completed 100%. This tends to yield slightly longer gameplay experiences.
+- **Beatable:** In Beatable seeds, you are guaranteed to have access to every item and ability you need to complete your goal, though you may not have access to every item location in the game. This tends to yield slightly more streamlined seeds -- however, it could also make helpful items like status upgrades unattainable, making this mode slightly more dangerous.
+- **Chaos:** Ability placement restrictions have been drastically loosened in this mode -- for instance, Freedan abilities can show up in towns, and Dark Spaces that are typically reserved for form changes might contain abilities, preventing the player from completing dungeons and accessing certain item locations.  As in Beatable, Chaos mode still ensures that the player has access to all the items and locations necessary to beat the game.
 
 #### Variants
-- Open World: All overworld movement is unlocked from the start -- i.e. Lola's Letter, the Teapot, the Memory Melody, the Will, and the Large Roast are all activated at start.  Additionally, these five items have been removed from the item pool and have been replaced with STR upgrades, DEF upgrades, herbs, and/or nothing (dependent on difficulty setting).
-- Allow Glitches: You may be required to perform simple glitches to access progression items or abilities.
-- OHKO (One Hit Knockout): You start the game with 1 HP and will never gain an HP upgrade, so each hit kills you automatically.
-- Red Jewel Madness: You start the game with 40 HP (max) and lose 1 HP for every Red Jewel you turn into the Jeweler. If you reach 0 total HP, you will be caught in an infinite death loop. Note: Gaining an HP upgrade when you're at or near 40 HP may result in lost upgrades, as any HP value above 40 is ignored.
-- Early Firebird: In this mode, you gain access to the Firebird attack when 1) you rescure Kara, 2) you equip the Crystal Ring, and 3) you're in Shadow's form.
-- Zelda 3 Mode: Choosing this variant makes some significant alterations to the game, inspired by the combat system of <i>The Legend of Zelda: A Link to the Past (ALTTP)</i>.  Below are the changes made in this mode. (Where appropriate, values given by level are provided in the format Beginner/Intermediate/Advanced/Expert.)
+- **Open World:** All overworld movement is unlocked from the start -- i.e. Lola's Letter, the Teapot, the Memory Melody, the Will, and the Large Roast are all activated at start.  Additionally, these five items have been removed from the item pool and have been replaced with STR upgrades, DEF upgrades, herbs, and/or nothing (dependent on difficulty setting).
+- **Allow Glitches:** You may be required to perform simple glitches to access progression items or abilities (see below).
+- **OHKO (One Hit Knockout):** You start the game with 1 HP and will never gain an HP upgrade, so each hit kills you automatically.
+- **Red Jewel Madness:** You start the game with 40 HP (max) and lose 1 HP for every Red Jewel you turn into the Jeweler. If you reach 0 total HP, you will be caught in an infinite death loop. Note: Gaining an HP upgrade when you're at or near 40 HP may result in lost upgrades, as any HP value above 40 is ignored.
+- **Early Firebird:** In this mode, you gain access to the Firebird attack when 1) you rescure Kara, 2) you equip the Crystal Ring, and 3) you're in Shadow's form.
+- **Zelda 3 Mode:** Choosing this variant makes some significant alterations to the game, inspired by the combat system of <i>The Legend of Zelda: A Link to the Past (ALTTP)</i>.  Below are the changes made in this mode. (Where appropriate, values given by level are provided in the format Beginner/Intermediate/Advanced/Expert.)
   - You begin the game with 6 HP instead of 8 (to mirror Link's starting health).
   - 12 Red Jewels have been removed from the game and replaced with 4 HP upgrades and 8 HP Pieces.  HP upgrades add +2 HP (+1 in Expert), and HP Pieces add +1 HP (+0.5 in Advanced and Expert).
   - Room rewards (HP only) grant +1 each.  The number of HP room upgrades available, by level, are 12/12/6/6
@@ -116,20 +117,40 @@ There are three logic modes available to the player.
   - Max HP available to the player, by level is 40/40/28/23.
   - Non-boss enemy stats are not shuffled between level choices. All non-bosses have 0 DEF.  Enemy damage ranges from 1 to 16.  (These values correspond to the enemies in A Link to the Past.)
 
+
+#### Glitches
+Here is a list of the glitches you may be required to perform when the "Allow Glitches" variant is selected:
+- **Z-ladder skip:** In Inca, you can take damage while mounting a ladder to enter the SE door early
+- **Cage Skip:** In Sky Garden SW room, you can jump-slash the dark-side switch to activate the cage as Will
+- **Golem Skip:** In Mu, on the second level, you can jump-slash past the Golem guarding the top of one of the ramps as Will (Dark Friar is normally required)
+- **Great Wall Skip:**
+  - If you have Psycho Slider, you can buffer an attack as you fly over the third room to access the first Dark Space as Will
+  - If you don't have Psycho Slider, you can backtrack from the end of the third room and dash-attack the switch to access the first Dark Space as Will
+- **Earthquaker Skip:** You can destroy the Gorgon guarding the way with Dark Friar instead of Earthquaker
+- **Glasses Skip:** You can navigate the bright room in Ankor Wat without the Black Glasses
+- **Pyramid Entrance:** Logic normally requires you to have Slider or Spin to get past the Mystic Orbs at the entrance, but it's possible without these abilities
+
 #### Enemizer (beta)
 The enemizer is (and likely will forever be) in beta, so play at your own risk. Graphical glitches abound, and some seeds may be incompletable due to enemy placement. Please report any game-breaking situations in the Discord.
 References to enemy stats refer to STR, DEF and HP.
-Note: Non-enemy sprites in dungeons have been largely removed in every enemizer setting except for Limited.
-- Limited: Enemies will be shuffled, but will only appear in their vanilla dungeons.
-- Balanced: Enemies can appear in any dungeon, but they will retain the stats of the enemies they replace, making each dungeon's difficulty relatively balanced to vanilla levels.
-- Full: Enemies can appear in any dungeon and retain their vanilla stats.
-- Insane: Enemeies can appear in any dungeon. Furthermore, enemy stats have been shuffled, so early enemies can have the stats of later enemies, and vice versa.
-- Boss Shuffle (in development!): In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. For Easy and Normal difficulties, each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. Solid Arm will only be included in the shuffle for Extreme difficulty.
+_Note: Non-enemy sprites in dungeons have been largely removed in every enemizer setting except for Limited._
+- **Limited:** Enemies will be shuffled, but will only appear in their vanilla dungeons.
+- **Balanced:** Enemies can appear in any dungeon, but they will retain the stats of the enemies they replace, making each dungeon's difficulty relatively balanced to vanilla levels.
+- **Full:** Enemies can appear in any dungeon and retain their vanilla stats.
+- **Insane:** Enemeies can appear in any dungeon. Furthermore, enemy stats have been shuffled, so early enemies can have the stats of later enemies, and vice versa.
+
+##### Boss Shuffle
+In this mode, the bosses are shuffled throughout the dungeons. Each boss guards the same Mystic Statue as they do in the vanilla game, so completing a dungeon may grant you a different Statue than normal. For Easy and Normal difficulties, each dungeon will inherit the music of the dungeon its boss typically resides in -- for example, if you hear the Inca Ruins music in Sky Garden, that means that Castoth is where Viper normally is, and defeating him will grant you the first Mystic Statue. Solid Arm will only be included in the shuffle for Extreme difficulty.
 
 #### Entrance Randomizer (new feature!)
-This feature will be fully implemented in a future version.  However, there is one feature you can choose:
+This feature shuffles some map transitions throughout the game.
 
-- Overword Shuffle: This mode shuffles the 19 overworld locations among the five continents, so the locations you have access to in each continent will be different in each seed.
+#### Entrance Shuffle
+- **Coupled:** When an entrance is shuffled, the to and from directions will be linked together. When you enter a door and go back through it, you'll end up where you started.
+- **Uncoupled:** Each shuffled entrance's to and from halves will lead to separate locations. When you enter a door and go back through it, you'll likely end up in a different location than where you started.
+
+#### Overword Shuffle
+This mode shuffles the 19 overworld locations among the five continents, so the locations you have access to in each continent will be different in each seed. The number of continents, as well as the number of locations in each continent, are held constant.
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
@@ -143,7 +164,7 @@ Kara's portrait can be found in one of the five minor dungeons, specified below.
 - Edward's Underground Tunnel
 - The Diamond Mine
 - The Angel Village
-- Mt. Kress
+- Mt. Kress (Mt. Temple)
 - Ankor Wat.
 
 Each seed may require a certain number of the six Mystic Statues. Talking to the schoolteacher in South Cape at the start of the game will indicate which statues are required. The statues are acquired by completing the following bosses/locations:
@@ -164,8 +185,10 @@ For this mode, the sole objective is to collect the required number of Red Jewel
 
 ### Features
 
-#### In-Game Tutorial
+#### In-Game Tools
 You can speak to the NPC standing in front of the school in South Cape for an in-game tutorial.  This guide will be tailored to the seed settings.
+
+Additionally, enter right-most house in South Cape for an interactive overworld map that allows you to explore how many items and Dark Spaces are available in each location, as well as the number of items you've gathered for each location.
 
 #### Item Shuffle
 The items in the game will be shuffled across the game.  If the randomizer is created with "Completable" logic, every item location will be accessible; if it is "Beatable" or "Chaos", certain items not required to fulfill the game's objectives may be inaccessible.
@@ -198,25 +221,23 @@ Movement between continents (and to locations not specified above) becomes possi
 #### Room Rewards and Stat Upgrades
 The number of HP, STR and DEF upgrades available in the game has been reduced to reflect the extreme balancing of enemy statistics throughout the game -- so though the number of upgrades has decreased, each upgrade is much more significant than in the vanilla game.  HP upgrades grant you +3 HP each.
 
-The rewards are shuffled at random throughout the entire game, map by map.  The total rewards available by difficulty (HP/STR/DEF) are:
-- Easy: 10/7/7
-- Normal: 10/4/4
-- Hard: 8/2/2 (max HP 35)
-- Extreme: 6/0/0 (max HP 29)
+The rewards are shuffled at random throughout the entire game, map by map.  The total rewards available by level (HP/STR/DEF) are:
+- **Beginner:** 10/7/7
+- **Intermediate:** 10/4/4
+- **Advanced:** 8/2/2 (max HP 35)
+- **Expert:** 6/0/0 (max HP 29)
 
 Upgrades can be accessed by clearing rooms that have a "Force" in them on the start menu.  (If you have the Black Glasses or the Crystal Ring equipped, the start menu will forecast which stat upgrade you'll receive for clearing a room.)
 
 Alternatively, defeating a boss will grant you any unobtained upgrades in the following dungeons, by boss:
-- Castoth: Underground Tunnel and Inca Ruins
-- Viper: Diamond Mine and Sky Garden
-- Vampires: Mu and Angel Dungeon
-- Sand Fanger: Great Wall and Mt. Kress
-- Mummy Queen: Pyramid
-- Babel Tower: Ankor Wat
+- **Castoth:** Underground Tunnel and Inca Ruins
+- **Viper:** Diamond Mine and Sky Garden
+- **Vampires:** Mu and Angel Dungeon
+- **Sand Fanger:** Great Wall and Mt. Kress
+- **Mummy Queen:** Pyramid
+- **Babel Tower:** Ankor Wat
 
-Each boss (and, by extension, the dungeons under each boss) is guaranteed to grant a total number of upgrades based on difficulty: 4 for Easy, 3 for Normal, 2 for Hard, and 1 for Extreme.
-
-Additionally, for Easy Mode, enter right-most house in South Cape for an interactive overworld map that allows you to explore how many items and Dark Spaces are available in each location, as well as the number of items you've gathered for each location.
+Each boss (and, by extension, the dungeons under each boss) is guaranteed to grant a total number of upgrades based on level: 4 for Beginner, 3 for Intermediate, 2 for Advanced, and 1 for Expert.
 
 #### In-Game Hints
 You may speak to a number of NPCs throughout the game to receive hints as to the location of certain key items in the game, as well as the contents of certain hard-to-reach locations.  The following NPCs will give you a hint (hints have been removed in Extreme difficulty):
@@ -249,22 +270,28 @@ You may speak to a number of NPCs throughout the game to receive hints as to the
 #### Inventory Management Tips
 With only sixteen slots available for items, inventory management is a significant meta aspect of this randomizer.  Below are some tips to help you manage your inventory space.  Logic will never grant you access to more key items than you can carry and/or get rid of.
 
-- The following items can be used immediately upon acquisition, upon which they disappear: Red Jewels (including "2 Red Jewels" and "3 Red Jewels"), herbs, status upgrades ("HP Jewels", "DEF Jewels" "STR Jewels", "Light Jewels" and "Dark Jewels"), Lola's Letter, Black Glasses, and Crystal Ring
+- The following items can be used immediately upon acquisition, upon which they disappear: Red Jewels (including "2 Red Jewels" and "3 Red Jewels"), herbs, Lola's Letter, Black Glasses, and Crystal Ring
 
-- The following items can be removed from inventory at any time: herbs, Lance's Letter, Rama Statues (if Mystic Statue 3 is not required), Father's Journal and Hieroglyphs (if Mystic Statue 5 is not required)
+- The following items can be removed from inventory at any time: herbs, Lance's Letter, Rama Statues (if Mystic Statue 3 is not required), and Father's Journal/Hieroglyphs (if Mystic Statue 5 is not required)
 
 - If you have access to the Pyramid, you can drop off any Hieroglyphs in the slots even if you don't have Father's Journal.  You can gain back placed hieroglyphs either by swapping them with a different hieroglyph from you inventory, or by filling in the slots completely in the wrong order.
 
 #### Misc. Notes and Strategies
-- Sky Garden: The Dark Space in the SW room does not in fact require Dark Friar to access. You can stand below the switch as Freedan and reach it easily with his sword. Also, you can use Aura Barrier to complete the NW room instead of Dark Friar.
+##### Dark Space Logic
+In Completable logic, some Dark Spaces will always be reserved for form changes and thus need not be checked when searching for abilities.  These include:
+- The Dark Space in the Underground Tunnel (just before the bridge)
+- The first Dark Space in Inca Ruins (just before the Singing Statue)
+- The first Dark Space in Mu (just to the left of where you access the second level)
+- The second Dark Space in Great Wall (vanilla Spin Dash location, with the multiple platforms)
+- The Dark Space in the Garden in Ankor Wat
+- Both Dark Spaces in the Pyramid
 
-- Great Wall: In Completable logic, the Dark Space where Spin Dash is normally found, as it's the only Dark Space in that area that can be accessed without any abilities, will actually never have an ability and will always be open for changing forms.  The Dark Space in the previous room might have an ability, and you can reach it without Spin Dash by turning into Freedan or Shadow, walking back, and using the longer reach of one of these characters to hit the switch that allows entrance into that map.
-
-- Ankor Wat: The Gorgon that blocks the way (for which you are intended to use the Earthquaker) can be easily defeated if you have Dark Friar, 2nd upgrade, by standing on the platform and spamming him with fireballs before he blocks the passage.
-
-- Ankor Wat: To get to the Dark Space with vanilla Earthquaker, you are intended to have Dark Friar to defeat the Frenzy that moves along the wall across the gap.  However, if you have Shadow unlocked, his attack has enough reach to defeat this enemy, so this may be the intended way to access that Dark Space in a randomized seed.
-
-- Pyramid: Room 3 (the "killer 6" room) can be done with Fredan if you have Dark Friar.  Some might find this form to be helpful to survive in this area, especially if you have upgraded Dark Friar and/or Aura Barrier.  Similarly, Room 5 can be completed with Freedan if you have the Earthquaker ability by using that ability from the various platforms in this area.  (Tiles will fall from the ceiling, allowing you to progress.)
+##### Randomizer-Specific Tactics and Strategies
+- **Sky Garden:** The Dark Space in the SW room does not in fact require Dark Friar to access. You can stand below the switch as Freedan and reach it easily with his sword. Also, you can use Aura Barrier to complete the NW room instead of Dark Friar.
+- **Great Wall:** The Dark Space in the third room might have an ability, and you can reach it without Spin Dash by turning into Freedan or Shadow in the fourth room, walking back, and using the longer reach of one of these characters to hit the switch that allows entrance into that map.
+- **Ankor Wat:** The Gorgon that blocks the way (for which you are intended to use the Earthquaker) can be easily defeated if you have Dark Friar, 2nd upgrade, by standing on the platform and spamming him with fireballs before he blocks the passage.
+- **Ankor Wat:** To get to the Dark Space with vanilla Earthquaker, you are intended to have Dark Friar to defeat the Frenzy that moves along the wall across the gap.  However, if you have Shadow unlocked, his attack has enough reach to defeat this enemy, so this may be the intended way to access that Dark Space in a randomized seed.
+- **Pyramid:** Room 3 (the "killer 6" room) can be done with Fredan if you have Dark Friar.  Some might find this form to be helpful to survive in this area, especially if you have upgraded Dark Friar and/or Aura Barrier.  Similarly, Room 5 can be completed with Freedan if you have the Earthquaker ability by using that ability from the various platforms in this area.  (Tiles will fall from the ceiling, allowing you to progress.)
 
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
@@ -272,7 +299,7 @@ With only sixteen slots available for items, inventory management is a significa
 The offical <a href="https://emotracker.net/download/">IoGR EmoTracker</a> is available for download. Furthermore, you can access a beta version of the autotracker by joining the <a href="https://discord.gg/KfZ4VeD">Discord</a> and referring to the #tracker channel.
 
 ### Future Releases
-- Entrance randomizer
+- Custom seeds
 - More text edits
 
 ### Known Bugs and Quirks
@@ -284,14 +311,14 @@ If you have an issue with the randomizer, please join our
 ### FAQ
 #### Can special abilities be found in any Dark Space?
 If you're playing Completable or Beatable logic (without glitches allowed), certain Dark Spaces will always be reserved for form changes and will never have abilities in them. (Though enabling glitches or choosing Chaos logic breaks this restriction.) You can skip checking these:
-- Underground Tunnel: The DS behind Lily's room will never have an ability
-- Inca Ruins: The DS north of the singing statue will never have an ability
-- Diamond Mine: If one of the Dark Spaces (not counting the one behind the false wall) has an ability, the other one is guaranteed not to have one
-- Sky Garden: between the Dark Spaces in the SE and NW rooms, one of them is guaranteed not to have an ability
-- Mu: the Dark Space to the west of the row of spikes will never have an ability
-- Great Wall: The DS you fall down to access (vanilla Spin Dash) will never have an ability
-- Ankor Wat: The DS in the garden will never have an ability
-- Pyramid: Neither DS will ever have an ability
+- **Underground Tunnel:** The DS behind Lily's room will never have an ability
+- **Inca Ruins:** The DS north of the singing statue will never have an ability
+- **Diamond Mine:** If one of the Dark Spaces (not counting the one behind the false wall) has an ability, the other one is guaranteed not to have one
+- **Sky Garden:** between the Dark Spaces in the SE and NW rooms, one of them is guaranteed not to have an ability
+- **Mu:** the Dark Space to the west of the row of spikes will never have an ability
+- **Great Wall:** The DS you fall down to access (vanilla Spin Dash) will never have an ability
+- **Ankor Wat:** The DS in the garden will never have an ability
+- **Pyramid:** Neither DS will ever have an ability
 
 #### If you have Psycho Slider and Spin Dash, do you need to keep looking for Psycho Dash?
 No.  Anything you would need Psycho Dash for can be done with either Slider or Spin.
