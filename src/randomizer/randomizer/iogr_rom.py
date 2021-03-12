@@ -3446,7 +3446,7 @@ class Randomizer:
                             coords[room] = [b"\x20\x07", b"\x30\x07", b"\xb0\x00", b"\xc0\x00"]
                         else:
                             f_ishtarmap.seek(int("6b2", 16))
-                            f_ishtarmap.write(b"\x77")
+                            f_ishtarmap.write(b"\x8f")
 
                     if change_id == 4:  # Add light vase L
                         f_ishtarmap.seek(int("7a3", 16))
@@ -3518,8 +3518,7 @@ class Randomizer:
                             f_ishtarmap.seek(int("6bd", 16))
                             f_ishtarmap.write(b"\x8f")
 
-        # Update cursor check ranges
-        for room in range(4):
+            # Update cursor check ranges
             if coords[room]:
                 for i in range(4):
                     patch.seek(int(room_offsets[room], 16) + coord_offsets[i] + rom_offset)
