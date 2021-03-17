@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.3.6"
+VERSION = "4.3.7"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -2620,22 +2620,34 @@ class Randomizer:
         ##########################################################################
         #                           Determine Boss Order
         ##########################################################################
-        boss_order = [1,2,3,4,5,6,7]
+        boss_order = [*range(1,8)]
         if settings.boss_shuffle:
-            # Determine statue order for shuffle
-            if settings.difficulty.value >= 3:
-                random.shuffle(boss_order)
-                #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
-                #    n = random.randint(1,6)
-                #    boss_order = boss_order[n:] + boss_order[:n]
-            else:
-                boss_order.remove(5)
+            non_will_bosses = [5]               # Can't be forced to play Mummy Queen as Will
+            if settings.difficulty.value < 3:   # Solid Arm cannot be shuffled in non-Extreme seeds
                 boss_order.remove(7)
-                random.shuffle(boss_order)
-                non_will_dungeons = [0,1,2,4]
-                random.shuffle(non_will_dungeons)
-                boss_order.insert(non_will_dungeons[0],5)
-                boss_order += [7]
+                if settings.difficulty.value < 2:
+                    non_will_bosses.append(3)   # In Easy/Normal, can't be forced to play Vampires as Will
+            random.shuffle(non_will_bosses)
+
+            # Determine statue order for shuffle
+            for x in non_will_bosses:
+                boss_order.remove(x)
+            random.shuffle(boss_order)
+            non_will_dungeons = [0,1,2,4]
+            random.shuffle(non_will_dungeons)
+            non_will_dungeons = non_will_dungeons[:len(non_will_bosses)]
+            non_will_dungeons.sort()
+            while non_will_bosses:
+                boss = non_will_bosses.pop(0)
+                dungeon = non_will_dungeons.pop(0)
+                boss_order.insert(dungeon,boss)
+            if 7 not in boss_order:
+                boss_order.append(7)
+
+            #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
+            #    n = random.randint(1,6)
+            #    boss_order = boss_order[n:] + boss_order[:n]
+
 
             # Define music map headers
             dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
