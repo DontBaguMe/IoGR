@@ -8,6 +8,7 @@ from randomizer.models.enums.difficulty import Difficulty
 from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.logic import Logic
+from randomizer.models.enums.entrance_shuffle import EntranceShuffle
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.models.randomizer_data import RandomizerData
 from randomizer.iogr_rom import Randomizer, generate_filename
@@ -42,7 +43,7 @@ parser.set_defaults(red_jewel_madness=False)
 def main(argv):
     args = parser.parse_args(argv)
     settings = RandomizerData(args.seed, args.difficulty, args.goal, args.logic, args.statues, args.enemizer, args.start, args.firebird, args.ohko, args.red_jewel_madness,
-                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.z3, args.overworld_shuffle, args.race, args.dungeon_shuffle, args.mute_music)
+                              args.allow_glitches, args.boss_shuffle, args.open_mode, args.z3, args.overworld_shuffle, args.entrance_shuffle,args.race, args.mute_music, args.dungeon_shuffle)
 
     rom_filename = generate_filename(settings, "sfc")
     spoiler_filename = generate_filename(settings, "json")

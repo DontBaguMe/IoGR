@@ -324,8 +324,8 @@ class Randomizer:
         f_mapdata.seek(addr)
         f_mapdata.write(b"\x00\x07")
 
-        # Remove music headers if background music is muted
-        if settings.mute_music == 1:
+        # Remove music headers if background music is muted - OLD METHOD
+        if settings.mute_music == 1 and False:
             music_headers = [b"\x11\x02\x00\x43\xc4\x97", #
                             b"\x11\x03\x00\xfc\x1c\xd4", #
                             b"\x11\x03\x02\xfc\x1c\xd4", #
@@ -377,6 +377,11 @@ class Randomizer:
                 f_mapdata.write(b"\x1b")
                 f_mapdata.seek(header_addr+3)
                 f_mapdata.write(b"\x1d\x2a\xdf")
+
+            flute_volume_addrs = [0x1e6b38,0x1e6c17,0x1e2a73]
+            for addr in flute_volume_addrs:
+                patch.seek(addr + rom_offset)
+                patch.write(b"\x00")
 
         ##########################################################################
         #                        Update treasure chest data
@@ -2798,6 +2803,57 @@ class Randomizer:
             # Restrict removal of Hieroglyphs from inventory
             patch.seek(int("1e12d", 16) + rom_offset)
             patch.write(b"\xf7\xff")
+
+        ##########################################################################
+        #                           Mute Music
+        ##########################################################################
+        # Mute instruments if background music is muted
+        if settings.mute_music == 1:
+            music_addrs = [0xC0000,   # Threat of Dark Gaia
+                            0xD7007,  # Unexplored Temple
+                            0x1071A0, # Great Pyramid
+                            0x111233, # Illusion of Gaia
+                            0x120000, # Legendary Sunken Continent
+                            0x121793, # Bittersweet Victory
+                            0x1273AE, # Guardians
+                            0x1371DA, # The Secret of Nazca
+                            0x141CFC, # Blessing of Nature
+                            0x143017, # Golden Road
+                            0x144290, # Descent into Darkness
+                            0x14670F, # Awakening the Wind
+                            0x15338D, # Royal Anthem
+                            0x157329, # Beautiful World
+                            0x15F39C, # Lively City by the Sea
+                            0x163553, # Space Beyond Time
+                            #0x171CAC, # (restart)          << IGNORE THIS ONE
+                            0x17C443, # Music - Lively City
+                            0x186037, # Longing for the Past
+                            0x19D266, # Rebirth
+                            0x1A4B72, # Deep Sadness
+                            0x1B49B7, # Ominous Whispers
+                            0x1C5C8D, # Drifting Endlessly
+                            0x1D4F6B, # ???
+                            0x1D57FC, # Important Item
+                            0x1E2A6E, # Melody of Memories
+                            0x1E6B33, # Lost Incan Melody
+                            0x1E6C12, # Lola's Melody
+                            #0x1F2A1D, # (no music)          << NO NEED TO CHANGE
+                            0x1F2BCB] # ???
+
+            for addr in music_addrs:
+                #data_len = int(self.original_rom_data[addr], 16)
+                addr += rom_offset
+                num_instruments = int(self.original_rom_data[addr]/6)
+                print(addr,num_instruments)
+                for i in range(num_instruments):
+                    patch.seek(addr+5+6*i)
+                    patch.write(b"\x00")
+                #    data += b"\x00"
+                #    data_len -= 1
+                #data = b"\x00" * data_len
+                #print(addr,data_len,data)
+                #patch.seek(addr+4)
+                #patch.write(data)
 
         ##########################################################################
         #                   Randomize Location of Kara Portrait
