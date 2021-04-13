@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.3.7"
+VERSION = "4.3.8"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -960,7 +960,8 @@ class Randomizer:
         # Lilly event serves as an overworld exit
         patch.seek(int("4f441", 16) + rom_offset)
         patch.write(b"\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b")
-        patch.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
+        patch.write(b"\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
+        #patch.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
 
         # Adjust timer for enemizer
         timer = 20
@@ -982,6 +983,10 @@ class Randomizer:
         ##########################################################################
         #                          Modify Inca events
         ##########################################################################
+        # Jumping over river from the south no longer will softlock you
+        patch.seek(int("c8e8c", 16) + rom_offset)
+        patch.write(b"\x05")
+
         # Fix forced form change
         patch.seek(int("9cfaa", 16) + rom_offset)
         patch.write(FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
