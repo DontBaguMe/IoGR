@@ -2655,7 +2655,7 @@ class Randomizer:
             if 7 not in boss_order:
                 boss_order.append(7)
 
-            if boss_order[6] != 6:      # Prevent early access to Babel entrance
+            if boss_order[5] != 6:      # Prevent early access to Babel entrance
                 patch.seek(int("ce165", 16) + rom_offset)
                 patch.write(b"\xff\xca")
 
