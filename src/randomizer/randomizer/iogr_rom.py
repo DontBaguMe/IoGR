@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.3.7"
+VERSION = "4.3.9"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -173,6 +173,12 @@ class Randomizer:
         # Write code for clearing enemy tally data
         patch.seek(int("1ff9b", 16) + rom_offset)
         patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
+
+        # Erase boss IDs to prevent being overwritten by normal enemies (Castoth and Babel bosses only)
+        boss_id_addrs = [0xc937b,0xce488,0xce4a8,0xce4c8,0xce4d1,0xce4f1,0xce52d]
+        for addr in boss_id_addrs:
+            patch.seek(addr + rom_offset)
+            patch.write(b"\x00")
 
         ##########################################################################
         #                             Early Firebird
@@ -1019,7 +1025,8 @@ class Randomizer:
         # Lilly event serves as an overworld exit
         patch.seek(int("4f441", 16) + rom_offset)
         patch.write(b"\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b")
-        patch.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
+        patch.write(b"\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
+        #patch.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
 
         # Adjust timer for enemizer
         timer = 20
@@ -1041,6 +1048,10 @@ class Randomizer:
         ##########################################################################
         #                          Modify Inca events
         ##########################################################################
+        # Jumping over river from the south no longer will softlock you
+        patch.seek(int("c8e8c", 16) + rom_offset)
+        patch.write(b"\x05")
+
         # Fix forced form change
         patch.seek(int("9cfaa", 16) + rom_offset)
         patch.write(FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
@@ -2702,6 +2713,13 @@ class Randomizer:
                 boss_order.insert(dungeon,boss)
             if 7 not in boss_order:
                 boss_order.append(7)
+
+            if boss_order[5] != 6:      # Prevent early access to Babel entrance
+                patch.seek(int("ce165", 16) + rom_offset)
+                patch.write(b"\xff\xca")
+
+            #    n = random.randint(1,6)
+            #    boss_order = boss_order[n:] + boss_order[:n]
 
             #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
             #    n = random.randint(1,6)
