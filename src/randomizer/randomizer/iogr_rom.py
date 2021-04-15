@@ -2655,6 +2655,13 @@ class Randomizer:
             if 7 not in boss_order:
                 boss_order.append(7)
 
+            if boss_order[6] != 6:      # Prevent early access to Babel entrance
+                patch.seek(int("ce165", 16) + rom_offset)
+                patch.write(b"\xff\xca")
+
+            #    n = random.randint(1,6)
+            #    boss_order = boss_order[n:] + boss_order[:n]
+
             #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
             #    n = random.randint(1,6)
             #    boss_order = boss_order[n:] + boss_order[:n]
