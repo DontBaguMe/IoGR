@@ -309,6 +309,9 @@ If you have an issue with the randomizer, please join our
 <a href="https://github.com/DontBaguMe/IoGR/blob/master/README.md#contents">Return to Top</a>
 
 ### FAQ
+#### I'm stuck in prison without the key. How do I get out?
+Talk to Gaia in the Dark Space.  After saving, you'll be prompted if you want to return to start.  (This works for any Dark Space, by the way.)
+
 #### Can special abilities be found in any Dark Space?
 If you're playing Completable or Beatable logic (without glitches allowed), certain Dark Spaces will always be reserved for form changes and will never have abilities in them. (Though enabling glitches or choosing Chaos logic breaks this restriction.) You can skip checking these:
 - **Underground Tunnel:** The DS behind Lily's room will never have an ability
