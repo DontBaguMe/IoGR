@@ -1023,9 +1023,9 @@ class Randomizer:
         patch.seek(int("18a09", 16) + rom_offset)
         patch.write(b"\xd0\x00\x40\x02\x03")
 
-        # Have ladder NPC move aside only if Mystic Statue has been acquired
-        patch.seek(int("583cb", 16) + rom_offset)
-        patch.write(b"\x10")
+        # Have ladder NPC move aside from start
+        patch.seek(int("583c9", 16) + rom_offset)
+        patch.write(b"\x80\x0a")
 
         # Modify queen switches
         patch.seek(int("58a04", 16) + rom_offset)

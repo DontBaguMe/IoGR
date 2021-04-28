@@ -793,11 +793,15 @@ class World:
         if (origin_exit <= 21 or self.entrance_shuffle != "Uncoupled") and check_connections and self.is_exit_coupled(origin_exit) and self.is_exit_coupled(dest_exit):
             new_origin = self.exits[dest_exit][0]
             new_dest = self.exits[origin_exit][0]
-            if (new_origin > 21 and self.exits[new_origin][1] != -1) or (new_dest > 21 and self.exits[new_dest][2] != -1):
-                if print_log:
-                    print("WARNING: Return exit already linked:",new_origin,new_dest)
+            if new_origin <= 21:  # Boss exits
+                if self.exits[new_origin][5] or new_origin in self.exits_detailed:
+                    self.link_exits(new_origin, new_dest, print_log, False, update_graph)
             else:
-                self.link_exits(new_origin, new_dest, print_log, False, update_graph)
+                if self.exits[new_origin][1] != -1 or self.exits[new_dest][2] != -1:
+                    if print_log:
+                        print("WARNING: Return exit already linked:",new_origin,new_dest)
+                else:
+                    self.link_exits(new_origin, new_dest, print_log, False, update_graph)
         return True
 
 
@@ -1272,33 +1276,34 @@ class World:
             print("Updating graph...")
         if update_exits:
             for exit in self.exits:
-                # Check if exit has been shuffled
-                if self.exits[exit][1] > 0:
-                    new_exit = self.exits[exit][1]
-                elif self.exits[exit][1] == 0:
-                    new_exit = exit
-                else:
-                    new_exit = -1
+                if exit > 21 or self.exits[exit][5] or exit in self.exits_detailed:
+                    # Check if exit has been shuffled
+                    if self.exits[exit][1] > 0:
+                        new_exit = self.exits[exit][1]
+                    elif self.exits[exit][1] == 0:
+                        new_exit = exit
+                    else:
+                        new_exit = -1
 
-                # Get exit origin
-                if new_exit > 0:
-                    origin = self.exits[exit][3]
-                    if not origin and self.is_exit_coupled(exit):
-                        sister_exit = self.exits[exit][0]
-                        origin = self.exits[sister_exit][4]
-                        self.exits[exit][3] = origin
+                    # Get exit origin
+                    if new_exit > 0:
+                        origin = self.exits[exit][3]
+                        if not origin and self.is_exit_coupled(exit):
+                            sister_exit = self.exits[exit][0]
+                            origin = self.exits[sister_exit][4]
+                            self.exits[exit][3] = origin
 
-                    # Get (new) exit destination
-                    if self.exits[new_exit][2] == 0 or self.exits[new_exit][2] == exit:
-                        dest = self.exits[new_exit][4]
-                        if not dest and self.is_exit_coupled(new_exit):
-                            sister_exit = self.exits[new_exit][0]
-                            dest = self.exits[sister_exit][3]
-                            self.exits[new_exit][4] = dest
+                        # Get (new) exit destination
+                        if self.exits[new_exit][2] == 0 or self.exits[new_exit][2] == exit:
+                            dest = self.exits[new_exit][4]
+                            if not dest and self.is_exit_coupled(new_exit):
+                                sister_exit = self.exits[new_exit][0]
+                                dest = self.exits[sister_exit][3]
+                                self.exits[new_exit][4] = dest
 
-                        # Translate link into world graph
-                        if origin and dest and (dest not in self.graph[origin][1]):
-                            self.graph[origin][1].append(dest)
+                            # Translate link into world graph
+                            if origin and dest and (dest not in self.graph[origin][1]):
+                                self.graph[origin][1].append(dest)
 
             if print_log:
                 print(" Exits updated")
@@ -1690,7 +1695,8 @@ class World:
                 exit_old = boss_exit_idx[boss-1]
                 exit_new = boss_exit_idx[dungeon]
                 self.link_exits(entrance_old,entrance_new,print_log)
-                self.link_exits(exit_old,exit_new,print_log)
+                if self.exits[exit_old][5] or exit_old in self.exits_detailed:
+                    self.link_exits(exit_old,exit_new,print_log)
                 dungeon += 1
 
         # Overworld shuffle
@@ -2950,6 +2956,7 @@ class World:
         self.item_destinations = []
         self.open_locations = [[],[]]
         self.open_edges = []
+        self.graph_viz = None
 
         # Initialize item pool, considers special attacks as "items"
         # Format = { ID:  [Quantity, Type code (1=item, 2=ability, 3=statue,4=other),
@@ -4791,6 +4798,13 @@ class World:
         }
 
 
+        # Database of special map exits that don't conform to the typical "02 26" format, IDs correspond to self.exits
+        # FORMAT: { ID: [MapAddr, Xaddr, Yaddr, FaceDirAddr, CameraAddr]}
+        self.exits_detailed = {
+            15: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
+        }
+
+
         # Database of map exits
         # FORMAT: { ID: [CoupleID (0 if one-way), ShuffleTo (0 if no shuffle), ShuffleFrom (0 if no shuffle), FromRegion, ToRegion,
         #           ROM_Location, DestString,BossFlag, DungeonFlag, DungeonEntranceFlag, Name]}
@@ -5383,12 +5397,3 @@ class World:
             721: [720, 0, 0, 480, 400, "8fcb4", b"", False,  True, True, "Mansion exit"]
 
         }
-
-
-        # Database of special map exits that don't conform to the typical "02 26" format, IDs correspond to self.exits
-        # FORMAT: { ID: [MapAddr, Xaddr, Yaddr, FaceDirAddr, CameraAddr]}
-        self.exits_detailed = {
-            15: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
-        }
-
-        self.graph_viz = None
