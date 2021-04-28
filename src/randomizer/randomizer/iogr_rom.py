@@ -14,7 +14,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.3.9"
+VERSION = "4.3.10"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
