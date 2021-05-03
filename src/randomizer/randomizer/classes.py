@@ -4771,7 +4771,7 @@ class World:
             1:  [0, b"\x01", 10, 20, "3b95b", "0cafd", "3b590", "SW Continent", "South Cape"],
             2:  [0, b"\x01", 10, 30, "3b96b", "0cb26", "3b5a9", "SW Continent", "Edward's"],
             3:  [0, b"\x01", 10, 50, "3b97b", "0cb5b", "3b5b5", "SW Continent", "Itory"],
-            4:  [0, b"\x01", 10, 60, "3b98b", "4f45a", "3b5c2", "SW Continent", "Moon Tribe"],
+            4:  [0, b"\x01", 10, 60, "3b98b", "4f453", "3b5c2", "SW Continent", "Moon Tribe"],
             5:  [0, b"\x01", 10, 63, "3b99b", "0cb74", "3b59c", "SW Continent", "Inca"],
 
             # SE Continent "\x07"
