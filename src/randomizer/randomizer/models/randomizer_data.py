@@ -2,6 +2,7 @@ import random
 
 from .enums.difficulty import Difficulty
 from .enums.goal import Goal
+from .enums.statue_req import StatueReq
 from .enums.logic import Logic
 from .enums.entrance_shuffle import EntranceShuffle
 from .enums.enemizer import Enemizer
@@ -11,8 +12,8 @@ from .enums.start_location import StartLocation
 
 class RandomizerData:
     def __init__(self, seed: int = random.randint(0, 999999999),
-                 difficulty: Difficulty = Difficulty.NORMAL, goal: Goal = Goal.DARK_GAIA,
-                 logic: Logic = Logic.COMPLETABLE, statues: str = "4", enemizer: Enemizer = Enemizer.NONE,
+                 difficulty: Difficulty = Difficulty.NORMAL, goal: Goal = Goal.DARK_GAIA, logic: Logic = Logic.COMPLETABLE,
+                 statues: str = "4", statue_req: StatueReq = StatueReq.GAME_CHOICE, enemizer: Enemizer = Enemizer.NONE,
                  start_location: StartLocation = StartLocation.SOUTH_CAPE, firebird: bool = False, ohko: bool = False,
                  red_jewel_madness: bool = False, allow_glitches: bool = False, boss_shuffle: bool = False,
                  open_mode: bool = False, z3: bool = False, overworld_shuffle: bool = False, entrance_shuffle: EntranceShuffle = EntranceShuffle.NONE, race_mode: bool = False,
@@ -22,6 +23,7 @@ class RandomizerData:
 #        self.level = level
         self.start_location = start_location
         self.goal = goal
+        self.statue_req = statue_req
         self.logic = logic
         self.statues = statues
         self.enemizer = enemizer

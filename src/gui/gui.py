@@ -10,6 +10,7 @@ from randomizer.models.enums.difficulty import Difficulty
 #from randomizer.models.enums.level import Level
 from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
+from randomizer.models.enums.statue_req import StatueReq
 from randomizer.models.enums.logic import Logic
 #from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
@@ -80,6 +81,15 @@ def generate_ROM():
         if g == "Red Jewel Hunt":
             return Goal.RED_JEWEL_HUNT
 
+    def get_statue_req():
+        s = statue_req.get()
+        if s == "Player Choice":
+            return StatueReq.PLAYER_CHOICE
+        if s == "Random Choice":
+            return StatueReq.RANDOM_CHOICE
+        else:
+            return StatueReq.GAME_CHOICE
+
     def get_logic():
         l = logic.get()
         if l == "Completable":
@@ -143,7 +153,7 @@ def generate_ROM():
 
     try:
         seed_int = int(seed_str)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
+        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
             overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get())#, get_level(), get_sprite())
 
@@ -293,14 +303,14 @@ tkinter.Label(mainframe, text="One Hit KO").grid(row=7, column=0, sticky=tkinter
 tkinter.Label(mainframe, text="Red Jewel Madness").grid(row=8, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=9, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Z3 Mode").grid(row=14, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=15, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=16, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Generate graph").grid(row=17, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Race seed").grid(row=18, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Allow Glitches").grid(row=12, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Boss Shuffle").grid(row=13, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Open Mode").grid(row=14, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Z3 Mode").grid(row=15, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=16, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=17, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Generate graph").grid(row=18, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Race seed").grid(row=19, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
@@ -370,6 +380,10 @@ statues = tkinter.StringVar(root)
 statue_choices = ["0", "1", "2", "3", "4", "5", "6", "Random"]
 statues.set("4")
 
+statue_req = tkinter.StringVar(root)
+statue_req_choices = ["Game Choice", "Player Choice", "Random Choice"]
+statue_req.set("Game Choice")
+
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)
 ROM.insert(0,load_ROM())
@@ -387,14 +401,15 @@ ohko_checkbox = tkinter.Checkbutton(mainframe, variable=ohko, onvalue=1, offvalu
 rjm_checkbox = tkinter.Checkbutton(mainframe, variable=red_jewel_madness, onvalue=1, offvalue=0).grid(row=8, column=1)
 enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(row=9, column=1)
 statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=10, column=1)
-glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=11, column=1)
-boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=12, column=1)
-open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
-z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
-overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=15, column=1)
-entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=16, column=1)
-graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=17, column=1)
-race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
+statue_req_menu = tkinter.OptionMenu(mainframe, statue_req, *statue_req_choices).grid(row=11, column=1)
+glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=12, column=1)
+boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=13, column=1)
+open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
+z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=15, column=1)
+overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=16, column=1)
+entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=17, column=1)
+graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
+race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
 #sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
@@ -409,6 +424,6 @@ tkinter.Button(mainframe, text='?', command=firebird_help).grid(row=5, column=2)
 tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
 tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
-tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=16, column=2)
+tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=17, column=2)
 
 root.mainloop()
