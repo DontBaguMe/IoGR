@@ -72,12 +72,12 @@ def generate_filename(settings: RandomizerData, extension: str):
             return "_RJ"
 
     def getStatueReq(statue_req):
-        if statue_req.value == StatueReq.GAME_CHOICE.value:
-            return ""
         if statue_req.value == StatueReq.PLAYER_CHOICE.value:
             return "p"
         if statue_req.value == StatueReq.RANDOM_CHOICE.value:
             return "r"
+        else:
+            return ""
 
     def getLogic(logic):
         if logic.value == Logic.COMPLETABLE.value:
@@ -3114,7 +3114,7 @@ class Randomizer:
             elif seed_adj > 0:
                 if PRINT_LOG:
                     print("Trying again... attempt", seed_adj+1)
-            self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
+            self.w = World(settings, statues_required, statues, statue_req, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj,PRINT_LOG)
             #k6_item = self.w.item_locations[136][3]
             #print(self.w.item_pool[k6_item][3])

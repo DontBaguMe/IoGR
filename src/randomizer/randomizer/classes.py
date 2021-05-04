@@ -7,6 +7,7 @@ import random
 
 from .models.enums.start_location import StartLocation
 from .models.enums.goal import Goal
+from .models.enums.statue_req import StatueReq
 from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.logic import Logic
@@ -683,6 +684,8 @@ class World:
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
+        if self.statue_req == StatueReq.PLAYER_CHOICE.value:
+            return self.random_fill([106]*6, locations)
         return self.random_fill([100, 101, 102, 103, 104, 105], locations)
 
 
@@ -1658,6 +1661,16 @@ class World:
         for x in self.statues:
             self.logic[406][4][x][1] = 1
 
+        # Change item pool for "player choice" statue requirement variant
+        if self.statue_req == StatueReq.PLAYER_CHOICE.value:
+            self.item_pool[100][0] = 0
+            self.item_pool[101][0] = 0
+            self.item_pool[102][0] = 0
+            self.item_pool[103][0] = 0
+            self.item_pool[104][0] = 0
+            self.item_pool[105][0] = 0
+            self.item_pool[106][0] = 6
+
         # Incorporate item locations and logic edges into world graph
         for x in self.item_locations:
             self.graph[self.item_locations[x][0]][11].append(x)
@@ -2076,7 +2089,10 @@ class World:
         spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
         spoiler["logic"] = str(self.logic_mode)
         spoiler["difficulty"] = str(difficulty_txt)
-        spoiler["statues_required"] = self.statues
+        if self.statue_req == StatueReq.PLAYER_CHOICE.value:
+            spoiler["statues_required"] = self.statues_required
+        else:
+            spoiler["statues_required"] = self.statues
         spoiler["boss_order"] = self.boss_order
         spoiler["kara_location"] = kara_txt
         spoiler["jeweler_amounts"] = self.gem
@@ -2861,11 +2877,13 @@ class World:
                 f.write(b"\x02\xe0")
 
     # Build world
-    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
+    def __init__(self, settings: RandomizerData, statues_required=6, statues=[1,2,3,4,5,6], statue_req=StatueReq.GAME_CHOICE.value, kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
 
         self.seed = settings.seed
         self.race_mode = settings.race_mode
         self.statues = statues
+        self.statues_required = statues_required
+        self.statue_req = statue_req
         self.boss_order = boss_order
         self.dungeons_req = []
         for x in self.statues:
@@ -3033,6 +3051,7 @@ class World:
             103: [1, 3, "", "Mystic Statue 4", False, 2],
             104: [1, 3, "", "Mystic Statue 5", False, 2],
             105: [1, 3, "", "Mystic Statue 6", False, 2],
+            106: [0, 3, "", "Mystic Statue", False, 2],
 
             # Event Switches
             500: [0, 4, "", "Kara Released", False, 1],
@@ -3453,11 +3472,11 @@ class World:
             99: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SE door)", [], False, [], [], [], [], [], [], [], []],
 
             # Gold Ship / Diamond Coast
-            100: [False, [],   1, [1,5,0,b"\x00"], 0, "Gold Ship: Deck", [], False, [], [], [], [], [], [], [], []],
-            101: [False, [],   2, [1,5,0,b"\x00"], 0, "Gold Ship: Interior", [], False, [], [], [], [], [], [], [], []],
-            102: [False, [11], 1, [2,6,0,b"\x00"], 0, "Diamond Coast: Main Area", [], False, [], [], [], [], [], [], [], []],
-            103: [False, [],   2, [2,6,0,b"\x00"], 0, "Diamond Coast: House", [], False, [], [], [], [], [], [], [], []],
-            104: [False, [],   0, [1,5,0,b"\x00"], 0, "Gold Ship: Crow's Nest Passage", [], False, [], [], [], [], [], [], [], []],
+            100: [False, [104], 1, [1,5,0,b"\x00"], 0, "Gold Ship: Deck", [], False, [], [], [], [], [], [], [], []],
+            101: [False, [],    2, [1,5,0,b"\x00"], 0, "Gold Ship: Interior", [], False, [], [], [], [], [], [], [], []],
+            102: [False, [11],  1, [2,6,0,b"\x00"], 0, "Diamond Coast: Main Area", [], False, [], [], [], [], [], [], [], []],
+            103: [False, [],    2, [2,6,0,b"\x00"], 0, "Diamond Coast: House", [], False, [], [], [], [], [], [], [], []],
+            104: [False, [],    0, [1,5,0,b"\x00"], 0, "Gold Ship: Crow's Nest Passage", [], False, [], [], [], [], [], [], [], []],
 
             # Freejia
             110: [False, [11],       1, [2,7,0,b"\x00"], 0, "Freejia: Main Area", [], False, [], [], [], [], [], [], [], []],
@@ -3928,7 +3947,7 @@ class World:
             97:  [0,  91,  92, False, [[61, 1]]],         # Map 38 progression w/ Psycho Dash
             98:  [0,  91,  92, False, [[62, 1]]],         # Map 38 progression w/ Psycho Slider
             99:  [0,  91,  92, False, [[63, 1]]],         # Map 38 progression w/ Spin Dash
-            100: [0, 100, 104, False, [[100, 1]]],        # Gold Ship progression w/ Statue 1
+            #100: [0, 100, 104, False, [[100, 1]]],        # Gold Ship progression w/ Statue 1
             101: [0, 110, 115, False, [[504, 1]]],        # Freejia: Slaver item w/ Laborer Found
 
             # Diamond Mine
@@ -4094,8 +4113,10 @@ class World:
             403: [-1, 345, 490, False, [[20, 1]]],                      # Rescue Kara from Mt. Temple w/ Magic Dust
             404: [-1, 391, 490, False, [[20, 1]]],                      # Rescue Kara from Ankor Wat w/ Magic Dust
             405: [0, 490, 491, False, [[36, 1], [39, 1], [602, 1]]],    # Early Firebird w/ Kara, Aura and Ring
-            406: [0, 490, 492, False, [[36, 1], [100, 0], [101, 0], [102, 0], [103, 0], [104, 0], [105, 0]]]
-                                                             # Beat Game w/Mystic Statues and Aura
+            406: [0, 490, 492, False, [[36, 1], [100, 0], [101, 0], [102, 0], [103, 0], [104, 0], [105, 0]]],
+                                                                        # Beat Game w/Mystic Statues and Aura
+            407: [0, 490, 492, False, [[36, 1], [106, self.statues_required]]]              # Beat Game w/Mystic Statues and Aura (player choice variant)
+
         }
 
 
