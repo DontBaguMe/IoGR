@@ -695,6 +695,7 @@ class Randomizer:
             # Also, herbs suck
             patch.seek(int("388e9", 16) + rom_offset)
             patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
+
         # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
         elif settings.red_jewel_madness:
             # Start @ 40 HP
@@ -709,6 +710,51 @@ class Randomizer:
             # 3 Red Jewels (item #$2f) removes 3 HP when used
             patch.seek(int("39dd9", 16) + rom_offset)
             patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
+
+        # Fluteless
+        #if settings.fluteless:
+        if True:
+            # Statues in Underground Tunnel are breakable with Will abilities
+            patch.seek(int("a8837", 16) + rom_offset)
+            patch.write(b"\x01\x4c\x99\x88")
+            # Remove flute from spritesets
+            flute_addrs = [
+                [0x1a8540,0x60],
+                [0x1a8740,0x60],
+                [0x1aa120,0x40],
+                [0x1aa560,0x20],
+                [0x1aa720,0x60],
+                [0x1aa8e0,0x80],
+                [0x1aab00,0x20],
+                [0x1aac60,0x40],
+                [0x1aae60,0x40],
+                [0x1ab400,0x80],
+                [0x1ab600,0x80],
+                [0x1ab800,0x40],
+                [0x1aba00,0x40]
+            ]
+            for [addr,l] in flute_addrs:
+                patch.seek(addr + rom_offset)
+                patch.write(b"\x00"*l)
+
+            # Change melody sprite to Will whistling
+            f_fluteless = open(BIN_PATH + "0f8fa4_fluteless.bin", "rb")
+            patch.seek(int("f8fa4", 16) + rom_offset)
+            patch.write(f_fluteless.read())
+            f_fluteless.close
+
+            # Move Ankor Wat wall bugs down so they can be hit
+            bug_strs = [b"\x5c\xbb\x8b",b"\x66\xbb\x8b"]
+            for bug_str in bug_strs:
+                done = False
+                addr = int("c8200", 16) + rom_offset
+                while not done:
+                    addr = self.original_rom_data.find(bug_str, addr+1)
+                    if addr < 0 or addr > int("ce5e4", 16) + rom_offset:
+                        done = True
+                    else:
+                        patch.seek(addr-2)
+                        patch.write((self.original_rom_data[addr-2]+1).to_bytes(1,byteorder="little"))
 
         ##########################################################################
         #                  Update overworld map movement scripts
