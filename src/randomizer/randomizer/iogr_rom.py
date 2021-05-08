@@ -711,12 +711,15 @@ class Randomizer:
             patch.seek(int("39dd9", 16) + rom_offset)
             patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
 
-        # Fluteless
+        # Fluteless - prepare subroutines
+        patch.seek(int("2f828", 16) + rom_offset)
+        patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"
+            + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60")
         #if settings.fluteless:
         if True:
-            # Statues in Underground Tunnel are breakable with Will abilities
-            patch.seek(int("a8837", 16) + rom_offset)
-            patch.write(b"\x01\x4c\x99\x88")
+            # Statues in Underground Tunnel are breakable with Will abilities - NOT NECESSARY
+            #patch.seek(int("a8837", 16) + rom_offset)
+            #patch.write(b"\x01\x4c\x99\x88")
             # Remove flute from spritesets
             flute_addrs = [
                 [0x1a8540,0x60],
@@ -742,6 +745,14 @@ class Randomizer:
             patch.seek(int("f8fa4", 16) + rom_offset)
             patch.write(f_fluteless.read())
             f_fluteless.close
+
+            # Disable blocking for Will
+            patch.seek(int("2ca63", 16) + rom_offset)
+            patch.write(b"\x20\x28\xf8")
+
+            # Disable attack damage for Will
+            patch.seek(int("2cefd", 16) + rom_offset)
+            patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x34\xf8")
 
             # Move Ankor Wat wall bugs down so they can be hit
             bug_strs = [b"\x5c\xbb\x8b",b"\x66\xbb\x8b"]
