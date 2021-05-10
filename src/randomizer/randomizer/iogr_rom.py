@@ -713,8 +713,9 @@ class Randomizer:
 
         # Fluteless - prepare subroutines
         patch.seek(int("2f828", 16) + rom_offset)
-        patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"
-            + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60")
+        patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f828
+            + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f834
+            + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f83f
         #if settings.fluteless:
         if True:
             # Statues in Underground Tunnel are breakable with Will abilities - NOT NECESSARY
@@ -753,6 +754,10 @@ class Randomizer:
             # Disable attack damage for Will
             patch.seek(int("2cefd", 16) + rom_offset)
             patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x34\xf8")
+
+            # Allow charging in snake game
+            patch.seek(int("2b7b3", 16) + rom_offset)
+            patch.write(b"\x4c\x3f\xf8")
 
             # Move Ankor Wat wall bugs down so they can be hit
             bug_strs = [b"\x5c\xbb\x8b",b"\x66\xbb\x8b"]
@@ -2399,6 +2404,9 @@ class Randomizer:
         ##########################################################################
         # Randomize snake game duration/goal
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
+        #if settings.fluteless:
+        if True:
+            snakes_per_sec = [i/4.0 for i in snakes_per_sec]
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
         snake_target = []
