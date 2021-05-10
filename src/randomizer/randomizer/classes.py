@@ -1694,6 +1694,11 @@ class World:
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
 
+        # TEMP - grant Psycho Dash at start for fluteless seeds
+        #if self.fluteless:
+        if True:
+            self.fill_item(61,self.start_loc,False,True,print_log)
+
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
             boss_entrance_idx = [1,4,7,10,13,16,19]
