@@ -1559,19 +1559,22 @@ class World:
         if "Allow Glitches" in self.variant:
             self.graph[0][1].append(601)
             self.graph[61][1].append(62)          # Moon Tribe: No ability required
-            self.graph[181][1].append(182)        # Sky Garden: Ramp glitch, cage glitch
+            self.graph[181][1].append(182)        # Sky Garden: Ramp glitch
             self.graph[181][1].append(184)
-            self.graph[182][1].append(183)
             self.graph[182][1].append(185)
             self.graph[222][1].append(221)        # Mu: Golem skip
-            self.item_locations[94][2] = False    # Great Wall: Slider glitch
-            self.graph[294][1].append(295)
+
             self.logic[268][4][1][1] = 0          # Ankor Wat: Earthquaker not required
             self.logic[273][4][0][1] = 0          # Ankor Wat: Glasses not required
             self.logic[274][4][0][1] = 0
             self.item_locations[124][2] = False   # Ankor Wat: Dropdown DS has abilities
             self.graph[410][1].append(411)        # Pyramid: No ability required
             self.item_locations[142][2] = False   # Pyramid: Bottom DS can have abilities
+            #if not self.fluteless:
+            if False:
+                self.graph[182][1].append(183)        # Sky Garden: cage glitch
+                self.item_locations[94][2] = False    # Great Wall: Slider glitch
+                self.graph[294][1].append(295)
 
         # Early Firebird
         if self.firebird:
