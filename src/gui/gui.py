@@ -107,7 +107,7 @@ def generate_ROM():
             return Enemizer.LIMITED
         if e == "Balanced":
             return Enemizer.BALANCED
-        if e == "Full":
+        if e == "FLIES":
             return Enemizer.FULL
         if e == "Insane":
             return Enemizer.INSANE
@@ -373,7 +373,7 @@ fluteless = tkinter.IntVar(root)
 fluteless.set(0)
 
 enemizer = tkinter.StringVar(root)
-enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
+enemizer_choices = ["None", "FLIES"]
 enemizer.set("None")
 
 sprite = tkinter.StringVar(root)
