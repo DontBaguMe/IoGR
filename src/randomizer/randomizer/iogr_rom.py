@@ -136,6 +136,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.z3, "z3")
     filename += getSwitch(settings.allow_glitches, "g")
+    filename += getSwitch(settings.fluteless, "fl")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
     filename += "_" + str(settings.seed)
     filename += getSwitch(settings.race_mode, "R")
@@ -716,8 +717,7 @@ class Randomizer:
         patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f828
             + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f834
             + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f83f
-        #if settings.fluteless:
-        if True:
+        if settings.fluteless:
             # Statues in Underground Tunnel are breakable with Will abilities - NOT NECESSARY
             #patch.seek(int("a8837", 16) + rom_offset)
             #patch.write(b"\x01\x4c\x99\x88")
@@ -2404,8 +2404,7 @@ class Randomizer:
         ##########################################################################
         # Randomize snake game duration/goal
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
-        #if settings.fluteless:
-        if True:
+        if settings.fluteless:
             snakes_per_sec = [i/4.0 for i in snakes_per_sec]
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
