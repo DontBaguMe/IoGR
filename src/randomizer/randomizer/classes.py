@@ -1570,8 +1570,7 @@ class World:
             self.item_locations[124][2] = False   # Ankor Wat: Dropdown DS has abilities
             self.graph[410][1].append(411)        # Pyramid: No ability required
             self.item_locations[142][2] = False   # Pyramid: Bottom DS can have abilities
-            #if not self.fluteless:
-            if False:
+            if not self.fluteless:
                 self.graph[182][1].append(183)        # Sky Garden: cage glitch
                 self.item_locations[94][2] = False    # Great Wall: Slider glitch
                 self.graph[294][1].append(295)
@@ -1698,8 +1697,7 @@ class World:
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
 
         # TEMP - grant Psycho Dash at start for fluteless seeds
-        #if self.fluteless:
-        if True:
+        if self.fluteless:
             self.fill_item(61,self.start_loc,False,True,print_log)
 
         # Boss Shuffle
@@ -2889,6 +2887,7 @@ class World:
 
         self.seed = settings.seed
         self.race_mode = settings.race_mode
+        self.fluteless = settings.fluteless
         self.statues = statues
         self.statues_required = statues_required
         self.statue_req = statue_req
