@@ -721,25 +721,25 @@ class Randomizer:
             # Statues in Underground Tunnel are breakable with Will abilities - NOT NECESSARY
             #patch.seek(int("a8837", 16) + rom_offset)
             #patch.write(b"\x01\x4c\x99\x88")
-            # Remove flute from spritesets
-            flute_addrs = [
-                [0x1a8540,0x60],
-                [0x1a8740,0x60],
-                [0x1aa120,0x40],
-                [0x1aa560,0x20],
-                [0x1aa720,0x60],
-                [0x1aa8e0,0x80],
-                [0x1aab00,0x20],
-                [0x1aac60,0x40],
-                [0x1aae60,0x40],
-                [0x1ab400,0x80],
-                [0x1ab600,0x80],
-                [0x1ab800,0x40],
-                [0x1aba00,0x40]
-            ]
-            for [addr,l] in flute_addrs:
-                patch.seek(addr + rom_offset)
-                patch.write(b"\x00"*l)
+            # Remove flute from spritesets - HANDLED BY CLIENT
+            #flute_addrs = [
+            #    [0x1a8540,0x60],
+            #    [0x1a8740,0x60],
+            #    [0x1aa120,0x40],
+            #    [0x1aa560,0x20],
+            #    [0x1aa720,0x60],
+            #    [0x1aa8e0,0x80],
+            #    [0x1aab00,0x20],
+            #    [0x1aac60,0x40],
+            #    [0x1aae60,0x40],
+            #    [0x1ab400,0x80],
+            #    [0x1ab600,0x80],
+            #    [0x1ab800,0x40],
+            #    [0x1aba00,0x40]
+            #]
+            #for [addr,l] in flute_addrs:
+            #    patch.seek(addr + rom_offset)
+            #    patch.write(b"\x00"*l)
 
             # Change melody sprite to Will whistling
             f_fluteless = open(BIN_PATH + "0f8fa4_fluteless.bin", "rb")
