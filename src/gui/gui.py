@@ -219,7 +219,6 @@ def write_patch(patch, rom_path, filename, settings):
     # Custom sprites
     if settings.sprite != Sprite.WILL:
         sprite_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"randomizer","randomizer","bin","plugins","sprites",settings.sprite.value,"")
-        print(sprite_dir)
         for binfile in os.listdir(sprite_dir):
             if binfile.endswith(".bin"):
                 f = open(os.path.join(sprite_dir,binfile), "rb")
