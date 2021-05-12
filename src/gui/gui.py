@@ -12,7 +12,7 @@ from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.statue_req import StatueReq
 from randomizer.models.enums.logic import Logic
-#from randomizer.models.enums.sprites import Sprite
+from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
@@ -155,7 +155,7 @@ def generate_ROM():
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get())#, get_level(), get_sprite())
+            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -165,7 +165,7 @@ def generate_ROM():
 
         patch = randomizer.generate_rom(rom_filename, settings)
 
-        write_patch(patch, rompath, rom_filename)
+        write_patch(patch, rompath, rom_filename, settings)
         if not race_mode_toggle.get():
             spoiler = randomizer.generate_spoiler()
             write_spoiler(spoiler, spoiler_filename, rompath)
@@ -199,7 +199,7 @@ def sort_patch(val):
     return val['index']
 
 
-def write_patch(patch, rom_path, filename):
+def write_patch(patch, rom_path, filename, settings):
     original = open(rom_path, "rb")
 
     randomized = open(os.path.dirname(rom_path) + os.path.sep + filename, "wb")
@@ -215,6 +215,39 @@ def write_patch(patch, rom_path, filename):
 
         randomized.seek(address)
         randomized.write(value)
+
+    # Custom sprites
+    if settings.sprite != Sprite.WILL:
+        sprite_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"randomizer","randomizer","bin","plugins","sprites",settings.sprite.value,"")
+        print(sprite_dir)
+        for binfile in os.listdir(sprite_dir):
+            if binfile.endswith(".bin"):
+                f = open(os.path.join(sprite_dir,binfile), "rb")
+                randomized.seek(int(binfile.partition(".")[0], 16))
+                randomized.write(f.read())
+                f.close
+
+    # Fluteless sprite work
+    if settings.fluteless:
+        flute_addrs = [
+            [0x1a8540,0x60],
+            [0x1a8740,0x60],
+            [0x1aa120,0x40],
+            [0x1aa560,0x20],
+            [0x1aa720,0x60],
+            [0x1aa8e0,0x80],
+            [0x1aab00,0x20],
+            [0x1aac60,0x40],
+            [0x1aae60,0x40],
+            [0x1ab400,0x80],
+            [0x1ab600,0x80],
+            [0x1ab800,0x40],
+            [0x1aba00,0x40]
+        ]
+        for [addr,l] in flute_addrs:
+            randomized.seek(addr)
+            randomized.write(b"\x00"*l)
+
     randomized.close()
 
 
@@ -312,7 +345,7 @@ tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=17, column=0, sticky=
 tkinter.Label(mainframe, text="Generate graph").grid(row=18, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Race seed").grid(row=19, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Fluteless").grid(row=20, column=0, sticky=tkinter.W)
-#tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Sprite").grid(row=21, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
@@ -377,7 +410,7 @@ enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
 sprite = tkinter.StringVar(root)
-sprite_choices = ["Will", "Bagu", "Freet", "Invisible", "Solar", "Sye"]
+sprite_choices = ["Will", "Bagu", "Invisible"]#, "Freet", "Solar", "Sye"]
 sprite.set("Will")
 
 statues = tkinter.StringVar(root)
@@ -415,7 +448,7 @@ entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entranc
 graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
 race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
 fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=20, column=1)
-#sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
+sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=21, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
