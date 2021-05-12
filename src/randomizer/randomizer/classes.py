@@ -2749,8 +2749,8 @@ class World:
         f.seek(0)
         rom = f.read()
 
-        # test_enemy = 13                         # TESTING!
-        # test_set = self.enemies[test_enemy][0]
+        test_enemy = 103                         # TESTING!
+        test_set = self.enemies[test_enemy][0]
 
         complex_enemies = [4, 15, 53, 62, 88]  # Enemies with many sprites, or are no fun
         max_complex = 5
@@ -2794,9 +2794,9 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            # if 10 in sets:      # TESTING!
+            #if 10 in sets:      # TESTING!
             #    newset = 10
-            # newset = test_set  # TESTING!
+            newset = test_set  # TESTING!
 
             # Gather enemies from old and new sets
             old_enemies = []
@@ -2848,9 +2848,9 @@ class World:
                         i = 0
                         found_enemy = False
 
-                        # if 13 in new_enemies_tmp:   # TESTING!
-                        #    new_enemy = 13
-                        #    found_enemy = True
+                        if test_enemy in new_enemies_tmp:   # TESTING!
+                            new_enemy = test_enemy
+                            found_enemy = True
 
                         while not found_enemy:
                             new_enemy = new_enemies_tmp[i]
@@ -2868,7 +2868,7 @@ class World:
                                                 i -= 1
                             i += 1
                         f.seek(addr - 1)
-                        # f.write(b"\x00" + self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING!
+                        #f.write(b"\x00" + self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING!
                         f.write(b"\x00" + self.enemies[new_enemy][1])
                         if self.enemizer == "Balanced" and enemy == 102:
                             f.write(b"\x47")
