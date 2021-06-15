@@ -205,6 +205,11 @@ class Randomizer:
         patch.write(f_firebird.read())
         f_firebird.close()
 
+        patch.seek(0x02f828 + rom_offset)
+        patch.write(b"\x02\x3b\x71\x36\xf8\x82\xa9\x00\x10\x04\x12\x6b")
+        patch.seek(0x02f834 + rom_offset)
+        patch.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
+
         if settings.firebird == 1:
             # Change firebird logic
             # Requires Shadow's form, Crystal Ring (switch #$3e) and Kara rescued (switch #$8a)
@@ -222,10 +227,6 @@ class Randomizer:
             patch.write(b"\x80\x00")
             patch.seek(int("eaf0", 16) + rom_offset)
             patch.write(b"\x22\x28\xf8\x82\xea")
-            patch.seek(0x02f828 + rom_offset)
-            patch.write(b"\x02\x3b\x71\x36\xf8\x82\xa9\x00\x10\x04\x12\x6b")
-            patch.seek(0x02f834 + rom_offset)
-            patch.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
 
         ##########################################################################
         #                            Modify ROM Header
@@ -713,10 +714,10 @@ class Randomizer:
             patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
 
         # Fluteless - prepare subroutines
-        patch.seek(int("2f828", 16) + rom_offset)
-        patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f828
-            + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f834
-            + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f83f
+        patch.seek(int("2f845", 16) + rom_offset)
+        patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f845
+            + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f851
+            + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f85c
         if settings.fluteless:
             # Statues in Underground Tunnel are breakable with Will abilities - NOT NECESSARY
             #patch.seek(int("a8837", 16) + rom_offset)
@@ -749,15 +750,15 @@ class Randomizer:
 
             # Disable blocking for Will
             patch.seek(int("2ca63", 16) + rom_offset)
-            patch.write(b"\x20\x28\xf8")
+            patch.write(b"\x20\x45\xf8")
 
             # Disable attack damage for Will
             patch.seek(int("2cefd", 16) + rom_offset)
-            patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x34\xf8")
+            patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x51\xf8")
 
             # Allow charging in snake game
             patch.seek(int("2b7b3", 16) + rom_offset)
-            patch.write(b"\x4c\x3f\xf8")
+            patch.write(b"\x4c\x5c\xf8")
 
             # Move Ankor Wat wall bugs down so they can be hit
             bug_strs = [b"\x5c\xbb\x8b",b"\x66\xbb\x8b"]
