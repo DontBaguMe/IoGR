@@ -2792,9 +2792,9 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            #if 10 in sets:      # TESTING!
-            #    newset = 10
-            newset = test_set  # TESTING!
+            if test_set in sets:      # TESTING!
+                newset = test_set
+            #newset = test_set  # TESTING!
 
             # Gather enemies from old and new sets
             old_enemies = []
