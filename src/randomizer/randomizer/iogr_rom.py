@@ -2478,7 +2478,7 @@ class Randomizer:
                 elif settings.difficulty.value == 2:
                     gem[6] = GEMS_Z3_HARD
                 elif settings.difficulty.value == 3:
-                    gem[6] = GEM_Z3S_EXTREME
+                    gem[6] = GEMS_Z3_EXTREME
         else:
             gem.append(random.randint(1, 3))
             gem.append(random.randint(4, 6))
