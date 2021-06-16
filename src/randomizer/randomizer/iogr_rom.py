@@ -15,7 +15,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.4.0"
+VERSION = "4.4.1"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -2478,7 +2478,7 @@ class Randomizer:
                 elif settings.difficulty.value == 2:
                     gem[6] = GEMS_Z3_HARD
                 elif settings.difficulty.value == 3:
-                    gem[6] = GEM_Z3S_EXTREME
+                    gem[6] = GEMS_Z3_EXTREME
         else:
             gem.append(random.randint(1, 3))
             gem.append(random.randint(4, 6))
