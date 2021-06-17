@@ -33,7 +33,7 @@ Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting
 #### Differences from the Original Game
 - Item and Ability locations have been shuffled. Check every location and Dark Space for potential items/moves.
 - Unlike the original game, only some rooms provide stat upgrades when you clear all the enemies. When you enter a dungeon room, bring up the Start menu map; if you see a pulsing Force icon on the top-left, you will receive a stat upgrade for defeating all the enemies in that room.
-- Herbs will stack in your inventory, so don't be alarmed if you know you collected more than one herb yet see only one in your inventory. They're all there.
+- Herbs will stack in your inventory, so don't be alarmed if you know you collected more than one herb yet see only one in your inventory; they're all there. Using an herb from the stack will bring up a confirmation box that informs you how many herbs you have left.
 - Illusion of Gaia has been transformed into an open-world game for the randomizer. To accomplish this, some items have different functionalities:
   - **Lola's Letter:** Acquiring _and reading_ this letter allows you to talk to Seth, who can take you between these three locations: South Cape (seaside cave), Diamond Coast (talk to Turbo), and Watermia (talk to the guy standing at the entrance)
   - **Teapot:** Use this in the Moon Tribe Camp to heal the spirits. They will take you to the Sky Garden and, from there, can take you back to the Moon Tribe Camp, the Nazca Plain, or the Seaside Palace.
@@ -41,6 +41,10 @@ Uploading a US Illusion of Gaia ROM, inputting the desired settings, and hitting
   - **Will:** Like the original game, you can use this to travel between Watermia (the guy tending kruks) and Euro (the guy standing near the town entrance)
   - **Large Roast:** Give this to a hungry kid in Natives Village and he'll guide you to Dao.
   - **Necklace:** Give this to Lilly in Itory Village and she'll take a ride in your pocket. You need her to progress through Edward's Tunnel and to acquire the coffin item in the Seaside Palace.
+  - **Aura:** Using this item for the first time will unlock Shadow.  This is also one of the win conditions for Gaia seeds, as well as for unlocking early Firebird.
+  - **Crystal Ring:** You can use this item immediately to activate it and make space in your inventory.  This (along with the Aura) allows you to pass through the barrier in Babel tower, and it's also one of the conditions to unlock early Firebird.
+  - **Black Glasses:** You can use this item immediately to activate it and make space in your inventory.  As in vanilla, this allows you to see in the bright room in Ankor Wat -- however, it also allows you to see which stat upgrade you would receive for clearing a room of enemies (e.g. "FORCE" will be replaced with "+3 HP").
+  - **Blue Journal:** This is an unused item that appears in the game code.  We've converted this to an in-game tutorial to help new players learn the game.  Talk to the NOC standing in front of the school in South Cape to get one.
 
 #### Win Conditions
 - For most seeds, you must **rescue Kara** from a painting using the Magic Dust. She can show up at the end of one of the five minor dungeons (Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat).
@@ -352,7 +356,7 @@ Scaling down the range of enemy strength was necessary to make end-game enemies 
 No. In the vanilla game, there are a number of stat upgrades that are given through NPCs and other locations - namely, 1 DEF upgrade, 2 STR upgrades, and 3 HP upgrades.
 
 #### My inventory keeps getting full, what do I do?
-Inventory management is a big part of the game. You may be required to drop or use herbs to make space for key items, but the game will never give you access to more key items than you can carry or use. Keep in mind that you may be able to dump certain key items that only access bosses you don't need to fight (see below).
+Inventory management is a big part of the game. You may be required to drop or use herbs to make space for key items, but the game will never give you access to more key items than you can carry or use. Try using key items, too, as some of them will disappear from your inventory and be "active" for the rest of the game (e.g. black glasses, crystal ring).  Also, keep in mind that you may be able to dump certain key items that only access bosses you don't need to fight (see below).
 
 #### Can I dump items that only grant access to bosses I don't need to fight?
 Generally yes.  The Rama Statues can be discarded from inventory if Statue 3 is not required, and the Hieroglyph Tiles/journal can be discarded if Statue 5 is not required. The restrictions on which items can be discarded changes from seed to seed.  Basically, if you're given the option to discard a key item, it means you don't need it to complete the game.
