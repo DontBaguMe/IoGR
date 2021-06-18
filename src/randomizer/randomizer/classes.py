@@ -2797,7 +2797,7 @@ class World:
             #if test_set in sets:      # TESTING!
             #    newset = test_set
             # All Flies logic
-            if sets and len(sets) <= 2:
+            if len(sets) > 2:
                 newset = test_set
             #newset = test_set  # TESTING!
 
