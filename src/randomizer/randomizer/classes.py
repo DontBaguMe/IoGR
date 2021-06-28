@@ -1635,7 +1635,7 @@ class World:
             self.logic[26][2] = 492
             self.logic[27][2] = 492
             del self.logic[406]
-            del self.logic[407]
+            if 407 in self.logic: del self.logic[407]
 
         # Change graph logic depending on Kara's location
         if self.kara == 1:
