@@ -1521,8 +1521,6 @@ class World:
             self.required_items += [14]
         if 3 in self.dungeons_req:
             self.required_items += [18, 19]
-        if 4 in self.dungeons_req:
-            self.required_items += [63, 64]
         if 5 in self.dungeons_req:
             self.required_items += [38, 30, 31, 32, 33, 34, 35]
         if 6 in self.dungeons_req:
@@ -1532,12 +1530,10 @@ class World:
             self.required_items += [2, 9, 23]
         elif self.kara == 2:
             self.required_items += [11, 12, 15]
-        elif self.kara == 3:
-            self.required_items += [62]
         elif self.kara == 4:
-            self.required_items += [26, 63]
+            self.required_items += [26]
         elif self.kara == 5:
-            self.required_items += [28, 62, 63, 66]
+            self.required_items += [28, 66]
 
         # Update inventory space logic
         if 3 in self.dungeons_req:
@@ -2974,9 +2970,9 @@ class World:
         self.exit_log = []
         self.spoilers = []
         self.required_items = [20, 36]
-        self.good_items = [10, 13, 24, 25, 63, 64, 65]
+        self.good_items = [10, 13, 24, 25, 37, 62, 63, 64]
         self.trolly_locations = [32, 45, 64, 65, 102, 108, 121, 128, 136, 147]
-        self.free_locations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24]
+        self.free_locations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24, 33, 34, 35, 36, 37, 38, 39]
         self.map_patches = []
         self.visited = []
         self.items_collected = []
