@@ -975,6 +975,11 @@ class Randomizer:
         patch.seek(int("4db15", 16) + rom_offset)
         patch.write(b"\x02\xe0")
 
+        # Fun with text
+        patch.seek(int("4dc5e", 16) + rom_offset)
+        patch.write(b"\xd3\x60\x8b\x84\x80\xa3\x84\x2a\x2a\x2a\xac\xd7\xad\xcb\x63\x8c\x80\xa3\x87\x4c\x80\x8d\x88" +
+                        b"\x80\x82\xac\x48\x0e\x8c\xac\xd6\xfd\xcb\x85\x8e\xa2\xac\x87\x88\x8c\x2a\x2a\x2a\xc0")
+
         # Move Dark Space, allows player to exit area without key
         # Set new X/Y coordinates in exit table
         patch.seek(int("18614", 16) + rom_offset)
