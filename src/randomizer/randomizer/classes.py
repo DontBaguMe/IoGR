@@ -2561,6 +2561,12 @@ class World:
         if self.enemizer != "None" and self.enemizer != "Limited":
             switch_str.append(b"\x02\xcc\xa0\x02\xcc\xa1")
 
+        # Disable all non-enemy sprites (enemizer and fluteless)
+        if (self.enemizer != "None" and self.enemizer != "Limited") or self.fluteless:
+            for sprite in self.nonenemy_sprites:
+                f.seek(int(self.nonenemy_sprites[sprite][1], 16) + rom_offset + 3)
+                f.write(b"\x02\xe0")
+
         f.seek(int("1ffb0", 16) + rom_offset)
         for x in switch_str:
             f.write(x)
@@ -2873,12 +2879,6 @@ class World:
                                 f.write(insane_dictionary[new_enemy])
                             else:
                                 f.write(self.enemies[new_enemy][2])
-
-        # Disable all non-enemy sprites
-        if self.enemizer != "Limited":
-            for sprite in self.nonenemy_sprites:
-                f.seek(int(self.nonenemy_sprites[sprite][1], 16) + rom_offset + 3)
-                f.write(b"\x02\xe0")
 
     # Build world
     def __init__(self, settings: RandomizerData, statues_required=6, statues=[1,2,3,4,5,6], statue_req=StatueReq.GAME_CHOICE.value, kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
