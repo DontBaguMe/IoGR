@@ -2567,6 +2567,13 @@ class World:
                 f.seek(int(self.nonenemy_sprites[sprite][1], 16) + rom_offset + 3)
                 f.write(b"\x02\xe0")
 
+        # Disable non-essential sword statues in Sky Garden (enemizer only)
+        if self.enemizer != "None" and self.enemizer != "Limited":
+            statue_addrs = [0xc9ffc,0xca003,0xca2e6]
+            for addr in statue_addrs:
+                f.seek(addr + rom_offset)
+                f.write(b"\x35\x88\x8a")  # Address for movable statue in Tunnel (disabled above)
+
         f.seek(int("1ffb0", 16) + rom_offset)
         for x in switch_str:
             f.write(x)
@@ -4498,21 +4505,21 @@ class World:
             # Sky Garden
             77: [4, 2, [0,0], b"\x4D\x00\x02\x12\x03", 4, "c9db3", "c9e92", []],
             78: [5, 2, [0,0], b"\x4E\x00\x02\x10\x03", 4, "c9e92", "c9f53", []],
-            79: [4, 2, [0,0], b"\x4F\x00\x02\x12\x03", 4, "c9f53", "ca01a", [4, 5]],
+            79: [4, 2, [0,0], b"\x4F\x00\x02\x12\x03", 4, "c9f53", "ca01a", []],
             80: [5, 2, [0,0], b"\x50\x00\x02\x10\x03", 4, "ca01a", "ca0cb", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
             81: [4, 2, [0,0], b"\x51\x00\x02\x12\x03", 4, "ca0cb", "ca192", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
             82: [5, 2, [0,0], b"\x52\x00\x02\x10\x03", 4, "ca192", "ca247", [4, 5]],
-            83: [4, 2, [0,0], b"\x53\x00\x02\x12\x03", 4, "ca247", "ca335", [4, 5]],
+            83: [4, 2, [0,0], b"\x53\x00\x02\x12\x03", 4, "ca247", "ca335", []],
             84: [5, 2, [0,0], b"\x54\x00\x02\x12\x03", 4, "ca335", "ca43b", [4, 5]],
 
             # Mu
             #            92: [6,0,0,b"\x5C\x00\x02\x15\x03",4,[]],  # Seaside Palace
             95: [6, 3, [0,0], b"\x5F\x00\x02\x14\x03", 4, "ca71b", "ca7ed", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            96: [6, 3, [0,0], b"\x60\x00\x02\x14\x03", 4, "ca7ed", "ca934", [6]],
-            97: [6, 3, [0,0], b"\x61\x00\x02\x14\x03", 4, "ca934", "caa7b", [6]],
+            96: [6, 3, [0,0], b"\x60\x00\x02\x14\x03", 4, "ca7ed", "ca934", [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
+            97: [6, 3, [0,0], b"\x61\x00\x02\x14\x03", 4, "ca934", "caa7b", [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
             98: [6, 3, [0,0], b"\x62\x00\x02\x14\x03", 4, "caa7b", "cab28", []],
             100: [6, 3, [0,0], b"\x64\x00\x02\x14\x03", 4, "cab4b", "cabd4", []],
-            101: [6, 3, [0,0], b"\x65\x00\x02\x14\x03", 4, "cabd4", "cacc3", [6]],
+            101: [6, 3, [0,0], b"\x65\x00\x02\x14\x03", 4, "cabd4", "cacc3", [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
 
             # Angel Dungeon
             109: [7, 3, [0,0], b"\x6D\x00\x02\x16\x03", 4, "caf6e", "cb04b", [7, 8, 9, 10]],  # Add 10's back in once flies are fixed
