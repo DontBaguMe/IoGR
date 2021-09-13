@@ -44,6 +44,28 @@ CHECKSUM
 https://codes-sources.commentcamarche.net/source/26284-snes-calculer-fixer-le-checksum-lire-editer-le-header-d-une-rom-super-famicom-super-nintendo-super-nes
 
 
+:statue requirement choice
+8dd17
+ad 1f 0a 8d 00 00 a9 00 00 18 e2 20 20 86 ff c2 20 c9 00 00 b0 03 4c 14 db 80 09
+
+:insert statue requirement @8dd29
+
+02 D0 10 00 14 DB 
+02 D0 F9 00 14 DB 
+02 D0 FA 00 14 DB 
+02 D0 FB 00 14 DB 
+02 D0 10 00 14 DB 
+02 D0 FD 00 14 DB
+
+:8ff86
+4e000069004e000069004e000069004e000069004e000069004e0000690060
+
+settings.statue_req.value
+StatueReq:
+GAME_CHOICE
+PLAYER_CHOICE
+RANDOM_CHOICE
+
 
 
 :: Ishtar's puzzle

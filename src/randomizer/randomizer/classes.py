@@ -7,6 +7,7 @@ import random
 
 from .models.enums.start_location import StartLocation
 from .models.enums.goal import Goal
+from .models.enums.statue_req import StatueReq
 from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.logic import Logic
@@ -683,6 +684,8 @@ class World:
 
     # Place Mystic Statues in World
     def fill_statues(self, locations=[148, 149, 150, 151, 152, 153]):
+        if self.statue_req == StatueReq.PLAYER_CHOICE.value:
+            return self.random_fill([106]*6, locations)
         return self.random_fill([100, 101, 102, 103, 104, 105], locations)
 
 
@@ -1518,8 +1521,6 @@ class World:
             self.required_items += [14]
         if 3 in self.dungeons_req:
             self.required_items += [18, 19]
-        if 4 in self.dungeons_req:
-            self.required_items += [63, 64]
         if 5 in self.dungeons_req:
             self.required_items += [38, 30, 31, 32, 33, 34, 35]
         if 6 in self.dungeons_req:
@@ -1529,12 +1530,10 @@ class World:
             self.required_items += [2, 9, 23]
         elif self.kara == 2:
             self.required_items += [11, 12, 15]
-        elif self.kara == 3:
-            self.required_items += [62]
         elif self.kara == 4:
-            self.required_items += [26, 63]
+            self.required_items += [26]
         elif self.kara == 5:
-            self.required_items += [28, 62, 63, 66]
+            self.required_items += [28, 66]
 
         # Update inventory space logic
         if 3 in self.dungeons_req:
@@ -1556,19 +1555,21 @@ class World:
         if "Allow Glitches" in self.variant:
             self.graph[0][1].append(601)
             self.graph[61][1].append(62)          # Moon Tribe: No ability required
-            self.graph[181][1].append(182)        # Sky Garden: Ramp glitch, cage glitch
+            self.graph[181][1].append(182)        # Sky Garden: Ramp glitch
             self.graph[181][1].append(184)
-            self.graph[182][1].append(183)
             self.graph[182][1].append(185)
             self.graph[222][1].append(221)        # Mu: Golem skip
-            self.item_locations[94][2] = False    # Great Wall: Slider glitch
-            self.graph[294][1].append(295)
+
             self.logic[268][4][1][1] = 0          # Ankor Wat: Earthquaker not required
             self.logic[273][4][0][1] = 0          # Ankor Wat: Glasses not required
             self.logic[274][4][0][1] = 0
             self.item_locations[124][2] = False   # Ankor Wat: Dropdown DS has abilities
             self.graph[410][1].append(411)        # Pyramid: No ability required
             self.item_locations[142][2] = False   # Pyramid: Bottom DS can have abilities
+            if not self.fluteless:
+                self.graph[182][1].append(183)        # Sky Garden: cage glitch
+                self.item_locations[94][2] = False    # Great Wall: Slider glitch
+                self.graph[294][1].append(295)
 
         # Early Firebird
         if self.firebird:
@@ -1635,7 +1636,7 @@ class World:
             self.logic[26][2] = 492
             self.logic[27][2] = 492
             del self.logic[406]
-            if 407 in self.logic: del self.logic[407]
+            del self.logic[407]
 
         # Change graph logic depending on Kara's location
         if self.kara == 1:
@@ -1660,6 +1661,16 @@ class World:
         for x in self.statues:
             self.logic[406][4][x][1] = 1
 
+        # Change item pool for "player choice" statue requirement variant
+        if self.statue_req == StatueReq.PLAYER_CHOICE.value:
+            self.item_pool[100][0] = 0
+            self.item_pool[101][0] = 0
+            self.item_pool[102][0] = 0
+            self.item_pool[103][0] = 0
+            self.item_pool[104][0] = 0
+            self.item_pool[105][0] = 0
+            self.item_pool[106][0] = 6
+
         # Incorporate item locations and logic edges into world graph
         for x in self.item_locations:
             self.graph[self.item_locations[x][0]][11].append(x)
@@ -1682,6 +1693,10 @@ class World:
         if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
+
+        # TEMP - grant Psycho Dash at start for fluteless seeds
+        if self.fluteless:
+            self.fill_item(61,self.start_loc,False,True,print_log)
 
         # Boss Shuffle
         if "Boss Shuffle" in self.variant:
@@ -2078,7 +2093,10 @@ class World:
         spoiler["start_location"] = self.item_locations[self.start_loc][9].strip()
         spoiler["logic"] = str(self.logic_mode)
         spoiler["difficulty"] = str(difficulty_txt)
-        spoiler["statues_required"] = self.statues
+        if self.statue_req == StatueReq.PLAYER_CHOICE.value:
+            spoiler["statues_required"] = self.statues_required
+        else:
+            spoiler["statues_required"] = self.statues
         spoiler["boss_order"] = self.boss_order
         spoiler["kara_location"] = kara_txt
         spoiler["jeweler_amounts"] = self.gem
@@ -2863,11 +2881,14 @@ class World:
                 f.write(b"\x02\xe0")
 
     # Build world
-    def __init__(self, settings: RandomizerData, statues=[1,2,3,4,5,6], kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
+    def __init__(self, settings: RandomizerData, statues_required=6, statues=[1,2,3,4,5,6], statue_req=StatueReq.GAME_CHOICE.value, kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
 
         self.seed = settings.seed
         self.race_mode = settings.race_mode
+        self.fluteless = settings.fluteless
         self.statues = statues
+        self.statues_required = statues_required
+        self.statue_req = statue_req
         self.boss_order = boss_order
         self.dungeons_req = []
         for x in self.statues:
@@ -2949,9 +2970,9 @@ class World:
         self.exit_log = []
         self.spoilers = []
         self.required_items = [20, 36]
-        self.good_items = [10, 13, 24, 25, 63, 64, 65]
+        self.good_items = [10, 13, 24, 25, 37, 62, 63, 64]
         self.trolly_locations = [32, 45, 64, 65, 102, 108, 121, 128, 136, 147]
-        self.free_locations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24]
+        self.free_locations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24, 33, 34, 35, 36, 37, 38, 39]
         self.map_patches = []
         self.visited = []
         self.items_collected = []
@@ -3035,6 +3056,7 @@ class World:
             103: [1, 3, "", "Mystic Statue 4", False, 2],
             104: [1, 3, "", "Mystic Statue 5", False, 2],
             105: [1, 3, "", "Mystic Statue 6", False, 2],
+            106: [0, 3, "", "Mystic Statue", False, 2],
 
             # Event Switches
             500: [0, 4, "", "Kara Released", False, 1],
@@ -3455,11 +3477,11 @@ class World:
             99: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 29 (SE door)", [], False, [], [], [], [], [], [], [], []],
 
             # Gold Ship / Diamond Coast
-            100: [False, [],   1, [1,5,0,b"\x00"], 0, "Gold Ship: Deck", [], False, [], [], [], [], [], [], [], []],
-            101: [False, [],   2, [1,5,0,b"\x00"], 0, "Gold Ship: Interior", [], False, [], [], [], [], [], [], [], []],
-            102: [False, [11], 1, [2,6,0,b"\x00"], 0, "Diamond Coast: Main Area", [], False, [], [], [], [], [], [], [], []],
-            103: [False, [],   2, [2,6,0,b"\x00"], 0, "Diamond Coast: House", [], False, [], [], [], [], [], [], [], []],
-            104: [False, [],   0, [1,5,0,b"\x00"], 0, "Gold Ship: Crow's Nest Passage", [], False, [], [], [], [], [], [], [], []],
+            100: [False, [104], 1, [1,5,0,b"\x00"], 0, "Gold Ship: Deck", [], False, [], [], [], [], [], [], [], []],
+            101: [False, [],    2, [1,5,0,b"\x00"], 0, "Gold Ship: Interior", [], False, [], [], [], [], [], [], [], []],
+            102: [False, [11],  1, [2,6,0,b"\x00"], 0, "Diamond Coast: Main Area", [], False, [], [], [], [], [], [], [], []],
+            103: [False, [],    2, [2,6,0,b"\x00"], 0, "Diamond Coast: House", [], False, [], [], [], [], [], [], [], []],
+            104: [False, [],    0, [1,5,0,b"\x00"], 0, "Gold Ship: Crow's Nest Passage", [], False, [], [], [], [], [], [], [], []],
 
             # Freejia
             110: [False, [11],       1, [2,7,0,b"\x00"], 0, "Freejia: Main Area", [], False, [], [], [], [], [], [], [], []],
@@ -3930,7 +3952,7 @@ class World:
             97:  [0,  91,  92, False, [[61, 1]]],         # Map 38 progression w/ Psycho Dash
             98:  [0,  91,  92, False, [[62, 1]]],         # Map 38 progression w/ Psycho Slider
             99:  [0,  91,  92, False, [[63, 1]]],         # Map 38 progression w/ Spin Dash
-            100: [0, 100, 104, False, [[100, 1]]],        # Gold Ship progression w/ Statue 1
+            #100: [0, 100, 104, False, [[100, 1]]],        # Gold Ship progression w/ Statue 1
             101: [0, 110, 115, False, [[504, 1]]],        # Freejia: Slaver item w/ Laborer Found
 
             # Diamond Mine
@@ -4096,8 +4118,10 @@ class World:
             403: [-1, 345, 490, False, [[20, 1]]],                      # Rescue Kara from Mt. Temple w/ Magic Dust
             404: [-1, 391, 490, False, [[20, 1]]],                      # Rescue Kara from Ankor Wat w/ Magic Dust
             405: [0, 490, 491, False, [[36, 1], [39, 1], [602, 1]]],    # Early Firebird w/ Kara, Aura and Ring
-            406: [0, 490, 492, False, [[36, 1], [100, 0], [101, 0], [102, 0], [103, 0], [104, 0], [105, 0]]]
-                                                             # Beat Game w/Mystic Statues and Aura
+            406: [0, 490, 492, False, [[36, 1], [100, 0], [101, 0], [102, 0], [103, 0], [104, 0], [105, 0]]],
+                                                                        # Beat Game w/Mystic Statues and Aura
+            407: [0, 490, 492, False, [[36, 1], [106, self.statues_required]]]              # Beat Game w/Mystic Statues and Aura (player choice variant)
+
         }
 
 

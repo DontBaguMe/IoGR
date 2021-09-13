@@ -9,12 +9,13 @@ from .errors import FileNotFoundError, OffsetError
 from .models.randomizer_data import RandomizerData
 from .models.enums.difficulty import Difficulty
 from .models.enums.goal import Goal
+from .models.enums.statue_req import StatueReq
 from .models.enums.logic import Logic
 from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.3.13"
+VERSION = "4.4.3"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -60,15 +61,23 @@ def generate_filename(settings: RandomizerData, extension: str):
         if difficulty.value == Difficulty.EXTREME.value:
             return "_extreme"
 
-    def getGoal(goal, statues):
+    def getGoal(goal, statues, statue_req):
         if goal.value is Goal.DARK_GAIA.value:
-            return "_DG" + statues[0]
+            return "_DG" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.APO_GAIA.value:
-            return "_AG" + statues[0]
+            return "_AG" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.RANDOM_GAIA.value:
-            return "_RG" + statues[0]
+            return "_RG" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.RED_JEWEL_HUNT.value:
             return "_RJ"
+
+    def getStatueReq(statue_req):
+        if statue_req.value == StatueReq.PLAYER_CHOICE.value:
+            return "p"
+        if statue_req.value == StatueReq.RANDOM_CHOICE.value:
+            return "r"
+        else:
+            return ""
 
     def getLogic(logic):
         if logic.value == Logic.COMPLETABLE.value:
@@ -115,7 +124,7 @@ def generate_filename(settings: RandomizerData, extension: str):
 
     filename = "IoGR_v" + VERSION
     filename += getDifficulty(settings.difficulty)
-    filename += getGoal(settings.goal, settings.statues)
+    filename += getGoal(settings.goal, settings.statues, settings.statue_req)
     filename += getLogic(settings.logic)
     filename += getEntranceShuffle(settings.entrance_shuffle)
     filename += getStartingLocation(settings.start_location)
@@ -127,6 +136,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.z3, "z3")
     filename += getSwitch(settings.allow_glitches, "g")
+    filename += getSwitch(settings.fluteless, "fl")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
     filename += "_" + str(settings.seed)
     filename += getSwitch(settings.race_mode, "R")
@@ -166,6 +176,12 @@ class Randomizer:
                 _ = random.randint(0,10000)
 
         statues_required = self.__get_required_statues__(settings)
+        statue_req = settings.statue_req.value
+        if statue_req == StatueReq.RANDOM_CHOICE.value:
+            if random.randint(0,1):
+                statue_req = StatueReq.GAME_CHOICE.value
+            else:
+                statue_req = StatueReq.PLAYER_CHOICE.value
 
         ##########################################################################
         #                          Global functions/misc
@@ -189,6 +205,11 @@ class Randomizer:
         patch.write(f_firebird.read())
         f_firebird.close()
 
+        patch.seek(0x02f828 + rom_offset)
+        patch.write(b"\x02\x3b\x71\x36\xf8\x82\xa9\x00\x10\x04\x12\x6b")
+        patch.seek(0x02f834 + rom_offset)
+        patch.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
+
         if settings.firebird == 1:
             # Change firebird logic
             # Requires Shadow's form, Crystal Ring (switch #$3e) and Kara rescued (switch #$8a)
@@ -206,10 +227,6 @@ class Randomizer:
             patch.write(b"\x80\x00")
             patch.seek(int("eaf0", 16) + rom_offset)
             patch.write(b"\x22\x28\xf8\x82\xea")
-            patch.seek(0x02f828 + rom_offset)
-            patch.write(b"\x02\x3b\x71\x36\xf8\x82\xa9\x00\x10\x04\x12\x6b")
-            patch.seek(0x02f834 + rom_offset)
-            patch.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
 
         ##########################################################################
         #                            Modify ROM Header
@@ -680,6 +697,7 @@ class Randomizer:
             # Also, herbs suck
             patch.seek(int("388e9", 16) + rom_offset)
             patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
+
         # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
         elif settings.red_jewel_madness:
             # Start @ 40 HP
@@ -694,6 +712,66 @@ class Randomizer:
             # 3 Red Jewels (item #$2f) removes 3 HP when used
             patch.seek(int("39dd9", 16) + rom_offset)
             patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
+
+        # Fluteless - prepare subroutines
+        patch.seek(int("2f845", 16) + rom_offset)
+        patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f845
+            + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f851
+            + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f85c
+        if settings.fluteless:
+            # Statues in Underground Tunnel are breakable with Will abilities - NOT NECESSARY
+            #patch.seek(int("a8837", 16) + rom_offset)
+            #patch.write(b"\x01\x4c\x99\x88")
+            # Remove flute from spritesets - HANDLED BY CLIENT
+            #flute_addrs = [
+            #    [0x1a8540,0x60],
+            #    [0x1a8740,0x60],
+            #    [0x1aa120,0x40],
+            #    [0x1aa560,0x20],
+            #    [0x1aa720,0x60],
+            #    [0x1aa8e0,0x80],
+            #    [0x1aab00,0x20],
+            #    [0x1aac60,0x40],
+            #    [0x1aae60,0x40],
+            #    [0x1ab400,0x80],
+            #    [0x1ab600,0x80],
+            #    [0x1ab800,0x40],
+            #    [0x1aba00,0x40]
+            #]
+            #for [addr,l] in flute_addrs:
+            #    patch.seek(addr + rom_offset)
+            #    patch.write(b"\x00"*l)
+
+            # Change melody sprite to Will whistling
+            f_fluteless = open(BIN_PATH + "0f8fa4_fluteless.bin", "rb")
+            patch.seek(int("f8fa4", 16) + rom_offset)
+            patch.write(f_fluteless.read())
+            f_fluteless.close
+
+            # Disable blocking for Will
+            patch.seek(int("2ca63", 16) + rom_offset)
+            patch.write(b"\x20\x45\xf8")
+
+            # Disable attack damage for Will
+            patch.seek(int("2cefd", 16) + rom_offset)
+            patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x51\xf8")
+
+            # Allow charging in snake game
+            patch.seek(int("2b7b3", 16) + rom_offset)
+            patch.write(b"\x4c\x5c\xf8")
+
+            # Move Ankor Wat wall bugs down so they can be hit
+            bug_strs = [b"\x5c\xbb\x8b",b"\x66\xbb\x8b"]
+            for bug_str in bug_strs:
+                done = False
+                addr = int("c8200", 16) + rom_offset
+                while not done:
+                    addr = self.original_rom_data.find(bug_str, addr+1)
+                    if addr < 0 or addr > int("ce5e4", 16) + rom_offset:
+                        done = True
+                    else:
+                        patch.seek(addr-2)
+                        patch.write((self.original_rom_data[addr-2]+1).to_bytes(1,byteorder="little"))
 
         ##########################################################################
         #                  Update overworld map movement scripts
@@ -896,6 +974,11 @@ class Randomizer:
         patch.write(b"\x6b")
         patch.seek(int("4db15", 16) + rom_offset)
         patch.write(b"\x02\xe0")
+
+        # Fun with text
+        patch.seek(int("4dc5e", 16) + rom_offset)
+        patch.write(b"\xd3\x60\x8b\x84\x80\xa3\x84\x2a\x2a\x2a\xac\xd7\xad\xcb\x63\x8c\x80\xa3\x87\x4c\x80\x8d\x88" +
+                        b"\x80\x82\xac\x48\x0e\x8c\xac\xd6\xfd\xcb\x85\x8e\xa2\xac\x87\x88\x8c\x2a\x2a\x2a\xc0")
 
         # Move Dark Space, allows player to exit area without key
         # Set new X/Y coordinates in exit table
@@ -2327,6 +2410,8 @@ class Randomizer:
         ##########################################################################
         # Randomize snake game duration/goal
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
+        if settings.fluteless:
+            snakes_per_sec = [i/4.0 for i in snakes_per_sec]
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
         snake_target = []
@@ -2505,89 +2590,102 @@ class Randomizer:
         statues = []
         statues_hex = []
 
-        i = 0
-        while i < statues_required:
-            if statueOrder[i] == 1:
-                statues.append(1)
-                statues_hex.append(b"\x21")
+        if statue_req == StatueReq.PLAYER_CHOICE.value:
+            statues = statueOrder[:]
+            statues_hex = []
 
-                # Check for Mystic Statue possession at end game state
-                patch.seek(int("8dd19", 16) + rom_offset)
-                patch.write(b"\xf8")
+            # Modify end-game logic to check for statue count
+            patch.seek(int("8dd17", 16) + rom_offset)
+            patch.write(b"\xad\x1f\x0a\x8d\x00\x00\xa9\x00\x00\x18\xe2\x20\x20\x86\xff\xc2\x20\xc9")
+            patch.write(statues_required.to_bytes(1,byteorder="little") + b"\x00\xb0\x03\x4c\x14\xdb\x80\x09")
+            patch.seek(int("8ff86", 16) + rom_offset)
+            patch.write(b"\x4e\x00\x00\x69\x00\x4e\x00\x00\x69\x00\x4e\x00\x00\x69\x00")
+            patch.write(b"\x4e\x00\x00\x69\x00\x4e\x00\x00\x69\x00\x4e\x00\x00\x69\x00\x60")
 
-                # Put statue requirements into RAM (for autotracker)
-                patch.seek(int("bfd1a", 16) + rom_offset)
-                patch.write(b"\xf8\x02")
+        else:
+            i = 0
+            while i < statues_required:
+                if statueOrder[i] == 1:
+                    statues.append(1)
+                    statues_hex.append(b"\x21")
 
-            if statueOrder[i] == 2:
-                statues.append(2)
-                statues_hex.append(b"\x22")
+                    # Check for Mystic Statue possession at end game state
+                    patch.seek(int("8dd19", 16) + rom_offset)
+                    patch.write(b"\xf8")
 
-                # Check for Mystic Statue possession at end game state
-                patch.seek(int("8dd1f", 16) + rom_offset)
-                patch.write(b"\xf9")
+                    # Put statue requirements into RAM (for autotracker)
+                    patch.seek(int("bfd1a", 16) + rom_offset)
+                    patch.write(b"\xf8\x02")
 
-                # Put statue requirements into RAM (for autotracker)
-                patch.seek(int("bfd1e", 16) + rom_offset)
-                patch.write(b"\xf9\x02")
+                if statueOrder[i] == 2:
+                    statues.append(2)
+                    statues_hex.append(b"\x22")
 
-            if statueOrder[i] == 3:
-                statues.append(3)
-                statues_hex.append(b"\x23")
+                    # Check for Mystic Statue possession at end game state
+                    patch.seek(int("8dd1f", 16) + rom_offset)
+                    patch.write(b"\xf9")
 
-                # Check for Mystic Statue possession at end game state
-                patch.seek(int("8dd25", 16) + rom_offset)
-                patch.write(b"\xfa")
+                    # Put statue requirements into RAM (for autotracker)
+                    patch.seek(int("bfd1e", 16) + rom_offset)
+                    patch.write(b"\xf9\x02")
 
-                # Put statue requirements into RAM (for autotracker)
-                patch.seek(int("bfd22", 16) + rom_offset)
-                patch.write(b"\xfa\x02")
+                if statueOrder[i] == 3:
+                    statues.append(3)
+                    statues_hex.append(b"\x23")
 
-                # Restrict removal of Rama Statues from inventory
-                patch.seek(int("1e12c", 16) + rom_offset)
-                patch.write(b"\x9f")
+                    # Check for Mystic Statue possession at end game state
+                    patch.seek(int("8dd25", 16) + rom_offset)
+                    patch.write(b"\xfa")
 
-            if statueOrder[i] == 4:
-                statues.append(4)
-                statues_hex.append(b"\x24")
+                    # Put statue requirements into RAM (for autotracker)
+                    patch.seek(int("bfd22", 16) + rom_offset)
+                    patch.write(b"\xfa\x02")
 
-                # Check for Mystic Statue possession at end game state
-                patch.seek(int("8dd2b", 16) + rom_offset)
-                patch.write(b"\xfb")
+                    # Restrict removal of Rama Statues from inventory
+                    patch.seek(int("1e12c", 16) + rom_offset)
+                    patch.write(b"\x9f")
 
-                # Put statue requirements into RAM (for autotracker)
-                patch.seek(int("bfd26", 16) + rom_offset)
-                patch.write(b"\xfb\x02")
+                if statueOrder[i] == 4:
+                    statues.append(4)
+                    statues_hex.append(b"\x24")
 
-            if statueOrder[i] == 5:
-                statues.append(5)
-                statues_hex.append(b"\x25")
+                    # Check for Mystic Statue possession at end game state
+                    patch.seek(int("8dd2b", 16) + rom_offset)
+                    patch.write(b"\xfb")
 
-                # Check for Mystic Statue possession at end game state
-                patch.seek(int("8dd31", 16) + rom_offset)
-                patch.write(b"\xfc")
+                    # Put statue requirements into RAM (for autotracker)
+                    patch.seek(int("bfd26", 16) + rom_offset)
+                    patch.write(b"\xfb\x02")
 
-                # Put statue requirements into RAM (for autotracker)
-                patch.seek(int("bfd2a", 16) + rom_offset)
-                patch.write(b"\xfc\x02")
+                if statueOrder[i] == 5:
+                    statues.append(5)
+                    statues_hex.append(b"\x25")
 
-                # Restrict removal of Hieroglyphs from inventory
-                patch.seek(int("1e12d", 16) + rom_offset)
-                patch.write(b"\xf7\xff")
+                    # Check for Mystic Statue possession at end game state
+                    patch.seek(int("8dd31", 16) + rom_offset)
+                    patch.write(b"\xfc")
 
-            if statueOrder[i] == 6:
-                statues.append(6)
-                statues_hex.append(b"\x26")
+                    # Put statue requirements into RAM (for autotracker)
+                    patch.seek(int("bfd2a", 16) + rom_offset)
+                    patch.write(b"\xfc\x02")
 
-                # Check for Mystic Statue possession at end game state
-                patch.seek(int("8dd37", 16) + rom_offset)
-                patch.write(b"\xfd")
+                    # Restrict removal of Hieroglyphs from inventory
+                    patch.seek(int("1e12d", 16) + rom_offset)
+                    patch.write(b"\xf7\xff")
 
-                # Put statue requirements into RAM (for autotracker)
-                patch.seek(int("bfd2e", 16) + rom_offset)
-                patch.write(b"\xfd\x02")
+                if statueOrder[i] == 6:
+                    statues.append(6)
+                    statues_hex.append(b"\x26")
 
-            i += 1
+                    # Check for Mystic Statue possession at end game state
+                    patch.seek(int("8dd37", 16) + rom_offset)
+                    patch.write(b"\xfd")
+
+                    # Put statue requirements into RAM (for autotracker)
+                    patch.seek(int("bfd2e", 16) + rom_offset)
+                    patch.write(b"\xfd\x02")
+
+                i += 1
 
         # Can't face Dark Gaia in Red Jewel hunts
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
@@ -2600,9 +2698,11 @@ class Randomizer:
         # Teacher at start spoils required Mystic Statues
         statue_str = ""
         if len(statues_hex) == 0:
-            statue_str = b"\xd3\x4d\x8e\xac\xd6\xd2\x80\xa2\x84\xac"
-            statue_str += b"\xa2\x84\xa1\xa5\x88\xa2\x84\x83\x4f\xc0"
-
+            if statues_required == 0:
+                statue_str = b"\xd3\x4d\x8e"
+            else:
+                statue_str = b"\xd3" + (0x20+statues_required).to_bytes(1,byteorder="little")
+            statue_str += b"\xac\xd6\xd2\x80\xa2\x84\xac\xa2\x84\xa1\xa5\x88\xa2\x84\x83\x4f\xc0"
         else:
             statue_str = b"\xd3\x69\x8e\xa5\xac\x8d\x84\x84\x83\xac"
             statue_str += b"\x4c\xa9\xa3\xa4\x88\x82\xac\x63\xa4\x80\xa4\xa5\x84"
@@ -3084,7 +3184,7 @@ class Randomizer:
             elif seed_adj > 0:
                 if PRINT_LOG:
                     print("Trying again... attempt", seed_adj+1)
-            self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
+            self.w = World(settings, statues_required, statues, statue_req, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj,PRINT_LOG)
             #k6_item = self.w.item_locations[136][3]
             #print(self.w.item_pool[k6_item][3])

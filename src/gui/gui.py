@@ -10,8 +10,9 @@ from randomizer.models.enums.difficulty import Difficulty
 #from randomizer.models.enums.level import Level
 from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
+from randomizer.models.enums.statue_req import StatueReq
 from randomizer.models.enums.logic import Logic
-#from randomizer.models.enums.sprites import Sprite
+from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
@@ -80,6 +81,15 @@ def generate_ROM():
         if g == "Red Jewel Hunt":
             return Goal.RED_JEWEL_HUNT
 
+    def get_statue_req():
+        s = statue_req.get()
+        if s == "Player Choice":
+            return StatueReq.PLAYER_CHOICE
+        if s == "Random Choice":
+            return StatueReq.RANDOM_CHOICE
+        else:
+            return StatueReq.GAME_CHOICE
+
     def get_logic():
         l = logic.get()
         if l == "Completable":
@@ -143,9 +153,9 @@ def generate_ROM():
 
     try:
         seed_int = int(seed_str)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_enemizer(), get_start_location(),
+        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get())#, get_level(), get_sprite())
+            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -155,7 +165,7 @@ def generate_ROM():
 
         patch = randomizer.generate_rom(rom_filename, settings)
 
-        write_patch(patch, rompath, rom_filename)
+        write_patch(patch, rompath, rom_filename, settings)
         if not race_mode_toggle.get():
             spoiler = randomizer.generate_spoiler()
             write_spoiler(spoiler, spoiler_filename, rompath)
@@ -189,7 +199,7 @@ def sort_patch(val):
     return val['index']
 
 
-def write_patch(patch, rom_path, filename):
+def write_patch(patch, rom_path, filename, settings):
     original = open(rom_path, "rb")
 
     randomized = open(os.path.dirname(rom_path) + os.path.sep + filename, "wb")
@@ -205,6 +215,38 @@ def write_patch(patch, rom_path, filename):
 
         randomized.seek(address)
         randomized.write(value)
+
+    # Custom sprites
+    if settings.sprite != Sprite.WILL:
+        sprite_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"randomizer","randomizer","bin","plugins","sprites",settings.sprite.value,"")
+        for binfile in os.listdir(sprite_dir):
+            if binfile.endswith(".bin"):
+                f = open(os.path.join(sprite_dir,binfile), "rb")
+                randomized.seek(int(binfile.partition(".")[0], 16))
+                randomized.write(f.read())
+                f.close
+
+    # Fluteless sprite work
+    if settings.fluteless:
+        flute_addrs = [
+            [0x1a8540,0x60],
+            [0x1a8740,0x60],
+            [0x1aa120,0x40],
+            [0x1aa560,0x20],
+            [0x1aa720,0x60],
+            [0x1aa8e0,0x80],
+            [0x1aab00,0x20],
+            [0x1aac60,0x40],
+            [0x1aae60,0x40],
+            [0x1ab400,0x80],
+            [0x1ab600,0x80],
+            [0x1ab800,0x40],
+            [0x1aba00,0x40]
+        ]
+        for [addr,l] in flute_addrs:
+            randomized.seek(addr)
+            randomized.write(b"\x00"*l)
+
     randomized.close()
 
 
@@ -293,15 +335,16 @@ tkinter.Label(mainframe, text="One Hit KO").grid(row=7, column=0, sticky=tkinter
 tkinter.Label(mainframe, text="Red Jewel Madness").grid(row=8, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=9, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Allow Glitches").grid(row=11, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Boss Shuffle").grid(row=12, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Open Mode").grid(row=13, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Z3 Mode").grid(row=14, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=15, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=16, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Generate graph").grid(row=17, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Race seed").grid(row=18, column=0, sticky=tkinter.W)
-#tkinter.Label(mainframe, text="Sprite").grid(row=14, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Allow Glitches").grid(row=12, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Boss Shuffle").grid(row=13, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Open Mode").grid(row=14, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Z3 Mode").grid(row=15, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=16, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=17, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Generate graph").grid(row=18, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Race seed").grid(row=19, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Fluteless").grid(row=20, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Sprite").grid(row=21, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
@@ -358,17 +401,24 @@ graph_viz_toggle.set(0)
 race_mode_toggle = tkinter.IntVar(root)
 race_mode_toggle.set(0)
 
+fluteless = tkinter.IntVar(root)
+fluteless.set(0)
+
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
 sprite = tkinter.StringVar(root)
-sprite_choices = ["Will", "Bagu", "Freet", "Invisible", "Solar", "Sye"]
+sprite_choices = ["Will", "Bagu", "Invisible"]#, "Freet", "Solar", "Sye"]
 sprite.set("Will")
 
 statues = tkinter.StringVar(root)
 statue_choices = ["0", "1", "2", "3", "4", "5", "6", "Random"]
 statues.set("4")
+
+statue_req = tkinter.StringVar(root)
+statue_req_choices = ["Game Choice", "Player Choice", "Random Choice"]
+statue_req.set("Game Choice")
 
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)
@@ -387,15 +437,17 @@ ohko_checkbox = tkinter.Checkbutton(mainframe, variable=ohko, onvalue=1, offvalu
 rjm_checkbox = tkinter.Checkbutton(mainframe, variable=red_jewel_madness, onvalue=1, offvalue=0).grid(row=8, column=1)
 enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(row=9, column=1)
 statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=10, column=1)
-glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=11, column=1)
-boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=12, column=1)
-open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=13, column=1)
-z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
-overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=15, column=1)
-entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=16, column=1)
-graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=17, column=1)
-race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
-#sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=14, column=1)
+statue_req_menu = tkinter.OptionMenu(mainframe, statue_req, *statue_req_choices).grid(row=11, column=1)
+glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=12, column=1)
+boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=13, column=1)
+open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
+z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=15, column=1)
+overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=16, column=1)
+entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=17, column=1)
+graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
+race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
+fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=20, column=1)
+sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=21, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
@@ -409,6 +461,6 @@ tkinter.Button(mainframe, text='?', command=firebird_help).grid(row=5, column=2)
 tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
 tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
-tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=16, column=2)
+tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=17, column=2)
 
 root.mainloop()
