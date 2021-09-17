@@ -2561,18 +2561,24 @@ class World:
         if self.enemizer != "None" and self.enemizer != "Limited":
             switch_str.append(b"\x02\xcc\xa0\x02\xcc\xa1")
 
-        # Disable all non-enemy sprites (enemizer and fluteless)
-        if (self.enemizer != "None" and self.enemizer != "Limited") or self.fluteless:
+        # Non-enemy sprite handling in enemizer
+        if self.enemizer != "None" and self.enemizer != "Limited":
+            # Disable all non-enemy sprites in enemizer
             for sprite in self.nonenemy_sprites:
                 f.seek(int(self.nonenemy_sprites[sprite][1], 16) + rom_offset + 3)
                 f.write(b"\x02\xe0")
-
-        # Disable non-essential sword statues in Sky Garden (enemizer only)
-        if self.enemizer != "None" and self.enemizer != "Limited":
+            # Disable non-essential sword statues in Sky Garden
             statue_addrs = [0xc9ffc,0xca003,0xca2e6]
             for addr in statue_addrs:
                 f.seek(addr + rom_offset)
                 f.write(b"\x35\x88\x8a")  # Address for movable statue in Tunnel (disabled above)
+
+        # Disable non-enemy sprites that have softlock potential in fluteless
+        if self.fluteless:
+            softlock_sprites = [4,5,6,7,61,62,63,64,65]
+            for sprite in softlock_sprites:
+                f.seek(int(self.nonenemy_sprites[sprite][1], 16) + rom_offset + 3)
+                f.write(b"\x02\xe0")
 
         f.seek(int("1ffb0", 16) + rom_offset)
         for x in switch_str:
