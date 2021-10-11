@@ -135,6 +135,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.z3, "z3")
+    filename += getSwitch(settings.dungeon_shuffle, "ds")
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.fluteless, "fl")
     filename += getSwitch(settings.red_jewel_madness, "rjm")

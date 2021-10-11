@@ -155,7 +155,7 @@ def generate_ROM():
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite())
+            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(), dungeon_shuffle.get())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -341,10 +341,11 @@ tkinter.Label(mainframe, text="Open Mode").grid(row=14, column=0, sticky=tkinter
 tkinter.Label(mainframe, text="Z3 Mode").grid(row=15, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=16, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=17, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Generate graph").grid(row=18, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Race seed").grid(row=19, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Fluteless").grid(row=20, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Sprite").grid(row=21, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=18, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Generate graph").grid(row=19, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Race seed").grid(row=20, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Fluteless").grid(row=21, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Sprite").grid(row=22, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
@@ -390,6 +391,9 @@ z3_mode.set(0)
 
 overworld_shuffle = tkinter.IntVar(root)
 overworld_shuffle.set(0)
+
+dungeon_shuffle = tkinter.IntVar(root)
+dungeon_shuffle.set(0)
 
 entrance_shuffle = tkinter.StringVar(root)
 entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
@@ -444,10 +448,11 @@ open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=
 z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=15, column=1)
 overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=16, column=1)
 entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=17, column=1)
-graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
-race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
-fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=20, column=1)
-sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=21, column=1)
+dungeon_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=dungeon_shuffle, onvalue=1, offvalue=0).grid(row=18, column=1)
+graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
+race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=20, column=1)
+fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=21, column=1)
+sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=22, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
