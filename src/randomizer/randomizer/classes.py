@@ -448,7 +448,7 @@ class World:
                         item_destinations_temp += self.graph[x][6]
                     inv_temp = self.get_inventory(start_items_temp,item_destinations_temp)
                     if len(inv_temp) <= MAX_INVENTORY:
-                        if self.entrance_shuffle == "None" or self.check_ds_access(dest,False,start_items_temp):
+                        if (self.entrance_shuffle == "None" and "Dungeon Shuffle" not in self.variant) or self.check_ds_access(dest,False,start_items_temp):
                             prereq_list[0].append(prereq)
                         else:
                             ds_list.append(prereq)
@@ -778,9 +778,9 @@ class World:
             if print_log:
                 print("ERROR: Invalid destination (link)", dest_exit)
             return False
-        if print_log and self.exits[origin_exit][1] != -1 and origin_exit > 21:
+        if print_log and self.exits[origin_exit][1] > 0 and origin_exit > 21:
             print("WARNING: Origin already linked", origin_exit)
-        if print_log and self.exits[dest_exit][2] != -1 and dest_exit > 21:
+        if print_log and self.exits[dest_exit][2] > 0 and dest_exit > 21:
             print("WARNING: Destination already linked", dest_exit)
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
@@ -904,7 +904,7 @@ class World:
                 while not dest_exit and dest_exits:
                     dest_exit = dest_exits.pop(0)
                     dest = self.exits[dest_exit][4]
-                    if self.exits[dest_exit][2] != -1 or (check_progression and self.is_accessible(dest)):
+                    if self.exits[dest_exit][2] != -1 or self.exit_dungeon(origin_exit) != self.exit_dungeon(dest_exit) or (check_progression and self.is_accessible(dest)):
                         dest_exit = 0
 
                 if not dest_exit:
@@ -1025,41 +1025,65 @@ class World:
 
         return [start_island,islands]
 
+
+    def exit_dungeon(self,exit=-1,print_log=False):
+        if exit not in self.exits:
+            if print_log:
+                print("ERROR: Exit not in database")
+            return -1
+
+        if self.exits[exit][8] and not self.exits[exit][9]:
+            return self.exits[exit][8]
+        return 0
+
     # Entrance randomizer
     def shuffle_exits(self,print_log=False):
         # Map passages and internal dungeon exits to graph and list all available exits
         one_way_exits = []
+        DS = ("Dungeon Shuffle" in self.variant)
+        ER = (self.entrance_shuffle != "None")
         for x in self.exits:
             if self.is_exit_coupled(x) and (not self.exits[x][3] or not self.exits[x][4]):    # Map missing O/D data for coupled exits
                 xprime = self.exits[x][0]
                 self.exits[x][3] = self.exits[xprime][4]
                 self.exits[x][4] = self.exits[xprime][3]
 
-            if not self.exits[x][1] and (self.exits[x][5] or self.exits[x][6]) and not self.exits[x][7] and (not self.exits[x][8] or self.exits[x][9]):
-                self.exits[x][1] = -1    # Mark exit for shuffling
-                self.exits[x][2] = -1
-                if not self.is_exit_coupled(x):
-                    one_way_exits.append(x)
-                self.graph[self.exits[x][3]][14].append(x)
-                self.graph[self.exits[x][4]][15].append(x)
+            if not self.exits[x][1] and (self.exits[x][5] or self.exits[x][6]) and not self.exits[x][7]:
+                if (DS and self.exits[x][8] and not self.exits[x][9]) or (ER and (not self.exits[x][8] or self.exits[x][9])):
+                    self.exits[x][1] = -1    # Mark exit for shuffling
+                    self.exits[x][2] = -1
+                    if not self.is_exit_coupled(x):
+                        one_way_exits.append(x)
+                    self.graph[self.exits[x][3]][14].append(x)
+                    self.graph[self.exits[x][4]][15].append(x)
+
+            print(x,self.exits[x])
 
         # Preserve Mu key door link
-        self.link_exits(310,310,print_log)
+        self.link_exits(310,310,print_log,False)
+        self.link_exits(311,311,print_log,False)
 
         # Set aside Jeweler's final exit in RJH seeds
         if self.goal == "Red Jewel Hunt":
             self.link_exits(720,720,print_log)
 
-        # If in Coupled mode, map one_way exits first
+        # If not in Uncoupled mode, map one_way exits first
         exit_log = []
-        if self.entrance_shuffle == "Coupled":
+        if self.entrance_shuffle != "Uncoupled":
             one_way_dest = one_way_exits[:]
             random.shuffle(one_way_dest)
             while one_way_exits:
-                exit1 = one_way_exits.pop()
-                exit2 = one_way_dest.pop()
-                self.link_exits(exit1, exit2, print_log, False)
-                exit_log.append([exit1,exit2])
+                o_exit = one_way_exits.pop()
+                found_oneway = False
+                while not found_oneway:
+                    d_exit = one_way_dest.pop()
+                    if self.exit_dungeon(d_exit) == self.exit_dungeon(o_exit):
+                        self.link_exits(o_exit, d_exit, print_log, False)
+                        exit_log.append([o_exit,d_exit])
+                        found_oneway = True
+                    else:
+                        one_way_dest.append(d_exit)
+
             if print_log:
                 print( "One-way exits mapped")
 
@@ -1080,6 +1104,8 @@ class World:
         islands = island_result[1]
         islands_built = []
 
+        print(islands)
+
         traverse_result = self.traverse()
         visited = traverse_result[0]
         origin_exits = []
@@ -1087,12 +1113,12 @@ class World:
             origin_exits += self.graph[node][14]
 
         if print_log:
-#            i = 0
-#            for x in islands:
-#                i += 1
-#                print("Island",i,x[1],x[2])
-#                for y in x[0]:
-#                    print("-",self.graph[y][5])
+            i = 0
+            for x in islands:
+                i += 1
+                print("Island",i,x[1],x[2])
+                for y in x[0]:
+                    print("-",self.graph[y][5])
             print(" Assembling islands...")
 
         random.shuffle(islands)
@@ -1105,21 +1131,21 @@ class World:
             origin_exits_new = island[1]
             dest_exits_new = island[2]
 
-#            if print_log:
-#                for y in nodes_new:
-#                    print("-",self.graph[y][5])
+            if print_log:
+                for y in nodes_new:
+                    print("-",self.graph[y][5])
 
             if not dest_exits_new or not origin_exits_new or self.is_accessible(nodes_new[0]):
                 if print_log and False:
                     print("  NOT ELIGIBLE")
             else:
-                if (check_progression and not origin_exits_new) or (self.entrance_shuffle == "Coupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
+                if (check_progression and not origin_exits_new) or (self.entrance_shuffle != "Uncoupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
                     quarantine.append(island)
-#                    if print_log:
-#                        print("  REJECTED")
+                    if print_log:
+                        print("  REJECTED")
                 else:
-#                    if print_log:
-#                        print("  ATTEMPTING...")
+                    if print_log:
+                        print("  ATTEMPTING...")
                     random.shuffle(origin_exits)
                     random.shuffle(dest_exits_new)
 
@@ -1726,7 +1752,7 @@ class World:
                 return False
 
         # Shuffle exits
-        if self.entrance_shuffle != "None":
+        if self.entrance_shuffle != "None" or "Dungeon Shuffle" in self.variant:
             if not self.shuffle_exits(print_log):
                 if print_log:
                     print("ERROR: Entrance rando failed")
@@ -2966,6 +2992,9 @@ class World:
 
         if settings.overworld_shuffle:
             self.variant.append("Overworld Shuffle")
+
+        if settings.dungeon_shuffle:
+            self.variant.append("Dungeon Shuffle")
 
         if settings.open_mode:
             self.variant.append("Open Mode")
