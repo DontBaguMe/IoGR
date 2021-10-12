@@ -982,7 +982,7 @@ class World:
 
     # Build islands, i.e. mutually-accessible nodes
     def build_islands(self,print_log=False):
-        islands = []
+        islands = [[] for _ in range(13)]
         visited = []
         start_island = []
         for node in self.graph:
@@ -994,7 +994,7 @@ class World:
                 origin_logic = []
                 dest_logic = []
                 is_start = False
-                is_island = False
+                dungeon = 9999
                 while to_visit:
                     x = to_visit.pop(0)
                     visited.append(x)
@@ -1004,9 +1004,11 @@ class World:
                     for exit in self.graph[x][14]:
                         if self.exits[exit][1] == -1:
                             origin_exits.append(exit)
+                            dungeon = min(dungeon,self.exit_dungeon(exit))
                     for exit in self.graph[x][15]:
                         if self.exits[exit][2] == -1:
                             dest_exits.append(exit)
+                            dungeon = min(dungeon,self.exit_dungeon(exit))
                     for edge in self.graph[x][12]:
                         if self.logic[edge][0] == 0:
                             origin_logic.append(edge)
@@ -1021,7 +1023,9 @@ class World:
                 if is_start:
                     start_island = island
                 else:
-                    islands.append(island)
+                    if dungeon == 9999 or "Dungeon Shuffle" not in self.variant:
+                        dungeon = 0
+                    islands[dungeon].append(island)
 
         return [start_island,islands]
 
@@ -1101,7 +1105,7 @@ class World:
         self.unsolve()
         island_result = self.build_islands()
         start_island = island_result[0]
-        islands = island_result[1]
+        islands = island_result[1].pop(0)
         islands_built = []
 
         print(islands)
@@ -1169,6 +1173,8 @@ class World:
                     check_direction = True
                     islands += quarantine
                     quarantine.clear()
+            if not islands and island_result[1]:
+                islands = island_result[1].pop(0)
 
         if print_log:
             print(" Island construction complete")
@@ -1179,7 +1185,7 @@ class World:
         self.update_graph(True,True,True)
 
         island_result = self.build_islands()
-        islands = island_result[1]
+        islands = island_result[1].pop(0)
 
         islands_no_ds = []
         for island in islands:
@@ -5337,48 +5343,48 @@ class World:
             # Ankor Wat
             562: [563, 0, 0, 360, 361, "1a028", b"", False,  9, False, "Ankor Wat: Map 176 to Map 177"],
             563: [562, 0, 0,   0,   0, "1a036", b"", False,  9, False, "Ankor Wat: Map 177 to Map 176"],
-            564: [565, 0, 0, 361, 363, "", b"", False,  9, False, "Ankor Wat: Map 177 to Map 178"],
-            565: [564, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 178 to Map 177"],
-            566: [567, 0, 0, 365, 366, "", b"", False,  9, False, "Ankor Wat: Map 178 to Map 179"],
-            567: [566, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 179 to Map 178"],
-            568: [569, 0, 0, 368, 367, "", b"", False,  9, False, "Ankor Wat: Map 180 to Map 179"],
-            569: [568, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 179 to Map 180"],
-            570: [571, 0, 0, 367, 369, "", b"", False,  9, False, "Ankor Wat: Map 179 to Map 181"],
-            571: [570, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 181 to Map 179"],
-            572: [573, 0, 0, 371, 362, "", b"", False,  9, False, "Ankor Wat: Map 181 to Map 177"],
-            573: [572, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 177 to Map 181"],
-            574: [575, 0, 0, 362, 372, "", b"", False,  9, False, "Ankor Wat: Map 177 to Map 182"],  # Garden
-            575: [574, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 182 to Map 177"],
-            576: [577, 0, 0, 372, 373, "", b"", False,  9, False, "Ankor Wat: Map 182 to Map 183"],
-            577: [576, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 183 to Map 182"],
-            578: [579, 0, 0, 373, 376, "", b"", False,  9, False, "Ankor Wat: Map 183 to Map 184"],
-            579: [578, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 184 to Map 183"],
-            580: [581, 0, 0, 374, 378, "", b"", False,  9, False, "Ankor Wat: Map 183 to Map 185 (W)"],
-            581: [580, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 185 to Map 183 (W)"],
-            582: [583, 0, 0, 378, 375, "", b"", False,  9, False, "Ankor Wat: Map 185 to Map 183 (E)"],
-            583: [582, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 183 to Map 185 (E)"],
-            584: [585, 0, 0, 375, 379, "", b"", False,  9, False, "Ankor Wat: Map 183 to Map 186"],
-            585: [584, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 186 to Map 183"],
-            586: [587, 0, 0, 379, 381, "", b"", False,  9, False, "Ankor Wat: Map 186 to Map 187 (W)"],
-            587: [586, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 187 to Map 186 (W)"],
-            588: [589, 0, 0, 381, 380, "", b"", False,  9, False, "Ankor Wat: Map 187 to Map 186 (E)"],
-            589: [588, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 186 to Map 187 (E)"],
-            590: [591, 0, 0, 381, 384, "", b"", False,  9, False, "Ankor Wat: Map 187 to Map 188"],
-            591: [590, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187"],
-            592: [593, 0, 0, 393, 386, "", b"", False,  9, False, "Ankor Wat: Map 188 to Map 189"],
-            593: [592, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 189 to Map 188"],
-            594: [595, 0, 0, 387, 389, "", b"", False,  9, False, "Ankor Wat: Map 189 to Map 190 (E)"],
-            595: [594, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (E)"],
-            596: [596, 0, 0, 388, 390, "", b"", False,  9, False, "Ankor Wat: Map 189 to Map 190 (W)"],
-            597: [597, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (W)"],
-            598: [599, 0, 0, 390, 391, "", b"", False,  9, False, "Ankor Wat: Map 190 to Map 191"],
-            599: [598, 0, 0,   0,   0, "", b"", False,  9, False, "Ankor Wat: Map 191 to Map 190"],
-            600: [  0, 0, 0, 366, 368, "", b"", False,  9, False, "Ankor Wat: Map 179 to Map 180 (drop)"],
-            601: [  0, 0, 0, 392, 381, "", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NW-L (drop)"],
-            602: [  0, 0, 0, 392, 381, "", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NW-R (drop)"],
-            603: [  0, 0, 0, 392, 383, "", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NE (drop)"],
-            604: [  0, 0, 0, 393, 382, "", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 SW (drop)"],
-            605: [  0, 0, 0, 389, 388, "", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (drop)"],
+            564: [565, 0, 0, 361, 363, "1a042", b"", False,  9, False, "Ankor Wat: Map 177 to Map 178"],
+            565: [564, 0, 0,   0,   0, "1a068", b"", False,  9, False, "Ankor Wat: Map 178 to Map 177"],
+            566: [567, 0, 0, 365, 366, "1a074", b"", False,  9, False, "Ankor Wat: Map 178 to Map 179"],
+            567: [566, 0, 0,   0,   0, "1a082", b"", False,  9, False, "Ankor Wat: Map 179 to Map 178"],
+            568: [569, 0, 0, 368, 367, "1a0b4", b"", False,  9, False, "Ankor Wat: Map 180 to Map 179"],
+            569: [568, 0, 0,   0,   0, "1a09a", b"", False,  9, False, "Ankor Wat: Map 179 to Map 180"],
+            570: [571, 0, 0, 367, 369, "1a0a6", b"", False,  9, False, "Ankor Wat: Map 179 to Map 181"],
+            571: [570, 0, 0,   0,   0, "1a0c2", b"", False,  9, False, "Ankor Wat: Map 181 to Map 179"],
+            572: [573, 0, 0, 371, 362, "1a0ce", b"", False,  9, False, "Ankor Wat: Map 181 to Map 177"],
+            573: [572, 0, 0,   0,   0, "1a05a", b"", False,  9, False, "Ankor Wat: Map 177 to Map 181"],
+            574: [575, 0, 0, 362, 372, "1a04e", b"", False,  9, False, "Ankor Wat: Map 177 to Map 182"],  # Garden
+            575: [574, 0, 0,   0,   0, "1a0dc", b"", False,  9, False, "Ankor Wat: Map 182 to Map 177"],
+            576: [577, 0, 0, 372, 373, "1a0e8", b"", False,  9, False, "Ankor Wat: Map 182 to Map 183"],
+            577: [576, 0, 0,   0,   0, "1a102", b"", False,  9, False, "Ankor Wat: Map 183 to Map 182"],
+            578: [579, 0, 0, 373, 376, "1a126", b"", False,  9, False, "Ankor Wat: Map 183 to Map 184"],
+            579: [578, 0, 0,   0,   0, "1a140", b"", False,  9, False, "Ankor Wat: Map 184 to Map 183"],
+            580: [581, 0, 0, 374, 378, "1a10e", b"", False,  9, False, "Ankor Wat: Map 183 to Map 185 (W)"],
+            581: [580, 0, 0,   0,   0, "1a15a", b"", False,  9, False, "Ankor Wat: Map 185 to Map 183 (W)"],
+            582: [583, 0, 0, 378, 375, "1a166", b"", False,  9, False, "Ankor Wat: Map 185 to Map 183 (E)"],
+            583: [582, 0, 0,   0,   0, "1a11a", b"", False,  9, False, "Ankor Wat: Map 183 to Map 185 (E)"],
+            584: [585, 0, 0, 375, 379, "1a132", b"", False,  9, False, "Ankor Wat: Map 183 to Map 186"],
+            585: [584, 0, 0,   0,   0, "1a174", b"", False,  9, False, "Ankor Wat: Map 186 to Map 183"],
+            586: [587, 0, 0, 379, 381, "1a180", b"", False,  9, False, "Ankor Wat: Map 186 to Map 187 (W)"],
+            587: [586, 0, 0,   0,   0, "1a1a6", b"", False,  9, False, "Ankor Wat: Map 187 to Map 186 (W)"],
+            588: [589, 0, 0, 381, 380, "1a1b2", b"", False,  9, False, "Ankor Wat: Map 187 to Map 186 (E)"],
+            589: [588, 0, 0,   0,   0, "1a18c", b"", False,  9, False, "Ankor Wat: Map 186 to Map 187 (E)"],
+            590: [591, 0, 0, 381, 384, "1a1be", b"", False,  9, False, "Ankor Wat: Map 187 to Map 188"],
+            591: [590, 0, 0,   0,   0, "1a1cc", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187"],
+            592: [593, 0, 0, 393, 386, "1a208", b"", False,  9, False, "Ankor Wat: Map 188 to Map 189"],
+            593: [592, 0, 0,   0,   0, "1a216", b"", False,  9, False, "Ankor Wat: Map 189 to Map 188"],
+            594: [595, 0, 0, 387, 389, "1a22e", b"", False,  9, False, "Ankor Wat: Map 189 to Map 190 (E)"],
+            595: [594, 0, 0,   0,   0, "1a248", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (E)"],
+            596: [597, 0, 0, 388, 390, "1a222", b"", False,  9, False, "Ankor Wat: Map 189 to Map 190 (W)"],
+            597: [596, 0, 0,   0,   0, "1a23c", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (W)"],
+            598: [599, 0, 0, 390, 391, "1a260", b"", False,  9, False, "Ankor Wat: Map 190 to Map 191"],
+            599: [598, 0, 0,   0,   0, "1a26e", b"", False,  9, False, "Ankor Wat: Map 191 to Map 190"],
+            600: [  0, 0, 0, 366, 368, "1a08e", b"", False,  9, False, "Ankor Wat: Map 179 to Map 180 (drop)"],
+            601: [  0, 0, 0, 392, 381, "1a1d8", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NW-L (drop)"],
+            602: [  0, 0, 0, 392, 381, "1a1e4", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NW-R (drop)"],
+            603: [  0, 0, 0, 392, 383, "1a1f0", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NE (drop)"],
+            604: [  0, 0, 0, 393, 382, "1a1fc", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 SW (drop)"],
+            605: [  0, 0, 0, 389, 388, "1a254", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (drop)"],
 
             # Dao
             612: [613, 0, 0, 400, 401, "1a27c", b"", False, 0, False, "Dao: NW House (in)"],
