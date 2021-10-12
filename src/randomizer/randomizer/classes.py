@@ -1071,6 +1071,19 @@ class World:
         if self.goal == "Red Jewel Hunt":
             self.link_exits(720,720,print_log)
 
+        # Special case for Slider exits in Angel Dungeon
+        if "Dungeon Shuffle" in self.variant:
+            if random.randint(0,1):
+                self.link_exits(408,414,print_log,False)
+                self.link_exits(409,415,print_log,False)
+                self.link_exits(414,408,print_log,False)
+                self.link_exits(415,409,print_log,False)
+            else:
+                self.link_exits(408,408,print_log,False)
+                self.link_exits(409,409,print_log,False)
+                self.link_exits(414,414,print_log,False)
+                self.link_exits(415,415,print_log,False)
+
         # If not in Uncoupled mode, map one_way exits first
         exit_log = []
         if self.entrance_shuffle != "Uncoupled":
@@ -3680,6 +3693,7 @@ class World:
             #256: [False, [],   2, [3,13,0,b"\x00"], 0, "Angel Village: Room 3", [], False, [], [], [], [], [], [], [], []],
 
             # Angel Dungeon
+            259: [False,    [], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 112 (entryway)", [], False, [], [], [], [], [], [], [], []],
             260: [False,    [], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 109", [], False, [], [], [], [], [], [], [], []],
             261: [False, [278], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 110 (main)", [], False, [], [], [], [], [], [], [], []],
             262: [False,    [], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 111", [], False, [], [], [], [], [], [], [], []],
@@ -5220,23 +5234,25 @@ class World:
             392: [393, 0, 0, 251, 255, "1946a", b"", False, 0, False, "Angel: DS Room (in)"],
             393: [392, 0, 0,   0,   0, "194f6", b"", False, 0, False, "Angel: DS Room (out)"],
 
-            # Angel Dungeon
-            400: [401, 0, 0, 251, 260, "19482", b"", False,  6,  True, "Angel Dungeon entrance"],
-            401: [400, 0, 0,   0,   0, "19534", b"", False,  6,  True, "Angel Dungeon exit"],
-            402: [403, 0, 0, 260, 261, "19528", b"", False,  6, False, "Angel Dungeon: Map 109 to Map 110"],
-            403: [402, 0, 0,   0,   0, "", b"", False,  6, False, "Angel Dungeon: Map 110 to Map 109"],
-            404: [405, 0, 0, 278, 262, "", b"", False,  6, False, "Angel Dungeon: Map 110 to Map 111"],
-            405: [404, 0, 0,   0,   0, "", b"", False,  6, False, "Angel Dungeon: Map 111 to Map 110"],
-            406: [407, 0, 0, 262, 263, "", b"", False,  6, False, "Angel Dungeon: Map 111 to Map 112"],
-            407: [406, 0, 0,   0,   0, "", b"", False,  6, False, "Angel Dungeon: Map 112 to Map 111"],
-            408: [409, 0, 0, 264, 265, "", b"", False,  6, False, "Angel Dungeon: Map 112 to Chest"],
-            409: [408, 0, 0,   0,   0, "", b"", False,  6, False, "Angel Dungeon: Chest to Map 112"],
-            410: [411, 0, 0, 279, 266, "", b"", False,  6, False, "Angel Dungeon: Map 112 to Map 113"],
-            411: [410, 0, 0,   0,   0, "", b"", False,  6, False, "Angel Dungeon: Map 113 to Map 112"],
-            412: [413, 0, 0, 266, 267, "", b"", False,  6, False, "Angel Dungeon: Map 113 to Map 114"],
-            413: [412, 0, 0,   0,   0, "", b"", False,  6, False, "Angel Dungeon: Map 114 to Map 113"],
-            414: [415, 0, 0, 268, 276, "", b"", False,  6, False, "Angel Dungeon: Map 114 to Ishtar Foyer"],
-            415: [414, 0, 0,   0,   0, "", b"", False,  6, False, "Angel Dungeon: Ishtar Foyer to Map 114"],
+            # Angel Dungeon MATCH UP SLIDER EXITS
+            400: [401, 0, 0, 251, 260, "19482", b"", False, 6,  True, "Angel Dungeon entrance"],
+            401: [400, 0, 0,   0,   0, "19534", b"", False, 6,  True, "Angel Dungeon exit"],
+            402: [403, 0, 0, 260, 261, "19528", b"", False, 6, False, "Angel Dungeon: Map 109 to Map 110"],
+            403: [402, 0, 0,   0,   0, "19576", b"", False, 6, False, "Angel Dungeon: Map 110 to Map 109"],
+            404: [405, 0, 0, 278, 262, "19582", b"", False, 6, False, "Angel Dungeon: Map 110 to Map 111"],
+            405: [404, 0, 0,   0,   0, "19612", b"", False, 6, False, "Angel Dungeon: Map 111 to Map 110"],
+            406: [407, 0, 0, 262, 259, "1961e", b"", False, 6, False, "Angel Dungeon: Map 111 to Map 112(N)"],
+            407: [406, 0, 0,   0,   0, "1962c", b"", False, 6, False, "Angel Dungeon: Map 112(N) to Map 111"],
+            408: [409, 0, 0, 259, 263, "19650", b"", False, 6, False, "Angel Dungeon: Map 112(N) to Map 112(main)"],
+            409: [408, 0, 0,   0,   0, "1965c", b"", False, 6, False, "Angel Dungeon: Map 112(main) to Map 112(N)"],
+            408: [409, 0, 0, 264, 265, "19638", b"", False, 6, False, "Angel Dungeon: Map 112 to Chest"],  #*************
+            409: [408, 0, 0,   0,   0, "19644", b"", False, 6, False, "Angel Dungeon: Chest to Map 112"],  #*************
+            410: [411, 0, 0, 279, 266, "19668", b"", False, 6, False, "Angel Dungeon: Map 112 to Map 113"],
+            411: [410, 0, 0,   0,   0, "19676", b"", False, 6, False, "Angel Dungeon: Map 113 to Map 112"],
+            412: [413, 0, 0, 266, 267, "19682", b"", False, 6, False, "Angel Dungeon: Map 113 to Map 114"],
+            413: [412, 0, 0,   0,   0, "19690", b"", False, 6, False, "Angel Dungeon: Map 114 to Map 113"],
+            414: [415, 0, 0, 268, 276, "1969c", b"", False, 6, False, "Angel Dungeon: Map 114 to Ishtar Foyer"],  #*************
+            415: [414, 0, 0,   0,   0, "196aa", b"", False, 6, False, "Angel Dungeon: Ishtar Foyer to Map 114"],  #*************
 
             # Ishtar's Studio
             420: [421, 0, 0, 277, 269, "196b6", b"", False, 0, False, "Ishtar entrance"],
@@ -5267,16 +5283,16 @@ class World:
             453: [452, 0, 0,   0,   0, "", b"", False, False,  True, "Euro: Watermia passage"],
 
             # Great Wall
-            462: [463, 0, 0, 290, 291, "", b"", False,  7, False, "Great Wall: Map 130 to Map 131"],
-            463: [462, 0, 0,   0,   0, "", b"", False,  7, False, "Great Wall: Map 131 to Map 130"],
-            464: [465, 0, 0, 293, 294, "", b"", False,  7, False, "Great Wall: Map 131 to Map 133"],
-            465: [464, 0, 0,   0,   0, "", b"", False,  7, False, "Great Wall: Map 133 to Map 131"],
-            466: [467, 0, 0, 296, 297, "", b"", False,  7, False, "Great Wall: Map 133 to Map 134"],
-            467: [466, 0, 0,   0,   0, "", b"", False,  7, False, "Great Wall: Map 134 to Map 133"],
-            468: [469, 0, 0, 297, 298, "", b"", False,  7, False, "Great Wall: Map 134 to Map 135"],
-            469: [468, 0, 0,   0,   0, "", b"", False,  7, False, "Great Wall: Map 135 to Map 134"],
-            470: [471, 0, 0, 299, 300, "", b"", False,  7, False, "Great Wall: Map 135 to Map 136"],
-            471: [470, 0, 0,   0,   0, "", b"", False,  7, False, "Great Wall: Map 136 to Map 135"],
+            462: [463, 0, 0, 290, 291, "1989e", b"", False,  7, False, "Great Wall: Map 130 to Map 131"],
+            463: [462, 0, 0,   0,   0, "198fa", b"", False,  7, False, "Great Wall: Map 131 to Map 130"],
+            464: [465, 0, 0, 293, 294, "19906", b"", False,  7, False, "Great Wall: Map 131 to Map 133"],
+            465: [464, 0, 0,   0,   0, "19a66", b"", False,  7, False, "Great Wall: Map 133 to Map 131"],
+            466: [467, 0, 0, 296, 297, "19a72", b"", False,  7, False, "Great Wall: Map 133 to Map 134"],
+            467: [466, 0, 0,   0,   0, "19b0e", b"", False,  7, False, "Great Wall: Map 134 to Map 133"],
+            468: [469, 0, 0, 297, 298, "19b1a", b"", False,  7, False, "Great Wall: Map 134 to Map 135"],
+            469: [468, 0, 0,   0,   0, "19b9c", b"", False,  7, False, "Great Wall: Map 135 to Map 134"],
+            470: [471, 0, 0, 299, 300, "19ba8", b"", False,  7, False, "Great Wall: Map 135 to Map 136"],
+            471: [470, 0, 0,   0,   0, "19c1e", b"", False,  7, False, "Great Wall: Map 136 to Map 135"],
 
             # Euro
             482: [483, 0, 0, 310, 312, "19cd2", b"", False, 0, False, "Euro: Rolek Company (in)"],
