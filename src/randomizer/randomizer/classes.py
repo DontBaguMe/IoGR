@@ -435,10 +435,11 @@ class World:
 
         for edge in open_edges:
             prereq = self.items_needed(edge)
-            if prereq and prereq not in prereq_list[0] and self.is_sublist(all_items, prereq):
-                if prereq not in prereq_list[1] and not self.forward_fill(prereq,self.open_locations[0],True,self.logic_mode == "Chaos"):
+            is_mushdrops = (26 in prereq)
+            if prereq and (prereq not in prereq_list[0] or is_mushdrops) and self.is_sublist(all_items, prereq): # Special case for Mushroom Drops (item 26)
+                if (prereq not in prereq_list[1] or is_mushdrops) and not self.forward_fill(prereq,self.open_locations[0],True,self.logic_mode == "Chaos"):
                     prereq_list[1].append(prereq)
-                elif prereq not in prereq_list[2]:
+                elif (prereq not in prereq_list[2] or is_mushdrops):
                     dest = self.logic[edge][2]
                     traverse_result = self.traverse([dest],True)
                     new_nodes = traverse_result[0]
@@ -457,6 +458,14 @@ class World:
 
         if prereq_list == [[],[],[]]:
             prereq_list[0] += ds_list
+
+        for prereq in prereq_list:
+            mdrops = 0
+            while [26] in prereq:
+                prereq.remove([26])
+                mdrops += 1
+            if mdrops:
+                prereq.append([26]*mdrops)
 
         return prereq_list
 
@@ -5256,7 +5265,9 @@ class World:
             392: [393, 0, 0, 251, 255, "1946a", b"", False, 0, False, "Angel: DS Room (in)"],
             393: [392, 0, 0,   0,   0, "194f6", b"", False, 0, False, "Angel: DS Room (out)"],
 
-            # Angel Dungeon MATCH UP SLIDER EXITS
+            # Angel Dungeon
+            398: [399, 0, 0, 259, 263, "19650", b"", False, 6, False, "Angel Dungeon: Map 112(N) to Map 112(main)"],
+            399: [398, 0, 0,   0,   0, "1965c", b"", False, 6, False, "Angel Dungeon: Map 112(main) to Map 112(N)"],
             400: [401, 0, 0, 251, 260, "19482", b"", False, 6,  True, "Angel Dungeon entrance"],
             401: [400, 0, 0,   0,   0, "19534", b"", False, 6,  True, "Angel Dungeon exit"],
             402: [403, 0, 0, 260, 261, "19528", b"", False, 6, False, "Angel Dungeon: Map 109 to Map 110"],
@@ -5265,16 +5276,14 @@ class World:
             405: [404, 0, 0,   0,   0, "19612", b"", False, 6, False, "Angel Dungeon: Map 111 to Map 110"],
             406: [407, 0, 0, 262, 259, "1961e", b"", False, 6, False, "Angel Dungeon: Map 111 to Map 112(N)"],
             407: [406, 0, 0,   0,   0, "1962c", b"", False, 6, False, "Angel Dungeon: Map 112(N) to Map 111"],
-            408: [409, 0, 0, 259, 263, "19650", b"", False, 6, False, "Angel Dungeon: Map 112(N) to Map 112(main)"],
-            409: [408, 0, 0,   0,   0, "1965c", b"", False, 6, False, "Angel Dungeon: Map 112(main) to Map 112(N)"],
-            408: [409, 0, 0, 264, 265, "19638", b"", False, 6, False, "Angel Dungeon: Map 112 to Chest"],  #*************
-            409: [408, 0, 0,   0,   0, "19644", b"", False, 6, False, "Angel Dungeon: Chest to Map 112"],  #*************
+            408: [409, 0, 0, 264, 265, "19638", b"", False, 6, False, "Angel Dungeon: Map 112 to Chest"],  # Slider
+            409: [408, 0, 0,   0,   0, "19644", b"", False, 6, False, "Angel Dungeon: Chest to Map 112"],  # Slider
             410: [411, 0, 0, 279, 266, "19668", b"", False, 6, False, "Angel Dungeon: Map 112 to Map 113"],
             411: [410, 0, 0,   0,   0, "19676", b"", False, 6, False, "Angel Dungeon: Map 113 to Map 112"],
             412: [413, 0, 0, 266, 267, "19682", b"", False, 6, False, "Angel Dungeon: Map 113 to Map 114"],
             413: [412, 0, 0,   0,   0, "19690", b"", False, 6, False, "Angel Dungeon: Map 114 to Map 113"],
-            414: [415, 0, 0, 268, 276, "1969c", b"", False, 6, False, "Angel Dungeon: Map 114 to Ishtar Foyer"],  #*************
-            415: [414, 0, 0,   0,   0, "196aa", b"", False, 6, False, "Angel Dungeon: Ishtar Foyer to Map 114"],  #*************
+            414: [415, 0, 0, 268, 276, "1969c", b"", False, 6, False, "Angel Dungeon: Map 114 to Ishtar Foyer"],  # Slider
+            415: [414, 0, 0,   0,   0, "196aa", b"", False, 6, False, "Angel Dungeon: Ishtar Foyer to Map 114"],  # Slider
 
             # Ishtar's Studio
             420: [421, 0, 0, 277, 269, "196b6", b"", False, 0, False, "Ishtar entrance"],
@@ -5347,28 +5356,28 @@ class World:
             509: [508, 0, 0,   0,   0, "19e20", b"", False, 0, False, "Euro: Dark Space House (out)"],
 
             # Mt. Kress
-            522: [523, 0, 0, 330, 331, "", b"", False,  8, False, "Mt. Kress: Map 160 to Map 161"],
-            523: [522, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 161 to Map 160"],
-            524: [525, 0, 0, 332, 333, "", b"", False,  8, False, "Mt. Kress: Map 161 to Map 162 (W)"],
-            525: [524, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 162 to Map 161 (W)"],
-            526: [527, 0, 0, 332, 334, "", b"", False,  8, False, "Mt. Kress: Map 161 to Map 162 (E)"],
-            527: [526, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 162 to Map 161 (E)"],
-            528: [529, 0, 0, 333, 337, "", b"", False,  8, False, "Mt. Kress: Map 162 to Map 163 (N)"],
-            529: [528, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 163 to Map 162 (N)"],
-            530: [531, 0, 0, 337, 336, "", b"", False,  8, False, "Mt. Kress: Map 163 to Map 162 (S)"],
-            531: [530, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 162 to Map 163 (S)"],
-            532: [533, 0, 0, 333, 338, "", b"", False,  8, False, "Mt. Kress: Map 162 to Map 164"],
-            533: [532, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 164 to Map 162"],
-            534: [535, 0, 0, 335, 339, "", b"", False,  8, False, "Mt. Kress: Map 162 to Map 165"],
-            535: [534, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 165 to Map 162"],
-            536: [537, 0, 0, 339, 342, "", b"", False,  8, False, "Mt. Kress: Map 165 to Map 166"],
-            537: [536, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 166 to Map 165"],
-            538: [539, 0, 0, 340, 343, "", b"", False,  8, False, "Mt. Kress: Map 165 to Map 167"],
-            539: [538, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 167 to Map 165"],
-            540: [541, 0, 0, 341, 344, "", b"", False,  8, False, "Mt. Kress: Map 165 to Map 168"],
-            541: [540, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 168 to Map 165"],
-            542: [543, 0, 0, 344, 345, "", b"", False,  8, False, "Mt. Kress: Map 168 to Map 169"],
-            543: [542, 0, 0,   0,   0, "", b"", False,  8, False, "Mt. Kress: Map 169 to Map 168"],
+            522: [523, 0, 0, 330, 331, "19ea6", b"", False,  8, False, "Mt. Kress: Map 160 to Map 161"],
+            523: [522, 0, 0,   0,   0, "19eb4", b"", False,  8, False, "Mt. Kress: Map 161 to Map 160"],
+            524: [525, 0, 0, 332, 333, "19ec0", b"", False,  8, False, "Mt. Kress: Map 161 to Map 162 (W)"],
+            525: [524, 0, 0,   0,   0, "19ee6", b"", False,  8, False, "Mt. Kress: Map 162 to Map 161 (W)"],
+            526: [527, 0, 0, 332, 334, "19ecc", b"", False,  8, False, "Mt. Kress: Map 161 to Map 162 (E)"],
+            527: [526, 0, 0,   0,   0, "19ef2", b"", False,  8, False, "Mt. Kress: Map 162 to Map 161 (E)"],
+            528: [529, 0, 0, 333, 337, "19f0a", b"", False,  8, False, "Mt. Kress: Map 162 to Map 163 (N)"],
+            529: [528, 0, 0,   0,   0, "19f3c", b"", False,  8, False, "Mt. Kress: Map 163 to Map 162 (N)"],
+            530: [531, 0, 0, 337, 336, "19f30", b"", False,  8, False, "Mt. Kress: Map 163 to Map 162 (S)"],
+            531: [530, 0, 0,   0,   0, "19efe", b"", False,  8, False, "Mt. Kress: Map 162 to Map 163 (S)"],
+            532: [533, 0, 0, 333, 338, "19f16", b"", False,  8, False, "Mt. Kress: Map 162 to Map 164"],
+            533: [532, 0, 0,   0,   0, "19f56", b"", False,  8, False, "Mt. Kress: Map 164 to Map 162"],
+            534: [535, 0, 0, 335, 339, "19f22", b"", False,  8, False, "Mt. Kress: Map 162 to Map 165"],
+            535: [534, 0, 0,   0,   0, "19f64", b"", False,  8, False, "Mt. Kress: Map 165 to Map 162"],
+            536: [537, 0, 0, 339, 342, "19f70", b"", False,  8, False, "Mt. Kress: Map 165 to Map 166"],
+            537: [536, 0, 0,   0,   0, "19f96", b"", False,  8, False, "Mt. Kress: Map 166 to Map 165"],
+            538: [539, 0, 0, 340, 343, "19f7c", b"", False,  8, False, "Mt. Kress: Map 165 to Map 167"],
+            539: [538, 0, 0,   0,   0, "19fa4", b"", False,  8, False, "Mt. Kress: Map 167 to Map 165"],
+            540: [541, 0, 0, 341, 344, "19f88", b"", False,  8, False, "Mt. Kress: Map 165 to Map 168"],
+            541: [540, 0, 0,   0,   0, "19fbe", b"", False,  8, False, "Mt. Kress: Map 168 to Map 165"],
+            542: [543, 0, 0, 344, 345, "19fca", b"", False,  8, False, "Mt. Kress: Map 168 to Map 169"],
+            543: [542, 0, 0,   0,   0, "19fd8", b"", False,  8, False, "Mt. Kress: Map 169 to Map 168"],
 
             # Native's Village
             552: [553, 0, 0, 350, 352, "19fe6", b"", False, 0, False, "Native's Village: West House (in)"],
@@ -5439,69 +5448,69 @@ class World:
             623: [622, 0, 0,   0,   0, "1a318", b"", False, 0, False, "Dao: SE House (out)"],
 
             # Pyramid
-            634: [635, 0, 0, 411, 415, "", b"", False, 10, False, "Pyramid: Map 204 to Map 205"],
-            635: [634, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 205 to Map 204"],
-            636: [637, 0, 0, 413, 416, "", b"", False, 10, False, "Pyramid: Map 204 to Map 206"],  # Room 1
-            637: [636, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 206 to Map 204"],
-            638: [639, 0, 0, 417, 418, "", b"", False, 10, False, "Pyramid: Map 206 to Map 207"],
-            639: [638, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 207 to Map 206"],
-            640: [641, 0, 0, 419, 442, "", b"", False, 10, False, "Pyramid: Map 207 to Map 218"],
-            641: [640, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 218 to Map 207"],
-            642: [643, 0, 0, 413, 420, "", b"", False, 10, False, "Pyramid: Map 204 to Map 208"],  # Room 2
-            643: [642, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 208 to Map 204"],
-            644: [645, 0, 0, 421, 422, "", b"", False, 10, False, "Pyramid: Map 208 to Map 209"],
-            645: [644, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 209 to Map 208"],
-            646: [647, 0, 0, 423, 443, "", b"", False, 10, False, "Pyramid: Map 209 to Map 218"],
-            647: [646, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 218 to Map 209"],
-            648: [649, 0, 0, 413, 431, "", b"", False, 10, False, "Pyramid: Map 204 to Map 214"],  # Room 3
-            649: [648, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 214 to Map 204"],
-            650: [651, 0, 0, 434, 435, "", b"", False, 10, False, "Pyramid: Map 214 to Map 215"],
-            651: [650, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 214 to Map 215"],
-            652: [653, 0, 0, 435, 444, "", b"", False, 10, False, "Pyramid: Map 215 to Map 218"],
-            653: [652, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 218 to Map 215"],
-            654: [655, 0, 0, 413, 436, "", b"", False, 10, False, "Pyramid: Map 204 to Map 216"],  # Room 4
-            655: [654, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 216 to Map 204"],
-            656: [657, 0, 0, 437, 438, "", b"", False, 10, False, "Pyramid: Map 216 to Map 217"],
-            657: [656, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 217 to Map 216"],
-            658: [659, 0, 0, 439, 440, "", b"", False, 10, False, "Pyramid: Map 217 to Map 219"],
-            659: [658, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 219 to Map 217"],
-            660: [661, 0, 0, 441, 445, "", b"", False, 10, False, "Pyramid: Map 219 to Map 218"],
-            661: [660, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 218 to Map 219"],
-            662: [663, 0, 0, 413, 426, "", b"", False, 10, False, "Pyramid: Map 204 to Map 212"],  # Room 5
-            663: [662, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 212 to Map 204"],
-            664: [665, 0, 0, 429, 430, "", b"", False, 10, False, "Pyramid: Map 212 to Map 213"],
-            665: [664, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 213 to Map 212"],
-            666: [667, 0, 0, 430, 446, "", b"", False, 10, False, "Pyramid: Map 213 to Map 218"],
-            667: [666, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 218 to Map 213"],
-            668: [669, 0, 0, 413, 424, "", b"", False, 10, False, "Pyramid: Map 204 to Map 210"],  # Room 6
-            669: [668, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 210 to Map 204"],
-            670: [671, 0, 0, 424, 425, "", b"", False, 10, False, "Pyramid: Map 210 to Map 211"],
-            671: [670, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 211 to Map 210"],
-            672: [673, 0, 0, 425, 447, "", b"", False, 10, False, "Pyramid: Map 211 to Map 218"],
-            673: [672, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 218 to Map 211"],
+            634: [635, 0, 0, 411, 415, "1a33e", b"", False, 10, False, "Pyramid: Map 204 to Map 205"],
+            635: [634, 0, 0,   0,   0, "1a394", b"", False, 10, False, "Pyramid: Map 205 to Map 204"],
+            636: [637, 0, 0, 413, 416, "1a34a", b"", False, 10, False, "Pyramid: Map 204 to Map 206"],  # Room 1
+            637: [636, 0, 0,   0,   0, "1a3a2", b"", False, 10, False, "Pyramid: Map 206 to Map 204"],
+            638: [639, 0, 0, 417, 418, "1a3ae", b"", False, 10, False, "Pyramid: Map 206 to Map 207"],
+            639: [638, 0, 0,   0,   0, "1a40a", b"", False, 10, False, "Pyramid: Map 207 to Map 206"],
+            640: [641, 0, 0, 419, 442, "1a416", b"", False, 10, False, "Pyramid: Map 207 to Map 218"],
+            641: [640, 0, 0,   0,   0, "1a730", b"", False, 10, False, "Pyramid: Map 218 to Map 207"],
+            642: [643, 0, 0, 413, 420, "1a356", b"", False, 10, False, "Pyramid: Map 204 to Map 208"],  # Room 2
+            643: [642, 0, 0,   0,   0, "1a43e", b"", False, 10, False, "Pyramid: Map 208 to Map 204"],
+            644: [645, 0, 0, 421, 422, "1a44a", b"", False, 10, False, "Pyramid: Map 208 to Map 209"],
+            645: [644, 0, 0,   0,   0, "1a48c", b"", False, 10, False, "Pyramid: Map 209 to Map 208"],
+            646: [647, 0, 0, 423, 443, "1a498", b"", False, 10, False, "Pyramid: Map 209 to Map 218"],
+            647: [646, 0, 0,   0,   0, "1a73c", b"", False, 10, False, "Pyramid: Map 218 to Map 209"],
+            648: [649, 0, 0, 413, 431, "1a362", b"", False, 10, False, "Pyramid: Map 204 to Map 214"],  # Room 3
+            649: [648, 0, 0,   0,   0, "1a590", b"", False, 10, False, "Pyramid: Map 214 to Map 204"],
+            650: [651, 0, 0, 434, 435, "1a59c", b"", False, 10, False, "Pyramid: Map 214 to Map 215"],
+            651: [650, 0, 0,   0,   0, "1a5de", b"", False, 10, False, "Pyramid: Map 215 to Map 214"],
+            652: [653, 0, 0, 435, 444, "1a5ea", b"", False, 10, False, "Pyramid: Map 215 to Map 218"],
+            653: [652, 0, 0,   0,   0, "1a760", b"", False, 10, False, "Pyramid: Map 218 to Map 215"],
+            654: [655, 0, 0, 413, 436, "1a36e", b"", False, 10, False, "Pyramid: Map 204 to Map 216"],  # Room 4
+            655: [654, 0, 0,   0,   0, "1a612", b"", False, 10, False, "Pyramid: Map 216 to Map 204"],
+            656: [657, 0, 0, 437, 438, "1a61e", b"", False, 10, False, "Pyramid: Map 216 to Map 217"],
+            657: [656, 0, 0,   0,   0, "1a6fc", b"", False, 10, False, "Pyramid: Map 217 to Map 216"],
+            658: [659, 0, 0, 439, 440, "1a708", b"", False, 10, False, "Pyramid: Map 217 to Map 219"],
+            659: [658, 0, 0,   0,   0, "1a77a", b"", False, 10, False, "Pyramid: Map 219 to Map 217"],
+            660: [661, 0, 0, 441, 445, "1a786", b"", False, 10, False, "Pyramid: Map 219 to Map 218"],
+            661: [660, 0, 0,   0,   0, "1a76c", b"", False, 10, False, "Pyramid: Map 218 to Map 219"],
+            662: [663, 0, 0, 413, 426, "1a37a", b"", False, 10, False, "Pyramid: Map 204 to Map 212"],  # Room 5
+            663: [662, 0, 0,   0,   0, "1a542", b"", False, 10, False, "Pyramid: Map 212 to Map 204"],
+            664: [665, 0, 0, 429, 430, "1a54e", b"", False, 10, False, "Pyramid: Map 212 to Map 213"],
+            665: [664, 0, 0,   0,   0, "1a55c", b"", False, 10, False, "Pyramid: Map 213 to Map 212"],
+            666: [667, 0, 0, 430, 446, "1a568", b"", False, 10, False, "Pyramid: Map 213 to Map 218"],
+            667: [666, 0, 0,   0,   0, "1a754", b"", False, 10, False, "Pyramid: Map 218 to Map 213"],
+            668: [669, 0, 0, 413, 424, "1a386", b"", False, 10, False, "Pyramid: Map 204 to Map 210"],  # Room 6
+            669: [668, 0, 0,   0,   0, "1a4a6", b"", False, 10, False, "Pyramid: Map 210 to Map 204"],
+            670: [671, 0, 0, 424, 425, "1a4b2", b"", False, 10, False, "Pyramid: Map 210 to Map 211"],
+            671: [670, 0, 0,   0,   0, "1a50e", b"", False, 10, False, "Pyramid: Map 211 to Map 210"],
+            672: [673, 0, 0, 425, 447, "1a51a", b"", False, 10, False, "Pyramid: Map 211 to Map 218"],
+            673: [672, 0, 0,   0,   0, "1a748", b"", False, 10, False, "Pyramid: Map 218 to Map 211"],
 
             # Babel
-            682: [683, 0, 0, 460, 461, "", b"", False, 11, False, "Babel: Map 222 to Map 223"],
-            683: [682, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 223 to Map 222"],
-            684: [685, 0, 0, 462, 463, "", b"", False, 11, False, "Babel: Map 223 to Map 224"],
-            685: [684, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 224 to Map 223"],
-            686: [687, 0, 0, 463, 474, "", b"", False, 11, False, "Babel: Map 224 to Map 242"],  # Castoth
-            687: [686, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 242 to Map 224"],
-            688: [689, 0, 0, 463, 475, "", b"", False, 11, False, "Babel: Map 224 to Map 243"],  # Viper
-            689: [688, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 243 to Map 224"],
-            690: [691, 0, 0, 463, 465, "", b"", False, 11, False, "Babel: Map 224 to Map 225 (bottom)"],
-            691: [690, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 225 to Map 224 (bottom)"],
-            692: [693, 0, 0, 466, 464, "", b"", False, 11, False, "Babel: Map 225 to Map 224 (top)"],
-            693: [692, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 224 to Map 225 (top)"],
-            694: [695, 0, 0, 464, 476, "", b"", False, 11, False, "Babel: Map 224 to Map 244"],  # Vampires
-            695: [694, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 244 to Map 224"],
-            696: [697, 0, 0, 464, 477, "", b"", False, 11, False, "Babel: Map 224 to Map 245"],  # Sand Fanger
-            697: [696, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 245 to Map 224"],
-            698: [699, 0, 0, 464, 469, "", b"", False, 11, False, "Babel: Map 224 to Map 226"],
-            699: [698, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 226 to Map 224"],
+            682: [683, 0, 0, 460, 461, "1a794", b"", False, 11, False, "Babel: Map 222 to Map 223"],
+            683: [682, 0, 0,   0,   0, "1a7ae", b"", False, 11, False, "Babel: Map 223 to Map 222"],
+            684: [685, 0, 0, 462, 463, "1a7ba", b"", False, 11, False, "Babel: Map 223 to Map 224"],
+            685: [684, 0, 0,   0,   0, "1a7ee", b"", False, 11, False, "Babel: Map 224 to Map 223"],
+            686: [687, 0, 0, 463, 474, "1a81e", b"", False, 11, False, "Babel: Map 224 to Map 242"],  # Castoth
+            687: [686, 0, 0,   0,   0, "a9af9", b"", False, 11, False, "Babel: Map 242 to Map 224"],
+            688: [689, 0, 0, 463, 475, "1a82a", b"", False, 11, False, "Babel: Map 224 to Map 243"],  # Viper
+            689: [688, 0, 0,   0,   0, "ad165", b"", False, 11, False, "Babel: Map 243 to Map 224"],
+            690: [691, 0, 0, 463, 465, "1a7fa", b"", False, 11, False, "Babel: Map 224 to Map 225 (bottom)"],
+            691: [690, 0, 0,   0,   0, "1a884", b"", False, 11, False, "Babel: Map 225 to Map 224 (bottom)"],
+            692: [693, 0, 0, 466, 464, "1a890", b"", False, 11, False, "Babel: Map 225 to Map 224 (top)"],
+            693: [692, 0, 0,   0,   0, "1a806", b"", False, 11, False, "Babel: Map 224 to Map 225 (top)"],
+            694: [695, 0, 0, 464, 476, "1a836", b"", False, 11, False, "Babel: Map 224 to Map 244"],  # Vampires
+            695: [694, 0, 0,   0,   0, "af1ed", b"", False, 11, False, "Babel: Map 244 to Map 224"],
+            696: [697, 0, 0, 464, 477, "1a842", b"", False, 11, False, "Babel: Map 224 to Map 245"],  # Sand Fanger
+            697: [696, 0, 0,   0,   0, "b8130", b"", False, 11, False, "Babel: Map 245 to Map 224"],
+            698: [699, 0, 0, 464, 469, "1a812", b"", False, 11, False, "Babel: Map 224 to Map 226"],
+            699: [698, 0, 0,   0,   0, "1a8b6", b"", False, 11, False, "Babel: Map 226 to Map 224"],
             #700: [701, 0, 0, 470, 471, "", b"", False, 11, False, "Babel: Map 226 to Map 227"],  #DUPLICATE W/BOSS EXITS
             #701: [700, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 227 to Map 226"],
-            702: [703, 0, 0, 471, 478, "", b"", False, 11, False, "Babel: Map 227 to Map 246"],  # Mummy Queen
+            702: [703, 0, 0, 471, 478, "", b"", False, 11, False, "Babel: Map 227 to Map 246"],  # Mummy Queen -- EVERYTHING HERE DOWN INTENTIONALLY NO ADDR
             703: [702, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 246 to Map 227"],
             704: [705, 0, 0, 471, 467, "", b"", False, 11, False, "Babel: Map 227 to Map 225 (bottom)"],
             705: [704, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 225 to Map 227 (bottom)"],
