@@ -904,7 +904,7 @@ class World:
                 while not dest_exit and dest_exits:
                     dest_exit = dest_exits.pop(0)
                     dest = self.exits[dest_exit][4]
-                    if self.exits[dest_exit][2] != -1 or self.exit_dungeon(origin_exit) != self.exit_dungeon(dest_exit) or (check_progression and self.is_accessible(dest)):
+                    if self.exits[dest_exit][2] != -1 or not self.check_dungeon(origin_exit, dest_exit) or (check_progression and self.is_accessible(dest)):
                         dest_exit = 0
 
                 if not dest_exit:
@@ -1040,6 +1040,24 @@ class World:
             return self.exits[exit][8]
         return 0
 
+    def check_dungeon(self,exit1=-1,exit2=-1,print_log=False):
+        if exit1 not in self.exits or exit2 not in self.exits:
+            if print_log:
+                print("ERROR: Exit not in database")
+            return -1
+
+        if self.exit_dungeon(exit1) != self.exit_dungeon(exit2):
+            return False
+
+        origin1 = self.exits[exit1][3]
+        origin2 = self.exits[exit2][3]
+        dest1 = self.exits[exit1][4]
+        dest2 = self.exits[exit2][4]
+
+        if self.graph[origin1][3][2] != self.graph[origin2][3][2] or self.graph[dest1][3][2] != self.graph[dest2][3][2]:
+            return False
+        return True
+
     # Entrance randomizer
     def shuffle_exits(self,print_log=False):
         # Map passages and internal dungeon exits to graph and list all available exits
@@ -1071,8 +1089,12 @@ class World:
         if self.goal == "Red Jewel Hunt":
             self.link_exits(720,720,print_log)
 
-        # Special case for Slider exits in Angel Dungeon
+        # Special case for Slider exits in Mu and Angel Dungeon
         if "Dungeon Shuffle" in self.variant:
+            # Mu
+            self.link_exits(356,356,print_log,False)
+            self.link_exits(357,357,print_log,False)
+            # Angel Dungeon
             if random.randint(0,1):
                 self.link_exits(408,414,print_log,False)
                 self.link_exits(409,415,print_log,False)
@@ -1094,7 +1116,7 @@ class World:
                 found_oneway = False
                 while not found_oneway:
                     d_exit = one_way_dest.pop()
-                    if self.exit_dungeon(d_exit) == self.exit_dungeon(o_exit):
+                    if self.check_dungeon(o_exit, d_exit):
                         self.link_exits(o_exit, d_exit, print_log, False)
                         exit_log.append([o_exit,d_exit])
                         found_oneway = True
@@ -5181,44 +5203,44 @@ class World:
             # Mu
             330: [331, 0, 0, 210, 212, "191ee", b"", False,  5,  True, "Mu entrance"],
             331: [330, 0, 0,   0,   0, "191fc", b"", False,  5,  True, "Mu exit"],
-            332: [333, 0, 0, 212, 217, "", b"", False,  5, False, "Mu: Map 95 to Map 96"],
-            333: [332, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 96 to Map 95"],
-            334: [335, 0, 0, 217, 220, "", b"", False,  5, False, "Mu: Map 96 to Map 97 (top)"],
-            335: [334, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 97 to Map 96 (top)"],
-            336: [337, 0, 0, 220, 231, "", b"", False,  5, False, "Mu: Map 97 to Map 99"],
-            337: [336, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 99 to Map 97"],
-            338: [339, 0, 0, 220, 225, "", b"", False,  5, False, "Mu: Map 97 to Map 98 (top)"],
-            339: [338, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 97 (top)"],
-            340: [341, 0, 0, 218, 222, "", b"", False,  5, False, "Mu: Map 96 to Map 97 (middle)"],
-            341: [340, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 97 to Map 96 (middle)"],
-            342: [343, 0, 0, 223, 227, "", b"", False,  5, False, "Mu: Map 97 to Map 98 (middle)"],
-            343: [342, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 97 (middle)"],
+            332: [333, 0, 0, 212, 217, "19208", b"", False,  5, False, "Mu: Map 95 to Map 96"],
+            333: [332, 0, 0,   0,   0, "1923a", b"", False,  5, False, "Mu: Map 96 to Map 95"],
+            334: [335, 0, 0, 217, 220, "19246", b"", False,  5, False, "Mu: Map 96 to Map 97 (top)"],
+            335: [334, 0, 0,   0,   0, "19278", b"", False,  5, False, "Mu: Map 97 to Map 96 (top)"],
+            336: [337, 0, 0, 220, 231, "192c0", b"", False,  5, False, "Mu: Map 97 to Map 99"],
+            337: [336, 0, 0,   0,   0, "1933c", b"", False,  5, False, "Mu: Map 99 to Map 97"],
+            338: [339, 0, 0, 220, 225, "1929c", b"", False,  5, False, "Mu: Map 97 to Map 98 (top)"],
+            339: [338, 0, 0,   0,   0, "192da", b"", False,  5, False, "Mu: Map 98 to Map 97 (top)"],
+            340: [341, 0, 0, 218, 222, "19252", b"", False,  5, False, "Mu: Map 96 to Map 97 (middle)"],
+            341: [340, 0, 0,   0,   0, "19284", b"", False,  5, False, "Mu: Map 97 to Map 96 (middle)"],
+            342: [343, 0, 0, 223, 227, "192a8", b"", False,  5, False, "Mu: Map 97 to Map 98 (middle)"],
+            343: [342, 0, 0,   0,   0, "192e6", b"", False,  5, False, "Mu: Map 98 to Map 97 (middle)"],
 #            344: [345, 0, 0, 000, 000, "", b"", False,  5, False, "Mu: Map 95 to Map 98 (middle)"],
 #            345: [344, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 95 (middle)"],
-            346: [347, 0, 0, 227, 233, "", b"", False,  5, False, "Mu: Map 98 to Map 100 (middle E)"],
-            347: [346, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 100 to Map 98 (middle E)"],
-            348: [349, 0, 0, 233, 237, "", b"", False,  5, False, "Mu: Map 100 to Map 101 (middle N)"],
-            349: [348, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 101 to Map 100 (middle N)"],
-            350: [351, 0, 0, 237, 234, "", b"", False,  5, False, "Mu: Map 101 to Map 100 (middle S)"],
-            351: [350, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 100 to Map 101 (middle S)"],
-            352: [353, 0, 0, 234, 228, "", b"", False,  5, False, "Mu: Map 100 to Map 98 (middle W)"],
-            353: [352, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 100 (middle W)"],
-            354: [355, 0, 0, 213, 232, "", b"", False,  5, False, "Mu: Map 95 to Map 99"],
-            355: [354, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 99 to Map 95"],
-            356: [357, 0, 0, 245, 246, "", b"", False,  5, False, "Mu: Map 95 to Map 98 (top)"],
-            357: [356, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 95 (top)"],
-            358: [359, 0, 0, 229, 224, "", b"", False,  5, False, "Mu: Map 98 to Map 97 (bottom)"],
-            359: [358, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 97 to Map 98 (bottom)"],
-            360: [361, 0, 0, 224, 219, "", b"", False,  5, False, "Mu: Map 97 to Map 96 (bottom)"],
-            361: [360, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 96 to Map 97 (bottom)"],
-            362: [363, 0, 0, 230, 216, "", b"", False,  5, False, "Mu: Map 98 to Map 95 (bottom)"],
-            363: [362, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 95 to Map 98 (bottom)"],
-            364: [365, 0, 0, 230, 235, "", b"", False,  5, False, "Mu: Map 98 to Map 100 (bottom)"],
-            365: [364, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 100 to Map 98 (bottom)"],
-            366: [367, 0, 0, 235, 239, "", b"", False,  5, False, "Mu: Map 100 to Map 101 (bottom)"],
-            367: [366, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 101 to Map 100 (bottom)"],
-            368: [369, 0, 0, 239, 240, "", b"", False,  5, False, "Mu: Map 101 to Map 102"],
-            369: [368, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 102 to Map 101"],
+            346: [347, 0, 0, 227, 233, "1930a", b"", False,  5, False, "Mu: Map 98 to Map 100 (middle E)"],
+            347: [346, 0, 0,   0,   0, "19356", b"", False,  5, False, "Mu: Map 100 to Map 98 (middle E)"],
+            348: [349, 0, 0, 233, 237, "1937a", b"", False,  5, False, "Mu: Map 100 to Map 101 (middle N)"],
+            349: [348, 0, 0,   0,   0, "193a0", b"", False,  5, False, "Mu: Map 101 to Map 100 (middle N)"],
+            350: [351, 0, 0, 237, 234, "193b8", b"", False,  5, False, "Mu: Map 101 to Map 100 (middle S)"],
+            351: [350, 0, 0,   0,   0, "19392", b"", False,  5, False, "Mu: Map 100 to Map 101 (middle S)"],
+            352: [353, 0, 0, 234, 228, "1936e", b"", False,  5, False, "Mu: Map 100 to Map 98 (middle W)"],
+            353: [352, 0, 0,   0,   0, "19322", b"", False,  5, False, "Mu: Map 98 to Map 100 (middle W)"],
+            354: [355, 0, 0, 213, 232, "1922c", b"", False,  5, False, "Mu: Map 95 to Map 99"],
+            355: [354, 0, 0,   0,   0, "19348", b"", False,  5, False, "Mu: Map 99 to Map 95"],
+            356: [357, 0, 0, 245, 246, "19220", b"", False,  5, False, "Mu: Map 95 to Map 98 (top)"], # Slider
+            357: [356, 0, 0,   0,   0, "192fe", b"", False,  5, False, "Mu: Map 98 to Map 95 (top)"], # Slider
+            358: [359, 0, 0, 229, 224, "192f2", b"", False,  5, False, "Mu: Map 98 to Map 97 (bottom)"],
+            359: [358, 0, 0,   0,   0, "192b4", b"", False,  5, False, "Mu: Map 97 to Map 98 (bottom)"],
+            360: [361, 0, 0, 224, 219, "19290", b"", False,  5, False, "Mu: Map 97 to Map 96 (bottom)"],
+            361: [360, 0, 0,   0,   0, "1925e", b"", False,  5, False, "Mu: Map 96 to Map 97 (bottom)"],
+            362: [363, 0, 0, 230, 216, "192ce", b"", False,  5, False, "Mu: Map 98 to Map 95 (bottom)"],
+            363: [362, 0, 0,   0,   0, "19214", b"", False,  5, False, "Mu: Map 95 to Map 98 (bottom)"],
+            364: [365, 0, 0, 230, 235, "19316", b"", False,  5, False, "Mu: Map 98 to Map 100 (bottom)"],
+            365: [364, 0, 0,   0,   0, "19362", b"", False,  5, False, "Mu: Map 100 to Map 98 (bottom)"],
+            366: [367, 0, 0, 235, 239, "19386", b"", False,  5, False, "Mu: Map 100 to Map 101 (bottom)"],
+            367: [366, 0, 0,   0,   0, "193ac", b"", False,  5, False, "Mu: Map 101 to Map 100 (bottom)"],
+            368: [369, 0, 0, 239, 240, "193c4", b"", False,  5, False, "Mu: Map 101 to Map 102"],
+            369: [368, 0, 0,   0,   0, "193de", b"", False,  5, False, "Mu: Map 102 to Map 101"],
 
             # Angel Village
             382: [383, 0, 0, 250, 210, "1941e", b"", False, 0, False, "Angel: Mu Passage (in)"],
