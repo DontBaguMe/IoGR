@@ -1046,7 +1046,7 @@ class World:
             return -1
 
         if self.exits[exit][8] and not self.exits[exit][9]:
-            return self.exits[exit][8]
+            return 1
         return 0
 
     def check_dungeon(self,exit1=-1,exit2=-1,print_log=False):
