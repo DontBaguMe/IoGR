@@ -1088,11 +1088,9 @@ class World:
                     self.graph[self.exits[x][3]][14].append(x)
                     self.graph[self.exits[x][4]][15].append(x)
 
-            print(x,self.exits[x])
-
-        # Preserve Mu key door link
-        self.link_exits(310,310,print_log,False)
-        self.link_exits(311,311,print_log,False)
+        # Preserve Mu key door link -- NO LONGER NECESSARY
+        #self.link_exits(310,310,print_log,False)
+        #self.link_exits(311,311,print_log,False)
 
         # Set aside Jeweler's final exit in RJH seeds
         if self.goal == "Red Jewel Hunt":
@@ -1100,9 +1098,9 @@ class World:
 
         # Special case for Slider exits in Mu and Angel Dungeon
         if "Dungeon Shuffle" in self.variant:
-            # Mu
-            self.link_exits(356,356,print_log,False)
-            self.link_exits(357,357,print_log,False)
+            # Mu -- NO LONGER NECESSARY
+            #self.link_exits(356,356,print_log,False)
+            #self.link_exits(357,357,print_log,False)
             # Angel Dungeon
             if random.randint(0,1):
                 self.link_exits(408,414,print_log,False)
@@ -1142,17 +1140,12 @@ class World:
         if print_log:
             print(" Graph updated. Beginning exit shuffle...")
 
-#        for x in self.graph:
-#            print(x,self.graph[x])
-
         # Build world skeleton with islands
         self.unsolve()
         island_result = self.build_islands()
         start_island = island_result[0]
         islands = island_result[1].pop(0)
         islands_built = []
-
-        print(islands)
 
         traverse_result = self.traverse()
         visited = traverse_result[0]
@@ -1169,19 +1162,15 @@ class World:
                     print("-",self.graph[y][5])
             print(" Assembling islands...")
 
-        random.shuffle(islands)
         check_direction = True
         check_progression = True
         quarantine = []
         while islands:
+            random.shuffle(islands)
             island = islands.pop(0)
             nodes_new = island[0]
             origin_exits_new = island[1]
             dest_exits_new = island[2]
-
-            if print_log:
-                for y in nodes_new:
-                    print("-",self.graph[y][5])
 
             if not dest_exits_new or not origin_exits_new or self.is_accessible(nodes_new[0]):
                 if print_log and False:
@@ -1189,11 +1178,9 @@ class World:
             else:
                 if (check_progression and not origin_exits_new) or (self.entrance_shuffle != "Uncoupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
                     quarantine.append(island)
-                    if print_log:
-                        print("  REJECTED")
+                    #if print_log:
+                    #    print("  REJECTED")
                 else:
-                    if print_log:
-                        print("  ATTEMPTING...")
                     random.shuffle(origin_exits)
                     random.shuffle(dest_exits_new)
 
@@ -1201,11 +1188,15 @@ class World:
                     if not result:
                         quarantine.append(island)
                     else:
-                        traverse_result = self.traverse(island[0])
-                        visited += traverse_result[0]
-                        progression_result = self.get_open_exits()
-                        origin_exits = progression_result[0]
-                        check_direction = True
+                        if print_log:
+                            print("NEW ISLAND:")
+                            for y in nodes_new:
+                                print(" -",self.graph[y][5])
+                            traverse_result = self.traverse(island[0])
+                            visited += traverse_result[0]
+                            progression_result = self.get_open_exits()
+                            origin_exits = progression_result[0]
+                            check_direction = True
 
             if not islands:
                 if check_direction:
@@ -1219,6 +1210,9 @@ class World:
                     quarantine.clear()
             if not islands and island_result[1]:
                 islands = island_result[1].pop(0)
+                check_direction = True
+                check_progression = True
+                quarantine = []
 
         if print_log:
             print(" Island construction complete")
@@ -5194,8 +5188,8 @@ class World:
             308: [307, 0, 0,   0,   0, "18fe0", b"", False,  4, False, "Sky Garden: Map 84 to Map 83 (W)"],
 
             # Seaside Palace
-            310: [311, 0, 0, 211, 201, "69759", b"", False, 0, False, "Seaside entrance"],  # ALWAYS LINKED
-            311: [310, 0, 0,   0,   0, "1906a", b"", False, 0, False, "Seaside exit"],
+            310: [311, 0, 0, 211, 201, "", b"", False, 0, False, "Seaside entrance"],  # ALWAYS LINKED (69759)
+            311: [310, 0, 0,   0,   0, "", b"", False, 0, False, "Seaside exit"],      # ALWAYS LINKED (1906a)
             312: [313, 0, 0, 200, 202, "19046", b"", False, 0, False, "Seaside: Area 1 NE Room (in)"],
             313: [312, 0, 0,   0,   0, "19114", b"", False, 0, False, "Seaside: Area 1 NE Room (out)"],
             314: [315, 0, 0, 200, 203, "19052", b"", False, 0, False, "Seaside: Area 1 NW Room (in)"],
@@ -5236,8 +5230,8 @@ class World:
             353: [352, 0, 0,   0,   0, "19322", b"", False,  5, False, "Mu: Map 98 to Map 100 (middle W)"],
             354: [355, 0, 0, 213, 232, "1922c", b"", False,  5, False, "Mu: Map 95 to Map 99"],
             355: [354, 0, 0,   0,   0, "19348", b"", False,  5, False, "Mu: Map 99 to Map 95"],
-            356: [357, 0, 0, 245, 246, "19220", b"", False,  5, False, "Mu: Map 95 to Map 98 (top)"], # Slider
-            357: [356, 0, 0,   0,   0, "192fe", b"", False,  5, False, "Mu: Map 98 to Map 95 (top)"], # Slider
+            356: [357, 0, 0, 245, 246, "", b"", False,  5, False, "Mu: Map 95 to Map 98 (top)"], # Slider, ALWAYS LINKED (19220)
+            357: [356, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 95 (top)"], # Slider, ALWAYS LINKED (192fe)
             358: [359, 0, 0, 229, 224, "192f2", b"", False,  5, False, "Mu: Map 98 to Map 97 (bottom)"],
             359: [358, 0, 0,   0,   0, "192b4", b"", False,  5, False, "Mu: Map 97 to Map 98 (bottom)"],
             360: [361, 0, 0, 224, 219, "19290", b"", False,  5, False, "Mu: Map 97 to Map 96 (bottom)"],
@@ -5448,8 +5442,8 @@ class World:
             623: [622, 0, 0,   0,   0, "1a318", b"", False, 0, False, "Dao: SE House (out)"],
 
             # Pyramid
-            634: [635, 0, 0, 411, 415, "1a33e", b"", False, 10, False, "Pyramid: Map 204 to Map 205"],
-            635: [634, 0, 0,   0,   0, "1a394", b"", False, 10, False, "Pyramid: Map 205 to Map 204"],
+            634: [635, 0, 0, 411, 415, "", b"", False, 10, False, "Pyramid: Map 204 to Map 205"], # Hieroglyph room, ALWAYS LINKED (1a33e)
+            635: [634, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 205 to Map 204"], # Hieroglyph room, ALWAYS LINKED (1a394)
             636: [637, 0, 0, 413, 416, "1a34a", b"", False, 10, False, "Pyramid: Map 204 to Map 206"],  # Room 1
             637: [636, 0, 0,   0,   0, "1a3a2", b"", False, 10, False, "Pyramid: Map 206 to Map 204"],
             638: [639, 0, 0, 417, 418, "1a3ae", b"", False, 10, False, "Pyramid: Map 206 to Map 207"],
@@ -5494,23 +5488,23 @@ class World:
             683: [682, 0, 0,   0,   0, "1a7ae", b"", False, 11, False, "Babel: Map 223 to Map 222"],
             684: [685, 0, 0, 462, 463, "1a7ba", b"", False, 11, False, "Babel: Map 223 to Map 224"],
             685: [684, 0, 0,   0,   0, "1a7ee", b"", False, 11, False, "Babel: Map 224 to Map 223"],
-            686: [687, 0, 0, 463, 474, "1a81e", b"", False, 11, False, "Babel: Map 224 to Map 242"],  # Castoth
-            687: [686, 0, 0,   0,   0, "a9af9", b"", False, 11, False, "Babel: Map 242 to Map 224"],
-            688: [689, 0, 0, 463, 475, "1a82a", b"", False, 11, False, "Babel: Map 224 to Map 243"],  # Viper
-            689: [688, 0, 0,   0,   0, "ad165", b"", False, 11, False, "Babel: Map 243 to Map 224"],
+            686: [687, 0, 0, 463, 474, "", b"", False, 11, False, "Babel: Map 224 to Map 242"],  # Castoth, ALWAYS LINKED (1a81e)
+            687: [686, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 242 to Map 224"],  # Castoth, ALWAYS LINKED (a9af9)
+            688: [689, 0, 0, 463, 475, "", b"", False, 11, False, "Babel: Map 224 to Map 243"],  # Viper, ALWAYS LINKED (1a82a)
+            689: [688, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 243 to Map 224"],  # Viper, ALWAYS LINKED (ad165)
             690: [691, 0, 0, 463, 465, "1a7fa", b"", False, 11, False, "Babel: Map 224 to Map 225 (bottom)"],
             691: [690, 0, 0,   0,   0, "1a884", b"", False, 11, False, "Babel: Map 225 to Map 224 (bottom)"],
             692: [693, 0, 0, 466, 464, "1a890", b"", False, 11, False, "Babel: Map 225 to Map 224 (top)"],
             693: [692, 0, 0,   0,   0, "1a806", b"", False, 11, False, "Babel: Map 224 to Map 225 (top)"],
-            694: [695, 0, 0, 464, 476, "1a836", b"", False, 11, False, "Babel: Map 224 to Map 244"],  # Vampires
-            695: [694, 0, 0,   0,   0, "af1ed", b"", False, 11, False, "Babel: Map 244 to Map 224"],
-            696: [697, 0, 0, 464, 477, "1a842", b"", False, 11, False, "Babel: Map 224 to Map 245"],  # Sand Fanger
-            697: [696, 0, 0,   0,   0, "b8130", b"", False, 11, False, "Babel: Map 245 to Map 224"],
+            694: [695, 0, 0, 464, 476, "", b"", False, 11, False, "Babel: Map 224 to Map 244"],  # Vampires, ALWAYS LINKED (1a836)
+            695: [694, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 244 to Map 224"],  # Vampires, ALWAYS LINKED (af1ed)
+            696: [697, 0, 0, 464, 477, "", b"", False, 11, False, "Babel: Map 224 to Map 245"],  # Sand Fanger, ALWAYS LINKED (1a842)
+            697: [696, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 245 to Map 224"],  # Sand Fanger, ALWAYS LINKED (b8130)
             698: [699, 0, 0, 464, 469, "1a812", b"", False, 11, False, "Babel: Map 224 to Map 226"],
             699: [698, 0, 0,   0,   0, "1a8b6", b"", False, 11, False, "Babel: Map 226 to Map 224"],
             #700: [701, 0, 0, 470, 471, "", b"", False, 11, False, "Babel: Map 226 to Map 227"],  #DUPLICATE W/BOSS EXITS
             #701: [700, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 227 to Map 226"],
-            702: [703, 0, 0, 471, 478, "", b"", False, 11, False, "Babel: Map 227 to Map 246"],  # Mummy Queen -- EVERYTHING HERE DOWN INTENTIONALLY NO ADDR
+            702: [703, 0, 0, 471, 478, "", b"", False, 11, False, "Babel: Map 227 to Map 246"],  # Mummy Queen -- EVERYTHING HERE DOWN ALWAYS LINKED
             703: [702, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 246 to Map 227"],
             704: [705, 0, 0, 471, 467, "", b"", False, 11, False, "Babel: Map 227 to Map 225 (bottom)"],
             705: [704, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 225 to Map 227 (bottom)"],
