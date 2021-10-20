@@ -3159,7 +3159,7 @@ class Randomizer:
 
         # Will death text
         patch.seek(int("d7c3", 16) + rom_offset)
-        patch.write(death_list[random.randint(0, len(death_list) - 1)])
+        #patch.write(death_list[random.randint(0, len(death_list) - 1)])
         # patch.write(death_list[0])
 
         # Standardize text, check for infinite death loop
