@@ -15,7 +15,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.4.5"
+VERSION = "4.4.6"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -2596,6 +2596,10 @@ class Randomizer:
         if statue_req == StatueReq.PLAYER_CHOICE.value:
             statues = statueOrder[:]
             statues_hex = []
+
+            # Set "player choice" flag in RAM (for autotracker)
+            patch.seek(int("bfd4a", 16) + rom_offset)
+            patch.write(b"\xfe\x02")
 
             # Modify end-game logic to check for statue count
             patch.seek(int("8dd17", 16) + rom_offset)
