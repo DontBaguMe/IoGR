@@ -5378,7 +5378,7 @@ class World:
             649: [648, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 214 to Map 204"],
             650: [651, 0, 0, 434, 435, "", b"", False,  True, False, "Pyramid: Map 214 to Map 215"],
             651: [650, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 214 to Map 215"],
-            652: [653, 0, 0, 435, 444, "", b"", False,  True, False, "Pyramid: Map 215 to Map 218"],
+            652: [653, 0, 0, 450, 444, "", b"", False,  True, False, "Pyramid: Map 215 to Map 218"],
             653: [652, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 218 to Map 215"],
             654: [655, 0, 0, 413, 436, "", b"", False,  True, False, "Pyramid: Map 204 to Map 216"],  # Room 4
             655: [654, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 216 to Map 204"],
