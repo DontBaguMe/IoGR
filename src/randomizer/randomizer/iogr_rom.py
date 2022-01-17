@@ -15,7 +15,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.4.3"
+VERSION = "4.4.7"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -760,18 +760,21 @@ class Randomizer:
             patch.seek(int("2b7b3", 16) + rom_offset)
             patch.write(b"\x4c\x5c\xf8")
 
-            # Move Ankor Wat wall bugs down so they can be hit
-            bug_strs = [b"\x5c\xbb\x8b",b"\x66\xbb\x8b"]
-            for bug_str in bug_strs:
+            # Y-shift certain enemy positions so they can be hit without a flute
+            enemy_shift = [
+                [b"\x5c\xbb\x8b", 1],    # Tunnel: Canal Worms up 1
+                [b"\x5c\xbb\x8b",-1],    # Ankor Wat: Wall Bugs up 1
+                [b"\x66\xbb\x8b",-1]]    # Ankor Wat: Wall Bugs up 1
+            for [enemy_str,yshift] in enemy_shift:
                 done = False
                 addr = int("c8200", 16) + rom_offset
                 while not done:
-                    addr = self.original_rom_data.find(bug_str, addr+1)
+                    addr = self.original_rom_data.find(enemy_str, addr+1)
                     if addr < 0 or addr > int("ce5e4", 16) + rom_offset:
                         done = True
                     else:
                         patch.seek(addr-2)
-                        patch.write((self.original_rom_data[addr-2]+1).to_bytes(1,byteorder="little"))
+                        patch.write((self.original_rom_data[addr-2]-yshift).to_bytes(1,byteorder="little"))
 
         ##########################################################################
         #                  Update overworld map movement scripts
@@ -2593,6 +2596,10 @@ class Randomizer:
         if statue_req == StatueReq.PLAYER_CHOICE.value:
             statues = statueOrder[:]
             statues_hex = []
+
+            # Set "player choice" flag in RAM (for autotracker)
+            patch.seek(int("bfd4a", 16) + rom_offset)
+            patch.write(b"\xfe\x02")
 
             # Modify end-game logic to check for statue count
             patch.seek(int("8dd17", 16) + rom_offset)
