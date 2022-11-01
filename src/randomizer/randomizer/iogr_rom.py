@@ -15,7 +15,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.4.8"
+VERSION = "4.4.9"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -3018,7 +3018,7 @@ class Randomizer:
             logic_int = 0x40 + kara_location
 
         patch.seek(int("bfd13", 16) + rom_offset)
-        patch.write(statues_required.to_bytes(1,byteorder="little"))
+        patch.write(logic_int.to_bytes(1,byteorder="little"))
 
         ##########################################################################
         #                          Have fun with death text
