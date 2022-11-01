@@ -854,6 +854,11 @@ class Randomizer:
         patch.write(f_roominit.read())
         f_roominit.close
 
+        # Set "open mode" flag in RAM (for autotracker)
+        if settings.open_mode:
+            patch.seek(int("bfd4e", 16) + rom_offset)
+            patch.write(b"\xff\x02")
+
         ##########################################################################
         #                         Modify South Cape events
         ##########################################################################
@@ -2907,10 +2912,6 @@ class Randomizer:
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x44\x83\xa7\x80\xa2\x83\x0e\xa3\xac\x60\xa2\x88\xa3\x8e\x8d")
 
-                # Set Kara's location in RAM switches (for autotracker)
-                patch.seek(int("bfd13", 16) + rom_offset)
-                patch.write(b"\x01")
-
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
                 patch.write(b"\x13\x00\xD0\x08\x02\x45\x0b\x0b\x0d\x0d")
@@ -2927,10 +2928,6 @@ class Randomizer:
                 # Set spoiler for Kara's location in Lance's Letter
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x43\x88\x80\x8c\x8e\x8d\x83\xac\x4c\x88\x8d\x84")
-
-                # Set Kara's location in RAM switches (for autotracker)
-                patch.seek(int("bfd13", 16) + rom_offset)
-                patch.write(b"\x02")
 
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
@@ -2975,10 +2972,6 @@ class Randomizer:
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x4c\xa4\x2a\xac\x4a\xa2\x84\xa3\xa3")
 
-                # Set Kara's location in RAM switches (for autotracker)
-                patch.seek(int("bfd13", 16) + rom_offset)
-                patch.write(b"\x04")
-
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
                 patch.write(b"\xa9\x00\xD0\x08\x02\x45\x12\x06\x14\x08")
@@ -3000,10 +2993,6 @@ class Randomizer:
                 patch.seek(int("39521", 16) + rom_offset)
                 patch.write(b"\x40\x8d\x8a\x8e\xa2\xac\x67\x80\xa4")
 
-                # Set Kara's location in RAM switches (for autotracker)
-                patch.seek(int("bfd13", 16) + rom_offset)
-                patch.write(b"\x05")
-
                 # Set map check ID for Magic Dust item event
                 patch.seek(int("393a9", 16) + rom_offset)
                 patch.write(b"\xbf\x00\xD0\x08\x02\x45\x1a\x10\x1c\x12")
@@ -3019,6 +3008,17 @@ class Randomizer:
                 # Adjust sprite
                 patch.seek(int("6d15b", 16) + rom_offset)
                 patch.write(b"\x02\xb6\x30")
+
+        # Set Kara's location and logic mode in RAM switches (for autotracker)
+        if settings.logic.value == Logic.COMPLETABLE.value:
+            logic_int = 0x10 + kara_location
+        elif settings.logic.value == Logic.BEATABLE.value:
+            logic_int = 0x20 + kara_location
+        else:
+            logic_int = 0x40 + kara_location
+
+        patch.seek(int("bfd13", 16) + rom_offset)
+        patch.write(statues_required.to_bytes(1,byteorder="little"))
 
         ##########################################################################
         #                          Have fun with death text
