@@ -19,10 +19,10 @@ class RandomizerData:
                  red_jewel_madness: bool = False, allow_glitches: bool = False, boss_shuffle: bool = False,
                  open_mode: bool = False, z3: bool = False, overworld_shuffle: bool = False,
                  entrance_shuffle: EntranceShuffle = EntranceShuffle.NONE, race_mode: bool = False, fluteless: bool = False,
-                 sprite: Sprite = Sprite.WILL, dungeon_shuffle: bool = False):
+                 sprite: Sprite = Sprite.WILL, dungeon_shuffle: bool = False, plando: str = ""):
         self.seed = seed
         self.difficulty = difficulty
-#        self.level = level
+        self.plando = plando
         self.start_location = start_location
         self.goal = goal
         self.statue_req = statue_req

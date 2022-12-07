@@ -1,4 +1,4 @@
-import binascii, hashlib, logging, os, random, tempfile, json, copy, graphviz
+import binascii, hashlib, json, logging, os, random, tempfile, json, copy, graphviz
 from typing import BinaryIO
 
 from .patch import Patch
@@ -15,7 +15,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.4.9"
+VERSION = "5.0.0"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -149,6 +149,7 @@ def generate_filename(settings: RandomizerData, extension: str):
 class Randomizer:
     offset: int = 0
     statues_required = 0
+    statues = []
     current_position = 0
 
     def __init__(self, rom_path: str):
@@ -175,13 +176,31 @@ class Randomizer:
             for i in range(random.randint(100, 1000)):
                 _ = random.randint(0,10000)
 
-        statues_required = self.__get_required_statues__(settings)
-        statue_req = settings.statue_req.value
-        if statue_req == StatueReq.RANDOM_CHOICE.value:
-            if random.randint(0,1):
+        try:
+            plando = json.loads(settings.plando)
+            if PRINT_LOG:
+                print("- PLANDO FILE FOUND -")
+        except:
+            plando = []
+
+        try:
+            plando_statues = plando["statues_required"]
+            if PRINT_LOG:
+                print("PLANDO FOUND: Statue requirement",plando_statues)
+            if type(plando_statues) is list:
+                statues_required = len(plando_statues)
                 statue_req = StatueReq.GAME_CHOICE.value
-            else:
+            elif plando_statues.isnumeric():
+                statues_required = plando_statues
                 statue_req = StatueReq.PLAYER_CHOICE.value
+        except:
+            statues_required = self.__get_required_statues__(settings)
+            statue_req = settings.statue_req.value
+            if statue_req == StatueReq.RANDOM_CHOICE.value:
+                if random.randint(0,1):
+                    statue_req = StatueReq.GAME_CHOICE.value
+                else:
+                    statue_req = StatueReq.PLAYER_CHOICE.value
 
         ##########################################################################
         #                          Global functions/misc
@@ -336,7 +355,6 @@ class Randomizer:
         f_mapdata_orig.close
 
         # Insert tutorial map in Beginner mode
-#        if settings.level.value == 0:
         f_mapdata.seek(0)
         addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
         f_mapdata.seek(addr)
@@ -2473,43 +2491,48 @@ class Randomizer:
         #                    Randomize Jeweler Reward amounts
         ##########################################################################
         # Randomize jeweler reward values
-        gem = []
-        if settings.z3:
-            gem.append(random.randint(1, 2))
-            gem.append(random.randint(3, 4))
-            gem.append(random.randint(5, 7))
-            gem.append(random.randint(8, 11))
-            gem.append(random.randint(12, 17))
-            gem.append(random.randint(18, 23))
-            gem.append(random.randint(24, 34))
+        try:
+            gem = plando["jeweler_amounts"][:]
+            if PRINT_LOG:
+                print("PLANDO FOUND: Jeweler reward amounts")
+        except:
+            gem = []
+            if settings.z3:
+                gem.append(random.randint(1, 2))
+                gem.append(random.randint(3, 4))
+                gem.append(random.randint(5, 7))
+                gem.append(random.randint(8, 11))
+                gem.append(random.randint(12, 17))
+                gem.append(random.randint(18, 23))
+                gem.append(random.randint(24, 34))
 
-            if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-                if settings.difficulty.value == 0:
-                    gem[6] = GEMS_Z3_EASY
-                elif settings.difficulty.value == 1:
-                    gem[6] = GEMS_Z3_NORMAL
-                elif settings.difficulty.value == 2:
-                    gem[6] = GEMS_Z3_HARD
-                elif settings.difficulty.value == 3:
-                    gem[6] = GEMS_Z3_EXTREME
-        else:
-            gem.append(random.randint(1, 3))
-            gem.append(random.randint(4, 6))
-            gem.append(random.randint(7, 9))
-            gem.append(random.randint(10, 14))
-            gem.append(random.randint(16, 24))
-            gem.append(random.randint(26, 34))
-            gem.append(random.randint(36, 50))
+                if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+                    if settings.difficulty.value == 0:
+                        gem[6] = GEMS_Z3_EASY
+                    elif settings.difficulty.value == 1:
+                        gem[6] = GEMS_Z3_NORMAL
+                    elif settings.difficulty.value == 2:
+                        gem[6] = GEMS_Z3_HARD
+                    elif settings.difficulty.value == 3:
+                        gem[6] = GEMS_Z3_EXTREME
+            else:
+                gem.append(random.randint(1, 3))
+                gem.append(random.randint(4, 6))
+                gem.append(random.randint(7, 9))
+                gem.append(random.randint(10, 14))
+                gem.append(random.randint(16, 24))
+                gem.append(random.randint(26, 34))
+                gem.append(random.randint(36, 50))
 
-            if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-                if settings.difficulty.value == 0:
-                    gem[6] = GEMS_EASY
-                elif settings.difficulty.value == 1:
-                    gem[6] = GEMS_NORMAL
-                elif settings.difficulty.value == 2:
-                    gem[6] = GEMS_HARD
-                elif settings.difficulty.value == 3:
-                    gem[6] = GEMS_EXTREME
+                if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+                    if settings.difficulty.value == 0:
+                        gem[6] = GEMS_EASY
+                    elif settings.difficulty.value == 1:
+                        gem[6] = GEMS_NORMAL
+                    elif settings.difficulty.value == 2:
+                        gem[6] = GEMS_HARD
+                    elif settings.difficulty.value == 3:
+                        gem[6] = GEMS_EXTREME
 
         gem_str = []
 
@@ -2592,15 +2615,10 @@ class Randomizer:
         ##########################################################################
         #                    Randomize Mystic Statue requirement
         ##########################################################################
-        statueOrder = [1, 2, 3, 4, 5, 6]
-        random.shuffle(statueOrder)
-
         statues = []
         statues_hex = []
 
         if statue_req == StatueReq.PLAYER_CHOICE.value:
-            statues = statueOrder[:]
-            statues_hex = []
 
             # Set "player choice" flag in RAM (for autotracker)
             patch.seek(int("bfd4a", 16) + rom_offset)
@@ -2615,6 +2633,14 @@ class Randomizer:
             patch.write(b"\x4e\x00\x00\x69\x00\x4e\x00\x00\x69\x00\x4e\x00\x00\x69\x00\x60")
 
         else:
+            try:
+                statueOrder = plando["statues_required"][:]
+                if PRINT_LOG:
+                    print("PLANDO FOUND: Statues Required")
+            except:
+                statueOrder = [1, 2, 3, 4, 5, 6]
+
+            random.shuffle(statueOrder)
             i = 0
             while i < statues_required:
                 if statueOrder[i] == 1:
@@ -2743,86 +2769,91 @@ class Randomizer:
         ##########################################################################
         #                           Determine Boss Order
         ##########################################################################
-        boss_order = [*range(1,8)]
-        if settings.boss_shuffle:
-            non_will_bosses = [5]               # Can't be forced to play Mummy Queen as Will
-            if settings.difficulty.value < 3:   # Solid Arm cannot be shuffled in non-Extreme seeds
-                boss_order.remove(7)
-                if settings.difficulty.value < 2:
-                    non_will_bosses.append(3)   # In Easy/Normal, can't be forced to play Vampires as Will
-            random.shuffle(non_will_bosses)
+        try:
+            boss_order = plando["boss_order"][:]
+            if PRINT_LOG:
+                print("PLANDO FOUND: Boss order")
+        except:
+            boss_order = [*range(1,8)]
+            if settings.boss_shuffle:
+                non_will_bosses = [5]               # Can't be forced to play Mummy Queen as Will
+                if settings.difficulty.value < 3:   # Solid Arm cannot be shuffled in non-Extreme seeds
+                    boss_order.remove(7)
+                    if settings.difficulty.value < 2:
+                        non_will_bosses.append(3)   # In Easy/Normal, can't be forced to play Vampires as Will
+                random.shuffle(non_will_bosses)
 
-            # Determine statue order for shuffle
-            for x in non_will_bosses:
-                boss_order.remove(x)
-            random.shuffle(boss_order)
-            non_will_dungeons = [0,1,2,4]
-            random.shuffle(non_will_dungeons)
-            non_will_dungeons = non_will_dungeons[:len(non_will_bosses)]
-            non_will_dungeons.sort()
-            while non_will_bosses:
-                boss = non_will_bosses.pop(0)
-                dungeon = non_will_dungeons.pop(0)
-                boss_order.insert(dungeon,boss)
-            if 7 not in boss_order:
-                boss_order.append(7)
+                # Determine statue order for shuffle
+                for x in non_will_bosses:
+                    boss_order.remove(x)
+                random.shuffle(boss_order)
+                non_will_dungeons = [0,1,2,4]
+                random.shuffle(non_will_dungeons)
+                non_will_dungeons = non_will_dungeons[:len(non_will_bosses)]
+                non_will_dungeons.sort()
+                while non_will_bosses:
+                    boss = non_will_bosses.pop(0)
+                    dungeon = non_will_dungeons.pop(0)
+                    boss_order.insert(dungeon,boss)
+                if 7 not in boss_order:
+                    boss_order.append(7)
 
-            if boss_order[5] != 6:      # Prevent early access to Babel entrance
-                patch.seek(int("ce165", 16) + rom_offset)
-                patch.write(b"\xff\xca")
+                if boss_order[5] != 6:      # Prevent early access to Babel entrance
+                    patch.seek(int("ce165", 16) + rom_offset)
+                    patch.write(b"\xff\xca")
 
-            #    n = random.randint(1,6)
-            #    boss_order = boss_order[n:] + boss_order[:n]
+                #    n = random.randint(1,6)
+                #    boss_order = boss_order[n:] + boss_order[:n]
 
-            #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
-            #    n = random.randint(1,6)
-            #    boss_order = boss_order[n:] + boss_order[:n]
+                #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
+                #    n = random.randint(1,6)
+                #    boss_order = boss_order[n:] + boss_order[:n]
 
 
-            # Define music map headers
-            dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
-            dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
-            dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
-            dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
-            dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
-            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Babel
-            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
+                # Define music map headers
+                dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
+                dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
+                dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
+                dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
+                dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
+                dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Babel
+                dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
 
-            # Find all music header locations in map data file
-            music_header_addrs = [[],[],[],[],[]]
-            i = 0
-            while i < 5:
-                done = False
-                addr = 0
-                while not done:
-                    f_mapdata.seek(0)
-                    addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
-                    if addr < 0:
-                        done = True
-                    else:
-                        music_header_addrs[i].append(addr)
-                i += 1
-
-            # Patch music headers into new dungeons (beginner and intermediate modes)
-            if settings.difficulty.value <= 1:
+                # Find all music header locations in map data file
+                music_header_addrs = [[],[],[],[],[]]
                 i = 0
                 while i < 5:
-                    boss = boss_order[i]
-                    while music_header_addrs[i]:
-                        addr = music_header_addrs[i].pop(0)
-                        f_mapdata.seek(addr)
-                        f_mapdata.write(dungeon_music[boss-1])
+                    done = False
+                    addr = 0
+                    while not done:
+                        f_mapdata.seek(0)
+                        addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
+                        if addr < 0:
+                            done = True
+                        else:
+                            music_header_addrs[i].append(addr)
                     i += 1
 
-                # Special case for Mansion
-                f_mapdata.seek(0)
-                addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
-                if addr < 27:
-                    if PRINT_LOG:
-                        print("ERROR: Couldn't find Mansion map header")
-                else:
-                    f_mapdata.seek(addr)
-                    f_mapdata.write(dungeon_music[boss_order[6]-1])
+                # Patch music headers into new dungeons (beginner and intermediate modes)
+                if settings.difficulty.value <= 1:
+                    i = 0
+                    while i < 5:
+                        boss = boss_order[i]
+                        while music_header_addrs[i]:
+                            addr = music_header_addrs[i].pop(0)
+                            f_mapdata.seek(addr)
+                            f_mapdata.write(dungeon_music[boss-1])
+                        i += 1
+
+                    # Special case for Mansion
+                    f_mapdata.seek(0)
+                    addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
+                    if addr < 27:
+                        if PRINT_LOG:
+                            print("ERROR: Couldn't find Mansion map header")
+                    else:
+                        f_mapdata.seek(addr)
+                        f_mapdata.write(dungeon_music[boss_order[6]-1])
 
         # Change conditions and text for Pyramid boss portal
         pyramid_boss = boss_order[4]
@@ -2880,10 +2911,22 @@ class Randomizer:
         #       Sets spoiler in Lance's Letter and places portrait sprite
         ##########################################################################
         # Determine random location ID
-        kara_location = random.randint(1, 5)
-        # ANGEL_TILESET = b"\x03\x00\x10\x10\x36\x18\xca\x01"
-        # ANGEL_PALETTE = b"\x04\x00\x60\xa0\x80\x01\xdf"
-        # ANGEL_SPRTESET = b"\x10\x43\x0a\x00\x00\x00\xda"
+        try:
+            kara_txt = plando["kara_location"]
+            if kara_txt == "Edward's Castle":
+                kara_location = 1
+            elif kara_txt == "Diamond Mine":
+                kara_location = 2
+            elif kara_txt == "Mt. Kress":
+                kara_location = 4
+            elif kara_txt == "Ankor Wat":
+                kara_location = 5
+            else:
+                kara_location = 3
+            if PRINT_LOG:
+                print("PLANDO FOUND: Jeweler reward amounts")
+        except:
+            kara_location = random.randint(1, 5)
 
         # Modify Kara Portrait event
         patch.seek(int("6d153", 16) + rom_offset)
@@ -3754,7 +3797,16 @@ class Randomizer:
             return 0
 
         if settings.statues.lower() == "random":
-            return random.randint(0, 6)
+            try:
+                statue_ct = plando["statues_required"]
+                if isnumeric(statue_ct):
+                    if PRINT_LOG:
+                        print("PLANDO FOUND: Statue requirement count")
+                    return statue_ct
+                else:
+                    return random.randint(0, 6)
+            except:
+                return random.randint(0, 6)
 
         return int(settings.statues)
 

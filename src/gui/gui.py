@@ -24,6 +24,9 @@ def find_ROM():
     ROM.delete(0, tkinter.END)
     ROM.insert(10, tkinter.filedialog.askopenfilename())
 
+def find_json():
+    plando.delete(0, tkinter.END)
+    plando.insert(10, tkinter.filedialog.askopenfilename())
 
 def load_ROM():
     try:
@@ -46,6 +49,7 @@ def generate_seed():
 def generate_ROM():
     rompath = ROM.get()
     save_ROM(rompath)
+
     seed_str = seed.get()
 
     def get_difficulty():
@@ -152,10 +156,15 @@ def generate_ROM():
         return
 
     try:
+        plando_json = open(plando.get(), "rb").read()
+    except:
+        plando_json = ""
+
+    try:
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite())
+            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(), False, plando_json)
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -345,7 +354,7 @@ tkinter.Label(mainframe, text="Generate graph").grid(row=18, column=0, sticky=tk
 tkinter.Label(mainframe, text="Race seed").grid(row=19, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Fluteless").grid(row=20, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Sprite").grid(row=21, column=0, sticky=tkinter.W)
-#tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Plando JSON").grid(row=22, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -448,7 +457,10 @@ graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_to
 race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
 fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=20, column=1)
 sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=21, column=1)
-#level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
+
+plando = tkinter.Entry(mainframe, width="40")
+plando.grid(row=22, column=1)
+#plando.insert(0,load_plando())
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(mainframe, text='Generate Seed', command=generate_seed).grid(row=1, column=2)
@@ -462,5 +474,7 @@ tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
 tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
 tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=17, column=2)
+
+tkinter.Button(mainframe, text='Browse...', command=find_json).grid(row=22, column=2)
 
 root.mainloop()

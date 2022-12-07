@@ -1,4 +1,5 @@
 import copy
+import json
 import time
 from datetime import datetime
 import binascii
@@ -35,7 +36,10 @@ class World:
         elif test:
             return True
 
-        self.item_pool[item][0] -= 1
+        if self.item_pool[item][0] > 0:
+            self.item_pool[item][0] -= 1
+        elif print_log and item != 60:
+            print("WARNING: Item not available in item pool:",[self.item_pool[item][3],self.item_locations[location][9]])
         self.item_locations[location][2] = True
         self.item_locations[location][3] = item
 
@@ -1853,6 +1857,21 @@ class World:
                 print("",self.graph[x][5])
 
 
+    def find_loc_key(self,val="",available=False):
+        for key, value in self.item_locations.items():
+            if val.strip() == value[9].strip():
+                if not available or not value[2]:
+                    return key
+        return -1
+
+    def find_item_key(self,val="",available=False):
+        for key, value in self.item_pool.items():
+            if val.strip() == value[3].strip():
+                if not available or value[0] or val.strip() == "Nothing" or val.strip() == "Empty":
+                    return key
+        return -1
+
+
     # Takes a random seed and builds out a randomized world
     def randomize(self, seed_adj=0, print_log=False):
         random.seed(self.seed + seed_adj)
@@ -1870,6 +1889,26 @@ class World:
             return False
         if print_log:
             print("Initialization complete")
+
+        # Fill plando items and abilities (if applicable)
+        try:
+            plando_items = self.plando["items"][:]
+            if print_log:
+                print("Placing plando items... ")
+            while plando_items:
+                x = plando_items.pop()
+                location_name = x["location"]
+                loc = self.find_loc_key(location_name, True)
+                item_name = x["name"]
+                item = self.find_item_key(item_name, True)
+                if loc >= 0 and item >= 0:
+                    self.fill_item(item, loc, False, True, print_log)
+                elif print_log:
+                    print("ERROR: Could not place > ",item_name,location_name)
+            if print_log:
+                print("Plando items finished")
+        except:
+            pass
 
         # Initialize and shuffle location list
         item_locations = self.list_item_locations()
@@ -1929,6 +1968,7 @@ class World:
                     for item in non_prog_items:
                         if item in self.items_collected:
                             self.items_collected.remove(item)
+                    print(non_prog_items)
                     self.forward_fill(non_prog_items, item_locations, False, self.logic_mode == "Chaos", print_log)
 
                     # List and shuffle remaining key items
@@ -2906,6 +2946,10 @@ class World:
         self.dungeons_req = []
         for x in self.statues:
             self.dungeons_req.append(self.boss_order[x-1])
+        try:
+            self.plando = json.loads(settings.plando)
+        except:
+            self.plando = []
 
         gaia_coinflip = random.randint(0, 1)
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
@@ -3000,7 +3044,7 @@ class World:
         #                  ProgressionType (1=unlocks new locations,2=quest item,3=no progression)] }
         self.item_pool = {
             # Items
-            0: [2, 1, b"\x00", "Nothing", False, 3],
+            0: [2, 1, b"\x00", "Empty", False, 3],
             1: [45, 1, b"\x01", "Red Jewel", False, 1],
             2: [1, 1, b"\x02", "Prison Key", True, 1],
             3: [1, 1, b"\x03", "Inca Statue A", True, 1],
