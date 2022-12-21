@@ -2494,7 +2494,7 @@ class Randomizer:
         try:
             gem = plando["jeweler_amounts"][:]
             if PRINT_LOG:
-                print("PLANDO FOUND: Jeweler reward amounts")
+                print("PLANDO FOUND: Jeweler reward amounts", gem)
         except:
             gem = []
             if settings.z3:
@@ -2635,8 +2635,8 @@ class Randomizer:
         else:
             try:
                 statueOrder = plando["statues_required"][:]
-                if PRINT_LOG:
-                    print("PLANDO FOUND: Statues Required")
+                #if PRINT_LOG:
+                #    print("PLANDO FOUND: Statues Required")
             except:
                 statueOrder = [1, 2, 3, 4, 5, 6]
 
@@ -2771,8 +2771,11 @@ class Randomizer:
         ##########################################################################
         try:
             boss_order = plando["boss_order"][:]
+            settings.boss_shuffle = True
+            if "Boss Shuffle" not in self.variant:
+                self.variant.append("Boss Shuffle")
             if PRINT_LOG:
-                print("PLANDO FOUND: Boss order")
+                print("PLANDO FOUND: Boss order", boss_order)
         except:
             boss_order = [*range(1,8)]
             if settings.boss_shuffle:
@@ -2924,7 +2927,7 @@ class Randomizer:
             else:
                 kara_location = 3
             if PRINT_LOG:
-                print("PLANDO FOUND: Jeweler reward amounts")
+                print("PLANDO FOUND: Kara location:",kara_txt)
         except:
             kara_location = random.randint(1, 5)
 

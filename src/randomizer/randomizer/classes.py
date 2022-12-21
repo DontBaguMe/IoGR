@@ -1610,29 +1610,6 @@ class World:
             self.item_pool[6][0] += 4  # Herbs
             self.item_pool[0][0] += 1  # Nothing
 
-        # Chaos mode -- MAY NOT NEED THIS ANYMORE
-#        if self.logic_mode == "Chaos":
-#            # Add "Inaccessible" node to graph
-#            self.graph[INACCESSIBLE] = [False, [], 0, [0,0,0,b"\x00"], 0, "Inaccessible", [], False, [], [], [], [], [], [], [], []]
-#
-#            # Towns can have Freedan abilities
-#            for x in self.item_locations:
-#                if self.item_locations[x][4] == [64, 65, 66]:
-#                    self.item_locations[x][4].clear()
-#
-            # Several locked Dark Spaces can have abilities
-#            ds_unlock = [74, 94, 124, 142]
-#
-#            if 1 not in self.dungeons_req:  # First DS in Inca
-#                ds_unlock.append(29)
-#            if self.kara != 1:  # DS in Underground Tunnel
-#                ds_unlock.append(19)
-#            if self.kara != 5:  # DS in Ankor Wat garden
-#                ds_unlock.append(122)
-#
-#            for x in ds_unlock:
-#                self.item_locations[x][2] = False
-
         # Red Jewel Hunts change the graph
         if self.goal == "Red Jewel Hunt":
             self.logic[24][2] = 492
@@ -1684,17 +1661,26 @@ class World:
                 self.graph[self.logic[y][2]][13].append(y)
 
         # Random start location
-        if self.start_mode != "South Cape":
-            self.start_loc = self.random_start()
+        try:
+            start_loc_name = self.plando["start_location"]
+            start_loc_key = self.find_loc_key(start_loc_name, True)
+            if start_loc_key >= 0:
+                self.start_loc = start_loc_key
+                self.start_mode = "Custom"
             if print_log:
-                print("Start location:",self.item_locations[self.start_loc][9])
-            if self.start_loc == 19:  # Open Lily's door when starting in Underground Tunnel
-                self.logic[62][0] = 2
+                print("PLANDO FOUND: Start location ",self.item_locations[self.start_loc][9])
+        except:
+            if self.start_mode != "South Cape":
+                self.start_loc = self.random_start()
+                if print_log:
+                    print("Start location:",self.item_locations[self.start_loc][9])
+        if self.start_loc == 19:  # Open Lily's door when starting in Underground Tunnel
+            self.logic[62][0] = 2
 #            elif self.start_loc == 30:  # Inca ramp can hardlock you -- NEW FIX MAKES THIS OBSELETE
 #                self.graph[83][1].append(82)
-            elif self.start_loc == 47:  # Diamond Mine behind fences
-                self.graph[131][1].append(130)
-        if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
+        elif self.start_loc == 47:  # Diamond Mine behind fences
+            self.graph[131][1].append(130)
+        if self.start_loc != 10 or self.entrance_shuffle != "None":
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
 
@@ -1721,11 +1707,28 @@ class World:
                 dungeon += 1
 
         # Overworld shuffle
-        if "Overworld Shuffle" in self.variant:
-            if not self.shuffle_overworld(print_log):
-                if print_log:
-                    print("ERROR: Overworld shuffle failed")
-                return False
+        try:
+            ow_links = self.plando["overworld_entrances"][:]
+            for ow_link in ow_links:
+                region_name = ow_link["region"]
+                continent_name = ow_link["continent"]
+                region_key = self.find_region_key(region_name, False)
+                continent_key = self.find_ow_key(continent_name, True)
+                print(region_key,continent_key)
+                if region_key >= 0 and continent_key >= 0:
+                    self.overworld_menus[continent_key][0] = region_key
+                    if "Overworld Shuffle" not in self.variant:
+                        self.variant.append("Overworld Shuffle")
+                    if print_log:
+                        print("PLANDO FOUND: OW Link - ",continent_name, region_name)
+            self.ows_update_graph(print_log)
+            self.update_graph(True,True,True)
+        except:
+            if "Overworld Shuffle" in self.variant:
+                if not self.shuffle_overworld(print_log):
+                    if print_log:
+                        print("ERROR: Overworld shuffle failed")
+                    return False
 
         # Shuffle exits
         if self.entrance_shuffle != "None":
@@ -1871,6 +1874,19 @@ class World:
                     return key
         return -1
 
+    def find_region_key(self,val="",available=False):
+        for key, value in self.overworld_menus.items():
+            if val.strip() == value[8].strip():
+                if not available or not self.overworld_menus[key][0]:
+                    return key
+        return -1
+
+    def find_ow_key(self,val="",available=False):
+        for key, value in self.overworld_menus.items():
+            if val.strip() == value[7].strip():
+                if not available or not value[0]:
+                    return key
+        return -1
 
     # Takes a random seed and builds out a randomized world
     def randomize(self, seed_adj=0, print_log=False):
@@ -2777,6 +2793,10 @@ class World:
         self.overworld_menus[18][0] = new_continents[4][0]
         self.overworld_menus[19][0] = new_continents[4][1]
 
+        return self.ows_update_graph(print_log)
+
+    # Update graph after overworld shuffle
+    def ows_update_graph(self,print_log=False):
         self.graph[10][1].clear()
         self.graph[11][1].clear()
         self.graph[12][1].clear()
@@ -2792,12 +2812,18 @@ class World:
         # Add new overworld to the graph
         for entry in self.overworld_menus:
             new_entry = self.overworld_menus[entry][0]
+            print(entry,new_entry)
             self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
-            self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
+            print(entry,new_entry)
+            try:
+                self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
+            except:
+                pass
+            print(entry,new_entry)
             self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
+            print(entry,new_entry)
 
         return True
-
 
     # Shuffle enemies in ROM
     def enemize(self, f, rom_offset=0):
