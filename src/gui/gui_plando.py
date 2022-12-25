@@ -1,8 +1,9 @@
 import json
 import os
 import tkinter as tk
-from tkinter import *
+#from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 import random
 
 from randomizer.iogr_rom import generate_filename
@@ -152,8 +153,75 @@ def generate_ROM():
         if sp == "Sye":
             return Sprite.SYE
 
-    if not seed_str.isdigit():
-        tk.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
+    def is_integer(val):
+        try:
+            float(val)
+        except:
+            return False
+        return float(val).is_integer()
+
+    def validate_settings():
+        if not seed_str.isdigit():
+            tk.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
+            return False
+
+        if kara_loc.get() == "Random":
+            tk.messagebox.showinfo("ERROR", "Please set Kara's location")
+            return False
+
+        bosses = boss_choices[:]
+        if boss_order.get() == "Custom":
+            try:
+                bosses.remove(boss1.get())
+                bosses.remove(boss2.get())
+                bosses.remove(boss3.get())
+                bosses.remove(boss4.get())
+                bosses.remove(boss5.get())
+                bosses.remove(boss6.get())
+                bosses.remove(boss7.get())
+            except:
+                tk.messagebox.showinfo("ERROR", "Remove duplicate bosses")
+                return False
+
+        if start_loc.get()[0] == "-":
+            tk.messagebox.showinfo("ERROR", "Please choose a valid start location")
+            return False
+
+        regions = ow_choices_all[:]
+        if ow_shuffle.get() == "Custom":
+            try:
+                regions.remove(ow_sw1.get())
+                regions.remove(ow_sw2.get())
+                regions.remove(ow_sw3.get())
+                regions.remove(ow_sw4.get())
+                regions.remove(ow_sw5.get())
+                regions.remove(ow_se1.get())
+                regions.remove(ow_se2.get())
+                regions.remove(ow_se3.get())
+                regions.remove(ow_se4.get())
+                regions.remove(ow_se5.get())
+                regions.remove(ow_ne1.get())
+                regions.remove(ow_ne2.get())
+                regions.remove(ow_ne3.get())
+                regions.remove(ow_n1.get())
+                regions.remove(ow_n2.get())
+                regions.remove(ow_n3.get())
+                regions.remove(ow_n4.get())
+                regions.remove(ow_nw1.get())
+                regions.remove(ow_nw2.get())
+            except:
+                tk.messagebox.showinfo("ERROR", "Invalid overworld configuration")
+                return False
+
+        if (not is_integer(gem1.get()) or not is_integer(gem2.get()) or not is_integer(gem3.get()) or not is_integer(gem4.get()) or
+                not is_integer(gem5.get()) or not is_integer(gem6.get()) or not is_integer(gem7.get())):
+            tk.messagebox.showinfo("ERROR", "Invalid jeweler reward amounts")
+            return False
+        if not (0 < float(gem1.get()) < float(gem2.get()) < float(gem3.get()) < float(gem4.get()) < float(gem5.get()) < float(gem6.get()) < float(gem7.get()) <= 50):
+            tk.messagebox.showinfo("ERROR", "Jeweler rewards must be in ascending order between 1 and 50")
+            return False
+
+    if not validate_settings():
         return
 
     try:
@@ -324,6 +392,71 @@ statue_req = tk.StringVar(root)
 statue_req_choices = ["Game Choice", "Player Choice"]
 statue_req.set("Game Choice")
 
+boss_order = tk.StringVar(root)
+boss_order_choices = ["Vanilla", "Custom"]
+boss_order.set("Vanilla")
+
+boss_choices = ["Castoth", "Viper", "Vampires", "Sand Fanger", "Mummy Queen", "Babel Queen","Solid Arm"]
+
+boss1 = tk.StringVar(root)
+boss1.set("Castoth")
+boss2 = tk.StringVar(root)
+boss2.set("Viper")
+boss3 = tk.StringVar(root)
+boss3.set("Vampires")
+boss4 = tk.StringVar(root)
+boss4.set("Sand Fanger")
+boss5 = tk.StringVar(root)
+boss5.set("Mummy Queen")
+boss6 = tk.StringVar(root)
+boss6.set("Babel Queen")
+boss7 = tk.StringVar(root)
+boss7.set("Solid Arm")
+
+kara_loc = tk.StringVar(root)
+kara_loc_choices = ["Random","Edward's Castle","Diamond Mine","Angel Dungeon","Mt. Kress","Ankor Wat"]
+kara_loc.set("Random")
+
+start_loc = tk.StringVar(root)
+safe_loc_choices = [
+    "-- SAFE --",
+    "South Cape: Dark Space",
+    "Itory Village: Dark Space",
+    "Freejia: Dark Space",
+    "Sky Garden: Dark Space (Foyer)",
+    "Seaside Palace: Dark Space",
+    "Angel Village: Dark Space",
+    "Watermia: Dark Space",
+    "Euro: Dark Space",
+    "Natives' Village: Dark Space",
+    "Dao: Dark Space",
+    "Babel: Dark Space Top"
+]
+unsafe_loc_choices = [
+    "-- UNSAFE --",
+    "Underground Tunnel: Dark Space",
+    "Inca Ruins: Dark Space 1",
+    "Inca Ruins: Dark Space 2",
+    "Diamond Mine: Appearing Dark Space",
+    "Diamond Mine: Dark Space at Wall",
+    "Diamond Mine: Dark Space behind Wall",
+    "Sky Garden: Dark Space (SE)",
+    "Sky Garden: Dark Space (SW)",
+    "Sky Garden: Dark Space (NW)",
+    "Great Wall: Archer Dark Space",
+    "Great Wall: Platform Dark Space",
+    "Great Wall: Appearing Dark Space",
+    "Mt. Temple: Dark Space 1",
+    "Mt. Temple: Dark Space 2",
+    "Mt. Temple: Dark Space 3",
+    "Ankor Wat: Garden Dark Space",
+    "Ankor Wat: Drop Down Dark Space",
+    "Pyramid: Dark Space Bottom",
+    "Babel: Dark Space Bottom"
+]
+start_loc_choices = safe_loc_choices+unsafe_loc_choices
+start_loc.set("South Cape")
+
 statues = tk.StringVar(root)
 statue_choices = ["0", "1", "2", "3", "4", "5", "6"]
 statues.set("4")
@@ -340,6 +473,72 @@ st5 = tk.IntVar(root)
 st5.set(0)
 st6 = tk.IntVar(root)
 st6.set(0)
+
+ow_shuffle = tk.StringVar(root)
+ow_shuffle_choices = ["Vanilla", "Custom"]
+ow_shuffle.set("Vanilla")
+
+ow_choices_all = [
+    "South Cape",
+    "Edward's",
+    "Itory",
+    "Moon Tribe",
+    "Inca",
+    "Diamond Coast",
+    "Freejia",
+    "Diamond Mine",
+    "Neil's",
+    "Nazca",
+    "Angel Village",
+    "Watermia",
+    "Great Wall",
+    "Euro",
+    "Mt. Temple",
+    "Native's Village",
+    "Ankor Wat",
+    "Dao",
+    "Pyramid"
+]
+ow_choices = ow_choices_all[:]
+
+ow_sw1 = tk.StringVar(root)
+ow_sw1.set("")
+ow_sw2 = tk.StringVar(root)
+ow_sw2.set("")
+ow_sw3 = tk.StringVar(root)
+ow_sw3.set("")
+ow_sw4 = tk.StringVar(root)
+ow_sw4.set("")
+ow_sw5 = tk.StringVar(root)
+ow_sw5.set("")
+ow_se1 = tk.StringVar(root)
+ow_se1.set("")
+ow_se2 = tk.StringVar(root)
+ow_se2.set("")
+ow_se3 = tk.StringVar(root)
+ow_se3.set("")
+ow_se4 = tk.StringVar(root)
+ow_se4.set("")
+ow_se5 = tk.StringVar(root)
+ow_se5.set("")
+ow_ne1 = tk.StringVar(root)
+ow_ne1.set("")
+ow_ne2 = tk.StringVar(root)
+ow_ne2.set("")
+ow_ne3 = tk.StringVar(root)
+ow_ne3.set("")
+ow_n1 = tk.StringVar(root)
+ow_n1.set("")
+ow_n2 = tk.StringVar(root)
+ow_n2.set("")
+ow_n3 = tk.StringVar(root)
+ow_n3.set("")
+ow_n4 = tk.StringVar(root)
+ow_n4.set("")
+ow_nw1 = tk.StringVar(root)
+ow_nw1.set("")
+ow_nw2 = tk.StringVar(root)
+ow_nw2.set("")
 
 # Create tabs
 tabControl = ttk.Notebook(root)
@@ -415,7 +614,13 @@ z3_mode_checkbox = tk.Checkbutton(tab1frame, variable=z3_mode, onvalue=1, offval
 fluteless_checkbox = tk.Checkbutton(tab1frame, variable=fluteless, onvalue=1, offvalue=0).grid(row=9, column=3)
 
 # Tab 2: Game Settings
-gamechoiceframe = tk.Frame(tab2)
+#   Setting 1: Statue Requirement
+statue_frame1 = tk.Frame(tab2frame)
+statue_frame1.pack()
+statue_frame2 = tk.Frame(tab2frame)
+statue_frame2.pack()
+
+gamechoiceframe = tk.Frame(statue_frame2)
 tk.Label(gamechoiceframe, text="1").grid(row=0, column=0, sticky=tk.W)
 tk.Label(gamechoiceframe, text="2").grid(row=0, column=2, sticky=tk.W)
 tk.Label(gamechoiceframe, text="3").grid(row=0, column=4, sticky=tk.W)
@@ -429,7 +634,7 @@ st4_checkbox = tk.Checkbutton(gamechoiceframe, variable=st4, onvalue=1, offvalue
 st5_checkbox = tk.Checkbutton(gamechoiceframe, variable=st5, onvalue=1, offvalue=0).grid(row=0, column=9)
 st6_checkbox = tk.Checkbutton(gamechoiceframe, variable=st6, onvalue=1, offvalue=0).grid(row=0, column=11)
 
-playerchoiceframe = tk.Frame(tab2)
+playerchoiceframe = tk.Frame(statue_frame2)
 tk.Label(playerchoiceframe, text="# statues").grid(row=0, column=0, sticky=tk.W)
 statues_menu = tk.OptionMenu(playerchoiceframe, statues, *statue_choices).grid(row=0, column=1)
 
@@ -442,15 +647,131 @@ def statue_req_toggle(var, index, mode):
         gamechoiceframe.pack()
 
 statue_req.trace_add(['read','write'], statue_req_toggle)
-tk.Label(tab2frame, text="Statues Required").grid(row=0, column=0, sticky=tk.W)
 
-statue_req_menu = tk.OptionMenu(tab2frame, statue_req, *statue_req_choices).grid(row=0, column=1)
-#tk.Button(root, text=statue_req, command=statue_req_toggle).grid(row=0, column=1)
+tk.Label(statue_frame1, text="Statues Required").grid(row=0, column=0, sticky=tk.W)
+statue_req_menu = tk.OptionMenu(statue_frame1, statue_req, *statue_req_choices).grid(row=0, column=1, sticky=tk.W)
 
+#   Setting 2: Kara Location
+kara_frame = tk.Frame(tab2frame)
+kara_frame.pack(pady=15)
 
+tk.Label(kara_frame, text="Kara Location").grid(row=0, column=0, sticky=tk.W)
+kara_loc_menu = tk.OptionMenu(kara_frame, kara_loc, *kara_loc_choices).grid(row=0, column=1)
 
+#   Setting 3: Boss Order
+boss_frame1 = tk.Frame(tab2frame)
+boss_frame1.pack(pady=15)
+boss_frame2 = tk.Frame(tab2frame)
+boss_frame2.pack()
 
-    #tk.Label(tab2frame, text="2").grid(row=1, column=0)#, sticky=tk.W)
+boss_order_frame = tk.Frame(boss_frame2)
+tk.Label(boss_order_frame, text="Inca").grid(row=0, column=0, sticky=tk.W)
+tk.Label(boss_order_frame, text="Sky Garden").grid(row=0, column=1, sticky=tk.W)
+tk.Label(boss_order_frame, text="Mu").grid(row=0, column=2, sticky=tk.W)
+tk.Label(boss_order_frame, text="Great Wall").grid(row=0, column=3, sticky=tk.W)
+tk.Label(boss_order_frame, text="Pyramid").grid(row=0, column=4, sticky=tk.W)
+tk.Label(boss_order_frame, text="Babel").grid(row=0, column=5, sticky=tk.W)
+tk.Label(boss_order_frame, text="Mansion").grid(row=0, column=6, sticky=tk.W)
+boss1_menu = tk.OptionMenu(boss_order_frame, boss1, *boss_choices).grid(row=1, column=0)
+boss2_menu = tk.OptionMenu(boss_order_frame, boss2, *boss_choices).grid(row=1, column=1)
+boss3_menu = tk.OptionMenu(boss_order_frame, boss3, *boss_choices).grid(row=1, column=2)
+boss4_menu = tk.OptionMenu(boss_order_frame, boss4, *boss_choices).grid(row=1, column=3)
+boss5_menu = tk.OptionMenu(boss_order_frame, boss5, *boss_choices).grid(row=1, column=4)
+boss6_menu = tk.OptionMenu(boss_order_frame, boss6, *boss_choices).grid(row=1, column=5)
+boss7_menu = tk.OptionMenu(boss_order_frame, boss7, *boss_choices).grid(row=1, column=6)
+
+def boss_order_toggle(var, index, mode):
+    if boss_order.get() == "Vanilla":
+        boss_order_frame.pack_forget()
+    else:
+        boss_order_frame.pack()
+
+boss_order.trace_add(['write'], boss_order_toggle)
+
+tk.Label(boss_frame1, text="Boss Order").grid(row=0, column=0, sticky=tk.W)
+boss_menu = tk.OptionMenu(boss_frame1, boss_order, *boss_order_choices).grid(row=0, column=1)
+
+#   Setting 4: Start Location
+start_frame = tk.Frame(tab2frame)
+start_frame.pack(pady=15)
+
+tk.Label(start_frame, text="Start Location").grid(row=0, column=0, sticky=tk.W)
+start_loc_menu = tk.OptionMenu(start_frame, start_loc, *start_loc_choices).grid(row=0, column=1)
+
+#   Setting 5: Overworld Shuffle
+ow_frame1 = tk.Frame(tab2frame)
+ow_frame1.pack(pady=15)
+ow_frame2 = tk.Frame(tab2frame)
+ow_frame2.pack()
+
+ow_shuffle_frame = tk.Frame(ow_frame2)
+tk.Label(ow_shuffle_frame, text="SW Continent").grid(row=0, column=0, sticky=tk.W)
+tk.Label(ow_shuffle_frame, text="SE Continent").grid(row=0, column=1, sticky=tk.W)
+tk.Label(ow_shuffle_frame, text="NE Continent").grid(row=0, column=2, sticky=tk.W)
+tk.Label(ow_shuffle_frame, text="N Continent").grid(row=0, column=3, sticky=tk.W)
+tk.Label(ow_shuffle_frame, text="NW Continent").grid(row=0, column=4, sticky=tk.W)
+
+ow_sw1_menu = tk.OptionMenu(ow_shuffle_frame, ow_sw1, *ow_choices).grid(row=1, column=0)
+ow_sw2_menu = tk.OptionMenu(ow_shuffle_frame, ow_sw2, *ow_choices).grid(row=2, column=0)
+ow_sw3_menu = tk.OptionMenu(ow_shuffle_frame, ow_sw3, *ow_choices).grid(row=3, column=0)
+ow_sw4_menu = tk.OptionMenu(ow_shuffle_frame, ow_sw4, *ow_choices).grid(row=4, column=0)
+ow_sw5_menu = tk.OptionMenu(ow_shuffle_frame, ow_sw5, *ow_choices).grid(row=5, column=0)
+
+ow_se1_menu = tk.OptionMenu(ow_shuffle_frame, ow_se1, *ow_choices).grid(row=1, column=1)
+ow_se2_menu = tk.OptionMenu(ow_shuffle_frame, ow_se2, *ow_choices).grid(row=2, column=1)
+ow_se3_menu = tk.OptionMenu(ow_shuffle_frame, ow_se3, *ow_choices).grid(row=3, column=1)
+ow_se4_menu = tk.OptionMenu(ow_shuffle_frame, ow_se4, *ow_choices).grid(row=4, column=1)
+ow_se5_menu = tk.OptionMenu(ow_shuffle_frame, ow_se5, *ow_choices).grid(row=5, column=1)
+
+ow_ne1_menu = tk.OptionMenu(ow_shuffle_frame, ow_ne1, *ow_choices).grid(row=1, column=2)
+ow_ne2_menu = tk.OptionMenu(ow_shuffle_frame, ow_ne2, *ow_choices).grid(row=2, column=2)
+ow_ne3_menu = tk.OptionMenu(ow_shuffle_frame, ow_ne3, *ow_choices).grid(row=3, column=2)
+
+ow_n1_menu = tk.OptionMenu(ow_shuffle_frame, ow_n1, *ow_choices).grid(row=1, column=3)
+ow_n2_menu = tk.OptionMenu(ow_shuffle_frame, ow_n2, *ow_choices).grid(row=2, column=3)
+ow_n3_menu = tk.OptionMenu(ow_shuffle_frame, ow_n3, *ow_choices).grid(row=3, column=3)
+ow_n4_menu = tk.OptionMenu(ow_shuffle_frame, ow_n4, *ow_choices).grid(row=4, column=3)
+
+ow_nw1_menu = tk.OptionMenu(ow_shuffle_frame, ow_nw1, *ow_choices).grid(row=1, column=4)
+ow_nw2_menu = tk.OptionMenu(ow_shuffle_frame, ow_nw2, *ow_choices).grid(row=2, column=4)
+
+def ow_toggle(var, index, mode):
+    if ow_shuffle.get() == "Vanilla":
+        ow_shuffle_frame.pack_forget()
+    else:
+        ow_shuffle_frame.pack()
+
+ow_shuffle.trace_add(['write'], ow_toggle)
+
+tk.Label(ow_frame1, text="Overworld").grid(row=0, column=0, sticky=tk.W)
+ow_shuffle_menu = tk.OptionMenu(ow_frame1, ow_shuffle, *ow_shuffle_choices).grid(row=0, column=1)
+
+#   Setting 6: Jeweler Rewards
+gem_frame = tk.Frame(tab2frame)
+gem_frame.pack(pady=15)
+
+tk.Label(gem_frame, text="Jeweler Rewards").grid(row=0, column=0, sticky=tk.W)
+gem1 = tk.Entry(gem_frame, width="4")
+gem1.grid(row=0, column=1)
+gem1.insert(0,"3")
+gem2 = tk.Entry(gem_frame, width="4")
+gem2.grid(row=0, column=2)
+gem2.insert(0,"5")
+gem3 = tk.Entry(gem_frame, width="4")
+gem3.grid(row=0, column=3)
+gem3.insert(0,"8")
+gem4 = tk.Entry(gem_frame, width="4")
+gem4.grid(row=0, column=4)
+gem4.insert(0,"12")
+gem5 = tk.Entry(gem_frame, width="4")
+gem5.grid(row=0, column=5)
+gem5.insert(0,"20")
+gem6 = tk.Entry(gem_frame, width="4")
+gem6.grid(row=0, column=6)
+gem6.insert(0,"30")
+gem7 = tk.Entry(gem_frame, width="4")
+gem7.grid(row=0, column=7)
+gem7.insert(0,"50")
 
 # Generate ROM buttom at bottom
 tk.Button(root, text='Generate ROM', command=generate_ROM).pack(pady=20, padx=20)

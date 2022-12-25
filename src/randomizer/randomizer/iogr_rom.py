@@ -3773,6 +3773,7 @@ class Randomizer:
         superhero_list.append(qt_encode("       Cowabunga!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("       SPOOOOON!!") + b"\xc3\x00\xc0")
         superhero_list.append(qt_encode("There better be bacon when I get there...") + b"\xc3\x00\xc0")
+        superhero_list.append(qt_encode(" To infinity... and beyond!!") + b"\xc3\x00\xc0")
 
         # Assign final text box
         rand_idx = random.randint(0, len(superhero_list) - 1)
