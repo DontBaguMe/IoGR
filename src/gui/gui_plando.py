@@ -4,6 +4,7 @@ import tkinter as tk
 #from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from datetime import datetime
 import random
 
 from randomizer.iogr_rom import generate_filename
@@ -87,14 +88,26 @@ def generate_ROM():
         if g == "Red Jewel Hunt":
             return Goal.RED_JEWEL_HUNT
 
+    def get_statues():
+        return int(statues.get())
+
     def get_statue_req():
-        s = statue_req.get()
-        if s == "Player Choice":
+        if statue_req.get() == "Player Choice":
             return StatueReq.PLAYER_CHOICE
-        if s == "Random Choice":
-            return StatueReq.RANDOM_CHOICE
         else:
             return StatueReq.GAME_CHOICE
+
+    def get_boss_shuffle():
+        if boss_order.get() == "Vanilla":
+            return False
+        else:
+            return True
+
+    def get_overworld_shuffle():
+        if ow_shuffle.get() == "Vanilla":
+            return False
+        else:
+            return True
 
     def get_logic():
         l = logic.get()
@@ -127,7 +140,7 @@ def generate_ROM():
         if g == "Uncoupled":
             return EntranceShuffle.UNCOUPLED
 
-    def get_start_location():
+    def get_start_location():#####################
         g = start.get()
         if g == "South Cape":
             return StartLocation.SOUTH_CAPE
@@ -165,7 +178,7 @@ def generate_ROM():
             tk.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
             return False
 
-        if kara_loc.get() == "Random":
+        if not kara_loc.get():
             tk.messagebox.showinfo("ERROR", "Please set Kara's location")
             return False
 
@@ -221,35 +234,132 @@ def generate_ROM():
             tk.messagebox.showinfo("ERROR", "Jeweler rewards must be in ascending order between 1 and 50")
             return False
 
+        return True
+
+    def generate_json():
+        plando_json = '{'
+
+        # Start location
+        plando_json += '"start_location": "' + start_loc.get() + '"'
+
+        # Statue retuirement
+        if goal.get() != "Red Jewel Hunt":
+            plando_json += ', "statues_required": '
+            if statue_req.get() == "Player Choice":
+                plando_json += statues.get()
+            else:
+                statue_list = []
+                if st1.get():
+                    statue_list.append('1')
+                if st2.get():
+                    statue_list.append('2')
+                if st3.get():
+                    statue_list.append('3')
+                if st4.get():
+                    statue_list.append('4')
+                if st5.get():
+                    statue_list.append('5')
+                if st6.get():
+                    statue_list.append(6)
+                plando_json += '[' + ','.join(statue_list) + ']'
+
+        # Boss order
+        if boss_order.get() == "Custom":
+            plando_json += ', "boss_order":'
+            boss_list = []
+            boss_list_txt = [boss1.get(),boss2.get(),boss3.get(),boss4.get(),boss5.get(),boss6.get(),boss7.get()]
+            while boss_list_txt:
+                boss = boss_list_txt.pop(0)
+                if boss == "Castoth":
+                    boss_list.append('1')
+                elif boss == "Viper":
+                    boss_list.append('2')
+                elif boss == "Vampires":
+                    boss_list.append('3')
+                elif boss == "Sand Fanger":
+                    boss_list.append('4')
+                elif boss == "Mummy Queen":
+                    boss_list.append('5')
+                elif boss == "Babel Queen":
+                    boss_list.append('6')
+                elif boss == "Solid Arm":
+                    boss_list.append('7')
+
+            plando_json += '[' + ','.join(boss_list) + ']'
+
+        # Kara location
+        plando_json += ', "kara_location": "' + kara_loc.get() + '"'
+
+        # Jeweler rewards
+        plando_json += ', "jeweler_amounts": [' + ','.join([gem1.get(),gem2.get(),gem3.get(),gem4.get(),gem5.get(),gem6.get(),gem7.get()]) + ']'
+
+        # Items and abilities
+        #plando_json += ', "items": ['
+        #plando_json += ']'
+
+        # Overworld shuffle
+        if ow_shuffle.get() == "Custom":
+            plando_json += ', "overworld_entrances": [{"region": ' + ow_sw1.get() + ', "continent": "SW Continent"}'
+            plando_json += ', {"region": "' + ow_sw2.get() + '", "continent": "SW Continent"}'
+            plando_json += ', {"region": "' + ow_sw3.get() + '", "continent": "SW Continent"}'
+            plando_json += ', {"region": "' + ow_sw4.get() + '", "continent": "SW Continent"}'
+            plando_json += ', {"region": "' + ow_sw5.get() + '", "continent": "SW Continent"}'
+            plando_json += ', {"region": "' + ow_se1.get() + '", "continent": "SE Continent"}'
+            plando_json += ', {"region": "' + ow_se2.get() + '", "continent": "SE Continent"}'
+            plando_json += ', {"region": "' + ow_se3.get() + '", "continent": "SE Continent"}'
+            plando_json += ', {"region": "' + ow_se4.get() + '", "continent": "SE Continent"}'
+            plando_json += ', {"region": "' + ow_se5.get() + '", "continent": "SE Continent"}'
+            plando_json += ', {"region": "' + ow_ne1.get() + '", "continent": "NE Continent"}'
+            plando_json += ', {"region": "' + ow_ne2.get() + '", "continent": "NE Continent"}'
+            plando_json += ', {"region": "' + ow_ne3.get() + '", "continent": "NE Continent"}'
+            plando_json += ', {"region": "' + ow_n1.get() + '", "continent": "N Continent"}'
+            plando_json += ', {"region": "' + ow_n2.get() + '", "continent": "N Continent"}'
+            plando_json += ', {"region": "' + ow_n3.get() + '", "continent": "N Continent"}'
+            plando_json += ', {"region": "' + ow_n4.get() + '", "continent": "N Continent"}'
+            plando_json += ', {"region": "' + ow_nw1.get() + '", "continent": "NW Continent"}'
+            plando_json += ', {"region": "' + ow_nw2.get() + '", "continent": "NW Continent"}]'
+
+        # Wrap it up
+        plando_json += '}'
+
+        #tk.messagebox.showinfo("JSON", plando_json)
+
+        return plando_json
+
+    # Generate ROM code
     if not validate_settings():
+        tk.messagebox.showinfo("ERROR", "Could not validate settings, ROM not generated")
+        return
+
+    plando_json = generate_json()
+    if not plando_json:
+        tk.messagebox.showinfo("ERROR", "Could not generate JSON input, ROM not generated")
         return
 
     try:
-        plando_json = open(plando.get(), "rb").read()
-    except:
-        plando_json = ""
-
-    try:
         seed_int = int(seed_str)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(), False, plando_json)
+        #settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
+        #    firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
+        #    overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(), False, plando_json)
+        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), get_statues(), get_statue_req(), get_enemizer(), get_start_location(),
+            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), get_boss_shuffle(), open_mode.get(), z3_mode.get(),
+            get_overworld_shuffle(), get_entrance_shuffle(), False, fluteless.get(), get_sprite(), False, plando_json)
 
-        rom_filename = generate_filename(settings, "sfc")
-        spoiler_filename = generate_filename(settings, "json")
-        graph_viz_filename = generate_filename(settings, "png")
+        filename = plando_name.get().replace(" ", "") + "_" + datetime.now().strftime("%Y%m%d%H%M%S")
+        rom_filename = filename + ".sfc"
+        spoiler_filename = filename + "json"
+        #graph_viz_filename = generate_filename(settings, "png")
 
         randomizer = Randomizer(rompath)
 
         patch = randomizer.generate_rom(rom_filename, settings)
 
         write_patch(patch, rompath, rom_filename, settings)
-        if not race_mode_toggle.get():
-            spoiler = randomizer.generate_spoiler()
-            write_spoiler(spoiler, spoiler_filename, rompath)
-        if graph_viz_toggle.get():
-            graph_viz = randomizer.generate_graph_visualization()
-            write_graph_viz(graph_viz, graph_viz_filename, rompath)
+        spoiler = randomizer.generate_spoiler()
+        write_spoiler(spoiler, spoiler_filename, rompath)
+        #if graph_viz_toggle.get():
+        #    graph_viz = randomizer.generate_graph_visualization()
+        #    write_graph_viz(graph_viz, graph_viz_filename, rompath)
 
         tk.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
@@ -414,8 +524,8 @@ boss7 = tk.StringVar(root)
 boss7.set("Solid Arm")
 
 kara_loc = tk.StringVar(root)
-kara_loc_choices = ["Random","Edward's Castle","Diamond Mine","Angel Dungeon","Mt. Kress","Ankor Wat"]
-kara_loc.set("Random")
+kara_loc_choices = ["","Edward's Castle","Diamond Mine","Angel Dungeon","Mt. Kress","Ankor Wat"]
+kara_loc.set("")
 
 start_loc = tk.StringVar(root)
 safe_loc_choices = [
@@ -565,22 +675,21 @@ tab2frame.pack(pady=20, padx=20)
 
 # Tab 1: General
 tk.Label(tab1frame, text="ROM File").grid(row=0, column=0, sticky=tk.W)
-tk.Label(tab1frame, text="Plando JSON").grid(row=1, column=0, sticky=tk.W)
+tk.Label(tab1frame, text="Plando Creator").grid(row=1, column=0, sticky=tk.W)
 tk.Label(tab1frame, text="Seed").grid(row=2, column=0, sticky=tk.W)
 
 ROM = tk.Entry(tab1frame, width="40")
 ROM.grid(row=0, column=1)
 ROM.insert(0,load_ROM())
 
-plando = tk.Entry(tab1frame, width="40")
-plando.grid(row=1, column=1)
+plando_name = tk.Entry(tab1frame, width="40")
+plando_name.grid(row=1, column=1)
 
 seed = tk.Entry(tab1frame)
 seed.grid(row=2, column=1)
 seed.insert(10, random.randint(0, 999999))
 
 tk.Button(tab1frame, text='Browse...', command=find_ROM).grid(row=0, column=2)
-tk.Button(tab1frame, text='Browse...', command=find_json).grid(row=1, column=2)
 tk.Button(tab1frame, text='Generate Seed', command=generate_seed).grid(row=2, column=2)
 
 tk.Label(tab1frame, text="Difficulty").grid(row=3, column=0, sticky=tk.W)

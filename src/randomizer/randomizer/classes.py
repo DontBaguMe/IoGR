@@ -3005,8 +3005,10 @@ class World:
             self.start_mode = "Safe"
         elif settings.start_location.value == StartLocation.UNSAFE.value:
             self.start_mode = "Unsafe"
-        else:
+        elif settings.start_location.value == StartLocation.FORCED_UNSAFE.value:
             self.start_mode = "Forced Unsafe"
+        else:
+            self.start_mode = "Custom"
 
         if settings.enemizer.value == Enemizer.NONE.value:
             self.enemizer = "None"
