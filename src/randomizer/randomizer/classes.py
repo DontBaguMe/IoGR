@@ -2812,16 +2812,12 @@ class World:
         # Add new overworld to the graph
         for entry in self.overworld_menus:
             new_entry = self.overworld_menus[entry][0]
-            print(entry,new_entry)
             self.graph[self.overworld_menus[entry][2]][1].append(self.overworld_menus[new_entry][3])
-            print(entry,new_entry)
             try:
                 self.graph[self.overworld_menus[new_entry][3]][1].remove(self.overworld_menus[new_entry][2])
             except:
                 pass
-            print(entry,new_entry)
             self.graph[self.overworld_menus[new_entry][3]][1].append(self.overworld_menus[entry][2])
-            print(entry,new_entry)
 
         return True
 

@@ -2801,62 +2801,63 @@ class Randomizer:
                 if 7 not in boss_order:
                     boss_order.append(7)
 
-                if boss_order[5] != 6:      # Prevent early access to Babel entrance
-                    patch.seek(int("ce165", 16) + rom_offset)
-                    patch.write(b"\xff\xca")
+        if settings.boss_shuffle:
+            if boss_order[5] != 6:      # Prevent early access to Babel entrance
+                patch.seek(int("ce165", 16) + rom_offset)
+                patch.write(b"\xff\xca")
 
-                #    n = random.randint(1,6)
-                #    boss_order = boss_order[n:] + boss_order[:n]
+            #    n = random.randint(1,6)
+            #    boss_order = boss_order[n:] + boss_order[:n]
 
-                #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
-                #    n = random.randint(1,6)
-                #    boss_order = boss_order[n:] + boss_order[:n]
+            #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
+            #    n = random.randint(1,6)
+            #    boss_order = boss_order[n:] + boss_order[:n]
 
 
-                # Define music map headers
-                dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
-                dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
-                dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
-                dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
-                dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
-                dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Babel
-                dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
+            # Define music map headers
+            dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
+            dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
+            dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
+            dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
+            dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
+            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Babel
+            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
 
-                # Find all music header locations in map data file
-                music_header_addrs = [[],[],[],[],[]]
+            # Find all music header locations in map data file
+            music_header_addrs = [[],[],[],[],[]]
+            i = 0
+            while i < 5:
+                done = False
+                addr = 0
+                while not done:
+                    f_mapdata.seek(0)
+                    addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
+                    if addr < 0:
+                        done = True
+                    else:
+                        music_header_addrs[i].append(addr)
+                i += 1
+
+            # Patch music headers into new dungeons (beginner and intermediate modes)
+            if settings.difficulty.value <= 1:
                 i = 0
                 while i < 5:
-                    done = False
-                    addr = 0
-                    while not done:
-                        f_mapdata.seek(0)
-                        addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
-                        if addr < 0:
-                            done = True
-                        else:
-                            music_header_addrs[i].append(addr)
+                    boss = boss_order[i]
+                    while music_header_addrs[i]:
+                        addr = music_header_addrs[i].pop(0)
+                        f_mapdata.seek(addr)
+                        f_mapdata.write(dungeon_music[boss-1])
                     i += 1
 
-                # Patch music headers into new dungeons (beginner and intermediate modes)
-                if settings.difficulty.value <= 1:
-                    i = 0
-                    while i < 5:
-                        boss = boss_order[i]
-                        while music_header_addrs[i]:
-                            addr = music_header_addrs[i].pop(0)
-                            f_mapdata.seek(addr)
-                            f_mapdata.write(dungeon_music[boss-1])
-                        i += 1
-
-                    # Special case for Mansion
-                    f_mapdata.seek(0)
-                    addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
-                    if addr < 27:
-                        if PRINT_LOG:
-                            print("ERROR: Couldn't find Mansion map header")
-                    else:
-                        f_mapdata.seek(addr)
-                        f_mapdata.write(dungeon_music[boss_order[6]-1])
+                # Special case for Mansion
+                f_mapdata.seek(0)
+                addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
+                if addr < 27:
+                    if PRINT_LOG:
+                        print("ERROR: Couldn't find Mansion map header")
+                else:
+                    f_mapdata.seek(addr)
+                    f_mapdata.write(dungeon_music[boss_order[6]-1])
 
         # Change conditions and text for Pyramid boss portal
         pyramid_boss = boss_order[4]

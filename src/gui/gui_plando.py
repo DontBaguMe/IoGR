@@ -88,9 +88,6 @@ def generate_ROM():
         if g == "Red Jewel Hunt":
             return Goal.RED_JEWEL_HUNT
 
-    def get_statues():
-        return int(statues.get())
-
     def get_statue_req():
         if statue_req.get() == "Player Choice":
             return StatueReq.PLAYER_CHOICE
@@ -260,7 +257,7 @@ def generate_ROM():
                 if st5.get():
                     statue_list.append('5')
                 if st6.get():
-                    statue_list.append(6)
+                    statue_list.append('6')
                 plando_json += '[' + ','.join(statue_list) + ']'
 
         # Boss order
@@ -299,7 +296,7 @@ def generate_ROM():
 
         # Overworld shuffle
         if ow_shuffle.get() == "Custom":
-            plando_json += ', "overworld_entrances": [{"region": ' + ow_sw1.get() + ', "continent": "SW Continent"}'
+            plando_json += ', "overworld_entrances": [{"region": "' + ow_sw1.get() + '", "continent": "SW Continent"}'
             plando_json += ', {"region": "' + ow_sw2.get() + '", "continent": "SW Continent"}'
             plando_json += ', {"region": "' + ow_sw3.get() + '", "continent": "SW Continent"}'
             plando_json += ', {"region": "' + ow_sw4.get() + '", "continent": "SW Continent"}'
@@ -341,13 +338,13 @@ def generate_ROM():
         #settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
         #    firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
         #    overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(), False, plando_json)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), get_statues(), get_statue_req(), get_enemizer(), get_start_location(),
+        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), get_boss_shuffle(), open_mode.get(), z3_mode.get(),
             get_overworld_shuffle(), get_entrance_shuffle(), False, fluteless.get(), get_sprite(), False, plando_json)
 
         filename = plando_name.get().replace(" ", "") + "_" + datetime.now().strftime("%Y%m%d%H%M%S")
         rom_filename = filename + ".sfc"
-        spoiler_filename = filename + "json"
+        spoiler_filename = filename + ".json"
         #graph_viz_filename = generate_filename(settings, "png")
 
         randomizer = Randomizer(rompath)
