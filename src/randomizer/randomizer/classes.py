@@ -104,10 +104,11 @@ class World:
         return item_list
 
     # Returns a list of unfilled item locations
-    def list_item_locations(self):
+    def list_item_locations(self, type=0):
         locations = []
         for x in self.item_locations:
-            locations.append(x)
+            if not type or type == self.item_locations[x][1]:
+                locations.append(x)
         return locations
 
     # Returns list of graph edges

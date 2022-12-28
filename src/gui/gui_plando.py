@@ -171,16 +171,20 @@ def generate_ROM():
         return float(val).is_integer()
 
     def validate_settings():
+        # Check for non-integer seed
         if not seed_str.isdigit():
             tk.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
             return False
 
+        # Check Kara location
         if not kara_loc.get():
             tk.messagebox.showinfo("ERROR", "Please set Kara's location")
             return False
 
-        bosses = boss_choices[:]
+        # Check boss order
         if boss_order.get() == "Custom":
+            bosses = boss_choices[:]
+            bosses.remove("")
             try:
                 bosses.remove(boss1.get())
                 bosses.remove(boss2.get())
@@ -190,13 +194,15 @@ def generate_ROM():
                 bosses.remove(boss6.get())
                 bosses.remove(boss7.get())
             except:
-                tk.messagebox.showinfo("ERROR", "Remove duplicate bosses")
+                tk.messagebox.showinfo("ERROR", "Invalid boss configuration")
                 return False
 
+        # Check start location
         if start_loc.get()[0] == "-":
             tk.messagebox.showinfo("ERROR", "Please choose a valid start location")
             return False
 
+        # Check overworld configuration
         regions = ow_choices_all[:]
         if ow_shuffle.get() == "Custom":
             try:
@@ -223,6 +229,7 @@ def generate_ROM():
                 tk.messagebox.showinfo("ERROR", "Invalid overworld configuration")
                 return False
 
+        # Check jeweler rewards
         if (not is_integer(gem1.get()) or not is_integer(gem2.get()) or not is_integer(gem3.get()) or not is_integer(gem4.get()) or
                 not is_integer(gem5.get()) or not is_integer(gem6.get()) or not is_integer(gem7.get())):
             tk.messagebox.showinfo("ERROR", "Invalid jeweler reward amounts")
@@ -230,6 +237,41 @@ def generate_ROM():
         if not (0 < float(gem1.get()) < float(gem2.get()) < float(gem3.get()) < float(gem4.get()) < float(gem5.get()) < float(gem6.get()) < float(gem7.get()) <= 50):
             tk.messagebox.showinfo("ERROR", "Jeweler rewards must be in ascending order between 1 and 50")
             return False
+
+        # Check ability placement
+        try:
+            ability_name_list = ability_choices[:]
+            ability_name_list.remove("-- WILL ONLY --")
+            ability_name_list.remove("-- FREEDAN OKAY --")
+            if ability1.get():
+                ability_name_list.remove(ability1.get())
+            if ability2.get():
+                ability_name_list.remove(ability2.get())
+            if ability3.get():
+                ability_name_list.remove(ability3.get())
+            if ability4.get():
+                ability_name_list.remove(ability4.get())
+            if ability5.get():
+                ability_name_list.remove(ability5.get())
+            if ability6.get():
+                ability_name_list.remove(ability6.get())
+        except:
+            tk.messagebox.showinfo("ERROR", "Invalid ability location(s)")
+            return False
+
+        # Check item placement
+        this_item = ""
+        try:
+            item_name_list = item_names_all[:]
+            for var in item_vars:
+                this_item = var.get()
+                if this_item:
+                    item_name_list.remove(this_item)
+        except:
+            tk.messagebox.showinfo("ERROR", "Too many items: " + this_item)
+            return False
+
+        # Check item
 
         return True
 
@@ -291,8 +333,27 @@ def generate_ROM():
         plando_json += ', "jeweler_amounts": [' + ','.join([gem1.get(),gem2.get(),gem3.get(),gem4.get(),gem5.get(),gem6.get(),gem7.get()]) + ']'
 
         # Items and abilities
-        #plando_json += ', "items": ['
-        #plando_json += ']'
+        plando_json += ', "items": ['
+        if ability1.get():
+            plando_json += '{"location": "' + ability1.get() + '", "name": "Psycho Dash"}, '
+        if ability2.get():
+            plando_json += '{"location": "' + ability2.get() + '", "name": "Psycho Slider"}, '
+        if ability3.get():
+            plando_json += '{"location": "' + ability3.get() + '", "name": "Spin Dash"}, '
+        if ability4.get():
+            plando_json += '{"location": "' + ability4.get() + '", "name": "Dark Friar"}, '
+        if ability5.get():
+            plando_json += '{"location": "' + ability5.get() + '", "name": "Aura Barrier"}, '
+        if ability6.get():
+            plando_json += '{"location": "' + ability6.get() + '", "name": "Earthquaker"}, '
+
+        for i in range(len(loc_names)):
+            item_var = item_vars[i].get()
+            if item_var:
+                plando_json += '{"location": "' + loc_names[i] + '", "name": "' + item_var + '"}, '
+
+        plando_json = plando_json[:-2]
+        plando_json += ']'
 
         # Overworld shuffle
         if ow_shuffle.get() == "Custom":
@@ -434,6 +495,42 @@ def write_patch(patch, rom_path, filename, settings):
 
     randomized.close()
 
+w = World(RandomizerData())
+
+item_list = w.list_item_pool(1)
+item_names = []
+item_names_all = []
+for item in item_list:
+    item_name = w.item_pool[item][3].strip()
+    item_names_all.append(item_name)
+    if item_name not in item_names:
+        item_names.append(item_name)
+
+ability_list = w.list_item_pool(2)
+ability_names = []
+for ability in ability_list:
+    ability_name = w.item_pool[ability][3].strip()
+    if ability_name not in ability_names:
+        ability_names.append(ability_name)
+
+loc_list = w.list_item_locations(1)
+loc_names = []
+for loc in loc_list:
+    loc_name = w.item_locations[loc][9].strip()
+    if loc_name not in loc_names:
+        loc_names.append(loc_name)
+
+ds_list = w.list_item_locations(2)
+ds_will = []
+ds_freedan = []
+for ds in ds_list:
+    ds_name = w.item_locations[ds][9].strip()
+    if w.item_locations[ds][4]:
+        if ds_name not in ds_will:
+            ds_will.append(ds_name)
+    else:
+        if ds_name not in ds_freedan:
+            ds_freedan.append(ds_name)
 
 root = tk.Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
@@ -503,64 +600,72 @@ boss_order = tk.StringVar(root)
 boss_order_choices = ["Vanilla", "Custom"]
 boss_order.set("Vanilla")
 
-boss_choices = ["Castoth", "Viper", "Vampires", "Sand Fanger", "Mummy Queen", "Babel Queen","Solid Arm"]
+boss_choices = ["","Castoth", "Viper", "Vampires", "Sand Fanger", "Mummy Queen", "Babel Queen", "Solid Arm"]
 
 boss1 = tk.StringVar(root)
-boss1.set("Castoth")
+boss1.set("")
 boss2 = tk.StringVar(root)
-boss2.set("Viper")
+boss2.set("")
 boss3 = tk.StringVar(root)
-boss3.set("Vampires")
+boss3.set("")
 boss4 = tk.StringVar(root)
-boss4.set("Sand Fanger")
+boss4.set("")
 boss5 = tk.StringVar(root)
-boss5.set("Mummy Queen")
+boss5.set("")
 boss6 = tk.StringVar(root)
-boss6.set("Babel Queen")
+boss6.set("")
 boss7 = tk.StringVar(root)
-boss7.set("Solid Arm")
+boss7.set("")
 
 kara_loc = tk.StringVar(root)
 kara_loc_choices = ["","Edward's Castle","Diamond Mine","Angel Dungeon","Mt. Kress","Ankor Wat"]
 kara_loc.set("")
 
 start_loc = tk.StringVar(root)
-safe_loc_choices = [
-    "-- SAFE --",
-    "South Cape: Dark Space",
-    "Itory Village: Dark Space",
-    "Freejia: Dark Space",
-    "Sky Garden: Dark Space (Foyer)",
-    "Seaside Palace: Dark Space",
-    "Angel Village: Dark Space",
-    "Watermia: Dark Space",
-    "Euro: Dark Space",
-    "Natives' Village: Dark Space",
-    "Dao: Dark Space",
-    "Babel: Dark Space Top"
-]
-unsafe_loc_choices = [
-    "-- UNSAFE --",
-    "Underground Tunnel: Dark Space",
-    "Inca Ruins: Dark Space 1",
-    "Inca Ruins: Dark Space 2",
-    "Diamond Mine: Appearing Dark Space",
-    "Diamond Mine: Dark Space at Wall",
-    "Diamond Mine: Dark Space behind Wall",
-    "Sky Garden: Dark Space (SE)",
-    "Sky Garden: Dark Space (SW)",
-    "Sky Garden: Dark Space (NW)",
-    "Great Wall: Archer Dark Space",
-    "Great Wall: Platform Dark Space",
-    "Great Wall: Appearing Dark Space",
-    "Mt. Temple: Dark Space 1",
-    "Mt. Temple: Dark Space 2",
-    "Mt. Temple: Dark Space 3",
-    "Ankor Wat: Garden Dark Space",
-    "Ankor Wat: Drop Down Dark Space",
-    "Pyramid: Dark Space Bottom",
-    "Babel: Dark Space Bottom"
-]
+safe_loc_choices = ["-- SAFE --"]
+unsafe_loc_choices = ["-- UNSAFE --"]
+for loc in loc_list:
+    if w.item_locations[loc][6] == "Safe":
+        safe_loc_choices.append(w.item_locations[loc][9].strip())
+    elif w.item_locations[loc][6] == "Unsafe":
+        unsafe_loc_choices.append(w.item_locations[loc][9].strip())
+
+#safe_loc_choices = [
+#    "-- SAFE --",
+#    "South Cape: Dark Space",
+#    "Itory Village: Dark Space",
+#    "Freejia: Dark Space",
+#    "Sky Garden: Dark Space (Foyer)",
+#    "Seaside Palace: Dark Space",
+#    "Angel Village: Dark Space",
+#    "Watermia: Dark Space",
+#    "Euro: Dark Space",
+#    "Natives' Village: Dark Space",
+#    "Dao: Dark Space",
+#    "Babel: Dark Space Top"
+#]
+#unsafe_loc_choices = [
+#    "-- UNSAFE --",
+#    "Underground Tunnel: Dark Space",
+#    "Inca Ruins: Dark Space 1",
+#    "Inca Ruins: Dark Space 2",
+#    "Diamond Mine: Appearing Dark Space",
+#    "Diamond Mine: Dark Space at Wall",
+#    "Diamond Mine: Dark Space behind Wall",
+#    "Sky Garden: Dark Space (SE)",
+#    "Sky Garden: Dark Space (SW)",
+#    "Sky Garden: Dark Space (NW)",
+#    "Great Wall: Archer Dark Space",
+#    "Great Wall: Platform Dark Space",
+#    "Great Wall: Appearing Dark Space",
+#    "Mt. Temple: Dark Space 1",
+#    "Mt. Temple: Dark Space 2",
+#    "Mt. Temple: Dark Space 3",
+#    "Ankor Wat: Garden Dark Space",
+#    "Ankor Wat: Drop Down Dark Space",
+#    "Pyramid: Dark Space Bottom",
+#    "Babel: Dark Space Bottom"
+#]
 start_loc_choices = safe_loc_choices+unsafe_loc_choices
 start_loc.set("South Cape")
 
@@ -585,27 +690,30 @@ ow_shuffle = tk.StringVar(root)
 ow_shuffle_choices = ["Vanilla", "Custom"]
 ow_shuffle.set("Vanilla")
 
-ow_choices_all = [
-    "South Cape",
-    "Edward's",
-    "Itory",
-    "Moon Tribe",
-    "Inca",
-    "Diamond Coast",
-    "Freejia",
-    "Diamond Mine",
-    "Neil's",
-    "Nazca",
-    "Angel Village",
-    "Watermia",
-    "Great Wall",
-    "Euro",
-    "Mt. Temple",
-    "Native's Village",
-    "Ankor Wat",
-    "Dao",
-    "Pyramid"
-]
+ow_choices_all = []
+for region in w.overworld_menus:
+    ow_choices_all.append(w.overworld_menus[region][8].strip())
+#ow_choices_all = [
+#    "South Cape",
+#    "Edward's",
+#    "Itory",
+#    "Moon Tribe",
+#    "Inca",
+#    "Diamond Coast",
+#    "Freejia",
+#    "Diamond Mine",
+#    "Neil's",
+#    "Nazca",
+#    "Angel Village",
+#    "Watermia",
+#    "Great Wall",
+#    "Euro",
+#    "Mt. Temple",
+#    "Native's Village",
+#    "Ankor Wat",
+#    "Dao",
+#    "Pyramid"
+#]
 ow_choices = ow_choices_all[:]
 
 ow_sw1 = tk.StringVar(root)
@@ -647,15 +755,33 @@ ow_nw1.set("")
 ow_nw2 = tk.StringVar(root)
 ow_nw2.set("")
 
+item_choices = [""] + item_names
+ability_choices = ["","-- WILL ONLY --"] + ds_will + ["-- FREEDAN OKAY --"] + ds_freedan
+
+ability1 = tk.StringVar(root)
+ability1.set("")
+ability2 = tk.StringVar(root)
+ability2.set("")
+ability3 = tk.StringVar(root)
+ability3.set("")
+ability4 = tk.StringVar(root)
+ability4.set("")
+ability5 = tk.StringVar(root)
+ability5.set("")
+ability6 = tk.StringVar(root)
+ability6.set("")
+
 # Create tabs
 tabControl = ttk.Notebook(root)
 tab1 = ttk.Frame(tabControl)
 tab2 = ttk.Frame(tabControl)
 tab3 = ttk.Frame(tabControl)
+tab4 = ttk.Frame(tabControl)
 
-tabControl.add(tab1, text ='1. General')
-tabControl.add(tab2, text ='2. Game Settings')
-tabControl.add(tab3, text ='3. Items')
+tabControl.add(tab1, text ='General')
+tabControl.add(tab2, text ='Game Settings')
+tabControl.add(tab3, text ='Abilities & Items')
+tabControl.add(tab4, text ='Items (cont)')
 tabControl.pack(expand = 1, fill ="both")
 
 tab1frame = tk.Frame(tab1)
@@ -669,6 +795,18 @@ tab2frame.grid(column=2, row=9, sticky=(tk.N, tk.W, tk.E, tk.S))
 tab2frame.columnconfigure(0, weight=1)
 tab2frame.rowconfigure(0, weight=1)
 tab2frame.pack(pady=20, padx=20)
+
+tab3frame = tk.Frame(tab3)
+tab3frame.grid(column=2, row=9, sticky=(tk.N, tk.W, tk.E, tk.S))
+tab3frame.columnconfigure(0, weight=1)
+tab3frame.rowconfigure(0, weight=1)
+tab3frame.pack(pady=20, padx=20)
+
+tab4frame = tk.Frame(tab4)
+tab4frame.grid(column=2, row=9, sticky=(tk.N, tk.W, tk.E, tk.S))
+tab4frame.columnconfigure(0, weight=1)
+tab4frame.rowconfigure(0, weight=1)
+tab4frame.pack(pady=20, padx=20)
 
 # Tab 1: General
 tk.Label(tab1frame, text="ROM File").grid(row=0, column=0, sticky=tk.W)
@@ -769,6 +907,43 @@ boss_frame1 = tk.Frame(tab2frame)
 boss_frame1.pack(pady=15)
 boss_frame2 = tk.Frame(tab2frame)
 boss_frame2.pack()
+
+def refresh_boss():
+    boss1_menu['menu'].delete(1,'end')
+    boss2_menu['menu'].delete(1,'end')
+    boss3_menu['menu'].delete(1,'end')
+    boss4_menu['menu'].delete(1,'end')
+    boss5_menu['menu'].delete(1,'end')
+    boss6_menu['menu'].delete(1,'end')
+    boss7_menu['menu'].delete(1,'end')
+
+    new_choices = boss_choices[:]
+    if boss1 and boss1 in new_choices:
+        new_choices.remove(boss1)
+    if boss2 and boss2 in new_choices:
+        new_choices.remove(boss2)
+    if boss3 and boss3 in new_choices:
+        new_choices.remove(boss3)
+    if boss4 and boss4 in new_choices:
+        new_choices.remove(boss4)
+    if boss5 and boss5 in new_choices:
+        new_choices.remove(boss5)
+    if boss6 and boss6 in new_choices:
+        new_choices.remove(boss6)
+    if boss7 and boss7 in new_choices:
+        new_choices.remove(boss7)
+
+    #for choice in new_choices:
+    #    boss1_menu['menu'].add_command(label=choice, command=tk._setit(options, choice))
+
+
+#boss1.trace_add(['write'], refresh_boss)
+#boss2.trace_add(['write'], refresh_boss)
+#boss3.trace_add(['write'], refresh_boss)
+#boss4.trace_add(['write'], refresh_boss)
+#boss5.trace_add(['write'], refresh_boss)
+#boss6.trace_add(['write'], refresh_boss)
+#boss7.trace_add(['write'], refresh_boss)
 
 boss_order_frame = tk.Frame(boss_frame2)
 tk.Label(boss_order_frame, text="Inca").grid(row=0, column=0, sticky=tk.W)
@@ -878,6 +1053,34 @@ gem6.insert(0,"30")
 gem7 = tk.Entry(gem_frame, width="4")
 gem7.grid(row=0, column=7)
 gem7.insert(0,"50")
+
+# Tabs 3&4: Items and Abilities
+item_vars = []
+MAX_ROWS = 15
+MAX_COLS = 4
+
+tk.Label(tab3frame, text=ability_names[0]).grid(row=0, column=1, sticky=tk.W)
+tk.Label(tab3frame, text=ability_names[1]).grid(row=0, column=3, sticky=tk.W)
+tk.Label(tab3frame, text=ability_names[2]).grid(row=0, column=5, sticky=tk.W)
+tk.Label(tab3frame, text=ability_names[3]).grid(row=1, column=1, sticky=tk.W)
+tk.Label(tab3frame, text=ability_names[4]).grid(row=1, column=3, sticky=tk.W)
+tk.Label(tab3frame, text=ability_names[5]).grid(row=1, column=5, sticky=tk.W)
+ability1_menu = tk.OptionMenu(tab3frame, ability1, *ability_choices).grid(row=0, column=2)
+ability2_menu = tk.OptionMenu(tab3frame, ability2, *ability_choices).grid(row=0, column=4)
+ability3_menu = tk.OptionMenu(tab3frame, ability3, *ability_choices).grid(row=0, column=6)
+ability4_menu = tk.OptionMenu(tab3frame, ability4, *ability_choices).grid(row=1, column=2)
+ability5_menu = tk.OptionMenu(tab3frame, ability5, *ability_choices).grid(row=1, column=4)
+ability6_menu = tk.OptionMenu(tab3frame, ability6, *ability_choices).grid(row=1, column=6)
+
+for i in range(len(loc_names)):
+    item_var = tk.StringVar(root)
+    item_vars.append(item_var)
+    if i < (MAX_ROWS-2)*MAX_COLS:
+        tk.Label(tab3frame, text=loc_names[i]).grid(row=i%(MAX_ROWS-2)+2, column=int(i/(MAX_ROWS-2))*2, sticky=tk.W)
+        item_menu = tk.OptionMenu(tab3frame, item_var, *item_choices).grid(row=i%(MAX_ROWS-2)+2, column=int(i/(MAX_ROWS-2))*2+1)
+    else:
+        tk.Label(tab4frame, text=loc_names[i]).grid(row=(i-(MAX_ROWS-2)*MAX_COLS)%MAX_ROWS, column=int((i-(MAX_ROWS-2)*MAX_COLS)/MAX_ROWS)*2, sticky=tk.W)
+        item_menu = tk.OptionMenu(tab4frame, item_var, *item_choices).grid(row=(i-(MAX_ROWS-2)*MAX_COLS)%MAX_ROWS, column=int((i-(MAX_ROWS-2)*MAX_COLS)/MAX_ROWS)*2+1)
 
 # Generate ROM buttom at bottom
 tk.Button(root, text='Generate ROM', command=generate_ROM).pack(pady=20, padx=20)

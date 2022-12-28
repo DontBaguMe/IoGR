@@ -2772,8 +2772,6 @@ class Randomizer:
         try:
             boss_order = plando["boss_order"][:]
             settings.boss_shuffle = True
-            if "Boss Shuffle" not in self.variant:
-                self.variant.append("Boss Shuffle")
             if PRINT_LOG:
                 print("PLANDO FOUND: Boss order", boss_order)
         except:
