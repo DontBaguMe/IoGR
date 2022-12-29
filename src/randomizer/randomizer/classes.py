@@ -1715,7 +1715,6 @@ class World:
                 continent_name = ow_link["continent"]
                 region_key = self.find_region_key(region_name, False)
                 continent_key = self.find_ow_key(continent_name, True)
-                print(region_key,continent_key)
                 if region_key >= 0 and continent_key >= 0:
                     self.overworld_menus[continent_key][0] = region_key
                     if "Overworld Shuffle" not in self.variant:
@@ -1985,7 +1984,7 @@ class World:
                     for item in non_prog_items:
                         if item in self.items_collected:
                             self.items_collected.remove(item)
-                    print(non_prog_items)
+                    #print(non_prog_items)
                     self.forward_fill(non_prog_items, item_locations, False, self.logic_mode == "Chaos", print_log)
 
                     # List and shuffle remaining key items

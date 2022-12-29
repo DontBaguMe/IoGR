@@ -1,7 +1,7 @@
 import json
 import os
 import tkinter as tk
-#from tkinter import *
+import tkinter.filedialog
 from tkinter import ttk
 from tkinter import messagebox
 from datetime import datetime
@@ -137,16 +137,12 @@ def generate_ROM():
         if g == "Uncoupled":
             return EntranceShuffle.UNCOUPLED
 
-    def get_start_location():#####################
-        g = start.get()
-        if g == "South Cape":
+    def get_start_location():
+        s = start_loc.get()
+        if s == "South Cape":
             return StartLocation.SOUTH_CAPE
-        if g == "Safe":
-            return StartLocation.SAFE
-        if g == "Unsafe":
+        else:
             return StartLocation.UNSAFE
-        if g == "Forced Unsafe":
-            return StartLocation.FORCED_UNSAFE
 
     def get_sprite():
         sp = sprite.get()
@@ -624,11 +620,11 @@ kara_loc.set("")
 start_loc = tk.StringVar(root)
 safe_loc_choices = ["-- SAFE --"]
 unsafe_loc_choices = ["-- UNSAFE --"]
-for loc in loc_list:
-    if w.item_locations[loc][6] == "Safe":
-        safe_loc_choices.append(w.item_locations[loc][9].strip())
-    elif w.item_locations[loc][6] == "Unsafe":
-        unsafe_loc_choices.append(w.item_locations[loc][9].strip())
+for ds in ds_list:
+    if w.item_locations[ds][6] == "Safe":
+        safe_loc_choices.append(w.item_locations[ds][9].strip())
+    elif w.item_locations[ds][6] == "Unsafe":
+        unsafe_loc_choices.append(w.item_locations[ds][9].strip())
 
 #safe_loc_choices = [
 #    "-- SAFE --",
