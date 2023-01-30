@@ -475,13 +475,19 @@ class World:
     def make_room(self, progression_result, print_log=False):
         # For inventory bottlenecks, remove one inventory item and try again
         if not progression_result[1] and progression_result[2]:
+            if print_log:
+                print("Trying to remove an inventory item...")
             return self.remove_nonprog(1,0,True,print_log)
 
         success = False
         for node in self.visited:
             if not success:
                 for x in self.graph[node][11]:
+                    if print_log:
+                        print("Considering:",self.item_locations[x][9])
                     if self.is_filled(x) and self.item_pool[self.item_locations[x][3]][5]>1:
+                        if print_log:
+                            print("Removing...")
                         if self.unfill_item(x,print_log):
                             success = True
         return success
@@ -1069,6 +1075,30 @@ class World:
 
     # Entrance randomizer
     def shuffle_exits(self,print_log=False):
+
+        # Dungeon Chaos seeds are quite long. Remove some empty corridors to mitigate that.
+        # 69 Inca U-turn room; 79 Inca statue "puzzle";
+        # 140,141,144,145 Mine elevator; 390 Wat corridor before spirit
+        dc_empty_dungeon_nodes = [69, 79, 140, 141, 144, 145, 390]
+        for nodenum in dc_empty_dungeon_nodes:
+            self.graph.pop(nodenum)
+        # Stitch up exits around empty Inca nodes.
+        self.exits[136][0] = 139
+        self.exits[139][0] = 136
+        self.exits[136][4] = 95
+        # Stitch up exits around empty Mine nodes.
+        self.exits[224][0] = 241
+        self.exits[241][0] = 224
+        self.exits[224][4] = 146
+        # Stitch up exits around empty Wat node.
+        self.exits[596][0] = 599
+        self.exits[599][0] = 596
+        self.exits[596][4] = 391
+        # Now drop all the exits we don't need.
+        dc_exits_from_empty_dungeon_nodes = [137, 118, 119, 138, 225, 236, 237, 238, 239, 240, 597, 598]
+        for exitnum in dc_exits_from_empty_dungeon_nodes:
+            self.exits.pop(exitnum)
+        
         # Map passages and internal dungeon exits to graph and list all available exits
         one_way_exits = []
         DS = ("Dungeon Shuffle" in self.variant)
@@ -1173,7 +1203,7 @@ class World:
             dest_exits_new = island[2]
 
             if not dest_exits_new or not origin_exits_new or self.is_accessible(nodes_new[0]):
-                if print_log and False:
+                if print_log:
                     print("  NOT ELIGIBLE")
             else:
                 if (check_progression and not origin_exits_new) or (self.entrance_shuffle != "Uncoupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
@@ -1187,16 +1217,16 @@ class World:
                     result = self.find_exit(origin_exits,dest_exits_new,print_log,check_direction,True)
                     if not result:
                         quarantine.append(island)
-                    else:
+                    else:    # Causes a list overrun for seed 35874865 Chaos Dungeonshuffle.
                         if print_log:
                             print("NEW ISLAND:")
                             for y in nodes_new:
                                 print(" -",self.graph[y][5])
-                            traverse_result = self.traverse(island[0])
-                            visited += traverse_result[0]
-                            progression_result = self.get_open_exits()
-                            origin_exits = progression_result[0]
-                            check_direction = True
+                        traverse_result = self.traverse(island[0])
+                        visited += traverse_result[0]
+                        progression_result = self.get_open_exits()
+                        origin_exits = progression_result[0]
+                        check_direction = True
 
             if not islands:
                 if check_direction:
@@ -1463,6 +1493,7 @@ class World:
                 node = to_visit.pop(0)
                 visited.append(node)
                 if self.check_ds_access(node,need_freedan):
+                    print("Node '",self.graph[start_node][5],"' has DS access via ",self.graph[node][5])
                     return True
                 else:
                     for edge in self.graph[node][12]:

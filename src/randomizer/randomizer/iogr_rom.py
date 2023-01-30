@@ -18,7 +18,7 @@ from .models.enums.start_location import StartLocation
 VERSION = "4.5.0"
 
 MAX_RANDO_RETRIES = 9
-PRINT_LOG = False
+PRINT_LOG = True
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -190,6 +190,10 @@ class Randomizer:
         # Write code for clearing enemy tally data
         patch.seek(int("1ff9b", 16) + rom_offset)
         patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
+
+        # Enemies always spawn in Dungeon Chaos
+        patch.seek(0x3d0f6 + rom_offset)
+        patch.write(b"\xEA\xEA")
 
         # Erase boss IDs to prevent being overwritten by normal enemies (Castoth and Babel bosses only)
         boss_id_addrs = [0xc937b,0xce488,0xce4a8,0xce4c8,0xce4d1,0xce4f1,0xce52d]
