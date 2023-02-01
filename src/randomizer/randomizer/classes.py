@@ -1192,11 +1192,11 @@ class World:
                             print("NEW ISLAND:")
                             for y in nodes_new:
                                 print(" -",self.graph[y][5])
-                            traverse_result = self.traverse(island[0])
-                            visited += traverse_result[0]
-                            progression_result = self.get_open_exits()
-                            origin_exits = progression_result[0]
-                            check_direction = True
+                        traverse_result = self.traverse(island[0])
+                        visited += traverse_result[0]
+                        progression_result = self.get_open_exits()
+                        origin_exits = progression_result[0]
+                        check_direction = True
 
             if not islands:
                 if check_direction:
