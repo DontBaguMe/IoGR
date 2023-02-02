@@ -190,12 +190,6 @@ class Randomizer:
         patch.seek(int("1ff9b", 16) + rom_offset)
         patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
 
-        # Erase boss IDs to prevent being overwritten by normal enemies (Castoth and Babel bosses only)
-        boss_id_addrs = [0xc937b,0xce488,0xce4a8,0xce4c8,0xce4d1,0xce4f1,0xce52d]
-        for addr in boss_id_addrs:
-            patch.seek(addr + rom_offset)
-            patch.write(b"\x00")
-
         ##########################################################################
         #                             Early Firebird
         ##########################################################################
@@ -350,12 +344,6 @@ class Randomizer:
         ##########################################################################
         #                        Update treasure chest data
         ##########################################################################
-        # Remove fanfares from treasure chests
-        f_chests = open(BIN_PATH + "01afa6_chests.bin", "rb")
-        patch.seek(int("1afa6", 16) + rom_offset)
-        patch.write(f_chests.read())
-        f_chests.close
-
         # Update item acquisition messages and add messages for new items (29-2f)
         f_acquisition = open(BIN_PATH + "01fd24_acquisition.bin", "rb")
         patch.seek(int("1fd24", 16) + rom_offset)
@@ -1080,10 +1068,6 @@ class Randomizer:
         ##########################################################################
         #                          Modify Inca events
         ##########################################################################
-        # Jumping over river from the south no longer will softlock you
-        patch.seek(int("c8e8c", 16) + rom_offset)
-        patch.write(b"\x05")
-
         # Fix forced form change
         patch.seek(int("9cfaa", 16) + rom_offset)
         patch.write(FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
