@@ -173,9 +173,9 @@ def generate_ROM():
             return False
 
         # Check Kara location
-        if not kara_loc.get():
-            tk.messagebox.showinfo("ERROR", "Please set Kara's location")
-            return False
+        #if not kara_loc.get():
+        #    tk.messagebox.showinfo("ERROR", "Please set Kara's location")
+        #    return False
 
         # Check boss order
         if boss_order.get() == "Custom":
@@ -323,7 +323,8 @@ def generate_ROM():
             plando_json += '[' + ','.join(boss_list) + ']'
 
         # Kara location
-        plando_json += ', "kara_location": "' + kara_loc.get() + '"'
+        if kara_loc.get():
+            plando_json += ', "kara_location": "' + kara_loc.get() + '"'
 
         # Jeweler rewards
         plando_json += ', "jeweler_amounts": [' + ','.join([gem1.get(),gem2.get(),gem3.get(),gem4.get(),gem5.get(),gem6.get(),gem7.get()]) + ']'
@@ -546,7 +547,7 @@ goal.set("Dark Gaia")
 
 logic = tk.StringVar(root)
 logic_choices = ["Completable", "Beatable", "Chaos"]
-logic.set("Completable")
+logic.set("Beatable")
 
 firebird = tk.IntVar(root)
 firebird.set(0)
