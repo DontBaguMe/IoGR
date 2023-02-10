@@ -12,12 +12,13 @@ from .models.enums.goal import Goal
 from .models.enums.statue_req import StatueReq
 from .models.enums.logic import Logic
 from .models.enums.entrance_shuffle import EntranceShuffle
+from .models.enums.dungeon_shuffle import DungeonShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.5.0"
+VERSION = "4.6.0"
 
-MAX_RANDO_RETRIES = 9
+MAX_RANDO_RETRIES = 500
 PRINT_LOG = True
 
 KARA_EDWARDS = 1
@@ -95,6 +96,14 @@ def generate_filename(settings: RandomizerData, extension: str):
         if entrance_shuffle.value == EntranceShuffle.NONE.value:
             return ""
 
+    def getDungeonShuffle(dungeon_shuffle):
+        if dungeon_shuffle.value == DungeonShuffle.BASIC.value:
+            return "_dsb"
+        if dungeon_shuffle.value == DungeonShuffle.CHAOS.value:
+            return "_dsx"
+        if dungeon_shuffle.value == DungeonShuffle.NONE.value:
+            return ""
+
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
             return ""
@@ -135,7 +144,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.z3, "z3")
-    filename += getSwitch(settings.dungeon_shuffle, "ds")
+    filename += getDungeonShuffle(settings.dungeon_shuffle)
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.fluteless, "fl")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
@@ -168,6 +177,7 @@ class Randomizer:
         self.logger = logging.getLogger("IOGR")
 
     def generate_rom(self, filename: str, settings: RandomizerData):
+        #breakpoint()
         patch = self.__generate_patch__()
         rom_offset = self.__get_offset__(patch)
 
@@ -191,9 +201,10 @@ class Randomizer:
         patch.seek(int("1ff9b", 16) + rom_offset)
         patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
 
-        # Enemies always spawn in Dungeon Chaos
-        patch.seek(0x3d0f6 + rom_offset)
-        patch.write(b"\xEA\xEA")
+        # Enemies always respawn in Dungeon Chaos
+        if settings.dungeon_shuffle.value == DungeonShuffle.CHAOS.value:
+            patch.seek(0x3d0f6 + rom_offset)
+            patch.write(b"\xEA\xEA")
 
         # Erase boss IDs to prevent being overwritten by normal enemies (Castoth and Babel bosses only)
         boss_id_addrs = [0xc937b,0xce488,0xce4a8,0xce4c8,0xce4d1,0xce4f1,0xce52d]
@@ -2872,6 +2883,58 @@ class Randomizer:
             patch.write(b"\xf7\xff")
 
         ##########################################################################
+        #                   Dungeon Chaos QOL improvements:
+        #                 Fix music; move door-blocking enemies
+        ##########################################################################
+        if settings.dungeon_shuffle.value == DungeonShuffle.CHAOS.value:
+            # Define music map headers
+            dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
+            dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
+            dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
+            dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
+            dungeon_music.append(b"\x11\x0b\x00\x07\x70\xcd")   # Wat
+            dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
+            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Babel
+            dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
+            
+            # Find all music header locations in map data file
+            music_header_addrs = [[],[],[],[],[],[]]
+            i = 0
+            while i < 6:
+                done = False
+                addr = 0
+                while not done:
+                    f_mapdata.seek(0)
+                    addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
+                    if addr < 0:
+                        done = True
+                    else:
+                        music_header_addrs[i].append(addr)
+                i += 1
+
+            # Patch music headers into dungeons
+            i = 0
+            while i < 6:
+                while music_header_addrs[i]:
+                    addr = music_header_addrs[i].pop(0)
+                    f_mapdata.seek(addr)
+                    f_mapdata.write(dungeon_music[7])
+                i += 1
+
+            # Move some dracos that block doors
+            patch.seek(0x0cb122 + rom_offset)
+            patch.write(b"\x0c")
+            patch.seek(0x0cb12b + rom_offset)
+            patch.write(b"\x0b")
+            patch.seek(0x0cb134 + rom_offset)
+            patch.write(b"\x2c")
+            patch.seek(0x0cb22e + rom_offset)
+            patch.write(b"\x1b")
+            patch.seek(0x0cb237 + rom_offset)
+            patch.write(b"\x1b")
+
+
+        ##########################################################################
         #                   Randomize Location of Kara Portrait
         #       Sets spoiler in Lance's Letter and places portrait sprite
         ##########################################################################
@@ -3199,7 +3262,7 @@ class Randomizer:
             #done = False
             seed_adj += 1
         self.w.generate_spoiler(VERSION)
-        self.w.write_to_rom(patch, rom_offset)
+        self.w.write_to_rom(patch, rom_offset,PRINT_LOG)
 
         ##########################################################################
         #                   Update map dataset after Enemizer

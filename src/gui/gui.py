@@ -14,6 +14,7 @@ from randomizer.models.enums.statue_req import StatueReq
 from randomizer.models.enums.logic import Logic
 from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
+from randomizer.models.enums.dungeon_shuffle import DungeonShuffle
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
@@ -121,6 +122,15 @@ def generate_ROM():
         if g == "Uncoupled":
             return EntranceShuffle.UNCOUPLED
 
+    def get_dungeon_shuffle():
+        g = dungeon_shuffle.get()
+        if g == "None":
+            return DungeonShuffle.NONE
+        if g == "Basic":
+            return DungeonShuffle.BASIC
+        if g == "Chaos":
+            return DungeonShuffle.CHAOS
+
     def get_start_location():
         g = start.get()
         if g == "South Cape":
@@ -155,7 +165,7 @@ def generate_ROM():
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(), dungeon_shuffle.get())
+            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(), get_dungeon_shuffle())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -392,8 +402,9 @@ z3_mode.set(0)
 overworld_shuffle = tkinter.IntVar(root)
 overworld_shuffle.set(0)
 
-dungeon_shuffle = tkinter.IntVar(root)
-dungeon_shuffle.set(0)
+dungeon_shuffle = tkinter.StringVar(root)
+dungeon_shuffle_choices = ["None", "Basic", "Chaos"]
+dungeon_shuffle.set("None")
 
 entrance_shuffle = tkinter.StringVar(root)
 entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
@@ -448,7 +459,7 @@ open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=
 z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=15, column=1)
 overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=16, column=1)
 entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=17, column=1)
-dungeon_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=dungeon_shuffle, onvalue=1, offvalue=0).grid(row=18, column=1)
+dungeon_shuffle_menu = tkinter.OptionMenu(mainframe, dungeon_shuffle, *dungeon_shuffle_choices).grid(row=18, column=1)
 graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
 race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=20, column=1)
 fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=21, column=1)

@@ -9,13 +9,14 @@ from .models.enums.start_location import StartLocation
 from .models.enums.goal import Goal
 from .models.enums.statue_req import StatueReq
 from .models.enums.entrance_shuffle import EntranceShuffle
+from .models.enums.dungeon_shuffle import DungeonShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.logic import Logic
 from .models.randomizer_data import RandomizerData
 
 MAX_INVENTORY = 15
 PROGRESS_ADJ = [1.5, 1.25, 1, 0.75]  # Required items are more likely to be placed in easier modes
-MAX_CYCLES = 100
+MAX_CYCLES = 500
 INACCESSIBLE = 9999
 
 
@@ -449,7 +450,7 @@ class World:
                         item_destinations_temp += self.graph[x][6]
                     inv_temp = self.get_inventory(start_items_temp,item_destinations_temp)
                     if len(inv_temp) <= MAX_INVENTORY:
-                        if (self.entrance_shuffle == "None" and "Dungeon Shuffle" not in self.variant) or self.check_ds_access(dest,False,start_items_temp):
+                        if (self.entrance_shuffle == "None" and self.dungeon_shuffle == "None") or self.check_ds_access(dest,False,start_items_temp):
                             prereq_list[0].append(prereq)
                         else:
                             ds_list.append(prereq)
@@ -485,7 +486,7 @@ class World:
                 for x in self.graph[node][11]:
                     if print_log:
                         print("Considering:",self.item_locations[x][9])
-                    if self.is_filled(x) and self.item_pool[self.item_locations[x][3]][5]>1:
+                    if self.is_filled(x) and self.item_pool[self.item_locations[x][3]][5]>1 and self.item_locations[x][3]<100:
                         if print_log:
                             print("Removing...")
                         if self.unfill_item(x,print_log):
@@ -703,17 +704,18 @@ class World:
             return self.random_fill([106]*6, locations)
         return self.random_fill([100, 101, 102, 103, 104, 105], locations)
 
-
     def lock_dark_spaces(self,print_log=False):
         nodes = []
         for edge in self.logic:
             if self.logic[edge][0] >-1 and self.logic[edge][3]:
                 nodes.append(self.logic[edge][1])
 
+        self.update_all_ds_access()
         for node in nodes:
-            if not self.check_ds_access(node, True):
+            if not self.check_ds_access(node, True, [1], print_log):
                 if print_log:
-                    print("ERROR: No Dark Space could be accessed ")
+                    print("Starting over: Freedan can't reach",node,self.graph[node])
+                    breakpoint()
                 return False
             else:
                 found_locked_ds = False
@@ -783,7 +785,10 @@ class World:
 #        return exits_remaining
 
 
-    # Link one exit to another
+    # Link one exit to another, making origin_exit act like dest_exit; that is,
+    # replace the transition data of origin_exit with the vanilla transition data of dest_exit.
+    # Check_Connections makes the transition "reflexive", such that the exit that is the
+    # reverse of dest_exit acts like the exit that is the reverse of origin_exit.
     def link_exits(self, origin_exit, dest_exit, print_log=False, check_connections=True, update_graph=True):
         if origin_exit not in self.exits:
             if print_log:
@@ -794,14 +799,16 @@ class World:
                 print("ERROR: Invalid destination (link)", dest_exit)
             return False
         if print_log and self.exits[origin_exit][1] > 0 and origin_exit > 21:
-            print("WARNING: Origin already linked", origin_exit)
+            print("WARNING: Origin already linked:", origin_exit, self.exits[origin_exit])
+            breakpoint()
         if print_log and self.exits[dest_exit][2] > 0 and dest_exit > 21:
-            print("WARNING: Destination already linked", dest_exit)
+            print("WARNING: Destination already linked:", dest_exit, self.exits[dest_exit])
+            breakpoint()
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
         self.exit_log.append([origin_exit,dest_exit])
         if print_log:
-            print("   Linked",self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+            print("   Linked",origin_exit,self.exits[origin_exit][10],"-",dest_exit,self.exits[dest_exit][10])
         if update_graph and self.exits[origin_exit][5]:
             origin = self.exits[origin_exit][3]
             dest = self.exits[dest_exit][4]
@@ -818,6 +825,7 @@ class World:
                 if self.exits[new_origin][1] != -1 or self.exits[new_dest][2] != -1:
                     if print_log:
                         print("WARNING: Return exit already linked:",new_origin,new_dest)
+                        breakpoint()
                 else:
                     self.link_exits(new_origin, new_dest, print_log, False, update_graph)
         return True
@@ -885,11 +893,13 @@ class World:
     def find_exit(self,origin_exits_ls=[],dest_exits_ls=[],print_log=False,check_direction=False,check_progression=False,check_ds_access=False,test=False):
         if not origin_exits_ls:
             if print_log:
-                print("ERROR: No accessible exits available")
+                print("  No more accessible exits available")
+                #breakpoint()
             return False
         elif not dest_exits_ls:
             if print_log:
-                print("ERROR: No destination exits available")
+                print("  No destination exits available from",origin_exits_ls)
+                #breakpoint()
             return False
 
         origin_exits = origin_exits_ls[:]
@@ -908,7 +918,8 @@ class World:
 
             if not origin_exit:
                 if print_log:
-                    print("ERROR: No accessible exits available")
+                    print("  No more accessible exits available")
+                    #breakpoint()
                 return False
 
             direction = self.exit_direction(origin_exit)
@@ -924,7 +935,8 @@ class World:
 
                 if not dest_exit:
                     if print_log:
-                        print("ERROR: No destination exits available")
+                        print("  No destination exits available from",origin_exit)
+                        #breakpoint()
                     return False
 
                 direction_new = self.exit_direction(dest_exit)
@@ -1038,7 +1050,7 @@ class World:
                 if is_start:
                     start_island = island
                 else:
-                    if dungeon == 9999 or "Dungeon Shuffle" not in self.variant:
+                    if dungeon == 9999 or self.dungeon_shuffle == "None":
                         dungeon = 0
                     islands[dungeon].append(island)
 
@@ -1052,7 +1064,9 @@ class World:
             return -1
 
         if self.exits[exit][8] and not self.exits[exit][9]:
-            return 1
+            if self.dungeon_shuffle == "Chaos":
+                return 1
+            return self.exits[exit][8]
         return 0
 
     def check_dungeon(self,exit1=-1,exit2=-1,print_log=False):
@@ -1075,33 +1089,9 @@ class World:
 
     # Entrance randomizer
     def shuffle_exits(self,print_log=False):
-
-        # Dungeon Chaos seeds are quite long. Remove some empty corridors to mitigate that.
-        # 69 Inca U-turn room; 79 Inca statue "puzzle";
-        # 140,141,144,145 Mine elevator; 390 Wat corridor before spirit
-        dc_empty_dungeon_nodes = [69, 79, 140, 141, 144, 145, 390]
-        for nodenum in dc_empty_dungeon_nodes:
-            self.graph.pop(nodenum)
-        # Stitch up exits around empty Inca nodes.
-        self.exits[136][0] = 139
-        self.exits[139][0] = 136
-        self.exits[136][4] = 95
-        # Stitch up exits around empty Mine nodes.
-        self.exits[224][0] = 241
-        self.exits[241][0] = 224
-        self.exits[224][4] = 146
-        # Stitch up exits around empty Wat node.
-        self.exits[596][0] = 599
-        self.exits[599][0] = 596
-        self.exits[596][4] = 391
-        # Now drop all the exits we don't need.
-        dc_exits_from_empty_dungeon_nodes = [137, 118, 119, 138, 225, 236, 237, 238, 239, 240, 597, 598]
-        for exitnum in dc_exits_from_empty_dungeon_nodes:
-            self.exits.pop(exitnum)
-        
         # Map passages and internal dungeon exits to graph and list all available exits
         one_way_exits = []
-        DS = ("Dungeon Shuffle" in self.variant)
+        DS = (self.dungeon_shuffle != "None")
         ER = (self.entrance_shuffle != "None")
         for x in self.exits:
             if self.is_exit_coupled(x) and (not self.exits[x][3] or not self.exits[x][4]):    # Map missing O/D data for coupled exits
@@ -1110,7 +1100,7 @@ class World:
                 self.exits[x][4] = self.exits[xprime][3]
 
             if not self.exits[x][1] and (self.exits[x][5] or self.exits[x][6]) and not self.exits[x][7]:
-                if (DS and self.exits[x][8] and not self.exits[x][9]) or (ER and (not self.exits[x][8] or self.exits[x][9])):
+                if (DS and self.exits[x][8] not in [0,11] and not self.exits[x][9]) or (ER and (not self.exits[x][8] or self.exits[x][9])):
                     self.exits[x][1] = -1    # Mark exit for shuffling
                     self.exits[x][2] = -1
                     if not self.is_exit_coupled(x):
@@ -1127,11 +1117,7 @@ class World:
             self.link_exits(720,720,print_log)
 
         # Special case for Slider exits in Mu and Angel Dungeon
-        if "Dungeon Shuffle" in self.variant:
-            # Mu -- NO LONGER NECESSARY
-            #self.link_exits(356,356,print_log,False)
-            #self.link_exits(357,357,print_log,False)
-            # Angel Dungeon
+        if self.dungeon_shuffle != "None":
             if random.randint(0,1):
                 self.link_exits(408,414,print_log,False)
                 self.link_exits(409,415,print_log,False)
@@ -1142,6 +1128,120 @@ class World:
                 self.link_exits(409,409,print_log,False)
                 self.link_exits(414,414,print_log,False)
                 self.link_exits(415,415,print_log,False)
+
+        # Dungeon Chaos gets very special handling.
+        if self.dungeon_shuffle == "Chaos":
+        
+            # Dungeon Chaos seeds are quite long. Remove some empty corridors to mitigate that.
+            # 69 Inca U-turn room; 79 Inca statue "puzzle";
+            # 140,141,144,145 Mine elevator; 259 Angl empty water room;
+            # Wat: 375,379 hall before and road to main hall; 390 corridor before spirit
+            dc_empty_dungeon_nodes = [69, 79, 140, 141, 144, 145, 259, 375, 379, 390]
+            for nodenum in dc_empty_dungeon_nodes:
+                self.graph[nodenum] = [False, [], 0, [0,0,0,b"\x00"], 0, "Trash node", [], False, [], [], [], [], [], [], [], []]
+                self.logic[10000+nodenum] = [0,1,nodenum,False,[]]
+            # Remove from the shuffle pool all the exits we don't need.
+            dc_exits_from_empty_dungeon_nodes = [137, 118, 119, 138, 225, 236, 237, 238, 239, 240, 398, 407, 583, 584, 585, 586, 597, 598]
+            for exitnum in dc_exits_from_empty_dungeon_nodes:
+                self.link_exits(exitnum,self.exits[exitnum][0],print_log,False)
+                
+            # Simple sequence-breaking to skip Freedan is assumed.
+            self.logic[144][3] = False   # No Freedan for Garden cage.
+            self.logic[177][4] = [[511,1]]   # No Freedan to traverse Mu.
+            self.logic[175] = self.logic[177]
+            self.logic[176] = self.logic[177]
+            
+            # Don't require Pyramid rooms too early.
+            for edge in range(290,314):
+                self.logic[edge][4].append([500,1])
+            self.graph[420][1] = []
+            self.graph[421][1] = []
+            for edge in [10297,10298,10299,10300]:
+                self.logic[edge][4] = [[36,1],[500,1]]
+                
+            # Link the large Pyramid rooms as in vanilla.
+            for exitnum in [638, 644, 650, 656, 664, 670]:
+                self.link_exits(exitnum,exitnum,print_log,True)
+                
+            # Don't consider porting from a Pyramid room to Dao in logic.
+            for regionid in [419, 423, 425, 428, 430, 435, 437, 441, 450]:
+                self.graph[regionid][1] = []
+            
+            # The code needs a lot of help creating completable Dungeon Chaos seeds.
+            dc_exits_from_kara = [73,247,543,599]
+            dc_exits_from_dead_ends = [67,125,129,141,149,231,235,243,245,294,296,298,300,339,531,533,537,539,589,641,647,653,661,667,673]
+            dc_exits_behind_reflexive_gates = [126,234,534]
+            dc_exits_from_boring_corridors = [[61,62], [123,124], [143,144], [403,404], [405,406], [411,412], [541,542]]
+            dc_exits_from_interesting_corridors = [[63,64], [121,122], [139,140], [223,226], [227,228], [229,232], [274,281], [290,291], [524,526], [535,536], [569,570], [577,578], [581,582]]
+            dc_exits_from_t_junctions = [[65,66,68], [127,128], [133,134], [147,148,150], [241,242,244], [276,287,289], [280,301], [282,283,285], [335,336,338], [525,527,529], [573,574], [587,588,590]]
+            dc_exits_from_pyramid_junction = [636,642,648,654,662,668]
+            dc_vanilla_exits_to_pyramid_junction = [637,643,649,655,663,669]
+            dc_dungeon_entrances_to_link = [60,120,222,402,462,522,562]
+            random.shuffle(dc_exits_from_dead_ends)
+            random.shuffle(dc_dungeon_entrances_to_link)
+            random.shuffle(dc_exits_from_interesting_corridors)
+            random.shuffle(dc_exits_from_boring_corridors)
+            random.shuffle(dc_exits_from_t_junctions)
+            random.shuffle(dc_exits_from_pyramid_junction)
+            
+            # Dungeon entrances lead to a T junction via a "boring" corridor, then an interesting corridor branches from there.
+            for dc_next_dungeon_entrance_to_link in dc_dungeon_entrances_to_link:
+                dc_next_exits_from_boring_corridor = dc_exits_from_boring_corridors.pop()
+                random.shuffle(dc_next_exits_from_boring_corridor)
+                dc_next_exits_from_t_junction = dc_exits_from_t_junctions.pop()
+                random.shuffle(dc_next_exits_from_t_junction)
+                dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                random.shuffle(dc_next_exits_from_interesting_corridor)
+                self.link_exits(dc_next_dungeon_entrance_to_link,self.exits[dc_next_exits_from_boring_corridor[0]][0],print_log,True)
+                self.link_exits(dc_next_exits_from_boring_corridor[1],self.exits[dc_next_exits_from_t_junction[0]][0],print_log,True)
+                self.link_exits(dc_next_exits_from_t_junction[1],self.exits[dc_next_exits_from_interesting_corridor[0]][0],print_log,True)
+                
+            # Pyramid rooms are more likely to lead to dead-end items instead of other doors.
+            for exitnum in [640,646,652,660,666,672,658]:
+                if random.randint(0,9) < 6:
+                    self.link_exits(dc_exits_from_dead_ends.pop(),self.exits[exitnum][0],print_log,True)
+            
+            # The Pyramid junction is more likely to lead to Pyramid rooms.
+            for exit in dc_exits_from_pyramid_junction:
+                if random.randint(0,9) < 4:
+                    self.link_exits(dc_vanilla_exits_to_pyramid_junction.pop(),self.exits[exit][0],print_log,True)
+                    
+            # Attach Kara rooms to interesting corridors.
+            for exit in dc_exits_from_kara:
+                dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                random.shuffle(dc_next_exits_from_interesting_corridor)
+                self.link_exits(exit,self.exits[dc_next_exits_from_interesting_corridor[0]][0],print_log,True)
+            
+            # Attach a subset of the remaining dead ends to remaining identified exits.
+            for exit in dc_exits_from_dead_ends:
+                room_type_roll = random.randint(0,10)
+                if room_type_roll < 2 and len(dc_exits_from_boring_corridors) > 0:
+                    dc_next_exits_from_boring_corridor = dc_exits_from_boring_corridors.pop()
+                    random.shuffle(dc_next_exits_from_boring_corridor)
+                    self.link_exits(dc_next_exits_from_boring_corridor[0],self.exits[exit][0],print_log,True)
+                elif room_type_roll < 6 and len(dc_exits_from_interesting_corridors) > 0:
+                    dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                    random.shuffle(dc_next_exits_from_interesting_corridor)
+                    self.link_exits(dc_next_exits_from_interesting_corridor[0],self.exits[exit][0],print_log,True)
+                elif room_type_roll < 7 and len(dc_exits_behind_reflexive_gates) > 0:
+                    self.link_exits(dc_exits_behind_reflexive_gates.pop(),self.exits[exit][0],print_log,True)
+                else:
+                    continue
+            
+            ## Give the rando some help making Freedan-requiring nodes accessible by Freedan.
+            #dc_exits_from_freedan_nodes = [133,229,292,304,306,466,469,578,579,649,663]
+            #dc_exits_from_t_junctions = [[66,68], [135,136], [147,148,150], [241,242,244], [278,297,299], [280,301], [282,283,285], [335,336,338], [525,528,532], [573,574], [587,588,590]]
+            #dc_exits_from_ds_rooms = [60,149,153,227,233,273,277,468,471,524,539,575]
+            #random.shuffle(dc_exits_from_t_junctions)
+            #random.shuffle(dc_exits_from_ds_rooms)
+            #for exit in dc_exits_from_freedan_nodes:
+            #    #breakpoint()
+            #    dc_next_exits_from_t_junction = dc_exits_from_t_junctions.pop()
+            #    random.shuffle(dc_next_exits_from_t_junction)
+            #    self.link_exits(exit,self.exits[dc_next_exits_from_t_junction[0]][0],print_log,True)
+            #    if True:#random.randint(0,1):
+            #        dc_next_exit_from_ds_room = dc_exits_from_ds_rooms.pop()
+            #        self.link_exits(dc_next_exits_from_t_junction[1],self.exits[dc_next_exit_from_ds_room][0],print_log,True)
 
         # If not in Uncoupled mode, map one_way exits first
         exit_log = []
@@ -1171,6 +1271,7 @@ class World:
             print(" Graph updated. Beginning exit shuffle...")
 
         # Build world skeleton with islands
+        #breakpoint()
         self.unsolve()
         island_result = self.build_islands()
         start_island = island_result[0]
@@ -1204,7 +1305,8 @@ class World:
 
             if not dest_exits_new or not origin_exits_new or self.is_accessible(nodes_new[0]):
                 if print_log:
-                    print("  NOT ELIGIBLE")
+                    print_log = print_log
+                    #print("  NOT ELIGIBLE")
             else:
                 if (check_progression and not origin_exits_new) or (self.entrance_shuffle != "Uncoupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
                     quarantine.append(island)
@@ -1216,8 +1318,10 @@ class World:
 
                     result = self.find_exit(origin_exits,dest_exits_new,print_log,check_direction,True)
                     if not result:
+                        if print_log:
+                            print("  Quarantined",island)
                         quarantine.append(island)
-                    else:    # Causes a list overrun for seed 35874865 Chaos Dungeonshuffle.
+                    else:
                         if print_log:
                             print("NEW ISLAND:")
                             for y in nodes_new:
@@ -1283,6 +1387,7 @@ class World:
                 if not result:
                     if print_log:
                         print("ERROR: Could not find Dark Space access")
+                        #breakpoint()
                     return False
                 else:
                     dest_exits_ds = result[3]
@@ -1320,6 +1425,7 @@ class World:
                 else:
                     if print_log:
                         print("WARNING: This shouldn't happen")
+                        breakpoint()
                     origin_exits = []
 
         # Quality check for missing exits
@@ -1328,21 +1434,31 @@ class World:
         for exit in self.exits:
             if self.exits[exit][1] == -1:
                 if print_log:
-                    print("How'd we miss this one??", self.exits[exit][10])
+                    print(" Unmapped exit:",exit,self.exits[exit])
                 origin_exits.append(exit)
             if self.exits[exit][2] == -1:
                 if print_log:
-                    print("This one too??", self.exits[exit][10])
+                    print(" No exit mapped to:",exit,self.exits[exit])
                 dest_exits.append(exit)
+            if origin_exits:
+                random.shuffle(origin_exits)
+            if dest_exits:
+                random.shuffle(dest_exits)
 
         while origin_exits:
             origin_exit = origin_exits.pop(0)
             if not dest_exits:
                 if print_log:
-                    print("ERROR: Entrance rando failed")
+                    print("ERROR: Entrance rando failed: no remaining exits to map to")
                 return False
-            dest_exit = dest_exits.pop(0)
+            if dest_exits[0] == self.exits[origin_exit][0] and len(dest_exits) > 1:
+                dest_exit = dest_exits.pop(1) # Don't point a door to itself, if possible
+            else:
+                dest_exit = dest_exits.pop(0)
             self.link_exits(origin_exit,dest_exit,print_log,self.entrance_shuffle != "Uncoupled")
+            if self.entrance_shuffle != "Uncoupled":  # Reverse direction is implicitly remapped.
+                origin_exits.remove(self.exits[dest_exit][0])
+                dest_exits.remove(self.exits[origin_exit][0])
 
         # Wrap it up
 #        self.reset_progress()
@@ -1358,6 +1474,11 @@ class World:
         for x in self.graph:
             self.graph[x][4] = 0
             self.graph[x][9].clear()
+
+        # Dungeon Chaos acts like Chaos for most DSes
+        if self.dungeon_shuffle == "Chaos":
+            for ds_to_unlock in [10,14,22,39,57,66,77,88,103,114,129,146]:
+                self.item_locations[ds_to_unlock][4].clear()
 
         # Find nodes that contain Dark Spaces
         pyramid_ds_id = 130          # Special case for Pyramid DS
@@ -1478,7 +1599,7 @@ class World:
 
 
     # Check if a node has Dark Space access
-    def check_ds_access(self, start_node=-1, need_freedan=False, items=[]):
+    def check_ds_access(self, start_node=-1, need_freedan=False, items=[], print_log=False):
         if start_node not in self.graph:
             return False
         if not self.graph[start_node][2] or self.graph[start_node][4] == 2 or (self.graph[start_node][4] == 1 and not need_freedan):
@@ -1488,12 +1609,14 @@ class World:
         else:
             to_visit = [start_node]
             visited = []
-            ds_access =  False
+            ds_access = False
             while not ds_access and to_visit:
                 node = to_visit.pop(0)
                 visited.append(node)
-                if self.check_ds_access(node,need_freedan):
-                    print("Node '",self.graph[start_node][5],"' has DS access via ",self.graph[node][5])
+                #breakpoint()
+                if start_node != node and self.check_ds_access(node,need_freedan,items,print_log):
+                    if print_log:
+                        print("Node '",self.graph[self.graph[start_node][5]],"' has DS access via node",self.graph[self.graph[node][5]])
                     return True
                 else:
                     for edge in self.graph[node][12]:
@@ -1526,6 +1649,17 @@ class World:
                     to_visit.append(x)
 
         return self.update_ds_access(to_visit,access_mode,ds_nodes)
+
+
+    # Update all DS access based on current graph connections.
+    def update_all_ds_access(self):
+        for node in self.graph:
+            found_discrepancy = False
+            for dest_node in self.graph[node][10]:
+                if self.graph[dest_node][4] < self.graph[node][4]:
+                    found_discrepancy = True                
+            if found_discrepancy:
+                self.update_ds_access(self.graph,self.graph[node][4],self.graph[node][9])
 
 
     # Check a logic edge to see if prerequisites have been met
@@ -1580,8 +1714,10 @@ class World:
                 self.graph[dest][8].append(origin)
 
             # Dark Space access data
-            if self.graph[dest][4] > self.graph[origin][4]:
-                self.update_ds_access([origin],self.graph[dest][4],self.graph[dest][9])
+            #if self.graph[dest][4] > self.graph[origin][4]:
+            #    self.update_ds_access([origin],self.graph[dest][4],self.graph[dest][9])
+            if self.graph[dest][4] < self.graph[origin][4]:
+                self.update_ds_access([dest],self.graph[origin][4],self.graph[origin][9])
 
         # Return list of newly-accessible nodes
         if self.is_accessible(origin) and not self.is_accessible(dest):
@@ -1827,7 +1963,8 @@ class World:
                 return False
 
         # Shuffle exits
-        if self.entrance_shuffle != "None" or "Dungeon Shuffle" in self.variant:
+        #breakpoint()
+        if self.entrance_shuffle != "None" or self.dungeon_shuffle != "None":
             if not self.shuffle_exits(print_log):
                 if print_log:
                     print("ERROR: Entrance rando failed")
@@ -1995,6 +2132,7 @@ class World:
             cycle += 1
             if print_log:
                 print(" Cycle",cycle)
+                #breakpoint()
             if cycle > MAX_CYCLES:
                 if print_log:
                     print("ERROR: Max cycles exceeded")
@@ -2068,6 +2206,7 @@ class World:
                         if print_log:
                             print("ERROR: Couldn't progress any further")
                             self.print_graph()
+                            #breakpoint()
                         return False
 
                     progress = False
@@ -2223,7 +2362,7 @@ class World:
                 overworld_links.append({"region": region_name, "continent": continent_name})
             spoiler["overworld_entrances"] = overworld_links
 
-        if self.entrance_shuffle != "None":
+        if self.entrance_shuffle != "None" or self.dungeon_shuffle != "None":
             exit_links = []
             for exit in self.exits:
                 exit_name = self.exits[exit][10]
@@ -2460,6 +2599,12 @@ class World:
                     f.write(binascii.unhexlify(format(map,"02x"))+b"\x03")
                     idx_tier4 += 1
         #print("maps done")
+        
+        # Dungeon Chaos has more transformation Dark Spaces
+        if self.dungeon_shuffle == "Chaos":
+            for x in [14,57]:
+                f.seek(int(self.item_locations[x][5],16) + rom_offset)
+                f.write(b"\x03")
 
         # Items and abilities
         for x in self.item_locations:
@@ -2615,8 +2760,14 @@ class World:
                     if self.exits[new_exit][6]:
                         new_data = self.exits[new_exit][6]
                     else:
+                        if print_log:
+                            print_log = print_log
+                            #breakpoint()
+                        new_data = bytearray(8)
                         f.seek(int(self.exits[new_exit][5], 16) + rom_offset)
-                        new_data = f.read(8)
+                        f.readinto(new_data)
+                        if self.dungeon_shuffle == "Chaos" and self.exits[new_exit][8] > 0 and self.exits[new_exit][8] < 11 and not self.exits[new_exit][9]:
+                            new_data[5] = 0x7f & new_data[5]   # Remove in-dungeon respawn points in Dungeon Chaos
                     er_patch_data.append([self.exits[exit][5], new_data])
                 except:
                     if print_log:
@@ -3032,6 +3183,13 @@ class World:
         elif settings.entrance_shuffle.value == EntranceShuffle.UNCOUPLED.value:
             self.entrance_shuffle = "Uncoupled"
 
+        if settings.dungeon_shuffle.value == DungeonShuffle.NONE.value:
+            self.dungeon_shuffle = "None"
+        elif settings.dungeon_shuffle.value == DungeonShuffle.BASIC.value:
+            self.dungeon_shuffle = "Basic"
+        elif settings.dungeon_shuffle.value == DungeonShuffle.CHAOS.value:
+            self.dungeon_shuffle = "Chaos"
+
         if settings.start_location.value == StartLocation.SOUTH_CAPE.value:
             self.start_mode = "South Cape"
         elif settings.start_location.value == StartLocation.SAFE.value:
@@ -3067,9 +3225,6 @@ class World:
 
         if settings.overworld_shuffle:
             self.variant.append("Overworld Shuffle")
-
-        if settings.dungeon_shuffle:
-            self.variant.append("Dungeon Shuffle")
 
         if settings.open_mode:
             self.variant.append("Open Mode")
@@ -3902,6 +4057,7 @@ class World:
             422: [False, [423],     2, [5,21,0,b"\x00"], 0, "Pyramid: Map 209 (W)", [], False, [], [], [], [], [], [], [], []],
             423: [False, [422,411], 2, [5,21,0,b"\x00"], 0, "Pyramid: Map 209 (E)", [], False, [], [], [], [], [], [], [], []],
             424: [False, [],        2, [5,21,0,b"\x00"], 0, "Pyramid: Map 210", [], False, [], [], [], [], [], [], [], []],
+            10424: [False, [],      2, [5,21,0,b"\x00"], 0, "Pyramid: Map 210 x 211", [], False, [], [], [], [], [], [], [], []],  # Artificial node to restrict this room in logic
             425: [False, [411],     2, [5,21,0,b"\x00"], 0, "Pyramid: Map 211", [], False, [], [], [], [], [], [], [], []],
             426: [False, [],        2, [5,21,0,b"\x00"], 0, "Pyramid: Map 212 (N)", [], False, [], [], [], [], [], [], [], []],
             427: [False, [426],     2, [5,21,0,b"\x00"], 0, "Pyramid: Map 212 (center)", [], False, [], [], [], [], [], [], [], []],
@@ -4109,8 +4265,8 @@ class World:
             147: [0, 195, 199,  True, [[64, 1]]],            # Map 84 progression w/ Dark Friar
             148: [0, 195, 199,  True, [[67, 1]]],            # Map 84 progression w/ Firebird
             149: [0, 195, 199,  True, [[65, 1]]],            # Map 84 progression w/ Aura Barrier
-            150: [0, 197, 199,  True, [[64, 1]]],            # Map 84 progression w/ Dark Friar
-            151: [0, 197, 199,  True, [[67, 1]]],            # Map 84 progression w/ Firebird
+            #150: [0, 197, 199,  True, [[64, 1]]],            # Map 84 progression w/ Dark Friar
+            #151: [0, 197, 199,  True, [[67, 1]]],            # Map 84 progression w/ Firebird
             152: [0, 170,  16, False, [[502, 1]]],           # Moon Tribe passage w/ spirits healed
 
             # Seaside Palace
@@ -4208,6 +4364,10 @@ class World:
             297: [0, 417, 416, False, [[63, 1]]],             # Map 206 progression w/ Spin Dash
             298: [0, 418, 419, False, [[63, 1]]],             # Map 206 progression w/ Spin Dash
             299: [0, 419, 418, False, [[63, 1]]],             # Map 206 progression w/ Spin Dash
+            10297: [0,420,421, False, []       ],             # Map 208 traversal is free except in Dungeon Chaos
+            10298: [0,421,420, False, []       ],             # Map 208 traversal is free except in Dungeon Chaos
+            10299: [0,10424,425,False,[]       ],             # Map 210 to Map 211 is free except in Dungeon Chaos
+            10300: [0,425,10424,False,[]       ],             # Map 211 to Map 210 is free except in Dungeon Chaos
             300: [0, 426, 427,  True, [[36, 1]]],             # Map 212 progression w/ Aura
             301: [0, 426, 427,  True, [[66, 1]]],             # Map 212 progression w/ Earthquaker
             302: [0, 427, 428,  True, [[36, 1]]],             # Map 212 progression w/ Aura
@@ -4944,16 +5104,14 @@ class World:
             19: [0, b"\x16", 14, 410, "3ba9b", "0cd55", "3b6a3", "NW Continent", "Pyramid"]
         }
 
-
         # Database of special map exits that don't conform to the typical "02 26" format, IDs correspond to self.exits
         # FORMAT: { ID: [MapAddr, Xaddr, Yaddr, FaceDirAddr, CameraAddr]}
         self.exits_detailed = {
             15: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
         }
 
-
         # Database of map exits
-        # FORMAT: { ID: [CoupleID (0 if one-way), ShuffleTo (0 if no shuffle), ShuffleFrom (0 if no shuffle), FromRegion, ToRegion,
+        # FORMAT: { ID: [CoupleID (0 if one-way), ShuffleTo/ActLike (0 if no shuffle), ShuffleFrom/BeActedLikeBy (0 if no shuffle), FromRegion, ToRegion,
         #           ROM_Location, DestString,BossFlag, DungeonID, DungeonEntranceFlag, Name]}
         # FOR DUNGEON SHUFFLE: Dungeon IDs begin with 1 (Tunnel) and end with 12 (Mansion)
         self.exits = {
@@ -5509,8 +5667,8 @@ class World:
             667: [666, 0, 0,   0,   0, "1a754", b"", False, 10, False, "Pyramid: Map 218 to Map 213"],
             668: [669, 0, 0, 413, 424, "1a386", b"", False, 10, False, "Pyramid: Map 204 to Map 210"],  # Room 6
             669: [668, 0, 0,   0,   0, "1a4a6", b"", False, 10, False, "Pyramid: Map 210 to Map 204"],
-            670: [671, 0, 0, 424, 425, "1a4b2", b"", False, 10, False, "Pyramid: Map 210 to Map 211"],
-            671: [670, 0, 0,   0,   0, "1a50e", b"", False, 10, False, "Pyramid: Map 211 to Map 210"],
+            670: [671, 0, 0, 424,10424,"1a4b2", b"", False, 10, False, "Pyramid: Map 210 to 210x211"],
+            671: [670, 0, 0,   0,   0, "1a50e", b"", False, 10, False, "Pyramid: 210x211 to Map 210"],
             672: [673, 0, 0, 425, 447, "1a51a", b"", False, 10, False, "Pyramid: Map 211 to Map 218"],
             673: [672, 0, 0,   0,   0, "1a748", b"", False, 10, False, "Pyramid: Map 218 to Map 211"],
 

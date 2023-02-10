@@ -27,6 +27,9 @@ class Patch:
     def read(self, n: int = None):
         return self.temp.read(n)
 
+    def readinto(self, container: bytearray) -> None:
+        return self.temp.readinto(container)
+
     def find(self, sub, start=None, end=None):
         d = self.read()
         return d.find(sub, start, end)
