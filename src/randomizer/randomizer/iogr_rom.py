@@ -18,7 +18,7 @@ from .models.enums.start_location import StartLocation
 
 VERSION = "4.6.0"
 
-MAX_RANDO_RETRIES = 500
+MAX_RANDO_RETRIES = 100
 PRINT_LOG = True
 
 KARA_EDWARDS = 1
@@ -177,7 +177,6 @@ class Randomizer:
         self.logger = logging.getLogger("IOGR")
 
     def generate_rom(self, filename: str, settings: RandomizerData):
-        #breakpoint()
         patch = self.__generate_patch__()
         rom_offset = self.__get_offset__(patch)
 
@@ -3249,7 +3248,7 @@ class Randomizer:
         seed_adj = 0
         #self.w = World(settings, statues, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
         while not done:
-            if seed_adj > MAX_RANDO_RETRIES:
+            if (seed_adj > MAX_RANDO_RETRIES and settings.dungeon_shuffle.value != DungeonShuffle.CHAOS.value) or (seed_adj > MAX_RANDO_RETRIES**2):   # Dungeon Chaos gets extra attempts...
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
             elif seed_adj > 0:
