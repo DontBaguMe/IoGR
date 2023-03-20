@@ -1,0 +1,37 @@
+arch 65816
+hirom
+
+
+
+
+
+TextFathersJournalSubstitute:
+db "It reads: ",$2d,"He who is",$cb
+db "valiant and pure of",$cb
+db "spirit..."
+db $cf
+db $2d,"... may find the Holy",$cb
+db "Grail in the Castle of...",$cb
+db "Aauugghh",$2e
+db $cf
+db "Here a page is missing."
+db $ca
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

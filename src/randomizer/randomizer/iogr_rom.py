@@ -36,7 +36,6 @@ GEMS_Z3_NORMAL = 28
 GEMS_Z3_HARD = 31
 GEMS_Z3_EXTREME = 34
 
-INV_FULL = b"\x5c\x8e\xc9\x80"
 FORCE_CHANGE = b"\x22\x30\xfd\x88"
 CLEAR_ENEMIES = b"\x22\x9B\xFF\x81"
 
@@ -184,55 +183,8 @@ class Randomizer:
                 statue_req = StatueReq.PLAYER_CHOICE.value
 
         ##########################################################################
-        #                          Global functions/misc
+        #                  Generate hash code for title screen
         ##########################################################################
-        # Write code for clearing enemy tally data
-        patch.seek(int("1ff9b", 16) + rom_offset)
-        patch.write(b"\x5A\x48\xA0\x00\x00\xA9\x00\x00\x99\x80\x0A\xC8\xC8\xC0\x20\x00\xD0\xF6\x68\x7A\x6B")
-
-        ##########################################################################
-        #                             Early Firebird
-        ##########################################################################
-        # Write new Firebird logic into unused memory location
-        f_firebird = open(BIN_PATH + "02f0c0_firebird.bin", "rb")
-        patch.seek(int("2f0c0", 16) + rom_offset)
-        patch.write(f_firebird.read())
-        f_firebird.close()
-
-        patch.seek(0x02f828 + rom_offset)
-        patch.write(b"\x02\x3b\x71\x36\xf8\x82\xa9\x00\x10\x04\x12\x6b")
-        patch.seek(0x02f834 + rom_offset)
-        patch.write(b"\x02\xc1\xad\xd4\x0a\xc9\x02\x00\xf0\x01\x6b\x02\x36\x02\x39\x80\xef")
-
-        if settings.firebird == 1:
-            # Change firebird logic
-            # Requires Shadow's form, Crystal Ring (switch #$3e) and Kara rescued (switch #$8a)
-            patch.seek(int("2cd07", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc0\xf0")
-            patch.seek(int("2cd88", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc1\xf0")
-            patch.seek(int("2ce06", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc2\xf0")
-            patch.seek(int("2ce84", 16) + rom_offset)
-            patch.write(b"\xa0\x00\x00\x4c\xc3\xf0")
-
-            # Load firebird assets into every map
-            patch.seek(int("3e03a", 16) + rom_offset)
-            patch.write(b"\x80\x00")
-            patch.seek(int("eaf0", 16) + rom_offset)
-            patch.write(b"\x22\x28\xf8\x82\xea")
-
-        ##########################################################################
-        #                            Modify ROM Header
-        ##########################################################################
-        # New game title
-        patch.seek(int("ffd1", 16) + rom_offset)
-        patch.write(b"\x52\x41\x4E\x44\x4F")
-
-        # Put randomizer hash code on start screen
-        patch.seek(int("1da4c", 16) + rom_offset)
-        patch.write(b"\x52\x41\x4E\x44\x4F\x90\x43\x4F\x44\x45\x90")
-
         hash_str = filename
         h = hashlib.sha256()
         h.update(hash_str.encode())
@@ -252,872 +204,189 @@ class Randomizer:
             hash_final += hash_dict[key]
             i += 1
 
-        # print binascii.hexlify(hash_final)
-        patch.seek(int("1da57", 16) + rom_offset)
-        patch.write(hash_final)
-
-        ##########################################################################
-        #                     Add level choice to intro screen
-        ##########################################################################
-        # Update menu logic
-        patch.seek(int("be43f", 16) + rom_offset)  # Level defaults to Intermediate
-        patch.write(b"\xA9\x01\x00\x9C\x8E\x0D")
-        patch.seek(0x0be4ae + rom_offset)          # 3 difficulty levels available
-        patch.write(b"\x03")
-        patch.seek(0x0be7b5 + rom_offset)          # --- and on the other menu too
-        patch.write(b"\x03")
-        patch.seek(int("bf5d2", 16) + rom_offset)  # Change "Sound" to "Level"
-        patch.write(b"\x4b\x84\xa6\x84\x8b")
-        patch.seek(0x0bf55a + rom_offset)          # --- and on the other menu too
-        patch.write(b"\x4b\x84\xa6\x84\x8b")
-        patch.seek(int("bf667", 16) + rom_offset)  # Insert level text pointers
-        patch.write(b"\xC0\xFC\xCD\xFC\xDA\xFC\xE7\xFC")
-        patch.seek(int("bfcc0", 16) + rom_offset)  # Insert level name text
-        patch.write(b"\x41\x84\x86\x88\x8d\x8d\x84\xa2\xac\xac\xac\xac\xca\x48\x8d\xa4\x84\xa2\x8c\x84\x83\x88\x80\xa4\x84\xca")
-        patch.write(b"\x40\x83\xa6\x80\x8d\x82\x84\x83\xac\xac\xac\xac\xca\x44\xa8\xa0\x84\xa2\xa4\xac\xac\xac\xac\xac\xac\xca")
-
-        ##########################################################################
-        #                           Negate useless switches
-        #                 Frees up switches for the randomizer's use
-        ##########################################################################
-        patch.seek(int("48a03", 16) + rom_offset)  # Switch 17 - Enter Seth's house
-        patch.write(b"\x10")
-        patch.seek(int("4bca9", 16) + rom_offset)  # Switch 18 - Enter Will's house (1/2)
-        patch.write(b"\x10")
-        patch.seek(int("4bccc", 16) + rom_offset)  # Switch 18 - Enter Will's house (2/2)
-        patch.write(b"\x10")
-        patch.seek(int("4bcda", 16) + rom_offset)  # Switch 19 - Enter Lance's house
-        patch.write(b"\x10")
-        patch.seek(int("4bce8", 16) + rom_offset)  # Switch 20 - Enter Erik's house
-        patch.write(b"\x10")
-        patch.seek(int("4be3d", 16) + rom_offset)  # Switch 21 - Enter seaside cave
-        patch.write(b"\x10")
-        patch.seek(int("4bcf6", 16) + rom_offset)  # Switch 23 - Complete seaside cave events
-        patch.write(b"\x10")
-        patch.seek(int("9bf95", 16) + rom_offset)  # Switch 58 - First convo with Lilly
-        patch.write(b"\x10")
-        patch.seek(int("4928a", 16) + rom_offset)  # Switch 62 - First convo with Lola (1/2)
-        patch.write(b"\x10")
-        patch.seek(int("49873", 16) + rom_offset)  # Switch 62 - First convo with Lola (1/2)
-        patch.write(b"\x10")
-        patch.seek(int("4e933", 16) + rom_offset)  # Switch 65 - Hear Elder's voice
-        patch.write(b"\x10")
-        patch.seek(int("58a29", 16) + rom_offset)  # Switch 78 - Talk to Gold Ship queen
-        patch.write(b"\x10")
-        patch.seek(int("4b067", 16) + rom_offset)
-        patch.write(b"\x10\x00")
-        patch.seek(int("4b465", 16) + rom_offset)
-        patch.write(b"\x10\x00")
-        patch.seek(int("4b8b6", 16) + rom_offset)
-        patch.write(b"\x10\x00")
-        patch.seek(int("686fa", 16) + rom_offset)  # Switch 111 - meet Lilly at Seaside Palace
-        patch.write(b"\x10")
-        patch.seek(int("78d76", 16) + rom_offset)
-        patch.write(b"\x10")
-        patch.seek(int("78d91", 16) + rom_offset)
-        patch.write(b"\x10")
-        patch.seek(int("7d7b1", 16) + rom_offset)  # Switch 159 - Mt. Kress on map
-        patch.write(b"\x10")
-        patch.seek(int("8f0a1", 16) + rom_offset)  # Switch 247 - first Freedan
-        patch.write(b"\x10")
-
-        ##########################################################################
-        #                     Initialize map header dataset
-        ##########################################################################
-        f_mapdata_orig = open(BIN_PATH + "0d8000_mapdata.bin", "rb")
-        f_mapdata = tempfile.TemporaryFile()
-        f_mapdata.write(f_mapdata_orig.read())
-        f_mapdata_orig.close
-
-        # Insert tutorial map in Beginner mode
-#        if settings.level.value == 0:
-        f_mapdata.seek(0)
-        addr = f_mapdata.read().find(b"\x00\x07\x00\x02\x01")
-        f_mapdata.seek(addr)
-        f_mapdata.write(b"\x00\x09")
-
-        f_mapdata.seek(0)
-        addr = f_mapdata.read().find(b"\x00\x09\x00\x02\x08")
-        f_mapdata.seek(addr)
-        f_mapdata.write(b"\x00\x07")
-
-        ##########################################################################
-        #                        Update treasure chest data
-        ##########################################################################
-        # Update item acquisition messages and add messages for new items (29-2f)
-        f_acquisition = open(BIN_PATH + "01fd24_acquisition.bin", "rb")
-        patch.seek(int("1fd24", 16) + rom_offset)
-        patch.write(f_acquisition.read())
-        f_acquisition.close
-
-        ##########################################################################
-        #                         Update GiveItem Routine
-        #             Allows status upgrades to be granted as items
-        ##########################################################################
-        # Disable nested cop commands
-        patch.seek(int("3f016", 16) + rom_offset)
-        patch.write(b"\xea\xea\xea")
-        patch.seek(int("3f03c", 16) + rom_offset)
-        patch.write(b"\xea\xea\xea")
-        patch.seek(int("3f05b", 16) + rom_offset)
-        patch.write(b"\xea\xea\xea")
-
-        # Write DEF and STR upgrade item scripts, also includes scripts for Z3 mode
-        f_statupgrades = open(BIN_PATH + "03f779_statupgrades.bin", "rb")
-        patch.seek(int("3f779", 16) + rom_offset)
-        patch.write(f_statupgrades.read())
-        f_statupgrades.close
-
-        # Allow upgrade items to use chest opening text table
-        # Starts at index #$30
-        patch.seek(int("3efb3", 16) + rom_offset)
-        patch.write(b"\x20\x95\xf7")  # Pointer to initialization script
-        patch.write(b"\x0A\xDA\xAA\xfc\x79\xf7\xFA\x4c\x7d\xf0")  # Main subroutine handler
-        patch.write(b"\xEE\x16\x0B\x80\x03\xEE\x1C\x0B\x60")  # Logic for Dash and Friar Upgrades
-#        patch.seek(int("3f765", 16) + rom_offset)
-#        patch.write(b"\x0c\xf0\x32\xf0\x51\xf0\xe9\xef\xed\xef\xf1\xef\xca\xef\x0c\xf0\x32\xf0\x51\xf0\xc0\xef\xc5\xef\xa0\xff") # Subroutine pointers
-#        patch.write(b"\x48\xE9\x57\x8D\xB8\x0D\x68\x38\xE9\x80\x60")  # Initialization script
-        patch.seek(int("3efe6", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f00a", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f030", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f04f", 16) + rom_offset)
-        patch.write(b"\x60")
-        patch.seek(int("3f06e", 16) + rom_offset)
-        patch.write(b"\x60")
-
-        # Write new logic (heart pieces, stacked herbs)
-        f_copd4 = open(BIN_PATH + "03ff90_copd4.bin", "rb")
-        patch.seek(int("3ff90", 16) + rom_offset)
-        patch.write(f_copd4.read())
-        f_copd4.close
-        patch.seek(int("3ef97", 16) + rom_offset)
-        patch.write(b"\x4c\xb1\xff")
-
-        # Treasure chest text: "Already maxed out!"
-        patch.seek(int("1ffed", 16) + rom_offset)
-        patch.write(b"\x40\x8B\xA2\x84\x80\x83\xA9\xAC\x8C\x80\xA8\x84\x83\xAC\x8E\xA5\xA4\x4F\xCA")
-
-        # Update pointers for Friar upgrade and Heart Piece
-#        patch.seek(int("3efc6", 16) + rom_offset)
-#        patch.write(b"\x27")
-#        patch.seek(int("3efc9", 16) + rom_offset)
-#        patch.write(b"\x2a")
-
-        # Insert logic for Dash and Friar upgrades
-#        patch.seek(int("3efe9", 16) + rom_offset)
-#        patch.write(b"\xee\x16\x0b\x80\x03\xEE\x1C\x0B\x4C\x7D\xF0\x4C\xA0\xFF")
+        # todo: pass hash_len in as !RandoTitleScreenHashScreen
+        
 
         ##########################################################################
         #                            Update item events
         #    Adds new items that increase HP, DEF, STR and improve abilities
         ##########################################################################
-        # Add pointers for new items @38491
-        patch.seek(int("38491", 16) + rom_offset)
-        patch.write(b"\x6f\x9f\x92\xf7\xcd\xf7\x3a\x88\x5e\x88\x90\x9d\xd0\x9d\xa0\xff")
-
-        # Add start menu descriptions for new items
-        f_startmenu = open(BIN_PATH + "01dabf_startmenu.bin", "rb")
-        patch.seek(int("1dabf", 16) + rom_offset)
-        patch.write(f_startmenu.read())
-        f_startmenu.close
-        f_itemdesc = open(BIN_PATH + "01e132_itemdesc.bin", "rb")
-        patch.seek(int("1e132", 16) + rom_offset)
-        patch.write(f_itemdesc.read())
-        f_itemdesc.close
-
-        # Write sprites for multi-jewel items
-        f_multijewel = open(BIN_PATH + "108ea3_multijewel.bin", "rb")
-        patch.seek(int("108ea3", 16) + rom_offset)
-        patch.write(f_multijewel.read())
-        f_multijewel.close
-
-        # Update sprite pointers for new items (placeholder bag of gold for obselete items)
-        # New sprite pointers at 108376, overwrites flaming sphere
-        patch.seek(int("108052", 16) + rom_offset)
-        patch.write(b"\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x9c\x81\x76\x83\x76\x83\x9c\x81")
-        patch.seek(int("108376", 16) + rom_offset)
-        patch.write(b"\x07\x00\xa3\x8e\x07\x00\xc5\x8e\xff\xff")
-
-        # Update item removal restriction flags
-        patch.seek(int("1e12a", 16) + rom_offset)
-        patch.write(b"\x9f\xff\x97\x37\xb0\x01")
-
-        # Write STR, Psycho Dash, and Dark Friar upgrade items
-        # Replaces code for item 05 - Inca Melody @3881d
-        f_item05 = open(BIN_PATH + "03881d_item05.bin", "rb")
-        patch.seek(int("3881d", 16) + rom_offset)
-        patch.write(f_item05.read())
-        f_item05.close
-
-        # Modify Prison Key, now is destroyed when used
-        patch.seek(int("385cf", 16) + rom_offset)
-        patch.write(b"\x13")
-        patch.seek(int("385dc", 16) + rom_offset)
-        patch.write(b"\x02\xd5\x02\xea\xea\xea")
-
-        # Modify Lola's Melody, now is destroyed when used and only works in Itory
-        f_item09 = open(BIN_PATH + "038bf5_item09.bin", "rb")
-        patch.seek(int("38bf5", 16) + rom_offset)
-        patch.write(f_item09.read())
-        f_item09.close
-        patch.seek(int("38bbc", 16) + rom_offset)
-        patch.write(b"\x00")
-        patch.seek(int("38bc1", 16) + rom_offset)
-        patch.write(b"\x00")
-
-        # Modify code for Memory Melody to heal Neil's memory
-        f_item0d = open(BIN_PATH + "038f17_item0d.bin", "rb")
-        patch.seek(int("38f17", 16) + rom_offset)
-        patch.write(f_item0d.read())
-        f_item0d.close
-
-        # Modify Magic Dust, alters switch set and text
-        patch.seek(int("393c3", 16) + rom_offset)
-        patch.write(b"\x8a")
-
-        # Modify Blue Journal, functions as an in-game tutorial
-        patch.seek(int("3943b", 16) + rom_offset)
-        patch.write(b"\xf0\x94")
-        patch.seek(int("39440", 16) + rom_offset)
-        patch.write(b"\x10\xf2")
-        patch.seek(int("39445", 16) + rom_offset)
-        patch.write(b"\x00\xf8")
-        patch.seek(int("3944a", 16) + rom_offset)
-        patch.write(b"\x00\xfb")
-
-        patch.seek(int("3944e", 16) + rom_offset)
-        patch.write(b"\xce" + qt_encode("       Welcome to") + b"\xcb\xcb" + qt_encode("  Bagu's Super-Helpful"))
-        patch.write(b"\xcb" + qt_encode("  In-Game Tutorial!(TM)|"))
-        patch.write(qt_encode("Whadaya wanna know about?") + b"\xcb" + qt_encode(" Beating the Game") + b"\xcb")
-        patch.write(qt_encode(" Exploring the World") + b"\xcb" + qt_encode(" What If I'm Stuck?") + b"\xca")
-
-        patch.seek(int("394f0", 16) + rom_offset)
-        patch.write(b"\xce" + qt_encode("He closed the journal.") + b"\xc0")
-
-        patch.seek(int("3f210", 16) + rom_offset)
-        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-            patch.write(b"\xce" + qt_encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
-            patch.write(qt_encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
-            patch.write(qt_encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
-            patch.write(qt_encode("Happy hunting!") + b"\xc0")
-        else:
-            patch.write(b"\xce" + qt_encode("BEATING THE GAME:       You must do three things to beat the game:|"))
-            patch.write(qt_encode("1. RESCUE KARA         Kara is trapped in a painting! You need Magic Dust to free her.|"))
-            patch.write(qt_encode("She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|"))
-            patch.write(qt_encode("You can search for her yourself or find Lance's Letter to learn where she is.|"))
-            patch.write(qt_encode("Once you find Kara, use the Magic Dust on her portrait to free her.|"))
-            patch.write(qt_encode("2. FIND/USE THE AURA  Using the Aura unlocks Shadow, the form you need to fight Dark Gaia.|"))
-            patch.write(qt_encode("3. GATHER MYSTIC STATUES You may be required to gather Mystic Statues.|"))
-            patch.write(qt_encode("The teacher in the South Cape classroom can tell you which Statues you need.|"))
-            patch.write(qt_encode("STATUE 1: INCA RUINS    You need the Wind Melody, Diamond Block, and both Incan Statues.|"))
-            patch.write(qt_encode("STATUE 2: SKY GARDEN    You need all four Crystal Balls to fight the boss Viper.|"))
-            patch.write(qt_encode("STATUE 3: MU            You need 2 Statues of Hope and 2 Rama Statues to fight the Vampires.|"))
-            patch.write(qt_encode("STATUE 4: GREAT WALL    You need Spin Dash and Dark Friar to face the boss Sand Fanger.|"))
-            patch.write(qt_encode("STATUE 5: PYRAMID       You need all six Hieroglyphs as well as your father's journal.|"))
-            patch.write(qt_encode("STATUE 6: BABEL TOWER   You need the Aura and the Crystal Ring to get in.|"))
-            patch.write(qt_encode("Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|"))
-            patch.write(qt_encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
-            patch.write(qt_encode("She will give you the option to face the final boss and beat the game. Good luck, and have fun!") + b"\xc0")
-
-        patch.seek(int("3f800", 16) + rom_offset)
-        patch.write(b"\xce" + qt_encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
-        patch.write(qt_encode("As you gain more items, you will be able to visit other continents and access more locations.|"))
-        patch.write(qt_encode("Here are some of the helpful travel items you can find in the game:|"))
-        patch.write(qt_encode("- Lola's Letter         If you find this letter, read it and go see Erik in South Cape.|"))
-        patch.write(qt_encode("- The Teapot            If you use the Teapot in the Moon Tribe camp, you can travel by Sky Garden.|"))
-        patch.write(qt_encode("- Memory Melody         Play this melody in Neil's Cottage, and he'll fly you in his airplane.|"))
-        patch.write(qt_encode("- The Will              Show this document to the stable masters in either Watermia or Euro.|"))
-        patch.write(qt_encode("- The Large Roast       Give this to the hungry child in the Natives' Village.|"))
-        patch.write(qt_encode("If you're ever stuck in a location, find a Dark Space. Gaia can always return you to South Cape.") + b"\xc0")
-
-        patch.seek(int("3fb00", 16) + rom_offset)
-        patch.write(b"\xce" + qt_encode("WHAT IF I'M STUCK?      There are a lot of item locations in this game! It's easy to get stuck.|"))
-        patch.write(qt_encode("Here are some resources that might help you:|"))
-        patch.write(qt_encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
-        patch.write(qt_encode("- EmoTracker            Download the IoGR package. Includes a map tracker!|"))
-        patch.write(qt_encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
-        patch.write(qt_encode("- Map House             Enter the east-most house in South Cape to check your collection rate.|"))
-        patch.write(qt_encode("- Spoiler Log           Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
-
-        # Modify Lance's Letter
-        # Prepare it to spoil Kara location
-        f_item16 = open(BIN_PATH + "03950c_item16.bin", "rb")
-        patch.seek(int("3950c", 16) + rom_offset)
-        patch.write(f_item16.read())
-        f_item16.close
-
-        # Modify Teapot
-        # Now activates in Moon Tribe camp instead of Euro
-        f_item19 = open(BIN_PATH + "03983d_item19.bin", "rb")
-        patch.seek(int("3983d", 16) + rom_offset)
-        patch.write(f_item19.read())
-        f_item19.close
-
-        # Modify Black Glasses, now permanently worn and removed from inventory when used
-        patch.seek(int("39981", 16) + rom_offset)
-        patch.write(b"\x8a\x99\x02\xcc\xf5\x02\xd5\x1c\x60\xd3\x42\x8e\x8e\x8b\x8d\x84")
-        patch.write(b"\xa3\xa3\xac\x88\x8d\xa4\x84\x8d\xa3\x88\x85\x88\x84\xa3\x4f\xc0")
-
-        # Modify Aura, now unlocks Shadow's form when used
-        patch.seek(int("39cdc", 16) + rom_offset)
-        patch.write(b"\x02\xbf\xe4\x9c\x02\xcc\xb4\x60\xd3")
-        patch.write(b"\xd6\x4c\x85\x8e\xa2\x8c\xac\xa5\x8d\x8b\x8e\x82\x8a\x84\x83\x4f\xc0")
-
-        # Write 2 Jewel and 3 Jewel items; Lola's Letter now teaches Morse Code
-        # Replaces and modifies code for item 25 - Lola's Letter @39d09
-        f_item25 = open(BIN_PATH + "039d09_item25.bin", "rb")
-        patch.seek(int("39d09", 16) + rom_offset)
-        patch.write(f_item25.read())
-        f_item25.close
-
-        # Have fun with text in Item 26 (Father's Journal)
-        patch.seek(int("39ea8", 16) + rom_offset)
-        patch.write(qt_encode("It reads: ") + b"\x2d" + qt_encode("He who is ") + b"\xcb" + qt_encode("valiant and pure of spirit...") + b"\xcf\x2d")
-        patch.write(qt_encode("... may find the Holy Grail in the Castle of... Aauugghh") + b"\x2e\xcf")
-        patch.write(qt_encode("Here a page is missing.") + b"\xc0")
-
-        # Modify Crystal Ring, now permanently worn and removed from inventory when used
-        patch.seek(int("39f32", 16) + rom_offset)
-        patch.write(b"\x3b\x9f\x02\xcc\x3e\x02\xd5\x27\x60\xd3\x41\x8b")
-        patch.write(b"\x88\x8d\x86\xac\x81\x8b\x88\x8d\x86\x2a\xc0")
-
-        # Write HP and DEF upgrade items; make the Apple non-consumable
-        # Replaces and modifies code for item 28 - Apple @39f5d
-        f_item28 = open(BIN_PATH + "039f5d_item28.bin", "rb")
-        patch.seek(int("39f5d", 16) + rom_offset)
-        patch.write(f_item28.read())
-        f_item28.close
-
-
-#        patch.seek(int("39f91", 16) + rom_offset)
-#        patch.write(qt_encode("Already maxed out!", True))
-
-        # Write Piece of Heart item
-#        patch.seek(int("3ffa0", 16) + rom_offset)
-#        patch.write(b"\x02\xBF\xC6\xFF\x20\xB2\x9F\xAD\x24\x0B\x89\x02\x00\xF0\x0D\x02\xD0\xF7\x01\xB9\xFF")
-#        patch.write(b"\x02\xCC\xF7\x60\x02\xCE\xF7\xEE\xCA\x0A\x20\x50\xFE\x8D\x22\x0B\x60")
-#        patch.write(qt_encode("You got a heart piece!", True))
-
-        # Update HP fill for herbs and HP jewels based on level
-        patch.seek(int("3889e", 16) + rom_offset)
-        patch.write(b"\x20\x50\xfe")
-        patch.seek(int("3fe50", 16) + rom_offset)
-        patch.write(b"\xAD\x24\x0B\xF0\x15\x3A\xF0\x0D\x3A\xF0\x05\xA9\x04\x00\x80\x0D")
-        patch.write(b"\xA9\x06\x00\x80\x08\xA9\x08\x00\x80\x03\xA9\x28\x00\x60\xff\xff")
-        patch.write(b"\xAD\x24\x0B\xF0\x05\xA9\x01\x00\x80\x03\xA9\x28\x00\x60")
-
-        # Stackable herb functionality, text
-        patch.seek(int("388a4", 16) + rom_offset)
-        patch.write(b"\x4c\xda\xff")
-        patch.seek(int("3ffda", 16) + rom_offset)
-        patch.write(b"\x38\xF8\xAD\xAA\x0A\xE9\x01\x00\x8D\xAA\x0A\xD8\xD0\x04\x20\xB2\x9F\x60\xa9\x00\x00\x8d\xc6\x0a\x3a\x8d\xc4\x0a\x60")
-        patch.seek(int("388ae", 16) + rom_offset)
-        patch.write(b"\xc6\x02\x00\xaa\x0a\xac\xd6\xae\x6d\xac\xd6\xe7\x8e\x8d\x84\x0d\xac\xac")
-
-        # Change item functionality for game variants
-        patch.seek(int("3ff00", 16) + rom_offset)
-        patch.write(qt_encode("Will drops the HP Jewel. It shatters into a million pieces. Whoops.", True))
-        patch.seek(int("3ff50", 16) + rom_offset)
-        patch.write(qt_encode("As the Jewel disappears, Will feels his strength draining!", True))
-
-        f_rjm = open(BIN_PATH + "03fd70_rjm.bin", "rb")
-        patch.seek(int("3fd70", 16) + rom_offset)
-        patch.write(f_rjm.read())
-        f_rjm.close
+        #patch.seek(int("3944e", 16) + rom_offset)
+        #patch.write(b"\xce" + qt_encode("       Welcome to") + b"\xcb\xcb" + qt_encode("  Bagu's Super-Helpful"))
+        #patch.write(b"\xcb" + qt_encode("  In-Game Tutorial!(TM)|"))
+        #patch.write(qt_encode("Whadaya wanna know about?") + b"\xcb" + qt_encode(" Beating the Game") + b"\xcb")
+        #patch.write(qt_encode(" Exploring the World") + b"\xcb" + qt_encode(" What If I'm Stuck?") + b"\xca")
+        #
+        #patch.seek(int("394f0", 16) + rom_offset)
+        #patch.write(b"\xce" + qt_encode("He closed the journal.") + b"\xc0")
+        #
+        #patch.seek(int("3f210", 16) + rom_offset)
+        #if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+        #    patch.write(b"\xce" + qt_encode("BEATING THE GAME:       It's a Red Jewel hunt! The objective is super simple:|"))
+        #    patch.write(qt_encode("Find the Red Jewels you need, and talk to the Jeweler. That's it!|"))
+        #    patch.write(qt_encode("Check the Jeweler's inventory to find out how many Red Jewels you need to beat the game.|"))
+        #    patch.write(qt_encode("Happy hunting!") + b"\xc0")
+        #else:
+        #    patch.write(b"\xce" + qt_encode("BEATING THE GAME:       You must do three things to beat the game:|"))
+        #    patch.write(qt_encode("1. RESCUE KARA         Kara is trapped in a painting! You need Magic Dust to free her.|"))
+        #    patch.write(qt_encode("She can be in either Edward's Prison, Diamond Mine, Angel Village, Mt. Temple, or Ankor Wat.|"))
+        #    patch.write(qt_encode("You can search for her yourself or find Lance's Letter to learn where she is.|"))
+        #    patch.write(qt_encode("Once you find Kara, use the Magic Dust on her portrait to free her.|"))
+        #    patch.write(qt_encode("2. FIND/USE THE AURA  Using the Aura unlocks Shadow, the form you need to fight Dark Gaia.|"))
+        #    patch.write(qt_encode("3. GATHER MYSTIC STATUES You may be required to gather Mystic Statues.|"))
+        #    patch.write(qt_encode("The teacher in the South Cape classroom can tell you which Statues you need.|"))
+        #    patch.write(qt_encode("STATUE 1: INCA RUINS    You need the Wind Melody, Diamond Block, and both Incan Statues.|"))
+        #    patch.write(qt_encode("STATUE 2: SKY GARDEN    You need all four Crystal Balls to fight the boss Viper.|"))
+        #    patch.write(qt_encode("STATUE 3: MU            You need 2 Statues of Hope and 2 Rama Statues to fight the Vampires.|"))
+        #    patch.write(qt_encode("STATUE 4: GREAT WALL    You need Spin Dash and Dark Friar to face the boss Sand Fanger.|"))
+        #    patch.write(qt_encode("STATUE 5: PYRAMID       You need all six Hieroglyphs as well as your father's journal.|"))
+        #    patch.write(qt_encode("STATUE 6: BABEL TOWER   You need the Aura and the Crystal Ring to get in.|"))
+        #    patch.write(qt_encode("Alternatively, if you collect enough Red Jewels to face Solid Arm, he can also take you there.|"))
+        #    patch.write(qt_encode("Once you've freed Kara and gathered the Statues you need, enter any Dark Space and talk to Gaia.|"))
+        #    patch.write(qt_encode("She will give you the option to face the final boss and beat the game. Good luck, and have fun!") + b"\xc0")
+        #
+        #patch.seek(int("3f800", 16) + rom_offset)
+        #patch.write(b"\xce" + qt_encode("EXPLORING THE WORLD:    When you start the game, you only have access to a few locations.|"))
+        #patch.write(qt_encode("As you gain more items, you will be able to visit other continents and access more locations.|"))
+        #patch.write(qt_encode("Here are some of the helpful travel items you can find in the game:|"))
+        #patch.write(qt_encode("- Lola's Letter         If you find this letter, read it and go see Erik in South Cape.|"))
+        #patch.write(qt_encode("- The Teapot            If you use the Teapot in the Moon Tribe camp, you can travel by Sky Garden.|"))
+        #patch.write(qt_encode("- Memory Melody         Play this melody in Neil's Cottage, and he'll fly you in his airplane.|"))
+        #patch.write(qt_encode("- The Will              Show this document to the stable masters in either Watermia or Euro.|"))
+        #patch.write(qt_encode("- The Large Roast       Give this to the hungry child in the Natives' Village.|"))
+        #patch.write(qt_encode("If you're ever stuck in a location, find a Dark Space. Gaia can always return you to South Cape.") + b"\xc0")
+        #
+        #patch.seek(int("3fb00", 16) + rom_offset)
+        #patch.write(b"\xce" + qt_encode("WHAT IF I'M STUCK?      There are a lot of item locations in this game! It's easy to get stuck.|"))
+        #patch.write(qt_encode("Here are some resources that might help you:|"))
+        #patch.write(qt_encode("- Video Tutorial        Search YouTube for a video guide of this randomizer.|"))
+        #patch.write(qt_encode("- EmoTracker            Download the IoGR package. Includes a map tracker!|"))
+        #patch.write(qt_encode("- Ask the Community     Find the IoGR community on Discord! Someone will be happy to help you.|"))
+        #patch.write(qt_encode("- Map House             Enter the east-most house in South Cape to check your collection rate.|"))
+        #patch.write(qt_encode("- Spoiler Log           Every seed comes with a detailed list of where every item can be found.") + b"\xc0")
 
         ##########################################################################
         #                           Special Settings
         ##########################################################################
-        # Z3 Mode - write subroutines to available space
-        patch.seek(int("3faee", 16) + rom_offset)     # DEF halves damage subroutine
-        patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
-#        patch.seek(int("fd00", 16) + rom_offset)     # Boss STR/DEF upgrades
-#        patch.write(z3_str)
-#        patch.seek(int("3ff90", 16) + rom_offset)     # Item HP upgrades
-#        patch.write(b"\x18\xA9\x03\xCD\x24\x0B\xF0\x03\xEE\xCA\x0A\xEE\xCA\x0A\x60")
-#        patch.seek(int("3ffe0", 16) + rom_offset)     # Item STR/DEF upgrades
-#        patch.write(b"\x48\xAD\xDE\x0A\x0A\x8D\xDE\x0A\x68\x60")  #\x48\xAD\xDC\x0A\x0A\x8D\xDC\x0A\x68\x60") used to be for DEF
-
-        if settings.z3:
-            # Start with 6 HP
-            patch.seek(int("8068", 16) + rom_offset)
-            patch.write(b"\x06")
-
-            # Double damage on jump slash
-            patch.seek(int("2cf58", 16) + rom_offset)
-            patch.write(b"\xAD\xDE\x0A")
-
-            # Each DEF upgrade halves damage received
-            patch.seek(int("3c464", 16) + rom_offset)
-            patch.write(b"\x20\xEE\xFA")
-
-            # Update herb/HP upgrade fill values
-            patch.seek(int("3fe5c", 16) + rom_offset)  # Expert #$08
-            patch.write(b"\x08")
-            patch.seek(int("3fe61", 16) + rom_offset)  # Advanced #$0E
-            patch.write(b"\x0E")
-            patch.seek(int("3fe66", 16) + rom_offset)  # Intermediate #$28
-            patch.write(b"\x28")
-
-            # Call item upgrade subroutines
-            patch.seek(int("3f01c", 16) + rom_offset)  # HP upgrade
-            patch.write(b"\x20\xa1\xf7")
-            patch.seek(int("3f042", 16) + rom_offset)  # STR upgrade
-            patch.write(b"\x20\xc1\xf7")
-            patch.seek(int("3f061", 16) + rom_offset)  # DEF upgrade
-            patch.write(b"\x20\xe3\xf7")
-
-        # In OHKO, the HP Jewels do nothing, and start @1HP
-        if settings.ohko:
-            patch.seek(int("8068", 16) + rom_offset)  # Start 1 HP
-            patch.write(b"\x01")
-            patch.seek(int("3f7b1", 16) + rom_offset) # HP upgrade
-            patch.write(b"\x00")
-            patch.seek(int("3f7b7", 16) + rom_offset) # HP upgrade
-            patch.write(b"\x00")
-            patch.seek(int("3ffac", 16) + rom_offset) # heart piece
-            patch.write(b"\x60")
-#            patch.seek(int("39f71", 16) + rom_offset)
-#            patch.write(b"\x00\xff\x02\xd5\x29\x60")
-            # Also, herbs suck
-            patch.seek(int("388e9", 16) + rom_offset)
-            patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
-
-        # In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
-        elif settings.red_jewel_madness:
-            # Start @ 40 HP
-            patch.seek(int("8068", 16) + rom_offset)
-            patch.write(b"\x28")
-            # Red Jewels (item #$01) remove 1 HP when used
-            patch.seek(int("384d5", 16) + rom_offset)
-            patch.write(b"\x4c\x70\xfd")
-            # 2 Red Jewels (item #$2e) removes 2 HP when used
-            patch.seek(int("39d99", 16) + rom_offset)
-            patch.write(b"\x01\x00\x8D\xB0\x0A\xD8\x4c\x76\xfd")
-            # 3 Red Jewels (item #$2f) removes 3 HP when used
-            patch.seek(int("39dd9", 16) + rom_offset)
-            patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
-
-        # Fluteless - prepare subroutines
-        patch.seek(int("2f845", 16) + rom_offset)
-        patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f845
-            + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f851
-            + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f85c
-        if settings.fluteless:
-            # Statues in Underground Tunnel are breakable with Will abilities - NOT NECESSARY
-            #patch.seek(int("a8837", 16) + rom_offset)
-            #patch.write(b"\x01\x4c\x99\x88")
-            # Remove flute from spritesets - HANDLED BY CLIENT
-            #flute_addrs = [
-            #    [0x1a8540,0x60],
-            #    [0x1a8740,0x60],
-            #    [0x1aa120,0x40],
-            #    [0x1aa560,0x20],
-            #    [0x1aa720,0x60],
-            #    [0x1aa8e0,0x80],
-            #    [0x1aab00,0x20],
-            #    [0x1aac60,0x40],
-            #    [0x1aae60,0x40],
-            #    [0x1ab400,0x80],
-            #    [0x1ab600,0x80],
-            #    [0x1ab800,0x40],
-            #    [0x1aba00,0x40]
-            #]
-            #for [addr,l] in flute_addrs:
-            #    patch.seek(addr + rom_offset)
-            #    patch.write(b"\x00"*l)
-
-            # Change melody sprite to Will whistling
-            f_fluteless = open(BIN_PATH + "0f8fa4_fluteless.bin", "rb")
-            patch.seek(int("f8fa4", 16) + rom_offset)
-            patch.write(f_fluteless.read())
-            f_fluteless.close
-
-            # Disable blocking for Will
-            patch.seek(int("2ca63", 16) + rom_offset)
-            patch.write(b"\x20\x45\xf8")
-
-            # Disable attack damage for Will
-            patch.seek(int("2cefd", 16) + rom_offset)
-            patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x51\xf8")
-
-            # Allow charging in snake game
-            patch.seek(int("2b7b3", 16) + rom_offset)
-            patch.write(b"\x4c\x5c\xf8")
-
-            # Y-shift certain enemy positions so they can be hit without a flute
-            enemy_shift = [
-                [b"\x5c\xbb\x8b", 1],    # Tunnel: Canal Worms up 1
-                [b"\x5c\xbb\x8b",-1],    # Ankor Wat: Wall Bugs up 1
-                [b"\x66\xbb\x8b",-1]]    # Ankor Wat: Wall Bugs up 1
-            for [enemy_str,yshift] in enemy_shift:
-                done = False
-                addr = int("c8200", 16) + rom_offset
-                while not done:
-                    addr = self.original_rom_data.find(enemy_str, addr+1)
-                    if addr < 0 or addr > int("ce5e4", 16) + rom_offset:
-                        done = True
-                    else:
-                        patch.seek(addr-2)
-                        patch.write((self.original_rom_data[addr-2]-yshift).to_bytes(1,byteorder="little"))
-
-        ##########################################################################
-        #                  Update overworld map movement scripts
-        #   Removes overworld animation and allows free travel within continents
-        ##########################################################################
-        # Update map choice scripts
-        f_mapchoices = open(BIN_PATH + "03b401_mapchoices.bin", "rb")
-        patch.seek(int("3b401", 16) + rom_offset)
-        patch.write(f_mapchoices.read())
-        f_mapchoices.close
-
-        # Update map destination array
-        f_mapdest = open(BIN_PATH + "03b955_mapdest.bin", "rb")
-        patch.seek(int("3b955", 16) + rom_offset)
-        patch.write(f_mapdest.read())
-        f_mapdest.close
-
-        ##########################################################################
-        #                   Rewrite Red Jewel acquisition event
-        #      Makes unique code for each instance (overwrites unused code)
-        ##########################################################################
-        # Fill block with new item acquisition code (16 items)
-        f_redjewel = open(BIN_PATH + "00f500_redjewel.bin", "rb")
-        patch.seek(int("f500", 16) + rom_offset)
-        patch.write(f_redjewel.read())
-        f_redjewel.close
-
-        # Update event table instances to point to new events
-        # New pointers include leading zero byte to negate event parameters
-        patch.seek(int("c8318", 16) + rom_offset)  # South Cape: bell tower
-        patch.write(b"\x00\x00\xf5\x80")
-        patch.seek(int("c837c", 16) + rom_offset)  # South Cape: Lance's house
-        patch.write(b"\x00\x80\xf5\x80")
-        patch.seek(int("c8ac0", 16) + rom_offset)  # Underground Tunnel: barrel
-        patch.write(b"\x00\x00\xf6\x80")
-        patch.seek(int("c8b50", 16) + rom_offset)  # Itory Village: logs
-        patch.write(b"\x00\x80\xf6\x80")
-        patch.seek(int("c9546", 16) + rom_offset)  # Diamond Coast: jar
-        patch.write(b"\x00\x00\xf7\x80")
-        patch.seek(int("c97a6", 16) + rom_offset)  # Freejia: hotel
-        patch.write(b"\x00\x80\xf7\x80")
-        patch.seek(int("caf60", 16) + rom_offset)  # Angel Village: dance hall
-        patch.write(b"\x00\x00\xf8\x80")
-        patch.seek(int("cb3a6", 16) + rom_offset)  # Angel Village: Ishtar's room
-        patch.write(b"\x00\x80\xf8\x80")
-        patch.seek(int("cb563", 16) + rom_offset)  # Watermia: west Watermia
-        patch.write(b"\x00\x00\xf9\x80")
-        patch.seek(int("cb620", 16) + rom_offset)  # Watermia: gambling house
-        patch.write(b"\x00\x80\xf9\x80")
-        patch.seek(int("cbf55", 16) + rom_offset)  # Euro: behind house
-        patch.write(b"\x00\x00\xfa\x80")
-        patch.seek(int("cc17c", 16) + rom_offset)  # Euro: slave room
-        patch.write(b"\x00\x80\xfa\x80")
-        patch.seek(int("ccb14", 16) + rom_offset)  # Natives' Village: statue room
-        patch.write(b"\x00\x00\xfb\x80")
-        patch.seek(int("cd440", 16) + rom_offset)  # Dao: east Dao
-        patch.write(b"\x00\x80\xfb\x80")
-        patch.seek(int("cd57e", 16) + rom_offset)  # Pyramid: east entrance
-        patch.write(b"\x00\x00\xfc\x80")
-        patch.seek(int("ce094", 16) + rom_offset)  # Babel: pillow
-        patch.write(b"\x00\x80\xfc\x80")
-
-        ##########################################################################
-        #                         Modify Game Start events
-        ##########################################################################
-        # Set beginning switches
-        patch.seek(int("be51c", 16) + rom_offset)
-        patch.write(b"\x80\x00\x12\x4c\x00\xfd")
-        f_switches = open(BIN_PATH + "0bfd00_switches.bin", "rb")
-        patch.seek(int("bfd00", 16) + rom_offset)
-        patch.write(f_switches.read())
-        f_switches.close
-
-        # Write room reward initialization routine
-        f_roominit = open(BIN_PATH + "00f49a_roominit.bin", "rb")
-        patch.seek(int("f49a", 16) + rom_offset)
-        patch.write(f_roominit.read())
-        f_roominit.close
-
-        # Set "open mode" flag in RAM (for autotracker)
-        if settings.open_mode:
-            patch.seek(int("bfd4e", 16) + rom_offset)
-            patch.write(b"\xff\x02")
-
-        ##########################################################################
-        #                         Modify South Cape events
-        ##########################################################################
-        # Teacher sets switch #$38 and spoils Mystic Statues required
-        f_teacher = open(BIN_PATH + "048a94_teacher.bin", "rb")
-        patch.seek(int("48a94", 16) + rom_offset)
-        patch.write(f_teacher.read())
-        f_teacher.close
-
-        # Force fisherman to always appear on E side of docks, and fix inventory full
-        patch.seek(int("48377", 16) + rom_offset)
-        patch.write(b"\x02\xd0\x10\x01\xaa\x83")
-        patch.seek(int("48468", 16) + rom_offset)
-        patch.write(b"\x02\xBF\x79\x84\x02\xD4\x01\x75\x84\x02\xCC\xD7\x6B" + INV_FULL)
-
-        # Disable weird logic in front of Will's door
-        patch.seek(int("4bc69", 16) + rom_offset)
-        patch.write(b"\xe0")
-
-        # Disable Lola Melody cutscene
-        patch.seek(int("49985", 16) + rom_offset)
-        patch.write(b"\x6b")
-
-        # Set flag 35 at Lola Melody acquisition
-        patch.seek(int("499dc", 16) + rom_offset)
-        patch.write(b"\xeb\x99\x02\xbf\xe5\x9b\x02\xd4\x09\xf0\x99")
-        patch.write(b"\x02\xcc\x35\x6b\x02\xbf\x94\x9d\x6b")
-        patch.write(INV_FULL)
-
-        # Erik in Seaside Cave allows player to use Lola's Letter to travel by sea
-        f_seaside = open(BIN_PATH + "04b9a5_seaside.bin", "rb")
-        patch.seek(int("4b9a5", 16) + rom_offset)
-        patch.write(f_seaside.read())
-        f_seaside.close
-        patch.seek(int("4b8b6", 16) + rom_offset)
-        patch.write(b"\x10\x01\x62")
-        patch.seek(int("4b96a", 16) + rom_offset)
-        patch.write(b"\xa5")
-
-        # Various NPCs can give you a tutorial
-        f_tutorial = open(BIN_PATH + "04fb50_tutorial.bin", "rb")
-        patch.seek(int("4fb50", 16) + rom_offset)
-        patch.write(f_tutorial.read())
-        f_tutorial.close
-        patch.seek(int("49231", 16) + rom_offset)  # NPC in front of school
-        patch.write(b"\x50\xfb")
-        # patch.seek(int("49238",16)+rom_offset)   # Grants max stats
-        # patch.write(b"\xA9\x28\x00\x8D\xCA\x0A\x8D\xCE\x0A\x8D\xDC\x0A\x8D\xDE\x0A\x02\xBF\x4C\x92\x6B")
-        # patch.write(qt_encode("Max stats baby!",True))
-
-        # Turns house in South Cape into item-tracking overworld map (Beginner only)
-#        if settings.level.value == 0:
-        patch.seek(int("18480", 16) + rom_offset)
-        patch.write(b"\x07\x90\x00\xd0\x03\x00\x00\x44")
-        patch.seek(int("1854e", 16) + rom_offset)
-        patch.write(b"\x00\x3e\x40\x02")
-        patch.seek(int("c846c", 16) + rom_offset)
-        patch.write(b"\x00\x01\x00\x00\xde\x86\x00\xFF\xCA")
-
-        f_collectioncheck = open(BIN_PATH + "06dd30_collectioncheck.bin", "rb")
-        patch.seek(int("6dd30", 16) + rom_offset)
-        patch.write(f_collectioncheck.read())
-        f_collectioncheck.close
-#        else:
-#            patch.seek(int("491ed", 16) + rom_offset)
-#            patch.write(qt_encode("This room is a lot cooler in Beginner mode.", True))
-
-        ##########################################################################
-        #                       Modify Edward's Castle events
-        ##########################################################################
-        # Shorten Edward conversation
-        patch.seek(int("4c3d6", 16) + rom_offset)
-        patch.write(b"\x06\xc4")
-
-        f_edward = open(BIN_PATH + "04c4fb_edward.bin", "rb")
-        patch.seek(int("4c4fb", 16) + rom_offset)
-        patch.write(f_edward.read())
-        f_edward.close
-        f_edward2 = open(BIN_PATH + "04c6af_edward2.bin", "rb")
-        patch.seek(int("4c6af", 16) + rom_offset)
-        patch.write(f_edward2.read())
-        f_edward2.close
-        patch.seek(int("4c4fb", 16) + rom_offset)
-        patch.write(b"\xd3")
-
-        # Talking to Edward doesn't soft lock you
-        patch.seek(int("4c746", 16) + rom_offset)
-        patch.write(b"\x10")
-
-        # Move guard to allow roast location get
-        f_castleguard = open(BIN_PATH + "04d1a0_castleguard.bin", "rb")
-        patch.seek(int("4d1a0", 16) + rom_offset)
-        patch.write(f_castleguard.read())
-        f_castleguard.close
-        patch.seek(int("c8551", 16) + rom_offset)
-        patch.write(b"\x10")
-
-        #  Update Large Roast event
-        patch.seek(int("4d0da", 16) + rom_offset)
-        patch.write(b"\x02\xc0\xe1\xd0\x02\xc1\x6b\x02\xd0\x46\x00\xe9\xd0\x02\xe0")
-        patch.write(b"\x02\xbf\x41\xd1\x02\xd4\x0a\xf6\xd0\x02\xcc\x46\x6b")
-        patch.write(INV_FULL)
-
-        # Fix hidden guard text box
-        patch.seek(int("4c297", 16) + rom_offset)
-        patch.write(b"\xc0")
-        patch.seek(int("4c20e", 16) + rom_offset)
-        patch.write(b"\x02\xBF\x99\xC2\x02\xD4\x00\x1B\xC2\x02\xCC\xD8\x6B" + INV_FULL)
-
-        ##########################################################################
-        #                   Modify Edward's Prison/Tunnel events
-        ##########################################################################
-        # Skip long cutscene in prison
-        patch.seek(int("4d209", 16) + rom_offset)
-        patch.write(b"\x34\xd2")
-        patch.seek(int("4d22a", 16) + rom_offset)
-        patch.write(b"\x80\x02")
-        patch.seek(int("4d234", 16) + rom_offset)
-        patch.write(b"\x02\xd0\x23\x00\xd6\xd2\x02\xe0")
-        patch.seek(int("4d335", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("4db15", 16) + rom_offset)
-        patch.write(b"\x02\xe0")
-
-        # Fun with text
-        patch.seek(int("4dc5e", 16) + rom_offset)
-        patch.write(b"\xd3\x60\x8b\x84\x80\xa3\x84\x2a\x2a\x2a\xac\xd7\xad\xcb\x63\x8c\x80\xa3\x87\x4c\x80\x8d\x88" +
-                        b"\x80\x82\xac\x48\x0e\x8c\xac\xd6\xfd\xcb\x85\x8e\xa2\xac\x87\x88\x8c\x2a\x2a\x2a\xc0")
-
-        # Move Dark Space, allows player to exit area without key
-        # Set new X/Y coordinates in exit table
-        patch.seek(int("18614", 16) + rom_offset)
-        patch.write(b"\x12\x07")
-        # Set new X/Y coordinates in event table
-        patch.seek(int("C8635", 16) + rom_offset)
-        patch.write(b"\x12\x08")
-
-        # Progression triggers when Lilly is with you
-        patch.seek(int("9aa45", 16) + rom_offset)
-        patch.write(b"\x6f\x00")
-        patch.seek(int("9aa4b", 16) + rom_offset)
-        patch.write(b"\x02")
-        patch.seek(int("9be74", 16) + rom_offset)
-        patch.write(b"\xd7\x18")
-
-        # Give appearing Dark Space the option of handling an ability
-        patch.seek(int("9bf7f", 16) + rom_offset)
-        patch.write(b"\xAC\xD6\x88\xA8\x00\xC0\x04\x00\x0B\x4c\x10\xf7")
-        patch.seek(int("9f710", 16) + rom_offset)
-        patch.write(b"\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
-        patch.seek(int("c8aa2", 16) + rom_offset)
-        patch.write(b"\x03")
-
-        # Fix forced form change
-        patch.seek(int("9c037", 16) + rom_offset)
-        patch.write(FORCE_CHANGE + b"\x02\xe0")
-
-        ##########################################################################
-        #                            Modify Itory events
-        ##########################################################################
-        # Lilly event becomes Lola's Melody handler
-        f_itory = open(BIN_PATH + "04e2a3_itory.bin", "rb")
-        patch.seek(int("4e2a3", 16) + rom_offset)
-        patch.write(f_itory.read())
-        f_itory.close
-
-        # Lilly now joins if you give her the Necklace
-        f_lilly = open(BIN_PATH + "04e5ff_lilly.bin", "rb")
-        patch.seek(int("4e5ff", 16) + rom_offset)
-        patch.write(f_lilly.read())
-        f_lilly.close
-        patch.seek(int("4e5a6", 16) + rom_offset)
-        patch.write(b"\x6f")
-        patch.seek(int("4e5ac", 16) + rom_offset)
-        patch.write(b"\xff\xe5\x02\x0b\x6b")
-
-        # Shorten Inca Statue get
-        patch.seek(int("4f37b", 16) + rom_offset)
-        patch.write(b"\x02\xbf\x8d\xf3\x6b")
-
-        # For elder to always give spoiler
-        patch.seek(int("4e933", 16) + rom_offset)
-        patch.write(b"\x10\x01")
-        patch.seek(int("4e97a", 16) + rom_offset)
-        patch.write(b"\x02\xbf\xff\xe9\x6b")
+        ## Z3 Mode - write subroutines to available space
+        #patch.seek(int("3faee", 16) + rom_offset)     # DEF halves damage subroutine
+        #patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
+        #
+        #if settings.z3:
+        #    # Start with 6 HP
+        #    patch.seek(int("8068", 16) + rom_offset)
+        #    patch.write(b"\x06")
+        #
+        #    # Double damage on jump slash
+        #    patch.seek(int("2cf58", 16) + rom_offset)
+        #    patch.write(b"\xAD\xDE\x0A")
+        #
+        #    # Each DEF upgrade halves damage received
+        #    patch.seek(int("3c464", 16) + rom_offset)
+        #    patch.write(b"\x20\xEE\xFA")
+        #
+        #    # Update herb/HP upgrade fill values
+        #    patch.seek(int("3fe5c", 16) + rom_offset)  # Expert #$08
+        #    patch.write(b"\x08")
+        #    patch.seek(int("3fe61", 16) + rom_offset)  # Advanced #$0E
+        #    patch.write(b"\x0E")
+        #    patch.seek(int("3fe66", 16) + rom_offset)  # Intermediate #$28
+        #    patch.write(b"\x28")
+        #
+        #    # Call item upgrade subroutines
+        #    patch.seek(int("3f01c", 16) + rom_offset)  # HP upgrade
+        #    patch.write(b"\x20\xa1\xf7")
+        #    patch.seek(int("3f042", 16) + rom_offset)  # STR upgrade
+        #    patch.write(b"\x20\xc1\xf7")
+        #    patch.seek(int("3f061", 16) + rom_offset)  # DEF upgrade
+        #    patch.write(b"\x20\xe3\xf7")
+        #
+        ## In OHKO, the HP Jewels do nothing, and start @1HP
+        #if settings.ohko:
+        #    patch.seek(int("8068", 16) + rom_offset)  # Start 1 HP
+        #    patch.write(b"\x01")
+        #    patch.seek(int("3f7b1", 16) + rom_offset) # HP upgrade
+        #    patch.write(b"\x00")
+        #    patch.seek(int("3f7b7", 16) + rom_offset) # HP upgrade
+        #    patch.write(b"\x00")
+        #    patch.seek(int("3ffac", 16) + rom_offset) # heart piece
+        #    patch.write(b"\x60")
+#       #     patch.seek(int("39f71", 16) + rom_offset)
+#       #     patch.write(b"\x00\xff\x02\xd5\x29\x60")
+        #    # Also, herbs suck
+        #    patch.seek(int("388e9", 16) + rom_offset)
+        #    patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
+        #
+        ## In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
+        #elif settings.red_jewel_madness:
+        #    # Start @ 40 HP
+        #    patch.seek(int("8068", 16) + rom_offset)
+        #    patch.write(b"\x28")
+        #    # Red Jewels (item #$01) remove 1 HP when used
+        #    patch.seek(int("384d5", 16) + rom_offset)
+        #    patch.write(b"\x4c\x70\xfd")
+        #    # 2 Red Jewels (item #$2e) removes 2 HP when used
+        #    patch.seek(int("39d99", 16) + rom_offset)
+        #    patch.write(b"\x01\x00\x8D\xB0\x0A\xD8\x4c\x76\xfd")
+        #    # 3 Red Jewels (item #$2f) removes 3 HP when used
+        #    patch.seek(int("39dd9", 16) + rom_offset)
+        #    patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
+        #
+        ## Fluteless - prepare subroutines
+        #patch.seek(int("2f845", 16) + rom_offset)
+        #patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f845
+        #    + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f851
+        #    + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f85c
+        #if settings.fluteless:
+        #    # Change melody sprite to Will whistling
+        #    f_fluteless = open(BIN_PATH + "0f8fa4_fluteless.bin", "rb")
+        #    patch.seek(int("f8fa4", 16) + rom_offset)
+        #    patch.write(f_fluteless.read())
+        #    f_fluteless.close
+        #
+        #    # Disable blocking for Will
+        #    patch.seek(int("2ca63", 16) + rom_offset)
+        #    patch.write(b"\x20\x45\xf8")
+        #
+        #    # Disable attack damage for Will
+        #    patch.seek(int("2cefd", 16) + rom_offset)
+        #    patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x51\xf8")
+        #
+        #    # Allow charging in snake game
+        #    patch.seek(int("2b7b3", 16) + rom_offset)
+        #    patch.write(b"\x4c\x5c\xf8")
+        #
+        #    # Y-shift certain enemy positions so they can be hit without a flute
+        #    enemy_shift = [
+        #        [b"\x5c\xbb\x8b", 1],    # Tunnel: Canal Worms up 1
+        #        [b"\x5c\xbb\x8b",-1],    # Ankor Wat: Wall Bugs up 1
+        #        [b"\x66\xbb\x8b",-1]]    # Ankor Wat: Wall Bugs up 1
+        #    for [enemy_str,yshift] in enemy_shift:
+        #        done = False
+        #        addr = int("c8200", 16) + rom_offset
+        #        while not done:
+        #            addr = self.original_rom_data.find(enemy_str, addr+1)
+        #            if addr < 0 or addr > int("ce5e4", 16) + rom_offset:
+        #                done = True
+        #            else:
+        #                patch.seek(addr-2)
+        #                patch.write((self.original_rom_data[addr-2]-yshift).to_bytes(1,byteorder="little"))
 
         ##########################################################################
         #                          Modify Moon Tribe events
         ##########################################################################
-        # Allows player to use Teapot to travel by Sky Garden
-        f_moontribe = open(BIN_PATH + "09d11e_moontribe.bin", "rb")
-        patch.seek(int("9d11e", 16) + rom_offset)
-        patch.write(f_moontribe.read())
-        f_moontribe.close
-
-        # Lilly event serves as an overworld exit
-        patch.seek(int("4f441", 16) + rom_offset)
-        patch.write(b"\x00\x00\x30\x02\x45\x14\x1c\x17\x1d\x4d\xf4\x6b")
-        patch.write(b"\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
-        #patch.write(b"\x02\x40\x00\x04\x54\xf4\x6b\x02\x66\x90\x00\x60\x02\x01\x02\xC1\x6b")
-
-        # Adjust timer for enemizer
-        timer = 20
-#        if settings.level.value == 0:
-#            timer += 5
-#        elif settings.level.value >= 3:
-#            timer -= 5
-        if settings.enemizer.value != Enemizer.NONE.value:
-            timer += 5
-            if settings.enemizer.value != Enemizer.LIMITED.value:
-                timer += 5
-        patch.seek(int("4f8b8", 16) + rom_offset)
-        patch.write(binascii.unhexlify(str(timer)))
-
-        # Shorten Inca Statue get
-        patch.seek(int("4fae7", 16) + rom_offset)
-        patch.write(b"\x02\xbf\xf9\xfa\x6b")
-
-        ##########################################################################
-        #                          Modify Inca events
-        ##########################################################################
-        # Fix forced form change
-        patch.seek(int("9cfaa", 16) + rom_offset)
-        patch.write(FORCE_CHANGE + b"\xA9\xF0\xEF\x1C\x5A\x06\x02\xe0")
-
-        # Put Gold Ship captain at Inca entrance
-#        patch.seek(int("c8c9c", 16) + rom_offset)
-#        patch.write(b"\x19\x1c\x00\x4e\x85\x85\x00")
-
-        ##########################################################################
-        #                          Modify Gold Ship events
-        ##########################################################################
-        # Move Seth from deserted ship to gold ship, allows player to acquire item
-        # Write pointer to Seth event in new map
-        patch.seek(int("c945c", 16) + rom_offset)
-        patch.write(b"\x0b\x24\x00\x3e\x96\x85\x00\xff\xca")
-        patch.seek(int("c805a", 16) + rom_offset)
-        patch.write(b"\x65")
-        # Modify Seth event to ignore switch conditions
-        patch.seek(int("59643", 16) + rom_offset)
-        patch.write(b"\x10\x00")
-        # Add in inventory full text
-        patch.seek(int("59665", 16) + rom_offset)
-        patch.write(INV_FULL)
-
-        # Entering Gold Ship doesn't lock out Castoth
-        patch.seek(int("58188", 16) + rom_offset)
-        patch.write(b"\x02\xc1\x02\xc1")
-        patch.seek(int("18a09", 16) + rom_offset)
-        patch.write(b"\xd0\x00\x40\x02\x03")
-
-        # Have ladder NPC move aside from start
-        patch.seek(int("583c9", 16) + rom_offset)
-        patch.write(b"\x80\x0a")
-
-        # Modify queen switches
-        patch.seek(int("58a04", 16) + rom_offset)
-        patch.write(b"\x10\x00")
-        patch.seek(int("58a1f", 16) + rom_offset)
-        patch.write(b"\x10")
-
-        # Have crow's nest NPC warp directly to Diamond Coast
-        # Also checks for Castoth being defeated
-        f_goldship = open(BIN_PATH + "0584a9_goldship.bin", "rb")
-        patch.seek(int("584a9", 16) + rom_offset)
-        patch.write(f_goldship.read())
-        f_goldship.close
-
-        # Sleeping sends player to Diamond Coast
-        patch.seek(int("586a3", 16) + rom_offset)
-        patch.write(b"\x02\x26\x30\x48\x00\x20\x00\x03\x00\x21")
+        ## Adjust timer for enemizer
+        #timer = 20
+#       # if settings.level.value == 0:
+#       #     timer += 5
+#       # elif settings.level.value >= 3:
+#       #     timer -= 5
+        #if settings.enemizer.value != Enemizer.NONE.value:
+        #    timer += 5
+        #    if settings.enemizer.value != Enemizer.LIMITED.value:
+        #        timer += 5
+        #patch.seek(int("4f8b8", 16) + rom_offset)
+        #patch.write(binascii.unhexlify(str(timer)))
 
         ##########################################################################
         #                        Modify Diamond Coast events
@@ -1135,50 +404,13 @@ class Randomizer:
         patch.write(b"\xd3" + qt_encode("Woof woof!") + b"\xcb")
         patch.write(qt_encode("(You don't happen to know Morse Code, do you?)") + b"\xc0")
 
-        # Kara event serves as an overworld exit
-        patch.seek(int("5aa9e", 16) + rom_offset)
-        patch.write(b"\x00\x00\x30\x02\x45\x03\x00\x06\x01\xaa\xaa\x6b")
-        patch.write(b"\x02\x40\x00\x08\xb1\xaa\x6b\x02\x66\x50\x02\x50\x03\x07\x02\xC1\x6b")
-
         ##########################################################################
         #                           Modify Freejia events
         ##########################################################################
-        # Trash can 1 gives you an item instead of a status upgrade
-        # NOTE: This cannibalizes the following event @5cfbc (locked door)
-        f_freejia = open(BIN_PATH + "05cf85_freejia.bin", "rb")
-        patch.seek(int("5cf85", 16) + rom_offset)
-        patch.write(f_freejia.read())
-        f_freejia.close
-
-        # Give full inventory text to trash can 2
-        patch.seek(int("5cf37", 16) + rom_offset)
-        patch.write(b"\x02\xBF\x49\xCF\x02\xD4\x12\x44\xCF\x02\xCC\x53\x6B" + INV_FULL)
-
-        # Redirect event table to bypass deleted event
-        # Changes locked door to a normal door
-        patch.seek(int("c95bb", 16) + rom_offset)
-        patch.write(b"\xf3\xc5\x80")
-
         # Update NPC dialogue to acknowledge change
         patch.seek(int("5c331", 16) + rom_offset)
         patch.write(b"\x42\xa2\x80\xa0\x2b\xac\x48\xac\xd6\xae\xa4\x87\x84\xac\xd7\x58\xcb\xa5")
         patch.write(b"\x8d\x8b\x8e\x82\x8a\x84\x83\xac\x80\x86\x80\x88\x8d\x2a\x2a\x2a\xc0")
-
-        # Add inventory full option to Creepy Guy event
-        patch.seek(int("5b6df", 16) + rom_offset)
-        patch.write(INV_FULL)
-
-        # Alter laborer text
-        patch.seek(int("5bfdb", 16) + rom_offset)
-        patch.write(b"\xde\xbf")
-
-        # Have some fun with snitch item text
-        patch.seek(int("5b8bc", 16) + rom_offset)
-        patch.write(b"\x62")
-        patch.seek(int("5b925", 16) + rom_offset)
-        patch.write(b"\x88\xa4\x84\x8c\x2a\xcb\xac\x69\x84\xa3\x2b\xac\x48\x0e\x8c\xac\x80\xac\x81")
-        patch.write(b"\x80\x83\xac\xa0\x84\xa2\xa3\x8e\x8d\xcb\xac\x63\x8d\x88\xa4\x82\x87\x84\xa3")
-        patch.write(b"\xac\x86\x84\xa4\xac\xa3\xa4\x88\xa4\x82\x87\x84\xa3\x2b\xac\xa9\x8e\xca")
 
         # Woman on roof can warp you to prevent softlocks
         patch.seek(int("5b683", 16) + rom_offset) #four bytes
@@ -1209,47 +441,13 @@ class Randomizer:
         patch.seek(int("aa77a", 16) + rom_offset)
         patch.write(b"\x6b")
 
-        # Speed up elevator
-        patch.seek(int("aa5d9", 16) + rom_offset)
-        patch.write(b"\x0f\x07")
-        patch.seek(int("aa618", 16) + rom_offset)
-        patch.write(b"\x10\x08")
-
-        # Shorten morgue item get
-        patch.seek(int("5d4d8", 16) + rom_offset)
-        patch.write(b"\x02\xbf\xeb\xd4\x02\xe0")
-
-        # Cut out Sam's song
-        patch.seek(int("5d24f", 16) + rom_offset)
-        patch.write(b"\x6b")
-
         # Give appearing Dark Space the option of handling an ability
         patch.seek(int("5d62f", 16) + rom_offset)
         patch.write(b"\xAC\xD6\x88\x00\x2B\xA5\x0E\x85\x24\xA9\x00\x20\x85\x0E\x02\xE0")
 
         ##########################################################################
-        #                       Modify Neil's Cottage events
-        ##########################################################################
-        # Allow travel by plane with the Memory Melody
-        f_neilscottage = open(BIN_PATH + "05d89a_neilscottage.bin", "rb")
-        patch.seek(int("5d89a", 16) + rom_offset)
-        patch.write(f_neilscottage.read())
-        f_neilscottage.close
-
-        # Invention event serves as an overworld exit
-        patch.seek(int("5e305", 16) + rom_offset)
-        patch.write(b"\x00\x00\x30\x02\x45\x07\x0d\x0a\x0e\x11\xe3\x6b")
-        patch.write(b"\x02\x40\x00\x04\x18\xe3\x6b\x02\x66\x70\x02\x70\x02\x07\x02\xC1\x6b")
-
-        ##########################################################################
         #                            Modify Nazca events
         ##########################################################################
-        # Speedup warp sequence to Sky Garden
-        f_nazca = open(BIN_PATH + "05e647_nazca.bin", "rb")
-        patch.seek(int("5e647", 16) + rom_offset)
-        patch.write(f_nazca.read())
-        f_nazca.close
-
         # Put a Moon Tribe where the warp point is
         patch.seek(int("5f2f1", 16) + rom_offset)
         patch.write(b"\x10\x80\x0B")
@@ -1258,19 +456,9 @@ class Randomizer:
         patch.seek(int("c9d29", 16) + rom_offset)
         patch.write(b"\x1D\x2C")
 
-        # Allow exit to world map
-        patch.seek(int("5e80c", 16) + rom_offset)
-        patch.write(b"\x02\x66\x10\x03\x90\x02\x07\x02\xC1\x6B")
-
         ##########################################################################
         #                          Modify Sky Garden events
         ##########################################################################
-        # Allow travel from Sky Garden to other locations
-        f_skygarden = open(BIN_PATH + "05f356_skygarden.bin", "rb")
-        patch.seek(int("5f356", 16) + rom_offset)
-        patch.write(f_skygarden.read())
-        f_skygarden.close
-
         # Instant form change & warp to Seaside Palace if Viper is defeated
         patch.seek(int("ace9b", 16) + rom_offset)
         patch.write(b"\x4c\x99\xff")
@@ -1295,10 +483,6 @@ class Randomizer:
         patch.seek(int("1e28a5", 16) + rom_offset)
         patch.write(f_mupassage.read())
         f_mupassage.close
-
-        # Shorten NPC item get
-        patch.seek(int("68b01", 16) + rom_offset)
-        patch.write(b"\x6b")
 
         # Speed up purification sequence
         patch.seek(int("69450", 16) + rom_offset)
@@ -1374,20 +558,6 @@ class Randomizer:
         patch.seek(int("69baa", 16) + rom_offset)
         patch.write(qt_encode("Hey.", True))
 
-        # Spirits in Rama statue room can't lock you
-        patch.seek(int("6a07a", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("6a082", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("6a08a", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("6a092", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("6a09a", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("6a0a2", 16) + rom_offset)
-        patch.write(b"\x6b")
-
         # Move exits around to make Vampires required for Statue
         patch.seek(int("193ea", 16) + rom_offset)
         patch.write(b"\x5f\x80\x00\x50\x00\x03\x00\x44")
@@ -1400,15 +570,6 @@ class Randomizer:
         patch.seek(int("6a4c9", 16) + rom_offset)
         patch.write(b"\x02\x26\x66\xf8\x00\xd8\x01\x00\x00\x22\x02\xc1\x6b")
 
-        # Instant form change after Vamps are defeated
-        patch.seek(int("6a43b", 16) + rom_offset)
-        patch.write(b"\x4c\x00\xe5")
-
-        f_vampchange = open(BIN_PATH + "06e500_vampchange.bin", "rb")
-        patch.seek(int("6e500", 16) + rom_offset)
-        patch.write(f_vampchange.read())
-        f_vampchange.close
-
         ##########################################################################
         #                       Modify Angel Village events
         ##########################################################################
@@ -1416,12 +577,6 @@ class Randomizer:
         patch.seek(int("1941a", 16) + rom_offset)
         patch.write(b"\x2a\x05\x01\x01\x5e\x48\x00\x90\x00\x01\x00\x14")  # Temporarily put exit one tile south
         # patch.write(b"\x2a\x05\x01\x01\x5e\x48\x00\x80\x00\x01\x00\x14")  # Change to this if map is ever updated
-
-        # Update sign to read "Passage to Mu"
-        f_angelsign = open(BIN_PATH + "06ba36_angelsign.bin", "rb")
-        patch.seek(int("6ba36", 16) + rom_offset)
-        patch.write(f_angelsign.read())
-        f_angelsign.close
 
         # Entering this area clears your enemy defeat count and forces change to Will
         patch.seek(int("6bff7", 16) + rom_offset)
@@ -1467,24 +622,6 @@ class Randomizer:
         patch.seek(int("78544", 16) + rom_offset)
         patch.write(b"\x69")
 
-        # Update event address pointers
-        f_watermia1 = open(BIN_PATH + "078569_watermia1.bin", "rb")
-        patch.seek(int("78569", 16) + rom_offset)
-        patch.write(f_watermia1.read())
-        f_watermia1.close
-
-        # Change textbox contents
-        f_watermia2 = open(BIN_PATH + "0786c1_watermia2.bin", "rb")
-        patch.seek(int("786c1", 16) + rom_offset)
-        patch.write(f_watermia2.read())
-        f_watermia2.close
-
-        # Russian Glass NPC just gives you the item
-        f_russianglass = open(BIN_PATH + "079237_russianglass.bin", "rb")
-        patch.seek(int("79237", 16) + rom_offset)
-        patch.write(f_russianglass.read())
-        f_russianglass.close
-
         # Fix Lance item get text
         patch.seek(int("7ad28", 16) + rom_offset)
         patch.write(INV_FULL)
@@ -1492,20 +629,6 @@ class Randomizer:
         ##########################################################################
         #                          Modify Great Wall events
         ##########################################################################
-        # Rewrite Necklace Stone acquisition event
-        # Fill block with new item acquisition code (2 items)
-        f_necklace = open(BIN_PATH + "07b59e_necklace.bin", "rb")
-        patch.seek(int("7b59e", 16) + rom_offset)
-        patch.write(f_necklace.read())
-        f_necklace.close
-
-        # Update event table instance to point to new events
-        # New pointers include leading zero byte to negate event parameters
-        patch.seek(int("cb822", 16) + rom_offset)  # First stone, map 130
-        patch.write(b"\x00\x9e\xb5\x87")
-        patch.seek(int("cb94a", 16) + rom_offset)  # Second stone, map 131
-        patch.write(b"\x00\xfe\xb5\x87")
-
         # Entering wrong door in 2nd map area doesn't softlock you
         patch.seek(int("19a4c", 16) + rom_offset)
         patch.write(b"\x84")
@@ -1520,10 +643,6 @@ class Randomizer:
         patch.seek(int("19c84", 16) + rom_offset)
         patch.write(b"\x82\x10\x00\x90\x00\x07\x00\x18")
 
-        # Spawn Fanger off-screen so we can't cheese hits off it with Earthquaker
-        patch.seek(0x0cbd2f + rom_offset)
-        patch.write(b"\x40")
-
         # Make Fanger's detection areas cover the arena, in case player moves during quake
         patch.seek(0x0b81a0 + rom_offset)
         patch.write(b"\x01\x19\x3f\x3f")
@@ -1533,17 +652,6 @@ class Randomizer:
         ##########################################################################
         #                            Modify Euro events
         ##########################################################################
-        # Allow travel from Euro to Watermia
-        # Update event address pointers
-        f_euro1 = open(BIN_PATH + "07c432_euro1.bin", "rb")
-        patch.seek(int("7c432", 16) + rom_offset)
-        patch.write(f_euro1.read())
-        f_euro1.close
-        # Change textbox contents
-        f_euro2 = open(BIN_PATH + "07c4d0_euro2.bin", "rb")
-        patch.seek(int("7c4d0", 16) + rom_offset)
-        patch.write(f_euro2.read())
-        f_euro2.close
         patch.seek(int("7c482", 16) + rom_offset)
         patch.write(qt_encode("A moose once bit my sister.", True))
 
@@ -1552,20 +660,6 @@ class Randomizer:
         patch.write(b"\x14\x00")
         patch.seek(int("7e392", 16) + rom_offset)
         patch.write(b"\x5C\xBE\xD8\x85")
-
-        # Hidden house replaces STR upgrade with item acquisition
-        f_euroitem = open(BIN_PATH + "07e517_euroitem.bin", "rb")
-        patch.seek(int("7e517", 16) + rom_offset)
-        patch.write(f_euroitem.read())
-        f_euroitem.close
-
-        # Speed up store line
-        patch.seek(int("7d5e1", 16) + rom_offset)
-        patch.write(b"\x00\x01")
-
-        # Simplify Ann logic
-        patch.seek(int("7df43", 16) + rom_offset)
-        patch.write(b"\x80\x0a")
 
         # Change vendor event, allows for only one item acquisition
         # Note: this cannibalizes the following event
@@ -1627,44 +721,13 @@ class Randomizer:
         ##########################################################################
         #                        Modify Native Village events
         ##########################################################################
-        # Native can guide you to Dao if you give him the roast
-        f_natives = open(BIN_PATH + "088fc4_natives.bin", "rb")
-        patch.seek(int("88fc4", 16) + rom_offset)
-        patch.write(f_natives.read())
-        f_natives.close
-
         # Change event pointers for cannibalized NPC code
         patch.seek(int("cca93", 16) + rom_offset)
         patch.write(b"\x88\x8f\x88")
 
         ##########################################################################
-        #                         Modify Ankor Wat events
-        ##########################################################################
-        # Modify Gorgon Flower event, make it a simple item get
-        f_ankorwat1 = open(BIN_PATH + "089abf_ankorwat.bin", "rb")
-        patch.seek(int("89abf", 16) + rom_offset)
-        patch.write(f_ankorwat1.read())
-        f_ankorwat1.close
-
-        # Shorten black glasses get
-        patch.seek(int("89fa9", 16) + rom_offset)
-        patch.write(b"\x02\xe0")
-
-        # Bright room looks at switch 4f rather than equipment
-        f_ankorwat2 = open(BIN_PATH + "089a31_ankorwat.bin", "rb")
-        patch.seek(int("89a31", 16) + rom_offset)
-        patch.write(f_ankorwat2.read())
-        f_ankorwat2.close
-
-        ##########################################################################
         #                            Modify Dao events
         ##########################################################################
-        # Snake game grants an item instead of sending Jewels to the Jeweler
-        f_snakegame = open(BIN_PATH + "08b010_snakegame.bin", "rb")
-        patch.seek(int("8b010", 16) + rom_offset)
-        patch.write(f_snakegame.read())
-        f_snakegame.close
-
         # Neil in Dao
         patch.seek(int("8a5bf", 16) + rom_offset)
         patch.write(b"\x10")
@@ -1714,20 +777,6 @@ class Randomizer:
         patch.write(qt_encode("I'll hold onto that journal for you. Come back anytime if you want to read it.", True))
         patch.seek(int("3f208", 16) + rom_offset)
         patch.write(b"\x02\xbf\x1a\x9e\x6b")
-
-        # Shorten hieroglyph get
-        patch.seek(int("8c7b8", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("8c87f", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("8c927", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("8c9cf", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("8ca77", 16) + rom_offset)
-        patch.write(b"\x6b")
-        patch.seek(int("8cb1f", 16) + rom_offset)
-        patch.write(b"\x6b")
 
         # Speed up Room 3 elevator
         patch.seek(int("8c55b", 16) + rom_offset)
@@ -2078,19 +1127,11 @@ class Randomizer:
         patch.seek(int("4e1b7", 16) + rom_offset)  # Kara
         patch.write(b"\xe0\x6b")
 
-        # Moon Tribe
-        # patch.seek(int("4f445",16)+rom_offset)   # Lilly
-        # patch.write(b"\xe0\x6b")
-
         # Inca Ruins Entrance
         patch.seek(int("9ca03", 16) + rom_offset)  # Lilly
         patch.write(b"\xe0\x6b")
         patch.seek(int("9cea7", 16) + rom_offset)  # Kara
         patch.write(b"\xe0\x6b")
-
-        # Diamond Coast
-        # patch.seek(int("5aaa2",16)+rom_offset)   # Kara
-        # patch.write(b"\xe0\x6b")
 
         # Freejia Hotel
         patch.seek(int("5c782", 16) + rom_offset)  # Lance

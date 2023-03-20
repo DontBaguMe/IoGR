@@ -1,0 +1,3949 @@
+arch 65816
+hirom
+fillbyte $FF
+
+
+; Various actor addressess.
+{
+EPlayer = 3+$82C38C
+ECameraEtc = 3+$80EAED
+EParallax_ScaleEffect = 3+$80EA96
+ECookingSmoke = 3+$848000
+EJeweler = 3+$88cea0
+EDarkSpace = 3+$88D6A9
+EWorldMapTransitionListener = 3+$80CA42
+ECapeCardPile = 3+$84afb2
+ELancesMother = 3+$848E84
+ESethsMother = 3+$8490FF
+ESethsFather = 3+$849182
+ESouthCapeCookingMan = 3+$8491DC
+EGaia = 3+$88D7A8
+EParallax_ScaleEffectY = 3+$80EAA7
+ECastleWestWallFire = 3+$84BF90
+ECastleEastWallFire = 3+$84BFBA
+ECPlotDriver = 3+$84D202
+ECGuard_Unlocker = 3+$84DC19
+ECCellBlocker = 3+$84DB12
+ECTalkingMoss = 3+$84DB4A
+ECTalkingBallAndChain = 3+$84DBD9
+EBat_Simple = 3+$8A8755
+EStatJewelTutorial = 3+$84DC92
+ECWaterWorm = 3+$8A8000
+ECSkeleton = 3+$8A826C
+ECPullableStatue = 3+$8A8835
+ECSpikesPuzzleButton = 3+$8A8931
+ECSpikesPuzzleBall1 = 3+$8A89DE
+ECSpikesPuzzleBall2 = 3+$8A8A0F
+ECSpikesPuzzleBall3 = 3+$8A8A46
+ECSpikesPuzzleBall4 = 3+$8A8A7D
+ECCrawlingSpikeBall = 3+$8A8AAE
+ECDandelionFirstMeet = 3+$89A915
+EBat_Boss = 3+$8A85F7
+EBat_Lackey1 = 3+$8A8669
+EBat_Lackey2 = 3+$8A869A
+EBat_Lackey3 = 3+$8A86CB
+EBat_Lackey4 = 3+$8A86FF
+ECSpear_Far = 3+$8A87C3
+ECSpear_Near = 3+$8A87CE
+ECRustyButton = 3+$8A8971
+ECTreasureRoomSpirit = 3+$84DCFD
+ECSongPuzzleFlower = 3+$89BC34
+ECSongPuzzleWestButton = 3+$89BC8B
+ECSongPuzzleEastButton = 3+$89BCD1
+ECSongPuzzleListener = 3+$89BDB5
+ECDandelionFinal = 3+$89AA40
+ECRedSkeleton = 3+$8A8476
+ECBridgeButton = 3+$89BF0F
+ECDarkSpaceSpawner = 3+$89BF6B
+ECLilyEnd = 3+$89BF90
+ERampLauncherToWest = 3+$80d2d0 
+ERampLauncherToEast = 3+$80d348 
+EIVWestHouseNpc = 3+$84DF85
+EIVKara_House = 3+$84E1B3
+EIVLily_House = 3+$84E5A1
+EIVNorthHouseMayor = 3+$84DDB6
+EIVNorthHouseNpc = 3+$84DE70
+EIVIncaStatuePickup = 3+$84F359
+EIVBreakableWall = 3+$84F3CD
+EMPSlug = 3+$8A8DB7
+EMPMudGolem = 3+$8A8B1B 
+EMPSpinner = 3+$8A8C70
+EMPSlime = 3+$8A97EE
+EMPFlyingHead = 3+$8A98BC
+EGoldenTileListener = 3+$89C66E
+ECastoth = 3+$8A9B03
+EBossClearRewarder = 3+$80C2BB
+EMineLizard = 3+$8AAACA
+EMineEyeStalker = 3+$8AB103
+EMineEyeFrozen = 3+$8AB0B3
+EMineWorm = 3+$8AAFF5
+ENazcaRobotBlue = 3+$8AB4B0
+ENazcaTopWormB = 3+$8AC533
+ENazcaRobotRed = 3+$8AB8B0
+ENazcaBackWorm = 3+$8AC816
+ENazcaFireball = 3+$8ACCF1
+ENazcaTopWormA = 3+$8AC520
+EViperFallingPlatform = 3+$8acfe5
+EViper = 3+$8ad16f
+ESGSkyFallingWill = 3+$868111
+ESGSkyNeilsPlane = 3+$868000
+EMuWizard = 3+$8ae26e
+EVJack = 3+$8AF1F7
+EVSyl = 3+$8AF3C8
+EAVSkeleton = 3+$8aea51
+EFanger = 3+$8B815C
+EGWLance = 3+$87b773
+EEuroNpcGreen = 3+$87c402
+EEuroNpcBlue = 3+$87ca65
+EAWZipFly = 3+$8baf4f
+EAWBush = 3+$8bb1d7
+EAWCyclops = 3+$8bb275
+EAWFlyingSkull = 3+$8bbd8d
+EAWWallSkull = 3+$8bbfd0
+EAWGolemBlocker = 3+$8899AF
+EAWDropDownListener = 3+$88985e
+EDaoNeil = 3+$88a5ae
+EDaoJailInteriorNpc = 3+$88a8fb
+EMummyQueen = 3+$8ba6b6
+EComet = 3+$8CEEAA
+EJMansionEntranceListener = 3+$88fc6a
+EBabelCastoth = 3+$8a99d7
+EBabelViper = 3+$8ad0d5
+EBabelVampireJack = 3+$8af150
+EBabelVampireSyl = 3+$8af19c
+EFanger_Babel = 3+$8B8000
+EBabelMummyQueen = 3+$8ba61a
+EMainMenu = 3+$8be237
+EWorldMapManager = 3+$83a2f1
+EInventoryScreenManager = 3+$82e396
+}
+
+
+org $8C8000
+ActorList:
+.Pointers:
+{
+dw .Map00
+dw .Map01
+dw .Map02
+dw .Map03
+dw .Map04
+dw .Map05
+dw .Map06
+dw .Map07
+dw .Map08
+dw .Map09
+dw .Map0A
+dw .Map0B
+dw .Map0C
+dw .Map0D
+dw .Map0E
+dw .Map0F
+dw .Map10
+dw .Map11
+dw .Map12
+dw .Map13
+dw .Map14
+dw .Map15
+dw .Map16
+dw .Map17
+dw .Map18
+dw .Map19
+dw .Map1A
+dw .Map1B
+dw .Map1C
+dw .Map1D
+dw .Map1E
+dw .Map1F
+dw .Map20
+dw .Map21
+dw .Map22
+dw .Map23
+dw .Map24
+dw .Map25
+dw .Map26
+dw .Map27
+dw .Map28
+dw .Map29
+dw .Map2A
+dw .Map2B
+dw .Map2C
+dw .Map2D
+dw .Map2E
+dw .Map2F
+dw .Map30
+dw .Map31
+dw .Map32
+dw .Map33
+dw .Map34
+dw .Map35
+dw .Map36
+dw .Map37
+dw .Map38
+dw .Map39
+dw .Map3A
+dw .Map3B
+dw .Map3C
+dw .Map3D
+dw .Map3E
+dw .Map3F
+dw .Map40
+dw .Map41
+dw .Map42
+dw .Map43
+dw .Map44
+dw .Map45
+dw .Map46
+dw .Map47
+dw .Map48
+dw .Map49
+dw .Map4A
+dw .Map4B
+dw .Map4C
+dw .Map4D
+dw .Map4E
+dw .Map4F
+dw .Map50
+dw .Map51
+dw .Map52
+dw .Map53
+dw .Map54
+dw .Map55
+dw .Map56
+dw .Map57
+dw .Map58
+dw .Map59
+dw .Map5A
+dw .Map5B
+dw .Map5C
+dw .Map5D
+dw .Map5E
+dw .Map5F
+dw .Map60
+dw .Map61
+dw .Map62
+dw .Map63
+dw .Map64
+dw .Map65
+dw .Map66
+dw .Map67
+dw .Map68
+dw .Map69
+dw .Map6A
+dw .Map6B
+dw .Map6C
+dw .Map6D
+dw .Map6E
+dw .Map6F
+dw .Map70
+dw .Map71
+dw .Map72
+dw .Map73
+dw .Map74
+dw .Map75
+dw .Map76
+dw .Map77
+dw .Map78
+dw .Map79
+dw .Map7A
+dw .Map7B
+dw .Map7C
+dw .Map7D
+dw .Map7E
+dw .Map7F
+dw .Map80
+dw .Map81
+dw .Map82
+dw .Map83
+dw .Map84
+dw .Map85
+dw .Map86
+dw .Map87
+dw .Map88
+dw .Map89
+dw .Map8A
+dw .Map8B
+dw .Map8C
+dw .Map8D
+dw .Map8E
+dw .Map8F
+dw .Map90
+dw .Map91
+dw .Map92
+dw .Map93
+dw .Map94
+dw .Map95
+dw .Map96
+dw .Map97
+dw .Map98
+dw .Map99
+dw .Map9A
+dw .Map9B
+dw .Map9C
+dw .Map9D
+dw .Map9E
+dw .Map9F
+dw .MapA0
+dw .MapA1
+dw .MapA2
+dw .MapA3
+dw .MapA4
+dw .MapA5
+dw .MapA6
+dw .MapA7
+dw .MapA8
+dw .MapA9
+dw .MapAA
+dw .MapAB
+dw .MapAC
+dw .MapAD
+dw .MapAE
+dw .MapAF
+dw .MapB0
+dw .MapB1
+dw .MapB2
+dw .MapB3
+dw .MapB4
+dw .MapB5
+dw .MapB6
+dw .MapB7
+dw .MapB8
+dw .MapB9
+dw .MapBA
+dw .MapBB
+dw .MapBC
+dw .MapBD
+dw .MapBE
+dw .MapBF
+dw .MapC0
+dw .MapC1
+dw .MapC2
+dw .MapC3
+dw .MapC4
+dw .MapC5
+dw .MapC6
+dw .MapC7
+dw .MapC8
+dw .MapC9
+dw .MapCA
+dw .MapCB
+dw .MapCC
+dw .MapCD
+dw .MapCE
+dw .MapCF
+dw .MapD0
+dw .MapD1
+dw .MapD2
+dw .MapD3
+dw .MapD4
+dw .MapD5
+dw .MapD6
+dw .MapD7
+dw .MapD8
+dw .MapD9
+dw .MapDA
+dw .MapDB
+dw .MapDC
+dw .MapDD
+dw .MapDE
+dw .MapDF
+dw .MapE0
+dw .MapE1
+dw .MapE2
+dw .MapE3
+dw .MapE4
+dw .MapE5
+dw .MapE6
+dw .MapE7
+dw .MapE8
+dw .MapE9
+dw .MapEA
+dw .MapEB
+dw .MapEC
+dw .MapED
+dw .MapEE
+dw .MapEF
+dw .MapF0
+dw .MapF1
+dw .MapF2
+dw .MapF3
+dw .MapF4
+dw .MapF5
+dw .MapF6
+dw .MapF7
+dw .MapF8
+dw .MapF9
+dw .MapFA
+dw .MapFB
+dw .MapFC
+dw .MapFD
+dw .MapFE
+dw .MapFF
+}
+; org $8C8200
+{
+ActorList_MapTEST:
+ActorList_Map09:
+ActorList_Map14:
+ActorList_Map2B:
+ActorList_Map2D:
+ActorList_Map48:
+ActorList_Map57:
+ActorList_Map76:
+ActorList_Map77:
+ActorList_Map80:
+ActorList_Map81:
+ActorList_Map9E:
+ActorList_MapAA:
+ActorList_MapAB:
+ActorList_MapAF:
+ActorList_MapC1:
+ActorList_MapC2:
+ActorList_MapCA:
+ActorList_MapCB:
+ActorList_MapF8:
+ActorList_MapF9:
+ActorList_Map00:
+db $FF,$CA
+ActorList_Map01:
+db $29,$2F,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $20,$0E,$00 : dl $80C5F3 : db $00 
+db $29,$0E,$00 : dl $80C5F3 : db $00 
+db $22,$21,$00 : dl $80C5F3 : db $00 
+db $07,$25,$00 : dl $80C5F3 : db $00 
+db $12,$25,$00 : dl $80C5F3 : db $00 
+db $12,$1A,$30 : dl ECookingSmoke-3 : db $00
+db $07,$1B,$30 : dl ECookingSmoke-3 : db $00
+db $19,$1C,$30 : dl ECookingSmoke-3 : db $00
+db $25,$13,$30 : dl ECookingSmoke-3 : db $00
+db $29,$13,$30 : dl ECookingSmoke-3 : db $00
+db $2B,$04,$30 : dl ECookingSmoke-3 : db $00
+db $1E,$03,$30 : dl ECookingSmoke-3 : db $00
+db $00,$01,$00 : dl $848004 : db $00 
+db $00,$01,$00 : dl $848004 : db $00 
+db $00,$01,$00 : dl $848004 : db $00 
+db $07,$24,$00 : dl $8489F2 : db $00 
+db $23,$18,$00 : dl $8480A8 : db $00 
+db $29,$18,$00 : dl $848134 : db $00 
+db $2B,$17,$00 : dl $8481A8 : db $00 
+db $2D,$0F,$00 : dl $8481ED : db $00
+db $06,$2F,$00 : dl $84836F : db $00 
+db $04,$07,$00 : dl $848494 : db $00 
+db $19,$08,$00 : dl $848531 : db $00 
+db $2B,$0F,$00 : dl $848654 : db $00 
+db $24,$24,$00 : dl $848762 : db $00 
+db $15,$28,$00 : dl $84884F : db $00 
+db $0A,$26,$00 : dl $84893A : db $00 
+db $03,$1D,$01 : dl EJeweler-3 : db $00
+db $0D,$15,$00 : dl $84922C : db $00 
+;db $00,$01,$00 : dl $84BC65 : db $00     ; Door-text-generator and Will-house-handler, removed in IOGR
+db $0E,$06,!DkSpSouthCapeType : dl EDarkSpace-3 : db $00
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $08,$0C,$03 : dl ERedJewelSpot-3 : db $00
+db $FF,$D6,$47,$42,$80,$A0,$84,$CA
+ActorList_Map02:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $08,$12,$00 : dl $84B8B1 : db $00 
+db $00,$01,$00 : dl $84BE38 : db $00 
+db $FF,$D7,$32,$42,$80,$A6,$84,$CA
+ActorList_Map03:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $06,$09,$00 : dl ELancesMother-3 : db $00
+db $07,$18,$01 : dl ERedJewelSpot-3 : db $00
+db $FF,$4B,$80,$8D,$82,$84,$0E,$A3,$AC,$47,$8E,$A5,$A3,$84,$CA
+ActorList_Map04:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $05,$19,$00 : dl $848F7A : db $00 
+db $19,$18,$00 : dl $848FDE : db $00 
+db $18,$09,$00 : dl $849052 : db $00 
+db $FF,$44,$A2,$88,$8A,$0E,$A3,$AC,$47,$8E,$A5,$A3,$84,$AC,$CA
+ActorList_Map05:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $02,$0A,$00 : dl ESethsMother-3 : db $00
+db $0D,$0A,$00 : dl ESethsFather-3 : db $00
+db $FF,$63,$84,$A4,$87,$0E,$A3,$AC,$47,$8E,$A5,$A3,$84,$AC,$CA
+ActorList_Map06:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $08,$0A,$00 : dl $849279 : db $00 
+db $08,$19,$00 : dl $849862 : db $00 
+db $03,$18,$00 : dl $849DAC : db $00 
+db $08,$19,$00 : dl $84A1D7 : db $00 
+db $05,$21,$00 : dl $84A360 : db $00 
+db $06,$21,$00 : dl $84A42F : db $00 
+db $00,$01,$00 : dl $84A461 : db $00 
+db $03,$07,$00 : dl $84AAF9 : db $00 
+db $05,$1D,$00 : dl $84A5AF : db $00 
+db $FF,$67,$88,$8B,$8B,$0E,$A3,$AC,$47,$8E,$A5,$A3,$84,$AC,$CA
+ActorList_Map07:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$0A,$00 : dl ECookingSmoke-3 : db $00
+db $06,$0A,$00 : dl ESouthCapeCookingMan-3 : db $00
+db $FF,$CA
+ActorList_Map08:
+db $05,$0B,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $08,$08,$00 : dl $848A8C : db $00 
+db $FF,$63,$82,$87,$8E,$8E,$8B,$CA
+ActorList_Map0A:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $18,$2C,$00 : dl $84BFE4 : db $00 
+db $27,$2C,$00 : dl $84C1B2 : db $00 
+db $16,$27,$00 : dl $84C2FE : db $00 
+db $1D,$16,$00 : dl $84C3C8 : db $00 
+db $21,$16,$00 : dl $84C56E : db $00 
+db $17,$18,$00 : dl $84C5C8 : db $00 
+db $1B,$1B,$00 : dl $84C61A : db $00 
+db $24,$1B,$00 : dl $84C69F : db $00 
+db $09,$19,$00 : dl $84C7AE : db $00 
+db $3A,$1C,$00 : dl $84C7FC : db $00 
+db $35,$09,$00 : dl $84C8B0 : db $00 
+db $10,$0C,$00 : dl $84C947 : db $00 
+db $34,$09,$00 : dl $84C8E6 : db $00 
+db $10,$3C,$00 : dl $84D19D : db $00    ; Basement guard, moved west for IOGR.
+db $1C,$16,$00 : dl $84C56A : db $00 
+db $28,$3B,$00 : dl $84D0D3 : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $32,$35,$00 : dl ECastleWestWallFire-3 : db $00
+db $33,$24,$00 : dl ECastleWestWallFire-3 : db $00
+db $32,$25,$00 : dl ECastleWestWallFire-3 : db $00
+db $12,$25,$00 : dl ECastleWestWallFire-3 : db $00
+db $13,$24,$00 : dl ECastleWestWallFire-3 : db $00
+db $02,$25,$00 : dl ECastleWestWallFire-3 : db $00
+db $03,$24,$00 : dl ECastleWestWallFire-3 : db $00
+db $32,$15,$00 : dl ECastleWestWallFire-3 : db $00
+db $33,$14,$00 : dl ECastleWestWallFire-3 : db $00
+db $33,$05,$00 : dl ECastleWestWallFire-3 : db $00
+db $3D,$35,$00 : dl ECastleEastWallFire-3 : db $00
+db $3D,$25,$00 : dl ECastleEastWallFire-3 : db $00
+db $3C,$24,$00 : dl ECastleEastWallFire-3 : db $00
+db $2D,$25,$00 : dl ECastleEastWallFire-3 : db $00
+db $2C,$24,$00 : dl ECastleEastWallFire-3 : db $00
+db $0D,$25,$00 : dl ECastleEastWallFire-3 : db $00
+db $0C,$24,$00 : dl ECastleEastWallFire-3 : db $00
+db $3D,$15,$00 : dl ECastleEastWallFire-3 : db $00
+db $3C,$14,$00 : dl ECastleEastWallFire-3 : db $00
+db $3D,$06,$00 : dl ECastleEastWallFire-3 : db $00
+db $3C,$05,$00 : dl ECastleEastWallFire-3 : db $00
+db $FF,$44,$83,$A7,$80,$A2,$83,$0E,$A3,$AC,$42,$80,$A3,$A4,$8B,$84,$AC,$CA
+ActorList_Map0B:
+db $0A,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0B,$20,$00 : dl ECPlotDriver-3 : db $00
+db $02,$14,$00 : dl ECGuard_Unlocker-3 : db $00
+db $12,$08,!DkSpPrisonCellType : dl EDarkSpace-3 : db $00
+db $0D,$11,$00 : dl ECCellBlocker-3 : db $00
+db $0E,$11,$00 : dl ECCellBlocker-3 : db $00
+db $0F,$11,$00 : dl ECCellBlocker-3 : db $00
+db $10,$11,$00 : dl ECCellBlocker-3 : db $00
+db $12,$07,$00 : dl ECTalkingMoss-3 : db $00
+db $0B,$0D,$00 : dl ECTalkingMoss-3 : db $00
+db $0C,$08,$00 : dl ECTalkingBallAndChain-3 : db $00
+db $FF,$44,$83,$A7,$80,$A2,$83,$0E,$A3,$AC,$D7,$26,$CA
+ActorList_Map0C:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $0B,$09,$00 : dl EBat_Simple-3 : db $05,$01,$00
+db $11,$0A,$00 : dl EBat_Simple-3 : db $05,$02,$00
+db $19,$07,$00 : dl EBat_Simple-3 : db $05,$03,$00
+db $FF,$CA
+ActorList_Map0D:
+db $0A,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $12,$22,$00 : dl ECWaterWorm-3 : db $02,$04,$01
+db $15,$2D,$00 : dl ECWaterWorm-3 : db $02,$05,$00
+db $0C,$3D,$00 : dl ECWaterWorm-3 : db $02,$06,$02
+db $09,$0B,$00 : dl EBat_Simple-3 : db $05,$07,$00
+db $03,$1B,$00 : dl EBat_Simple-3 : db $05,$08,$00
+db $01,$22,$00 : dl EBat_Simple-3 : db $05,$09,$00
+db $0A,$22,$00 : dl EBat_Simple-3 : db $05,$0A,$00
+db $1B,$18,$00 : dl EBat_Simple-3 : db $05,$0B,$00
+db $16,$1C,$00 : dl EBat_Simple-3 : db $05,$0C,$00
+db $16,$3B,$00 : dl EBat_Simple-3 : db $05,$0D,$00
+db $1C,$38,$00 : dl EBat_Simple-3 : db $05,$0E,$00
+db $09,$3A,$00 : dl EBat_Simple-3 : db $05,$0F,$00
+db $02,$3B,$00 : dl EBat_Simple-3 : db $05,$10,$00
+db $18,$23,$00 : dl ECSkeleton-3 : db $01,$11,$00
+db $0D,$32,$00 : dl ECSkeleton-3 : db $01,$12,$00
+db $FF,$65,$8D,$83,$84,$A2,$86,$A2,$8E,$A5,$8D,$83,$AC,$64,$A5,$8D,$8D,$84,$8B,$CA
+ActorList_Map0E:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $2B,$10,$00 : dl ECWaterWorm-3 : db $02,$13,$00
+db $1F,$1B,$00 : dl ECWaterWorm-3 : db $02,$14,$00
+db $11,$15,$00 : dl ECWaterWorm-3 : db $02,$15,$00
+db $08,$0B,$00 : dl ECWaterWorm-3 : db $02,$16,$03
+db $37,$04,$00 : dl EBat_Simple-3 : db $05,$17,$00
+db $3D,$07,$00 : dl EBat_Simple-3 : db $05,$18,$00
+db $34,$1E,$00 : dl EBat_Simple-3 : db $05,$19,$00
+db $3B,$17,$00 : dl EBat_Simple-3 : db $05,$1A,$00
+db $28,$0F,$00 : dl EBat_Simple-3 : db $05,$1B,$00
+db $1F,$09,$00 : dl EBat_Simple-3 : db $05,$1C,$00
+db $0C,$10,$00 : dl EBat_Simple-3 : db $05,$1D,$00
+db $37,$1A,$00 : dl ECSkeleton-3 : db $01,$1E,$00
+db $10,$04,$00 : dl ECSkeleton-3 : db $01,$1F,$00
+db $19,$1C,$00 : dl ECSkeleton-3 : db $01,$21,$00
+db $06,$08,$00 : dl ECSkeleton-3 : db $01,$22,$00
+db $3D,$11,$00 : dl ECPullableStatue-3 : db $00
+db $3E,$11,$00 : dl ECPullableStatue-3 : db $00
+db $17,$18,$00 : dl ECSpikesPuzzleButton-3 : db $00
+db $14,$15,$00 : dl ECSpikesPuzzleBall1-3 : db $00
+db $15,$15,$00 : dl ECSpikesPuzzleBall2-3 : db $00
+db $16,$1C,$00 : dl ECSpikesPuzzleBall3-3 : db $00
+db $16,$1D,$00 : dl ECSpikesPuzzleBall4-3 : db $00
+db $06,$1B,$00 : dl ECCrawlingSpikeBall-3 : db $00
+db $27,$16,$00 : dl ECCrawlingSpikeBall-3 : db $00
+db $23,$17,$80 : dl ECCrawlingSpikeBall-3 : db $00
+db $FF,$CA
+ActorList_Map0F:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0C,$5B,$00 : dl ECWaterWorm-3 : db $02,$23,$00
+db $03,$5B,$00 : dl ECWaterWorm-3 : db $02,$24,$00
+db $02,$23,$00 : dl EBat_Simple-3 : db $05,$25,$00
+db $06,$1F,$00 : dl EBat_Simple-3 : db $05,$26,$00
+db $03,$1A,$00 : dl EBat_Simple-3 : db $05,$27,$00
+db $02,$30,$00 : dl EBat_Simple-3 : db $05,$28,$00
+db $0D,$45,$00 : dl ECSkeleton-3 : db $01,$29,$00
+db $0D,$22,$00 : dl ECSkeleton-3 : db $01,$2A,$00
+db $07,$07,$00 : dl EBat_Boss-3 : db $03,$2B,$05
+db $09,$07,$00 : dl EBat_Lackey1-3 : db $04,$2C,$00
+db $05,$07,$00 : dl EBat_Lackey2-3 : db $04,$2D,$00
+db $0B,$07,$00 : dl EBat_Lackey3-3 : db $04,$2E,$00
+db $03,$07,$00 : dl EBat_Lackey4-3 : db $04,$2F,$00
+db $02,$31,$00 : dl ECSpear_Far-3 : db $00
+db $0D,$31,$00 : dl ECSpear_Far-3 : db $00
+db $06,$4C,$00 : dl ECSpear_Near-3 : db $00
+db $0D,$4A,$00 : dl ECSpear_Near-3 : db $00
+db $09,$47,$00 : dl ECSpear_Near-3 : db $00
+db $08,$48,$00 : dl ECSpear_Near-3 : db $00
+db $07,$49,$00 : dl ECSpear_Near-3 : db $00
+db $01,$46,$00 : dl ECSpear_Near-3 : db $00
+db $02,$46,$00 : dl ECSpear_Near-3 : db $00
+db $0D,$2B,$00 : dl ECRustyButton-3 : db $00
+db $0B,$32,$40 : dl ECCrawlingSpikeBall-3 : db $00
+db $05,$32,$40 : dl ECCrawlingSpikeBall-3 : db $00
+db $01,$39,$00 : dl ECCrawlingSpikeBall-3 : db $00
+db $0E,$2E,$80 : dl ECCrawlingSpikeBall-3 : db $00
+db $FF,$CA
+ActorList_Map10:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $02,$06,$00 : dl ECTreasureRoomSpirit-3 : db $00
+db $FF,$CA
+ActorList_Map11:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $04,$05,$00 : dl ECSongPuzzleFlower-3 : db $00
+db $03,$07,$00 : dl ECSongPuzzleWestButton-3 : db $00
+db $1C,$07,$00 : dl ECSongPuzzleEastButton-3 : db $00
+db $1C,$07,$00 : dl ECSongPuzzleListener-3 : db $00
+db $0B,$0B,$00 : dl ECDandelionFinal-3 : db $00
+db $FF,$CA
+ActorList_Map12:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $15,$5A,$00 : dl ECWaterWorm-3 : db $02,$30,$00
+db $21,$5A,$00 : dl ECWaterWorm-3 : db $02,$31,$00
+db $0F,$4D,$00 : dl ECWaterWorm-3 : db $02,$32,$00
+db $0F,$4B,$00 : dl ECWaterWorm-3 : db $02,$33,$00
+db $05,$4D,$00 : dl ECWaterWorm-3 : db $02,$34,$00
+db $05,$4B,$00 : dl ECWaterWorm-3 : db $02,$35,$16
+db $0A,$18,$00 : dl ECWaterWorm-3 : db $02,$36,$00
+db $1B,$56,$00 : dl EBat_Simple-3 : db $05,$37,$00
+db $0B,$56,$00 : dl EBat_Simple-3 : db $05,$38,$00
+db $28,$4C,$00 : dl EBat_Simple-3 : db $05,$39,$00
+db $02,$0C,$00 : dl EBat_Simple-3 : db $05,$3A,$00
+db $02,$03,$00 : dl EBat_Simple-3 : db $05,$3B,$00
+db $08,$03,$00 : dl EBat_Simple-3 : db $05,$3C,$00
+db $0B,$06,$00 : dl EBat_Simple-3 : db $05,$3D,$00
+db $15,$56,$00 : dl ECSkeleton-3 : db $01,$3E,$00
+db $27,$39,$00 : dl ECSkeleton-3 : db $01,$3F,$00
+db $06,$23,$00 : dl ECSkeleton-3 : db $01,$40,$00
+db $05,$21,$00 : dl ECSkeleton-3 : db $01,$41,$00
+db $11,$21,$00 : dl ECSkeleton-3 : db $01,$42,$00
+db $12,$15,$00 : dl ECSkeleton-3 : db $01,$43,$00
+db $03,$3A,$00 : dl ECRedSkeleton-3 : db $10,$44,$17
+db $27,$13,$00 : dl ECRedSkeleton-3 : db $10,$45,$18
+db $16,$3E,$40 : dl ECCrawlingSpikeBall-3 : db $00
+db $19,$3B,$C0 : dl ECCrawlingSpikeBall-3 : db $00
+db $11,$38,$80 : dl ECCrawlingSpikeBall-3 : db $00
+db $1E,$39,$00 : dl ECCrawlingSpikeBall-3 : db $00
+db $1B,$12,$80 : dl ECCrawlingSpikeBall-3 : db $00
+db $1E,$15,$40 : dl ECCrawlingSpikeBall-3 : db $00
+db $20,$12,$00 : dl ECCrawlingSpikeBall-3 : db $00
+db $1D,$0F,$C0 : dl ECCrawlingSpikeBall-3 : db $00
+db $2B,$56,$00 : dl ECBridgeButton-3 : db $00
+db $00,$01,!DkSpPrisonEndType : dl ECDarkSpaceSpawner-3 : db $00
+db $FF,$CA
+ActorList_Map13:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$08,$00 : dl ECLilyEnd-3 : db $00
+db $0D,$18,$05 : dl ERedJewelSpot-3 : db $00
+if !KaraLocation == 0
+db $0b,$0b,$00 : dl $86d14e : db $00
+endif
+db $FF,$CA
+ActorList_Map15:
+db $2D,$2B,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$00,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $4C,$10,$00 : dl $84DE21 : db $00 
+db $43,$0E,$00 : dl $84DEB3 : db $00 
+db $44,$0E,$00 : dl $84DF0C : db $00 
+db $3D,$2B,$00 : dl $84E022 : db $00 
+db $2E,$36,$00 : dl $84E2A3 : db $00 
+db $0A,$18,$00 : dl $84E929 : db $00 
+db $43,$08,!DkSpItoryType : dl EDarkSpace-3 : db $00
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $30,$19,$01 : dl ERampLauncherToWest-3 : db $00
+db $0F,$25,$01 : dl ERampLauncherToEast-3 : db $00
+db $25,$28,$07 : dl ERedJewelSpot-3 : db $00
+db $FF,$48,$A4,$8E,$A2,$A9,$AC,$66,$88,$8B,$8B,$80,$86,$84,$CA
+ActorList_Map16:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $04,$09,$00 : dl EIVWestHouseNpc-3 : db $00
+db $FF,$CA
+ActorList_Map17:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $08,$0B,$00 : dl EIVLily_House-3 : db $00
+db $FF,$D7,$18,$47,$8E,$A5,$A3,$84,$CA
+ActorList_Map18:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $09,$0A,$00 : dl EIVNorthHouseMayor-3 : db $00
+db $0B,$0B,$00 : dl EIVNorthHouseNpc-3 : db $00
+db $FF,$CA
+ActorList_Map19:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$29,$00 : dl EIVIncaStatuePickup-3 : db $00
+db $09,$07,$00 : dl EIVBreakableWall-3 : db $00
+db $FF,$CA
+ActorList_Map1A:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$00,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $16,$1B,$00 : dl $84F441 : db $00 
+db $0F,$0B,$00 : dl EMoonTribeSpirit-3 : db $00 
+db $0C,$07,$00 : dl EMoonTribeSpirit-3 : db $00 
+db $11,$09,$00 : dl EMoonTribeSpirit-3 : db $00 
+db $17,$0D,$00 : dl EMoonTribeSpirit-3 : db $00 
+db $0B,$12,$00 : dl EMoonTribeSpirit-3 : db $00 
+db $FF,$47,$8E,$8C,$84,$AC,$8E,$85,$AC,$D6,$31,$64,$A2,$88,$81,$84,$CA
+ActorList_Map1B:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $84F895 : db $00 
+db $0F,$10,$00 : dl $84FAC5 : db $00
+db $09,$0B,$00 : dl EMPSlug-3 : db $0B,$00,$00
+db $0C,$0B,$00 : dl EMPSlug-3 : db $0B,$00,$00
+db $0F,$0B,$00 : dl EMPSlug-3 : db $0B,$00,$00
+db $12,$0B,$00 : dl EMPSlug-3 : db $0B,$00,$00
+db $15,$0B,$00 : dl EMPSlug-3 : db $0B,$00,$00
+db $18,$0B,$00 : dl EMPSlug-3 : db $0B,$00,$00
+db $FF,$CA
+ActorList_Map1C:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$00,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $FF,$44,$8D,$A4,$A2,$80,$8D,$82,$84,$AC,$A4,$8E,$AC,$62,$A5,$88,$8D,$A3,$CA
+ActorList_Map1D:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $00,$01,$00 : dl $89D02B : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $89C579 : db $00 
+db $22,$19,$00 : dl EMPMudGolem-3 : db $0A,$01,$00
+db $28,$1C,$00 : dl EMPMudGolem-3 : db $0A,$02,$00
+db $29,$32,$00 : dl EMPMudGolem-3 : db $0A,$03,$00
+db $14,$43,$00 : dl EMPMudGolem-3 : db $0A,$04,$00
+db $17,$47,$00 : dl EMPMudGolem-3 : db $0A,$05,$00
+db $12,$18,$00 : dl EMPSpinner-3 : db $0C,$06,$00
+db $10,$2A,$00 : dl EMPSpinner-3 : db $0C,$07,$0D
+db $2C,$3F,$00 : dl EMPSpinner-3 : db $0C,$08,$0E
+db $0A,$45,$00 : dl EMPSpinner-3 : db $0C,$09,$00
+db $07,$4C,$00 : dl EMPSpinner-3 : db $0C,$0A,$00
+db $2D,$19,$00 : dl EMPSpinner-3 : db $0C,$0B,$0F
+db $09,$3A,$00 : dl $8A8EB6 : db $0B,$0C,$00 
+db $03,$3D,$00 : dl $8A8EB6 : db $0B,$0D,$00 
+db $17,$41,$00 : dl $8A8EB6 : db $0B,$0E,$00 
+db $14,$48,$00 : dl $8A8EB6 : db $0B,$0F,$00 
+db $02,$3E,$00 : dl $89C26F : db $00 
+db $FF,$D7,$19,$42,$8B,$88,$85,$85,$CA
+ActorList_Map1E:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $89C4B2 : db $00 
+db $37,$14,$00 : dl $89C54D : db $00 
+db $26,$17,$00 : dl $89C563 : db $00 
+db $19,$12,$03 : dl ERampLauncherToWest-3 : db $00
+db $2C,$05,!DkSpIncaEndType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map1F:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $05,$0F,$00 : dl $8A95C2 : db $0D,$00,$00 
+db $05,$15,$00 : dl $8A95C2 : db $0D,$00,$00 
+db $1A,$0F,$00 : dl $8A95BD : db $0D,$00,$00 
+db $1A,$15,$00 : dl $8A95BD : db $0D,$00,$00 
+db $08,$0C,$03 : dl $89C3BB : db $00 
+db $0C,$0C,$05 : dl $89C3BB : db $00 
+db $12,$0C,$07 : dl $89C3BB : db $00 
+db $16,$0C,$09 : dl $89C3BB : db $00 
+db $00,$01,$00 : dl $89C489 : db $00 
+db $FF,$CA
+ActorList_Map20:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $1B,$06,$00 : dl EMPMudGolem-3 : db $0A,$10,$00
+db $18,$0C,$00 : dl EMPSpinner-3 : db $0C,$11,$00
+db $1C,$0C,$00 : dl EMPSpinner-3 : db $0C,$12,$00
+db $18,$16,$00 : dl EMPSpinner-3 : db $0C,$13,$00
+db $1C,$16,$00 : dl EMPSpinner-3 : db $0C,$14,$00
+db $03,$0B,$00 : dl EMPSlug-3 : db $0B,$15,$00
+db $03,$18,$00 : dl EMPSlug-3 : db $0B,$16,$00
+db $05,$11,$00 : dl EMPSlug-3 : db $0B,$17,$00
+db $07,$17,$00 : dl $8A88DE : db $00 
+db $FF,$CA
+ActorList_Map21:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $25,$15,$0B : dl $80D428 : db $00 
+db $25,$1A,$03 : dl $80D3BA : db $00 
+db $3C,$3C,$00 : dl $8A9026 : db $00 
+db $18,$05,$00 : dl $8A9061 : db $0D,$18,$00 
+db $21,$05,$00 : dl $8A9061 : db $0D,$19,$00 
+db $2A,$05,$00 : dl $8A9061 : db $0D,$1A,$00 
+db $05,$19,$00 : dl $8A95C2 : db $0D,$1B,$00 
+db $02,$2C,$00 : dl $8A9070 : db $0D,$1C,$00 
+db $07,$2C,$00 : dl $8A906B : db $0D,$1D,$00 
+db $1F,$3A,$10 : dl $8A95B3 : db $0D,$1E,$00 
+db $27,$3A,$10 : dl $8A95B3 : db $0D,$1F,$00 
+db $2F,$3A,$10 : dl $8A9061 : db $0D,$20,$00 
+db $37,$3A,$10 : dl $8A9061 : db $0D,$21,$00 
+db $3B,$25,$00 : dl EMPSlime-3 : db $0F,$22,$00
+db $3B,$29,$00 : dl EMPSlime-3 : db $0F,$23,$00
+db $3B,$2E,$00 : dl EMPSlime-3 : db $0F,$24,$00
+db $1F,$2D,$00 : dl EMPSlime-3 : db $0F,$25,$00
+db $1F,$32,$00 : dl EMPSlime-3 : db $0F,$26,$00
+db $03,$36,$00 : dl EMPSlime-3 : db $0F,$27,$00
+db $05,$3B,$00 : dl EMPSlime-3 : db $0F,$28,$00
+db $36,$09,$00 : dl EMPFlyingHead-3 : db $0E,$29,$00
+db $05,$22,$00 : dl EMPFlyingHead-3 : db $0E,$2A,$00
+db $23,$2F,$00 : dl EMPFlyingHead-3 : db $0E,$2B,$00
+db $29,$11,$00 : dl $8A99C3 : db $0E,$2C,$0C 
+db $FF,$CA
+ActorList_Map22:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $22,$19,$00 : dl $8A9061 : db $0D,$2D,$00 
+db $1A,$19,$00 : dl $8A9061 : db $0D,$2E,$00 
+db $0A,$1E,$00 : dl $8A9026 : db $00 
+db $0A,$1A,$10 : dl $8A95B3 : db $0D,$2F,$00 
+db $0A,$23,$10 : dl $8A95B8 : db $0D,$30,$00 
+db $0E,$1E,$10 : dl $8A95BD : db $0D,$31,$00 
+db $06,$1E,$10 : dl $8A95C2 : db $0D,$32,$00 
+db $11,$2C,$00 : dl EMPSlime-3 : db $0F,$33,$00
+db $0E,$2F,$00 : dl EMPSlime-3 : db $0F,$34,$00
+db $14,$2F,$00 : dl EMPSlime-3 : db $0F,$35,$00
+db $26,$20,$00 : dl EMPSlime-3 : db $0F,$36,$00
+db $26,$1D,$00 : dl EMPSlime-3 : db $0F,$37,$00
+db $1E,$09,$00 : dl EMPSlime-3 : db $0F,$38,$00
+db $1E,$0A,$00 : dl EMPSlime-3 : db $0F,$39,$00
+db $1E,$0B,$00 : dl EMPSlime-3 : db $0F,$3A,$00
+db $1E,$0C,$00 : dl EMPSlime-3 : db $0F,$3B,$00
+db $33,$1F,$00 : dl EMPSlime-3 : db $0F,$3C,$00
+db $2F,$1A,$00 : dl EMPFlyingHead-3 : db $0E,$3D,$00
+db $37,$1A,$00 : dl EMPFlyingHead-3 : db $0E,$3E,$00
+db $2F,$20,$00 : dl EMPFlyingHead-3 : db $0E,$3F,$00
+db $37,$20,$00 : dl EMPFlyingHead-3 : db $0E,$40,$00
+db $10,$0B,$00 : dl $80C963 : db $00 
+db $FF,$CA
+ActorList_Map23:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$21,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $29,$15,$03 : dl ERampLauncherToWest-3 : db $00
+db $1C,$15,$03 : dl ERampLauncherToEast-3 : db $00
+db $35,$07,$00 : dl EMPSlime-3 : db $0F,$41,$00
+db $39,$0C,$00 : dl EMPSlime-3 : db $0F,$42,$00
+db $3B,$12,$00 : dl EMPSlime-3 : db $0F,$43,$00
+db $35,$22,$00 : dl EMPSlime-3 : db $0F,$44,$00
+db $39,$28,$00 : dl EMPSlime-3 : db $0F,$45,$00
+db $24,$22,$00 : dl EMPSlime-3 : db $0F,$46,$00
+db $1D,$23,$00 : dl EMPSlime-3 : db $0F,$47,$00
+db $18,$22,$00 : dl EMPSlime-3 : db $0F,$48,$00
+db $0D,$26,$00 : dl EMPSlime-3 : db $0F,$49,$00
+db $07,$2B,$00 : dl EMPSlime-3 : db $0F,$4A,$00
+db $09,$0A,$00 : dl EMPSlime-3 : db $0F,$4B,$00
+db $03,$0B,$00 : dl EMPSlime-3 : db $0F,$4C,$00
+db $37,$24,$00 : dl EMPFlyingHead-3 : db $0E,$4D,$00
+db $06,$08,$00 : dl EMPFlyingHead-3 : db $0E,$4E,$00
+db $2B,$1C,$00 : dl $8A99C3 : db $0E,$4F,$0B 
+db $FF,$CA
+ActorList_Map24:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl EGoldenTileListener-3 : db $00
+db $FF,$CA
+ActorList_Map25:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $08,$1A,$00 : dl $89C33B : db $00 
+db $08,$1C,$00 : dl $89C33B : db $00 
+db $08,$1E,$00 : dl $89C33B : db $00 
+db $0A,$1A,$00 : dl $89C33B : db $00 
+db $0A,$1C,$00 : dl $89C33B : db $00 
+db $0A,$1E,$00 : dl $89C33B : db $00 
+db $0E,$1C,$00 : dl $89C39F : db $00 
+db $03,$1D,$00 : dl EMPMudGolem-3 : db $0A,$50,$00
+db $09,$17,$00 : dl EMPMudGolem-3 : db $0A,$51,$00
+db $24,$17,$00 : dl EMPMudGolem-3 : db $0A,$53,$00
+db $26,$1C,$00 : dl EMPMudGolem-3 : db $0A,$54,$00
+db $2B,$14,$00 : dl EMPMudGolem-3 : db $0A,$55,$00
+db $2C,$11,$00 : dl EMPMudGolem-3 : db $0A,$56,$00
+db $24,$06,$00 : dl EMPMudGolem-3 : db $0A,$57,$00
+db $15,$06,$00 : dl EMPMudGolem-3 : db $0A,$59,$00
+db $26,$09,$00 : dl EMPSpinner-3 : db $0C,$5A,$00
+db $0B,$13,$00 : dl EMPSpinner-3 : db $0C,$5B,$00
+db $07,$13,$00 : dl EMPSpinner-3 : db $0C,$5C,$00
+db $0E,$1C,$00 : dl EMPSpinner-3 : db $0C,$5D,$00
+db $FF,$CA
+ActorList_Map26:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $0E,$05,$00 : dl EMPMudGolem-3 : db $0A,$5E,$00
+db $0D,$07,$00 : dl EMPMudGolem-3 : db $0A,$5F,$00
+db $1A,$2C,$00 : dl EMPMudGolem-3 : db $0A,$61,$00
+db $15,$2A,$00 : dl EMPMudGolem-3 : db $0A,$62,$00
+db $02,$12,$00 : dl EMPSlug-3 : db $0B,$63,$00
+db $03,$12,$00 : dl EMPSlug-3 : db $0B,$64,$00
+db $0A,$1C,$00 : dl $8A8EB6 : db $0B,$65,$00 
+db $0B,$1C,$00 : dl $8A8EB6 : db $0B,$66,$00 
+db $0C,$1C,$00 : dl $8A8EB6 : db $0B,$67,$00 
+db $0D,$1C,$00 : dl $8A8EB6 : db $0B,$68,$00 
+db $13,$1D,$00 : dl $8A8896 : db $00 
+db $18,$1E,$00 : dl $8A8896 : db $00 
+db $1D,$20,$00 : dl $8A8896 : db $00 
+db $19,$21,$00 : dl $8A8896 : db $00 
+db $1A,$21,$00 : dl $8A8896 : db $00 
+db $11,$28,$00 : dl $89C798 : db $00 
+db $11,$16,$00 : dl $89C8F7 : db $00 
+db $1C,$14,!DkSpInca2Type : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map27:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$21,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $38,$09,$00 : dl EMPMudGolem-3 : db $0A,$6C,$00
+db $27,$07,$00 : dl EMPMudGolem-3 : db $0A,$6D,$00
+db $02,$10,$00 : dl EMPMudGolem-3 : db $0A,$6E,$00
+db $02,$16,$00 : dl EMPMudGolem-3 : db $0A,$70,$00
+db $2A,$08,$00 : dl EMPSpinner-3 : db $0C,$71,$00
+db $24,$06,$00 : dl EMPSpinner-3 : db $0C,$72,$00
+db $12,$08,$00 : dl EMPSpinner-3 : db $0C,$73,$00
+db $0C,$06,$00 : dl EMPSpinner-3 : db $0C,$74,$00
+db $06,$08,$00 : dl EMPSpinner-3 : db $0C,$75,$00
+db $06,$1C,$00 : dl EMPSpinner-3 : db $0C,$76,$00
+db $0C,$1D,$00 : dl EMPSpinner-3 : db $0C,$77,$00
+db $19,$1C,$00 : dl EMPSpinner-3 : db $0C,$78,$0A
+db $23,$1B,$00 : dl EMPSlug-3 : db $0B,$79,$00
+db $26,$13,$00 : dl EMPSlug-3 : db $0B,$7A,$00
+db $2C,$10,$00 : dl EMPSlug-3 : db $0B,$7B,$00
+db $2D,$18,$00 : dl EMPSlug-3 : db $0B,$7D,$00
+db $33,$1C,$00 : dl EMPSlug-3 : db $0B,$7E,$00
+db $FF,$CA
+ActorList_Map28:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$08,!DkSpInca1Type : dl EDarkSpace-3 : db $00
+db $13,$17,$00 : dl $8A8EB6 : db $0B,$7F,$00 
+db $0C,$24,$00 : dl $8A8EB6 : db $0B,$80,$00 
+db $11,$27,$00 : dl $8A8EB6 : db $0B,$81,$00 
+db $04,$10,$00 : dl EMPSpinner-3 : db $0C,$82,$00
+db $02,$1A,$00 : dl EMPSpinner-3 : db $0C,$83,$00
+db $04,$24,$00 : dl EMPSpinner-3 : db $0C,$84,$10
+db $12,$12,$00 : dl EMPSpinner-3 : db $0C,$85,$00
+db $0E,$18,$00 : dl EMPSpinner-3 : db $0C,$86,$00
+db $00,$01,$00 : dl $89C6A9 : db $00 
+db $1B,$13,$00 : dl $89C89D : db $00 
+db $FF,$CA
+ActorList_Map29:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$11,$00 : dl ECastoth-3 : db $14,$88,$00
+db $00,$01,$00 : dl $89CF86 : db $00 
+db $00,$01,$01 : dl EBossClearRewarder-3 : db $00
+db $FF,$CA
+ActorList_Map2A:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $08,$19,$00 : dl $859454 : db $00 
+db $00,$01,$01 : dl $80C1AA : db $00 
+db $FF,$CA
+ActorList_Map2C:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $858027 : db $00 
+db $00,$01,$00 : dl $85813A : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $858179 : db $00 
+db $20,$20,$00 : dl $85824F : db $00 
+db $25,$22,$00 : dl $858284 : db $00 
+db $22,$22,$00 : dl $858305 : db $00 
+db $1B,$26,$00 : dl $858383 : db $00 
+db $15,$25,$00 : dl $8583C6 : db $00 
+db $14,$0B,$00 : dl $858424 : db $00 
+db $11,$27,$00 : dl $85816F : db $00 
+db $0B,$24,$00 : dl $85963E : db $00
+db $FF,$CA
+ActorList_Map2E:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $858027 : db $00 
+db $08,$0B,$00 : dl $85862C : db $00 
+db $18,$09,$00 : dl $85878C : db $00 
+db $2D,$0C,$00 : dl $85882D : db $00 
+db $24,$1D,$00 : dl $8588E5 : db $00 
+db $19,$1B,$00 : dl $8589CA : db $00 
+db $2B,$0B,$00 : dl $8589FF : db $00 
+db $FF,$CA
+ActorList_Map2F:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$01,$00 : dl $858027 : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $0B,$0B,$30 : dl $85970F : db $00 
+db $00,$01,$00 : dl $8596FA : db $00 
+db $FF,$CA
+ActorList_Map30:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $07,$06,$00 : dl $85AA6C : db $00 
+db $00,$00,$00 : dl $85AA9E : db $00 
+db $0F,$0A,$09 : dl ERedJewelSpot-3 : db $00
+db $FF,$CA
+ActorList_Map31:
+db $0A,$07,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $09,$0A,$00 : dl $85AB5C : db $00 
+db $05,$0A,$00 : dl $85AF85 : db $00 
+db $FF,$CA
+ActorList_Map32:
+db $13,$36,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $01,$82,$00 : dl $80E9EC : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $85B01E : db $00 
+db $07,$2B,$00 : dl $80C5F3 : db $00 
+db $16,$2D,$00 : dl $80C5F3 : db $00 
+db $21,$2B,$00 : dl $80C5F3 : db $00 
+db $41,$2C,$00 : dl $80C5F3 : db $00 
+db $2F,$2B,$00 : dl $80C5F3 : db $00    ; In IOGR this is a normal door.
+db $19,$0E,$00 : dl $80C62D : db $00 
+db $2F,$0F,$00 : dl $80C62D : db $00 
+db $0D,$16,$00 : dl $85CF04 : db $00 
+db $0D,$19,$00 : dl $85CEF8 : db $00 
+db $3C,$16,$00 : dl $85CF10 : db $00 
+db $22,$17,$00 : dl $85CF10 : db $00 
+db $14,$0E,$00 : dl $85CF20 : db $00 
+db $24,$0E,$00 : dl $85CF20 : db $00 
+db $34,$10,$00 : dl $85CF20 : db $00 
+db $0F,$0F,$00 : dl $85CF85 : db $00 
+db $1D,$0F,$00 : dl $85CF85 : db $00 
+db $36,$10,$00 : dl $85CF85 : db $00 
+db $14,$36,$00 : dl $85B050 : db $00 
+db $22,$26,$00 : dl $85B32C : db $00 
+db $03,$26,$00 : dl $85B33D : db $00 
+db $21,$26,$00 : dl $85B35D : db $00 
+db $07,$0D,$00 : dl $85B36E : db $00 
+db $1D,$2A,$00 : dl $85B57C : db $00 
+db $36,$1E,$00 : dl $85B663 : db $00 
+db $4D,$34,$00 : dl $85B6C0 : db $00 
+db $1C,$31,$00 : dl $85B195 : db $00 
+db $12,$2F,$00 : dl $85BA0C : db $00 
+db $35,$11,$00 : dl $85B799 : db $00 
+db $15,$0F,$00 : dl $85B816 : db $00 
+db $17,$0F,$00 : dl $85B852 : db $00 
+db $23,$07,$00 : dl $85BD7B : db $00 
+db $0C,$0F,$00 : dl $85BE0E : db $00 
+db $3D,$09,$00 : dl $85BE55 : db $00 
+db $1C,$1C,$01 : dl EJeweler-3 : db $00
+db $FF,$D6,$08,$8E,$85,$AC,$45,$A2,$84,$84,$89,$88,$80,$AC,$CA
+ActorList_Map33:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $06,$08,$00 : dl $85CD74 : db $00 
+db $FF,$CA
+ActorList_Map34:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $04,$09,!DkSpFreejiaType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map35:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $06,$09,$00 : dl $85C375 : db $00 
+db $08,$09,$00 : dl $85C3A5 : db $00 
+db $09,$09,$00 : dl $85C3F8 : db $00 
+db $FF,$4B,$80,$81,$8E,$A2,$AC,$42,$80,$8C,$A0,$CA
+ActorList_Map36:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0C,$0C,$00 : dl $85BB47 : db $00 
+db $FF,$CA
+ActorList_Map37:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $03,$1B,$00 : dl $85BCFF : db $00 
+db $FF,$CA
+ActorList_Map38:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $04,$1D,$00 : dl $85BA51 : db $00 
+db $0A,$0D,$00 : dl $85BA8D : db $00 
+db $0B,$0D,$00 : dl $85BAE7 : db $00 
+db $FF,$CA
+ActorList_Map39:
+db $04,$1D,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $27,$08,$0B : dl ERedJewelSpot-3 : db $00
+db $FF,$CA
+ActorList_Map3A:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0E,$0C,$00 : dl $85C30E : db $00 
+db $08,$0A,$00 : dl $85BC56 : db $00 
+db $FF,$CA
+ActorList_Map3B:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $05,$0A,$00 : dl $85BBEF : db $00 
+db $FF,$CA
+ActorList_Map3C:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $05,$07,$00 : dl $85BEE6 : db $00 
+db $07,$07,$00 : dl $85BFAA : db $00 
+db $09,$07,$00 : dl $85C073 : db $00 
+db $03,$0A,$00 : dl $85C154 : db $00 
+db $08,$0B,$00 : dl $85C22E : db $00 
+db $0B,$08,$00 : dl $85C2AD : db $00 
+db $FF,$4B,$80,$81,$8E,$A2,$AC,$4C,$80,$A2,$8A,$84,$A4,$CA
+ActorList_Map3D:
+db $05,$08,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $03,$3A,$00 : dl EMineLizard-3 : db $18,$01,$00
+db $0C,$3A,$00 : dl EMineLizard-3 : db $18,$02,$34
+db $04,$42,$00 : dl EMineEyeStalker-3 : db $19,$03,$00
+db $0C,$42,$00 : dl EMineEyeStalker-3 : db $19,$04,$00
+db $08,$2C,$00 : dl EMineEyeStalker-3 : db $19,$05,$36
+db $04,$4C,$00 : dl EMineEyeFrozen-3 : db $19,$06,$35
+db $04,$51,$00 : dl EMineEyeFrozen-3 : db $19,$07,$00
+db $0B,$4C,$00 : dl EMineEyeFrozen-3 : db $19,$08,$00
+db $0B,$51,$00 : dl EMineEyeFrozen-3 : db $19,$09,$00
+db $02,$29,$00 : dl EMineWorm-3 : db $1A,$0A,$00
+db $0D,$29,$00 : dl EMineWorm-3 : db $1A,$0B,$00
+db $05,$03,$00 : dl $8AA9EC : db $00 
+db $0D,$0B,!DkSpMineAtWallType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map3E:
+db $0A,$3E,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$24,$00 : dl EMineWorm-3 : db $1A,$10,$00
+db $1A,$18,$00 : dl EMineWorm-3 : db $1A,$11,$00
+db $13,$07,$00 : dl EMineWorm-3 : db $1A,$12,$00
+db $0A,$34,$00 : dl EMineLizard-3 : db $18,$13,$00
+db $11,$22,$00 : dl EMineLizard-3 : db $18,$14,$00
+db $17,$21,$00 : dl EMineLizard-3 : db $18,$15,$00
+db $0B,$0D,$00 : dl EMineLizard-3 : db $18,$16,$00
+db $00,$01,$00 : dl $85F99C : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $FF,$D6,$0E,$4C,$88,$8D,$84,$CA
+ActorList_Map3F:
+db $0B,$3C,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $19,$0C,$20 : dl EMineWorm-3 : db $1A,$21,$22
+db $36,$0B,$20 : dl EMineWorm-3 : db $1A,$22,$00
+db $3A,$0A,$20 : dl EMineWorm-3 : db $1A,$23,$00
+db $37,$12,$20 : dl EMineWorm-3 : db $1A,$24,$00
+db $29,$2C,$20 : dl EMineWorm-3 : db $1A,$25,$00
+db $37,$34,$20 : dl EMineWorm-3 : db $1A,$26,$00
+db $2D,$3B,$20 : dl EMineWorm-3 : db $1A,$27,$00
+db $2C,$1D,$30 : dl EMineWorm-3 : db $1A,$28,$00
+db $20,$2E,$30 : dl EMineWorm-3 : db $1A,$29,$00
+db $10,$19,$00 : dl EMineEyeStalker-3 : db $19,$2A,$00
+db $0F,$0C,$00 : dl EMineEyeStalker-3 : db $19,$2B,$00
+db $13,$0D,$00 : dl EMineEyeStalker-3 : db $19,$2C,$00
+db $27,$10,$00 : dl EMineEyeStalker-3 : db $19,$2D,$00
+db $2D,$14,$00 : dl EMineEyeStalker-3 : db $19,$2E,$00
+db $31,$21,$00 : dl EMineEyeStalker-3 : db $19,$2F,$00
+db $30,$30,$00 : dl EMineEyeStalker-3 : db $19,$30,$00
+db $15,$39,$00 : dl EMineLizard-3 : db $18,$31,$00
+db $10,$2D,$00 : dl EMineLizard-3 : db $18,$32,$00
+db $12,$12,$00 : dl EMineLizard-3 : db $18,$33,$00
+db $04,$10,$00 : dl EMineLizard-3 : db $18,$34,$00
+db $27,$37,$00 : dl EMineLizard-3 : db $18,$35,$00
+db $14,$20,$00 : dl EMineLizard-3 : db $18,$36,$00
+db $09,$28,$00 : dl $8AAA8A : db $18,$37,$00 
+db $37,$09,$00 : dl $8AAA8A : db $18,$38,$00 
+db $07,$27,$01 : dl EMineSlave-3 : db $00
+db $35,$08,$03 : dl EMineSlave-3 : db $00
+db $00,$01,$00 : dl $85D066 : db $00 
+db $20,$10,$00 : dl $85D020 : db $00 
+db $14,$1F,$00 : dl $85D020 : db $00 
+db $2D,$1C,$00 : dl $85D020 : db $00 
+db $20,$30,$00 : dl $85D020 : db $00 
+db $1A,$33,$00 : dl $85D6A8 : db $00 
+db $18,$36,$00 : dl $85D642 : db $00 
+db $FF,$CA
+ActorList_Map40:
+db $0B,$1C,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $1B,$06,$00 : dl EMineLizard-3 : db $18,$40,$00
+db $0A,$0D,$00 : dl EMineLizard-3 : db $18,$41,$00
+db $0B,$18,$00 : dl EMineLizard-3 : db $18,$42,$00
+db $1B,$2D,$00 : dl EMineEyeStalker-3 : db $19,$43,$00
+db $08,$28,$00 : dl EMineWorm-3 : db $1A,$44,$00
+db $16,$18,$00 : dl EMineWorm-3 : db $1A,$45,$32
+db $1C,$16,!DkSpMineAppearingType : dl $85D61E : db $00 
+db $08,$14,$00 : dl $85D736 : db $00 
+db $FF,$CA
+ActorList_Map41:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $23,$23,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0F,$23,$00 : dl EMineWorm-3 : db $1A,$50,$00
+db $12,$0E,$00 : dl EMineWorm-3 : db $1A,$51,$00
+db $22,$11,$00 : dl EMineWorm-3 : db $1A,$52,$00
+db $25,$0D,$00 : dl EMineWorm-3 : db $1A,$53,$00
+db $29,$04,$30 : dl $85D70A : db $1A,$55,$23 
+db $00,$01,$00 : dl $85D6F3 : db $00 
+db $1E,$29,$00 : dl EMineEyeStalker-3 : db $19,$56,$00
+db $12,$24,$00 : dl EMineEyeStalker-3 : db $19,$58,$00
+db $08,$24,$00 : dl EMineEyeStalker-3 : db $19,$59,$00
+db $16,$2E,$00 : dl EMineLizard-3 : db $18,$5A,$00
+db $0C,$29,$00 : dl EMineLizard-3 : db $18,$5B,$00
+db $26,$10,$00 : dl EMineLizard-3 : db $18,$5C,$00
+db $02,$07,$00 : dl $8AA4E2 : db $00 
+db $28,$03,$00 : dl $8AA4F5 : db $00 
+db $15,$3D,$00 : dl $8AA50C : db $00 
+db $16,$1C,$00 : dl $80C963 : db $00 
+db $1B,$0B,$00 : dl $80C963 : db $00 
+db $FF,$CA
+ActorList_Map42:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $27,$06,!DkSpMineBehindType : dl EDarkSpace-3 : db $00
+db $28,$17,$07 : dl EMineSlave-3 : db $00
+db $FF,$CA
+ActorList_Map43:
+db $05,$0A,$32 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$21,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$30 : dl $8AA5A6 : db $00 
+db $28,$03,$00 : dl $8AA678 : db $00 
+db $15,$3D,$00 : dl $8AA699 : db $00 
+db $FF,$CA
+ActorList_Map44:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $0F,$18,$00 : dl $85D528 : db $00 
+db $FF,$CA
+ActorList_Map45:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$0B,$00 : dl EMineWorm-3 : db $1A,$60,$00
+db $0B,$12,$00 : dl EMineWorm-3 : db $1A,$61,$00
+db $08,$1A,$00 : dl EMineWorm-3 : db $1A,$62,$00
+db $12,$14,$00 : dl EMineWorm-3 : db $1A,$63,$00
+db $19,$0F,$00 : dl EMineWorm-3 : db $1A,$64,$00
+db $19,$1D,$00 : dl EMineWorm-3 : db $1A,$65,$00
+db $1B,$1C,$00 : dl $85D4AF : db $00 
+db $FF,$4C,$8E,$A2,$86,$A5,$84,$CA
+ActorList_Map46:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $18,$0F,$00 : dl EMineEyeStalker-3 : db $19,$70,$00
+db $17,$18,$00 : dl EMineEyeStalker-3 : db $19,$71,$00
+db $0F,$0B,$00 : dl EMineEyeStalker-3 : db $19,$73,$00
+db $07,$12,$00 : dl EMineEyeStalker-3 : db $19,$74,$00
+db $1C,$18,$00 : dl EMineLizard-3 : db $18,$75,$00
+db $13,$12,$00 : dl EMineLizard-3 : db $18,$76,$00
+db $11,$1C,$00 : dl EMineLizard-3 : db $18,$77,$00
+db $09,$0F,$00 : dl EMineLizard-3 : db $18,$78,$00
+db $02,$0C,$00 : dl $8AAA54 : db $18,$7A,$00 
+db $04,$0B,$05 : dl EMineSlave-3 : db $00
+db $FF,$CA
+ActorList_Map47:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+if !KaraLocation == 1
+db $0b,$24,$00 : dl $86d14e : db $00
+else
+db $0B,$25,$00 : dl $85D08E : db $00 
+db $03,$23,$00 : dl $85D15A : db $00 
+endif
+db $02,$2A,$00 : dl $85D223 : db $00 
+db $FF,$CA
+ActorList_Map49:
+db $09,$0C,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $08,$09,$00 : dl $85D89A : db $00 
+db $08,$11,$00 : dl $85E142 : db $00 
+db $08,$12,$00 : dl $85DD3C : db $00 
+db $08,$12,$00 : dl $85E018 : db $00 
+db $09,$12,$00 : dl $85E295 : db $00 
+db $04,$08,$00 : dl $85E305 : db $00 
+db $05,$08,$00 : dl $85E3F3 : db $00 
+db $09,$08,$00 : dl $85E4D7 : db $00 
+db $0C,$0B,$00 : dl $85E53A : db $00 
+db $FF,$D6,$37,$42,$8E,$A4,$A4,$80,$86,$84,$AC,$CA
+ActorList_Map4A:
+db $05,$0E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $FF,$CA
+ActorList_Map4B:
+db $12,$09,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $04,$3C,$00 : dl $85F2EF : db $00 
+db $1D,$2C,$00 : dl $85E647 : db $00 
+db $FF,$4D,$80,$AA,$82,$80,$AC,$60,$8B,$80,$88,$8D,$AC,$CA
+ActorList_Map4C:
+db $0F,$14,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $41,$41,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $09,$06,!DkSpSGFoyerType : dl EDarkSpace-3 : db $00
+db $13,$0E,$00 : dl $85F504 : db $00 
+db $13,$12,$00 : dl $85F533 : db $00 
+db $0B,$0C,$00 : dl $85F571 : db $00 
+db $0B,$10,$00 : dl $85F5A0 : db $00 
+db $1A,$0A,$00 : dl ESGMoonTribe-3 : db $00 
+db $18,$17,$00 : dl ESGMoonTribe-3 : db $00 
+db $0E,$14,$00 : dl ESGMoonTribe-3 : db $00 
+db $00,$01,$00 : dl ESGExitPortal-3 : db $00 
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map4D:
+db $07,$08,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $41,$41,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $85F76B : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $0A,$31,$00 : dl ENazcaRobotBlue-3 : db $1D,$01,$00
+db $18,$22,$00 : dl ENazcaRobotBlue-3 : db $1D,$02,$00
+db $1E,$22,$00 : dl ENazcaRobotBlue-3 : db $1D,$03,$00
+db $14,$12,$00 : dl ENazcaRobotBlue-3 : db $1D,$04,$00
+db $1B,$12,$00 : dl ENazcaRobotBlue-3 : db $1D,$05,$00
+db $2B,$1B,$00 : dl ENazcaRobotBlue-3 : db $1D,$06,$00
+db $36,$1B,$00 : dl ENazcaRobotBlue-3 : db $1D,$07,$00
+db $06,$26,$00 : dl ENazcaTopWormB-3 : db $1B,$08,$00
+db $0E,$23,$00 : dl ENazcaTopWormB-3 : db $1B,$09,$00
+db $14,$38,$00 : dl ENazcaTopWormB-3 : db $1B,$0A,$00
+db $1B,$30,$00 : dl ENazcaTopWormB-3 : db $1B,$0B,$00
+db $20,$08,$00 : dl ENazcaTopWormB-3 : db $1B,$0D,$00
+db $27,$06,$00 : dl ENazcaTopWormB-3 : db $1B,$0E,$00
+db $2D,$11,$00 : dl ENazcaTopWormB-3 : db $1B,$0F,$00
+db $34,$16,$00 : dl ENazcaTopWormB-3 : db $1B,$10,$00
+db $28,$20,$00 : dl ENazcaTopWormB-3 : db $1B,$11,$00
+db $37,$1E,$00 : dl ENazcaTopWormB-3 : db $1B,$12,$00
+db $31,$38,$00 : dl ENazcaTopWormB-3 : db $1B,$13,$00
+db $3A,$33,$00 : dl $8AC0FE : db $00 
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map4E:
+db $3C,$14,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $02,$02,$00 : dl $80E8D7 : db $00 
+db $00,$01,$00 : dl $85F76B : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $09,$1A,$00 : dl ENazcaRobotRed-3 : db $1E,$20,$00
+db $14,$1A,$00 : dl ENazcaRobotRed-3 : db $1E,$21,$00
+db $1E,$0B,$00 : dl ENazcaRobotRed-3 : db $1E,$22,$00
+db $23,$0B,$00 : dl ENazcaRobotRed-3 : db $1E,$23,$00
+db $24,$32,$00 : dl ENazcaRobotRed-3 : db $1E,$24,$00
+db $38,$25,$00 : dl ENazcaRobotRed-3 : db $1E,$25,$00
+db $09,$14,$00 : dl ENazcaBackWorm-3 : db $1C,$26,$00
+db $1E,$0E,$00 : dl ENazcaBackWorm-3 : db $1C,$27,$00
+db $24,$09,$00 : dl ENazcaBackWorm-3 : db $1C,$28,$00
+db $20,$21,$00 : dl ENazcaBackWorm-3 : db $1C,$2B,$00
+db $2C,$38,$00 : dl ENazcaBackWorm-3 : db $1C,$2C,$00
+db $0D,$31,$00 : dl ENazcaBackWorm-3 : db $1C,$2D,$00
+db $11,$38,$00 : dl ENazcaBackWorm-3 : db $1C,$2E,$00
+db $39,$14,$00 : dl ENazcaFireball-3 : db $00
+db $3B,$24,$00 : dl ENazcaFireball-3 : db $00
+db $33,$27,$00 : dl ENazcaFireball-3 : db $00
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$D7,$04,$8E,$85,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map4F:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $41,$41,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $18,$35,$03 : dl ERampLauncherToEast-3 : db $00
+db $27,$35,$03 : dl ERampLauncherToWest-3 : db $00
+db $00,$01,$00 : dl $85F76B : db $00 
+db $0D,$1B,$00 : dl ENazcaRobotBlue-3 : db $1D,$40,$00
+db $11,$1B,$00 : dl ENazcaRobotBlue-3 : db $1D,$41,$00
+db $15,$1B,$00 : dl ENazcaRobotBlue-3 : db $1D,$42,$00
+db $36,$09,$00 : dl ENazcaRobotBlue-3 : db $1D,$44,$00
+db $20,$0B,$00 : dl ENazcaRobotBlue-3 : db $1D,$45,$37
+db $09,$0E,$00 : dl ENazcaTopWormB-3 : db $1B,$46,$00
+db $2F,$19,$00 : dl ENazcaTopWormB-3 : db $1B,$4A,$00
+db $38,$0D,$00 : dl ENazcaTopWormB-3 : db $1B,$4B,$00
+db $33,$05,$00 : dl ENazcaTopWormA-3 : db $1B,$4C,$00
+db $20,$05,$00 : dl ENazcaTopWormB-3 : db $1B,$4D,$00
+db $1F,$11,$00 : dl ENazcaTopWormB-3 : db $1B,$4E,$00
+db $1A,$0B,$00 : dl ENazcaTopWormB-3 : db $1B,$4F,$00
+db $25,$0B,$00 : dl ENazcaTopWormB-3 : db $1B,$50,$00
+db $17,$36,$00 : dl $8AC150 : db $00 
+db $2E,$20,$00 : dl $8AC150 : db $00 
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map50:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $02,$02,$00 : dl $80E8D7 : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $85F76B : db $00 
+db $1F,$0B,$00 : dl ENazcaRobotRed-3 : db $1E,$60,$00
+db $2A,$1B,$00 : dl ENazcaRobotRed-3 : db $1E,$61,$00
+db $2E,$1B,$00 : dl ENazcaRobotRed-3 : db $1E,$62,$00
+db $32,$1B,$00 : dl ENazcaRobotRed-3 : db $1E,$63,$00
+db $3A,$09,$00 : dl ENazcaRobotRed-3 : db $1E,$64,$30
+db $15,$0B,$00 : dl ENazcaBackWorm-3 : db $1C,$65,$00
+db $1F,$05,$00 : dl ENazcaBackWorm-3 : db $1C,$66,$00
+db $1F,$12,$00 : dl ENazcaBackWorm-3 : db $1C,$67,$00
+db $0B,$1C,$00 : dl ENazcaBackWorm-3 : db $1C,$68,$00
+db $0B,$1E,$00 : dl ENazcaBackWorm-3 : db $1C,$69,$00
+db $0B,$20,$00 : dl ENazcaBackWorm-3 : db $1C,$6A,$00
+db $37,$1C,$00 : dl ENazcaBackWorm-3 : db $1C,$6B,$00
+db $34,$06,$00 : dl ENazcaFireball-3 : db $00
+db $3B,$06,$00 : dl ENazcaFireball-3 : db $00
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$D7,$04,$8E,$85,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map51:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $41,$41,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $27,$1F,$00 : dl ENazcaRobotBlue-3 : db $1D,$80,$24
+db $16,$07,$00 : dl ENazcaRobotBlue-3 : db $1D,$81,$00
+db $19,$07,$00 : dl ENazcaRobotBlue-3 : db $1D,$82,$00
+db $16,$0C,$00 : dl ENazcaRobotBlue-3 : db $1D,$83,$2B
+db $07,$1C,$00 : dl ENazcaRobotBlue-3 : db $1D,$84,$00
+db $04,$20,$00 : dl ENazcaRobotBlue-3 : db $1D,$85,$00
+db $07,$24,$00 : dl ENazcaRobotBlue-3 : db $1D,$86,$00
+db $37,$23,$00 : dl ENazcaTopWormB-3 : db $1B,$87,$00
+db $29,$22,$00 : dl ENazcaTopWormA-3 : db $1B,$88,$00
+db $25,$1D,$00 : dl ENazcaTopWormB-3 : db $1B,$89,$00
+db $28,$08,$00 : dl ENazcaTopWormB-3 : db $1B,$8A,$00
+db $23,$0C,$00 : dl ENazcaTopWormB-3 : db $1B,$8B,$00
+db $1A,$23,$00 : dl ENazcaTopWormB-3 : db $1B,$8C,$2C
+db $18,$22,$00 : dl $8ACCD4 : db $00 
+db $30,$33,$00 : dl $85F8C0 : db $00 
+db $30,$34,$00 : dl $85F8C0 : db $00 
+db $03,$0B,!DkSpSGSWType : dl EDarkSpace-3 : db $00
+db $00,$01,$00 : dl $85F76B : db $00 
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map52:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $02,$02,$00 : dl $80E8D7 : db $00 
+db $38,$33,$00 : dl $8AC150 : db $00 
+db $25,$33,$00 : dl ENazcaRobotRed-3 : db $1E,$A0,$00
+db $38,$1C,$00 : dl ENazcaRobotRed-3 : db $1E,$A1,$00
+db $3C,$1F,$00 : dl ENazcaRobotRed-3 : db $1E,$A2,$00
+db $38,$23,$00 : dl ENazcaRobotRed-3 : db $1E,$A3,$00
+db $18,$1F,$00 : dl ENazcaRobotRed-3 : db $1E,$A5,$31
+db $25,$23,$00 : dl ENazcaBackWorm-3 : db $1C,$A6,$00
+db $29,$1D,$00 : dl ENazcaBackWorm-3 : db $1C,$A7,$00
+db $19,$34,$00 : dl ENazcaFireball-3 : db $00
+db $1C,$23,$00 : dl ENazcaFireball-3 : db $00
+db $15,$1C,$00 : dl ENazcaFireball-3 : db $00
+db $0C,$09,$00 : dl ENazcaFireball-3 : db $00
+db $19,$0B,$00 : dl $85F5DE : db $00 
+db $23,$0A,$00 : dl $85F5DE : db $00 
+db $3D,$0C,$00 : dl $85F655 : db $00 
+db $25,$33,$00 : dl $85F6D0 : db $00 
+db $00,$01,$00 : dl $85F76B : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$D7,$04,$8E,$85,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map53:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $41,$41,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $32,$18,$00 : dl ENazcaRobotBlue-3 : db $1D,$C0,$00
+db $0C,$19,$00 : dl ENazcaRobotBlue-3 : db $1D,$C1,$00
+db $08,$18,$00 : dl ENazcaRobotBlue-3 : db $1D,$C2,$00
+db $04,$1E,$00 : dl ENazcaRobotBlue-3 : db $1D,$C3,$00
+db $0A,$26,$00 : dl ENazcaRobotBlue-3 : db $1D,$C4,$00
+db $38,$3A,$00 : dl ENazcaRobotBlue-3 : db $1D,$C5,$00
+db $04,$14,$00 : dl ENazcaTopWormB-3 : db $1B,$C6,$00
+db $04,$04,$00 : dl ENazcaTopWormB-3 : db $1B,$C7,$00
+db $20,$14,$00 : dl ENazcaTopWormB-3 : db $1B,$C8,$00
+db $20,$1D,$00 : dl ENazcaTopWormB-3 : db $1B,$C9,$00
+db $16,$24,$00 : dl ENazcaTopWormB-3 : db $1B,$CA,$00
+db $03,$2D,$00 : dl ENazcaTopWormB-3 : db $1B,$CB,$00
+db $33,$28,$00 : dl ENazcaTopWormB-3 : db $1B,$CC,$00
+db $36,$2A,$00 : dl ENazcaTopWormB-3 : db $1B,$CD,$00
+db $39,$29,$00 : dl ENazcaTopWormB-3 : db $1B,$CE,$00
+db $31,$38,$00 : dl $8AC409 : db $00 
+db $08,$26,$00 : dl $8AC3B3 : db $00 
+db $26,$08,$03 : dl ERampLauncherToEast-3 : db $00
+db $10,$08,$03 : dl ERampLauncherToEast-3 : db $00
+db $1A,$33,$03 : dl ERampLauncherToEast-3 : db $00
+db $1A,$39,$03 : dl ERampLauncherToEast-3 : db $00
+db $26,$18,$03 : dl ERampLauncherToWest-3 : db $00
+db $00,$01,$00 : dl $85F76B : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map54:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $02,$02,$00 : dl $80E8D7 : db $00 
+db $3A,$2F,$00 : dl $8AC409 : db $00 
+db $34,$2E,$00 : dl $85F749 : db $00 
+db $1C,$2C,$00 : dl ENazcaRobotRed-3 : db $1E,$E0,$00
+db $08,$38,$00 : dl ENazcaRobotRed-3 : db $1E,$E1,$00
+db $2A,$33,$00 : dl ENazcaRobotRed-3 : db $1E,$E2,$00
+db $2A,$3A,$00 : dl ENazcaRobotRed-3 : db $1E,$E3,$00
+db $09,$06,$00 : dl ENazcaBackWorm-3 : db $1C,$E5,$00
+db $08,$1A,$00 : dl ENazcaBackWorm-3 : db $1C,$E6,$00
+db $11,$1A,$00 : dl ENazcaBackWorm-3 : db $1C,$E7,$00
+db $2E,$19,$00 : dl ENazcaBackWorm-3 : db $1C,$E8,$00
+db $33,$26,$00 : dl ENazcaBackWorm-3 : db $1C,$E9,$00
+db $39,$28,$00 : dl ENazcaBackWorm-3 : db $1C,$EA,$00
+db $28,$2C,$00 : dl ENazcaBackWorm-3 : db $1C,$EB,$00
+db $21,$2C,$00 : dl ENazcaBackWorm-3 : db $1C,$EC,$00
+db $16,$35,$00 : dl ENazcaBackWorm-3 : db $1C,$ED,$00
+db $16,$38,$00 : dl ENazcaBackWorm-3 : db $1C,$EE,$00
+db $31,$04,$00 : dl ENazcaBackWorm-3 : db $1C,$EF,$00
+db $36,$05,$00 : dl ENazcaBackWorm-3 : db $1C,$F0,$00
+db $0F,$06,$00 : dl ENazcaFireball-3 : db $00
+db $18,$19,$00 : dl ENazcaFireball-3 : db $00
+db $37,$18,$00 : dl ENazcaFireball-3 : db $00
+db $32,$33,$00 : dl ENazcaFireball-3 : db $00
+db $29,$34,$00 : dl ENazcaFireball-3 : db $00
+db $3B,$0C,$00 : dl ENazcaFireball-3 : db $00
+db $00,$01,$00 : dl $85F76B : db $00 
+db $00,$01,$00 : dl $80C667 : db $00 
+db $02,$06,!DkSpSGNWType : dl EDarkSpace-3 : db $00
+db $00,$01,$00 : dl $8AB496 : db $00 
+db $FF,$D7,$04,$8E,$85,$AC,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_Map55:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $07,$0D,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$0E,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$0F,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$10,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$11,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$12,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$13,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$14,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$15,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$16,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$17,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$18,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$19,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$1A,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$1B,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$1C,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$1D,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$1E,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$1F,$30 : dl EViperFallingPlatform-3 : db $00
+db $07,$20,$30 : dl EViperFallingPlatform-3 : db $00
+db $10,$05,$30 : dl EViper-3 : db $27,$00,$00
+db $00,$01,$00 : dl $8ACE34 : db $00 
+db $00,$01,$01 : dl EBossClearRewarder-3 : db $00
+db $FF,$CA
+ActorList_Map56:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$09,!DkSpSGSEType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map58:
+db $00,$01,$00 : dl EPlayer-3 : db $00
+db $00,$0C,$00 : dl $80E8D7 : db $00 
+db $08,$01,$00 : dl ESGSkyFallingWill-3 : db $00
+db $00,$0B,$00 : dl ESGSkyNeilsPlane-3 : db $00
+db $08,$0B,$00 : dl $868190 : db $00 
+db $05,$03,$00 : dl $868380 : db $00 
+db $07,$04,$00 : dl $868380 : db $00 
+db $08,$01,$00 : dl $868380 : db $00 
+db $0A,$02,$00 : dl $868380 : db $00 
+db $0C,$05,$00 : dl $86838D : db $00 
+db $FF,$CA
+ActorList_Map59:
+db $05,$03,$00 : dl $83A0AA : db $00 
+db $FF,$CA
+ActorList_Map5A:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$51,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $2F,$08,!DkSpSeaPalType : dl EDarkSpace-3 : db $00
+db $21,$0A,$00 : dl $8689A3 : db $00 
+db $2D,$2B,$00 : dl $8689A3 : db $00 
+db $13,$27,$00 : dl $8689A3 : db $00 
+db $16,$5B,$0D : dl $868A59 : db $00 
+db $2F,$5B,$2F : dl $868A59 : db $00 
+db $31,$4B,$71 : dl $868A59 : db $00 
+db $04,$49,$15 : dl $868A59 : db $00 
+db $1F,$3A,$33 : dl $868A59 : db $00 
+db $2E,$2A,$77 : dl $868A59 : db $00 
+db $2E,$1A,$19 : dl $868A59 : db $00 
+db $2F,$19,$3B : dl $868A59 : db $00 
+db $00,$01,$00 : dl $869535 : db $00 
+db $00,$01,$00 : dl $868496 : db $00 
+db $FF,$CA
+ActorList_Map5B:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$51,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $09,$0A,$00 : dl $86861E : db $00 
+db $06,$19,$00 : dl $868876 : db $00 
+db $06,$2B,$00 : dl $8688F0 : db $00 
+db $0A,$28,$00 : dl $86894C : db $00 
+db $FF,$CA
+ActorList_Map5C:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$41,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $2F,$0A,$00 : dl $868FEB : db $00 
+db $2B,$0A,$00 : dl $8691AC : db $00 
+db $2A,$39,$01 : dl $868A59 : db $00 
+db $1B,$3B,$23 : dl $868A59 : db $00 
+db $1C,$2B,$65 : dl $868A59 : db $00 
+db $30,$29,$07 : dl $868A59 : db $00 
+db $31,$29,$29 : dl $868A59 : db $00 
+db $36,$0B,$6B : dl $868A59 : db $00 
+db $2A,$19,$00 : dl $8AE45C : db $2A,$00,$00 
+db $37,$19,$00 : dl $8AE45C : db $2A,$00,$00 
+db $26,$2A,$00 : dl $8AE45C : db $2A,$00,$00 
+db $1A,$2B,$00 : dl $8AE45C : db $2A,$00,$00 
+db $0D,$3B,$00 : dl $8AE45C : db $2A,$00,$00 
+db $1E,$3B,$00 : dl $8AE45C : db $2A,$00,$00 
+db $30,$2B,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $0A,$2A,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $08,$2C,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $25,$3B,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $27,$3A,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $2A,$3C,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $2B,$3A,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $30,$3A,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $32,$3C,$00 : dl $8AE6F4 : db $2B,$00,$00 
+db $FF,$CA
+ActorList_Map5D:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $8693F8 : db $00 
+db $FF,$CA
+ActorList_Map5E:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $869736 : db $00 
+db $FF,$CA
+ActorList_Map5F:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $868496 : db $00 
+db $26,$13,$30 : dl $8ADD9E : db $28,$13,$00 
+db $23,$3B,$30 : dl $8ADE07 : db $28,$01,$3D 
+db $3D,$24,$30 : dl $8ADD9E : db $28,$02,$00 
+db $3A,$1F,$30 : dl $8ADD9E : db $28,$03,$00 
+db $16,$16,$30 : dl $8ADD9E : db $28,$04,$00 
+db $1E,$20,$30 : dl $8ADD9E : db $28,$05,$00 
+db $10,$0C,$30 : dl $8AE45C : db $2A,$06,$00 
+db $1A,$07,$30 : dl $8AE45C : db $2A,$07,$00 
+db $1E,$0B,$30 : dl $8AE45C : db $2A,$08,$00 
+db $26,$1F,$30 : dl $8AE45C : db $2A,$09,$00 
+db $26,$31,$30 : dl $8AE45C : db $2A,$0A,$00 
+db $23,$3E,$30 : dl $8AE45C : db $2A,$0B,$00 
+db $33,$31,$30 : dl $8AE45C : db $2A,$0C,$00 
+db $3B,$31,$30 : dl $8AE45C : db $2A,$0D,$00 
+db $3D,$37,$30 : dl $8AE45C : db $2A,$0E,$00 
+db $14,$32,$30 : dl $8AE45C : db $2A,$0F,$00 
+db $1A,$2D,$30 : dl $8AE45C : db $2A,$10,$00 
+db $21,$1B,$30 : dl $8AE45C : db $2A,$11,$00 
+db $14,$2E,$30 : dl EMuWizard-3 : db $29,$12,$00
+db $33,$3E,$09 : dl $80D1B5 : db $00 
+db $FF,$4C,$A5,$CA
+ActorList_Map60:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $3A,$21,$30 : dl $869D4D : db $00 
+db $2F,$08,$30 : dl $869D4D : db $00 
+db $36,$2E,$30 : dl $8AE6CC : db $2B,$20,$00 
+db $3C,$2F,$30 : dl $8AE6CC : db $2B,$21,$3E 
+db $38,$31,$30 : dl $8AE6CC : db $2B,$22,$00 
+db $3C,$32,$30 : dl $8AE6CC : db $2B,$23,$3F 
+db $37,$35,$30 : dl $8AE6CC : db $2B,$24,$00 
+db $1F,$1A,$30 : dl $8ADE07 : db $28,$25,$00 
+db $3B,$1A,$30 : dl $8ADD9E : db $28,$26,$00 
+db $3E,$1A,$30 : dl $8ADD9E : db $28,$27,$00 
+db $2C,$3B,$30 : dl $8ADD9E : db $28,$28,$00 
+db $2C,$3E,$30 : dl $8ADD9E : db $28,$29,$00 
+db $28,$1E,$30 : dl $8ADD9E : db $28,$2A,$00 
+db $2D,$1E,$30 : dl $8ADE07 : db $28,$2B,$00 
+db $2F,$1E,$30 : dl $8ADE07 : db $28,$2C,$00 
+db $11,$08,$30 : dl EMuWizard-3 : db $29,$2D,$00
+db $3C,$0B,$30 : dl EMuWizard-3 : db $29,$2E,$00
+db $34,$1F,$30 : dl EMuWizard-3 : db $29,$2F,$00
+db $0D,$2E,$30 : dl EMuWizard-3 : db $29,$39,$00
+db $27,$0A,$30 : dl $8AE45C : db $2A,$30,$00 
+db $32,$05,$30 : dl $8AE45C : db $2A,$31,$00 
+db $31,$0A,$30 : dl $8AE45C : db $2A,$32,$00 
+db $3A,$28,$30 : dl $8AE45C : db $2A,$33,$00 
+db $1B,$37,$30 : dl $8AE45C : db $2A,$34,$00 
+db $0A,$1A,$30 : dl $8AE45C : db $2A,$35,$00 
+db $11,$1A,$30 : dl $8AE45C : db $2A,$36,$00 
+db $0D,$16,$30 : dl $8AE45C : db $2A,$37,$00 
+db $2C,$28,$30 : dl $8AE45C : db $2A,$38,$00 
+db $19,$26,$30 : dl $869CE9 : db $00 
+db $1A,$26,$30 : dl $869CE9 : db $00 
+db $1B,$26,$30 : dl $869CE9 : db $00 
+db $1C,$26,$30 : dl $869CE9 : db $00 
+db $1D,$26,$30 : dl $869CE9 : db $00 
+db $1E,$26,$30 : dl $869CE9 : db $00 
+db $2B,$34,$30 : dl $8AE943 : db $00 
+db $07,$23,!DkSpMuTransformType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map61:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $3B,$12,$30 : dl $869D4D : db $00 
+db $21,$25,$30 : dl $869D4D : db $00 
+db $2B,$18,$30 : dl $8AE6CC : db $2B,$40,$00 
+db $2E,$1C,$30 : dl $8AE6CC : db $2B,$41,$00 
+db $2B,$20,$30 : dl $8AE6CC : db $2B,$42,$00 
+db $2E,$24,$30 : dl $8AE6CC : db $2B,$43,$00 
+db $3C,$27,$30 : dl $8ADD9E : db $28,$44,$00 
+db $3C,$31,$30 : dl $8ADD9E : db $28,$45,$00 
+db $18,$31,$30 : dl $8ADE07 : db $28,$46,$00 
+db $21,$13,$30 : dl $8ADD9E : db $28,$47,$00 
+db $22,$18,$30 : dl $8ADE07 : db $28,$48,$00 
+db $3B,$08,$30 : dl EMuWizard-3 : db $29,$49,$00
+db $20,$2A,$30 : dl EMuWizard-3 : db $29,$4A,$00
+db $0F,$2A,$30 : dl EMuWizard-3 : db $29,$4B,$00
+db $09,$24,$30 : dl EMuWizard-3 : db $29,$4C,$00
+db $0C,$1F,$30 : dl EMuWizard-3 : db $29,$4D,$00
+db $20,$0B,$30 : dl $8AE45C : db $2A,$4E,$00 
+db $36,$3A,$30 : dl $8AE45C : db $2A,$4F,$00 
+db $36,$3E,$30 : dl $8AE45C : db $2A,$50,$00 
+db $30,$3A,$30 : dl $8AE45C : db $2A,$51,$00 
+db $29,$3A,$30 : dl $8AE45C : db $2A,$52,$00 
+db $22,$3B,$30 : dl $8AE45C : db $2A,$53,$00 
+db $22,$20,$30 : dl $8AE45C : db $2A,$54,$00 
+db $2E,$14,$30 : dl $8AE45C : db $2A,$55,$00 
+db $22,$31,$30 : dl $8AE45C : db $2A,$56,$00 
+db $22,$33,$30 : dl $8AE45C : db $2A,$57,$00 
+db $22,$35,$30 : dl $8AE45C : db $2A,$58,$00 
+db $22,$37,$30 : dl $8AE45C : db $2A,$59,$00 
+db $1A,$0A,$30 : dl $869CE9 : db $00 
+db $1A,$0B,$30 : dl $869CE9 : db $00 
+db $1A,$0C,$30 : dl $869CE9 : db $00 
+db $1D,$0A,$30 : dl $869CE9 : db $00 
+db $1D,$0B,$30 : dl $869CE9 : db $00 
+db $1D,$0C,$30 : dl $869CE9 : db $00 
+db $00,$01,$00 : dl $8697A6 : db $00 
+db $00,$01,$00 : dl $868496 : db $00 
+db $FF,$CA
+ActorList_Map62:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $2F,$3A,$00 : dl $8698A2 : db $00 
+db $10,$1A,!DkSpMuSliderType : dl EDarkSpace-3 : db $00
+db $2A,$24,$30 : dl $8AE45C : db $2A,$60,$00 
+db $30,$24,$30 : dl $8AE45C : db $2A,$61,$00 
+db $2A,$28,$30 : dl $8AE45C : db $2A,$62,$00 
+db $30,$28,$30 : dl $8AE45C : db $2A,$63,$00 
+db $2D,$26,$30 : dl $8AE45C : db $2A,$64,$42 
+db $26,$09,$30 : dl $8AE45C : db $2A,$65,$00 
+db $18,$2A,$30 : dl $8AE45C : db $2A,$66,$00 
+db $11,$28,$30 : dl $8AE45C : db $2A,$67,$00 
+db $1A,$31,$30 : dl $8AE45C : db $2A,$68,$00 
+db $07,$2D,$30 : dl $8AE45C : db $2A,$69,$00 
+db $1B,$26,$30 : dl EMuWizard-3 : db $29,$6A,$00
+db $11,$30,$30 : dl EMuWizard-3 : db $29,$6B,$00
+db $38,$11,$30 : dl $8AE943 : db $00 
+db $20,$1C,$11 : dl $80D119 : db $00 
+db $28,$1C,$11 : dl $80D0D1 : db $00 
+db $33,$05,$0B : dl $80D16A : db $00 
+db $FF,$CA
+ActorList_Map63:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $8699C7 : db $00 
+db $FF,$62,$8E,$8E,$8C,$AC,$8E,$85,$AC,$87,$8E,$A0,$84,$CA
+ActorList_Map64:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $13,$20,$30 : dl $8ADD9E : db $28,$45,$00 
+db $04,$31,$30 : dl $8AE45C : db $2A,$70,$00 
+db $07,$27,$30 : dl $8AE45C : db $2A,$71,$00 
+db $0E,$3D,$30 : dl $8AE45C : db $2A,$72,$00 
+db $16,$3B,$30 : dl $8AE45C : db $2A,$73,$00 
+db $1B,$1B,$30 : dl $8AE45C : db $2A,$74,$00 
+db $0E,$13,$30 : dl EMuWizard-3 : db $29,$75,$00
+db $0E,$31,$30 : dl EMuWizard-3 : db $29,$76,$00
+db $03,$2E,$30 : dl $8AE943 : db $00 
+db $09,$2E,$30 : dl $8AE943 : db $00 
+db $15,$26,$00 : dl $8A9026 : db $00 
+db $1B,$2D,$00 : dl $8A9026 : db $00 
+db $1A,$27,$00 : dl $869D1F : db $00 
+db $1B,$27,$00 : dl $869D1F : db $00 
+db $FF,$CA
+ActorList_Map65:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $14,$1F,$1B : dl $80D16A : db $00 
+db $14,$13,$19 : dl $80D1B5 : db $00 
+db $1D,$39,$30 : dl $8ADE07 : db $28,$90,$41 
+db $36,$19,$30 : dl $8ADE07 : db $28,$91,$00 
+db $3D,$19,$30 : dl $8ADE07 : db $28,$92,$00 
+db $36,$20,$30 : dl $8ADE07 : db $28,$93,$00 
+db $3D,$20,$30 : dl $8ADE07 : db $28,$94,$00 
+db $08,$08,$30 : dl $8ADE07 : db $28,$95,$00 
+db $15,$2F,$30 : dl EMuWizard-3 : db $29,$96,$00
+db $31,$3E,$30 : dl $8AE45C : db $2A,$97,$00 
+db $2F,$07,$30 : dl $8AE45C : db $2A,$98,$00 
+db $22,$08,$30 : dl $8AE45C : db $2A,$99,$00 
+db $10,$18,$30 : dl $8AE45C : db $2A,$9A,$00 
+db $1E,$27,$30 : dl $8AE45C : db $2A,$9B,$00 
+db $31,$29,$30 : dl $8AE6CC : db $2B,$9C,$00 
+db $31,$2F,$30 : dl $8AE6CC : db $2B,$9D,$00 
+db $2E,$2C,$30 : dl $8AE6CC : db $2B,$9E,$40 
+db $06,$05,$30 : dl $8AE6CC : db $2B,$9F,$00 
+db $06,$0A,$30 : dl $8AE6CC : db $2B,$A0,$00 
+db $2A,$3E,$30 : dl $86994D : db $00 
+db $39,$1C,$30 : dl $8AE943 : db $00 
+db $37,$38,$30 : dl $869D4D : db $00 
+db $35,$3D,$30 : dl $869CE9 : db $00 
+db $34,$3D,$30 : dl $869CE9 : db $00 
+db $2D,$3D,$30 : dl $869CE9 : db $00 
+db $2C,$3D,$30 : dl $869CE9 : db $00 
+db $FF,$CA
+ActorList_Map66:
+db $05,$0A,$32 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $24,$08,$00 : dl $869C2A : db $00 
+db $2B,$08,$00 : dl $869C6D : db $00 
+db $00,$01,$00 : dl $869C85 : db $00 
+db $0F,$07,$00 : dl $869E3C : db $00 
+db $FF,$CA
+ActorList_Map67:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0A,$09,$30 : dl EVJack-3 : db $2F,$00,$00
+db $05,$09,$30 : dl EVSyl-3 : db $30,$00,$00
+db $07,$11,$30 : dl $86A410 : db $00 
+db $07,$12,$30 : dl $86A2BE : db $00 
+db $07,$22,$30 : dl $86A745 : db $00 
+db $08,$22,$30 : dl $86A828 : db $00 
+db $07,$23,$30 : dl $86A846 : db $00 
+db $00,$01,$01 : dl EBossClearRewarder-3 : db $00
+db $FF,$CA
+ActorList_Map68:
+db $07,$0D,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $08,$0B,$00 : dl $86AAAD : db $00 
+db $07,$09,$00 : dl $86AAD5 : db $00 
+db $09,$09,$00 : dl $86ADED : db $00 
+db $06,$0B,$00 : dl $86AEB0 : db $00 
+db $0A,$0B,$00 : dl $86AF2F : db $00 
+db $09,$0D,$00 : dl $86B4EC : db $00 
+db $16,$0A,$00 : dl $86B840 : db $00 
+db $00,$01,$00 : dl $86B937 : db $00 
+db $FF,$D7,$32,$64,$A5,$8D,$8D,$84,$8B,$CA
+ActorList_Map69:
+db $2A,$0D,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $29,$0C,$00 : dl $86BA85 : db $00 
+db $2A,$0C,$00 : dl $86BFF7 : db $00 
+db $2B,$0C,$00 : dl $86C1B2 : db $00 
+db $29,$0D,$00 : dl $86C348 : db $00 
+db $2B,$0D,$00 : dl $86C46A : db $00 
+db $28,$07,$01 : dl $86BA09 : db $00 
+db $06,$08,$03 : dl $86BA09 : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $FF,$CA
+ActorList_Map6A:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $1D,$0C,$00 : dl $86BBEF : db $00 
+db $03,$0D,$00 : dl $86C038 : db $00 
+db $0F,$0B,$00 : dl $86C28E : db $00 
+db $06,$0D,$00 : dl $86C4B9 : db $00 
+db $1A,$0B,$00 : dl $86C382 : db $00 
+db $FF,$CA
+ActorList_Map6B:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $1B,$08,$01 : dl $86C6DA : db $00 
+db $0D,$0C,$01 : dl $86C755 : db $00 
+db $33,$17,$43 : dl $86C755 : db $00 
+db $09,$1B,$01 : dl EJeweler-3 : db $00
+db $39,$28,$07 : dl $86C755 : db $00 
+db $12,$26,$A9 : dl $86C755 : db $00 
+db $25,$0D,$01 : dl $86CACA : db $00 
+db $32,$17,$61 : dl $86CBAF : db $00 
+db $38,$0D,$03 : dl $86CACA : db $00 
+db $33,$0D,$63 : dl $86CBAF : db $00 
+db $03,$1D,$00 : dl $86D0AB : db $00 
+db $03,$08,$00 : dl $86D55B : db $00 
+db $06,$08,$00 : dl $86D55B : db $00 
+db $1A,$05,$00 : dl $86D55B : db $00 
+db $2E,$14,$00 : dl $86D55B : db $00 
+db $0A,$15,$00 : dl $86D55B : db $00 
+db $3A,$28,$00 : dl $86D745 : db $00 
+db $FF,$40,$8D,$86,$84,$8B,$AC,$66,$88,$8B,$8B,$80,$86,$84,$CA
+ActorList_Map6C:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $27,$0A,$01 : dl $86CA10 : db $00 
+db $2C,$07,$03 : dl $86CA10 : db $00 
+db $21,$0C,$6B : dl $86C755 : db $00 
+db $28,$0A,$01 : dl $86CD47 : db $00 
+db $2D,$07,$03 : dl $86CD47 : db $00 
+db $32,$0A,$05 : dl $86CD47 : db $00 
+db $06,$09,$21 : dl $86CBAF : db $00 
+db $17,$19,$00 : dl $86D04D : db $00 
+db $37,$08,$00 : dl $86D124 : db $00 
+db $3A,$09,$00 : dl $86D124 : db $00 
+db $3D,$0A,$00 : dl $86D124 : db $00 
+db $1A,$06,$00 : dl $86D55B : db $00 
+db $14,$16,$00 : dl $86D55B : db $00 
+db $1A,$16,$00 : dl $86D55B : db $00 
+db $04,$16,$00 : dl $86D55B : db $00 
+db $07,$16,$00 : dl $86D55B : db $00 
+db $0A,$16,$00 : dl $86D55B : db $00 
+db $26,$06,$40 : dl $86D134 : db $00 
+db $2B,$05,$00 : dl $86D139 : db $00 
+db $2E,$05,$00 : dl $86D134 : db $00 
+db $35,$06,$00 : dl $86D141 : db $00 
+db $23,$09,$0D : dl ERedJewelSpot-3 : db $00
+db $19,$0A,!DkSpAngelVillageType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map6D:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $12,$07,$00 : dl $86D56F : db $00 
+db $1E,$05,$00 : dl $86D56F : db $00 
+db $29,$05,$00 : dl $86D56F : db $00 
+db $2E,$05,$00 : dl $86D57E : db $00 
+db $10,$15,$00 : dl $86D57E : db $00 
+db $25,$15,$00 : dl $86D57E : db $00 
+db $14,$28,$00 : dl $86D56F : db $00 
+db $2C,$25,$00 : dl $86D56F : db $00 
+db $1F,$0C,$00 : dl EAVSkeleton-3 : db $2C,$01,$00
+db $24,$19,$00 : dl EAVSkeleton-3 : db $2C,$02,$00
+db $10,$19,$00 : dl EAVSkeleton-3 : db $2C,$03,$00
+db $10,$2C,$00 : dl EAVSkeleton-3 : db $2C,$04,$00
+db $1C,$2C,$00 : dl EAVSkeleton-3 : db $2C,$05,$00
+db $2D,$29,$00 : dl EAVSkeleton-3 : db $2C,$06,$00
+db $10,$03,$00 : dl $8AEE9F : db $2D,$07,$00 
+db $14,$04,$00 : dl $8AEE9F : db $2D,$08,$00 
+db $24,$04,$00 : dl $8AEE9F : db $2D,$09,$00 
+db $22,$13,$00 : dl $8AEE9F : db $2D,$0A,$00 
+db $18,$12,$00 : dl $8AEE9F : db $2D,$0B,$00 
+db $1B,$12,$00 : dl $8AEE9F : db $2D,$0C,$00 
+db $07,$13,$00 : dl $8AEE9F : db $2D,$0D,$00 
+db $16,$25,$00 : dl $8AEE9F : db $2D,$0E,$00 
+db $20,$25,$00 : dl $8AEE9F : db $2D,$0F,$00 
+db $FF,$CA
+ActorList_Map6E:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $09,$05,$00 : dl $86D56F : db $00 
+db $10,$05,$00 : dl $86D56F : db $00 
+db $25,$06,$00 : dl $86D56F : db $00 
+db $2A,$06,$00 : dl $86D57E : db $00 
+db $33,$05,$00 : dl $86D57E : db $00 
+db $31,$27,$00 : dl $86D56F : db $00 
+db $11,$0C,$00 : dl EAVSkeleton-3 : db $2C,$10,$00
+db $33,$0C,$00 : dl EAVSkeleton-3 : db $2C,$11,$00
+db $3D,$1C,$00 : dl EAVSkeleton-3 : db $2C,$12,$00
+db $28,$1C,$00 : dl EAVSkeleton-3 : db $2C,$13,$00
+db $05,$1C,$00 : dl EAVSkeleton-3 : db $2C,$14,$00
+db $03,$2C,$00 : dl EAVSkeleton-3 : db $2C,$15,$00
+db $08,$2A,$00 : dl EAVSkeleton-3 : db $2C,$16,$00
+db $3B,$2C,$00 : dl EAVSkeleton-3 : db $2C,$17,$00
+db $1B,$05,$00 : dl $8AEE9F : db $2D,$18,$00 
+db $21,$04,$00 : dl $8AEE9F : db $2D,$19,$00 
+db $2A,$03,$00 : dl $8AEE9F : db $2D,$1A,$00 
+db $2F,$15,$00 : dl $8AEE9F : db $2D,$1B,$00 
+db $0E,$25,$00 : dl $8AEE9F : db $2D,$1C,$00 
+db $16,$25,$00 : dl $8AEE9F : db $2D,$1D,$00 
+db $30,$24,$00 : dl $8AEE9F : db $2D,$1E,$00 
+db $35,$23,$00 : dl $8AEE9F : db $2D,$1F,$00 
+db $28,$09,$00 : dl $8AEF33 : db $2E,$20,$00 
+db $37,$08,$00 : dl $8AEF33 : db $2E,$21,$00 
+db $39,$29,$00 : dl $8AEF33 : db $2E,$22,$00 
+db $FF,$CA
+ActorList_Map6F:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $0D,$06,$00 : dl $86D56F : db $00 
+db $14,$07,$00 : dl $86D56F : db $00 
+db $1A,$06,$00 : dl $86D56F : db $00 
+db $22,$09,$00 : dl $86D56F : db $00 
+db $0F,$02,$00 : dl $8AEE9F : db $2D,$23,$00 
+db $16,$02,$00 : dl $8AEE9F : db $2D,$24,$00 
+db $18,$02,$00 : dl $8AEE9F : db $2D,$25,$00 
+db $1C,$02,$00 : dl $8AEE9F : db $2D,$26,$00 
+db $22,$05,$00 : dl $8AEE9F : db $2D,$27,$00 
+db $24,$05,$00 : dl $8AEE9F : db $2D,$28,$00 
+db $FF,$CA
+ActorList_Map70:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $12,$07,$00 : dl $86D56F : db $00 
+db $1D,$04,$00 : dl $86D57E : db $00 
+db $2A,$05,$00 : dl $86D57E : db $00 
+db $05,$16,$00 : dl $86D56F : db $00 
+db $02,$27,$00 : dl $86D58F : db $00 
+db $07,$26,$00 : dl $86D58F : db $00 
+db $0C,$27,$00 : dl $86D58F : db $00 
+db $17,$08,$00 : dl $86D59E : db $00 
+db $00,$01,$00 : dl $86D62F : db $00 
+db $1B,$19,$00 : dl EAVSkeleton-3 : db $2C,$30,$00
+db $1F,$12,$00 : dl $8AEE9F : db $2D,$31,$00 
+db $17,$13,$00 : dl $8AEE9F : db $2D,$32,$00 
+db $12,$14,$00 : dl $8AEE9F : db $2D,$33,$00 
+db $27,$18,$00 : dl $8AEF33 : db $2E,$34,$00 
+db $2A,$18,$00 : dl $8AEF33 : db $2E,$35,$00 
+db $12,$1C,$00 : dl $8AF0C7 : db $2E,$36,$00 
+db $26,$18,$09 : dl $80D16A : db $00 
+db $0A,$2E,$09 : dl $80D1B5 : db $00 
+db $FF,$CA
+ActorList_Map71:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $86D68D : db $00 
+db $1C,$09,$00 : dl $86D56F : db $00 
+db $14,$07,$00 : dl $86D56F : db $00 
+db $1B,$0C,$00 : dl $8AF0C7 : db $2E,$37,$00 
+db $1E,$0E,$00 : dl $8AF0C7 : db $2E,$38,$00 
+db $FF,$D7,$3D,$64,$A5,$8D,$8D,$84,$8B,$CA
+ActorList_Map72:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $19,$0C,$00 : dl EAVSkeleton-3 : db $2C,$43,$00
+db $49,$0C,$00 : dl EAVSkeleton-3 : db $2C,$44,$00
+db $13,$05,$00 : dl $8AEE9F : db $2D,$45,$00 
+db $15,$05,$00 : dl $8AEE9F : db $2D,$46,$00 
+db $19,$05,$00 : dl $8AEE9F : db $2D,$47,$00 
+db $1B,$05,$00 : dl $8AEE9F : db $2D,$48,$00 
+db $1F,$05,$00 : dl $8AEE9F : db $2D,$49,$00 
+db $21,$05,$00 : dl $8AEE9F : db $2D,$50,$00 
+db $32,$05,$00 : dl $8AEE9F : db $2D,$51,$00 
+db $39,$05,$00 : dl $8AEE9F : db $2D,$52,$00 
+db $47,$05,$00 : dl $8AEE9F : db $2D,$53,$00 
+db $29,$0B,$00 : dl $8AF0C7 : db $2E,$54,$00 
+db $2A,$0C,$00 : dl $8AF0C7 : db $2E,$55,$00 
+db $2B,$0D,$00 : dl $8AF0C7 : db $2E,$56,$00 
+db $45,$0B,$00 : dl $8AF0C7 : db $2E,$57,$00 
+db $46,$0C,$00 : dl $8AF0C7 : db $2E,$58,$00 
+db $47,$0D,$00 : dl $8AF0C7 : db $2E,$59,$00 
+db $57,$08,$09 : dl $80D161 : db $00 
+db $FF,$CA
+ActorList_Map73:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $08,$1E,$09 : dl $80D1B5 : db $00 
+db $00,$01,$00 : dl $86D62F : db $00 
+db $2C,$17,$00 : dl $86D59E : db $00 
+db $00,$01,$00 : dl $86D6F4 : db $00 
+db $FF,$CA
+ActorList_Map74:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+if !KaraLocation == 2
+db $07,$08,$00 : dl $86D14E : db $00 
+endif
+db $25,$0B,$00 : dl $86CE82 : db $00 
+db $15,$09,$0F : dl ERedJewelSpot-3 : db $00
+db $FF,$CA
+ActorList_Map75:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $08,$1A,$01 : dl $86D784 : db $00 
+db $12,$1A,$03 : dl $86D784 : db $00 
+db $25,$1A,$05 : dl $86D784 : db $00 
+db $2F,$1A,$07 : dl $86D784 : db $00 
+db $42,$1A,$09 : dl $86D784 : db $00 
+db $4C,$1A,$0B : dl $86D784 : db $00 
+db $5F,$1A,$0D : dl $86D784 : db $00 
+db $69,$1A,$0F : dl $86D784 : db $00 
+db $00,$01,$00 : dl $86D8BC : db $00 
+db $1D,$1D,$00 : dl $86DC50 : db $00 
+db $25,$08,$00 : dl $86D139 : db $00 
+db $29,$08,$00 : dl $86D141 : db $00 
+db $35,$08,$00 : dl $86D139 : db $00 
+db $39,$08,$00 : dl $86D141 : db $00 
+db $FF,$CA
+ActorList_Map78:
+db $25,$38,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $00,$01,$00 : dl $80C667 : db $00 
+db $00,$01,$00 : dl $878000 : db $00 
+db $00,$01,$00 : dl $8781BE : db $00 
+db $4C,$2E,$00 : dl $879F9E : db $00 
+db $2D,$2C,$00 : dl $879B7C : db $00 
+db $1B,$1D,$00 : dl $879B7C : db $00 
+db $3E,$0E,$00 : dl $879B7C : db $00 
+db $0D,$11,$00 : dl $879B7C : db $00 
+db $0B,$12,$00 : dl $879B7C : db $00 
+db $0B,$14,$00 : dl $879B7C : db $00 
+db $09,$15,$00 : dl $879B7C : db $00 
+db $09,$17,$00 : dl $879B7C : db $00 
+db $09,$19,$00 : dl $879B7C : db $00 
+db $03,$3B,$00 : dl $879B88 : db $00 
+db $29,$38,$41 : dl $878501 : db $00 
+db $31,$34,$23 : dl $878501 : db $00 
+db $3F,$34,$45 : dl $878501 : db $00 
+db $33,$21,$01 : dl $878282 : db $00 
+db $39,$11,$0B : dl $878501 : db $00 
+db $15,$3A,$01 : dl $878962 : db $00 
+db $24,$2C,$01 : dl $8783ED : db $00 
+db $1D,$18,$03 : dl $878962 : db $00 
+db $1D,$3B,$01 : dl $87849B : db $00 
+db $05,$1D,$01 : dl $878BBF : db $00 
+db $06,$1D,$03 : dl $878BBF : db $00 
+db $1E,$18,$05 : dl $878BBF : db $00 
+db $42,$1B,$07 : dl $878BBF : db $00 
+db $11,$1D,$00 : dl $87A08C : db $00 
+db $4A,$0A,$00 : dl $878FC7 : db $00 
+db $30,$33,$00 : dl $879AD3 : db $00 
+db $30,$31,$00 : dl $879AD3 : db $00 
+db $26,$08,$00 : dl $879AD3 : db $00 
+db $1E,$22,$00 : dl $879B06 : db $00 
+db $1E,$24,$00 : dl $879B06 : db $00 
+db $1E,$26,$00 : dl $879B06 : db $00 
+db $1E,$28,$00 : dl $879B06 : db $00 
+db $25,$3A,$00 : dl $879B67 : db $00 
+db $25,$3C,$00 : dl $879B67 : db $00 
+db $2A,$3B,$00 : dl $879B67 : db $00 
+db $30,$28,$00 : dl $879B67 : db $00 
+db $0F,$16,$00 : dl $879B67 : db $00 
+db $35,$0B,$00 : dl $879BF5 : db $00 
+db $12,$38,$11 : dl ERedJewelSpot-3 : db $00
+db $FF,$67,$80,$A4,$84,$A2,$8C,$88,$80,$CA
+ActorList_Map79:
+db $05,$09,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $09,$0A,$00 : dl $87A19C : db $00 
+db $08,$09,$00 : dl $87A428 : db $00 
+db $05,$0A,$00 : dl $87A537 : db $00 
+db $07,$0C,$00 : dl $87AC7C : db $00 
+db $FF,$CA
+ActorList_Map7A:
+db $05,$09,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0D,$0B,$00 : dl $87B39A : db $00
+db $0B,$0B,$00 : dl $87AAF5 : db $00
+db $FF,$CA
+ActorList_Map7B:
+db $05,$09,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $12,$08,$0D : dl $878501 : db $00 
+db $0E,$08,$01 : dl EJeweler-3 : db $00
+db $15,$0B,$4F : dl $878501 : db $00 
+db $0A,$0C,$71 : dl $878501 : db $00 
+db $11,$08,$05 : dl $878962 : db $00 
+db $0A,$0A,$67 : dl $878962 : db $00 
+db $0D,$0A,$00 : dl $87A0F0 : db $00 
+db $12,$0A,$00 : dl $87A146 : db $00 
+db $1A,$07,$13 : dl ERedJewelSpot-3 : db $00
+db $FF,$43,$84,$A3,$84,$A2,$A4,$CA
+ActorList_Map7C:
+db $05,$09,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $04,$09,!DkSpWatermiaType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map7D:
+db $05,$09,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0B,$0A,$00 : dl $878D71 : db $00 
+db $07,$08,$09 : dl $878962 : db $00 
+db $FF,$CA
+ActorList_Map7E:
+db $05,$09,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $09,$08,$17 : dl $878501 : db $00 
+db $03,$0A,$6B : dl $878962 : db $00 
+db $FF,$CA
+ActorList_Map7F:
+db $2E,$0C,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $8781BE : db $00 
+db $2D,$0B,$00 : dl $87B1D8 : db $00 
+db $2B,$0B,$00 : dl $87AFCA : db $00 
+db $FF,$CA
+ActorList_Map82:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $00,$01,$00 : dl $87B52F : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $20,$18,$00 : dl $8B9177 : db $33,$01,$00 
+db $20,$1B,$00 : dl $8B9177 : db $33,$02,$00 
+db $21,$38,$00 : dl $8B9177 : db $33,$03,$00 
+db $33,$38,$00 : dl $8B9177 : db $33,$04,$00 
+db $47,$38,$00 : dl $8B9177 : db $33,$05,$00 
+db $60,$28,$00 : dl $8B9155 : db $33,$06,$00 
+db $60,$2B,$00 : dl $8B9155 : db $33,$07,$00 
+db $6F,$28,$00 : dl $8B9155 : db $33,$08,$00 
+db $6F,$2B,$00 : dl $8B9155 : db $33,$09,$00 
+db $15,$0A,$00 : dl $8B9155 : db $33,$10,$00 
+db $13,$1A,$00 : dl $8B9165 : db $33,$11,$00 
+db $0E,$1A,$00 : dl $8B9165 : db $33,$12,$00 
+db $14,$29,$00 : dl $8B9165 : db $33,$13,$00 
+db $13,$2B,$00 : dl $8B9165 : db $33,$14,$00 
+db $64,$1B,$00 : dl $8B9165 : db $33,$15,$00 
+db $62,$18,$00 : dl $8B9165 : db $33,$16,$00 
+db $5D,$1B,$00 : dl $8B9165 : db $33,$17,$00 
+db $1F,$04,$00 : dl $8B8C70 : db $35,$18,$00 
+db $2C,$04,$00 : dl $8B8C70 : db $35,$19,$00 
+db $30,$14,$00 : dl $8B8C70 : db $35,$1A,$00 
+db $30,$34,$00 : dl $8B8C70 : db $35,$1B,$00 
+db $5F,$13,$00 : dl $8B8C70 : db $35,$1C,$00 
+db $57,$03,$00 : dl $8B8C70 : db $35,$1D,$00 
+db $0E,$38,$00 : dl $8B8DBE : db $34,$1E,$00 
+db $17,$37,$00 : dl $8B8DBE : db $34,$1F,$00 
+db $40,$39,$00 : dl $8B8DBE : db $34,$20,$00 
+db $43,$37,$00 : dl $8B8DBE : db $34,$21,$00 
+db $5C,$38,$00 : dl $8B8DBE : db $34,$22,$00 
+db $76,$38,$00 : dl $8B8DBE : db $34,$23,$00 
+db $70,$1A,$00 : dl $8B8DBE : db $34,$24,$00 
+db $51,$19,$00 : dl $8B8DBE : db $34,$25,$00 
+db $4C,$1A,$00 : dl $8B8DBE : db $34,$26,$00 
+db $5A,$08,$01 : dl $8B8C30 : db $00 
+db $5D,$08,$01 : dl $8B8C30 : db $00 
+db $60,$08,$01 : dl $8B8C30 : db $00 
+db $63,$08,$01 : dl $8B8C30 : db $00 
+db $54,$28,$00 : dl $87B59E : db $00    ; Necklace stone pickup 1.
+db $3E,$09,$03 : dl ERampLauncherToEast-3 : db $00
+db $40,$09,$03 : dl ERampLauncherToWest-3 : db $00
+db $FF,$42,$87,$88,$8D,$80,$0E,$A3,$AC,$D6,$16,$67,$80,$8B,$8B,$CA
+ActorList_Map83:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $14,$0A,$00 : dl $8B9177 : db $33,$30,$00 
+db $24,$49,$00 : dl $8B9177 : db $33,$31,$00 
+db $1A,$0A,$00 : dl $8B9155 : db $33,$32,$00 
+db $3B,$2B,$00 : dl $8B9155 : db $33,$33,$00 
+db $2F,$2B,$00 : dl $8B9155 : db $33,$34,$00 
+db $24,$69,$00 : dl $8B9165 : db $33,$35,$00 
+db $24,$6B,$00 : dl $8B9165 : db $33,$36,$00 
+db $30,$49,$00 : dl $8B9165 : db $33,$37,$00 
+db $25,$19,$00 : dl $8B9165 : db $33,$38,$00 
+db $24,$1A,$00 : dl $8B9165 : db $33,$39,$00 
+db $31,$78,$00 : dl $8B8EFE : db $33,$40,$00 
+db $30,$04,$00 : dl $8B8C70 : db $35,$41,$00 
+db $37,$33,$00 : dl $8B8C70 : db $35,$42,$00 
+db $30,$6B,$00 : dl $8B8DBE : db $34,$43,$00 
+db $30,$58,$00 : dl $8B8DBE : db $34,$44,$00 
+db $34,$58,$00 : dl $8B8DBE : db $34,$45,$00 
+db $27,$4B,$00 : dl $8B9423 : db $32,$46,$00 
+db $37,$3A,$00 : dl $8B9423 : db $32,$47,$00 
+db $34,$39,$00 : dl $8B9423 : db $32,$48,$00 
+db $37,$2B,$00 : dl $8B9423 : db $32,$49,$00 
+db $2B,$2B,$00 : dl $8B9423 : db $32,$4A,$00 
+db $29,$47,$01 : dl $8B8C30 : db $00 
+db $30,$08,$01 : dl $8B8C30 : db $00 
+db $31,$08,$11 : dl $8B8C30 : db $00 
+db $32,$08,$21 : dl $8B8C30 : db $00 
+db $33,$08,$31 : dl $8B8C30 : db $00 
+db $35,$1B,$03 : dl $80C9FB : db $00 
+db $35,$1B,$00 : dl $87BDA4 : db $00 
+db $35,$29,$00 : dl $87b5fe : db $00    ; Necklace stone pickup 2.
+db $2E,$05,$00 : dl $87B677 : db $00 
+db $16,$09,$03 : dl ERampLauncherToEast-3 : db $00
+db $18,$09,$03 : dl ERampLauncherToWest-3 : db $00
+db $FF,$CA
+ActorList_Map84:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $FF,$CA
+ActorList_Map85:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $3E,$0B,$03 : dl ERampLauncherToEast-3 : db $00
+db $50,$0B,$03 : dl ERampLauncherToEast-3 : db $00
+db $62,$0B,$03 : dl ERampLauncherToEast-3 : db $00
+db $68,$0B,$03 : dl ERampLauncherToEast-3 : db $00
+db $40,$0B,$03 : dl ERampLauncherToWest-3 : db $00
+db $52,$0B,$03 : dl ERampLauncherToWest-3 : db $00
+db $64,$0B,$03 : dl ERampLauncherToWest-3 : db $00
+db $6A,$0B,$03 : dl ERampLauncherToWest-3 : db $00
+db $15,$1D,$00 : dl $8B9423 : db $32,$50,$00 
+db $1C,$1A,$00 : dl $8B9423 : db $32,$51,$00 
+db $47,$1B,$00 : dl $8B9423 : db $32,$52,$00 
+db $4C,$1A,$00 : dl $8B9423 : db $32,$53,$00 
+db $4E,$1D,$00 : dl $8B9423 : db $32,$54,$00 
+db $53,$1B,$00 : dl $8B9423 : db $32,$55,$00 
+db $26,$2A,$00 : dl $8B9423 : db $32,$56,$00 
+db $6A,$2A,$00 : dl $8B9423 : db $32,$57,$00 
+db $6E,$2B,$00 : dl $8B9423 : db $32,$58,$00 
+db $75,$2A,$00 : dl $8B9423 : db $32,$59,$00 
+db $27,$1D,$00 : dl $8B8DBE : db $34,$60,$00 
+db $4C,$1C,$00 : dl $8B8DBE : db $34,$61,$00 
+db $28,$2D,$00 : dl $8B8DBE : db $34,$64,$00 
+db $4E,$2D,$00 : dl $8B8DBE : db $34,$66,$00 
+db $55,$2D,$00 : dl $8B8DBE : db $34,$67,$00 
+db $5C,$2D,$00 : dl $8B8DBE : db $34,$68,$00 
+db $6D,$2D,$00 : dl $8B8DBE : db $34,$69,$00 
+db $74,$2D,$00 : dl $8B8DBE : db $34,$6A,$00 
+db $4B,$25,$00 : dl $8B8C70 : db $35,$6B,$00 
+db $5A,$25,$00 : dl $8B8C70 : db $35,$6C,$00 
+db $11,$1D,$00 : dl $8B9165 : db $33,$6D,$00 
+db $1D,$1C,$00 : dl $8B9165 : db $33,$6E,$00 
+db $20,$1B,$00 : dl $8B9165 : db $33,$6F,$00 
+db $23,$1C,$00 : dl $8B9165 : db $33,$70,$00 
+db $10,$2B,$00 : dl $8B9165 : db $33,$71,$00 
+db $17,$2B,$00 : dl $8B9165 : db $33,$72,$00 
+db $13,$29,$01 : dl $8B8C30 : db $00 
+db $1A,$29,$01 : dl $8B8C30 : db $00 
+db $12,$19,$00 : dl $87BCE8 : db $00 
+db $2C,$29,$00 : dl $87BD17 : db $00 
+db $34,$29,$00 : dl $87BD46 : db $00 
+db $64,$19,$00 : dl $87BD75 : db $00 
+db $65,$19,$00 : dl $87BD75 : db $00 
+db $18,$1A,$03 : dl $80C9FB : db $00 
+db $3B,$29,$05 : dl $80C9FB : db $00 
+db $29,$2B,$05 : dl $80C9FB : db $00 
+db $37,$2C,$07 : dl $80C9FB : db $00 
+db $64,$1D,$09 : dl $80C9FB : db $00 
+db $00,$01,$00 : dl $87E901 : db $00 
+db $06,$2B,!DkSpGreatWall1Type : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map86:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $17,$28,$00 : dl $8B8EFE : db $33,$80,$00 
+db $1B,$28,$00 : dl $8B8EFE : db $33,$81,$00 
+db $14,$1B,$00 : dl $8B9423 : db $32,$82,$00 
+db $0F,$1B,$00 : dl $8B9423 : db $32,$83,$00 
+db $1E,$1B,$00 : dl $8B9423 : db $32,$84,$00 
+db $26,$1B,$00 : dl $8B9423 : db $32,$85,$00 
+db $08,$5B,$00 : dl $8B9423 : db $32,$86,$00 
+db $1F,$5B,$00 : dl $8B9423 : db $32,$87,$00 
+db $24,$5B,$00 : dl $8B9423 : db $32,$88,$00 
+db $15,$47,!DkSpGreatWallSpinType : dl EDarkSpace-3 : db $00
+db $FF,$CA
+ActorList_Map87:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $21,$0A,$00 : dl $8B9155 : db $33,$9B,$53 
+db $0D,$18,$00 : dl $8B9165 : db $33,$90,$00 
+db $0C,$19,$00 : dl $8B9165 : db $33,$91,$00 
+db $0B,$1A,$00 : dl $8B9165 : db $33,$92,$00 
+db $0A,$1B,$00 : dl $8B9165 : db $33,$93,$00 
+db $08,$2A,$00 : dl $8B8F72 : db $46,$94,$00 
+db $14,$2A,$00 : dl $8B8F72 : db $46,$95,$00 
+db $1B,$2B,$00 : dl $8B8F72 : db $46,$96,$00 
+db $25,$2A,$00 : dl $8B8F72 : db $46,$97,$00 
+db $26,$2B,$00 : dl $8B8F72 : db $46,$98,$00 
+db $2F,$2B,$00 : dl $8B8F72 : db $46,$99,$00 
+db $28,$14,$00 : dl $8B8C70 : db $33,$9A,$00 
+db $2F,$28,$1F : dl $80C9FB : db $00 
+db $27,$17,$01 : dl $8B8C30 : db $00 
+db $28,$17,$21 : dl $8B8C30 : db $00 
+db $29,$17,$41 : dl $8B8C30 : db $00 
+db $2D,$17,$41 : dl $8B8C30 : db $00 
+db $2E,$17,$21 : dl $8B8C30 : db $00 
+db $2F,$17,$01 : dl $8B8C30 : db $00 
+db $FF,$CA
+ActorList_Map88:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $16,$09,$03 : dl ERampLauncherToEast-3 : db $00
+db $18,$09,$03 : dl ERampLauncherToWest-3 : db $00
+db $00,$01,!DkSpGreatWallEndType : dl $87BDE8 : db $00 
+db $14,$1B,$00 : dl $8B9177 : db $33,$A0,$00 
+db $2F,$1A,$00 : dl $8B9177 : db $33,$A1,$00 
+db $1E,$18,$00 : dl $8B9155 : db $33,$A2,$00 
+db $3A,$1A,$00 : dl $8B9155 : db $33,$A3,$00 
+db $05,$18,$00 : dl $8B9165 : db $33,$A4,$00 
+db $0A,$1B,$00 : dl $8B9165 : db $33,$A5,$00 
+db $2F,$2B,$00 : dl $8B8F4F : db $33,$F8,$00 
+db $06,$2B,$00 : dl $8B8F4F : db $33,$F9,$00 
+db $11,$28,$00 : dl $8B8F4F : db $33,$FA,$00 
+db $15,$28,$00 : dl $8B8F4F : db $33,$FB,$00 
+db $27,$28,$00 : dl $8B8F4F : db $33,$FC,$00 
+db $36,$28,$00 : dl $8B8F4F : db $33,$FD,$00 
+db $19,$18,$00 : dl $8B9423 : db $32,$A8,$00 
+db $28,$1B,$00 : dl $8B8DBE : db $34,$A6,$00 
+db $35,$1B,$00 : dl $8B8DBE : db $34,$A7,$00 
+db $2B,$17,$01 : dl $8B8C30 : db $00 
+db $32,$17,$01 : dl $8B8C30 : db $00 
+db $07,$17,$01 : dl $8B8BF8 : db $00 
+db $17,$17,$01 : dl $8B8BF8 : db $00 
+db $FF,$CA
+ActorList_Map89:
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $8BE029 : db $00 
+db $FF,$CA
+ActorList_Map8A:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $27,$40,$00 : dl EFanger-3 : db $36,$00,$6A    ; Fanger spawns offscreen to prevent Earthquaker abuse.
+db $00,$01,$01 : dl EBossClearRewarder-3 : db $00
+db $FF,$CA
+ActorList_Map8B:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffectY-3 : db $00
+db $04,$1A,$00 : dl EGWLance-3 : db $00
+db $FF,$CA
+ActorList_Map8C:
+db $00,$01,$00 : dl $8BCA02 : db $00 
+db $00,$01,$00 : dl $8BCE79 : db $00 
+db $00,$01,$00 : dl $8BC9BD : db $00 
+db $FF,$CA
+ActorList_Map8D:
+db $00,$01,$00 : dl $8BCB4E : db $00 
+db $00,$01,$00 : dl $8BC9BD : db $00 
+db $FF,$CA
+ActorList_Map8E:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$12,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $8BCD4B : db $00 
+db $00,$01,$00 : dl $8BC9BD : db $00 
+db $FF,$CA
+ActorList_Map8F:
+db $00,$01,$00 : dl $8BCE33 : db $00 
+db $00,$01,$00 : dl $8BC9BD : db $00 
+db $FF,$CA
+ActorList_Map90:
+db $00,$01,$00 : dl $8BDE40 : db $00 
+db $FF,$CA
+ActorList_Map91:
+db $37,$44,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $87BE22 : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $14,$3B,$21 : dl $87C05B : db $00 
+db $14,$39,$43 : dl $87C05B : db $00 
+db $1B,$39,$61 : dl $87C05B : db $00 
+db $1B,$35,$07 : dl $87C05B : db $00 
+db $1B,$2C,$8F : dl $87C05B : db $00 
+db $1B,$2E,$0F : dl $87C05B : db $00 
+db $1B,$2F,$0F : dl $87C05B : db $00 
+db $14,$28,$A9 : dl $87C05B : db $00 
+db $14,$29,$AB : dl $87C05B : db $00 
+db $14,$2C,$D1 : dl $87C05B : db $00 
+db $1B,$20,$ED : dl $87C05B : db $00 
+db $14,$20,$00 : dl $87E4BC : db $00 
+db $03,$41,$00 : dl $87C266 : db $00 
+db $01,$3F,$00 : dl $87C266 : db $00 
+db $03,$41,$00 : dl $87C276 : db $00 
+db $13,$3B,$81 : dl $87C286 : db $00 
+db $13,$2D,$C1 : dl $87C286 : db $00 
+db $1C,$21,$61 : dl $87C2B5 : db $00 
+db $13,$39,$21 : dl $87C286 : db $00 
+db $1C,$2D,$41 : dl $87C2B5 : db $00 
+db $13,$21,$61 : dl $87C286 : db $00 
+db $1C,$39,$00 : dl $87C375 : db $00 
+db $13,$29,$00 : dl $87C3B9 : db $00 
+db $34,$43,$01 : dl EEuroNpcGreen-3 : db $00
+db $39,$0C,$03 : dl EEuroNpcGreen-3 : db $00
+db $1A,$40,$05 : dl EEuroNpcGreen-3 : db $00
+db $15,$39,$47 : dl EEuroNpcGreen-3 : db $00
+db $27,$0A,$69 : dl EEuroNpcGreen-3 : db $00
+db $02,$40,$0B : dl EEuroNpcGreen-3 : db $00
+db $27,$21,$00 : dl $87D051 : db $00 
+db $37,$31,$61 : dl $87C751 : db $00 
+db $15,$29,$43 : dl $87C751 : db $00 
+db $01,$2E,$65 : dl $87C751 : db $00 
+db $17,$1E,$01 : dl $87C92A : db $00 
+db $18,$0A,$03 : dl $87C92A : db $00 
+db $39,$39,$01 : dl EEuroNpcBlue-3 : db $00
+db $19,$31,$03 : dl EEuroNpcBlue-3 : db $00
+db $16,$1B,$05 : dl EEuroNpcBlue-3 : db $00
+db $22,$41,$01 : dl $87D252 : db $00 
+db $22,$42,$A3 : dl $87D252 : db $00 
+db $23,$42,$05 : dl $87D252 : db $00 
+db $24,$42,$A7 : dl $87D252 : db $00 
+db $25,$42,$A9 : dl $87D252 : db $00 
+db $2C,$42,$0B : dl $87D252 : db $00 
+db $22,$40,$01 : dl $87D5D5 : db $00 
+db $06,$40,$00 : dl $80C5F3 : db $00 
+db $0D,$40,$00 : dl $80C5F3 : db $00 
+db $33,$40,$00 : dl $80C5F3 : db $00 
+db $34,$31,$00 : dl $80C5F3 : db $00 
+db $31,$23,$00 : dl $80C5F3 : db $00 
+db $29,$23,$00 : dl $80C5F3 : db $00 
+db $23,$23,$00 : dl $80C5F3 : db $00 
+db $27,$32,$15 : dl ERedJewelSpot-3 : db $00
+db $FF,$D6,$08,$8E,$85,$AC,$44,$A5,$A2,$8E,$CA
+ActorList_Map92:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $06,$09,$00 : dl $87D79E : db $00 
+db $08,$09,$00 : dl $87D5E7 : db $00 
+db $FF,$CA
+ActorList_Map93:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$09,$00 : dl $87E50B : db $00 
+db $FF,$CA
+ActorList_Map94:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0C,$0C,$00 : dl $87CEFA : db $00 
+db $0B,$0C,$6D : dl EEuroNpcGreen-3 : db $00
+db $FF,$D6,$44,$42,$8E,$8C,$A0,$80,$8D,$A9,$CA
+ActorList_Map95:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0B,$0A,$00 : dl $87DF04 : db $00 
+db $2B,$0B,$00 : dl $87E1BA : db $00 
+db $29,$0C,$00 : dl $87E2D7 : db $00 
+db $2A,$0B,$00 : dl $87E37A : db $00 
+db $FF,$D6,$44,$4C,$80,$8D,$A3,$88,$8E,$8D,$CA
+ActorList_Map96:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $FF,$46,$A5,$84,$A3,$A4,$AC,$62,$8E,$8E,$8C,$CA
+ActorList_Map97:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $19,$0C,$00 : dl $87CB95 : db $00 
+db $08,$0D,$00 : dl $87CC39 : db $00 
+db $0D,$08,$00 : dl $87CCF3 : db $00 
+db $10,$08,$00 : dl $87CDDA : db $00 
+db $FF,$CA
+ActorList_Map98:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$0A,$07 : dl EEuroNpcBlue-3 : db $00
+db $FF,$CA
+ActorList_Map99:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0B,$0A,!DkSpEuroType : dl EDarkSpace-3 : db $00
+db $04,$1A,$05 : dl $87C92A : db $00 
+db $FF,$CA
+ActorList_Map9A:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$09,$00 : dl $87E604 : db $00 
+db $05,$0A,$00 : dl $87E696 : db $00 
+db $0A,$0A,$00 : dl $87E713 : db $00 
+db $FF,$CA
+ActorList_Map9B:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $03,$0C,$01 : dl EJeweler-3 : db $00
+db $FF,$CA
+ActorList_Map9C:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $04,$0B,$0F : dl EEuroNpcGreen-3 : db $00
+db $03,$0B,$11 : dl EEuroNpcGreen-3 : db $00
+db $FF,$CA
+ActorList_Map9D:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $06,$18,$01 : dl $87D099 : db $00 
+db $08,$18,$03 : dl $87D099 : db $00 
+db $0B,$18,$05 : dl $87D099 : db $00 
+db $12,$19,$07 : dl $87D099 : db $00 
+db $14,$19,$09 : dl $87D099 : db $00 
+db $03,$1A,$00 : dl $87D237 : db $00 
+db $05,$19,$00 : dl $87D237 : db $00 
+db $0F,$08,$00 : dl $87E56D : db $00 
+db $1E,$1C,$17 : dl ERedJewelSpot-3 : db $00
+db $FF,$63,$87,$A2,$88,$8D,$84,$AC,$CA
+ActorList_Map9F:
+db $FF,$CA
+ActorList_MapA0:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $00,$01,$00 : dl $87E75D : db $00 
+db $1E,$1C,$30 : dl $8B9C4E : db $3E,$01,$00 
+db $15,$1C,$30 : dl $8B9C4E : db $3E,$02,$00 
+db $08,$15,$30 : dl $8B9C4E : db $3E,$03,$00 
+db $10,$09,$30 : dl $8B9C4E : db $3E,$04,$00 
+db $20,$09,$30 : dl $8B9C4E : db $3E,$05,$00 
+db $25,$15,$30 : dl $8B9BAC : db $3E,$06,$00 
+db $17,$11,$30 : dl $8B9BAC : db $3E,$07,$00 
+db $07,$19,$30 : dl $8BA0CF : db $3C,$08,$00 
+db $0E,$05,$30 : dl $8BA0CF : db $3C,$09,$00 
+db $13,$0F,$30 : dl $8BA0CF : db $3C,$0A,$00 
+db $18,$04,$30 : dl $8BA0CF : db $3C,$0B,$00 
+db $FF,$D7,$1E,$64,$84,$8C,$A0,$8B,$84,$CA
+ActorList_MapA1:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $36,$27,$09 : dl $80D3BA : db $00 
+db $16,$1E,$09 : dl $80D3BA : db $00 
+db $1A,$23,$11 : dl $80D428 : db $00 
+db $10,$0C,$03 : dl ERampLauncherToEast-3 : db $00
+db $1F,$30,!DkSpKress1Type : dl EDarkSpace-3 : db $00
+db $0B,$33,$30 : dl $8B983B : db $3F,$10,$00 
+db $28,$0C,$30 : dl $8B983B : db $3F,$11,$00 
+db $1B,$0B,$30 : dl $8B983B : db $3F,$12,$00 
+db $31,$25,$30 : dl $8BA0CF : db $3C,$13,$00 
+db $09,$21,$30 : dl $8BA049 : db $3C,$14,$00 
+db $0B,$21,$30 : dl $8BA049 : db $3C,$15,$00 
+db $1A,$22,$30 : dl $8BA075 : db $3C,$16,$00 
+db $17,$1F,$30 : dl $8BA0A1 : db $3C,$17,$00 
+db $2E,$34,$30 : dl $8B9C4E : db $3E,$18,$00 
+db $30,$3C,$30 : dl $8B9C4E : db $3E,$19,$00 
+db $1E,$2A,$30 : dl $8B9C4E : db $3E,$1A,$00 
+db $1C,$1A,$30 : dl $8B9C4E : db $3E,$1B,$00 
+db $07,$11,$30 : dl $8B9BAC : db $3E,$1C,$00 
+db $0C,$11,$30 : dl $8B9BAC : db $3E,$1D,$00 
+db $26,$38,$30 : dl $8B9D0F : db $3D,$1E,$00 
+db $17,$27,$30 : dl $8B9D0F : db $3D,$1F,$00 
+db $21,$17,$30 : dl $8B9D0F : db $3D,$20,$00 
+db $24,$17,$30 : dl $8B9D0F : db $3D,$21,$00 
+db $2A,$2A,$30 : dl $8B9F53 : db $3D,$22,$00 
+db $09,$1B,$30 : dl $8B9F53 : db $3D,$23,$00 
+db $0A,$16,$30 : dl $8B9F53 : db $3D,$24,$00 
+db $09,$11,$30 : dl $8B9F53 : db $3D,$25,$00 
+db $0A,$0C,$30 : dl $8B9F53 : db $3D,$26,$00 
+db $2D,$1A,$30 : dl $8B9F53 : db $3D,$27,$00 
+db $36,$28,$01 : dl $80C286 : db $00 
+db $FF,$CA
+ActorList_MapA2:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $0C,$2D,$09 : dl $80D3BA : db $00 
+db $00,$01,$00 : dl $87E7F0 : db $00 
+db $0D,$1C,$30 : dl $8BA0CF : db $3C,$30,$00 
+db $0D,$18,$30 : dl $8BA0CF : db $3C,$31,$00 
+db $07,$09,$30 : dl $8BA0CF : db $3C,$32,$00 
+db $04,$30,$30 : dl $8BA0A1 : db $3C,$33,$00 
+db $15,$09,$30 : dl $8BA0A1 : db $3C,$34,$00 
+db $11,$2C,$30 : dl $8BA01D : db $3C,$35,$00 
+db $07,$2B,$30 : dl $8B9BAC : db $3E,$36,$00 
+db $18,$24,$30 : dl $8B9C4E : db $3E,$37,$00 
+db $18,$1A,$30 : dl $8B9C4E : db $3E,$38,$00 
+db $11,$1F,$30 : dl $8B9C44 : db $3E,$39,$00 
+db $11,$15,$30 : dl $8B9C44 : db $3E,$3A,$00 
+db $0C,$0F,$30 : dl $8B9F53 : db $3D,$3B,$00 
+db $13,$29,$30 : dl $8B9E8B : db $3D,$3C,$00 
+db $1B,$09,$30 : dl $8B9E8B : db $3D,$3D,$00 
+db $0C,$2E,$01 : dl $80C286 : db $00 
+db $FF,$CA
+ActorList_MapA3:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $69,$11,$03 : dl ERampLauncherToWest-3 : db $00
+db $58,$11,$03 : dl ERampLauncherToWest-3 : db $00
+db $47,$11,$03 : dl ERampLauncherToWest-3 : db $00
+db $36,$11,$03 : dl ERampLauncherToWest-3 : db $00
+db $25,$11,$03 : dl ERampLauncherToWest-3 : db $00
+db $7C,$0B,!DkSpKress2Type : dl EDarkSpace-3 : db $00
+db $12,$09,$30 : dl $8B9C44 : db $3E,$40,$00 
+db $21,$09,$30 : dl $8B9C44 : db $3E,$41,$00 
+db $3D,$09,$30 : dl $8B9C44 : db $3E,$42,$00 
+db $54,$0E,$30 : dl $8B9C44 : db $3E,$43,$00 
+db $74,$09,$30 : dl $8B9C44 : db $3E,$44,$00 
+db $1B,$09,$30 : dl $8BA0CF : db $3C,$45,$00 
+db $23,$07,$30 : dl $8BA0CF : db $3C,$46,$00 
+db $7A,$0B,$30 : dl $8BA0CF : db $3C,$47,$00 
+db $76,$0E,$30 : dl $8BA0CF : db $3C,$48,$00 
+db $7B,$10,$30 : dl $8BA0CF : db $3C,$49,$00 
+db $28,$14,$30 : dl $8BA0A1 : db $3C,$4A,$00 
+db $3E,$0E,$30 : dl $8BA0A1 : db $3C,$4B,$00 
+db $51,$09,$30 : dl $8BA0A1 : db $3C,$4C,$00 
+db $35,$14,$30 : dl $8BA075 : db $3C,$4D,$00 
+db $58,$09,$30 : dl $8BA075 : db $3C,$4E,$00 
+db $2D,$0F,$30 : dl $8B9F53 : db $3D,$50,$00 
+db $30,$0F,$30 : dl $8B9E8B : db $3D,$51,$00 
+db $2E,$12,$30 : dl $8B9D0F : db $3D,$52,$00 
+db $3F,$0C,$30 : dl $8B9D0F : db $3D,$53,$00 
+db $6B,$07,$30 : dl $8B9D0F : db $3D,$55,$00 
+db $6A,$11,$01 : dl $80C1DF : db $00 
+db $4F,$11,$01 : dl $80C1DF : db $00 
+db $40,$11,$01 : dl $80C1DF : db $00 
+db $36,$11,$01 : dl $80C1DF : db $00 
+db $25,$11,$01 : dl $80C1DF : db $00 
+db $FF,$CA
+ActorList_MapA4:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $19,$16,$30 : dl $8B9C44 : db $3E,$60,$00 
+db $26,$16,$30 : dl $8B9C44 : db $3E,$61,$00 
+db $21,$3E,$30 : dl $8B9C4E : db $3E,$62,$00 
+db $09,$38,$30 : dl $8B9C4E : db $3E,$63,$00 
+db $2E,$06,$30 : dl $8B9C4E : db $3E,$64,$00 
+db $29,$06,$30 : dl $8B9C4E : db $3E,$65,$00 
+db $24,$06,$30 : dl $8B9C4E : db $3E,$66,$00 
+db $1F,$06,$30 : dl $8B9C4E : db $3E,$67,$00 
+db $32,$25,$30 : dl $8B9BAC : db $3E,$68,$00 
+db $0F,$1F,$30 : dl $8B9BAC : db $3E,$69,$00 
+db $26,$38,$30 : dl $8B9E8B : db $3D,$6A,$00 
+db $11,$28,$30 : dl $8B9E8B : db $3D,$6B,$00 
+db $13,$1C,$30 : dl $8B9E8B : db $3D,$6C,$00 
+db $32,$0F,$30 : dl $8B9E8B : db $3D,$6D,$00 
+db $34,$10,$30 : dl $8B9E8B : db $3D,$6E,$68 
+db $1C,$2F,$30 : dl $8B9F53 : db $3D,$6F,$00 
+db $0C,$28,$30 : dl $8B9F53 : db $3D,$70,$00 
+db $0A,$1C,$30 : dl $8B9F53 : db $3D,$71,$00 
+db $1E,$2E,$30 : dl $8B9D0F : db $3D,$72,$00 
+db $28,$38,$30 : dl $8BA075 : db $3C,$73,$00 
+db $31,$38,$30 : dl $8BA0CF : db $3C,$74,$00 
+db $35,$38,$30 : dl $8BA0CF : db $3C,$75,$00 
+db $0D,$32,$30 : dl $8BA0CF : db $3C,$76,$00 
+db $10,$12,$30 : dl $8BA0CF : db $3C,$77,$00 
+db $13,$12,$30 : dl $8BA0CF : db $3C,$78,$00 
+db $16,$12,$30 : dl $8BA0CF : db $3C,$79,$00 
+db $FF,$CA
+ActorList_MapA5:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $14,$0F,$11 : dl $80D428 : db $00 
+db $00,$01,$00 : dl $87E843 : db $00 
+db $00,$01,$00 : dl $87E896 : db $00 
+db $23,$3D,$30 : dl $8B983B : db $3F,$80,$00 
+db $15,$23,$30 : dl $8B983B : db $3F,$81,$00 
+db $0A,$19,$30 : dl $8B983B : db $3F,$82,$00 
+db $08,$33,$30 : dl $8B9D0F : db $3D,$83,$00 
+db $26,$23,$30 : dl $8B9D0F : db $3D,$84,$00 
+db $08,$3A,$30 : dl $8B9DCD : db $3D,$85,$00 
+db $29,$13,$30 : dl $8B9F53 : db $3D,$86,$00 
+db $0E,$07,$30 : dl $8B9E8B : db $3D,$87,$00 
+db $11,$07,$30 : dl $8B9E8B : db $3D,$88,$00 
+db $38,$13,$30 : dl $8B9BAC : db $3E,$89,$00 
+db $37,$2B,$30 : dl $8B9C44 : db $3E,$8A,$00 
+db $1C,$2B,$30 : dl $8B9C44 : db $3E,$8B,$00 
+db $19,$3A,$30 : dl $8B9C4E : db $3E,$8C,$00 
+db $05,$13,$30 : dl $8B9C4E : db $3E,$8D,$00 
+db $0C,$13,$30 : dl $8B9C4E : db $3E,$8E,$00 
+db $12,$13,$30 : dl $8B9C4E : db $3E,$8F,$00 
+db $0E,$37,$30 : dl $8BA0CF : db $3C,$90,$00 
+db $12,$27,$30 : dl $8BA0CF : db $3C,$91,$00 
+db $0F,$03,$30 : dl $8BA0CF : db $3C,$92,$00 
+db $2B,$09,$30 : dl $8BA049 : db $3C,$93,$00 
+db $1A,$31,$30 : dl $8BA075 : db $3C,$94,$00 
+db $29,$25,$30 : dl $8BA075 : db $3C,$95,$00 
+db $14,$37,$30 : dl $8BA0A1 : db $3C,$96,$00 
+db $24,$25,$30 : dl $8BA0A1 : db $3C,$97,$00 
+db $14,$0E,$01 : dl $80C1DF : db $00 
+db $FF,$CA
+ActorList_MapA6:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $17,$2E,$30 : dl $8B983B : db $3F,$A0,$00 
+db $2B,$33,$30 : dl $8B983B : db $3F,$A1,$00 
+db $0D,$21,$30 : dl $8B983B : db $3F,$A2,$00 
+db $2E,$1C,$30 : dl $8B983B : db $3F,$A3,$00 
+db $35,$16,$30 : dl $8B983B : db $3F,$A4,$00 
+db $26,$0C,$30 : dl $8B983B : db $3F,$A5,$00 
+db $14,$1C,$30 : dl $8B9E8B : db $3D,$A6,$00 
+db $17,$1D,$30 : dl $8B9E8B : db $3D,$A7,$00 
+db $1A,$1C,$30 : dl $8B9E8B : db $3D,$A8,$00 
+db $1D,$1D,$30 : dl $8B9E8B : db $3D,$A9,$00 
+db $05,$07,$30 : dl $8B9D0F : db $3D,$AA,$00 
+db $22,$0B,$30 : dl $8B9C4E : db $3E,$AB,$00 
+db $38,$29,$30 : dl $8BA0CF : db $3C,$AC,$00 
+db $39,$2D,$30 : dl $8BA0CF : db $3C,$AD,$00 
+db $3C,$2B,$30 : dl $8BA0CF : db $3C,$AE,$00 
+db $FF,$CA
+ActorList_MapA7:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $79,$31,!DkSpKress3Type : dl EDarkSpace-3 : db $00
+db $25,$09,$03 : dl ERampLauncherToEast-3 : db $00
+db $27,$0F,$03 : dl ERampLauncherToWest-3 : db $00
+db $15,$1F,$03 : dl ERampLauncherToWest-3 : db $00
+db $0F,$22,$09 : dl $80D3BA : db $00 
+db $22,$28,$09 : dl $80D3BA : db $00 
+db $4A,$1F,$03 : dl ERampLauncherToEast-3 : db $00
+db $66,$35,$03 : dl ERampLauncherToEast-3 : db $00
+db $65,$2E,$03 : dl ERampLauncherToWest-3 : db $00
+db $54,$2E,$03 : dl ERampLauncherToWest-3 : db $00
+db $43,$2E,$03 : dl ERampLauncherToWest-3 : db $00
+db $32,$2E,$03 : dl ERampLauncherToWest-3 : db $00
+db $06,$17,$30 : dl $8B983B : db $3F,$B3,$00 
+db $73,$14,$30 : dl $8B983B : db $3F,$B5,$00 
+db $59,$0F,$30 : dl $8B983B : db $3F,$B6,$00 
+db $38,$33,$30 : dl $8BA0CF : db $3C,$B7,$00 
+db $3B,$31,$30 : dl $8BA0CF : db $3C,$B8,$00 
+db $40,$31,$30 : dl $8BA0CF : db $3C,$B9,$00 
+db $41,$38,$30 : dl $8BA0CF : db $3C,$BA,$00 
+db $51,$28,$30 : dl $8BA0CF : db $3C,$BB,$00 
+db $3D,$28,$30 : dl $8BA0CF : db $3C,$BC,$00 
+db $37,$22,$30 : dl $8BA0CF : db $3C,$BD,$00 
+db $62,$19,$30 : dl $8BA0CF : db $3C,$BE,$00 
+db $7A,$14,$30 : dl $8BA0CF : db $3C,$BF,$00 
+db $5B,$3A,$30 : dl $8B9D0F : db $3D,$C0,$00 
+db $5C,$3A,$30 : dl $8B9D0F : db $3D,$C1,$00 
+db $40,$0F,$30 : dl $8B9D0F : db $3D,$C2,$00 
+db $14,$03,$30 : dl $8B9D0F : db $3D,$C3,$00 
+db $18,$03,$30 : dl $8B9D0F : db $3D,$C4,$00 
+db $7B,$23,$30 : dl $8B9DCD : db $3D,$C5,$00 
+db $79,$24,$30 : dl $8B9DCD : db $3D,$C6,$00 
+db $77,$25,$30 : dl $8B9DCD : db $3D,$C7,$00 
+db $48,$14,$30 : dl $8B9DCD : db $3D,$C8,$00 
+db $12,$08,$30 : dl $8B9DCD : db $3D,$C9,$00 
+db $16,$08,$30 : dl $8B9DCD : db $3D,$CA,$00 
+db $5F,$31,$30 : dl $8B9E8B : db $3D,$CB,$00 
+db $44,$10,$30 : dl $8B9E8B : db $3D,$CC,$00 
+db $5B,$31,$30 : dl $8B9F53 : db $3D,$CD,$00 
+db $57,$31,$30 : dl $8B9F53 : db $3D,$CE,$00 
+db $33,$1B,$30 : dl $8B9BA2 : db $3E,$CF,$00 
+db $7A,$1B,$30 : dl $8B9BA2 : db $3E,$D0,$00 
+db $5D,$25,$30 : dl $8B9C44 : db $3E,$D1,$00 
+db $56,$25,$30 : dl $8B9C44 : db $3E,$D2,$00 
+db $4F,$25,$30 : dl $8B9C44 : db $3E,$D3,$00 
+db $48,$25,$30 : dl $8B9C44 : db $3E,$D4,$00 
+db $1C,$05,$30 : dl $8B9C44 : db $3E,$D5,$00 
+db $46,$3D,$30 : dl $8B9C4E : db $3E,$D6,$00 
+db $4E,$3D,$30 : dl $8B9C4E : db $3E,$D7,$00 
+db $56,$3D,$30 : dl $8B9C4E : db $3E,$D8,$00 
+db $52,$07,$30 : dl $8B9C4E : db $3E,$D9,$00 
+db $3B,$0B,$30 : dl $8BA075 : db $3C,$DA,$00 
+db $23,$09,$01 : dl $80C218 : db $00 
+db $28,$0F,$01 : dl $80C1DF : db $00 
+db $48,$1F,$01 : dl $80C218 : db $00 
+db $16,$1F,$01 : dl $80C1DF : db $00 
+db $0F,$23,$01 : dl $80C286 : db $00 
+db $66,$2E,$01 : dl $80C1DF : db $00 
+db $64,$35,$01 : dl $80C218 : db $00 
+db $22,$29,$01 : dl $80C286 : db $00 
+db $FF,$CA
+ActorList_MapA8:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+db $31,$18,$30 : dl $8B983B : db $3F,$E0,$00 
+db $1E,$0E,$30 : dl $8B983B : db $3F,$E1,$00 
+db $16,$0E,$30 : dl $8B983B : db $3F,$E2,$00 
+db $0A,$1D,$30 : dl $8B983B : db $3F,$E3,$00 
+db $21,$0F,$30 : dl $8B9D0F : db $3D,$E4,$00 
+db $1F,$0B,$30 : dl $8B9D0F : db $3D,$E5,$00 
+db $15,$0B,$30 : dl $8B9D0F : db $3D,$E6,$00 
+db $14,$0F,$30 : dl $8B9D0F : db $3D,$E7,$00 
+db $FF,$CA
+ActorList_MapA9:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $DF,$DF,$00 : dl $80E94D : db $00 
+if !KaraLocation == 3
+db $12,$06,$00 : dl $86d14e : db $00
+endif
+db $FF,$CA
+ActorList_MapAC:
+db $1C,$1E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $1C,$04,!DkSpNativesType : dl EDarkSpace-3 : db $00
+db $1D,$1D,$00 : dl $888546 : db $00 
+db $1D,$1E,$00 : dl $888057 : db $00 
+db $1D,$1F,$00 : dl $888659 : db $00 
+db $05,$08,$00 : dl $888000 : db $00 
+db $19,$14,$00 : dl $888000 : db $00 
+db $11,$07,$00 : dl $888000 : db $00 
+db $04,$11,$00 : dl $888000 : db $00 
+db $08,$13,$00 : dl $888C51 : db $00 
+db $07,$12,$00 : dl $888C6D : db $00 
+db $09,$14,$00 : dl $888D6B : db $00 
+db $04,$13,$00 : dl $888E86 : db $00 
+db $0C,$12,$00 : dl $888F88 : db $00 
+db $0C,$14,$00 : dl $888f88 : db $00 
+db $06,$0F,$00 : dl $889200 : db $00 
+db $08,$0F,$00 : dl $889248 : db $00 
+db $0A,$0F,$00 : dl $88925C : db $00 
+db $FF,$CA
+ActorList_MapAD:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$0D,$00 : dl $888AC7 : db $00 
+db $07,$0E,$00 : dl $888B9F : db $00 
+db $08,$0E,$00 : dl $888C0E : db $00 
+db $FF,$CA
+ActorList_MapAE:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $06,$07,$00 : dl $8892A2 : db $00 
+db $08,$07,$00 : dl $889366 : db $00 
+db $0A,$07,$00 : dl $889471 : db $00 
+db $07,$10,$00 : dl $88951E : db $00 
+db $08,$10,$00 : dl $889730 : db $00 
+db $03,$0D,$19 : dl ERedJewelSpot-3 : db $00
+db $FF,$CA
+ActorList_MapB0:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $00,$01,$00 : dl $8897E0 : db $00 
+db $0E,$1F,$00 : dl EAWZipFly-3 : db $4A,$01,$00
+db $13,$1B,$00 : dl EAWZipFly-3 : db $4A,$02,$00
+db $15,$22,$00 : dl EAWZipFly-3 : db $4A,$03,$00
+db $2D,$1D,$00 : dl EAWZipFly-3 : db $4A,$04,$00
+db $30,$21,$00 : dl EAWZipFly-3 : db $4A,$05,$00
+db $30,$3D,$00 : dl EAWBush-3 : db $49,$06,$00
+db $3A,$34,$00 : dl EAWBush-3 : db $49,$07,$00
+db $08,$38,$00 : dl EAWBush-3 : db $49,$08,$00
+db $21,$3B,$00 : dl EAWCyclops-3 : db $46,$09,$00
+db $22,$31,$00 : dl EAWCyclops-3 : db $46,$0A,$00
+db $08,$24,$00 : dl EAWCyclops-3 : db $46,$0B,$00
+db $1E,$2C,$00 : dl EAWCyclops-3 : db $46,$0C,$00
+db $38,$24,$00 : dl EAWCyclops-3 : db $46,$0D,$00
+db $1E,$1C,$00 : dl EAWCyclops-3 : db $46,$0E,$00
+db $21,$1C,$00 : dl EAWCyclops-3 : db $46,$0F,$00
+db $FF,$43,$8E,$8E,$A2,$AC,$A4,$8E,$AC,$40,$8D,$8A,$8E,$A2,$AC,$67,$80,$A4,$CA
+ActorList_MapB1:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $0B,$15,$00 : dl EAWFlyingSkull-3 : db $42,$10,$00
+db $4A,$16,$00 : dl EAWFlyingSkull-3 : db $42,$11,$00
+db $6D,$10,$00 : dl EAWFlyingSkull-3 : db $42,$12,$00
+db $1A,$0B,$02 : dl EAWWallSkull-3 : db $43,$13,$00
+db $1A,$11,$02 : dl EAWWallSkull-3 : db $43,$14,$00
+db $1A,$17,$02 : dl EAWWallSkull-3 : db $43,$15,$00
+db $1D,$11,$06 : dl $8BBFBB : db $43,$16,$00 
+db $1D,$18,$06 : dl $8BBFBB : db $43,$17,$00 
+db $22,$0E,$06 : dl $8BBFBB : db $43,$18,$00 
+db $22,$14,$06 : dl $8BBFBB : db $43,$19,$00 
+db $22,$1A,$06 : dl $8BBFBB : db $43,$1A,$00 
+db $27,$11,$06 : dl $8BBFBB : db $43,$1B,$00 
+db $27,$18,$06 : dl $8BBFBB : db $43,$1C,$00 
+db $47,$04,$00 : dl $8BBB5C : db $44,$1D,$6C 
+db $10,$0E,$00 : dl $8BBB66 : db $44,$1E,$00 
+db $58,$10,$00 : dl $8BB825 : db $45,$1F,$00 
+db $62,$12,$00 : dl $8BB825 : db $45,$20,$00 
+db $75,$08,$00 : dl $8BB825 : db $45,$21,$00 
+db $7A,$08,$00 : dl $8BB825 : db $45,$22,$00 
+db $FF,$60,$80,$A3,$A3,$80,$86,$84,$AC,$6D,$AC,$4E,$A5,$A4,$A3,$88,$83,$84,$CA,$CA
+ActorList_MapB2:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$27,$00 : dl $8898C8 : db $00 
+db $07,$1E,$13 : dl $80D1B5 : db $00 
+db $0B,$6D,$00 : dl EAWFlyingSkull-3 : db $42,$30,$00
+db $08,$0C,$00 : dl EAWFlyingSkull-3 : db $42,$31,$00
+db $06,$57,$02 : dl EAWWallSkull-3 : db $43,$32,$00
+db $03,$33,$00 : dl $8BBFBB : db $43,$33,$00 
+db $0C,$33,$00 : dl $8BBFBB : db $43,$34,$00 
+db $0B,$45,$00 : dl $8BBB66 : db $44,$35,$00 
+db $06,$25,$00 : dl $8BBB66 : db $44,$36,$00 
+db $09,$25,$00 : dl $8BBB66 : db $44,$37,$6B 
+db $07,$47,$00 : dl $8BB825 : db $45,$38,$00 
+db $04,$09,$00 : dl $8BB825 : db $45,$39,$00 
+db $0B,$09,$00 : dl $8BB825 : db $45,$3A,$00 
+db $FF,$CA
+ActorList_MapB3:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $66,$07,$03 : dl ERampLauncherToEast-3 : db $00
+db $00,$01,$00 : dl $8898DA : db $00 
+db $18,$13,$00 : dl EAWFlyingSkull-3 : db $42,$40,$00
+db $71,$05,$06 : dl EAWWallSkull-3 : db $43,$41,$00
+db $71,$10,$02 : dl EAWWallSkull-3 : db $43,$42,$00
+db $35,$05,$00 : dl $8BBB66 : db $44,$43,$00 
+db $3B,$05,$00 : dl $8BBB66 : db $44,$44,$00 
+db $41,$05,$00 : dl $8BBB66 : db $44,$45,$00 
+db $47,$05,$00 : dl $8BBB66 : db $44,$46,$00 
+db $FF,$CA
+ActorList_MapB4:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $88992A : db $00 
+db $00,$01,$00 : dl $8897CB : db $00 
+db $04,$05,$00 : dl $8BBB5C : db $3A,$50,$6D 
+db $24,$0D,$00 : dl EAWFlyingSkull-3 : db $42,$51,$00
+db $24,$15,$00 : dl EAWFlyingSkull-3 : db $42,$52,$00
+db $14,$11,$00 : dl EAWFlyingSkull-3 : db $42,$53,$00
+db $18,$0D,$02 : dl EAWWallSkull-3 : db $43,$54,$00
+db $13,$15,$00 : dl EAWWallSkull-3 : db $43,$55,$00
+db $FF,$CA
+ActorList_MapB5:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $06,$0E,$0F : dl $80D1B5 : db $00 
+db $08,$0E,$0F : dl $80D1B5 : db $00 
+db $06,$15,$11 : dl $80D16A : db $00 
+db $08,$15,$11 : dl $80D16A : db $00 
+db $07,$1E,$13 : dl $80D1B5 : db $00 
+db $07,$27,$15 : dl $80D16A : db $00 
+db $07,$4B,$11 : dl $80D428 : db $00 
+db $04,$45,$00 : dl $8BBB66 : db $3A,$60,$00 
+db $0B,$45,$00 : dl $8BBB66 : db $3A,$61,$00 
+db $03,$19,$02 : dl EAWWallSkull-3 : db $43,$62,$00
+db $0C,$19,$00 : dl EAWWallSkull-3 : db $43,$63,$00
+db $06,$34,$04 : dl $8BBFBB : db $43,$64,$00 
+db $04,$12,$00 : dl $8BB817 : db $45,$65,$00 
+db $0B,$12,$00 : dl $8BB817 : db $45,$66,$00 
+db $04,$2F,$00 : dl $8BB825 : db $45,$67,$00 
+db $0B,$2F,$00 : dl $8BB825 : db $45,$68,$00 
+db $03,$74,$00 : dl $8BB817 : db $45,$69,$00 
+db $0C,$74,$00 : dl $8BB817 : db $45,$6A,$00 
+db $FF,$CA
+ActorList_MapB6:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $42,$32,!DkSpWatGardenType : dl EDarkSpace-3 : db $00
+db $3A,$31,$00 : dl EAWZipFly-3 : db $4A,$70,$00
+db $4F,$34,$00 : dl EAWZipFly-3 : db $4A,$71,$00
+db $4C,$28,$00 : dl EAWZipFly-3 : db $4A,$72,$00
+db $38,$22,$00 : dl EAWZipFly-3 : db $4A,$73,$00
+db $34,$25,$00 : dl EAWZipFly-3 : db $4A,$74,$00
+db $1F,$26,$00 : dl EAWZipFly-3 : db $4A,$75,$00
+db $1F,$14,$00 : dl EAWZipFly-3 : db $4A,$76,$00
+db $41,$11,$00 : dl EAWZipFly-3 : db $4A,$77,$00
+db $22,$31,$00 : dl EAWBush-3 : db $49,$78,$00
+db $15,$2C,$00 : dl EAWBush-3 : db $49,$79,$00
+db $02,$1D,$00 : dl EAWBush-3 : db $49,$7A,$00
+db $02,$1A,$00 : dl EAWBush-3 : db $49,$7B,$00
+db $02,$17,$00 : dl EAWBush-3 : db $49,$7C,$00
+db $13,$16,$00 : dl EAWBush-3 : db $49,$7D,$00
+db $1E,$11,$00 : dl EAWBush-3 : db $49,$7E,$00
+db $14,$33,$00 : dl $8BB1B4 : db $49,$7F,$00 
+db $18,$23,$00 : dl $8BB1B4 : db $49,$80,$00 
+db $19,$19,$00 : dl $8BB1B4 : db $49,$81,$00 
+db $28,$1C,$00 : dl $8BB1B4 : db $49,$82,$00 
+db $27,$1B,$00 : dl $8BB1B4 : db $49,$83,$00 
+db $28,$1A,$00 : dl $8BB1B4 : db $49,$84,$00 
+db $29,$19,$00 : dl $8BB1B4 : db $49,$85,$00 
+db $3F,$1C,$00 : dl $8BB1B4 : db $49,$86,$00 
+db $3E,$1D,$00 : dl $8BB1B4 : db $49,$87,$00 
+db $41,$20,$00 : dl $8BB1B4 : db $49,$88,$00 
+db $5B,$1B,$00 : dl $8BB1B4 : db $49,$89,$00 
+db $5B,$1C,$00 : dl $8BB1B4 : db $49,$8A,$00 
+db $5B,$1D,$00 : dl $8BB1B4 : db $49,$8B,$00 
+db $5B,$1E,$00 : dl $8BB1B4 : db $49,$8C,$00 
+db $19,$0A,$00 : dl $8BB1B4 : db $49,$8D,$00 
+db $12,$03,$00 : dl $8BB1B4 : db $49,$8E,$00 
+db $5B,$26,$00 : dl EAWCyclops-3 : db $46,$8F,$00
+db $48,$2E,$00 : dl EAWCyclops-3 : db $46,$90,$00
+db $29,$2F,$00 : dl EAWCyclops-3 : db $46,$91,$00
+db $1E,$2E,$00 : dl EAWCyclops-3 : db $46,$92,$00
+db $05,$29,$00 : dl EAWCyclops-3 : db $46,$93,$00
+db $29,$1B,$00 : dl EAWCyclops-3 : db $46,$94,$00
+db $2F,$15,$00 : dl EAWCyclops-3 : db $46,$95,$00
+db $4E,$12,$00 : dl EAWCyclops-3 : db $46,$96,$00
+db $53,$28,$00 : dl $889FFC : db $00
+db $FF,$46,$80,$A2,$83,$84,$8D,$CA
+ActorList_MapB7:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $03,$10,$00 : dl EAWGolemBlocker-3 : db $45,$A0,$00
+db $29,$15,$00 : dl $8BB817 : db $45,$A1,$00 
+db $0B,$14,$00 : dl $8BB825 : db $45,$A2,$00 
+db $14,$05,$00 : dl $8BBB5C : db $3A,$A3,$00 
+db $1A,$05,$00 : dl $8BBB66 : db $3A,$A4,$00 
+db $54,$09,$04 : dl EAWWallSkull-3 : db $43,$A5,$00
+db $54,$15,$04 : dl EAWWallSkull-3 : db $43,$A6,$00
+db $49,$1B,$06 : dl EAWWallSkull-3 : db $43,$A7,$00
+db $51,$15,$06 : dl EAWWallSkull-3 : db $43,$A8,$00
+db $58,$15,$06 : dl EAWWallSkull-3 : db $43,$A9,$00
+db $4E,$0F,$06 : dl $8BBFBB : db $43,$AA,$00 
+db $4A,$15,$06 : dl $8BBFBB : db $43,$AB,$00 
+db $FF,$60,$80,$A3,$A3,$80,$86,$84,$AC,$6D,$AC,$48,$8D,$A3,$88,$83,$84,$CA,$CA
+ActorList_MapB8:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $08,$06,!DkSpWatQuakeType : dl EDarkSpace-3 : db $00
+db $05,$56,$00 : dl $8BB817 : db $45,$B0,$00 
+db $0A,$4D,$00 : dl $8BB817 : db $45,$B1,$00 
+db $05,$25,$00 : dl $8BBB5C : db $3A,$B2,$00 
+db $0A,$25,$00 : dl $8BBB5C : db $3A,$B3,$00 
+db $03,$3D,$02 : dl EAWWallSkull-3 : db $43,$B4,$00
+db $0C,$3D,$02 : dl EAWWallSkull-3 : db $43,$B5,$6F
+db $FF,$CA
+ActorList_MapB9:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$16,$00 : dl EAWFlyingSkull-3 : db $42,$B8,$00
+db $08,$4F,$00 : dl EAWFlyingSkull-3 : db $42,$B9,$00
+db $05,$17,$00 : dl EAWWallSkull-3 : db $43,$BA,$00
+db $0A,$17,$02 : dl EAWWallSkull-3 : db $43,$BB,$00
+db $04,$32,$00 : dl $8BB825 : db $45,$BC,$00 
+db $0B,$32,$00 : dl $8BB825 : db $45,$BD,$00 
+db $04,$45,$00 : dl $8BBB66 : db $3A,$BE,$00 
+db $0B,$45,$00 : dl $8BBB66 : db $3A,$BF,$00 
+db $FF,$CA
+ActorList_MapBA:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $3D,$0E,$00 : dl $8BB1B4 : db $49,$C0,$00 
+db $3D,$0E,$00 : dl $889F7C : db $00
+db $15,$3C,$00 : dl EAWCyclops-3 : db $46,$C1,$00
+db $0F,$43,$00 : dl EAWCyclops-3 : db $46,$C2,$00
+db $29,$3D,$00 : dl EAWCyclops-3 : db $46,$C3,$00
+db $2F,$43,$00 : dl EAWCyclops-3 : db $46,$C4,$00
+db $03,$42,$00 : dl $88A25E : db $00
+db $FF,$62,$8E,$80,$83,$AC,$A4,$8E,$AC,$D7,$1B,$47,$80,$8B,$8B,$CA
+ActorList_MapBB:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $2B,$1B,!DkSpWatDropType : dl EDarkSpace-3 : db $00
+db $00,$01,$00 : dl EAWDropDownListener-3 : db $00
+db $07,$11,$00 : dl EAWFlyingSkull-3 : db $42,$C8,$00
+db $0B,$11,$00 : dl EAWFlyingSkull-3 : db $42,$C9,$00
+db $08,$0D,$00 : dl EAWFlyingSkull-3 : db $42,$CA,$00
+db $27,$24,$00 : dl EAWFlyingSkull-3 : db $42,$CB,$00
+db $07,$07,$06 : dl EAWWallSkull-3 : db $43,$CC,$00
+db $21,$07,$06 : dl EAWWallSkull-3 : db $43,$CD,$00
+db $FF,$D7,$1B,$47,$80,$8B,$8B,$AC,$21,$45,$CA
+ActorList_MapBC:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl $889A1C : db $00 
+db $1D,$0B,$00 : dl $889F2C : db $00 
+db $0F,$1D,$00 : dl $889F2C : db $00 
+db $06,$24,$00 : dl $889F2C : db $00 
+db $27,$15,$00 : dl $889F2C : db $00 
+db $05,$14,$0F : dl $80D1B5 : db $00 
+db $05,$1B,$0F : dl $80D16A : db $00 
+db $20,$1C,$0F : dl $80D1B5 : db $00 
+db $22,$1C,$0F : dl $80D1B5 : db $00 
+db $20,$23,$0F : dl $80D16A : db $00 
+db $21,$23,$0F : dl $80D16A : db $00 
+db $09,$1F,$00 : dl EAWFlyingSkull-3 : db $42,$D0,$00
+db $27,$23,$00 : dl EAWFlyingSkull-3 : db $42,$D1,$00
+db $23,$07,$06 : dl EAWWallSkull-3 : db $43,$D2,$00
+db $29,$0C,$02 : dl EAWWallSkull-3 : db $43,$D3,$00
+db $24,$17,$00 : dl EAWWallSkull-3 : db $43,$D4,$00
+db $0C,$09,$00 : dl EAWWallSkull-3 : db $43,$D5,$00
+db $03,$10,$02 : dl EAWWallSkull-3 : db $43,$D6,$00
+db $FF,$D7,$1B,$47,$80,$8B,$8B,$AC,$22,$45,$CA,$CA
+ActorList_MapBD:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl EAWDropDownListener-3 : db $00
+db $08,$1A,$0D : dl $80D1B5 : db $00 
+db $0A,$1A,$0D : dl $80D1B5 : db $00 
+db $08,$20,$0D : dl $80D16A : db $00 
+db $09,$20,$0D : dl $80D16A : db $00 
+db $05,$22,$00 : dl EAWFlyingSkull-3 : db $42,$E0,$00
+db $10,$10,$00 : dl EAWFlyingSkull-3 : db $42,$E1,$00
+db $19,$0F,$00 : dl EAWFlyingSkull-3 : db $42,$E2,$00
+db $24,$1D,$06 : dl $8BBFBB : db $43,$E3,$00 
+db $26,$27,$04 : dl $8BBFBB : db $43,$E4,$00 
+db $21,$23,$04 : dl $8BBFBB : db $43,$E5,$00 
+db $12,$1A,$04 : dl $8BBFBB : db $43,$E6,$00 
+db $06,$1C,$04 : dl $8BBFBB : db $43,$E7,$00 
+db $06,$26,$00 : dl $8BB817 : db $45,$E8,$00 
+db $2B,$19,$00 : dl $8BB825 : db $45,$E9,$00 
+db $0E,$1C,$00 : dl $8BB825 : db $45,$EA,$00 
+db $FF,$D7,$1B,$47,$80,$8B,$8B,$AC,$23,$45,$CA
+ActorList_MapBE:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $20,$2B,$04 : dl $8BBFBB : db $43,$F0,$00 
+db $17,$2B,$04 : dl $8BBFBB : db $43,$F1,$00 
+db $0E,$2B,$04 : dl $8BBFBB : db $43,$F2,$00 
+db $25,$07,$04 : dl $8BBFBB : db $43,$F3,$00 
+db $2A,$07,$06 : dl $8BBFBB : db $43,$F4,$00 
+db $1E,$13,$00 : dl EAWFlyingSkull-3 : db $42,$F5,$00
+db $25,$2B,$00 : dl $8BB825 : db $45,$F6,$00 
+db $FF,$D7,$1B,$47,$80,$8B,$8B,$AC,$24,$45,$CA,$CA
+ActorList_MapBF:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $0F,$0B,$00 : dl $889AA3 : db $00
+if !KaraLocation == 4
+db $1a,$10,$00 : dl $86d14e : db $00
+endif
+db $FF,$CA
+ActorList_MapC0:
+db $00,$01,$00 : dl $83A1FA : db $00 
+db $FF,$CA
+ActorList_MapC3:
+db $05,$0A,$32 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $03,$02,$00 : dl $80E9EC : db $00 
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $02,$07,!DkSpDaoType : dl $88D69B : db $00 
+db $0E,$10,$30 : dl $88A7F6 : db $00 
+db $14,$07,$01 : dl EJeweler-3 : db $00
+db $27,$0F,$30 : dl $88A89B : db $00 
+db $29,$0A,$30 : dl $88AB23 : db $00 
+db $2A,$0A,$30 : dl $88AB88 : db $00 
+db $29,$0F,$30 : dl $88AADF : db $00 
+db $29,$07,$70 : dl $88ABF7 : db $00 
+db $2C,$09,$30 : dl $88AC23 : db $00 
+db $15,$1A,$00 : dl $88AC4F : db $00 
+db $1E,$06,$30 : dl $88ACC5 : db $00 
+db $29,$17,$30 : dl $88AD8F : db $00 
+db $05,$0C,$30 : dl $88B152 : db $00 
+db $18,$1B,$30 : dl $88B2ED : db $00 
+db $07,$1B,$30 : dl $88B334 : db $00 
+db $21,$08,$00 : dl $8980C3 : db $00 
+db $28,$05,$1B : dl ERedJewelSpot-3 : db $00
+db $FF,$D7,$08,$66,$88,$8B,$8B,$80,$86,$84,$AC,$43,$80,$8E,$CA
+ActorList_MapC4:
+db $07,$0B,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $FF,$CA
+ActorList_MapC5:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $08,$08,$00 : dl $88B3A2 : db $00 
+db $06,$09,$21 : dl $88B464 : db $00 
+db $06,$0B,$23 : dl $88B464 : db $00 
+db $09,$09,$05 : dl $88B464 : db $00 
+db $09,$0B,$07 : dl $88B464 : db $00 
+db $FF,$CA
+ActorList_MapC6:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$09,$00 : dl $88AE49 : db $00 
+db $FF,$CA
+ActorList_MapC7:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $06,$0A,$00 : dl $88A98E : db $00 
+db $07,$09,$00 : dl $88A9DD : db $00 
+db $08,$0A,$00 : dl $88AA9B : db $00 
+db $FF,$CA
+ActorList_MapC8:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$09,$00 : dl $87E37A : db $00
+db $FF,$CA
+ActorList_MapC9:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $07,$0A,$00 : dl EDaoJailInteriorNpc-3 : db $00
+db $FF,$CA
+ActorList_MapCC:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $00,$01,$00 : dl EWorldMapTransitionListener-3 : db $00
+db $3B,$3C,$00 : dl $88B6A2 : db $00 
+db $1C,$1E,$00 : dl $8BC65F : db $4F,$01,$00 
+db $23,$1E,$00 : dl $8BC65F : db $4F,$02,$73 
+db $27,$1B,$E7 : dl $88B668 : db $00 
+db $1C,$38,!DkSpPyramidBotType : dl EDarkSpace-3 : db $00
+db $1F,$13,$00 : dl $88CD6C : db $00 
+db $36,$2A,$1D : dl ERedJewelSpot-3 : db $00
+db $FF,$60,$A9,$A2,$80,$8C,$88,$83,$CA
+ActorList_MapCD:
+db $05,$0A,$32 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $02,$0B,$00 : dl $88B74D : db $00 
+db $07,$0E,$00 : dl $88BD30 : db $00 
+db $04,$0A,$00 : dl $88C1FD : db $00 
+db $00,$01,$00 : dl $88CB9A : db $00 
+db $FF,$CA
+ActorList_MapCE:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $31,$0E,$03 : dl ERampLauncherToWest-3 : db $00
+db $24,$0E,$03 : dl ERampLauncherToEast-3 : db $00
+db $29,$3C,$00 : dl $8BC39D : db $4E,$03,$00 
+db $04,$14,$00 : dl $8BC5A3 : db $4F,$04,$00 
+db $0B,$14,$00 : dl $8BC5A3 : db $4F,$05,$00 
+db $1D,$2E,$00 : dl $8BC5A3 : db $4F,$06,$00 
+db $49,$2C,$00 : dl $8BC5A3 : db $4F,$07,$00 
+db $48,$2D,$00 : dl $8BC5A3 : db $4F,$08,$00 
+db $43,$11,$00 : dl $8BC5FC : db $4F,$09,$00 
+db $1A,$3C,$00 : dl $8BC5FC : db $4F,$0A,$00 
+db $22,$2F,$00 : dl $8BC5FC : db $4F,$0B,$00 
+db $0C,$29,$00 : dl $8BC5FC : db $4F,$0C,$00 
+db $03,$3D,$00 : dl $8BC5FC : db $4F,$0D,$00 
+db $10,$3D,$00 : dl $8BC5FC : db $4F,$0E,$00 
+db $FF,$CA
+ActorList_MapCF:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $31,$3C,$03 : dl ERampLauncherToWest-3 : db $00
+db $24,$3C,$03 : dl ERampLauncherToEast-3 : db $00
+db $04,$3C,$00 : dl $88B6A2 : db $00 
+db $42,$13,$00 : dl $8BC5FC : db $4F,$10,$00 
+db $07,$15,$00 : dl $8BC5FC : db $4F,$11,$00 
+db $55,$25,$00 : dl $8BC5FC : db $4F,$12,$00 
+db $5C,$24,$00 : dl $8BC5FC : db $4F,$13,$00 
+db $0D,$15,$00 : dl $8BC5A3 : db $4F,$14,$00 
+db $58,$24,$00 : dl $8BC5A3 : db $4F,$15,$00 
+db $2F,$14,$00 : dl $8BC65F : db $4F,$16,$00 
+db $30,$14,$00 : dl $8BC65F : db $4F,$17,$00 
+db $31,$14,$00 : dl $8BC65F : db $4F,$18,$00 
+db $2F,$15,$00 : dl $8BC65F : db $4F,$19,$00 
+db $30,$15,$00 : dl $8BC65F : db $4F,$1A,$00 
+db $31,$15,$00 : dl $8BC65F : db $4F,$1B,$00 
+db $33,$27,$00 : dl $8BC39D : db $4E,$1C,$00 
+db $48,$2F,$00 : dl $8BC39D : db $4E,$1D,$00 
+db $FF,$CA
+ActorList_MapD0:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $26,$15,$01 : dl $88B592 : db $00 
+db $2B,$15,$00 : dl $8BC65F : db $4F,$20,$00 
+db $1E,$15,$00 : dl $8BC65F : db $4F,$21,$00 
+db $27,$12,$00 : dl $8BC5FC : db $4F,$22,$00 
+db $26,$10,$00 : dl $8BC5FC : db $4F,$23,$00 
+db $4B,$4D,$00 : dl $8BC5FC : db $4F,$24,$00 
+db $45,$4D,$00 : dl $8BC5FC : db $4F,$25,$00 
+db $38,$4C,$00 : dl $8BC5FC : db $4F,$26,$00 
+db $33,$4D,$00 : dl $8BC39D : db $4E,$27,$00 
+db $FF,$CA
+ActorList_MapD1:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $36,$19,$03 : dl $88B592 : db $00 
+db $32,$49,$00 : dl $88B6A2 : db $00 
+db $35,$19,$00 : dl $8BC65F : db $4F,$30,$00 
+db $36,$19,$00 : dl $8BC65F : db $4F,$31,$00 
+db $37,$19,$00 : dl $8BC65F : db $4F,$32,$00 
+db $38,$19,$00 : dl $8BC65F : db $4F,$33,$00 
+db $1E,$3A,$00 : dl $8BC65F : db $4F,$34,$00 
+db $1F,$3A,$00 : dl $8BC65F : db $4F,$35,$00 
+db $20,$3A,$00 : dl $8BC65F : db $4F,$36,$00 
+db $21,$3A,$00 : dl $8BC65F : db $4F,$37,$00 
+db $22,$3A,$00 : dl $8BC65F : db $4F,$38,$00 
+db $23,$3A,$00 : dl $8BC65F : db $4F,$39,$00 
+db $28,$16,$00 : dl $8BC5A3 : db $4F,$3A,$00 
+db $07,$2A,$00 : dl $8BC5A3 : db $4F,$3B,$00 
+db $05,$4A,$00 : dl $8BC5A3 : db $4F,$3C,$00 
+db $25,$17,$00 : dl $8BC5FC : db $4F,$3D,$00 
+db $0C,$2B,$00 : dl $8BC5FC : db $4F,$3E,$00 
+db $03,$4C,$00 : dl $8BC5FC : db $4F,$3F,$00 
+db $06,$2A,$00 : dl $8BC39D : db $4E,$40,$00 
+db $20,$5B,$00 : dl $8BC39D : db $4E,$41,$00 
+db $27,$5C,$00 : dl $8BC39D : db $4E,$42,$00 
+db $FF,$CA
+ActorList_MapD2:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $26,$15,$00 : dl $8BC184 : db $4C,$48,$00 
+db $2A,$15,$00 : dl $8BC184 : db $4C,$49,$00 
+db $2E,$15,$00 : dl $8BC184 : db $4C,$4A,$00 
+db $4E,$0F,$00 : dl $8BC184 : db $4C,$4B,$00 
+db $52,$0F,$00 : dl $8BC184 : db $4C,$4C,$00 
+db $56,$0F,$00 : dl $8BC184 : db $4C,$4D,$00 
+db $35,$26,$00 : dl $8BC184 : db $4C,$4E,$00 
+db $39,$26,$00 : dl $8BC184 : db $4C,$4F,$00 
+db $11,$28,$00 : dl $8BC184 : db $4C,$50,$00 
+db $15,$28,$00 : dl $8BC184 : db $4C,$51,$00 
+db $19,$28,$00 : dl $8BC184 : db $4C,$52,$00 
+db $30,$17,$00 : dl $8BC5A3 : db $4F,$53,$00 
+db $58,$11,$00 : dl $8BC5A3 : db $4F,$54,$00 
+db $50,$10,$00 : dl $8BC5FC : db $4F,$55,$00 
+db $54,$10,$00 : dl $8BC5FC : db $4F,$56,$00 
+db $3B,$27,$00 : dl $8BC5FC : db $4F,$57,$00 
+db $37,$27,$00 : dl $8BC5FC : db $4F,$58,$00 
+db $33,$27,$00 : dl $8BC5FC : db $4F,$59,$00 
+db $5D,$39,$00 : dl $8BC798 : db $51,$5A,$00 
+db $1B,$3B,$00 : dl $8BC798 : db $51,$5B,$00 
+db $07,$3B,$00 : dl $8BC798 : db $51,$5C,$00 
+db $10,$3B,$00 : dl $8BC39D : db $4E,$5D,$00 
+db $FF,$CA
+ActorList_MapD3:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $79,$25,$00 : dl $88B6A2 : db $00 
+db $24,$13,$00 : dl $8BC184 : db $4C,$60,$00 
+db $28,$13,$00 : dl $8BC184 : db $4C,$61,$00 
+db $2C,$13,$00 : dl $8BC184 : db $4C,$62,$00 
+db $4E,$0F,$00 : dl $8BC184 : db $4C,$63,$00 
+db $52,$0F,$00 : dl $8BC184 : db $4C,$64,$00 
+db $66,$0D,$00 : dl $8BC184 : db $4C,$65,$00 
+db $6A,$0D,$00 : dl $8BC184 : db $4C,$66,$00 
+db $72,$0D,$00 : dl $8BC184 : db $4C,$67,$00 
+db $76,$0D,$00 : dl $8BC184 : db $4C,$68,$00 
+db $2A,$14,$00 : dl $8BC5A3 : db $4F,$69,$00 
+db $2F,$14,$00 : dl $8BC5A3 : db $4F,$6A,$00 
+db $6D,$0E,$00 : dl $8BC5A3 : db $4F,$6B,$00 
+db $76,$0F,$00 : dl $8BC5A3 : db $4F,$6C,$00 
+db $6D,$0E,$00 : dl $8BC5FC : db $4F,$6D,$00 
+db $44,$27,$00 : dl $8BC798 : db $51,$6E,$00 
+db $53,$12,$00 : dl $8BC39D : db $4E,$6F,$00 
+db $44,$28,$00 : dl $8BC39D : db $4E,$70,$00 
+db $FF,$CA
+ActorList_MapD4:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $22,$1B,$E5 : dl $88C6EA : db $00 
+db $24,$1B,$E5 : dl $88C6EA : db $00 
+db $22,$1D,$E5 : dl $88C6EA : db $00 
+db $24,$1D,$E5 : dl $88C6EA : db $00 
+db $0C,$4B,$E7 : dl $88C6EA : db $00 
+db $0E,$4B,$E7 : dl $88C6EA : db $00 
+db $0C,$4D,$E7 : dl $88C6EA : db $00 
+db $0E,$4D,$E7 : dl $88C6EA : db $00 
+db $21,$1B,$00 : dl $8BC5A3 : db $4F,$78,$00 
+db $21,$1D,$00 : dl $8BC5A3 : db $4F,$79,$00 
+db $4B,$0A,$00 : dl $8BC5A3 : db $4F,$7A,$00 
+db $1B,$2C,$00 : dl $8BC5A3 : db $4F,$7B,$00 
+db $0F,$1A,$00 : dl $8BC5FC : db $4F,$7C,$00 
+db $11,$1D,$00 : dl $8BC5FC : db $4F,$7D,$00 
+db $13,$1A,$00 : dl $8BC5FC : db $4F,$7E,$00 
+db $15,$1D,$00 : dl $8BC5FC : db $4F,$7F,$00 
+db $18,$2C,$00 : dl $8BC5FC : db $4F,$80,$00 
+db $31,$34,$00 : dl $8BC5FC : db $4F,$81,$00 
+db $1B,$0C,$00 : dl $8BC39D : db $4E,$82,$00 
+db $32,$0C,$00 : dl $8BC39D : db $4E,$83,$00 
+db $2C,$34,$00 : dl $8BC39D : db $4E,$84,$00 
+db $4D,$2C,$00 : dl $8BC798 : db $51,$85,$00 
+db $0B,$4B,$00 : dl $8BC798 : db $51,$86,$00 
+db $0B,$4D,$00 : dl $8BC798 : db $51,$87,$00 
+db $42,$4C,$00 : dl $88B6A2 : db $00 
+db $FF,$CA
+ActorList_MapD5:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $04,$4C,$00 : dl $88B6A2 : db $00 
+db $33,$0B,$00 : dl $8BC5FC : db $4F,$90,$00 
+db $42,$0B,$00 : dl $8BC5A3 : db $4F,$91,$00 
+db $1B,$10,$00 : dl $8BC1A7 : db $4C,$92,$00 
+db $1D,$10,$00 : dl $8BC1A7 : db $4C,$93,$00 
+db $32,$0A,$00 : dl $8BC184 : db $4C,$94,$00 
+db $45,$0A,$00 : dl $8BC184 : db $4C,$95,$00 
+db $47,$0A,$00 : dl $8BC184 : db $4C,$96,$00 
+db $0A,$1A,$00 : dl $8BC184 : db $4C,$97,$00 
+db $08,$1A,$00 : dl $8BC184 : db $4C,$98,$00 
+db $06,$1A,$00 : dl $8BC184 : db $4C,$99,$00 
+db $23,$26,$00 : dl $8BC184 : db $4C,$9A,$00 
+db $21,$26,$00 : dl $8BC184 : db $4C,$9B,$00 
+db $1F,$26,$00 : dl $8BC184 : db $4C,$9C,$00 
+db $1D,$26,$00 : dl $8BC184 : db $4C,$9D,$00 
+db $14,$1D,$00 : dl $8BC39D : db $4E,$9E,$00 
+db $30,$34,$00 : dl $8BC39D : db $4E,$9F,$00 
+db $0C,$4C,$00 : dl $8BC39D : db $4E,$A0,$00 
+db $0C,$4D,$00 : dl $8BC39D : db $4E,$A1,$00 
+db $3D,$45,$00 : dl $8BC798 : db $51,$A2,$00 
+db $4D,$4B,$00 : dl $8BC798 : db $51,$A3,$00 
+db $FF,$CA
+ActorList_MapD6:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl $80EAC3 : db $00 
+db $3B,$0C,$03 : dl ERampLauncherToWest-3 : db $00
+db $32,$0C,$03 : dl ERampLauncherToEast-3 : db $00
+db $3A,$2C,$00 : dl $88C2DA : db $00 
+db $3A,$4C,$00 : dl $88C3FD : db $00 
+db $33,$4D,$00 : dl $88C3FD : db $00 
+db $11,$0C,$00 : dl $8BC65F : db $4F,$A8,$00 
+db $15,$0D,$00 : dl $8BC65F : db $4F,$A9,$00 
+db $19,$0C,$00 : dl $8BC65F : db $4F,$AA,$00 
+db $1D,$0D,$00 : dl $8BC65F : db $4F,$AB,$00 
+db $03,$2B,$00 : dl $8BC5A3 : db $4F,$AC,$00 
+db $29,$0A,$00 : dl $8BC5FC : db $4F,$AD,$00 
+db $3B,$2C,$00 : dl $8BC5FC : db $4F,$AE,$00 
+db $3E,$4C,$00 : dl $8BC5FC : db $4F,$AF,$00 
+db $1C,$45,$00 : dl $8BC5FC : db $4F,$B0,$00 
+db $28,$0A,$00 : dl $8BC39D : db $4E,$B1,$00 
+db $0D,$2A,$00 : dl $8BC39D : db $4E,$B2,$00 
+db $1E,$46,$00 : dl $8BC39D : db $4E,$B3,$00 
+db $4C,$0B,$00 : dl $8BC798 : db $51,$B4,$00 
+db $29,$3A,$00 : dl $8BC798 : db $51,$B5,$00 
+db $29,$3B,$00 : dl $8BC798 : db $51,$B6,$00 
+db $29,$3C,$00 : dl $8BC798 : db $51,$B7,$00 
+db $29,$3D,$00 : dl $8BC798 : db $51,$B8,$00 
+db $FF,$CA
+ActorList_MapD7:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl $80EAC3 : db $00 
+db $3B,$4C,$00 : dl $88B6A2 : db $00 
+db $11,$1C,$03 : dl $88C4EA : db $00 
+db $37,$1C,$05 : dl $88C4EA : db $00 
+db $08,$2C,$03 : dl $88C4EA : db $00 
+db $37,$3C,$07 : dl $88C57F : db $00 
+db $08,$4C,$0B : dl $88C57F : db $00 
+db $34,$5D,$03 : dl $88C4EA : db $00 
+db $0B,$5D,$07 : dl $88C4EA : db $00 
+db $36,$1A,$00 : dl $8BC5FC : db $4F,$C0,$00 
+db $38,$1D,$00 : dl $8BC5FC : db $4F,$C1,$00 
+db $07,$2C,$00 : dl $8BC65F : db $4F,$C2,$00 
+db $09,$2C,$00 : dl $8BC65F : db $4F,$C3,$00 
+db $08,$2B,$00 : dl $8BC65F : db $4F,$C4,$00 
+db $08,$2D,$00 : dl $8BC65F : db $4F,$C5,$00 
+db $0C,$5C,$00 : dl $8BC65F : db $4F,$C6,$00 
+db $0D,$5D,$00 : dl $8BC65F : db $4F,$C7,$00 
+db $0E,$5C,$00 : dl $8BC65F : db $4F,$C8,$00 
+db $0F,$5D,$00 : dl $8BC65F : db $4F,$C9,$00 
+db $10,$5C,$00 : dl $8BC65F : db $4F,$CA,$00 
+db $11,$5D,$00 : dl $8BC65F : db $4F,$CB,$00 
+db $08,$4C,$00 : dl $8BC65F : db $4F,$CC,$00 
+db $33,$3A,$00 : dl $8BC798 : db $51,$CD,$00 
+db $3B,$3A,$00 : dl $8BC798 : db $51,$CE,$00 
+db $34,$5D,$00 : dl $8BC798 : db $51,$CF,$00 
+db $FF,$CA
+ActorList_MapD8:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $44,$1C,$00 : dl $88B6A2 : db $00 
+db $40,$29,$00 : dl $8BC184 : db $4C,$D0,$00 
+db $3C,$29,$00 : dl $8BC184 : db $4C,$D1,$00 
+db $34,$19,$00 : dl $8BC184 : db $4C,$D2,$00 
+db $30,$19,$00 : dl $8BC184 : db $4C,$D3,$00 
+db $2C,$19,$00 : dl $8BC184 : db $4C,$D4,$00 
+db $25,$49,$00 : dl $8BC184 : db $4C,$D5,$00 
+db $21,$49,$00 : dl $8BC184 : db $4C,$D6,$00 
+db $1D,$49,$00 : dl $8BC184 : db $4C,$D7,$00 
+db $16,$39,$00 : dl $8BC184 : db $4C,$D8,$00 
+db $11,$39,$00 : dl $8BC184 : db $4C,$D9,$00 
+db $0C,$39,$00 : dl $8BC184 : db $4C,$DA,$00 
+db $46,$19,$00 : dl $8BC184 : db $4C,$DB,$00 
+db $37,$0C,$00 : dl $8BC5A3 : db $4F,$DC,$00 
+db $37,$0D,$00 : dl $8BC5A3 : db $4F,$DD,$00 
+db $30,$1D,$00 : dl $8BC5A3 : db $4F,$DE,$00 
+db $2C,$1B,$00 : dl $8BC5A3 : db $4F,$DF,$00 
+db $0F,$25,$00 : dl $8BC5FC : db $4F,$E0,$00 
+db $10,$26,$00 : dl $8BC5FC : db $4F,$E1,$00 
+db $11,$25,$00 : dl $8BC5FC : db $4F,$E2,$00 
+db $12,$26,$00 : dl $8BC5FC : db $4F,$E3,$00 
+db $13,$25,$00 : dl $8BC5FC : db $4F,$E4,$00 
+db $14,$26,$00 : dl $8BC5FC : db $4F,$E5,$00 
+db $15,$25,$00 : dl $8BC5FC : db $4F,$E6,$00 
+db $3E,$2A,$00 : dl $8BC5FC : db $4F,$E7,$00 
+db $41,$3A,$00 : dl $8BC1A7 : db $4C,$E8,$00 
+db $40,$3D,$00 : dl $8BC1A7 : db $4C,$E9,$00 
+db $4C,$3A,$00 : dl $8BC1A7 : db $4C,$EA,$00 
+db $4D,$3D,$00 : dl $8BC1A7 : db $4C,$EB,$00 
+db $22,$0D,$00 : dl $8BC39D : db $4E,$EC,$00 
+db $0E,$3B,$00 : dl $8BC39D : db $4E,$ED,$00 
+db $06,$3B,$00 : dl $8BC39D : db $4E,$EE,$00 
+db $0C,$4A,$00 : dl $8BC798 : db $51,$EF,$00 
+db $0D,$4D,$00 : dl $8BC798 : db $51,$F0,$00 
+db $03,$4A,$00 : dl $8BC798 : db $51,$F1,$00 
+db $02,$4D,$00 : dl $8BC798 : db $51,$F2,$00 
+db $FF,$CA
+ActorList_MapD9:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl $80EAC3 : db $00 
+db $00,$01,$00 : dl $88C5CA : db $00 
+db $33,$1A,$00 : dl $8BC65F : db $4F,$F3,$00 
+db $4A,$0B,$00 : dl $8BC65F : db $4F,$F4,$00 
+db $4B,$0B,$00 : dl $8BC65F : db $4F,$F4,$00 
+db $4A,$0C,$00 : dl $8BC65F : db $4F,$F4,$00 
+db $4B,$0C,$00 : dl $8BC65F : db $4F,$F4,$00 
+db $2B,$1A,$00 : dl $8BC5A3 : db $4F,$F8,$00 
+db $39,$1A,$00 : dl $8BC5A3 : db $4F,$F8,$00 
+db $4C,$2A,$00 : dl $8BC5FC : db $4F,$FA,$00 
+db $49,$2B,$00 : dl $8BC5FC : db $4F,$FA,$00 
+db $50,$2A,$00 : dl $8BC5FC : db $4F,$FA,$00 
+db $52,$2B,$00 : dl $8BC5FC : db $4F,$FA,$00 
+db $45,$0C,$00 : dl $8BC5FC : db $4F,$FA,$00 
+db $4E,$2A,$00 : dl $8BC798 : db $51,$FB,$00 
+db $4E,$2B,$00 : dl $8BC798 : db $51,$FB,$00 
+db $4E,$2C,$00 : dl $8BC798 : db $51,$FB,$00 
+db $4E,$2D,$00 : dl $8BC798 : db $51,$FB,$00 
+db $66,$1A,$00 : dl $8BC39D : db $4E,$FC,$00 
+db $73,$2A,$00 : dl $8BC1A7 : db $4C,$FD,$00 
+db $72,$2B,$00 : dl $8BC1A7 : db $4C,$FD,$00 
+db $72,$2D,$00 : dl $8BC1A7 : db $4C,$FD,$00 
+db $7C,$2A,$00 : dl $8BC1A7 : db $4C,$FD,$00 
+db $7D,$2B,$00 : dl $8BC1A7 : db $4C,$FD,$00 
+db $7D,$2D,$00 : dl $8BC1A7 : db $4C,$FD,$00 
+db $FF,$CA
+ActorList_MapDA:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$07,$00 : dl $88C77F : db $00 
+db $17,$07,$00 : dl $88C84C : db $00 
+db $27,$07,$00 : dl $88C8F4 : db $00 
+db $37,$07,$00 : dl $88C99C : db $00 
+db $47,$07,$00 : dl $88CA44 : db $00 
+db $57,$07,$00 : dl $88CAEC : db $00 
+db $FF,$CA
+ActorList_MapDB:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl $80EAC3 : db $00 
+db $00,$01,$00 : dl $88C5CA : db $00 
+db $7C,$0C,$00 : dl $88B6A2 : db $00 
+db $4E,$0D,$00 : dl $8BC798 : db $51,$FE,$00 
+db $4E,$0E,$00 : dl $8BC798 : db $51,$FE,$00 
+db $68,$0E,$00 : dl $8BC5A3 : db $4F,$BE,$00 
+db $6C,$0F,$00 : dl $8BC5A3 : db $4F,$BF,$00 
+db $FF,$CA
+ActorList_MapDD:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $04,$0C,$30 : dl $8BADBE : db $00 
+db $04,$1B,$30 : dl $8BADC7 : db $00 
+db $1B,$0C,$30 : dl $8BADBE : db $00 
+db $1B,$1B,$30 : dl $8BADCC : db $00 
+db $0F,$0C,$30 : dl EMummyQueen : db $50,$00,$00
+db $00,$01,$01 : dl $8BA5DF : db $00 
+db $00,$01,$00 : dl $88CE12 : db $00 
+db $00,$01,$01 : dl EBossClearRewarder-3 : db $00
+db $FF,$CA
+ActorList_MapDC:
+db $00,$01,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl $80E8D7 : db $00 
+db $08,$0B,$00 : dl $898146 : db $00 
+db $FF,$CA
+ActorList_MapDE:
+db $05,$0A,$32 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $17,$0B,$00 : dl $898808 : db $00 
+db $00,$01,$00 : dl $898620 : db $00 
+db $00,$01,$00 : dl $8998B3 : db $00 
+db $FF,$CA
+ActorList_MapDF:
+db $07,$0E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $898620 : db $00 
+db $00,$01,$00 : dl $899972 : db $00 
+db $00,$01,$00 : dl $8998B3 : db $00 
+db $4B,$0A,$01 : dl $899B2E : db $00 
+db $2B,$0A,$05 : dl $899B2E : db $00 
+db $28,$0A,$07 : dl $899B2E : db $00 
+db $3F,$1A,$1F : dl ERedJewelSpot-3 : db $00
+db $79,$1A,!DkSpBabelBotType : dl $88D6A9 : db $00    ; Added for IOGR.
+db $FF,$CA
+ActorList_MapE0:
+db $07,$0E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $898718 : db $00
+db $00,$01,$00 : dl $898748 : db $00
+db $00,$01,$00 : dl $898778 : db $00
+db $00,$01,$00 : dl $8987A8 : db $00
+db $00,$01,$00 : dl $898620 : db $00
+db $27,$1A,$03 : dl $899B2E : db $00
+db $FF,$CA
+ActorList_MapE1:
+db $07,$0E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $898620 : db $00
+db $00,$01,$00 : dl $899586 : db $00
+db $15,$6E,$00 : dl $899634 : db $00
+db $FF,$CA
+ActorList_MapE2:
+db $07,$0E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $18,$70,$00 : dl $8997CC : db $00
+db $FF,$CA
+ActorList_MapE3:
+db $07,$0E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$11,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $00,$01,$00 : dl $8987D8 : db $00
+db $00,$01,$00 : dl $898620 : db $00
+db $09,$1A,$00 : dl $898515 : db $00    ; Added for IOGR.
+db $2B,$1A,!DkSpBabelTopType : dl $88D6A9 : db $00
+db $28,$1A,$00 : dl $898000 : db $00
+db $17,$3A,$03 : dl $899B2E : db $00
+db $FF,$CA
+ActorList_MapE4:
+db $07,$0E,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$41,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $10,$12,$00 : dl $898F92 : db $00 
+db $11,$15,$00 : dl $898D18 : db $00 
+db $FF,$CA
+ActorList_MapE5:
+db $09,$0B,$32 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $07,$0B,$30 : dl $8BD306 : db $00 
+db $FF,$CA
+ActorList_MapF7:
+db $12,$01,$00 : dl $89DFF8 : db $00 
+db $12,$01,$00 : dl $89E26C : db $00 
+db $12,$01,$00 : dl $89E3EB : db $00 
+db $12,$01,$00 : dl $89E4DD : db $00 
+db $12,$01,$00 : dl $89E591 : db $00 
+db $12,$01,$00 : dl $89E607 : db $00 
+db $00,$01,$00 : dl $89D64D : db $00 
+db $FF,$CA
+ActorList_MapE6:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $01,$82,$00 : dl $80E9EC : db $00 
+db $00,$01,$00 : dl EGaia-3 : db $00
+db $FF,$D6,$0C,$63,$A0,$80,$82,$84,$CA
+ActorList_MapE7:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$01,$00 : dl $8CEDC5 : db $00 
+db $FF,$CA
+ActorList_MapE8:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$01,$00 : dl EComet-3 : db $54,$00,$00
+db $FF,$CA
+ActorList_MapE9:
+db $33,$3E,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $81,$02,$00 : dl $80E9EC : db $00 
+db $28,$2E,$17 : dl $80D16A : db $00 
+db $28,$23,$17 : dl $80D1B5 : db $00 
+db $00,$01,$00 : dl EJMansionEntranceListener-3 : db $00
+db $25,$3A,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $1D,$3A,$00 : dl EMineLizard-3 : db $61,$00,$9A
+db $18,$3A,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $10,$3A,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $02,$32,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $0B,$11,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $03,$0E,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $16,$10,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $2F,$27,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $2A,$30,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $26,$0F,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $2A,$06,$00 : dl EMineLizard-3 : db $61,$00,$00
+db $14,$3A,$00 : dl EMineEyeStalker-3 : db $62,$00,$9B
+db $0B,$25,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $03,$21,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $08,$1F,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $0C,$1A,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $09,$0D,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $0C,$0D,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $16,$13,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $14,$19,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $17,$19,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $13,$2F,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $32,$2F,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $2D,$16,$00 : dl EMineEyeStalker-3 : db $62,$00,$00
+db $04,$32,$00 : dl $8AB0D8 : db $62,$00,$00 
+db $04,$31,$00 : dl $8AB0D8 : db $62,$00,$00 
+db $37,$18,$00 : dl $8AB0D8 : db $62,$00,$00 
+db $38,$18,$00 : dl $8AB0D8 : db $62,$00,$00 
+db $1B,$0D,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $1B,$12,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $17,$23,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $21,$23,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $17,$2C,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $21,$2C,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $25,$1D,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $24,$13,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $29,$13,$00 : dl EMineWorm-3 : db $63,$00,$00
+db $FF,$CA
+ActorList_MapEA:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $83,$04,$00 : dl $80E9EC : db $00 
+db $00,$01,$00 : dl $8ADC55 : db $00 
+db $08,$07,$00 : dl $88F709 : db $5F,$00,$00 
+db $FF,$CA
+ActorList_MapEB:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $03,$86,$00 : dl $80E9EC : db $00 
+db $FF,$D6,$0C,$63,$A0,$80,$82,$84,$CA
+ActorList_MapEC:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $01,$82,$00 : dl $80E9EC : db $00 
+db $FF,$D6,$0C,$63,$A0,$80,$82,$84,$CA
+ActorList_MapED:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $01,$82,$00 : dl $80E9EC : db $00 
+db $FF,$D6,$0C,$63,$A0,$80,$82,$84,$CA
+ActorList_MapEE:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $01,$82,$00 : dl $80E9EC : db $00 
+db $FF,$D6,$0C,$63,$A0,$80,$82,$84,$CA
+ActorList_MapEF:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $01,$82,$00 : dl $80E9EC : db $00 
+db $FF,$D6,$0C,$63,$A0,$80,$82,$84,$CA
+ActorList_MapF0:
+db $00,$01,$00 : dl $89DB67 : db $00 
+db $FF,$CA
+ActorList_MapF2:
+db $05,$0A,$30 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $11,$82,$00 : dl $80E9EC : db $00 
+db $07,$09,$00 : dl EBabelCastoth-3 : db $5A,$00,$00
+db $FF,$CA
+ActorList_MapF3:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $06,$86,$00 : dl $80E9EC : db $00 
+db $10,$05,$30 : dl EBabelViper-3 : db $5B,$00,$00
+db $FF,$CA
+ActorList_MapF4:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $21,$21,$00 : dl EParallax_ScaleEffect-3 : db $00
+db $0A,$09,$30 : dl EBabelVampireJack-3 : db $5C,$00,$00
+db $05,$09,$30 : dl EBabelVampireSyl-3 : db $5C,$00,$00
+db $FF,$CA
+ActorList_MapF5:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $06,$81,$00 : dl $80E9EC : db $00 
+db $27,$30,$00 : dl EFanger_Babel-3 : db $5D,$00,$00
+db $FF,$CA
+ActorList_MapF6:
+db $05,$0A,$00 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $81,$02,$00 : dl $80E9EC : db $00 
+db $04,$0C,$30 : dl $8BADBE : db $00 
+db $04,$1B,$30 : dl $8BADC7 : db $00 
+db $1B,$0C,$30 : dl $8BADBE : db $00 
+db $1B,$1B,$30 : dl $8BADCC : db $00 
+db $0F,$0C,$30 : dl EBabelMummyQueen : db $5E,$00,$00
+db $00,$01,$01 : dl $8BA5DF : db $00 
+db $00,$01,$01 : dl $80c2bb : db $00
+db $FF,$CA
+ActorList_MapF1:
+db $05,$0A,$02 : dl EPlayer-3 : db $00
+db $00,$00,$00 : dl ECameraEtc-3 : db $00
+db $81,$02,$00 : dl $80E9EC : db $00 
+db $FF,$43,$84,$8C,$8E,$8D,$AC,$60,$80,$8B,$80,$82,$84,$CA
+ActorList_MapFA:
+db $00,$01,$00 : dl EMainMenu-3 : db $00
+db $FF,$CA
+ActorList_MapFB:
+db $07,$08,$01 : dl $8BC8BA : db $00 
+db $FF,$CA
+ActorList_MapFC:
+db $00,$01,$00 : dl $8BC924 : db $00
+db $00,$01,$00 : dl $8BC9AE : db $00 
+db $FF,$CA
+ActorList_MapFD:
+db $02,$03,$21 : dl $80CD59 : db $00 
+db $01,$05,$03 : dl $80CD59 : db $00 
+db $02,$08,$05 : dl $80CD59 : db $00 
+db $0C,$03,$27 : dl $80CD59 : db $00 
+db $0D,$05,$09 : dl $80CD59 : db $00 
+db $0C,$08,$0B : dl $80CD59 : db $00 
+db $FF,$CA
+ActorList_MapFE:
+db $00,$01,$00 : dl EWorldMapManager-3 : db $00
+db $FF,$CA
+ActorList_MapFF:
+db $00,$01,$00 : dl EInventoryScreenManager-3 : db $00
+db $02,$03,$21 : dl $80CF29 : db $00 
+db $01,$05,$03 : dl $80CF29 : db $00 
+db $02,$08,$05 : dl $80CF29 : db $00 
+db $0C,$03,$27 : dl $80CF29 : db $00 
+db $0D,$05,$09 : dl $80CF29 : db $00 
+db $0C,$08,$0B : dl $80CF29 : db $00 
+db $FF,$CA
+}
+
+
+warnpc $8CE5E5
+
+

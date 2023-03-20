@@ -1,0 +1,920 @@
+arch 65816
+hirom
+
+
+
+
+LR_SecOnAnyFlagA:
+jsl $80b4ba    ; i.e. 3+LR_SecOnFlagA
+rtl
+LR_SetAnyFlagA:
+jsl $80b4c1    ; i.e. 3+LR_SetFlagA
+rtl
+LR_ClearAnyFlagA:
+jsl $80b4c8    ; i.e. 3+LR_ClearFlagA
+rtl
+
+; Flags $022f - $0247 (chest block) and $0290 - $02bf (RJ block) are free in IOGR.
+; Monster item flags are mapped onto those.
+SR_MapMonsterItemFlagA:
+dec : clc : adc #$022f : cmp #$0248 : bcc +
+  clc : adc #$0048
++:
+rts
+LR_SecOnMonsterItemFlagA:
+jsr SR_MapMonsterItemFlagA
+jsl $80b4ba    ; i.e. 3+LR_SecOnFlagA
+rtl
+LR_SetMonsterItemFlagA:
+jsr SR_MapMonsterItemFlagA
+jsl $80b4c1    ; i.e. 3+LR_SetFlagA
+rtl
+LR_ClearMonsterItemFlagA:
+jsr SR_MapMonsterItemFlagA
+jsl $80b4c8    ; i.e. 3+LR_ClearFlagA
+rtl
+
+
+
+LR_GiveAnyItemA16OrSec:
+pha
+and #$ff00 : cmp #$1000 : bne .ItemIsNotUnlockedDoor
+  jmp .GiveUnlockedDoor
+.ItemIsNotUnlockedDoor:
+.TryGiveItemA8:
+lda $01,s : and #$00ff : cmp #$0080 : bcc +
+  sec : sbc #$0087
+  clc : adc #$0029
++:
+sta $0db8
+lda $01,s : and #$00ff : cmp #$0006 : bne ..PostHerbCheck
+  cop #$D5 : db $06    ; "Remove" herb placeholder item so there's room to "give" an herb.
+..PostHerbCheck:
+lda $01,s : and #$00ff : cmp #$0087 : bcc ..IsSpecial
+..IsNotSpecial:
+lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
+..GotItem:
+cop #$BF : dw ...Text
+stz $0db8
+pla
+clc
+rtl
+...Text:
+db $cd : dl .TextItsAnItem
+db $c0
+..InvFull:
+cop #$BF : dw ...Text
+stz $0db8
+pla
+sec
+rtl
+...Text:
+db $cd : dl .TextItsAnItem
+db "But your inventory's full!"
+db $c0
+..IsSpecial:    ; Handling for upgrades, duplicate stat items, and Heart Pieces.
+lda $01,s : cmp #$008a : bcs ..IsNotStatUpgrade
+..IsStatUpgrade:
+sec : sbc #$0007 : jsl LR_GiveNormalItemA8OrSec
+bra ..GotItem
+..IsNotStatUpgrade:
+cmp #$008a : beq ...LightUpgrade
+cmp #$008b : beq ...DarkUpgrade
+...HeartPiece:
+php
+sep #$20
+lda $0b24 : bit #$02 : beq ....DoGiveHp
+lda $0a1e : bit #$80 : bne ....CompleteHeart
+  ora #$80 : sta $0a1e
+  bra ....NoGiveHp
+....CompleteHeart:
+eor #$80 : sta $0a1e
+....DoGiveHp:
+plp
+lda #$0080 : jsl LR_GiveNormalItemA8OrSec
+bra ..GotItem
+....NoGiveHp:
+plp
+bra ..GotItem
+...LightUpgrade:
+inc $0b16
+bra ..GotItem
+...DarkUpgrade:
+inc $0b1c
+bra ..GotItem
+
+.GiveUnlockedDoor:
+pla : and #$00ff
+pha
+jsl $80b4e0    ; jsl LR_SetFlag10A
+lda $01,s : asl : asl : asl : tay
+lda $d3ce,y : and #$00ff : cmp $0644 : bne ..PostThisMapCheck
+  lda $01,s : jsl $82A363   ; jsl LR_StageMapRearrange
+  cop #$33
+..PostThisMapCheck:
+pla : sta $0db8
+cop #$BF : dw ..Text
+clc
+rtl
+..Text:
+db $cd : dl .TextItsADoor
+db $c0
+
+.TextItsAnItem:
+db $d3
+db $d6,$1d    ; "It's "
+db $c5 : dw TextItemGetNames, $0db8
+db "!",$cb
+db $ca
+.TextItsADoor:
+db $d3
+db "Opened a door!",$ca
+db $c5 : dw TextDoorNames, $0db8
+db $ca
+
+TextItemGetNames:
+.Pointers:
+{
+dw .Null
+dw .RedJewel
+dw .PrisonKey
+dw .IncaStatueA
+dw .IncaStatueB
+dw .IncaMelody
+dw .Herb
+dw .DiamondBlock
+dw .WindMelody
+dw .LolasMelody
+dw .Meat
+dw .MineKeyA
+dw .MineKeyB
+dw .MemoryMelody
+dw .CrystalBall
+dw .MineElevatorKey
+dw .MuPalaceKey
+dw .PurifyStone
+dw .HopeStatue
+dw .RamaStatue
+dw .MagicPowder
+dw .BlueJournal
+dw .LancesLetter
+dw .Necklace
+dw .RussianGlassWill
+dw .Teapot
+dw .MushroomDrops
+dw .BagOfGold
+dw .BlackGlasses
+dw .GorgonFlower
+dw .Hieroglyph1E
+dw .Hieroglyph1F
+dw .Hieroglyph20
+dw .Hieroglyph21
+dw .Hieroglyph22
+dw .Hieroglyph23
+dw .Aura
+dw .LolasLetter
+dw .FathersJournal
+dw .CrystalRing
+dw .Apple
+dw .HpItem
+dw .StrItem
+dw .DefItem
+dw .LightJewel
+dw .DarkJewel
+dw .TwoRedJewels
+dw .ThreeRedJewels
+dw .HeartPiece   ; $30
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .MysticStatue1
+}
+{
+.Null:
+db "nothing",$ca
+.TwoRedJewels:
+db "2 Red Jewels",$ca
+.ThreeRedJewels:
+db "3 Red Jewels",$ca
+.LolasLetter:
+db "Lola's letter",$ca
+.FathersJournal:
+db "your father's",$cb,"journal",$ca
+.MushroomDrops:
+db "Mushroom Drops",$ca
+.LancesLetter:
+db "Lance's letter",$ca
+.MineKeyA:
+db "Mine Key A",$ca
+.MineKeyB:
+db "Mine Key B",$ca
+.LolasMelody:
+db "Lola's Melody",$ca
+.IncaStatueA:
+db "Inca Statue A",$ca
+.IncaStatueB:
+db "Inca Statue B",$ca
+.RedJewel:
+db "a Red Jewel",$ca
+.CrystalBall:
+db "a Crystal Ball",$ca
+.HopeStatue:
+db "a Statue of Hope",$ca
+.BlueJournal:
+db "the Blue Journal",$ca
+.BagOfGold:
+db "a Bag of Tricks",$ca
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+db "a Hieroglyph Tile",$ca
+.DefItem:
+db "DEF",$ca
+.StrItem:
+db "STR",$ca
+.LightJewel:
+db "a Light Upgrade",$ca
+.DarkJewel:
+db "a Dark Upgrade",$ca
+.RamaStatue:
+db "a Rama Statue",$ca
+.Herb:
+db "an herb",$ca
+.Apple:
+db "an apple",$ca
+.HpItem:
+db "HP",$ca
+.PrisonKey:
+db "the Prison Key",$ca
+.IncaMelody:
+db "the Inca Melody",$ca
+.DiamondBlock:
+db "the Diamond Block",$ca
+.WindMelody:
+db "the Wind Melody",$ca
+.Meat:
+db "the Large Roast",$ca
+.MemoryMelody:
+db "the Memory Melody",$ca
+.MineElevatorKey:
+db "the Elevator Key",$ca
+.MuPalaceKey:
+db "the Mu Palace Key",$ca
+.PurifyStone:
+db "the Purification",$cb,"Stone",$ca
+.MagicPowder:
+db "the Magic Powder",$ca
+.Necklace:
+db "the Necklace",$ca
+.RussianGlassWill:
+db "the Will",$ca
+.Teapot:
+db "the Teapot",$ca
+.BlackGlasses:
+db "the Black Glasses",$ca
+.GorgonFlower:
+db "the Gorgon Flower",$ca
+.Aura:
+db "the Aura",$ca
+.CrystalRing:
+db "the Crystal Ring",$ca
+.HeartPiece:
+db "a Heart Piece",$ca
+.MysticStatue1:
+db "a Mystic Statue",$ca
+}
+
+TextDoorNames:
+.Pointers:
+{
+dw .Door00
+dw .Door01
+dw .Door02
+dw .Door03
+dw .Door04
+dw .Door05
+dw .Door06
+dw .Door07
+dw .Door08
+dw .Door09
+dw .Door0A
+dw .Door0B
+dw .Door0C
+dw .Door0D
+dw .Door0E
+dw .Door0F
+dw .Door10
+dw .Door11
+dw .Door12
+dw .Door13
+dw .Door14
+dw .Door15
+dw .Door16
+dw .Door17
+dw .Door18
+dw .Door19
+dw .Door1A
+dw .Door1B
+dw .Door1C
+dw .Door1D
+dw .Door1E
+dw .Door1F
+dw .Door20
+dw .Door21
+dw .Door22
+dw .Door23
+dw .Door24
+dw .Door25
+dw .Door26
+dw .Door27
+dw .Door28
+dw .Door29
+dw .Door2A
+dw .Door2B
+dw .Door2C
+dw .Door2D
+dw .Door2E
+dw .Door2F
+dw .Door30
+dw .Door31
+dw .Door32
+dw .Door33
+dw .Door34
+dw .Door35
+dw .Door36
+dw .Door37
+dw .Door38
+dw .Door39
+dw .Door3A
+dw .Door3B
+dw .Door3C
+dw .Door3D
+dw .Door3E
+dw .Door3F
+dw .Door40
+dw .Door41
+dw .Door42
+dw .Door43
+dw .Door44
+dw .Door45
+dw .Door46
+dw .Door47
+dw .Door48
+dw .Door49
+dw .Door4A
+dw .Door4B
+dw .Door4C
+dw .Door4D
+dw .Door4E
+dw .Door4F
+dw .Door50
+dw .Door51
+dw .Door52
+dw .Door53
+dw .Door54
+dw .Door55
+dw .Door56
+dw .Door57
+dw .Door58
+dw .Door59
+dw .Door5A
+dw .Door5B
+dw .Door5C
+dw .Door5D
+dw .Door5E
+dw .Door5F
+dw .Door60
+dw .Door61
+dw .Door62
+dw .Door63
+dw .Door64
+dw .Door65
+dw .Door66
+dw .Door67
+dw .Door68
+dw .Door69
+dw .Door6A
+dw .Door6B
+dw .Door6C
+dw .Door6D
+dw .Door6E
+dw .Door6F
+dw .Door70
+dw .Door71
+dw .Door72
+dw .Door73
+dw .Door74
+dw .Door75
+dw .Door76
+dw .Door77
+dw .Door78
+dw .Door79
+dw .Door7A
+dw .Door7B
+dw .Door7C
+dw .Door7D
+dw .Door7E
+dw .Door7F
+dw .Door80
+dw .Door81
+dw .Door82
+dw .Door83
+dw .Door84
+dw .Door85
+dw .Door86
+dw .Door87
+dw .Door88
+dw .Door89
+dw .Door8A
+dw .Door8B
+dw .Door8C
+dw .Door8D
+dw .Door8E
+dw .Door8F
+dw .Door90
+dw .Door91
+dw .Door92
+dw .Door93
+dw .Door94
+dw .Door95
+dw .Door96
+dw .Door97
+dw .Door98
+dw .Door99
+dw .Door9A
+dw .Door9B
+dw .Door9C
+dw .Door9D
+}
+{
+.DoorUndefined:
+{
+.Door00:
+.Door04:
+.Door06:
+.Door07:
+.Door08:
+.Door09:
+.Door11:
+.Door12:
+.Door13:
+.Door14:
+.Door15:
+.Door19:
+.Door1A:
+.Door1B:
+.Door1C:
+.Door1D:
+.Door1E:
+.Door1F:
+.Door20:
+.Door21:
+.Door25:
+.Door26:
+.Door27:
+.Door28:
+.Door29:
+.Door2A:
+.Door2D:
+.Door2E:
+.Door2F:
+.Door33:
+.Door38:
+.Door39:
+.Door3A:
+.Door3B:
+.Door3C:
+.Door43:
+.Door44:
+.Door45:
+.Door46:
+.Door47:
+.Door48:
+.Door49:
+.Door4A:
+.Door4B:
+.Door4C:
+.Door4D:
+.Door4E:
+.Door4F:
+.Door50:
+.Door51:
+.Door52:
+.Door54:
+.Door55:
+.Door56:
+.Door57:
+.Door58:
+.Door59:
+.Door5A:
+.Door5B:
+.Door5C:
+.Door5D:
+.Door5E:
+.Door5F:
+.Door60:
+.Door61:
+.Door62:
+.Door63:
+.Door64:
+.Door65:
+.Door66:
+.Door67:
+.Door69:
+.Door6A:
+.Door6D:
+.Door6E:
+.Door70:
+.Door71:
+.Door72:
+.Door74:
+.Door75:
+.Door76:
+.Door77:
+.Door78:
+.Door79:
+.Door7A:
+.Door7B:
+.Door7C:
+.Door7D:
+.Door7E:
+.Door7F:
+.Door80:
+.Door81:
+.Door82:
+.Door83:
+.Door84:
+.Door85:
+.Door86:
+.Door87:
+.Door88:
+.Door89:
+.Door8A:
+.Door8B:
+.Door8C:
+.Door8D:
+.Door8E:
+.Door8F:
+.Door90:
+.Door91:
+.Door92:
+.Door93:
+.Door94:
+.Door95:
+.Door96:
+.Door97:
+.Door98:
+.Door99:
+.Door9C:
+.Door9D:
+}
+db "Undefined door"
+db $ca
+
+.Door01:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Blue Skeleton Cage"
+db $ca
+
+.Door02:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__East Room Worm Door"
+
+.Door03:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__South Room Worm Door"
+db $ca
+
+.Door05:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__West Room Bat Door"
+db $ca
+
+.Door16:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Hidden Dark Space"
+db $ca
+
+.Door17:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Red Skeleton Barrier 1"
+db $ca
+
+.Door18:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Red Skeleton Barrier 2"
+db $ca
+
+.Door0D:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Exterior West Ladder"
+db $ca
+
+.Door0E:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Exterior Upper Ladder"
+db $ca
+
+.Door0F:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Exterior Lower Ladder"
+db $ca
+
+.Door0C:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Water Room Ramp"
+db $ca
+
+.Door0B:
+db $cd : dl TextDoorsAbbreviateInca
+db "__East-West Ramp"
+db $ca
+
+.Door0A:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Diamond Block Stairs"
+db $ca
+
+.Door10:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Singing Statue Stairs"
+db $ca
+
+.Door34:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Tunnel, Middle Fence"
+db $ca
+
+.Door35:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Tunnel, South Fence"
+db $ca
+
+.Door36:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Tunnel, North Fence"
+db $ca
+
+.Door22:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Big Room Monster Cage"
+db $ca
+
+.Door32:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Hidden Dark Space"
+db $ca
+
+.Door23:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Ramp Room Worm Fence"
+db $ca
+
+.Door37:
+db $cd : dl TextDoorsAbbreviateSGSE
+db "__Topside Friar Barrier"
+db $ca
+
+.Door30:
+db $cd : dl TextDoorsAbbreviateSGSE
+db "__Darkside Chest Barrier"
+db $ca
+
+.Door24:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Topside North Barrier"
+db $ca
+
+.Door2B:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Topside Robot Ramp"
+db $ca
+
+.Door2C:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Topside West Barrier"
+db $ca
+
+.Door31:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Darkside Fire Cages"
+db $ca
+
+.Door3D:
+db $cd : dl TextDoorsAbbreviateMu
+db "__Entrance Room Barrier"
+db $ca
+
+.Door3E:
+db $cd : dl TextDoorsAbbreviateMu
+db "__Northeast Room Rock 1"
+db $ca
+
+.Door3F:
+db $cd : dl TextDoorsAbbreviateMu
+db "__Northeast Room Rock 2"
+db $ca
+
+.Door42:
+db $cd : dl TextDoorsAbbreviateMu
+db "__West Room Slime Cages"
+db $ca
+
+.Door41:
+db $cd : dl TextDoorsAbbreviateMu
+db "__East-Facing Stone Head"
+db $ca
+
+.Door40:
+db $cd : dl TextDoorsAbbreviateMu
+db "__South-Facing Stone Head"
+db $ca
+
+.Door53:
+db $cd : dl TextDoorsAbbreviateGtWl
+db "__Archer Friar Barrier"
+db $ca
+
+.Door68:
+db $cd : dl TextDoorsAbbreviateKress
+db "__West Chest Shortcut"
+db $ca
+
+.Door6C:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Entrance Stairs"
+db $ca
+
+.Door6B:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Outer East Slider Hole"
+db $ca
+
+.Door6F:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Dark Space Corridor"
+db $ca
+
+.Door73:
+db $cd : dl TextDoorsAbbreviatePymd
+db "__Foyer Upper Dark Space"
+db $ca
+
+.Door9A:
+db $cd : dl TextDoorsAbbreviateMansion
+db "__First Barrier"
+db $ca
+
+.Door9B:
+db $cd : dl TextDoorsAbbreviateMansion
+db "__Second Barrier"
+db $ca
+}
+
+; Area name abbreviations for door names.
+{
+TextDoorsAbbreviateEdDg:
+db "__Underground Tunnel:"
+db $ca
+
+TextDoorsAbbreviateInca:
+db "__Incan Ruins:"
+db $ca
+
+TextDoorsAbbreviateMine:
+db "__Diamond Mine:"
+db $ca
+
+TextDoorsAbbreviateSGSE:
+db "__Sky Garden, Southeast:"
+db $ca
+
+TextDoorsAbbreviateSGSW:
+db "__Sky Garden, Southwest:"
+db $ca
+
+TextDoorsAbbreviateMu:
+db "__Mu:"
+db $ca
+
+TextDoorsAbbreviateGtWl:
+db "__Great Wall:"
+db $ca
+
+TextDoorsAbbreviateKress:
+db "__Mt. Temple:"
+db $ca
+
+TextDoorsAbbreviateAnkr:
+db "__Ankor Wat:"
+db $ca
+
+TextDoorsAbbreviatePymd:
+db "__Pyramid:"
+db $ca
+
+TextDoorsAbbreviateMansion:
+db "__Jeweler's Mansion:"
+db $ca
+}
+
+
+
+
+
+
+
+EMonsterDeathDoorOrItem:
+cop #$B7 : db $00
+lda #$0342 : sta $10
+lda #$6000 : trb $12
+cop #$88 : dl $8EE000
+cop #$82 : db $29, $04
+cop #$89
+cop #$82 : db $29, $02
+cop #$89
+cop #$82 : db $29, $12
+cop #$89
+cop #$84 : db $29, $01
+cop #$8A
+cop #$B6 : db $30
+phx
+  lda $7F0024,x : dec : asl : tax
+  lda.l .ItemList,x
+plx
+jsl LR_GiveAnyItemA16OrSec : bcs .AnimateAndDie
+.ItemGiven:
+lda $7f0024,x : jsl LR_SetMonsterItemFlagA
+.AnimateAndDie:
+cop #$80 : db $02
+cop #$89
+cop #$E0
+.ItemList:
+db !MonsterItem01Id, !MonsterItem01Type
+db !MonsterItem02Id, !MonsterItem02Type
+db !MonsterItem03Id, !MonsterItem03Type
+db !MonsterItem04Id, !MonsterItem04Type
+db !MonsterItem05Id, !MonsterItem05Type
+db !MonsterItem06Id, !MonsterItem06Type
+db !MonsterItem07Id, !MonsterItem07Type
+db !MonsterItem08Id, !MonsterItem08Type
+db !MonsterItem09Id, !MonsterItem09Type
+db !MonsterItem0AId, !MonsterItem0AType
+db !MonsterItem0BId, !MonsterItem0BType
+db !MonsterItem0CId, !MonsterItem0CType
+db !MonsterItem0DId, !MonsterItem0DType
+db !MonsterItem0EId, !MonsterItem0EType
+db !MonsterItem0FId, !MonsterItem0FType
+db !MonsterItem10Id, !MonsterItem10Type
+db !MonsterItem11Id, !MonsterItem11Type
+db !MonsterItem12Id, !MonsterItem12Type
+db !MonsterItem13Id, !MonsterItem13Type
+db !MonsterItem14Id, !MonsterItem14Type
+db !MonsterItem15Id, !MonsterItem15Type
+db !MonsterItem16Id, !MonsterItem16Type
+db !MonsterItem17Id, !MonsterItem17Type
+db !MonsterItem18Id, !MonsterItem18Type
+db !MonsterItem19Id, !MonsterItem19Type
+db !MonsterItem1AId, !MonsterItem1AType
+db !MonsterItem1BId, !MonsterItem1BType
+db !MonsterItem1CId, !MonsterItem1CType
+db !MonsterItem1DId, !MonsterItem1DType
+db !MonsterItem1EId, !MonsterItem1EType
+db !MonsterItem1FId, !MonsterItem1FType
+db !MonsterItem20Id, !MonsterItem20Type
+db !MonsterItem21Id, !MonsterItem21Type
+db !MonsterItem22Id, !MonsterItem22Type
+db !MonsterItem23Id, !MonsterItem23Type
+db !MonsterItem24Id, !MonsterItem24Type
+db !MonsterItem25Id, !MonsterItem25Type
+db !MonsterItem26Id, !MonsterItem26Type
+db !MonsterItem27Id, !MonsterItem27Type
+db !MonsterItem28Id, !MonsterItem28Type
+db !MonsterItem29Id, !MonsterItem29Type
+db !MonsterItem2AId, !MonsterItem2AType
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

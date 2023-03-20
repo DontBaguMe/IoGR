@@ -1,0 +1,6645 @@
+arch 65816
+hirom
+
+
+!DefaultMonsterItem01Id = $01
+!DefaultMonsterItem02Id = $02
+!DefaultMonsterItem03Id = $03
+!DefaultMonsterItem04Id = $05
+!DefaultMonsterItem05Id = $16
+!DefaultMonsterItem06Id = $17
+!DefaultMonsterItem07Id = $18
+!DefaultMonsterItem08Id = $0D
+!DefaultMonsterItem09Id = $0E
+!DefaultMonsterItem0AId = $0F
+!DefaultMonsterItem0BId = $0C
+!DefaultMonsterItem0CId = $0B
+!DefaultMonsterItem0DId = $0A
+!DefaultMonsterItem0EId = $10
+!DefaultMonsterItem0FId = $34
+!DefaultMonsterItem10Id = $36
+!DefaultMonsterItem11Id = $35
+!DefaultMonsterItem12Id = $22
+!DefaultMonsterItem13Id = $32
+!DefaultMonsterItem14Id = $23
+!DefaultMonsterItem15Id = $37
+!DefaultMonsterItem16Id = $30
+!DefaultMonsterItem17Id = $24
+!DefaultMonsterItem18Id = $2B
+!DefaultMonsterItem19Id = $2C
+!DefaultMonsterItem1AId = $31
+!DefaultMonsterItem1BId = $3D
+!DefaultMonsterItem1CId = $3E
+!DefaultMonsterItem1DId = $3F
+!DefaultMonsterItem1EId = $42
+!DefaultMonsterItem1FId = $41
+!DefaultMonsterItem20Id = $40
+!DefaultMonsterItem21Id = $53
+!DefaultMonsterItem22Id = $6A
+!DefaultMonsterItem23Id = $68
+!DefaultMonsterItem24Id = $6C
+!DefaultMonsterItem25Id = $6B
+!DefaultMonsterItem26Id = $6D
+!DefaultMonsterItem27Id = $6F
+!DefaultMonsterItem28Id = $73
+!DefaultMonsterItem29Id = $9A
+!DefaultMonsterItem2AId = $9B
+
+!DefaultMonsterItem01Type = $10
+!DefaultMonsterItem02Type = $10
+!DefaultMonsterItem03Type = $10
+!DefaultMonsterItem04Type = $10
+!DefaultMonsterItem05Type = $10
+!DefaultMonsterItem06Type = $10
+!DefaultMonsterItem07Type = $10
+!DefaultMonsterItem08Type = $10
+!DefaultMonsterItem09Type = $10
+!DefaultMonsterItem0AType = $10
+!DefaultMonsterItem0BType = $10
+!DefaultMonsterItem0CType = $10
+!DefaultMonsterItem0DType = $10
+!DefaultMonsterItem0EType = $10
+!DefaultMonsterItem0FType = $10
+!DefaultMonsterItem10Type = $10
+!DefaultMonsterItem11Type = $10
+!DefaultMonsterItem12Type = $10
+!DefaultMonsterItem13Type = $10
+!DefaultMonsterItem14Type = $10
+!DefaultMonsterItem15Type = $10
+!DefaultMonsterItem16Type = $10
+!DefaultMonsterItem17Type = $10
+!DefaultMonsterItem18Type = $10
+!DefaultMonsterItem19Type = $10
+!DefaultMonsterItem1AType = $10
+!DefaultMonsterItem1BType = $10
+!DefaultMonsterItem1CType = $10
+!DefaultMonsterItem1DType = $10
+!DefaultMonsterItem1EType = $10
+!DefaultMonsterItem1FType = $10
+!DefaultMonsterItem20Type = $10
+!DefaultMonsterItem21Type = $10
+!DefaultMonsterItem22Type = $10
+!DefaultMonsterItem23Type = $10
+!DefaultMonsterItem24Type = $10
+!DefaultMonsterItem25Type = $10
+!DefaultMonsterItem26Type = $10
+!DefaultMonsterItem27Type = $10
+!DefaultMonsterItem28Type = $10
+!DefaultMonsterItem29Type = $10
+!DefaultMonsterItem2AType = $10
+
+
+!DefaultMonster0001Param = $00
+!DefaultMonster0001Addr = $8A8755
+!DefaultMonster0001Stats = $05
+!DefaultMonster0001ItemFlag = $00
+
+!DefaultMonster0002Param = $00
+!DefaultMonster0002Addr = $8A8755
+!DefaultMonster0002Stats = $05
+!DefaultMonster0002ItemFlag = $00
+
+!DefaultMonster0003Param = $00
+!DefaultMonster0003Addr = $8A8755
+!DefaultMonster0003Stats = $05
+!DefaultMonster0003ItemFlag = $00
+
+!DefaultMonster0004Param = $00
+!DefaultMonster0004Addr = $8A8000
+!DefaultMonster0004Stats = $02
+!DefaultMonster0004ItemFlag = $01
+
+!DefaultMonster0005Param = $00
+!DefaultMonster0005Addr = $8A8000
+!DefaultMonster0005Stats = $02
+!DefaultMonster0005ItemFlag = $00
+
+!DefaultMonster0006Param = $00
+!DefaultMonster0006Addr = $8A8000
+!DefaultMonster0006Stats = $02
+!DefaultMonster0006ItemFlag = $02
+
+!DefaultMonster0007Param = $00
+!DefaultMonster0007Addr = $8A8755
+!DefaultMonster0007Stats = $05
+!DefaultMonster0007ItemFlag = $00
+
+!DefaultMonster0008Param = $00
+!DefaultMonster0008Addr = $8A8755
+!DefaultMonster0008Stats = $05
+!DefaultMonster0008ItemFlag = $00
+
+!DefaultMonster0009Param = $00
+!DefaultMonster0009Addr = $8A8755
+!DefaultMonster0009Stats = $05
+!DefaultMonster0009ItemFlag = $00
+
+!DefaultMonster000AParam = $00
+!DefaultMonster000AAddr = $8A8755
+!DefaultMonster000AStats = $05
+!DefaultMonster000AItemFlag = $00
+
+!DefaultMonster000BParam = $00
+!DefaultMonster000BAddr = $8A8755
+!DefaultMonster000BStats = $05
+!DefaultMonster000BItemFlag = $00
+
+!DefaultMonster000CParam = $00
+!DefaultMonster000CAddr = $8A8755
+!DefaultMonster000CStats = $05
+!DefaultMonster000CItemFlag = $00
+
+!DefaultMonster000DParam = $00
+!DefaultMonster000DAddr = $8A8755
+!DefaultMonster000DStats = $05
+!DefaultMonster000DItemFlag = $00
+
+!DefaultMonster000EParam = $00
+!DefaultMonster000EAddr = $8A8755
+!DefaultMonster000EStats = $05
+!DefaultMonster000EItemFlag = $00
+
+!DefaultMonster000FParam = $00
+!DefaultMonster000FAddr = $8A8755
+!DefaultMonster000FStats = $05
+!DefaultMonster000FItemFlag = $00
+
+!DefaultMonster0010Param = $00
+!DefaultMonster0010Addr = $8A8755
+!DefaultMonster0010Stats = $05
+!DefaultMonster0010ItemFlag = $00
+
+!DefaultMonster0011Param = $00
+!DefaultMonster0011Addr = $8A826C
+!DefaultMonster0011Stats = $01
+!DefaultMonster0011ItemFlag = $00
+
+!DefaultMonster0012Param = $00
+!DefaultMonster0012Addr = $8A826C
+!DefaultMonster0012Stats = $01
+!DefaultMonster0012ItemFlag = $00
+
+!DefaultMonster0013Param = $00
+!DefaultMonster0013Addr = $8A8000
+!DefaultMonster0013Stats = $02
+!DefaultMonster0013ItemFlag = $00
+
+!DefaultMonster0014Param = $00
+!DefaultMonster0014Addr = $8A8000
+!DefaultMonster0014Stats = $02
+!DefaultMonster0014ItemFlag = $00
+
+!DefaultMonster0015Param = $00
+!DefaultMonster0015Addr = $8A8000
+!DefaultMonster0015Stats = $02
+!DefaultMonster0015ItemFlag = $00
+
+!DefaultMonster0016Param = $00
+!DefaultMonster0016Addr = $8A8000
+!DefaultMonster0016Stats = $02
+!DefaultMonster0016ItemFlag = $03
+
+!DefaultMonster0017Param = $00
+!DefaultMonster0017Addr = $8A8755
+!DefaultMonster0017Stats = $05
+!DefaultMonster0017ItemFlag = $00
+
+!DefaultMonster0018Param = $00
+!DefaultMonster0018Addr = $8A8755
+!DefaultMonster0018Stats = $05
+!DefaultMonster0018ItemFlag = $00
+
+!DefaultMonster0019Param = $00
+!DefaultMonster0019Addr = $8A8755
+!DefaultMonster0019Stats = $05
+!DefaultMonster0019ItemFlag = $00
+
+!DefaultMonster001AParam = $00
+!DefaultMonster001AAddr = $8A8755
+!DefaultMonster001AStats = $05
+!DefaultMonster001AItemFlag = $00
+
+!DefaultMonster001BParam = $00
+!DefaultMonster001BAddr = $8A8755
+!DefaultMonster001BStats = $05
+!DefaultMonster001BItemFlag = $00
+
+!DefaultMonster001CParam = $00
+!DefaultMonster001CAddr = $8A8755
+!DefaultMonster001CStats = $05
+!DefaultMonster001CItemFlag = $00
+
+!DefaultMonster001DParam = $00
+!DefaultMonster001DAddr = $8A8755
+!DefaultMonster001DStats = $05
+!DefaultMonster001DItemFlag = $00
+
+!DefaultMonster001EParam = $00
+!DefaultMonster001EAddr = $8A826C
+!DefaultMonster001EStats = $01
+!DefaultMonster001EItemFlag = $00
+
+!DefaultMonster001FParam = $00
+!DefaultMonster001FAddr = $8A826C
+!DefaultMonster001FStats = $01
+!DefaultMonster001FItemFlag = $00
+
+!DefaultMonster0020Param = $00
+!DefaultMonster0020Addr = $8A826C
+!DefaultMonster0020Stats = $01
+!DefaultMonster0020ItemFlag = $00
+
+!DefaultMonster0021Param = $00
+!DefaultMonster0021Addr = $8A826C
+!DefaultMonster0021Stats = $01
+!DefaultMonster0021ItemFlag = $00
+
+!DefaultMonster0022Param = $00
+!DefaultMonster0022Addr = $8A8000
+!DefaultMonster0022Stats = $02
+!DefaultMonster0022ItemFlag = $00
+
+!DefaultMonster0023Param = $00
+!DefaultMonster0023Addr = $8A8000
+!DefaultMonster0023Stats = $02
+!DefaultMonster0023ItemFlag = $00
+
+!DefaultMonster0024Param = $00
+!DefaultMonster0024Addr = $8A8755
+!DefaultMonster0024Stats = $05
+!DefaultMonster0024ItemFlag = $00
+
+!DefaultMonster0025Param = $00
+!DefaultMonster0025Addr = $8A8755
+!DefaultMonster0025Stats = $05
+!DefaultMonster0025ItemFlag = $00
+
+!DefaultMonster0026Param = $00
+!DefaultMonster0026Addr = $8A8755
+!DefaultMonster0026Stats = $05
+!DefaultMonster0026ItemFlag = $00
+
+!DefaultMonster0027Param = $00
+!DefaultMonster0027Addr = $8A8755
+!DefaultMonster0027Stats = $05
+!DefaultMonster0027ItemFlag = $00
+
+!DefaultMonster0028Param = $00
+!DefaultMonster0028Addr = $8A826C
+!DefaultMonster0028Stats = $01
+!DefaultMonster0028ItemFlag = $00
+
+!DefaultMonster0029Param = $00
+!DefaultMonster0029Addr = $8A826C
+!DefaultMonster0029Stats = $01
+!DefaultMonster0029ItemFlag = $00
+
+!DefaultMonster002AParam = $00
+!DefaultMonster002AAddr = $8A85F7
+!DefaultMonster002AStats = $03
+!DefaultMonster002AItemFlag = $04
+
+!DefaultMonster002BParam = $00
+!DefaultMonster002BAddr = $8A8669
+!DefaultMonster002BStats = $04
+!DefaultMonster002BItemFlag = $00
+
+!DefaultMonster002CParam = $00
+!DefaultMonster002CAddr = $8A869A
+!DefaultMonster002CStats = $04
+!DefaultMonster002CItemFlag = $00
+
+!DefaultMonster002DParam = $00
+!DefaultMonster002DAddr = $8A86CB
+!DefaultMonster002DStats = $04
+!DefaultMonster002DItemFlag = $00
+
+!DefaultMonster002EParam = $00
+!DefaultMonster002EAddr = $8A86FF
+!DefaultMonster002EStats = $04
+!DefaultMonster002EItemFlag = $00
+
+!DefaultMonster002FParam = $00
+!DefaultMonster002FAddr = $8A8000
+!DefaultMonster002FStats = $02
+!DefaultMonster002FItemFlag = $00
+
+!DefaultMonster0030Param = $00
+!DefaultMonster0030Addr = $8A8000
+!DefaultMonster0030Stats = $02
+!DefaultMonster0030ItemFlag = $00
+
+!DefaultMonster0031Param = $00
+!DefaultMonster0031Addr = $8A8000
+!DefaultMonster0031Stats = $02
+!DefaultMonster0031ItemFlag = $00
+
+!DefaultMonster0032Param = $00
+!DefaultMonster0032Addr = $8A8000
+!DefaultMonster0032Stats = $02
+!DefaultMonster0032ItemFlag = $00
+
+!DefaultMonster0033Param = $00
+!DefaultMonster0033Addr = $8A8000
+!DefaultMonster0033Stats = $02
+!DefaultMonster0033ItemFlag = $00
+
+!DefaultMonster0034Param = $00
+!DefaultMonster0034Addr = $8A8000
+!DefaultMonster0034Stats = $02
+!DefaultMonster0034ItemFlag = $05
+
+!DefaultMonster0035Param = $00
+!DefaultMonster0035Addr = $8A8000
+!DefaultMonster0035Stats = $02
+!DefaultMonster0035ItemFlag = $00
+
+!DefaultMonster0036Param = $00
+!DefaultMonster0036Addr = $8A8755
+!DefaultMonster0036Stats = $05
+!DefaultMonster0036ItemFlag = $00
+
+!DefaultMonster0037Param = $00
+!DefaultMonster0037Addr = $8A8755
+!DefaultMonster0037Stats = $05
+!DefaultMonster0037ItemFlag = $00
+
+!DefaultMonster0038Param = $00
+!DefaultMonster0038Addr = $8A8755
+!DefaultMonster0038Stats = $05
+!DefaultMonster0038ItemFlag = $00
+
+!DefaultMonster0039Param = $00
+!DefaultMonster0039Addr = $8A8755
+!DefaultMonster0039Stats = $05
+!DefaultMonster0039ItemFlag = $00
+
+!DefaultMonster003AParam = $00
+!DefaultMonster003AAddr = $8A8755
+!DefaultMonster003AStats = $05
+!DefaultMonster003AItemFlag = $00
+
+!DefaultMonster003BParam = $00
+!DefaultMonster003BAddr = $8A8755
+!DefaultMonster003BStats = $05
+!DefaultMonster003BItemFlag = $00
+
+!DefaultMonster003CParam = $00
+!DefaultMonster003CAddr = $8A8755
+!DefaultMonster003CStats = $05
+!DefaultMonster003CItemFlag = $00
+
+!DefaultMonster003DParam = $00
+!DefaultMonster003DAddr = $8A826C
+!DefaultMonster003DStats = $01
+!DefaultMonster003DItemFlag = $00
+
+!DefaultMonster003EParam = $00
+!DefaultMonster003EAddr = $8A826C
+!DefaultMonster003EStats = $01
+!DefaultMonster003EItemFlag = $00
+
+!DefaultMonster003FParam = $00
+!DefaultMonster003FAddr = $8A826C
+!DefaultMonster003FStats = $01
+!DefaultMonster003FItemFlag = $00
+
+!DefaultMonster0040Param = $00
+!DefaultMonster0040Addr = $8A826C
+!DefaultMonster0040Stats = $01
+!DefaultMonster0040ItemFlag = $00
+
+!DefaultMonster0041Param = $00
+!DefaultMonster0041Addr = $8A826C
+!DefaultMonster0041Stats = $01
+!DefaultMonster0041ItemFlag = $00
+
+!DefaultMonster0042Param = $00
+!DefaultMonster0042Addr = $8A826C
+!DefaultMonster0042Stats = $01
+!DefaultMonster0042ItemFlag = $00
+
+!DefaultMonster0043Param = $00
+!DefaultMonster0043Addr = $8A8476
+!DefaultMonster0043Stats = $10
+!DefaultMonster0043ItemFlag = $06
+
+!DefaultMonster0044Param = $00
+!DefaultMonster0044Addr = $8A8476
+!DefaultMonster0044Stats = $10
+!DefaultMonster0044ItemFlag = $07
+
+!DefaultMonster0045Param = $00
+!DefaultMonster0045Addr = $8A8DB7
+!DefaultMonster0045Stats = $0B
+!DefaultMonster0045ItemFlag = $00
+
+!DefaultMonster0046Param = $00
+!DefaultMonster0046Addr = $8A8DB7
+!DefaultMonster0046Stats = $0B
+!DefaultMonster0046ItemFlag = $00
+
+!DefaultMonster0047Param = $00
+!DefaultMonster0047Addr = $8A8DB7
+!DefaultMonster0047Stats = $0B
+!DefaultMonster0047ItemFlag = $00
+
+!DefaultMonster0048Param = $00
+!DefaultMonster0048Addr = $8A8DB7
+!DefaultMonster0048Stats = $0B
+!DefaultMonster0048ItemFlag = $00
+
+!DefaultMonster0049Param = $00
+!DefaultMonster0049Addr = $8A8DB7
+!DefaultMonster0049Stats = $0B
+!DefaultMonster0049ItemFlag = $00
+
+!DefaultMonster004AParam = $00
+!DefaultMonster004AAddr = $8A8DB7
+!DefaultMonster004AStats = $0B
+!DefaultMonster004AItemFlag = $00
+
+!DefaultMonster004BParam = $00
+!DefaultMonster004BAddr = $8A8B1B
+!DefaultMonster004BStats = $0A
+!DefaultMonster004BItemFlag = $00
+
+!DefaultMonster004CParam = $00
+!DefaultMonster004CAddr = $8A8B1B
+!DefaultMonster004CStats = $0A
+!DefaultMonster004CItemFlag = $00
+
+!DefaultMonster004DParam = $00
+!DefaultMonster004DAddr = $8A8B1B
+!DefaultMonster004DStats = $0A
+!DefaultMonster004DItemFlag = $00
+
+!DefaultMonster004EParam = $00
+!DefaultMonster004EAddr = $8A8B1B
+!DefaultMonster004EStats = $0A
+!DefaultMonster004EItemFlag = $00
+
+!DefaultMonster004FParam = $00
+!DefaultMonster004FAddr = $8A8B1B
+!DefaultMonster004FStats = $0A
+!DefaultMonster004FItemFlag = $00
+
+!DefaultMonster0050Param = $00
+!DefaultMonster0050Addr = $8A8C70
+!DefaultMonster0050Stats = $0C
+!DefaultMonster0050ItemFlag = $00
+
+!DefaultMonster0051Param = $00
+!DefaultMonster0051Addr = $8A8C70
+!DefaultMonster0051Stats = $0C
+!DefaultMonster0051ItemFlag = $08
+
+!DefaultMonster0052Param = $00
+!DefaultMonster0052Addr = $8A8C70
+!DefaultMonster0052Stats = $0C
+!DefaultMonster0052ItemFlag = $09
+
+!DefaultMonster0053Param = $00
+!DefaultMonster0053Addr = $8A8C70
+!DefaultMonster0053Stats = $0C
+!DefaultMonster0053ItemFlag = $00
+
+!DefaultMonster0054Param = $00
+!DefaultMonster0054Addr = $8A8C70
+!DefaultMonster0054Stats = $0C
+!DefaultMonster0054ItemFlag = $00
+
+!DefaultMonster0055Param = $00
+!DefaultMonster0055Addr = $8A8C70
+!DefaultMonster0055Stats = $0C
+!DefaultMonster0055ItemFlag = $0a
+
+!DefaultMonster0056Param = $00
+!DefaultMonster0056Addr = $8A8EB6
+!DefaultMonster0056Stats = $0B
+!DefaultMonster0056ItemFlag = $00
+
+!DefaultMonster0057Param = $00
+!DefaultMonster0057Addr = $8A8EB6
+!DefaultMonster0057Stats = $0B
+!DefaultMonster0057ItemFlag = $00
+
+!DefaultMonster0058Param = $00
+!DefaultMonster0058Addr = $8A8EB6
+!DefaultMonster0058Stats = $0B
+!DefaultMonster0058ItemFlag = $00
+
+!DefaultMonster0059Param = $00
+!DefaultMonster0059Addr = $8A8EB6
+!DefaultMonster0059Stats = $0B
+!DefaultMonster0059ItemFlag = $00
+
+!DefaultMonster005AParam = $00
+!DefaultMonster005AAddr = $8A95C2
+!DefaultMonster005AStats = $0D
+!DefaultMonster005AItemFlag = $00
+
+!DefaultMonster005BParam = $00
+!DefaultMonster005BAddr = $8A95C2
+!DefaultMonster005BStats = $0D
+!DefaultMonster005BItemFlag = $00
+
+!DefaultMonster005CParam = $00
+!DefaultMonster005CAddr = $8A95BD
+!DefaultMonster005CStats = $0D
+!DefaultMonster005CItemFlag = $00
+
+!DefaultMonster005DParam = $00
+!DefaultMonster005DAddr = $8A95BD
+!DefaultMonster005DStats = $0D
+!DefaultMonster005DItemFlag = $00
+
+!DefaultMonster005EParam = $00
+!DefaultMonster005EAddr = $8A8B1B
+!DefaultMonster005EStats = $0A
+!DefaultMonster005EItemFlag = $00
+
+!DefaultMonster005FParam = $00
+!DefaultMonster005FAddr = $8A8C70
+!DefaultMonster005FStats = $0C
+!DefaultMonster005FItemFlag = $00
+
+!DefaultMonster0060Param = $00
+!DefaultMonster0060Addr = $8A8C70
+!DefaultMonster0060Stats = $0C
+!DefaultMonster0060ItemFlag = $00
+
+!DefaultMonster0061Param = $00
+!DefaultMonster0061Addr = $8A8C70
+!DefaultMonster0061Stats = $0C
+!DefaultMonster0061ItemFlag = $00
+
+!DefaultMonster0062Param = $00
+!DefaultMonster0062Addr = $8A8C70
+!DefaultMonster0062Stats = $0C
+!DefaultMonster0062ItemFlag = $00
+
+!DefaultMonster0063Param = $00
+!DefaultMonster0063Addr = $8A8DB7
+!DefaultMonster0063Stats = $0B
+!DefaultMonster0063ItemFlag = $00
+
+!DefaultMonster0064Param = $00
+!DefaultMonster0064Addr = $8A8DB7
+!DefaultMonster0064Stats = $0B
+!DefaultMonster0064ItemFlag = $00
+
+!DefaultMonster0065Param = $00
+!DefaultMonster0065Addr = $8A8DB7
+!DefaultMonster0065Stats = $0B
+!DefaultMonster0065ItemFlag = $00
+
+!DefaultMonster0066Param = $00
+!DefaultMonster0066Addr = $8A9061
+!DefaultMonster0066Stats = $0D
+!DefaultMonster0066ItemFlag = $00
+
+!DefaultMonster0067Param = $00
+!DefaultMonster0067Addr = $8A9061
+!DefaultMonster0067Stats = $0D
+!DefaultMonster0067ItemFlag = $00
+
+!DefaultMonster0068Param = $00
+!DefaultMonster0068Addr = $8A9061
+!DefaultMonster0068Stats = $0D
+!DefaultMonster0068ItemFlag = $00
+
+!DefaultMonster0069Param = $00
+!DefaultMonster0069Addr = $8A95C2
+!DefaultMonster0069Stats = $0D
+!DefaultMonster0069ItemFlag = $00
+
+!DefaultMonster006AParam = $00
+!DefaultMonster006AAddr = $8A9070
+!DefaultMonster006AStats = $0D
+!DefaultMonster006AItemFlag = $00
+
+!DefaultMonster006BParam = $00
+!DefaultMonster006BAddr = $8A906B
+!DefaultMonster006BStats = $0D
+!DefaultMonster006BItemFlag = $00
+
+!DefaultMonster006CParam = $10
+!DefaultMonster006CAddr = $8A95B3
+!DefaultMonster006CStats = $0D
+!DefaultMonster006CItemFlag = $00
+
+!DefaultMonster006DParam = $10
+!DefaultMonster006DAddr = $8A95B3
+!DefaultMonster006DStats = $0D
+!DefaultMonster006DItemFlag = $00
+
+!DefaultMonster006EParam = $10
+!DefaultMonster006EAddr = $8A9061
+!DefaultMonster006EStats = $0D
+!DefaultMonster006EItemFlag = $00
+
+!DefaultMonster006FParam = $10
+!DefaultMonster006FAddr = $8A9061
+!DefaultMonster006FStats = $0D
+!DefaultMonster006FItemFlag = $00
+
+!DefaultMonster0070Param = $00
+!DefaultMonster0070Addr = $8A97EE
+!DefaultMonster0070Stats = $0F
+!DefaultMonster0070ItemFlag = $00
+
+!DefaultMonster0071Param = $00
+!DefaultMonster0071Addr = $8A97EE
+!DefaultMonster0071Stats = $0F
+!DefaultMonster0071ItemFlag = $00
+
+!DefaultMonster0072Param = $00
+!DefaultMonster0072Addr = $8A97EE
+!DefaultMonster0072Stats = $0F
+!DefaultMonster0072ItemFlag = $00
+
+!DefaultMonster0073Param = $00
+!DefaultMonster0073Addr = $8A97EE
+!DefaultMonster0073Stats = $0F
+!DefaultMonster0073ItemFlag = $00
+
+!DefaultMonster0074Param = $00
+!DefaultMonster0074Addr = $8A97EE
+!DefaultMonster0074Stats = $0F
+!DefaultMonster0074ItemFlag = $00
+
+!DefaultMonster0075Param = $00
+!DefaultMonster0075Addr = $8A97EE
+!DefaultMonster0075Stats = $0F
+!DefaultMonster0075ItemFlag = $00
+
+!DefaultMonster0076Param = $00
+!DefaultMonster0076Addr = $8A97EE
+!DefaultMonster0076Stats = $0F
+!DefaultMonster0076ItemFlag = $00
+
+!DefaultMonster0077Param = $00
+!DefaultMonster0077Addr = $8A98BC
+!DefaultMonster0077Stats = $0E
+!DefaultMonster0077ItemFlag = $00
+
+!DefaultMonster0078Param = $00
+!DefaultMonster0078Addr = $8A98BC
+!DefaultMonster0078Stats = $0E
+!DefaultMonster0078ItemFlag = $00
+
+!DefaultMonster0079Param = $00
+!DefaultMonster0079Addr = $8A98BC
+!DefaultMonster0079Stats = $0E
+!DefaultMonster0079ItemFlag = $00
+
+!DefaultMonster007AParam = $00
+!DefaultMonster007AAddr = $8A99C3
+!DefaultMonster007AStats = $0E
+!DefaultMonster007AItemFlag = $0b
+
+!DefaultMonster007BParam = $00
+!DefaultMonster007BAddr = $8A9061
+!DefaultMonster007BStats = $0D
+!DefaultMonster007BItemFlag = $00
+
+!DefaultMonster007CParam = $00
+!DefaultMonster007CAddr = $8A9061
+!DefaultMonster007CStats = $0D
+!DefaultMonster007CItemFlag = $00
+
+!DefaultMonster007DParam = $10
+!DefaultMonster007DAddr = $8A95B3
+!DefaultMonster007DStats = $0D
+!DefaultMonster007DItemFlag = $00
+
+!DefaultMonster007EParam = $10
+!DefaultMonster007EAddr = $8A95B8
+!DefaultMonster007EStats = $0D
+!DefaultMonster007EItemFlag = $00
+
+!DefaultMonster007FParam = $10
+!DefaultMonster007FAddr = $8A95BD
+!DefaultMonster007FStats = $0D
+!DefaultMonster007FItemFlag = $00
+
+!DefaultMonster0080Param = $10
+!DefaultMonster0080Addr = $8A95C2
+!DefaultMonster0080Stats = $0D
+!DefaultMonster0080ItemFlag = $00
+
+!DefaultMonster0081Param = $00
+!DefaultMonster0081Addr = $8A97EE
+!DefaultMonster0081Stats = $0F
+!DefaultMonster0081ItemFlag = $00
+
+!DefaultMonster0082Param = $00
+!DefaultMonster0082Addr = $8A97EE
+!DefaultMonster0082Stats = $0F
+!DefaultMonster0082ItemFlag = $00
+
+!DefaultMonster0083Param = $00
+!DefaultMonster0083Addr = $8A97EE
+!DefaultMonster0083Stats = $0F
+!DefaultMonster0083ItemFlag = $00
+
+!DefaultMonster0084Param = $00
+!DefaultMonster0084Addr = $8A97EE
+!DefaultMonster0084Stats = $0F
+!DefaultMonster0084ItemFlag = $00
+
+!DefaultMonster0085Param = $00
+!DefaultMonster0085Addr = $8A97EE
+!DefaultMonster0085Stats = $0F
+!DefaultMonster0085ItemFlag = $00
+
+!DefaultMonster0086Param = $00
+!DefaultMonster0086Addr = $8A97EE
+!DefaultMonster0086Stats = $0F
+!DefaultMonster0086ItemFlag = $00
+
+!DefaultMonster0087Param = $00
+!DefaultMonster0087Addr = $8A97EE
+!DefaultMonster0087Stats = $0F
+!DefaultMonster0087ItemFlag = $00
+
+!DefaultMonster0088Param = $00
+!DefaultMonster0088Addr = $8A97EE
+!DefaultMonster0088Stats = $0F
+!DefaultMonster0088ItemFlag = $00
+
+!DefaultMonster0089Param = $00
+!DefaultMonster0089Addr = $8A97EE
+!DefaultMonster0089Stats = $0F
+!DefaultMonster0089ItemFlag = $00
+
+!DefaultMonster008AParam = $00
+!DefaultMonster008AAddr = $8A97EE
+!DefaultMonster008AStats = $0F
+!DefaultMonster008AItemFlag = $00
+
+!DefaultMonster008BParam = $00
+!DefaultMonster008BAddr = $8A98BC
+!DefaultMonster008BStats = $0E
+!DefaultMonster008BItemFlag = $00
+
+!DefaultMonster008CParam = $00
+!DefaultMonster008CAddr = $8A98BC
+!DefaultMonster008CStats = $0E
+!DefaultMonster008CItemFlag = $00
+
+!DefaultMonster008DParam = $00
+!DefaultMonster008DAddr = $8A98BC
+!DefaultMonster008DStats = $0E
+!DefaultMonster008DItemFlag = $00
+
+!DefaultMonster008EParam = $00
+!DefaultMonster008EAddr = $8A98BC
+!DefaultMonster008EStats = $0E
+!DefaultMonster008EItemFlag = $00
+
+!DefaultMonster008FParam = $00
+!DefaultMonster008FAddr = $8A97EE
+!DefaultMonster008FStats = $0F
+!DefaultMonster008FItemFlag = $00
+
+!DefaultMonster0090Param = $00
+!DefaultMonster0090Addr = $8A97EE
+!DefaultMonster0090Stats = $0F
+!DefaultMonster0090ItemFlag = $00
+
+!DefaultMonster0091Param = $00
+!DefaultMonster0091Addr = $8A97EE
+!DefaultMonster0091Stats = $0F
+!DefaultMonster0091ItemFlag = $00
+
+!DefaultMonster0092Param = $00
+!DefaultMonster0092Addr = $8A97EE
+!DefaultMonster0092Stats = $0F
+!DefaultMonster0092ItemFlag = $00
+
+!DefaultMonster0093Param = $00
+!DefaultMonster0093Addr = $8A97EE
+!DefaultMonster0093Stats = $0F
+!DefaultMonster0093ItemFlag = $00
+
+!DefaultMonster0094Param = $00
+!DefaultMonster0094Addr = $8A97EE
+!DefaultMonster0094Stats = $0F
+!DefaultMonster0094ItemFlag = $00
+
+!DefaultMonster0095Param = $00
+!DefaultMonster0095Addr = $8A97EE
+!DefaultMonster0095Stats = $0F
+!DefaultMonster0095ItemFlag = $00
+
+!DefaultMonster0096Param = $00
+!DefaultMonster0096Addr = $8A97EE
+!DefaultMonster0096Stats = $0F
+!DefaultMonster0096ItemFlag = $00
+
+!DefaultMonster0097Param = $00
+!DefaultMonster0097Addr = $8A97EE
+!DefaultMonster0097Stats = $0F
+!DefaultMonster0097ItemFlag = $00
+
+!DefaultMonster0098Param = $00
+!DefaultMonster0098Addr = $8A97EE
+!DefaultMonster0098Stats = $0F
+!DefaultMonster0098ItemFlag = $00
+
+!DefaultMonster0099Param = $00
+!DefaultMonster0099Addr = $8A97EE
+!DefaultMonster0099Stats = $0F
+!DefaultMonster0099ItemFlag = $00
+
+!DefaultMonster009AParam = $00
+!DefaultMonster009AAddr = $8A97EE
+!DefaultMonster009AStats = $0F
+!DefaultMonster009AItemFlag = $00
+
+!DefaultMonster009BParam = $00
+!DefaultMonster009BAddr = $8A98BC
+!DefaultMonster009BStats = $0E
+!DefaultMonster009BItemFlag = $00
+
+!DefaultMonster009CParam = $00
+!DefaultMonster009CAddr = $8A98BC
+!DefaultMonster009CStats = $0E
+!DefaultMonster009CItemFlag = $00
+
+!DefaultMonster009DParam = $00
+!DefaultMonster009DAddr = $8A99C3
+!DefaultMonster009DStats = $0E
+!DefaultMonster009DItemFlag = $0c
+
+!DefaultMonster009EParam = $00
+!DefaultMonster009EAddr = $8A8B1B
+!DefaultMonster009EStats = $0A
+!DefaultMonster009EItemFlag = $00
+
+!DefaultMonster009FParam = $00
+!DefaultMonster009FAddr = $8A8B1B
+!DefaultMonster009FStats = $0A
+!DefaultMonster009FItemFlag = $00
+
+!DefaultMonster00A0Param = $00
+!DefaultMonster00A0Addr = $8A8B1B
+!DefaultMonster00A0Stats = $0A
+!DefaultMonster00A0ItemFlag = $00
+
+!DefaultMonster00A1Param = $00
+!DefaultMonster00A1Addr = $8A8B1B
+!DefaultMonster00A1Stats = $0A
+!DefaultMonster00A1ItemFlag = $00
+
+!DefaultMonster00A2Param = $00
+!DefaultMonster00A2Addr = $8A8B1B
+!DefaultMonster00A2Stats = $0A
+!DefaultMonster00A2ItemFlag = $00
+
+!DefaultMonster00A3Param = $00
+!DefaultMonster00A3Addr = $8A8B1B
+!DefaultMonster00A3Stats = $0A
+!DefaultMonster00A3ItemFlag = $00
+
+!DefaultMonster00A4Param = $00
+!DefaultMonster00A4Addr = $8A8B1B
+!DefaultMonster00A4Stats = $0A
+!DefaultMonster00A4ItemFlag = $00
+
+!DefaultMonster00A5Param = $00
+!DefaultMonster00A5Addr = $8A8B1B
+!DefaultMonster00A5Stats = $0A
+!DefaultMonster00A5ItemFlag = $00
+
+!DefaultMonster00A6Param = $00
+!DefaultMonster00A6Addr = $8A8C70
+!DefaultMonster00A6Stats = $0C
+!DefaultMonster00A6ItemFlag = $00
+
+!DefaultMonster00A7Param = $00
+!DefaultMonster00A7Addr = $8A8C70
+!DefaultMonster00A7Stats = $0C
+!DefaultMonster00A7ItemFlag = $00
+
+!DefaultMonster00A8Param = $00
+!DefaultMonster00A8Addr = $8A8C70
+!DefaultMonster00A8Stats = $0C
+!DefaultMonster00A8ItemFlag = $00
+
+!DefaultMonster00A9Param = $00
+!DefaultMonster00A9Addr = $8A8C70
+!DefaultMonster00A9Stats = $0C
+!DefaultMonster00A9ItemFlag = $00
+
+!DefaultMonster00AAParam = $00
+!DefaultMonster00AAAddr = $8A8B1B
+!DefaultMonster00AAStats = $0A
+!DefaultMonster00AAItemFlag = $00
+
+!DefaultMonster00ABParam = $00
+!DefaultMonster00ABAddr = $8A8B1B
+!DefaultMonster00ABStats = $0A
+!DefaultMonster00ABItemFlag = $00
+
+!DefaultMonster00ACParam = $00
+!DefaultMonster00ACAddr = $8A8B1B
+!DefaultMonster00ACStats = $0A
+!DefaultMonster00ACItemFlag = $00
+
+!DefaultMonster00ADParam = $00
+!DefaultMonster00ADAddr = $8A8B1B
+!DefaultMonster00ADStats = $0A
+!DefaultMonster00ADItemFlag = $00
+
+!DefaultMonster00AEParam = $00
+!DefaultMonster00AEAddr = $8A8DB7
+!DefaultMonster00AEStats = $0B
+!DefaultMonster00AEItemFlag = $00
+
+!DefaultMonster00AFParam = $00
+!DefaultMonster00AFAddr = $8A8DB7
+!DefaultMonster00AFStats = $0B
+!DefaultMonster00AFItemFlag = $00
+
+!DefaultMonster00B0Param = $00
+!DefaultMonster00B0Addr = $8A8EB6
+!DefaultMonster00B0Stats = $0B
+!DefaultMonster00B0ItemFlag = $00
+
+!DefaultMonster00B1Param = $00
+!DefaultMonster00B1Addr = $8A8EB6
+!DefaultMonster00B1Stats = $0B
+!DefaultMonster00B1ItemFlag = $00
+
+!DefaultMonster00B2Param = $00
+!DefaultMonster00B2Addr = $8A8EB6
+!DefaultMonster00B2Stats = $0B
+!DefaultMonster00B2ItemFlag = $00
+
+!DefaultMonster00B3Param = $00
+!DefaultMonster00B3Addr = $8A8EB6
+!DefaultMonster00B3Stats = $0B
+!DefaultMonster00B3ItemFlag = $00
+
+!DefaultMonster00B4Param = $00
+!DefaultMonster00B4Addr = $8A8B1B
+!DefaultMonster00B4Stats = $0A
+!DefaultMonster00B4ItemFlag = $00
+
+!DefaultMonster00B5Param = $00
+!DefaultMonster00B5Addr = $8A8B1B
+!DefaultMonster00B5Stats = $0A
+!DefaultMonster00B5ItemFlag = $00
+
+!DefaultMonster00B6Param = $00
+!DefaultMonster00B6Addr = $8A8B1B
+!DefaultMonster00B6Stats = $0A
+!DefaultMonster00B6ItemFlag = $00
+
+!DefaultMonster00B7Param = $00
+!DefaultMonster00B7Addr = $8A8B1B
+!DefaultMonster00B7Stats = $0A
+!DefaultMonster00B7ItemFlag = $00
+
+!DefaultMonster00B8Param = $00
+!DefaultMonster00B8Addr = $8A8C70
+!DefaultMonster00B8Stats = $0C
+!DefaultMonster00B8ItemFlag = $00
+
+!DefaultMonster00B9Param = $00
+!DefaultMonster00B9Addr = $8A8C70
+!DefaultMonster00B9Stats = $0C
+!DefaultMonster00B9ItemFlag = $00
+
+!DefaultMonster00BAParam = $00
+!DefaultMonster00BAAddr = $8A8C70
+!DefaultMonster00BAStats = $0C
+!DefaultMonster00BAItemFlag = $00
+
+!DefaultMonster00BBParam = $00
+!DefaultMonster00BBAddr = $8A8C70
+!DefaultMonster00BBStats = $0C
+!DefaultMonster00BBItemFlag = $00
+
+!DefaultMonster00BCParam = $00
+!DefaultMonster00BCAddr = $8A8C70
+!DefaultMonster00BCStats = $0C
+!DefaultMonster00BCItemFlag = $00
+
+!DefaultMonster00BDParam = $00
+!DefaultMonster00BDAddr = $8A8C70
+!DefaultMonster00BDStats = $0C
+!DefaultMonster00BDItemFlag = $00
+
+!DefaultMonster00BEParam = $00
+!DefaultMonster00BEAddr = $8A8C70
+!DefaultMonster00BEStats = $0C
+!DefaultMonster00BEItemFlag = $00
+
+!DefaultMonster00BFParam = $00
+!DefaultMonster00BFAddr = $8A8C70
+!DefaultMonster00BFStats = $0C
+!DefaultMonster00BFItemFlag = $0d
+
+!DefaultMonster00C0Param = $00
+!DefaultMonster00C0Addr = $8A8DB7
+!DefaultMonster00C0Stats = $0B
+!DefaultMonster00C0ItemFlag = $00
+
+!DefaultMonster00C1Param = $00
+!DefaultMonster00C1Addr = $8A8DB7
+!DefaultMonster00C1Stats = $0B
+!DefaultMonster00C1ItemFlag = $00
+
+!DefaultMonster00C2Param = $00
+!DefaultMonster00C2Addr = $8A8DB7
+!DefaultMonster00C2Stats = $0B
+!DefaultMonster00C2ItemFlag = $00
+
+!DefaultMonster00C3Param = $00
+!DefaultMonster00C3Addr = $8A8DB7
+!DefaultMonster00C3Stats = $0B
+!DefaultMonster00C3ItemFlag = $00
+
+!DefaultMonster00C4Param = $00
+!DefaultMonster00C4Addr = $8A8DB7
+!DefaultMonster00C4Stats = $0B
+!DefaultMonster00C4ItemFlag = $00
+
+!DefaultMonster00C5Param = $00
+!DefaultMonster00C5Addr = $8A8EB6
+!DefaultMonster00C5Stats = $0B
+!DefaultMonster00C5ItemFlag = $00
+
+!DefaultMonster00C6Param = $00
+!DefaultMonster00C6Addr = $8A8EB6
+!DefaultMonster00C6Stats = $0B
+!DefaultMonster00C6ItemFlag = $00
+
+!DefaultMonster00C7Param = $00
+!DefaultMonster00C7Addr = $8A8EB6
+!DefaultMonster00C7Stats = $0B
+!DefaultMonster00C7ItemFlag = $00
+
+!DefaultMonster00C8Param = $00
+!DefaultMonster00C8Addr = $8A8C70
+!DefaultMonster00C8Stats = $0C
+!DefaultMonster00C8ItemFlag = $00
+
+!DefaultMonster00C9Param = $00
+!DefaultMonster00C9Addr = $8A8C70
+!DefaultMonster00C9Stats = $0C
+!DefaultMonster00C9ItemFlag = $00
+
+!DefaultMonster00CAParam = $00
+!DefaultMonster00CAAddr = $8A8C70
+!DefaultMonster00CAStats = $0C
+!DefaultMonster00CAItemFlag = $0e
+
+!DefaultMonster00CBParam = $00
+!DefaultMonster00CBAddr = $8A8C70
+!DefaultMonster00CBStats = $0C
+!DefaultMonster00CBItemFlag = $00
+
+!DefaultMonster00CCParam = $00
+!DefaultMonster00CCAddr = $8A8C70
+!DefaultMonster00CCStats = $0C
+!DefaultMonster00CCItemFlag = $00
+
+!DefaultMonster00CDParam = $00
+!DefaultMonster00CDAddr = $8A9B03
+!DefaultMonster00CDStats = $14
+!DefaultMonster00CDItemFlag = $00
+
+!DefaultMonster00CEParam = $00
+!DefaultMonster00CEAddr = $8AAACA
+!DefaultMonster00CEStats = $18
+!DefaultMonster00CEItemFlag = $00
+
+!DefaultMonster00CFParam = $00
+!DefaultMonster00CFAddr = $8AAACA
+!DefaultMonster00CFStats = $18
+!DefaultMonster00CFItemFlag = $0f
+
+!DefaultMonster00D0Param = $00
+!DefaultMonster00D0Addr = $8AB103
+!DefaultMonster00D0Stats = $19
+!DefaultMonster00D0ItemFlag = $00
+
+!DefaultMonster00D1Param = $00
+!DefaultMonster00D1Addr = $8AB103
+!DefaultMonster00D1Stats = $19
+!DefaultMonster00D1ItemFlag = $00
+
+!DefaultMonster00D2Param = $00
+!DefaultMonster00D2Addr = $8AB103
+!DefaultMonster00D2Stats = $19
+!DefaultMonster00D2ItemFlag = $10
+
+!DefaultMonster00D3Param = $00
+!DefaultMonster00D3Addr = $8AB0B3
+!DefaultMonster00D3Stats = $19
+!DefaultMonster00D3ItemFlag = $11
+
+!DefaultMonster00D4Param = $00
+!DefaultMonster00D4Addr = $8AB0B3
+!DefaultMonster00D4Stats = $19
+!DefaultMonster00D4ItemFlag = $00
+
+!DefaultMonster00D5Param = $00
+!DefaultMonster00D5Addr = $8AB0B3
+!DefaultMonster00D5Stats = $19
+!DefaultMonster00D5ItemFlag = $00
+
+!DefaultMonster00D6Param = $00
+!DefaultMonster00D6Addr = $8AB0B3
+!DefaultMonster00D6Stats = $19
+!DefaultMonster00D6ItemFlag = $00
+
+!DefaultMonster00D7Param = $00
+!DefaultMonster00D7Addr = $8AAFF5
+!DefaultMonster00D7Stats = $1A
+!DefaultMonster00D7ItemFlag = $00
+
+!DefaultMonster00D8Param = $00
+!DefaultMonster00D8Addr = $8AAFF5
+!DefaultMonster00D8Stats = $1A
+!DefaultMonster00D8ItemFlag = $00
+
+!DefaultMonster00D9Param = $00
+!DefaultMonster00D9Addr = $8AAFF5
+!DefaultMonster00D9Stats = $1A
+!DefaultMonster00D9ItemFlag = $00
+
+!DefaultMonster00DAParam = $00
+!DefaultMonster00DAAddr = $8AAFF5
+!DefaultMonster00DAStats = $1A
+!DefaultMonster00DAItemFlag = $00
+
+!DefaultMonster00DBParam = $00
+!DefaultMonster00DBAddr = $8AAFF5
+!DefaultMonster00DBStats = $1A
+!DefaultMonster00DBItemFlag = $00
+
+!DefaultMonster00DCParam = $00
+!DefaultMonster00DCAddr = $8AAACA
+!DefaultMonster00DCStats = $18
+!DefaultMonster00DCItemFlag = $00
+
+!DefaultMonster00DDParam = $00
+!DefaultMonster00DDAddr = $8AAACA
+!DefaultMonster00DDStats = $18
+!DefaultMonster00DDItemFlag = $00
+
+!DefaultMonster00DEParam = $00
+!DefaultMonster00DEAddr = $8AAACA
+!DefaultMonster00DEStats = $18
+!DefaultMonster00DEItemFlag = $00
+
+!DefaultMonster00DFParam = $00
+!DefaultMonster00DFAddr = $8AAACA
+!DefaultMonster00DFStats = $18
+!DefaultMonster00DFItemFlag = $00
+
+!DefaultMonster00E0Param = $20
+!DefaultMonster00E0Addr = $8AAFF5
+!DefaultMonster00E0Stats = $1A
+!DefaultMonster00E0ItemFlag = $12
+
+!DefaultMonster00E1Param = $20
+!DefaultMonster00E1Addr = $8AAFF5
+!DefaultMonster00E1Stats = $1A
+!DefaultMonster00E1ItemFlag = $00
+
+!DefaultMonster00E2Param = $20
+!DefaultMonster00E2Addr = $8AAFF5
+!DefaultMonster00E2Stats = $1A
+!DefaultMonster00E2ItemFlag = $00
+
+!DefaultMonster00E3Param = $20
+!DefaultMonster00E3Addr = $8AAFF5
+!DefaultMonster00E3Stats = $1A
+!DefaultMonster00E3ItemFlag = $00
+
+!DefaultMonster00E4Param = $20
+!DefaultMonster00E4Addr = $8AAFF5
+!DefaultMonster00E4Stats = $1A
+!DefaultMonster00E4ItemFlag = $00
+
+!DefaultMonster00E5Param = $20
+!DefaultMonster00E5Addr = $8AAFF5
+!DefaultMonster00E5Stats = $1A
+!DefaultMonster00E5ItemFlag = $00
+
+!DefaultMonster00E6Param = $20
+!DefaultMonster00E6Addr = $8AAFF5
+!DefaultMonster00E6Stats = $1A
+!DefaultMonster00E6ItemFlag = $00
+
+!DefaultMonster00E7Param = $30
+!DefaultMonster00E7Addr = $8AAFF5
+!DefaultMonster00E7Stats = $1A
+!DefaultMonster00E7ItemFlag = $00
+
+!DefaultMonster00E8Param = $30
+!DefaultMonster00E8Addr = $8AAFF5
+!DefaultMonster00E8Stats = $1A
+!DefaultMonster00E8ItemFlag = $00
+
+!DefaultMonster00E9Param = $00
+!DefaultMonster00E9Addr = $8AB103
+!DefaultMonster00E9Stats = $19
+!DefaultMonster00E9ItemFlag = $00
+
+!DefaultMonster00EAParam = $00
+!DefaultMonster00EAAddr = $8AB103
+!DefaultMonster00EAStats = $19
+!DefaultMonster00EAItemFlag = $00
+
+!DefaultMonster00EBParam = $00
+!DefaultMonster00EBAddr = $8AB103
+!DefaultMonster00EBStats = $19
+!DefaultMonster00EBItemFlag = $00
+
+!DefaultMonster00ECParam = $00
+!DefaultMonster00ECAddr = $8AB103
+!DefaultMonster00ECStats = $19
+!DefaultMonster00ECItemFlag = $00
+
+!DefaultMonster00EDParam = $00
+!DefaultMonster00EDAddr = $8AB103
+!DefaultMonster00EDStats = $19
+!DefaultMonster00EDItemFlag = $00
+
+!DefaultMonster00EEParam = $00
+!DefaultMonster00EEAddr = $8AB103
+!DefaultMonster00EEStats = $19
+!DefaultMonster00EEItemFlag = $00
+
+!DefaultMonster00EFParam = $00
+!DefaultMonster00EFAddr = $8AB103
+!DefaultMonster00EFStats = $19
+!DefaultMonster00EFItemFlag = $00
+
+!DefaultMonster00F0Param = $00
+!DefaultMonster00F0Addr = $8AAACA
+!DefaultMonster00F0Stats = $18
+!DefaultMonster00F0ItemFlag = $00
+
+!DefaultMonster00F1Param = $00
+!DefaultMonster00F1Addr = $8AAACA
+!DefaultMonster00F1Stats = $18
+!DefaultMonster00F1ItemFlag = $00
+
+!DefaultMonster00F2Param = $00
+!DefaultMonster00F2Addr = $8AAACA
+!DefaultMonster00F2Stats = $18
+!DefaultMonster00F2ItemFlag = $00
+
+!DefaultMonster00F3Param = $00
+!DefaultMonster00F3Addr = $8AAACA
+!DefaultMonster00F3Stats = $18
+!DefaultMonster00F3ItemFlag = $00
+
+!DefaultMonster00F4Param = $00
+!DefaultMonster00F4Addr = $8AAACA
+!DefaultMonster00F4Stats = $18
+!DefaultMonster00F4ItemFlag = $00
+
+!DefaultMonster00F5Param = $00
+!DefaultMonster00F5Addr = $8AAACA
+!DefaultMonster00F5Stats = $18
+!DefaultMonster00F5ItemFlag = $00
+
+!DefaultMonster00F6Param = $00
+!DefaultMonster00F6Addr = $8AAA8A
+!DefaultMonster00F6Stats = $18
+!DefaultMonster00F6ItemFlag = $00
+
+!DefaultMonster00F7Param = $00
+!DefaultMonster00F7Addr = $8AAA8A
+!DefaultMonster00F7Stats = $18
+!DefaultMonster00F7ItemFlag = $00
+
+!DefaultMonster00F8Param = $00
+!DefaultMonster00F8Addr = $8AAACA
+!DefaultMonster00F8Stats = $18
+!DefaultMonster00F8ItemFlag = $00
+
+!DefaultMonster00F9Param = $00
+!DefaultMonster00F9Addr = $8AAACA
+!DefaultMonster00F9Stats = $18
+!DefaultMonster00F9ItemFlag = $00
+
+!DefaultMonster00FAParam = $00
+!DefaultMonster00FAAddr = $8AAACA
+!DefaultMonster00FAStats = $18
+!DefaultMonster00FAItemFlag = $00
+
+!DefaultMonster00FBParam = $00
+!DefaultMonster00FBAddr = $8AB103
+!DefaultMonster00FBStats = $19
+!DefaultMonster00FBItemFlag = $00
+
+!DefaultMonster00FCParam = $00
+!DefaultMonster00FCAddr = $8AAFF5
+!DefaultMonster00FCStats = $1A
+!DefaultMonster00FCItemFlag = $00
+
+!DefaultMonster00FDParam = $00
+!DefaultMonster00FDAddr = $8AAFF5
+!DefaultMonster00FDStats = $1A
+!DefaultMonster00FDItemFlag = $13
+
+!DefaultMonster00FEParam = $00
+!DefaultMonster00FEAddr = $8AAFF5
+!DefaultMonster00FEStats = $1A
+!DefaultMonster00FEItemFlag = $00
+
+!DefaultMonster00FFParam = $00
+!DefaultMonster00FFAddr = $8AAFF5
+!DefaultMonster00FFStats = $1A
+!DefaultMonster00FFItemFlag = $00
+
+!DefaultMonster0100Param = $00
+!DefaultMonster0100Addr = $8AAFF5
+!DefaultMonster0100Stats = $1A
+!DefaultMonster0100ItemFlag = $00
+
+!DefaultMonster0101Param = $00
+!DefaultMonster0101Addr = $8AAFF5
+!DefaultMonster0101Stats = $1A
+!DefaultMonster0101ItemFlag = $00
+
+!DefaultMonster0102Param = $30
+!DefaultMonster0102Addr = $85D70A
+!DefaultMonster0102Stats = $1A
+!DefaultMonster0102ItemFlag = $14
+
+!DefaultMonster0103Param = $00
+!DefaultMonster0103Addr = $8AB103
+!DefaultMonster0103Stats = $19
+!DefaultMonster0103ItemFlag = $00
+
+!DefaultMonster0104Param = $00
+!DefaultMonster0104Addr = $8AB103
+!DefaultMonster0104Stats = $19
+!DefaultMonster0104ItemFlag = $00
+
+!DefaultMonster0105Param = $00
+!DefaultMonster0105Addr = $8AB103
+!DefaultMonster0105Stats = $19
+!DefaultMonster0105ItemFlag = $00
+
+!DefaultMonster0106Param = $00
+!DefaultMonster0106Addr = $8AAACA
+!DefaultMonster0106Stats = $18
+!DefaultMonster0106ItemFlag = $00
+
+!DefaultMonster0107Param = $00
+!DefaultMonster0107Addr = $8AAACA
+!DefaultMonster0107Stats = $18
+!DefaultMonster0107ItemFlag = $00
+
+!DefaultMonster0108Param = $00
+!DefaultMonster0108Addr = $8AAACA
+!DefaultMonster0108Stats = $18
+!DefaultMonster0108ItemFlag = $00
+
+!DefaultMonster0109Param = $00
+!DefaultMonster0109Addr = $8AAFF5
+!DefaultMonster0109Stats = $1A
+!DefaultMonster0109ItemFlag = $00
+
+!DefaultMonster010AParam = $00
+!DefaultMonster010AAddr = $8AAFF5
+!DefaultMonster010AStats = $1A
+!DefaultMonster010AItemFlag = $00
+
+!DefaultMonster010BParam = $00
+!DefaultMonster010BAddr = $8AAFF5
+!DefaultMonster010BStats = $1A
+!DefaultMonster010BItemFlag = $00
+
+!DefaultMonster010CParam = $00
+!DefaultMonster010CAddr = $8AAFF5
+!DefaultMonster010CStats = $1A
+!DefaultMonster010CItemFlag = $00
+
+!DefaultMonster010DParam = $00
+!DefaultMonster010DAddr = $8AAFF5
+!DefaultMonster010DStats = $1A
+!DefaultMonster010DItemFlag = $00
+
+!DefaultMonster010EParam = $00
+!DefaultMonster010EAddr = $8AAFF5
+!DefaultMonster010EStats = $1A
+!DefaultMonster010EItemFlag = $00
+
+!DefaultMonster010FParam = $00
+!DefaultMonster010FAddr = $8AB103
+!DefaultMonster010FStats = $19
+!DefaultMonster010FItemFlag = $00
+
+!DefaultMonster0110Param = $00
+!DefaultMonster0110Addr = $8AB103
+!DefaultMonster0110Stats = $19
+!DefaultMonster0110ItemFlag = $00
+
+!DefaultMonster0111Param = $00
+!DefaultMonster0111Addr = $8AB103
+!DefaultMonster0111Stats = $19
+!DefaultMonster0111ItemFlag = $00
+
+!DefaultMonster0112Param = $00
+!DefaultMonster0112Addr = $8AB103
+!DefaultMonster0112Stats = $19
+!DefaultMonster0112ItemFlag = $00
+
+!DefaultMonster0113Param = $00
+!DefaultMonster0113Addr = $8AAACA
+!DefaultMonster0113Stats = $18
+!DefaultMonster0113ItemFlag = $00
+
+!DefaultMonster0114Param = $00
+!DefaultMonster0114Addr = $8AAACA
+!DefaultMonster0114Stats = $18
+!DefaultMonster0114ItemFlag = $00
+
+!DefaultMonster0115Param = $00
+!DefaultMonster0115Addr = $8AAACA
+!DefaultMonster0115Stats = $18
+!DefaultMonster0115ItemFlag = $00
+
+!DefaultMonster0116Param = $00
+!DefaultMonster0116Addr = $8AAACA
+!DefaultMonster0116Stats = $18
+!DefaultMonster0116ItemFlag = $00
+
+!DefaultMonster0117Param = $00
+!DefaultMonster0117Addr = $8AAA54
+!DefaultMonster0117Stats = $18
+!DefaultMonster0117ItemFlag = $00
+
+!DefaultMonster0118Param = $00
+!DefaultMonster0118Addr = $8AB4B0
+!DefaultMonster0118Stats = $1D
+!DefaultMonster0118ItemFlag = $00
+
+!DefaultMonster0119Param = $00
+!DefaultMonster0119Addr = $8AB4B0
+!DefaultMonster0119Stats = $1D
+!DefaultMonster0119ItemFlag = $00
+
+!DefaultMonster011AParam = $00
+!DefaultMonster011AAddr = $8AB4B0
+!DefaultMonster011AStats = $1D
+!DefaultMonster011AItemFlag = $00
+
+!DefaultMonster011BParam = $00
+!DefaultMonster011BAddr = $8AB4B0
+!DefaultMonster011BStats = $1D
+!DefaultMonster011BItemFlag = $00
+
+!DefaultMonster011CParam = $00
+!DefaultMonster011CAddr = $8AB4B0
+!DefaultMonster011CStats = $1D
+!DefaultMonster011CItemFlag = $00
+
+!DefaultMonster011DParam = $00
+!DefaultMonster011DAddr = $8AB4B0
+!DefaultMonster011DStats = $1D
+!DefaultMonster011DItemFlag = $00
+
+!DefaultMonster011EParam = $00
+!DefaultMonster011EAddr = $8AB4B0
+!DefaultMonster011EStats = $1D
+!DefaultMonster011EItemFlag = $00
+
+!DefaultMonster011FParam = $00
+!DefaultMonster011FAddr = $8AC533
+!DefaultMonster011FStats = $1B
+!DefaultMonster011FItemFlag = $00
+
+!DefaultMonster0120Param = $00
+!DefaultMonster0120Addr = $8AC533
+!DefaultMonster0120Stats = $1B
+!DefaultMonster0120ItemFlag = $00
+
+!DefaultMonster0121Param = $00
+!DefaultMonster0121Addr = $8AC533
+!DefaultMonster0121Stats = $1B
+!DefaultMonster0121ItemFlag = $00
+
+!DefaultMonster0122Param = $00
+!DefaultMonster0122Addr = $8AC533
+!DefaultMonster0122Stats = $1B
+!DefaultMonster0122ItemFlag = $00
+
+!DefaultMonster0123Param = $00
+!DefaultMonster0123Addr = $8AC533
+!DefaultMonster0123Stats = $1B
+!DefaultMonster0123ItemFlag = $00
+
+!DefaultMonster0124Param = $00
+!DefaultMonster0124Addr = $8AC533
+!DefaultMonster0124Stats = $1B
+!DefaultMonster0124ItemFlag = $00
+
+!DefaultMonster0125Param = $00
+!DefaultMonster0125Addr = $8AC533
+!DefaultMonster0125Stats = $1B
+!DefaultMonster0125ItemFlag = $00
+
+!DefaultMonster0126Param = $00
+!DefaultMonster0126Addr = $8AC533
+!DefaultMonster0126Stats = $1B
+!DefaultMonster0126ItemFlag = $00
+
+!DefaultMonster0127Param = $00
+!DefaultMonster0127Addr = $8AC533
+!DefaultMonster0127Stats = $1B
+!DefaultMonster0127ItemFlag = $00
+
+!DefaultMonster0128Param = $00
+!DefaultMonster0128Addr = $8AC533
+!DefaultMonster0128Stats = $1B
+!DefaultMonster0128ItemFlag = $00
+
+!DefaultMonster0129Param = $00
+!DefaultMonster0129Addr = $8AC533
+!DefaultMonster0129Stats = $1B
+!DefaultMonster0129ItemFlag = $00
+
+!DefaultMonster012AParam = $00
+!DefaultMonster012AAddr = $8AB8B0
+!DefaultMonster012AStats = $1E
+!DefaultMonster012AItemFlag = $00
+
+!DefaultMonster012BParam = $00
+!DefaultMonster012BAddr = $8AB8B0
+!DefaultMonster012BStats = $1E
+!DefaultMonster012BItemFlag = $00
+
+!DefaultMonster012CParam = $00
+!DefaultMonster012CAddr = $8AB8B0
+!DefaultMonster012CStats = $1E
+!DefaultMonster012CItemFlag = $00
+
+!DefaultMonster012DParam = $00
+!DefaultMonster012DAddr = $8AB8B0
+!DefaultMonster012DStats = $1E
+!DefaultMonster012DItemFlag = $00
+
+!DefaultMonster012EParam = $00
+!DefaultMonster012EAddr = $8AB8B0
+!DefaultMonster012EStats = $1E
+!DefaultMonster012EItemFlag = $00
+
+!DefaultMonster012FParam = $00
+!DefaultMonster012FAddr = $8AB8B0
+!DefaultMonster012FStats = $1E
+!DefaultMonster012FItemFlag = $00
+
+!DefaultMonster0130Param = $00
+!DefaultMonster0130Addr = $8AC816
+!DefaultMonster0130Stats = $1C
+!DefaultMonster0130ItemFlag = $00
+
+!DefaultMonster0131Param = $00
+!DefaultMonster0131Addr = $8AC816
+!DefaultMonster0131Stats = $1C
+!DefaultMonster0131ItemFlag = $00
+
+!DefaultMonster0132Param = $00
+!DefaultMonster0132Addr = $8AC816
+!DefaultMonster0132Stats = $1C
+!DefaultMonster0132ItemFlag = $00
+
+!DefaultMonster0133Param = $00
+!DefaultMonster0133Addr = $8AC816
+!DefaultMonster0133Stats = $1C
+!DefaultMonster0133ItemFlag = $00
+
+!DefaultMonster0134Param = $00
+!DefaultMonster0134Addr = $8AC816
+!DefaultMonster0134Stats = $1C
+!DefaultMonster0134ItemFlag = $00
+
+!DefaultMonster0135Param = $00
+!DefaultMonster0135Addr = $8AC816
+!DefaultMonster0135Stats = $1C
+!DefaultMonster0135ItemFlag = $00
+
+!DefaultMonster0136Param = $00
+!DefaultMonster0136Addr = $8AC816
+!DefaultMonster0136Stats = $1C
+!DefaultMonster0136ItemFlag = $00
+
+!DefaultMonster0137Param = $00
+!DefaultMonster0137Addr = $8AB4B0
+!DefaultMonster0137Stats = $1D
+!DefaultMonster0137ItemFlag = $00
+
+!DefaultMonster0138Param = $00
+!DefaultMonster0138Addr = $8AB4B0
+!DefaultMonster0138Stats = $1D
+!DefaultMonster0138ItemFlag = $00
+
+!DefaultMonster0139Param = $00
+!DefaultMonster0139Addr = $8AB4B0
+!DefaultMonster0139Stats = $1D
+!DefaultMonster0139ItemFlag = $00
+
+!DefaultMonster013AParam = $00
+!DefaultMonster013AAddr = $8AB4B0
+!DefaultMonster013AStats = $1D
+!DefaultMonster013AItemFlag = $00
+
+!DefaultMonster013BParam = $00
+!DefaultMonster013BAddr = $8AB4B0
+!DefaultMonster013BStats = $1D
+!DefaultMonster013BItemFlag = $15
+
+!DefaultMonster013CParam = $00
+!DefaultMonster013CAddr = $8AC533
+!DefaultMonster013CStats = $1B
+!DefaultMonster013CItemFlag = $00
+
+!DefaultMonster013DParam = $00
+!DefaultMonster013DAddr = $8AC533
+!DefaultMonster013DStats = $1B
+!DefaultMonster013DItemFlag = $00
+
+!DefaultMonster013EParam = $00
+!DefaultMonster013EAddr = $8AC533
+!DefaultMonster013EStats = $1B
+!DefaultMonster013EItemFlag = $00
+
+!DefaultMonster013FParam = $00
+!DefaultMonster013FAddr = $8AC520
+!DefaultMonster013FStats = $1B
+!DefaultMonster013FItemFlag = $00
+
+!DefaultMonster0140Param = $00
+!DefaultMonster0140Addr = $8AC533
+!DefaultMonster0140Stats = $1B
+!DefaultMonster0140ItemFlag = $00
+
+!DefaultMonster0141Param = $00
+!DefaultMonster0141Addr = $8AC533
+!DefaultMonster0141Stats = $1B
+!DefaultMonster0141ItemFlag = $00
+
+!DefaultMonster0142Param = $00
+!DefaultMonster0142Addr = $8AC533
+!DefaultMonster0142Stats = $1B
+!DefaultMonster0142ItemFlag = $00
+
+!DefaultMonster0143Param = $00
+!DefaultMonster0143Addr = $8AC533
+!DefaultMonster0143Stats = $1B
+!DefaultMonster0143ItemFlag = $00
+
+!DefaultMonster0144Param = $00
+!DefaultMonster0144Addr = $8AB8B0
+!DefaultMonster0144Stats = $1E
+!DefaultMonster0144ItemFlag = $00
+
+!DefaultMonster0145Param = $00
+!DefaultMonster0145Addr = $8AB8B0
+!DefaultMonster0145Stats = $1E
+!DefaultMonster0145ItemFlag = $00
+
+!DefaultMonster0146Param = $00
+!DefaultMonster0146Addr = $8AB8B0
+!DefaultMonster0146Stats = $1E
+!DefaultMonster0146ItemFlag = $00
+
+!DefaultMonster0147Param = $00
+!DefaultMonster0147Addr = $8AB8B0
+!DefaultMonster0147Stats = $1E
+!DefaultMonster0147ItemFlag = $00
+
+!DefaultMonster0148Param = $00
+!DefaultMonster0148Addr = $8AB8B0
+!DefaultMonster0148Stats = $1E
+!DefaultMonster0148ItemFlag = $16
+
+!DefaultMonster0149Param = $00
+!DefaultMonster0149Addr = $8AC816
+!DefaultMonster0149Stats = $1C
+!DefaultMonster0149ItemFlag = $00
+
+!DefaultMonster014AParam = $00
+!DefaultMonster014AAddr = $8AC816
+!DefaultMonster014AStats = $1C
+!DefaultMonster014AItemFlag = $00
+
+!DefaultMonster014BParam = $00
+!DefaultMonster014BAddr = $8AC816
+!DefaultMonster014BStats = $1C
+!DefaultMonster014BItemFlag = $00
+
+!DefaultMonster014CParam = $00
+!DefaultMonster014CAddr = $8AC816
+!DefaultMonster014CStats = $1C
+!DefaultMonster014CItemFlag = $00
+
+!DefaultMonster014DParam = $00
+!DefaultMonster014DAddr = $8AC816
+!DefaultMonster014DStats = $1C
+!DefaultMonster014DItemFlag = $00
+
+!DefaultMonster014EParam = $00
+!DefaultMonster014EAddr = $8AC816
+!DefaultMonster014EStats = $1C
+!DefaultMonster014EItemFlag = $00
+
+!DefaultMonster014FParam = $00
+!DefaultMonster014FAddr = $8AC816
+!DefaultMonster014FStats = $1C
+!DefaultMonster014FItemFlag = $00
+
+!DefaultMonster0150Param = $00
+!DefaultMonster0150Addr = $8AB4B0
+!DefaultMonster0150Stats = $1D
+!DefaultMonster0150ItemFlag = $17
+
+!DefaultMonster0151Param = $00
+!DefaultMonster0151Addr = $8AB4B0
+!DefaultMonster0151Stats = $1D
+!DefaultMonster0151ItemFlag = $00
+
+!DefaultMonster0152Param = $00
+!DefaultMonster0152Addr = $8AB4B0
+!DefaultMonster0152Stats = $1D
+!DefaultMonster0152ItemFlag = $00
+
+!DefaultMonster0153Param = $00
+!DefaultMonster0153Addr = $8AB4B0
+!DefaultMonster0153Stats = $1D
+!DefaultMonster0153ItemFlag = $18
+
+!DefaultMonster0154Param = $00
+!DefaultMonster0154Addr = $8AB4B0
+!DefaultMonster0154Stats = $1D
+!DefaultMonster0154ItemFlag = $00
+
+!DefaultMonster0155Param = $00
+!DefaultMonster0155Addr = $8AB4B0
+!DefaultMonster0155Stats = $1D
+!DefaultMonster0155ItemFlag = $00
+
+!DefaultMonster0156Param = $00
+!DefaultMonster0156Addr = $8AB4B0
+!DefaultMonster0156Stats = $1D
+!DefaultMonster0156ItemFlag = $00
+
+!DefaultMonster0157Param = $00
+!DefaultMonster0157Addr = $8AC533
+!DefaultMonster0157Stats = $1B
+!DefaultMonster0157ItemFlag = $00
+
+!DefaultMonster0158Param = $00
+!DefaultMonster0158Addr = $8AC520
+!DefaultMonster0158Stats = $1B
+!DefaultMonster0158ItemFlag = $00
+
+!DefaultMonster0159Param = $00
+!DefaultMonster0159Addr = $8AC533
+!DefaultMonster0159Stats = $1B
+!DefaultMonster0159ItemFlag = $00
+
+!DefaultMonster015AParam = $00
+!DefaultMonster015AAddr = $8AC533
+!DefaultMonster015AStats = $1B
+!DefaultMonster015AItemFlag = $00
+
+!DefaultMonster015BParam = $00
+!DefaultMonster015BAddr = $8AC533
+!DefaultMonster015BStats = $1B
+!DefaultMonster015BItemFlag = $00
+
+!DefaultMonster015CParam = $00
+!DefaultMonster015CAddr = $8AC533
+!DefaultMonster015CStats = $1B
+!DefaultMonster015CItemFlag = $19
+
+!DefaultMonster015DParam = $00
+!DefaultMonster015DAddr = $8AB8B0
+!DefaultMonster015DStats = $1E
+!DefaultMonster015DItemFlag = $00
+
+!DefaultMonster015EParam = $00
+!DefaultMonster015EAddr = $8AB8B0
+!DefaultMonster015EStats = $1E
+!DefaultMonster015EItemFlag = $00
+
+!DefaultMonster015FParam = $00
+!DefaultMonster015FAddr = $8AB8B0
+!DefaultMonster015FStats = $1E
+!DefaultMonster015FItemFlag = $00
+
+!DefaultMonster0160Param = $00
+!DefaultMonster0160Addr = $8AB8B0
+!DefaultMonster0160Stats = $1E
+!DefaultMonster0160ItemFlag = $00
+
+!DefaultMonster0161Param = $00
+!DefaultMonster0161Addr = $8AB8B0
+!DefaultMonster0161Stats = $1E
+!DefaultMonster0161ItemFlag = $1a
+
+!DefaultMonster0162Param = $00
+!DefaultMonster0162Addr = $8AC816
+!DefaultMonster0162Stats = $1C
+!DefaultMonster0162ItemFlag = $00
+
+!DefaultMonster0163Param = $00
+!DefaultMonster0163Addr = $8AC816
+!DefaultMonster0163Stats = $1C
+!DefaultMonster0163ItemFlag = $00
+
+!DefaultMonster0164Param = $00
+!DefaultMonster0164Addr = $8AB4B0
+!DefaultMonster0164Stats = $1D
+!DefaultMonster0164ItemFlag = $00
+
+!DefaultMonster0165Param = $00
+!DefaultMonster0165Addr = $8AB4B0
+!DefaultMonster0165Stats = $1D
+!DefaultMonster0165ItemFlag = $00
+
+!DefaultMonster0166Param = $00
+!DefaultMonster0166Addr = $8AB4B0
+!DefaultMonster0166Stats = $1D
+!DefaultMonster0166ItemFlag = $00
+
+!DefaultMonster0167Param = $00
+!DefaultMonster0167Addr = $8AB4B0
+!DefaultMonster0167Stats = $1D
+!DefaultMonster0167ItemFlag = $00
+
+!DefaultMonster0168Param = $00
+!DefaultMonster0168Addr = $8AB4B0
+!DefaultMonster0168Stats = $1D
+!DefaultMonster0168ItemFlag = $00
+
+!DefaultMonster0169Param = $00
+!DefaultMonster0169Addr = $8AB4B0
+!DefaultMonster0169Stats = $1D
+!DefaultMonster0169ItemFlag = $00
+
+!DefaultMonster016AParam = $00
+!DefaultMonster016AAddr = $8AC533
+!DefaultMonster016AStats = $1B
+!DefaultMonster016AItemFlag = $00
+
+!DefaultMonster016BParam = $00
+!DefaultMonster016BAddr = $8AC533
+!DefaultMonster016BStats = $1B
+!DefaultMonster016BItemFlag = $00
+
+!DefaultMonster016CParam = $00
+!DefaultMonster016CAddr = $8AC533
+!DefaultMonster016CStats = $1B
+!DefaultMonster016CItemFlag = $00
+
+!DefaultMonster016DParam = $00
+!DefaultMonster016DAddr = $8AC533
+!DefaultMonster016DStats = $1B
+!DefaultMonster016DItemFlag = $00
+
+!DefaultMonster016EParam = $00
+!DefaultMonster016EAddr = $8AC533
+!DefaultMonster016EStats = $1B
+!DefaultMonster016EItemFlag = $00
+
+!DefaultMonster016FParam = $00
+!DefaultMonster016FAddr = $8AC533
+!DefaultMonster016FStats = $1B
+!DefaultMonster016FItemFlag = $00
+
+!DefaultMonster0170Param = $00
+!DefaultMonster0170Addr = $8AC533
+!DefaultMonster0170Stats = $1B
+!DefaultMonster0170ItemFlag = $00
+
+!DefaultMonster0171Param = $00
+!DefaultMonster0171Addr = $8AC533
+!DefaultMonster0171Stats = $1B
+!DefaultMonster0171ItemFlag = $00
+
+!DefaultMonster0172Param = $00
+!DefaultMonster0172Addr = $8AC533
+!DefaultMonster0172Stats = $1B
+!DefaultMonster0172ItemFlag = $00
+
+!DefaultMonster0173Param = $00
+!DefaultMonster0173Addr = $8AB8B0
+!DefaultMonster0173Stats = $1E
+!DefaultMonster0173ItemFlag = $00
+
+!DefaultMonster0174Param = $00
+!DefaultMonster0174Addr = $8AB8B0
+!DefaultMonster0174Stats = $1E
+!DefaultMonster0174ItemFlag = $00
+
+!DefaultMonster0175Param = $00
+!DefaultMonster0175Addr = $8AB8B0
+!DefaultMonster0175Stats = $1E
+!DefaultMonster0175ItemFlag = $00
+
+!DefaultMonster0176Param = $00
+!DefaultMonster0176Addr = $8AB8B0
+!DefaultMonster0176Stats = $1E
+!DefaultMonster0176ItemFlag = $00
+
+!DefaultMonster0177Param = $00
+!DefaultMonster0177Addr = $8AC816
+!DefaultMonster0177Stats = $1C
+!DefaultMonster0177ItemFlag = $00
+
+!DefaultMonster0178Param = $00
+!DefaultMonster0178Addr = $8AC816
+!DefaultMonster0178Stats = $1C
+!DefaultMonster0178ItemFlag = $00
+
+!DefaultMonster0179Param = $00
+!DefaultMonster0179Addr = $8AC816
+!DefaultMonster0179Stats = $1C
+!DefaultMonster0179ItemFlag = $00
+
+!DefaultMonster017AParam = $00
+!DefaultMonster017AAddr = $8AC816
+!DefaultMonster017AStats = $1C
+!DefaultMonster017AItemFlag = $00
+
+!DefaultMonster017BParam = $00
+!DefaultMonster017BAddr = $8AC816
+!DefaultMonster017BStats = $1C
+!DefaultMonster017BItemFlag = $00
+
+!DefaultMonster017CParam = $00
+!DefaultMonster017CAddr = $8AC816
+!DefaultMonster017CStats = $1C
+!DefaultMonster017CItemFlag = $00
+
+!DefaultMonster017DParam = $00
+!DefaultMonster017DAddr = $8AC816
+!DefaultMonster017DStats = $1C
+!DefaultMonster017DItemFlag = $00
+
+!DefaultMonster017EParam = $00
+!DefaultMonster017EAddr = $8AC816
+!DefaultMonster017EStats = $1C
+!DefaultMonster017EItemFlag = $00
+
+!DefaultMonster017FParam = $00
+!DefaultMonster017FAddr = $8AC816
+!DefaultMonster017FStats = $1C
+!DefaultMonster017FItemFlag = $00
+
+!DefaultMonster0180Param = $00
+!DefaultMonster0180Addr = $8AC816
+!DefaultMonster0180Stats = $1C
+!DefaultMonster0180ItemFlag = $00
+
+!DefaultMonster0181Param = $00
+!DefaultMonster0181Addr = $8AC816
+!DefaultMonster0181Stats = $1C
+!DefaultMonster0181ItemFlag = $00
+
+!DefaultMonster0182Param = $00
+!DefaultMonster0182Addr = $8AC816
+!DefaultMonster0182Stats = $1C
+!DefaultMonster0182ItemFlag = $00
+
+!DefaultMonster0183Param = $30
+!DefaultMonster0183Addr = $8ad16f
+!DefaultMonster0183Stats = $27
+!DefaultMonster0183ItemFlag = $00
+
+!DefaultMonster0184Param = $00
+!DefaultMonster0184Addr = $8ae45c
+!DefaultMonster0184Stats = $2A
+!DefaultMonster0184ItemFlag = $00
+
+!DefaultMonster0185Param = $00
+!DefaultMonster0185Addr = $8ae45c
+!DefaultMonster0185Stats = $2A
+!DefaultMonster0185ItemFlag = $00
+
+!DefaultMonster0186Param = $00
+!DefaultMonster0186Addr = $8ae45c
+!DefaultMonster0186Stats = $2A
+!DefaultMonster0186ItemFlag = $00
+
+!DefaultMonster0187Param = $00
+!DefaultMonster0187Addr = $8ae45c
+!DefaultMonster0187Stats = $2A
+!DefaultMonster0187ItemFlag = $00
+
+!DefaultMonster0188Param = $00
+!DefaultMonster0188Addr = $8ae45c
+!DefaultMonster0188Stats = $2A
+!DefaultMonster0188ItemFlag = $00
+
+!DefaultMonster0189Param = $00
+!DefaultMonster0189Addr = $8ae45c
+!DefaultMonster0189Stats = $2A
+!DefaultMonster0189ItemFlag = $00
+
+!DefaultMonster018AParam = $00
+!DefaultMonster018AAddr = $8AE6F4
+!DefaultMonster018AStats = $2B
+!DefaultMonster018AItemFlag = $00
+
+!DefaultMonster018BParam = $00
+!DefaultMonster018BAddr = $8AE6F4
+!DefaultMonster018BStats = $2B
+!DefaultMonster018BItemFlag = $00
+
+!DefaultMonster018CParam = $00
+!DefaultMonster018CAddr = $8AE6F4
+!DefaultMonster018CStats = $2B
+!DefaultMonster018CItemFlag = $00
+
+!DefaultMonster018DParam = $00
+!DefaultMonster018DAddr = $8AE6F4
+!DefaultMonster018DStats = $2B
+!DefaultMonster018DItemFlag = $00
+
+!DefaultMonster018EParam = $00
+!DefaultMonster018EAddr = $8AE6F4
+!DefaultMonster018EStats = $2B
+!DefaultMonster018EItemFlag = $00
+
+!DefaultMonster018FParam = $00
+!DefaultMonster018FAddr = $8AE6F4
+!DefaultMonster018FStats = $2B
+!DefaultMonster018FItemFlag = $00
+
+!DefaultMonster0190Param = $00
+!DefaultMonster0190Addr = $8AE6F4
+!DefaultMonster0190Stats = $2B
+!DefaultMonster0190ItemFlag = $00
+
+!DefaultMonster0191Param = $00
+!DefaultMonster0191Addr = $8AE6F4
+!DefaultMonster0191Stats = $2B
+!DefaultMonster0191ItemFlag = $00
+
+!DefaultMonster0192Param = $00
+!DefaultMonster0192Addr = $8AE6F4
+!DefaultMonster0192Stats = $2B
+!DefaultMonster0192ItemFlag = $00
+
+!DefaultMonster0193Param = $30
+!DefaultMonster0193Addr = $8add9e
+!DefaultMonster0193Stats = $28
+!DefaultMonster0193ItemFlag = $00
+
+!DefaultMonster0194Param = $30
+!DefaultMonster0194Addr = $8ade07
+!DefaultMonster0194Stats = $28
+!DefaultMonster0194ItemFlag = $1b
+
+!DefaultMonster0195Param = $30
+!DefaultMonster0195Addr = $8add9e
+!DefaultMonster0195Stats = $28
+!DefaultMonster0195ItemFlag = $00
+
+!DefaultMonster0196Param = $30
+!DefaultMonster0196Addr = $8add9e
+!DefaultMonster0196Stats = $28
+!DefaultMonster0196ItemFlag = $00
+
+!DefaultMonster0197Param = $30
+!DefaultMonster0197Addr = $8add9e
+!DefaultMonster0197Stats = $28
+!DefaultMonster0197ItemFlag = $00
+
+!DefaultMonster0198Param = $30
+!DefaultMonster0198Addr = $8add9e
+!DefaultMonster0198Stats = $28
+!DefaultMonster0198ItemFlag = $00
+
+!DefaultMonster0199Param = $30
+!DefaultMonster0199Addr = $8ae45c
+!DefaultMonster0199Stats = $2A
+!DefaultMonster0199ItemFlag = $00
+
+!DefaultMonster019AParam = $30
+!DefaultMonster019AAddr = $8ae45c
+!DefaultMonster019AStats = $2A
+!DefaultMonster019AItemFlag = $00
+
+!DefaultMonster019BParam = $30
+!DefaultMonster019BAddr = $8ae45c
+!DefaultMonster019BStats = $2A
+!DefaultMonster019BItemFlag = $00
+
+!DefaultMonster019CParam = $30
+!DefaultMonster019CAddr = $8ae45c
+!DefaultMonster019CStats = $2A
+!DefaultMonster019CItemFlag = $00
+
+!DefaultMonster019DParam = $30
+!DefaultMonster019DAddr = $8ae45c
+!DefaultMonster019DStats = $2A
+!DefaultMonster019DItemFlag = $00
+
+!DefaultMonster019EParam = $30
+!DefaultMonster019EAddr = $8ae45c
+!DefaultMonster019EStats = $2A
+!DefaultMonster019EItemFlag = $00
+
+!DefaultMonster019FParam = $30
+!DefaultMonster019FAddr = $8ae45c
+!DefaultMonster019FStats = $2A
+!DefaultMonster019FItemFlag = $00
+
+!DefaultMonster01A0Param = $30
+!DefaultMonster01A0Addr = $8ae45c
+!DefaultMonster01A0Stats = $2A
+!DefaultMonster01A0ItemFlag = $00
+
+!DefaultMonster01A1Param = $30
+!DefaultMonster01A1Addr = $8ae45c
+!DefaultMonster01A1Stats = $2A
+!DefaultMonster01A1ItemFlag = $00
+
+!DefaultMonster01A2Param = $30
+!DefaultMonster01A2Addr = $8ae45c
+!DefaultMonster01A2Stats = $2A
+!DefaultMonster01A2ItemFlag = $00
+
+!DefaultMonster01A3Param = $30
+!DefaultMonster01A3Addr = $8ae45c
+!DefaultMonster01A3Stats = $2A
+!DefaultMonster01A3ItemFlag = $00
+
+!DefaultMonster01A4Param = $30
+!DefaultMonster01A4Addr = $8ae45c
+!DefaultMonster01A4Stats = $2A
+!DefaultMonster01A4ItemFlag = $00
+
+!DefaultMonster01A5Param = $30
+!DefaultMonster01A5Addr = $8ae26e
+!DefaultMonster01A5Stats = $29
+!DefaultMonster01A5ItemFlag = $00
+
+!DefaultMonster01A6Param = $30
+!DefaultMonster01A6Addr = $8ae6cc
+!DefaultMonster01A6Stats = $2B
+!DefaultMonster01A6ItemFlag = $00
+
+!DefaultMonster01A7Param = $30
+!DefaultMonster01A7Addr = $8ae6cc
+!DefaultMonster01A7Stats = $2B
+!DefaultMonster01A7ItemFlag = $1c
+
+!DefaultMonster01A8Param = $30
+!DefaultMonster01A8Addr = $8ae6cc
+!DefaultMonster01A8Stats = $2B
+!DefaultMonster01A8ItemFlag = $00
+
+!DefaultMonster01A9Param = $30
+!DefaultMonster01A9Addr = $8ae6cc
+!DefaultMonster01A9Stats = $2B
+!DefaultMonster01A9ItemFlag = $1d
+
+!DefaultMonster01AAParam = $30
+!DefaultMonster01AAAddr = $8ae6cc
+!DefaultMonster01AAStats = $2B
+!DefaultMonster01AAItemFlag = $00
+
+!DefaultMonster01ABParam = $30
+!DefaultMonster01ABAddr = $8ade07
+!DefaultMonster01ABStats = $28
+!DefaultMonster01ABItemFlag = $00
+
+!DefaultMonster01ACParam = $30
+!DefaultMonster01ACAddr = $8add9e
+!DefaultMonster01ACStats = $28
+!DefaultMonster01ACItemFlag = $00
+
+!DefaultMonster01ADParam = $30
+!DefaultMonster01ADAddr = $8add9e
+!DefaultMonster01ADStats = $28
+!DefaultMonster01ADItemFlag = $00
+
+!DefaultMonster01AEParam = $30
+!DefaultMonster01AEAddr = $8add9e
+!DefaultMonster01AEStats = $28
+!DefaultMonster01AEItemFlag = $00
+
+!DefaultMonster01AFParam = $30
+!DefaultMonster01AFAddr = $8add9e
+!DefaultMonster01AFStats = $28
+!DefaultMonster01AFItemFlag = $00
+
+!DefaultMonster01B0Param = $30
+!DefaultMonster01B0Addr = $8add9e
+!DefaultMonster01B0Stats = $28
+!DefaultMonster01B0ItemFlag = $00
+
+!DefaultMonster01B1Param = $30
+!DefaultMonster01B1Addr = $8ade07
+!DefaultMonster01B1Stats = $28
+!DefaultMonster01B1ItemFlag = $00
+
+!DefaultMonster01B2Param = $30
+!DefaultMonster01B2Addr = $8ade07
+!DefaultMonster01B2Stats = $28
+!DefaultMonster01B2ItemFlag = $00
+
+!DefaultMonster01B3Param = $30
+!DefaultMonster01B3Addr = $8ae26e
+!DefaultMonster01B3Stats = $29
+!DefaultMonster01B3ItemFlag = $00
+
+!DefaultMonster01B4Param = $30
+!DefaultMonster01B4Addr = $8ae26e
+!DefaultMonster01B4Stats = $29
+!DefaultMonster01B4ItemFlag = $00
+
+!DefaultMonster01B5Param = $30
+!DefaultMonster01B5Addr = $8ae26e
+!DefaultMonster01B5Stats = $29
+!DefaultMonster01B5ItemFlag = $00
+
+!DefaultMonster01B6Param = $30
+!DefaultMonster01B6Addr = $8ae26e
+!DefaultMonster01B6Stats = $29
+!DefaultMonster01B6ItemFlag = $00
+
+!DefaultMonster01B7Param = $30
+!DefaultMonster01B7Addr = $8ae45c
+!DefaultMonster01B7Stats = $2A
+!DefaultMonster01B7ItemFlag = $00
+
+!DefaultMonster01B8Param = $30
+!DefaultMonster01B8Addr = $8ae45c
+!DefaultMonster01B8Stats = $2A
+!DefaultMonster01B8ItemFlag = $00
+
+!DefaultMonster01B9Param = $30
+!DefaultMonster01B9Addr = $8ae45c
+!DefaultMonster01B9Stats = $2A
+!DefaultMonster01B9ItemFlag = $00
+
+!DefaultMonster01BAParam = $30
+!DefaultMonster01BAAddr = $8ae45c
+!DefaultMonster01BAStats = $2A
+!DefaultMonster01BAItemFlag = $00
+
+!DefaultMonster01BBParam = $30
+!DefaultMonster01BBAddr = $8ae45c
+!DefaultMonster01BBStats = $2A
+!DefaultMonster01BBItemFlag = $00
+
+!DefaultMonster01BCParam = $30
+!DefaultMonster01BCAddr = $8ae45c
+!DefaultMonster01BCStats = $2A
+!DefaultMonster01BCItemFlag = $00
+
+!DefaultMonster01BDParam = $30
+!DefaultMonster01BDAddr = $8ae45c
+!DefaultMonster01BDStats = $2A
+!DefaultMonster01BDItemFlag = $00
+
+!DefaultMonster01BEParam = $30
+!DefaultMonster01BEAddr = $8ae45c
+!DefaultMonster01BEStats = $2A
+!DefaultMonster01BEItemFlag = $00
+
+!DefaultMonster01BFParam = $30
+!DefaultMonster01BFAddr = $8ae45c
+!DefaultMonster01BFStats = $2A
+!DefaultMonster01BFItemFlag = $00
+
+!DefaultMonster01C0Param = $30
+!DefaultMonster01C0Addr = $8ae6cc
+!DefaultMonster01C0Stats = $2B
+!DefaultMonster01C0ItemFlag = $00
+
+!DefaultMonster01C1Param = $30
+!DefaultMonster01C1Addr = $8ae6cc
+!DefaultMonster01C1Stats = $2B
+!DefaultMonster01C1ItemFlag = $00
+
+!DefaultMonster01C2Param = $30
+!DefaultMonster01C2Addr = $8ae6cc
+!DefaultMonster01C2Stats = $2B
+!DefaultMonster01C2ItemFlag = $00
+
+!DefaultMonster01C3Param = $30
+!DefaultMonster01C3Addr = $8ae6cc
+!DefaultMonster01C3Stats = $2B
+!DefaultMonster01C3ItemFlag = $00
+
+!DefaultMonster01C4Param = $30
+!DefaultMonster01C4Addr = $8add9e
+!DefaultMonster01C4Stats = $28
+!DefaultMonster01C4ItemFlag = $00
+
+!DefaultMonster01C5Param = $30
+!DefaultMonster01C5Addr = $8add9e
+!DefaultMonster01C5Stats = $28
+!DefaultMonster01C5ItemFlag = $00
+
+!DefaultMonster01C6Param = $30
+!DefaultMonster01C6Addr = $8ade07
+!DefaultMonster01C6Stats = $28
+!DefaultMonster01C6ItemFlag = $00
+
+!DefaultMonster01C7Param = $30
+!DefaultMonster01C7Addr = $8add9e
+!DefaultMonster01C7Stats = $28
+!DefaultMonster01C7ItemFlag = $00
+
+!DefaultMonster01C8Param = $30
+!DefaultMonster01C8Addr = $8ade07
+!DefaultMonster01C8Stats = $28
+!DefaultMonster01C8ItemFlag = $00
+
+!DefaultMonster01C9Param = $30
+!DefaultMonster01C9Addr = $8ae26e
+!DefaultMonster01C9Stats = $29
+!DefaultMonster01C9ItemFlag = $00
+
+!DefaultMonster01CAParam = $30
+!DefaultMonster01CAAddr = $8ae26e
+!DefaultMonster01CAStats = $29
+!DefaultMonster01CAItemFlag = $00
+
+!DefaultMonster01CBParam = $30
+!DefaultMonster01CBAddr = $8ae26e
+!DefaultMonster01CBStats = $29
+!DefaultMonster01CBItemFlag = $00
+
+!DefaultMonster01CCParam = $30
+!DefaultMonster01CCAddr = $8ae26e
+!DefaultMonster01CCStats = $29
+!DefaultMonster01CCItemFlag = $00
+
+!DefaultMonster01CDParam = $30
+!DefaultMonster01CDAddr = $8ae26e
+!DefaultMonster01CDStats = $29
+!DefaultMonster01CDItemFlag = $00
+
+!DefaultMonster01CEParam = $30
+!DefaultMonster01CEAddr = $8ae45c
+!DefaultMonster01CEStats = $2A
+!DefaultMonster01CEItemFlag = $00
+
+!DefaultMonster01CFParam = $30
+!DefaultMonster01CFAddr = $8ae45c
+!DefaultMonster01CFStats = $2A
+!DefaultMonster01CFItemFlag = $00
+
+!DefaultMonster01D0Param = $30
+!DefaultMonster01D0Addr = $8ae45c
+!DefaultMonster01D0Stats = $2A
+!DefaultMonster01D0ItemFlag = $00
+
+!DefaultMonster01D1Param = $30
+!DefaultMonster01D1Addr = $8ae45c
+!DefaultMonster01D1Stats = $2A
+!DefaultMonster01D1ItemFlag = $00
+
+!DefaultMonster01D2Param = $30
+!DefaultMonster01D2Addr = $8ae45c
+!DefaultMonster01D2Stats = $2A
+!DefaultMonster01D2ItemFlag = $00
+
+!DefaultMonster01D3Param = $30
+!DefaultMonster01D3Addr = $8ae45c
+!DefaultMonster01D3Stats = $2A
+!DefaultMonster01D3ItemFlag = $00
+
+!DefaultMonster01D4Param = $30
+!DefaultMonster01D4Addr = $8ae45c
+!DefaultMonster01D4Stats = $2A
+!DefaultMonster01D4ItemFlag = $00
+
+!DefaultMonster01D5Param = $30
+!DefaultMonster01D5Addr = $8ae45c
+!DefaultMonster01D5Stats = $2A
+!DefaultMonster01D5ItemFlag = $00
+
+!DefaultMonster01D6Param = $30
+!DefaultMonster01D6Addr = $8ae45c
+!DefaultMonster01D6Stats = $2A
+!DefaultMonster01D6ItemFlag = $00
+
+!DefaultMonster01D7Param = $30
+!DefaultMonster01D7Addr = $8ae45c
+!DefaultMonster01D7Stats = $2A
+!DefaultMonster01D7ItemFlag = $00
+
+!DefaultMonster01D8Param = $30
+!DefaultMonster01D8Addr = $8ae45c
+!DefaultMonster01D8Stats = $2A
+!DefaultMonster01D8ItemFlag = $00
+
+!DefaultMonster01D9Param = $30
+!DefaultMonster01D9Addr = $8ae45c
+!DefaultMonster01D9Stats = $2A
+!DefaultMonster01D9ItemFlag = $00
+
+!DefaultMonster01DAParam = $30
+!DefaultMonster01DAAddr = $8ae45c
+!DefaultMonster01DAStats = $2A
+!DefaultMonster01DAItemFlag = $00
+
+!DefaultMonster01DBParam = $30
+!DefaultMonster01DBAddr = $8ae45c
+!DefaultMonster01DBStats = $2A
+!DefaultMonster01DBItemFlag = $00
+
+!DefaultMonster01DCParam = $30
+!DefaultMonster01DCAddr = $8ae45c
+!DefaultMonster01DCStats = $2A
+!DefaultMonster01DCItemFlag = $00
+
+!DefaultMonster01DDParam = $30
+!DefaultMonster01DDAddr = $8ae45c
+!DefaultMonster01DDStats = $2A
+!DefaultMonster01DDItemFlag = $00
+
+!DefaultMonster01DEParam = $30
+!DefaultMonster01DEAddr = $8ae45c
+!DefaultMonster01DEStats = $2A
+!DefaultMonster01DEItemFlag = $1e
+
+!DefaultMonster01DFParam = $30
+!DefaultMonster01DFAddr = $8ae45c
+!DefaultMonster01DFStats = $2A
+!DefaultMonster01DFItemFlag = $00
+
+!DefaultMonster01E0Param = $30
+!DefaultMonster01E0Addr = $8ae45c
+!DefaultMonster01E0Stats = $2A
+!DefaultMonster01E0ItemFlag = $00
+
+!DefaultMonster01E1Param = $30
+!DefaultMonster01E1Addr = $8ae45c
+!DefaultMonster01E1Stats = $2A
+!DefaultMonster01E1ItemFlag = $00
+
+!DefaultMonster01E2Param = $30
+!DefaultMonster01E2Addr = $8ae45c
+!DefaultMonster01E2Stats = $2A
+!DefaultMonster01E2ItemFlag = $00
+
+!DefaultMonster01E3Param = $30
+!DefaultMonster01E3Addr = $8ae45c
+!DefaultMonster01E3Stats = $2A
+!DefaultMonster01E3ItemFlag = $00
+
+!DefaultMonster01E4Param = $30
+!DefaultMonster01E4Addr = $8ae26e
+!DefaultMonster01E4Stats = $29
+!DefaultMonster01E4ItemFlag = $00
+
+!DefaultMonster01E5Param = $30
+!DefaultMonster01E5Addr = $8ae26e
+!DefaultMonster01E5Stats = $29
+!DefaultMonster01E5ItemFlag = $00
+
+!DefaultMonster01E6Param = $30
+!DefaultMonster01E6Addr = $8add9e
+!DefaultMonster01E6Stats = $28
+!DefaultMonster01E6ItemFlag = $00
+
+!DefaultMonster01E7Param = $30
+!DefaultMonster01E7Addr = $8ae45c
+!DefaultMonster01E7Stats = $2A
+!DefaultMonster01E7ItemFlag = $00
+
+!DefaultMonster01E8Param = $30
+!DefaultMonster01E8Addr = $8ae45c
+!DefaultMonster01E8Stats = $2A
+!DefaultMonster01E8ItemFlag = $00
+
+!DefaultMonster01E9Param = $30
+!DefaultMonster01E9Addr = $8ae45c
+!DefaultMonster01E9Stats = $2A
+!DefaultMonster01E9ItemFlag = $00
+
+!DefaultMonster01EAParam = $30
+!DefaultMonster01EAAddr = $8ae45c
+!DefaultMonster01EAStats = $2A
+!DefaultMonster01EAItemFlag = $00
+
+!DefaultMonster01EBParam = $30
+!DefaultMonster01EBAddr = $8ae45c
+!DefaultMonster01EBStats = $2A
+!DefaultMonster01EBItemFlag = $00
+
+!DefaultMonster01ECParam = $30
+!DefaultMonster01ECAddr = $8ae26e
+!DefaultMonster01ECStats = $29
+!DefaultMonster01ECItemFlag = $00
+
+!DefaultMonster01EDParam = $30
+!DefaultMonster01EDAddr = $8ae26e
+!DefaultMonster01EDStats = $29
+!DefaultMonster01EDItemFlag = $00
+
+!DefaultMonster01EEParam = $30
+!DefaultMonster01EEAddr = $8ade07
+!DefaultMonster01EEStats = $28
+!DefaultMonster01EEItemFlag = $1f
+
+!DefaultMonster01EFParam = $30
+!DefaultMonster01EFAddr = $8ade07
+!DefaultMonster01EFStats = $28
+!DefaultMonster01EFItemFlag = $00
+
+!DefaultMonster01F0Param = $30
+!DefaultMonster01F0Addr = $8ade07
+!DefaultMonster01F0Stats = $28
+!DefaultMonster01F0ItemFlag = $00
+
+!DefaultMonster01F1Param = $30
+!DefaultMonster01F1Addr = $8ade07
+!DefaultMonster01F1Stats = $28
+!DefaultMonster01F1ItemFlag = $00
+
+!DefaultMonster01F2Param = $30
+!DefaultMonster01F2Addr = $8ade07
+!DefaultMonster01F2Stats = $28
+!DefaultMonster01F2ItemFlag = $00
+
+!DefaultMonster01F3Param = $30
+!DefaultMonster01F3Addr = $8ade07
+!DefaultMonster01F3Stats = $28
+!DefaultMonster01F3ItemFlag = $00
+
+!DefaultMonster01F4Param = $30
+!DefaultMonster01F4Addr = $8ae26e
+!DefaultMonster01F4Stats = $29
+!DefaultMonster01F4ItemFlag = $00
+
+!DefaultMonster01F5Param = $30
+!DefaultMonster01F5Addr = $8ae45c
+!DefaultMonster01F5Stats = $2A
+!DefaultMonster01F5ItemFlag = $00
+
+!DefaultMonster01F6Param = $30
+!DefaultMonster01F6Addr = $8ae45c
+!DefaultMonster01F6Stats = $2A
+!DefaultMonster01F6ItemFlag = $00
+
+!DefaultMonster01F7Param = $30
+!DefaultMonster01F7Addr = $8ae45c
+!DefaultMonster01F7Stats = $2A
+!DefaultMonster01F7ItemFlag = $00
+
+!DefaultMonster01F8Param = $30
+!DefaultMonster01F8Addr = $8ae45c
+!DefaultMonster01F8Stats = $2A
+!DefaultMonster01F8ItemFlag = $00
+
+!DefaultMonster01F9Param = $30
+!DefaultMonster01F9Addr = $8ae45c
+!DefaultMonster01F9Stats = $2A
+!DefaultMonster01F9ItemFlag = $00
+
+!DefaultMonster01FAParam = $30
+!DefaultMonster01FAAddr = $8ae6cc
+!DefaultMonster01FAStats = $2B
+!DefaultMonster01FAItemFlag = $00
+
+!DefaultMonster01FBParam = $30
+!DefaultMonster01FBAddr = $8ae6cc
+!DefaultMonster01FBStats = $2B
+!DefaultMonster01FBItemFlag = $00
+
+!DefaultMonster01FCParam = $30
+!DefaultMonster01FCAddr = $8ae6cc
+!DefaultMonster01FCStats = $2B
+!DefaultMonster01FCItemFlag = $20
+
+!DefaultMonster01FDParam = $30
+!DefaultMonster01FDAddr = $8ae6cc
+!DefaultMonster01FDStats = $2B
+!DefaultMonster01FDItemFlag = $00
+
+!DefaultMonster01FEParam = $30
+!DefaultMonster01FEAddr = $8ae6cc
+!DefaultMonster01FEStats = $2B
+!DefaultMonster01FEItemFlag = $00
+
+!DefaultMonster01FFParam = $30
+!DefaultMonster01FFAddr = $8AF1F7
+!DefaultMonster01FFStats = $2F
+!DefaultMonster01FFItemFlag = $00
+
+!DefaultMonster0200Param = $30
+!DefaultMonster0200Addr = $8AF3C8
+!DefaultMonster0200Stats = $30
+!DefaultMonster0200ItemFlag = $00
+
+!DefaultMonster0201Param = $00
+!DefaultMonster0201Addr = $8aea51
+!DefaultMonster0201Stats = $2C
+!DefaultMonster0201ItemFlag = $00
+
+!DefaultMonster0202Param = $00
+!DefaultMonster0202Addr = $8aea51
+!DefaultMonster0202Stats = $2C
+!DefaultMonster0202ItemFlag = $00
+
+!DefaultMonster0203Param = $00
+!DefaultMonster0203Addr = $8aea51
+!DefaultMonster0203Stats = $2C
+!DefaultMonster0203ItemFlag = $00
+
+!DefaultMonster0204Param = $00
+!DefaultMonster0204Addr = $8aea51
+!DefaultMonster0204Stats = $2C
+!DefaultMonster0204ItemFlag = $00
+
+!DefaultMonster0205Param = $00
+!DefaultMonster0205Addr = $8aea51
+!DefaultMonster0205Stats = $2C
+!DefaultMonster0205ItemFlag = $00
+
+!DefaultMonster0206Param = $00
+!DefaultMonster0206Addr = $8aea51
+!DefaultMonster0206Stats = $2C
+!DefaultMonster0206ItemFlag = $00
+
+!DefaultMonster0207Param = $00
+!DefaultMonster0207Addr = $8AEE9F
+!DefaultMonster0207Stats = $2D
+!DefaultMonster0207ItemFlag = $00
+
+!DefaultMonster0208Param = $00
+!DefaultMonster0208Addr = $8AEE9F
+!DefaultMonster0208Stats = $2D
+!DefaultMonster0208ItemFlag = $00
+
+!DefaultMonster0209Param = $00
+!DefaultMonster0209Addr = $8AEE9F
+!DefaultMonster0209Stats = $2D
+!DefaultMonster0209ItemFlag = $00
+
+!DefaultMonster020AParam = $00
+!DefaultMonster020AAddr = $8AEE9F
+!DefaultMonster020AStats = $2D
+!DefaultMonster020AItemFlag = $00
+
+!DefaultMonster020BParam = $00
+!DefaultMonster020BAddr = $8AEE9F
+!DefaultMonster020BStats = $2D
+!DefaultMonster020BItemFlag = $00
+
+!DefaultMonster020CParam = $00
+!DefaultMonster020CAddr = $8AEE9F
+!DefaultMonster020CStats = $2D
+!DefaultMonster020CItemFlag = $00
+
+!DefaultMonster020DParam = $00
+!DefaultMonster020DAddr = $8AEE9F
+!DefaultMonster020DStats = $2D
+!DefaultMonster020DItemFlag = $00
+
+!DefaultMonster020EParam = $00
+!DefaultMonster020EAddr = $8AEE9F
+!DefaultMonster020EStats = $2D
+!DefaultMonster020EItemFlag = $00
+
+!DefaultMonster020FParam = $00
+!DefaultMonster020FAddr = $8AEE9F
+!DefaultMonster020FStats = $2D
+!DefaultMonster020FItemFlag = $00
+
+!DefaultMonster0210Param = $00
+!DefaultMonster0210Addr = $8aea51
+!DefaultMonster0210Stats = $2C
+!DefaultMonster0210ItemFlag = $00
+
+!DefaultMonster0211Param = $00
+!DefaultMonster0211Addr = $8aea51
+!DefaultMonster0211Stats = $2C
+!DefaultMonster0211ItemFlag = $00
+
+!DefaultMonster0212Param = $00
+!DefaultMonster0212Addr = $8aea51
+!DefaultMonster0212Stats = $2C
+!DefaultMonster0212ItemFlag = $00
+
+!DefaultMonster0213Param = $00
+!DefaultMonster0213Addr = $8aea51
+!DefaultMonster0213Stats = $2C
+!DefaultMonster0213ItemFlag = $00
+
+!DefaultMonster0214Param = $00
+!DefaultMonster0214Addr = $8aea51
+!DefaultMonster0214Stats = $2C
+!DefaultMonster0214ItemFlag = $00
+
+!DefaultMonster0215Param = $00
+!DefaultMonster0215Addr = $8aea51
+!DefaultMonster0215Stats = $2C
+!DefaultMonster0215ItemFlag = $00
+
+!DefaultMonster0216Param = $00
+!DefaultMonster0216Addr = $8aea51
+!DefaultMonster0216Stats = $2C
+!DefaultMonster0216ItemFlag = $00
+
+!DefaultMonster0217Param = $00
+!DefaultMonster0217Addr = $8aea51
+!DefaultMonster0217Stats = $2C
+!DefaultMonster0217ItemFlag = $00
+
+!DefaultMonster0218Param = $00
+!DefaultMonster0218Addr = $8AEE9F
+!DefaultMonster0218Stats = $2D
+!DefaultMonster0218ItemFlag = $00
+
+!DefaultMonster0219Param = $00
+!DefaultMonster0219Addr = $8AEE9F
+!DefaultMonster0219Stats = $2D
+!DefaultMonster0219ItemFlag = $00
+
+!DefaultMonster021AParam = $00
+!DefaultMonster021AAddr = $8AEE9F
+!DefaultMonster021AStats = $2D
+!DefaultMonster021AItemFlag = $00
+
+!DefaultMonster021BParam = $00
+!DefaultMonster021BAddr = $8AEE9F
+!DefaultMonster021BStats = $2D
+!DefaultMonster021BItemFlag = $00
+
+!DefaultMonster021CParam = $00
+!DefaultMonster021CAddr = $8AEE9F
+!DefaultMonster021CStats = $2D
+!DefaultMonster021CItemFlag = $00
+
+!DefaultMonster021DParam = $00
+!DefaultMonster021DAddr = $8AEE9F
+!DefaultMonster021DStats = $2D
+!DefaultMonster021DItemFlag = $00
+
+!DefaultMonster021EParam = $00
+!DefaultMonster021EAddr = $8AEE9F
+!DefaultMonster021EStats = $2D
+!DefaultMonster021EItemFlag = $00
+
+!DefaultMonster021FParam = $00
+!DefaultMonster021FAddr = $8AEE9F
+!DefaultMonster021FStats = $2D
+!DefaultMonster021FItemFlag = $00
+
+!DefaultMonster0220Param = $00
+!DefaultMonster0220Addr = $8AEF33
+!DefaultMonster0220Stats = $2E
+!DefaultMonster0220ItemFlag = $00
+
+!DefaultMonster0221Param = $00
+!DefaultMonster0221Addr = $8AEF33
+!DefaultMonster0221Stats = $2E
+!DefaultMonster0221ItemFlag = $00
+
+!DefaultMonster0222Param = $00
+!DefaultMonster0222Addr = $8AEF33
+!DefaultMonster0222Stats = $2E
+!DefaultMonster0222ItemFlag = $00
+
+!DefaultMonster0223Param = $00
+!DefaultMonster0223Addr = $8AEE9F
+!DefaultMonster0223Stats = $2D
+!DefaultMonster0223ItemFlag = $00
+
+!DefaultMonster0224Param = $00
+!DefaultMonster0224Addr = $8AEE9F
+!DefaultMonster0224Stats = $2D
+!DefaultMonster0224ItemFlag = $00
+
+!DefaultMonster0225Param = $00
+!DefaultMonster0225Addr = $8AEE9F
+!DefaultMonster0225Stats = $2D
+!DefaultMonster0225ItemFlag = $00
+
+!DefaultMonster0226Param = $00
+!DefaultMonster0226Addr = $8AEE9F
+!DefaultMonster0226Stats = $2D
+!DefaultMonster0226ItemFlag = $00
+
+!DefaultMonster0227Param = $00
+!DefaultMonster0227Addr = $8AEE9F
+!DefaultMonster0227Stats = $2D
+!DefaultMonster0227ItemFlag = $00
+
+!DefaultMonster0228Param = $00
+!DefaultMonster0228Addr = $8AEE9F
+!DefaultMonster0228Stats = $2D
+!DefaultMonster0228ItemFlag = $00
+
+!DefaultMonster0229Param = $00
+!DefaultMonster0229Addr = $8aea51
+!DefaultMonster0229Stats = $2C
+!DefaultMonster0229ItemFlag = $00
+
+!DefaultMonster022AParam = $00
+!DefaultMonster022AAddr = $8AEE9F
+!DefaultMonster022AStats = $2D
+!DefaultMonster022AItemFlag = $00
+
+!DefaultMonster022BParam = $00
+!DefaultMonster022BAddr = $8AEE9F
+!DefaultMonster022BStats = $2D
+!DefaultMonster022BItemFlag = $00
+
+!DefaultMonster022CParam = $00
+!DefaultMonster022CAddr = $8AEE9F
+!DefaultMonster022CStats = $2D
+!DefaultMonster022CItemFlag = $00
+
+!DefaultMonster022DParam = $00
+!DefaultMonster022DAddr = $8AEF33
+!DefaultMonster022DStats = $2E
+!DefaultMonster022DItemFlag = $00
+
+!DefaultMonster022EParam = $00
+!DefaultMonster022EAddr = $8AEF33
+!DefaultMonster022EStats = $2E
+!DefaultMonster022EItemFlag = $00
+
+!DefaultMonster022FParam = $00
+!DefaultMonster022FAddr = $8AF0C7
+!DefaultMonster022FStats = $2E
+!DefaultMonster022FItemFlag = $00
+
+!DefaultMonster0230Param = $00
+!DefaultMonster0230Addr = $8AF0C7
+!DefaultMonster0230Stats = $2E
+!DefaultMonster0230ItemFlag = $00
+
+!DefaultMonster0231Param = $00
+!DefaultMonster0231Addr = $8AF0C7
+!DefaultMonster0231Stats = $2E
+!DefaultMonster0231ItemFlag = $00
+
+!DefaultMonster0232Param = $00
+!DefaultMonster0232Addr = $8aea51
+!DefaultMonster0232Stats = $2C
+!DefaultMonster0232ItemFlag = $00
+
+!DefaultMonster0233Param = $00
+!DefaultMonster0233Addr = $8aea51
+!DefaultMonster0233Stats = $2C
+!DefaultMonster0233ItemFlag = $00
+
+!DefaultMonster0234Param = $00
+!DefaultMonster0234Addr = $8AEE9F
+!DefaultMonster0234Stats = $2D
+!DefaultMonster0234ItemFlag = $00
+
+!DefaultMonster0235Param = $00
+!DefaultMonster0235Addr = $8AEE9F
+!DefaultMonster0235Stats = $2D
+!DefaultMonster0235ItemFlag = $00
+
+!DefaultMonster0236Param = $00
+!DefaultMonster0236Addr = $8AEE9F
+!DefaultMonster0236Stats = $2D
+!DefaultMonster0236ItemFlag = $00
+
+!DefaultMonster0237Param = $00
+!DefaultMonster0237Addr = $8AEE9F
+!DefaultMonster0237Stats = $2D
+!DefaultMonster0237ItemFlag = $00
+
+!DefaultMonster0238Param = $00
+!DefaultMonster0238Addr = $8AEE9F
+!DefaultMonster0238Stats = $2D
+!DefaultMonster0238ItemFlag = $00
+
+!DefaultMonster0239Param = $00
+!DefaultMonster0239Addr = $8AEE9F
+!DefaultMonster0239Stats = $2D
+!DefaultMonster0239ItemFlag = $00
+
+!DefaultMonster023AParam = $00
+!DefaultMonster023AAddr = $8AEE9F
+!DefaultMonster023AStats = $2D
+!DefaultMonster023AItemFlag = $00
+
+!DefaultMonster023BParam = $00
+!DefaultMonster023BAddr = $8AEE9F
+!DefaultMonster023BStats = $2D
+!DefaultMonster023BItemFlag = $00
+
+!DefaultMonster023CParam = $00
+!DefaultMonster023CAddr = $8AEE9F
+!DefaultMonster023CStats = $2D
+!DefaultMonster023CItemFlag = $00
+
+!DefaultMonster023DParam = $00
+!DefaultMonster023DAddr = $8AF0C7
+!DefaultMonster023DStats = $2E
+!DefaultMonster023DItemFlag = $00
+
+!DefaultMonster023EParam = $00
+!DefaultMonster023EAddr = $8AF0C7
+!DefaultMonster023EStats = $2E
+!DefaultMonster023EItemFlag = $00
+
+!DefaultMonster023FParam = $00
+!DefaultMonster023FAddr = $8AF0C7
+!DefaultMonster023FStats = $2E
+!DefaultMonster023FItemFlag = $00
+
+!DefaultMonster0240Param = $00
+!DefaultMonster0240Addr = $8AF0C7
+!DefaultMonster0240Stats = $2E
+!DefaultMonster0240ItemFlag = $00
+
+!DefaultMonster0241Param = $00
+!DefaultMonster0241Addr = $8AF0C7
+!DefaultMonster0241Stats = $2E
+!DefaultMonster0241ItemFlag = $00
+
+!DefaultMonster0242Param = $00
+!DefaultMonster0242Addr = $8AF0C7
+!DefaultMonster0242Stats = $2E
+!DefaultMonster0242ItemFlag = $00
+
+!DefaultMonster0243Param = $00
+!DefaultMonster0243Addr = $8B9177
+!DefaultMonster0243Stats = $33
+!DefaultMonster0243ItemFlag = $00
+
+!DefaultMonster0244Param = $00
+!DefaultMonster0244Addr = $8B9177
+!DefaultMonster0244Stats = $33
+!DefaultMonster0244ItemFlag = $00
+
+!DefaultMonster0245Param = $00
+!DefaultMonster0245Addr = $8B9177
+!DefaultMonster0245Stats = $33
+!DefaultMonster0245ItemFlag = $00
+
+!DefaultMonster0246Param = $00
+!DefaultMonster0246Addr = $8B9177
+!DefaultMonster0246Stats = $33
+!DefaultMonster0246ItemFlag = $00
+
+!DefaultMonster0247Param = $00
+!DefaultMonster0247Addr = $8B9177
+!DefaultMonster0247Stats = $33
+!DefaultMonster0247ItemFlag = $00
+
+!DefaultMonster0248Param = $00
+!DefaultMonster0248Addr = $8B9155
+!DefaultMonster0248Stats = $33
+!DefaultMonster0248ItemFlag = $00
+
+!DefaultMonster0249Param = $00
+!DefaultMonster0249Addr = $8B9155
+!DefaultMonster0249Stats = $33
+!DefaultMonster0249ItemFlag = $00
+
+!DefaultMonster024AParam = $00
+!DefaultMonster024AAddr = $8B9155
+!DefaultMonster024AStats = $33
+!DefaultMonster024AItemFlag = $00
+
+!DefaultMonster024BParam = $00
+!DefaultMonster024BAddr = $8B9155
+!DefaultMonster024BStats = $33
+!DefaultMonster024BItemFlag = $00
+
+!DefaultMonster024CParam = $00
+!DefaultMonster024CAddr = $8B9155
+!DefaultMonster024CStats = $33
+!DefaultMonster024CItemFlag = $00
+
+!DefaultMonster024DParam = $00
+!DefaultMonster024DAddr = $8B9165
+!DefaultMonster024DStats = $33
+!DefaultMonster024DItemFlag = $00
+
+!DefaultMonster024EParam = $00
+!DefaultMonster024EAddr = $8B9165
+!DefaultMonster024EStats = $33
+!DefaultMonster024EItemFlag = $00
+
+!DefaultMonster024FParam = $00
+!DefaultMonster024FAddr = $8B9165
+!DefaultMonster024FStats = $33
+!DefaultMonster024FItemFlag = $00
+
+!DefaultMonster0250Param = $00
+!DefaultMonster0250Addr = $8B9165
+!DefaultMonster0250Stats = $33
+!DefaultMonster0250ItemFlag = $00
+
+!DefaultMonster0251Param = $00
+!DefaultMonster0251Addr = $8B9165
+!DefaultMonster0251Stats = $33
+!DefaultMonster0251ItemFlag = $00
+
+!DefaultMonster0252Param = $00
+!DefaultMonster0252Addr = $8B9165
+!DefaultMonster0252Stats = $33
+!DefaultMonster0252ItemFlag = $00
+
+!DefaultMonster0253Param = $00
+!DefaultMonster0253Addr = $8B9165
+!DefaultMonster0253Stats = $33
+!DefaultMonster0253ItemFlag = $00
+
+!DefaultMonster0254Param = $00
+!DefaultMonster0254Addr = $8B8C70
+!DefaultMonster0254Stats = $35
+!DefaultMonster0254ItemFlag = $00
+
+!DefaultMonster0255Param = $00
+!DefaultMonster0255Addr = $8B8C70
+!DefaultMonster0255Stats = $35
+!DefaultMonster0255ItemFlag = $00
+
+!DefaultMonster0256Param = $00
+!DefaultMonster0256Addr = $8B8C70
+!DefaultMonster0256Stats = $35
+!DefaultMonster0256ItemFlag = $00
+
+!DefaultMonster0257Param = $00
+!DefaultMonster0257Addr = $8B8C70
+!DefaultMonster0257Stats = $35
+!DefaultMonster0257ItemFlag = $00
+
+!DefaultMonster0258Param = $00
+!DefaultMonster0258Addr = $8B8C70
+!DefaultMonster0258Stats = $35
+!DefaultMonster0258ItemFlag = $00
+
+!DefaultMonster0259Param = $00
+!DefaultMonster0259Addr = $8B8C70
+!DefaultMonster0259Stats = $35
+!DefaultMonster0259ItemFlag = $00
+
+!DefaultMonster025AParam = $00
+!DefaultMonster025AAddr = $8B8DBE
+!DefaultMonster025AStats = $34
+!DefaultMonster025AItemFlag = $00
+
+!DefaultMonster025BParam = $00
+!DefaultMonster025BAddr = $8B8DBE
+!DefaultMonster025BStats = $34
+!DefaultMonster025BItemFlag = $00
+
+!DefaultMonster025CParam = $00
+!DefaultMonster025CAddr = $8B8DBE
+!DefaultMonster025CStats = $34
+!DefaultMonster025CItemFlag = $00
+
+!DefaultMonster025DParam = $00
+!DefaultMonster025DAddr = $8B8DBE
+!DefaultMonster025DStats = $34
+!DefaultMonster025DItemFlag = $00
+
+!DefaultMonster025EParam = $00
+!DefaultMonster025EAddr = $8B8DBE
+!DefaultMonster025EStats = $34
+!DefaultMonster025EItemFlag = $00
+
+!DefaultMonster025FParam = $00
+!DefaultMonster025FAddr = $8B8DBE
+!DefaultMonster025FStats = $34
+!DefaultMonster025FItemFlag = $00
+
+!DefaultMonster0260Param = $00
+!DefaultMonster0260Addr = $8B8DBE
+!DefaultMonster0260Stats = $34
+!DefaultMonster0260ItemFlag = $00
+
+!DefaultMonster0261Param = $00
+!DefaultMonster0261Addr = $8B8DBE
+!DefaultMonster0261Stats = $34
+!DefaultMonster0261ItemFlag = $00
+
+!DefaultMonster0262Param = $00
+!DefaultMonster0262Addr = $8B8DBE
+!DefaultMonster0262Stats = $34
+!DefaultMonster0262ItemFlag = $00
+
+!DefaultMonster0263Param = $00
+!DefaultMonster0263Addr = $8B9177
+!DefaultMonster0263Stats = $33
+!DefaultMonster0263ItemFlag = $00
+
+!DefaultMonster0264Param = $00
+!DefaultMonster0264Addr = $8B9177
+!DefaultMonster0264Stats = $33
+!DefaultMonster0264ItemFlag = $00
+
+!DefaultMonster0265Param = $00
+!DefaultMonster0265Addr = $8B9155
+!DefaultMonster0265Stats = $33
+!DefaultMonster0265ItemFlag = $00
+
+!DefaultMonster0266Param = $00
+!DefaultMonster0266Addr = $8B9155
+!DefaultMonster0266Stats = $33
+!DefaultMonster0266ItemFlag = $00
+
+!DefaultMonster0267Param = $00
+!DefaultMonster0267Addr = $8B9155
+!DefaultMonster0267Stats = $33
+!DefaultMonster0267ItemFlag = $00
+
+!DefaultMonster0268Param = $00
+!DefaultMonster0268Addr = $8B9165
+!DefaultMonster0268Stats = $33
+!DefaultMonster0268ItemFlag = $00
+
+!DefaultMonster0269Param = $00
+!DefaultMonster0269Addr = $8B9165
+!DefaultMonster0269Stats = $33
+!DefaultMonster0269ItemFlag = $00
+
+!DefaultMonster026AParam = $00
+!DefaultMonster026AAddr = $8B9165
+!DefaultMonster026AStats = $33
+!DefaultMonster026AItemFlag = $00
+
+!DefaultMonster026BParam = $00
+!DefaultMonster026BAddr = $8B9165
+!DefaultMonster026BStats = $33
+!DefaultMonster026BItemFlag = $00
+
+!DefaultMonster026CParam = $00
+!DefaultMonster026CAddr = $8B9165
+!DefaultMonster026CStats = $33
+!DefaultMonster026CItemFlag = $00
+
+!DefaultMonster026DParam = $00
+!DefaultMonster026DAddr = $8B8EFE
+!DefaultMonster026DStats = $33
+!DefaultMonster026DItemFlag = $00
+
+!DefaultMonster026EParam = $00
+!DefaultMonster026EAddr = $8B8C70
+!DefaultMonster026EStats = $35
+!DefaultMonster026EItemFlag = $00
+
+!DefaultMonster026FParam = $00
+!DefaultMonster026FAddr = $8B8C70
+!DefaultMonster026FStats = $35
+!DefaultMonster026FItemFlag = $00
+
+!DefaultMonster0270Param = $00
+!DefaultMonster0270Addr = $8B8DBE
+!DefaultMonster0270Stats = $34
+!DefaultMonster0270ItemFlag = $00
+
+!DefaultMonster0271Param = $00
+!DefaultMonster0271Addr = $8B8DBE
+!DefaultMonster0271Stats = $34
+!DefaultMonster0271ItemFlag = $00
+
+!DefaultMonster0272Param = $00
+!DefaultMonster0272Addr = $8B8DBE
+!DefaultMonster0272Stats = $34
+!DefaultMonster0272ItemFlag = $00
+
+!DefaultMonster0273Param = $00
+!DefaultMonster0273Addr = $8B9423
+!DefaultMonster0273Stats = $32
+!DefaultMonster0273ItemFlag = $00
+
+!DefaultMonster0274Param = $00
+!DefaultMonster0274Addr = $8B9423
+!DefaultMonster0274Stats = $32
+!DefaultMonster0274ItemFlag = $00
+
+!DefaultMonster0275Param = $00
+!DefaultMonster0275Addr = $8B9423
+!DefaultMonster0275Stats = $32
+!DefaultMonster0275ItemFlag = $00
+
+!DefaultMonster0276Param = $00
+!DefaultMonster0276Addr = $8B9423
+!DefaultMonster0276Stats = $32
+!DefaultMonster0276ItemFlag = $00
+
+!DefaultMonster0277Param = $00
+!DefaultMonster0277Addr = $8B9423
+!DefaultMonster0277Stats = $32
+!DefaultMonster0277ItemFlag = $00
+
+!DefaultMonster0278Param = $00
+!DefaultMonster0278Addr = $8B9423
+!DefaultMonster0278Stats = $32
+!DefaultMonster0278ItemFlag = $00
+
+!DefaultMonster0279Param = $00
+!DefaultMonster0279Addr = $8B9423
+!DefaultMonster0279Stats = $32
+!DefaultMonster0279ItemFlag = $00
+
+!DefaultMonster027AParam = $00
+!DefaultMonster027AAddr = $8B9423
+!DefaultMonster027AStats = $32
+!DefaultMonster027AItemFlag = $00
+
+!DefaultMonster027BParam = $00
+!DefaultMonster027BAddr = $8B9423
+!DefaultMonster027BStats = $32
+!DefaultMonster027BItemFlag = $00
+
+!DefaultMonster027CParam = $00
+!DefaultMonster027CAddr = $8B9423
+!DefaultMonster027CStats = $32
+!DefaultMonster027CItemFlag = $00
+
+!DefaultMonster027DParam = $00
+!DefaultMonster027DAddr = $8B9423
+!DefaultMonster027DStats = $32
+!DefaultMonster027DItemFlag = $00
+
+!DefaultMonster027EParam = $00
+!DefaultMonster027EAddr = $8B9423
+!DefaultMonster027EStats = $32
+!DefaultMonster027EItemFlag = $00
+
+!DefaultMonster027FParam = $00
+!DefaultMonster027FAddr = $8B9423
+!DefaultMonster027FStats = $32
+!DefaultMonster027FItemFlag = $00
+
+!DefaultMonster0280Param = $00
+!DefaultMonster0280Addr = $8B9423
+!DefaultMonster0280Stats = $32
+!DefaultMonster0280ItemFlag = $00
+
+!DefaultMonster0281Param = $00
+!DefaultMonster0281Addr = $8B9423
+!DefaultMonster0281Stats = $32
+!DefaultMonster0281ItemFlag = $00
+
+!DefaultMonster0282Param = $00
+!DefaultMonster0282Addr = $8B8DBE
+!DefaultMonster0282Stats = $34
+!DefaultMonster0282ItemFlag = $00
+
+!DefaultMonster0283Param = $00
+!DefaultMonster0283Addr = $8B8DBE
+!DefaultMonster0283Stats = $34
+!DefaultMonster0283ItemFlag = $00
+
+!DefaultMonster0284Param = $00
+!DefaultMonster0284Addr = $8B8DBE
+!DefaultMonster0284Stats = $34
+!DefaultMonster0284ItemFlag = $00
+
+!DefaultMonster0285Param = $00
+!DefaultMonster0285Addr = $8B8DBE
+!DefaultMonster0285Stats = $34
+!DefaultMonster0285ItemFlag = $00
+
+!DefaultMonster0286Param = $00
+!DefaultMonster0286Addr = $8B8DBE
+!DefaultMonster0286Stats = $34
+!DefaultMonster0286ItemFlag = $00
+
+!DefaultMonster0287Param = $00
+!DefaultMonster0287Addr = $8B8DBE
+!DefaultMonster0287Stats = $34
+!DefaultMonster0287ItemFlag = $00
+
+!DefaultMonster0288Param = $00
+!DefaultMonster0288Addr = $8B8DBE
+!DefaultMonster0288Stats = $34
+!DefaultMonster0288ItemFlag = $00
+
+!DefaultMonster0289Param = $00
+!DefaultMonster0289Addr = $8B8DBE
+!DefaultMonster0289Stats = $34
+!DefaultMonster0289ItemFlag = $00
+
+!DefaultMonster028AParam = $00
+!DefaultMonster028AAddr = $8B8C70
+!DefaultMonster028AStats = $35
+!DefaultMonster028AItemFlag = $00
+
+!DefaultMonster028BParam = $00
+!DefaultMonster028BAddr = $8B8C70
+!DefaultMonster028BStats = $35
+!DefaultMonster028BItemFlag = $00
+
+!DefaultMonster028CParam = $00
+!DefaultMonster028CAddr = $8B9165
+!DefaultMonster028CStats = $33
+!DefaultMonster028CItemFlag = $00
+
+!DefaultMonster028DParam = $00
+!DefaultMonster028DAddr = $8B9165
+!DefaultMonster028DStats = $33
+!DefaultMonster028DItemFlag = $00
+
+!DefaultMonster028EParam = $00
+!DefaultMonster028EAddr = $8B9165
+!DefaultMonster028EStats = $33
+!DefaultMonster028EItemFlag = $00
+
+!DefaultMonster028FParam = $00
+!DefaultMonster028FAddr = $8B9165
+!DefaultMonster028FStats = $33
+!DefaultMonster028FItemFlag = $00
+
+!DefaultMonster0290Param = $00
+!DefaultMonster0290Addr = $8B9165
+!DefaultMonster0290Stats = $33
+!DefaultMonster0290ItemFlag = $00
+
+!DefaultMonster0291Param = $00
+!DefaultMonster0291Addr = $8B9165
+!DefaultMonster0291Stats = $33
+!DefaultMonster0291ItemFlag = $00
+
+!DefaultMonster0292Param = $00
+!DefaultMonster0292Addr = $8B8EFE
+!DefaultMonster0292Stats = $33
+!DefaultMonster0292ItemFlag = $00
+
+!DefaultMonster0293Param = $00
+!DefaultMonster0293Addr = $8B8EFE
+!DefaultMonster0293Stats = $33
+!DefaultMonster0293ItemFlag = $00
+
+!DefaultMonster0294Param = $00
+!DefaultMonster0294Addr = $8B9423
+!DefaultMonster0294Stats = $32
+!DefaultMonster0294ItemFlag = $00
+
+!DefaultMonster0295Param = $00
+!DefaultMonster0295Addr = $8B9423
+!DefaultMonster0295Stats = $32
+!DefaultMonster0295ItemFlag = $00
+
+!DefaultMonster0296Param = $00
+!DefaultMonster0296Addr = $8B9423
+!DefaultMonster0296Stats = $32
+!DefaultMonster0296ItemFlag = $00
+
+!DefaultMonster0297Param = $00
+!DefaultMonster0297Addr = $8B9423
+!DefaultMonster0297Stats = $32
+!DefaultMonster0297ItemFlag = $00
+
+!DefaultMonster0298Param = $00
+!DefaultMonster0298Addr = $8B9423
+!DefaultMonster0298Stats = $32
+!DefaultMonster0298ItemFlag = $00
+
+!DefaultMonster0299Param = $00
+!DefaultMonster0299Addr = $8B9423
+!DefaultMonster0299Stats = $32
+!DefaultMonster0299ItemFlag = $00
+
+!DefaultMonster029AParam = $00
+!DefaultMonster029AAddr = $8B9423
+!DefaultMonster029AStats = $32
+!DefaultMonster029AItemFlag = $00
+
+!DefaultMonster029BParam = $00
+!DefaultMonster029BAddr = $8B9155
+!DefaultMonster029BStats = $33
+!DefaultMonster029BItemFlag = $21
+
+!DefaultMonster029CParam = $00
+!DefaultMonster029CAddr = $8B9165
+!DefaultMonster029CStats = $33
+!DefaultMonster029CItemFlag = $00
+
+!DefaultMonster029DParam = $00
+!DefaultMonster029DAddr = $8B9165
+!DefaultMonster029DStats = $33
+!DefaultMonster029DItemFlag = $00
+
+!DefaultMonster029EParam = $00
+!DefaultMonster029EAddr = $8B9165
+!DefaultMonster029EStats = $33
+!DefaultMonster029EItemFlag = $00
+
+!DefaultMonster029FParam = $00
+!DefaultMonster029FAddr = $8B9165
+!DefaultMonster029FStats = $33
+!DefaultMonster029FItemFlag = $00
+
+!DefaultMonster02A0Param = $00
+!DefaultMonster02A0Addr = $8B8F72
+!DefaultMonster02A0Stats = $46
+!DefaultMonster02A0ItemFlag = $00
+
+!DefaultMonster02A1Param = $00
+!DefaultMonster02A1Addr = $8B8F72
+!DefaultMonster02A1Stats = $46
+!DefaultMonster02A1ItemFlag = $00
+
+!DefaultMonster02A2Param = $00
+!DefaultMonster02A2Addr = $8B8F72
+!DefaultMonster02A2Stats = $46
+!DefaultMonster02A2ItemFlag = $00
+
+!DefaultMonster02A3Param = $00
+!DefaultMonster02A3Addr = $8B8F72
+!DefaultMonster02A3Stats = $46
+!DefaultMonster02A3ItemFlag = $00
+
+!DefaultMonster02A4Param = $00
+!DefaultMonster02A4Addr = $8B8F72
+!DefaultMonster02A4Stats = $46
+!DefaultMonster02A4ItemFlag = $00
+
+!DefaultMonster02A5Param = $00
+!DefaultMonster02A5Addr = $8B8F72
+!DefaultMonster02A5Stats = $46
+!DefaultMonster02A5ItemFlag = $00
+
+!DefaultMonster02A6Param = $00
+!DefaultMonster02A6Addr = $8B8C70
+!DefaultMonster02A6Stats = $33
+!DefaultMonster02A6ItemFlag = $00
+
+!DefaultMonster02A7Param = $00
+!DefaultMonster02A7Addr = $8B9177
+!DefaultMonster02A7Stats = $33
+!DefaultMonster02A7ItemFlag = $00
+
+!DefaultMonster02A8Param = $00
+!DefaultMonster02A8Addr = $8B9177
+!DefaultMonster02A8Stats = $33
+!DefaultMonster02A8ItemFlag = $00
+
+!DefaultMonster02A9Param = $00
+!DefaultMonster02A9Addr = $8B9155
+!DefaultMonster02A9Stats = $33
+!DefaultMonster02A9ItemFlag = $00
+
+!DefaultMonster02AAParam = $00
+!DefaultMonster02AAAddr = $8B9155
+!DefaultMonster02AAStats = $33
+!DefaultMonster02AAItemFlag = $00
+
+!DefaultMonster02ABParam = $00
+!DefaultMonster02ABAddr = $8B9165
+!DefaultMonster02ABStats = $33
+!DefaultMonster02ABItemFlag = $00
+
+!DefaultMonster02ACParam = $00
+!DefaultMonster02ACAddr = $8B9165
+!DefaultMonster02ACStats = $33
+!DefaultMonster02ACItemFlag = $00
+
+!DefaultMonster02ADParam = $00
+!DefaultMonster02ADAddr = $8B8F4F
+!DefaultMonster02ADStats = $33
+!DefaultMonster02ADItemFlag = $00
+
+!DefaultMonster02AEParam = $00
+!DefaultMonster02AEAddr = $8B8F4F
+!DefaultMonster02AEStats = $33
+!DefaultMonster02AEItemFlag = $00
+
+!DefaultMonster02AFParam = $00
+!DefaultMonster02AFAddr = $8B8F4F
+!DefaultMonster02AFStats = $33
+!DefaultMonster02AFItemFlag = $00
+
+!DefaultMonster02B0Param = $00
+!DefaultMonster02B0Addr = $8B8F4F
+!DefaultMonster02B0Stats = $33
+!DefaultMonster02B0ItemFlag = $00
+
+!DefaultMonster02B1Param = $00
+!DefaultMonster02B1Addr = $8B8F4F
+!DefaultMonster02B1Stats = $33
+!DefaultMonster02B1ItemFlag = $00
+
+!DefaultMonster02B2Param = $00
+!DefaultMonster02B2Addr = $8B8F4F
+!DefaultMonster02B2Stats = $33
+!DefaultMonster02B2ItemFlag = $00
+
+!DefaultMonster02B3Param = $00
+!DefaultMonster02B3Addr = $8B9423
+!DefaultMonster02B3Stats = $32
+!DefaultMonster02B3ItemFlag = $00
+
+!DefaultMonster02B4Param = $00
+!DefaultMonster02B4Addr = $8B8DBE
+!DefaultMonster02B4Stats = $34
+!DefaultMonster02B4ItemFlag = $00
+
+!DefaultMonster02B5Param = $00
+!DefaultMonster02B5Addr = $8B8DBE
+!DefaultMonster02B5Stats = $34
+!DefaultMonster02B5ItemFlag = $00
+
+!DefaultMonster02B6Param = $00
+!DefaultMonster02B6Addr = $8B815C
+!DefaultMonster02B6Stats = $36
+!DefaultMonster02B6ItemFlag = $22
+
+!DefaultMonster02B7Param = $30
+!DefaultMonster02B7Addr = $8B9C4E
+!DefaultMonster02B7Stats = $3E
+!DefaultMonster02B7ItemFlag = $00
+
+!DefaultMonster02B8Param = $30
+!DefaultMonster02B8Addr = $8B9C4E
+!DefaultMonster02B8Stats = $3E
+!DefaultMonster02B8ItemFlag = $00
+
+!DefaultMonster02B9Param = $30
+!DefaultMonster02B9Addr = $8B9C4E
+!DefaultMonster02B9Stats = $3E
+!DefaultMonster02B9ItemFlag = $00
+
+!DefaultMonster02BAParam = $30
+!DefaultMonster02BAAddr = $8B9C4E
+!DefaultMonster02BAStats = $3E
+!DefaultMonster02BAItemFlag = $00
+
+!DefaultMonster02BBParam = $30
+!DefaultMonster02BBAddr = $8B9C4E
+!DefaultMonster02BBStats = $3E
+!DefaultMonster02BBItemFlag = $00
+
+!DefaultMonster02BCParam = $30
+!DefaultMonster02BCAddr = $8B9BAC
+!DefaultMonster02BCStats = $3E
+!DefaultMonster02BCItemFlag = $00
+
+!DefaultMonster02BDParam = $30
+!DefaultMonster02BDAddr = $8B9BAC
+!DefaultMonster02BDStats = $3E
+!DefaultMonster02BDItemFlag = $00
+
+!DefaultMonster02BEParam = $30
+!DefaultMonster02BEAddr = $8BA0CF
+!DefaultMonster02BEStats = $3C
+!DefaultMonster02BEItemFlag = $00
+
+!DefaultMonster02BFParam = $30
+!DefaultMonster02BFAddr = $8BA0CF
+!DefaultMonster02BFStats = $3C
+!DefaultMonster02BFItemFlag = $00
+
+!DefaultMonster02C0Param = $30
+!DefaultMonster02C0Addr = $8BA0CF
+!DefaultMonster02C0Stats = $3C
+!DefaultMonster02C0ItemFlag = $00
+
+!DefaultMonster02C1Param = $30
+!DefaultMonster02C1Addr = $8BA0CF
+!DefaultMonster02C1Stats = $3C
+!DefaultMonster02C1ItemFlag = $00
+
+!DefaultMonster02C2Param = $30
+!DefaultMonster02C2Addr = $8B983B
+!DefaultMonster02C2Stats = $3F
+!DefaultMonster02C2ItemFlag = $00
+
+!DefaultMonster02C3Param = $30
+!DefaultMonster02C3Addr = $8B983B
+!DefaultMonster02C3Stats = $3F
+!DefaultMonster02C3ItemFlag = $00
+
+!DefaultMonster02C4Param = $30
+!DefaultMonster02C4Addr = $8B983B
+!DefaultMonster02C4Stats = $3F
+!DefaultMonster02C4ItemFlag = $00
+
+!DefaultMonster02C5Param = $30
+!DefaultMonster02C5Addr = $8BA0CF
+!DefaultMonster02C5Stats = $3C
+!DefaultMonster02C5ItemFlag = $00
+
+!DefaultMonster02C6Param = $30
+!DefaultMonster02C6Addr = $8BA049
+!DefaultMonster02C6Stats = $3C
+!DefaultMonster02C6ItemFlag = $00
+
+!DefaultMonster02C7Param = $30
+!DefaultMonster02C7Addr = $8BA049
+!DefaultMonster02C7Stats = $3C
+!DefaultMonster02C7ItemFlag = $00
+
+!DefaultMonster02C8Param = $30
+!DefaultMonster02C8Addr = $8BA075
+!DefaultMonster02C8Stats = $3C
+!DefaultMonster02C8ItemFlag = $00
+
+!DefaultMonster02C9Param = $30
+!DefaultMonster02C9Addr = $8BA0A1
+!DefaultMonster02C9Stats = $3C
+!DefaultMonster02C9ItemFlag = $00
+
+!DefaultMonster02CAParam = $30
+!DefaultMonster02CAAddr = $8B9C4E
+!DefaultMonster02CAStats = $3E
+!DefaultMonster02CAItemFlag = $00
+
+!DefaultMonster02CBParam = $30
+!DefaultMonster02CBAddr = $8B9C4E
+!DefaultMonster02CBStats = $3E
+!DefaultMonster02CBItemFlag = $00
+
+!DefaultMonster02CCParam = $30
+!DefaultMonster02CCAddr = $8B9C4E
+!DefaultMonster02CCStats = $3E
+!DefaultMonster02CCItemFlag = $00
+
+!DefaultMonster02CDParam = $30
+!DefaultMonster02CDAddr = $8B9C4E
+!DefaultMonster02CDStats = $3E
+!DefaultMonster02CDItemFlag = $00
+
+!DefaultMonster02CEParam = $30
+!DefaultMonster02CEAddr = $8B9BAC
+!DefaultMonster02CEStats = $3E
+!DefaultMonster02CEItemFlag = $00
+
+!DefaultMonster02CFParam = $30
+!DefaultMonster02CFAddr = $8B9BAC
+!DefaultMonster02CFStats = $3E
+!DefaultMonster02CFItemFlag = $00
+
+!DefaultMonster02D0Param = $30
+!DefaultMonster02D0Addr = $8B9D0F
+!DefaultMonster02D0Stats = $3D
+!DefaultMonster02D0ItemFlag = $00
+
+!DefaultMonster02D1Param = $30
+!DefaultMonster02D1Addr = $8B9D0F
+!DefaultMonster02D1Stats = $3D
+!DefaultMonster02D1ItemFlag = $00
+
+!DefaultMonster02D2Param = $30
+!DefaultMonster02D2Addr = $8B9D0F
+!DefaultMonster02D2Stats = $3D
+!DefaultMonster02D2ItemFlag = $00
+
+!DefaultMonster02D3Param = $30
+!DefaultMonster02D3Addr = $8B9D0F
+!DefaultMonster02D3Stats = $3D
+!DefaultMonster02D3ItemFlag = $00
+
+!DefaultMonster02D4Param = $30
+!DefaultMonster02D4Addr = $8B9F53
+!DefaultMonster02D4Stats = $3D
+!DefaultMonster02D4ItemFlag = $00
+
+!DefaultMonster02D5Param = $30
+!DefaultMonster02D5Addr = $8B9F53
+!DefaultMonster02D5Stats = $3D
+!DefaultMonster02D5ItemFlag = $00
+
+!DefaultMonster02D6Param = $30
+!DefaultMonster02D6Addr = $8B9F53
+!DefaultMonster02D6Stats = $3D
+!DefaultMonster02D6ItemFlag = $00
+
+!DefaultMonster02D7Param = $30
+!DefaultMonster02D7Addr = $8B9F53
+!DefaultMonster02D7Stats = $3D
+!DefaultMonster02D7ItemFlag = $00
+
+!DefaultMonster02D8Param = $30
+!DefaultMonster02D8Addr = $8B9F53
+!DefaultMonster02D8Stats = $3D
+!DefaultMonster02D8ItemFlag = $00
+
+!DefaultMonster02D9Param = $30
+!DefaultMonster02D9Addr = $8B9F53
+!DefaultMonster02D9Stats = $3D
+!DefaultMonster02D9ItemFlag = $00
+
+!DefaultMonster02DAParam = $30
+!DefaultMonster02DAAddr = $8BA0CF
+!DefaultMonster02DAStats = $3C
+!DefaultMonster02DAItemFlag = $00
+
+!DefaultMonster02DBParam = $30
+!DefaultMonster02DBAddr = $8BA0CF
+!DefaultMonster02DBStats = $3C
+!DefaultMonster02DBItemFlag = $00
+
+!DefaultMonster02DCParam = $30
+!DefaultMonster02DCAddr = $8BA0CF
+!DefaultMonster02DCStats = $3C
+!DefaultMonster02DCItemFlag = $00
+
+!DefaultMonster02DDParam = $30
+!DefaultMonster02DDAddr = $8BA0A1
+!DefaultMonster02DDStats = $3C
+!DefaultMonster02DDItemFlag = $00
+
+!DefaultMonster02DEParam = $30
+!DefaultMonster02DEAddr = $8BA0A1
+!DefaultMonster02DEStats = $3C
+!DefaultMonster02DEItemFlag = $00
+
+!DefaultMonster02DFParam = $30
+!DefaultMonster02DFAddr = $8BA01D
+!DefaultMonster02DFStats = $3C
+!DefaultMonster02DFItemFlag = $00
+
+!DefaultMonster02E0Param = $30
+!DefaultMonster02E0Addr = $8B9BAC
+!DefaultMonster02E0Stats = $3E
+!DefaultMonster02E0ItemFlag = $00
+
+!DefaultMonster02E1Param = $30
+!DefaultMonster02E1Addr = $8B9C4E
+!DefaultMonster02E1Stats = $3E
+!DefaultMonster02E1ItemFlag = $00
+
+!DefaultMonster02E2Param = $30
+!DefaultMonster02E2Addr = $8B9C4E
+!DefaultMonster02E2Stats = $3E
+!DefaultMonster02E2ItemFlag = $00
+
+!DefaultMonster02E3Param = $30
+!DefaultMonster02E3Addr = $8B9C44
+!DefaultMonster02E3Stats = $3E
+!DefaultMonster02E3ItemFlag = $00
+
+!DefaultMonster02E4Param = $30
+!DefaultMonster02E4Addr = $8B9C44
+!DefaultMonster02E4Stats = $3E
+!DefaultMonster02E4ItemFlag = $00
+
+!DefaultMonster02E5Param = $30
+!DefaultMonster02E5Addr = $8B9F53
+!DefaultMonster02E5Stats = $3D
+!DefaultMonster02E5ItemFlag = $00
+
+!DefaultMonster02E6Param = $30
+!DefaultMonster02E6Addr = $8B9E8B
+!DefaultMonster02E6Stats = $3D
+!DefaultMonster02E6ItemFlag = $00
+
+!DefaultMonster02E7Param = $30
+!DefaultMonster02E7Addr = $8B9E8B
+!DefaultMonster02E7Stats = $3D
+!DefaultMonster02E7ItemFlag = $00
+
+!DefaultMonster02E8Param = $30
+!DefaultMonster02E8Addr = $8B9C44
+!DefaultMonster02E8Stats = $3E
+!DefaultMonster02E8ItemFlag = $00
+
+!DefaultMonster02E9Param = $30
+!DefaultMonster02E9Addr = $8B9C44
+!DefaultMonster02E9Stats = $3E
+!DefaultMonster02E9ItemFlag = $00
+
+!DefaultMonster02EAParam = $30
+!DefaultMonster02EAAddr = $8B9C44
+!DefaultMonster02EAStats = $3E
+!DefaultMonster02EAItemFlag = $00
+
+!DefaultMonster02EBParam = $30
+!DefaultMonster02EBAddr = $8B9C44
+!DefaultMonster02EBStats = $3E
+!DefaultMonster02EBItemFlag = $00
+
+!DefaultMonster02ECParam = $30
+!DefaultMonster02ECAddr = $8B9C44
+!DefaultMonster02ECStats = $3E
+!DefaultMonster02ECItemFlag = $00
+
+!DefaultMonster02EDParam = $30
+!DefaultMonster02EDAddr = $8BA0CF
+!DefaultMonster02EDStats = $3C
+!DefaultMonster02EDItemFlag = $00
+
+!DefaultMonster02EEParam = $30
+!DefaultMonster02EEAddr = $8BA0CF
+!DefaultMonster02EEStats = $3C
+!DefaultMonster02EEItemFlag = $00
+
+!DefaultMonster02EFParam = $30
+!DefaultMonster02EFAddr = $8BA0CF
+!DefaultMonster02EFStats = $3C
+!DefaultMonster02EFItemFlag = $00
+
+!DefaultMonster02F0Param = $30
+!DefaultMonster02F0Addr = $8BA0CF
+!DefaultMonster02F0Stats = $3C
+!DefaultMonster02F0ItemFlag = $00
+
+!DefaultMonster02F1Param = $30
+!DefaultMonster02F1Addr = $8BA0CF
+!DefaultMonster02F1Stats = $3C
+!DefaultMonster02F1ItemFlag = $00
+
+!DefaultMonster02F2Param = $30
+!DefaultMonster02F2Addr = $8BA0A1
+!DefaultMonster02F2Stats = $3C
+!DefaultMonster02F2ItemFlag = $00
+
+!DefaultMonster02F3Param = $30
+!DefaultMonster02F3Addr = $8BA0A1
+!DefaultMonster02F3Stats = $3C
+!DefaultMonster02F3ItemFlag = $00
+
+!DefaultMonster02F4Param = $30
+!DefaultMonster02F4Addr = $8BA0A1
+!DefaultMonster02F4Stats = $3C
+!DefaultMonster02F4ItemFlag = $00
+
+!DefaultMonster02F5Param = $30
+!DefaultMonster02F5Addr = $8BA075
+!DefaultMonster02F5Stats = $3C
+!DefaultMonster02F5ItemFlag = $00
+
+!DefaultMonster02F6Param = $30
+!DefaultMonster02F6Addr = $8BA075
+!DefaultMonster02F6Stats = $3C
+!DefaultMonster02F6ItemFlag = $00
+
+!DefaultMonster02F7Param = $30
+!DefaultMonster02F7Addr = $8B9F53
+!DefaultMonster02F7Stats = $3D
+!DefaultMonster02F7ItemFlag = $00
+
+!DefaultMonster02F8Param = $30
+!DefaultMonster02F8Addr = $8B9E8B
+!DefaultMonster02F8Stats = $3D
+!DefaultMonster02F8ItemFlag = $00
+
+!DefaultMonster02F9Param = $30
+!DefaultMonster02F9Addr = $8B9D0F
+!DefaultMonster02F9Stats = $3D
+!DefaultMonster02F9ItemFlag = $00
+
+!DefaultMonster02FAParam = $30
+!DefaultMonster02FAAddr = $8B9D0F
+!DefaultMonster02FAStats = $3D
+!DefaultMonster02FAItemFlag = $00
+
+!DefaultMonster02FBParam = $30
+!DefaultMonster02FBAddr = $8B9D0F
+!DefaultMonster02FBStats = $3D
+!DefaultMonster02FBItemFlag = $00
+
+!DefaultMonster02FCParam = $30
+!DefaultMonster02FCAddr = $8B9C44
+!DefaultMonster02FCStats = $3E
+!DefaultMonster02FCItemFlag = $00
+
+!DefaultMonster02FDParam = $30
+!DefaultMonster02FDAddr = $8B9C44
+!DefaultMonster02FDStats = $3E
+!DefaultMonster02FDItemFlag = $00
+
+!DefaultMonster02FEParam = $30
+!DefaultMonster02FEAddr = $8B9C4E
+!DefaultMonster02FEStats = $3E
+!DefaultMonster02FEItemFlag = $00
+
+!DefaultMonster02FFParam = $30
+!DefaultMonster02FFAddr = $8B9C4E
+!DefaultMonster02FFStats = $3E
+!DefaultMonster02FFItemFlag = $00
+
+!DefaultMonster0300Param = $30
+!DefaultMonster0300Addr = $8B9C4E
+!DefaultMonster0300Stats = $3E
+!DefaultMonster0300ItemFlag = $00
+
+!DefaultMonster0301Param = $30
+!DefaultMonster0301Addr = $8B9C4E
+!DefaultMonster0301Stats = $3E
+!DefaultMonster0301ItemFlag = $00
+
+!DefaultMonster0302Param = $30
+!DefaultMonster0302Addr = $8B9C4E
+!DefaultMonster0302Stats = $3E
+!DefaultMonster0302ItemFlag = $00
+
+!DefaultMonster0303Param = $30
+!DefaultMonster0303Addr = $8B9C4E
+!DefaultMonster0303Stats = $3E
+!DefaultMonster0303ItemFlag = $00
+
+!DefaultMonster0304Param = $30
+!DefaultMonster0304Addr = $8B9BAC
+!DefaultMonster0304Stats = $3E
+!DefaultMonster0304ItemFlag = $00
+
+!DefaultMonster0305Param = $30
+!DefaultMonster0305Addr = $8B9BAC
+!DefaultMonster0305Stats = $3E
+!DefaultMonster0305ItemFlag = $00
+
+!DefaultMonster0306Param = $30
+!DefaultMonster0306Addr = $8B9E8B
+!DefaultMonster0306Stats = $3D
+!DefaultMonster0306ItemFlag = $00
+
+!DefaultMonster0307Param = $30
+!DefaultMonster0307Addr = $8B9E8B
+!DefaultMonster0307Stats = $3D
+!DefaultMonster0307ItemFlag = $00
+
+!DefaultMonster0308Param = $30
+!DefaultMonster0308Addr = $8B9E8B
+!DefaultMonster0308Stats = $3D
+!DefaultMonster0308ItemFlag = $00
+
+!DefaultMonster0309Param = $30
+!DefaultMonster0309Addr = $8B9E8B
+!DefaultMonster0309Stats = $3D
+!DefaultMonster0309ItemFlag = $00
+
+!DefaultMonster030AParam = $30
+!DefaultMonster030AAddr = $8B9E8B
+!DefaultMonster030AStats = $3D
+!DefaultMonster030AItemFlag = $23
+
+!DefaultMonster030BParam = $30
+!DefaultMonster030BAddr = $8B9F53
+!DefaultMonster030BStats = $3D
+!DefaultMonster030BItemFlag = $00
+
+!DefaultMonster030CParam = $30
+!DefaultMonster030CAddr = $8B9F53
+!DefaultMonster030CStats = $3D
+!DefaultMonster030CItemFlag = $00
+
+!DefaultMonster030DParam = $30
+!DefaultMonster030DAddr = $8B9F53
+!DefaultMonster030DStats = $3D
+!DefaultMonster030DItemFlag = $00
+
+!DefaultMonster030EParam = $30
+!DefaultMonster030EAddr = $8B9D0F
+!DefaultMonster030EStats = $3D
+!DefaultMonster030EItemFlag = $00
+
+!DefaultMonster030FParam = $30
+!DefaultMonster030FAddr = $8BA075
+!DefaultMonster030FStats = $3C
+!DefaultMonster030FItemFlag = $00
+
+!DefaultMonster0310Param = $30
+!DefaultMonster0310Addr = $8BA0CF
+!DefaultMonster0310Stats = $3C
+!DefaultMonster0310ItemFlag = $00
+
+!DefaultMonster0311Param = $30
+!DefaultMonster0311Addr = $8BA0CF
+!DefaultMonster0311Stats = $3C
+!DefaultMonster0311ItemFlag = $00
+
+!DefaultMonster0312Param = $30
+!DefaultMonster0312Addr = $8BA0CF
+!DefaultMonster0312Stats = $3C
+!DefaultMonster0312ItemFlag = $00
+
+!DefaultMonster0313Param = $30
+!DefaultMonster0313Addr = $8BA0CF
+!DefaultMonster0313Stats = $3C
+!DefaultMonster0313ItemFlag = $00
+
+!DefaultMonster0314Param = $30
+!DefaultMonster0314Addr = $8BA0CF
+!DefaultMonster0314Stats = $3C
+!DefaultMonster0314ItemFlag = $00
+
+!DefaultMonster0315Param = $30
+!DefaultMonster0315Addr = $8BA0CF
+!DefaultMonster0315Stats = $3C
+!DefaultMonster0315ItemFlag = $00
+
+!DefaultMonster0316Param = $30
+!DefaultMonster0316Addr = $8B983B
+!DefaultMonster0316Stats = $3F
+!DefaultMonster0316ItemFlag = $00
+
+!DefaultMonster0317Param = $30
+!DefaultMonster0317Addr = $8B983B
+!DefaultMonster0317Stats = $3F
+!DefaultMonster0317ItemFlag = $00
+
+!DefaultMonster0318Param = $30
+!DefaultMonster0318Addr = $8B983B
+!DefaultMonster0318Stats = $3F
+!DefaultMonster0318ItemFlag = $00
+
+!DefaultMonster0319Param = $30
+!DefaultMonster0319Addr = $8B9D0F
+!DefaultMonster0319Stats = $3D
+!DefaultMonster0319ItemFlag = $00
+
+!DefaultMonster031AParam = $30
+!DefaultMonster031AAddr = $8B9D0F
+!DefaultMonster031AStats = $3D
+!DefaultMonster031AItemFlag = $00
+
+!DefaultMonster031BParam = $30
+!DefaultMonster031BAddr = $8B9DCD
+!DefaultMonster031BStats = $3D
+!DefaultMonster031BItemFlag = $00
+
+!DefaultMonster031CParam = $30
+!DefaultMonster031CAddr = $8B9F53
+!DefaultMonster031CStats = $3D
+!DefaultMonster031CItemFlag = $00
+
+!DefaultMonster031DParam = $30
+!DefaultMonster031DAddr = $8B9E8B
+!DefaultMonster031DStats = $3D
+!DefaultMonster031DItemFlag = $00
+
+!DefaultMonster031EParam = $30
+!DefaultMonster031EAddr = $8B9E8B
+!DefaultMonster031EStats = $3D
+!DefaultMonster031EItemFlag = $00
+
+!DefaultMonster031FParam = $30
+!DefaultMonster031FAddr = $8B9BAC
+!DefaultMonster031FStats = $3E
+!DefaultMonster031FItemFlag = $00
+
+!DefaultMonster0320Param = $30
+!DefaultMonster0320Addr = $8B9C44
+!DefaultMonster0320Stats = $3E
+!DefaultMonster0320ItemFlag = $00
+
+!DefaultMonster0321Param = $30
+!DefaultMonster0321Addr = $8B9C44
+!DefaultMonster0321Stats = $3E
+!DefaultMonster0321ItemFlag = $00
+
+!DefaultMonster0322Param = $30
+!DefaultMonster0322Addr = $8B9C4E
+!DefaultMonster0322Stats = $3E
+!DefaultMonster0322ItemFlag = $00
+
+!DefaultMonster0323Param = $30
+!DefaultMonster0323Addr = $8B9C4E
+!DefaultMonster0323Stats = $3E
+!DefaultMonster0323ItemFlag = $00
+
+!DefaultMonster0324Param = $30
+!DefaultMonster0324Addr = $8B9C4E
+!DefaultMonster0324Stats = $3E
+!DefaultMonster0324ItemFlag = $00
+
+!DefaultMonster0325Param = $30
+!DefaultMonster0325Addr = $8B9C4E
+!DefaultMonster0325Stats = $3E
+!DefaultMonster0325ItemFlag = $00
+
+!DefaultMonster0326Param = $30
+!DefaultMonster0326Addr = $8BA0CF
+!DefaultMonster0326Stats = $3C
+!DefaultMonster0326ItemFlag = $00
+
+!DefaultMonster0327Param = $30
+!DefaultMonster0327Addr = $8BA0CF
+!DefaultMonster0327Stats = $3C
+!DefaultMonster0327ItemFlag = $00
+
+!DefaultMonster0328Param = $30
+!DefaultMonster0328Addr = $8BA0CF
+!DefaultMonster0328Stats = $3C
+!DefaultMonster0328ItemFlag = $00
+
+!DefaultMonster0329Param = $30
+!DefaultMonster0329Addr = $8BA049
+!DefaultMonster0329Stats = $3C
+!DefaultMonster0329ItemFlag = $00
+
+!DefaultMonster032AParam = $30
+!DefaultMonster032AAddr = $8BA075
+!DefaultMonster032AStats = $3C
+!DefaultMonster032AItemFlag = $00
+
+!DefaultMonster032BParam = $30
+!DefaultMonster032BAddr = $8BA075
+!DefaultMonster032BStats = $3C
+!DefaultMonster032BItemFlag = $00
+
+!DefaultMonster032CParam = $30
+!DefaultMonster032CAddr = $8BA0A1
+!DefaultMonster032CStats = $3C
+!DefaultMonster032CItemFlag = $00
+
+!DefaultMonster032DParam = $30
+!DefaultMonster032DAddr = $8BA0A1
+!DefaultMonster032DStats = $3C
+!DefaultMonster032DItemFlag = $00
+
+!DefaultMonster032EParam = $30
+!DefaultMonster032EAddr = $8B983B
+!DefaultMonster032EStats = $3F
+!DefaultMonster032EItemFlag = $00
+
+!DefaultMonster032FParam = $30
+!DefaultMonster032FAddr = $8B983B
+!DefaultMonster032FStats = $3F
+!DefaultMonster032FItemFlag = $00
+
+!DefaultMonster0330Param = $30
+!DefaultMonster0330Addr = $8B983B
+!DefaultMonster0330Stats = $3F
+!DefaultMonster0330ItemFlag = $00
+
+!DefaultMonster0331Param = $30
+!DefaultMonster0331Addr = $8B983B
+!DefaultMonster0331Stats = $3F
+!DefaultMonster0331ItemFlag = $00
+
+!DefaultMonster0332Param = $30
+!DefaultMonster0332Addr = $8B983B
+!DefaultMonster0332Stats = $3F
+!DefaultMonster0332ItemFlag = $00
+
+!DefaultMonster0333Param = $30
+!DefaultMonster0333Addr = $8B983B
+!DefaultMonster0333Stats = $3F
+!DefaultMonster0333ItemFlag = $00
+
+!DefaultMonster0334Param = $30
+!DefaultMonster0334Addr = $8B9E8B
+!DefaultMonster0334Stats = $3D
+!DefaultMonster0334ItemFlag = $00
+
+!DefaultMonster0335Param = $30
+!DefaultMonster0335Addr = $8B9E8B
+!DefaultMonster0335Stats = $3D
+!DefaultMonster0335ItemFlag = $00
+
+!DefaultMonster0336Param = $30
+!DefaultMonster0336Addr = $8B9E8B
+!DefaultMonster0336Stats = $3D
+!DefaultMonster0336ItemFlag = $00
+
+!DefaultMonster0337Param = $30
+!DefaultMonster0337Addr = $8B9E8B
+!DefaultMonster0337Stats = $3D
+!DefaultMonster0337ItemFlag = $00
+
+!DefaultMonster0338Param = $30
+!DefaultMonster0338Addr = $8B9D0F
+!DefaultMonster0338Stats = $3D
+!DefaultMonster0338ItemFlag = $00
+
+!DefaultMonster0339Param = $30
+!DefaultMonster0339Addr = $8B9C4E
+!DefaultMonster0339Stats = $3E
+!DefaultMonster0339ItemFlag = $00
+
+!DefaultMonster033AParam = $30
+!DefaultMonster033AAddr = $8BA0CF
+!DefaultMonster033AStats = $3C
+!DefaultMonster033AItemFlag = $00
+
+!DefaultMonster033BParam = $30
+!DefaultMonster033BAddr = $8BA0CF
+!DefaultMonster033BStats = $3C
+!DefaultMonster033BItemFlag = $00
+
+!DefaultMonster033CParam = $30
+!DefaultMonster033CAddr = $8BA0CF
+!DefaultMonster033CStats = $3C
+!DefaultMonster033CItemFlag = $00
+
+!DefaultMonster033DParam = $30
+!DefaultMonster033DAddr = $8B983B
+!DefaultMonster033DStats = $3F
+!DefaultMonster033DItemFlag = $00
+
+!DefaultMonster033EParam = $30
+!DefaultMonster033EAddr = $8B983B
+!DefaultMonster033EStats = $3F
+!DefaultMonster033EItemFlag = $00
+
+!DefaultMonster033FParam = $30
+!DefaultMonster033FAddr = $8B983B
+!DefaultMonster033FStats = $3F
+!DefaultMonster033FItemFlag = $00
+
+!DefaultMonster0340Param = $30
+!DefaultMonster0340Addr = $8BA0CF
+!DefaultMonster0340Stats = $3C
+!DefaultMonster0340ItemFlag = $00
+
+!DefaultMonster0341Param = $30
+!DefaultMonster0341Addr = $8BA0CF
+!DefaultMonster0341Stats = $3C
+!DefaultMonster0341ItemFlag = $00
+
+!DefaultMonster0342Param = $30
+!DefaultMonster0342Addr = $8BA0CF
+!DefaultMonster0342Stats = $3C
+!DefaultMonster0342ItemFlag = $00
+
+!DefaultMonster0343Param = $30
+!DefaultMonster0343Addr = $8BA0CF
+!DefaultMonster0343Stats = $3C
+!DefaultMonster0343ItemFlag = $00
+
+!DefaultMonster0344Param = $30
+!DefaultMonster0344Addr = $8BA0CF
+!DefaultMonster0344Stats = $3C
+!DefaultMonster0344ItemFlag = $00
+
+!DefaultMonster0345Param = $30
+!DefaultMonster0345Addr = $8BA0CF
+!DefaultMonster0345Stats = $3C
+!DefaultMonster0345ItemFlag = $00
+
+!DefaultMonster0346Param = $30
+!DefaultMonster0346Addr = $8BA0CF
+!DefaultMonster0346Stats = $3C
+!DefaultMonster0346ItemFlag = $00
+
+!DefaultMonster0347Param = $30
+!DefaultMonster0347Addr = $8BA0CF
+!DefaultMonster0347Stats = $3C
+!DefaultMonster0347ItemFlag = $00
+
+!DefaultMonster0348Param = $30
+!DefaultMonster0348Addr = $8BA0CF
+!DefaultMonster0348Stats = $3C
+!DefaultMonster0348ItemFlag = $00
+
+!DefaultMonster0349Param = $30
+!DefaultMonster0349Addr = $8B9D0F
+!DefaultMonster0349Stats = $3D
+!DefaultMonster0349ItemFlag = $00
+
+!DefaultMonster034AParam = $30
+!DefaultMonster034AAddr = $8B9D0F
+!DefaultMonster034AStats = $3D
+!DefaultMonster034AItemFlag = $00
+
+!DefaultMonster034BParam = $30
+!DefaultMonster034BAddr = $8B9D0F
+!DefaultMonster034BStats = $3D
+!DefaultMonster034BItemFlag = $00
+
+!DefaultMonster034CParam = $30
+!DefaultMonster034CAddr = $8B9D0F
+!DefaultMonster034CStats = $3D
+!DefaultMonster034CItemFlag = $00
+
+!DefaultMonster034DParam = $30
+!DefaultMonster034DAddr = $8B9D0F
+!DefaultMonster034DStats = $3D
+!DefaultMonster034DItemFlag = $00
+
+!DefaultMonster034EParam = $30
+!DefaultMonster034EAddr = $8B9DCD
+!DefaultMonster034EStats = $3D
+!DefaultMonster034EItemFlag = $00
+
+!DefaultMonster034FParam = $30
+!DefaultMonster034FAddr = $8B9DCD
+!DefaultMonster034FStats = $3D
+!DefaultMonster034FItemFlag = $00
+
+!DefaultMonster0350Param = $30
+!DefaultMonster0350Addr = $8B9DCD
+!DefaultMonster0350Stats = $3D
+!DefaultMonster0350ItemFlag = $00
+
+!DefaultMonster0351Param = $30
+!DefaultMonster0351Addr = $8B9DCD
+!DefaultMonster0351Stats = $3D
+!DefaultMonster0351ItemFlag = $00
+
+!DefaultMonster0352Param = $30
+!DefaultMonster0352Addr = $8B9DCD
+!DefaultMonster0352Stats = $3D
+!DefaultMonster0352ItemFlag = $00
+
+!DefaultMonster0353Param = $30
+!DefaultMonster0353Addr = $8B9DCD
+!DefaultMonster0353Stats = $3D
+!DefaultMonster0353ItemFlag = $00
+
+!DefaultMonster0354Param = $30
+!DefaultMonster0354Addr = $8B9E8B
+!DefaultMonster0354Stats = $3D
+!DefaultMonster0354ItemFlag = $00
+
+!DefaultMonster0355Param = $30
+!DefaultMonster0355Addr = $8B9E8B
+!DefaultMonster0355Stats = $3D
+!DefaultMonster0355ItemFlag = $00
+
+!DefaultMonster0356Param = $30
+!DefaultMonster0356Addr = $8B9F53
+!DefaultMonster0356Stats = $3D
+!DefaultMonster0356ItemFlag = $00
+
+!DefaultMonster0357Param = $30
+!DefaultMonster0357Addr = $8B9F53
+!DefaultMonster0357Stats = $3D
+!DefaultMonster0357ItemFlag = $00
+
+!DefaultMonster0358Param = $30
+!DefaultMonster0358Addr = $8B9BA2
+!DefaultMonster0358Stats = $3E
+!DefaultMonster0358ItemFlag = $00
+
+!DefaultMonster0359Param = $30
+!DefaultMonster0359Addr = $8B9BA2
+!DefaultMonster0359Stats = $3E
+!DefaultMonster0359ItemFlag = $00
+
+!DefaultMonster035AParam = $30
+!DefaultMonster035AAddr = $8B9C44
+!DefaultMonster035AStats = $3E
+!DefaultMonster035AItemFlag = $00
+
+!DefaultMonster035BParam = $30
+!DefaultMonster035BAddr = $8B9C44
+!DefaultMonster035BStats = $3E
+!DefaultMonster035BItemFlag = $00
+
+!DefaultMonster035CParam = $30
+!DefaultMonster035CAddr = $8B9C44
+!DefaultMonster035CStats = $3E
+!DefaultMonster035CItemFlag = $00
+
+!DefaultMonster035DParam = $30
+!DefaultMonster035DAddr = $8B9C44
+!DefaultMonster035DStats = $3E
+!DefaultMonster035DItemFlag = $00
+
+!DefaultMonster035EParam = $30
+!DefaultMonster035EAddr = $8B9C44
+!DefaultMonster035EStats = $3E
+!DefaultMonster035EItemFlag = $00
+
+!DefaultMonster035FParam = $30
+!DefaultMonster035FAddr = $8B9C4E
+!DefaultMonster035FStats = $3E
+!DefaultMonster035FItemFlag = $00
+
+!DefaultMonster0360Param = $30
+!DefaultMonster0360Addr = $8B9C4E
+!DefaultMonster0360Stats = $3E
+!DefaultMonster0360ItemFlag = $00
+
+!DefaultMonster0361Param = $30
+!DefaultMonster0361Addr = $8B9C4E
+!DefaultMonster0361Stats = $3E
+!DefaultMonster0361ItemFlag = $00
+
+!DefaultMonster0362Param = $30
+!DefaultMonster0362Addr = $8B9C4E
+!DefaultMonster0362Stats = $3E
+!DefaultMonster0362ItemFlag = $00
+
+!DefaultMonster0363Param = $30
+!DefaultMonster0363Addr = $8BA075
+!DefaultMonster0363Stats = $3C
+!DefaultMonster0363ItemFlag = $00
+
+!DefaultMonster0364Param = $30
+!DefaultMonster0364Addr = $8B983B
+!DefaultMonster0364Stats = $3F
+!DefaultMonster0364ItemFlag = $00
+
+!DefaultMonster0365Param = $30
+!DefaultMonster0365Addr = $8B983B
+!DefaultMonster0365Stats = $3F
+!DefaultMonster0365ItemFlag = $00
+
+!DefaultMonster0366Param = $30
+!DefaultMonster0366Addr = $8B983B
+!DefaultMonster0366Stats = $3F
+!DefaultMonster0366ItemFlag = $00
+
+!DefaultMonster0367Param = $30
+!DefaultMonster0367Addr = $8B983B
+!DefaultMonster0367Stats = $3F
+!DefaultMonster0367ItemFlag = $00
+
+!DefaultMonster0368Param = $30
+!DefaultMonster0368Addr = $8B9D0F
+!DefaultMonster0368Stats = $3D
+!DefaultMonster0368ItemFlag = $00
+
+!DefaultMonster0369Param = $30
+!DefaultMonster0369Addr = $8B9D0F
+!DefaultMonster0369Stats = $3D
+!DefaultMonster0369ItemFlag = $00
+
+!DefaultMonster036AParam = $30
+!DefaultMonster036AAddr = $8B9D0F
+!DefaultMonster036AStats = $3D
+!DefaultMonster036AItemFlag = $00
+
+!DefaultMonster036BParam = $30
+!DefaultMonster036BAddr = $8B9D0F
+!DefaultMonster036BStats = $3D
+!DefaultMonster036BItemFlag = $00
+
+!DefaultMonster036CParam = $00
+!DefaultMonster036CAddr = $8baf4f
+!DefaultMonster036CStats = $4A
+!DefaultMonster036CItemFlag = $00
+
+!DefaultMonster036DParam = $00
+!DefaultMonster036DAddr = $8baf4f
+!DefaultMonster036DStats = $4A
+!DefaultMonster036DItemFlag = $00
+
+!DefaultMonster036EParam = $00
+!DefaultMonster036EAddr = $8baf4f
+!DefaultMonster036EStats = $4A
+!DefaultMonster036EItemFlag = $00
+
+!DefaultMonster036FParam = $00
+!DefaultMonster036FAddr = $8baf4f
+!DefaultMonster036FStats = $4A
+!DefaultMonster036FItemFlag = $00
+
+!DefaultMonster0370Param = $00
+!DefaultMonster0370Addr = $8baf4f
+!DefaultMonster0370Stats = $4A
+!DefaultMonster0370ItemFlag = $00
+
+!DefaultMonster0371Param = $00
+!DefaultMonster0371Addr = $8bb1d7
+!DefaultMonster0371Stats = $49
+!DefaultMonster0371ItemFlag = $00
+
+!DefaultMonster0372Param = $00
+!DefaultMonster0372Addr = $8bb1d7
+!DefaultMonster0372Stats = $49
+!DefaultMonster0372ItemFlag = $00
+
+!DefaultMonster0373Param = $00
+!DefaultMonster0373Addr = $8bb1d7
+!DefaultMonster0373Stats = $49
+!DefaultMonster0373ItemFlag = $00
+
+!DefaultMonster0374Param = $00
+!DefaultMonster0374Addr = $8bb275
+!DefaultMonster0374Stats = $46
+!DefaultMonster0374ItemFlag = $00
+
+!DefaultMonster0375Param = $00
+!DefaultMonster0375Addr = $8bb275
+!DefaultMonster0375Stats = $46
+!DefaultMonster0375ItemFlag = $00
+
+!DefaultMonster0376Param = $00
+!DefaultMonster0376Addr = $8bb275
+!DefaultMonster0376Stats = $46
+!DefaultMonster0376ItemFlag = $00
+
+!DefaultMonster0377Param = $00
+!DefaultMonster0377Addr = $8bb275
+!DefaultMonster0377Stats = $46
+!DefaultMonster0377ItemFlag = $00
+
+!DefaultMonster0378Param = $00
+!DefaultMonster0378Addr = $8bb275
+!DefaultMonster0378Stats = $46
+!DefaultMonster0378ItemFlag = $00
+
+!DefaultMonster0379Param = $00
+!DefaultMonster0379Addr = $8bb275
+!DefaultMonster0379Stats = $46
+!DefaultMonster0379ItemFlag = $00
+
+!DefaultMonster037AParam = $00
+!DefaultMonster037AAddr = $8bb275
+!DefaultMonster037AStats = $46
+!DefaultMonster037AItemFlag = $00
+
+!DefaultMonster037BParam = $00
+!DefaultMonster037BAddr = $8bbd8d
+!DefaultMonster037BStats = $42
+!DefaultMonster037BItemFlag = $00
+
+!DefaultMonster037CParam = $00
+!DefaultMonster037CAddr = $8bbd8d
+!DefaultMonster037CStats = $42
+!DefaultMonster037CItemFlag = $00
+
+!DefaultMonster037DParam = $00
+!DefaultMonster037DAddr = $8bbd8d
+!DefaultMonster037DStats = $42
+!DefaultMonster037DItemFlag = $00
+
+!DefaultMonster037EParam = $02
+!DefaultMonster037EAddr = $8bbfd0
+!DefaultMonster037EStats = $43
+!DefaultMonster037EItemFlag = $00
+
+!DefaultMonster037FParam = $02
+!DefaultMonster037FAddr = $8bbfd0
+!DefaultMonster037FStats = $43
+!DefaultMonster037FItemFlag = $00
+
+!DefaultMonster0380Param = $02
+!DefaultMonster0380Addr = $8bbfd0
+!DefaultMonster0380Stats = $43
+!DefaultMonster0380ItemFlag = $00
+
+!DefaultMonster0381Param = $06
+!DefaultMonster0381Addr = $8BBFBB
+!DefaultMonster0381Stats = $43
+!DefaultMonster0381ItemFlag = $00
+
+!DefaultMonster0382Param = $06
+!DefaultMonster0382Addr = $8BBFBB
+!DefaultMonster0382Stats = $43
+!DefaultMonster0382ItemFlag = $00
+
+!DefaultMonster0383Param = $06
+!DefaultMonster0383Addr = $8BBFBB
+!DefaultMonster0383Stats = $43
+!DefaultMonster0383ItemFlag = $00
+
+!DefaultMonster0384Param = $06
+!DefaultMonster0384Addr = $8BBFBB
+!DefaultMonster0384Stats = $43
+!DefaultMonster0384ItemFlag = $00
+
+!DefaultMonster0385Param = $06
+!DefaultMonster0385Addr = $8BBFBB
+!DefaultMonster0385Stats = $43
+!DefaultMonster0385ItemFlag = $00
+
+!DefaultMonster0386Param = $06
+!DefaultMonster0386Addr = $8BBFBB
+!DefaultMonster0386Stats = $43
+!DefaultMonster0386ItemFlag = $00
+
+!DefaultMonster0387Param = $06
+!DefaultMonster0387Addr = $8BBFBB
+!DefaultMonster0387Stats = $43
+!DefaultMonster0387ItemFlag = $00
+
+!DefaultMonster0388Param = $00
+!DefaultMonster0388Addr = $8BBB5C
+!DefaultMonster0388Stats = $44
+!DefaultMonster0388ItemFlag = $24
+
+!DefaultMonster0389Param = $00
+!DefaultMonster0389Addr = $8BBB66
+!DefaultMonster0389Stats = $44
+!DefaultMonster0389ItemFlag = $00
+
+!DefaultMonster038AParam = $00
+!DefaultMonster038AAddr = $8BB825
+!DefaultMonster038AStats = $45
+!DefaultMonster038AItemFlag = $00
+
+!DefaultMonster038BParam = $00
+!DefaultMonster038BAddr = $8BB825
+!DefaultMonster038BStats = $45
+!DefaultMonster038BItemFlag = $00
+
+!DefaultMonster038CParam = $00
+!DefaultMonster038CAddr = $8BB825
+!DefaultMonster038CStats = $45
+!DefaultMonster038CItemFlag = $00
+
+!DefaultMonster038DParam = $00
+!DefaultMonster038DAddr = $8BB825
+!DefaultMonster038DStats = $45
+!DefaultMonster038DItemFlag = $00
+
+!DefaultMonster038EParam = $00
+!DefaultMonster038EAddr = $8bbd8d
+!DefaultMonster038EStats = $42
+!DefaultMonster038EItemFlag = $00
+
+!DefaultMonster038FParam = $00
+!DefaultMonster038FAddr = $8bbd8d
+!DefaultMonster038FStats = $42
+!DefaultMonster038FItemFlag = $00
+
+!DefaultMonster0390Param = $02
+!DefaultMonster0390Addr = $8bbfd0
+!DefaultMonster0390Stats = $43
+!DefaultMonster0390ItemFlag = $00
+
+!DefaultMonster0391Param = $00
+!DefaultMonster0391Addr = $8BBFBB
+!DefaultMonster0391Stats = $43
+!DefaultMonster0391ItemFlag = $00
+
+!DefaultMonster0392Param = $00
+!DefaultMonster0392Addr = $8BBFBB
+!DefaultMonster0392Stats = $43
+!DefaultMonster0392ItemFlag = $00
+
+!DefaultMonster0393Param = $00
+!DefaultMonster0393Addr = $8BBB66
+!DefaultMonster0393Stats = $44
+!DefaultMonster0393ItemFlag = $00
+
+!DefaultMonster0394Param = $00
+!DefaultMonster0394Addr = $8BBB66
+!DefaultMonster0394Stats = $44
+!DefaultMonster0394ItemFlag = $00
+
+!DefaultMonster0395Param = $00
+!DefaultMonster0395Addr = $8BBB66
+!DefaultMonster0395Stats = $44
+!DefaultMonster0395ItemFlag = $25
+
+!DefaultMonster0396Param = $00
+!DefaultMonster0396Addr = $8BB825
+!DefaultMonster0396Stats = $45
+!DefaultMonster0396ItemFlag = $00
+
+!DefaultMonster0397Param = $00
+!DefaultMonster0397Addr = $8BB825
+!DefaultMonster0397Stats = $45
+!DefaultMonster0397ItemFlag = $00
+
+!DefaultMonster0398Param = $00
+!DefaultMonster0398Addr = $8BB825
+!DefaultMonster0398Stats = $45
+!DefaultMonster0398ItemFlag = $00
+
+!DefaultMonster0399Param = $00
+!DefaultMonster0399Addr = $8bbd8d
+!DefaultMonster0399Stats = $42
+!DefaultMonster0399ItemFlag = $00
+
+!DefaultMonster039AParam = $06
+!DefaultMonster039AAddr = $8bbfd0
+!DefaultMonster039AStats = $43
+!DefaultMonster039AItemFlag = $00
+
+!DefaultMonster039BParam = $02
+!DefaultMonster039BAddr = $8bbfd0
+!DefaultMonster039BStats = $43
+!DefaultMonster039BItemFlag = $00
+
+!DefaultMonster039CParam = $00
+!DefaultMonster039CAddr = $8BBB66
+!DefaultMonster039CStats = $44
+!DefaultMonster039CItemFlag = $00
+
+!DefaultMonster039DParam = $00
+!DefaultMonster039DAddr = $8BBB66
+!DefaultMonster039DStats = $44
+!DefaultMonster039DItemFlag = $00
+
+!DefaultMonster039EParam = $00
+!DefaultMonster039EAddr = $8BBB66
+!DefaultMonster039EStats = $44
+!DefaultMonster039EItemFlag = $00
+
+!DefaultMonster039FParam = $00
+!DefaultMonster039FAddr = $8BBB66
+!DefaultMonster039FStats = $44
+!DefaultMonster039FItemFlag = $00
+
+!DefaultMonster03A0Param = $00
+!DefaultMonster03A0Addr = $8BBB5C
+!DefaultMonster03A0Stats = $3A
+!DefaultMonster03A0ItemFlag = $26
+
+!DefaultMonster03A1Param = $00
+!DefaultMonster03A1Addr = $8bbd8d
+!DefaultMonster03A1Stats = $42
+!DefaultMonster03A1ItemFlag = $00
+
+!DefaultMonster03A2Param = $00
+!DefaultMonster03A2Addr = $8bbd8d
+!DefaultMonster03A2Stats = $42
+!DefaultMonster03A2ItemFlag = $00
+
+!DefaultMonster03A3Param = $00
+!DefaultMonster03A3Addr = $8bbd8d
+!DefaultMonster03A3Stats = $42
+!DefaultMonster03A3ItemFlag = $00
+
+!DefaultMonster03A4Param = $02
+!DefaultMonster03A4Addr = $8bbfd0
+!DefaultMonster03A4Stats = $43
+!DefaultMonster03A4ItemFlag = $00
+
+!DefaultMonster03A5Param = $00
+!DefaultMonster03A5Addr = $8bbfd0
+!DefaultMonster03A5Stats = $43
+!DefaultMonster03A5ItemFlag = $00
+
+!DefaultMonster03A6Param = $00
+!DefaultMonster03A6Addr = $8BBB66
+!DefaultMonster03A6Stats = $3A
+!DefaultMonster03A6ItemFlag = $00
+
+!DefaultMonster03A7Param = $00
+!DefaultMonster03A7Addr = $8BBB66
+!DefaultMonster03A7Stats = $3A
+!DefaultMonster03A7ItemFlag = $00
+
+!DefaultMonster03A8Param = $02
+!DefaultMonster03A8Addr = $8bbfd0
+!DefaultMonster03A8Stats = $43
+!DefaultMonster03A8ItemFlag = $00
+
+!DefaultMonster03A9Param = $00
+!DefaultMonster03A9Addr = $8bbfd0
+!DefaultMonster03A9Stats = $43
+!DefaultMonster03A9ItemFlag = $00
+
+!DefaultMonster03AAParam = $04
+!DefaultMonster03AAAddr = $8BBFBB
+!DefaultMonster03AAStats = $43
+!DefaultMonster03AAItemFlag = $00
+
+!DefaultMonster03ABParam = $00
+!DefaultMonster03ABAddr = $8BB817
+!DefaultMonster03ABStats = $45
+!DefaultMonster03ABItemFlag = $00
+
+!DefaultMonster03ACParam = $00
+!DefaultMonster03ACAddr = $8BB817
+!DefaultMonster03ACStats = $45
+!DefaultMonster03ACItemFlag = $00
+
+!DefaultMonster03ADParam = $00
+!DefaultMonster03ADAddr = $8BB825
+!DefaultMonster03ADStats = $45
+!DefaultMonster03ADItemFlag = $00
+
+!DefaultMonster03AEParam = $00
+!DefaultMonster03AEAddr = $8BB825
+!DefaultMonster03AEStats = $45
+!DefaultMonster03AEItemFlag = $00
+
+!DefaultMonster03AFParam = $00
+!DefaultMonster03AFAddr = $8BB817
+!DefaultMonster03AFStats = $45
+!DefaultMonster03AFItemFlag = $00
+
+!DefaultMonster03B0Param = $00
+!DefaultMonster03B0Addr = $8BB817
+!DefaultMonster03B0Stats = $45
+!DefaultMonster03B0ItemFlag = $00
+
+!DefaultMonster03B1Param = $00
+!DefaultMonster03B1Addr = $8baf4f
+!DefaultMonster03B1Stats = $4A
+!DefaultMonster03B1ItemFlag = $00
+
+!DefaultMonster03B2Param = $00
+!DefaultMonster03B2Addr = $8baf4f
+!DefaultMonster03B2Stats = $4A
+!DefaultMonster03B2ItemFlag = $00
+
+!DefaultMonster03B3Param = $00
+!DefaultMonster03B3Addr = $8baf4f
+!DefaultMonster03B3Stats = $4A
+!DefaultMonster03B3ItemFlag = $00
+
+!DefaultMonster03B4Param = $00
+!DefaultMonster03B4Addr = $8baf4f
+!DefaultMonster03B4Stats = $4A
+!DefaultMonster03B4ItemFlag = $00
+
+!DefaultMonster03B5Param = $00
+!DefaultMonster03B5Addr = $8baf4f
+!DefaultMonster03B5Stats = $4A
+!DefaultMonster03B5ItemFlag = $00
+
+!DefaultMonster03B6Param = $00
+!DefaultMonster03B6Addr = $8baf4f
+!DefaultMonster03B6Stats = $4A
+!DefaultMonster03B6ItemFlag = $00
+
+!DefaultMonster03B7Param = $00
+!DefaultMonster03B7Addr = $8baf4f
+!DefaultMonster03B7Stats = $4A
+!DefaultMonster03B7ItemFlag = $00
+
+!DefaultMonster03B8Param = $00
+!DefaultMonster03B8Addr = $8baf4f
+!DefaultMonster03B8Stats = $4A
+!DefaultMonster03B8ItemFlag = $00
+
+!DefaultMonster03B9Param = $00
+!DefaultMonster03B9Addr = $8bb1d7
+!DefaultMonster03B9Stats = $49
+!DefaultMonster03B9ItemFlag = $00
+
+!DefaultMonster03BAParam = $00
+!DefaultMonster03BAAddr = $8bb1d7
+!DefaultMonster03BAStats = $49
+!DefaultMonster03BAItemFlag = $00
+
+!DefaultMonster03BBParam = $00
+!DefaultMonster03BBAddr = $8bb1d7
+!DefaultMonster03BBStats = $49
+!DefaultMonster03BBItemFlag = $00
+
+!DefaultMonster03BCParam = $00
+!DefaultMonster03BCAddr = $8bb1d7
+!DefaultMonster03BCStats = $49
+!DefaultMonster03BCItemFlag = $00
+
+!DefaultMonster03BDParam = $00
+!DefaultMonster03BDAddr = $8bb1d7
+!DefaultMonster03BDStats = $49
+!DefaultMonster03BDItemFlag = $00
+
+!DefaultMonster03BEParam = $00
+!DefaultMonster03BEAddr = $8bb1d7
+!DefaultMonster03BEStats = $49
+!DefaultMonster03BEItemFlag = $00
+
+!DefaultMonster03BFParam = $00
+!DefaultMonster03BFAddr = $8bb1d7
+!DefaultMonster03BFStats = $49
+!DefaultMonster03BFItemFlag = $00
+
+!DefaultMonster03C0Param = $00
+!DefaultMonster03C0Addr = $8BB1B4
+!DefaultMonster03C0Stats = $49
+!DefaultMonster03C0ItemFlag = $00
+
+!DefaultMonster03C1Param = $00
+!DefaultMonster03C1Addr = $8BB1B4
+!DefaultMonster03C1Stats = $49
+!DefaultMonster03C1ItemFlag = $00
+
+!DefaultMonster03C2Param = $00
+!DefaultMonster03C2Addr = $8BB1B4
+!DefaultMonster03C2Stats = $49
+!DefaultMonster03C2ItemFlag = $00
+
+!DefaultMonster03C3Param = $00
+!DefaultMonster03C3Addr = $8BB1B4
+!DefaultMonster03C3Stats = $49
+!DefaultMonster03C3ItemFlag = $00
+
+!DefaultMonster03C4Param = $00
+!DefaultMonster03C4Addr = $8BB1B4
+!DefaultMonster03C4Stats = $49
+!DefaultMonster03C4ItemFlag = $00
+
+!DefaultMonster03C5Param = $00
+!DefaultMonster03C5Addr = $8BB1B4
+!DefaultMonster03C5Stats = $49
+!DefaultMonster03C5ItemFlag = $00
+
+!DefaultMonster03C6Param = $00
+!DefaultMonster03C6Addr = $8BB1B4
+!DefaultMonster03C6Stats = $49
+!DefaultMonster03C6ItemFlag = $00
+
+!DefaultMonster03C7Param = $00
+!DefaultMonster03C7Addr = $8BB1B4
+!DefaultMonster03C7Stats = $49
+!DefaultMonster03C7ItemFlag = $00
+
+!DefaultMonster03C8Param = $00
+!DefaultMonster03C8Addr = $8BB1B4
+!DefaultMonster03C8Stats = $49
+!DefaultMonster03C8ItemFlag = $00
+
+!DefaultMonster03C9Param = $00
+!DefaultMonster03C9Addr = $8BB1B4
+!DefaultMonster03C9Stats = $49
+!DefaultMonster03C9ItemFlag = $00
+
+!DefaultMonster03CAParam = $00
+!DefaultMonster03CAAddr = $8BB1B4
+!DefaultMonster03CAStats = $49
+!DefaultMonster03CAItemFlag = $00
+
+!DefaultMonster03CBParam = $00
+!DefaultMonster03CBAddr = $8BB1B4
+!DefaultMonster03CBStats = $49
+!DefaultMonster03CBItemFlag = $00
+
+!DefaultMonster03CCParam = $00
+!DefaultMonster03CCAddr = $8BB1B4
+!DefaultMonster03CCStats = $49
+!DefaultMonster03CCItemFlag = $00
+
+!DefaultMonster03CDParam = $00
+!DefaultMonster03CDAddr = $8BB1B4
+!DefaultMonster03CDStats = $49
+!DefaultMonster03CDItemFlag = $00
+
+!DefaultMonster03CEParam = $00
+!DefaultMonster03CEAddr = $8BB1B4
+!DefaultMonster03CEStats = $49
+!DefaultMonster03CEItemFlag = $00
+
+!DefaultMonster03CFParam = $00
+!DefaultMonster03CFAddr = $8BB1B4
+!DefaultMonster03CFStats = $49
+!DefaultMonster03CFItemFlag = $00
+
+!DefaultMonster03D0Param = $00
+!DefaultMonster03D0Addr = $8bb275
+!DefaultMonster03D0Stats = $46
+!DefaultMonster03D0ItemFlag = $00
+
+!DefaultMonster03D1Param = $00
+!DefaultMonster03D1Addr = $8bb275
+!DefaultMonster03D1Stats = $46
+!DefaultMonster03D1ItemFlag = $00
+
+!DefaultMonster03D2Param = $00
+!DefaultMonster03D2Addr = $8bb275
+!DefaultMonster03D2Stats = $46
+!DefaultMonster03D2ItemFlag = $00
+
+!DefaultMonster03D3Param = $00
+!DefaultMonster03D3Addr = $8bb275
+!DefaultMonster03D3Stats = $46
+!DefaultMonster03D3ItemFlag = $00
+
+!DefaultMonster03D4Param = $00
+!DefaultMonster03D4Addr = $8bb275
+!DefaultMonster03D4Stats = $46
+!DefaultMonster03D4ItemFlag = $00
+
+!DefaultMonster03D5Param = $00
+!DefaultMonster03D5Addr = $8bb275
+!DefaultMonster03D5Stats = $46
+!DefaultMonster03D5ItemFlag = $00
+
+!DefaultMonster03D6Param = $00
+!DefaultMonster03D6Addr = $8bb275
+!DefaultMonster03D6Stats = $46
+!DefaultMonster03D6ItemFlag = $00
+
+!DefaultMonster03D7Param = $00
+!DefaultMonster03D7Addr = $8bb275
+!DefaultMonster03D7Stats = $46
+!DefaultMonster03D7ItemFlag = $00
+
+!DefaultMonster03D8Param = $00
+!DefaultMonster03D8Addr = $8899AF
+!DefaultMonster03D8Stats = $45
+!DefaultMonster03D8ItemFlag = $00
+
+!DefaultMonster03D9Param = $00
+!DefaultMonster03D9Addr = $8BB817
+!DefaultMonster03D9Stats = $45
+!DefaultMonster03D9ItemFlag = $00
+
+!DefaultMonster03DAParam = $00
+!DefaultMonster03DAAddr = $8BB825
+!DefaultMonster03DAStats = $45
+!DefaultMonster03DAItemFlag = $00
+
+!DefaultMonster03DBParam = $00
+!DefaultMonster03DBAddr = $8BBB5C
+!DefaultMonster03DBStats = $3A
+!DefaultMonster03DBItemFlag = $00
+
+!DefaultMonster03DCParam = $00
+!DefaultMonster03DCAddr = $8BBB66
+!DefaultMonster03DCStats = $3A
+!DefaultMonster03DCItemFlag = $00
+
+!DefaultMonster03DDParam = $04
+!DefaultMonster03DDAddr = $8bbfd0
+!DefaultMonster03DDStats = $43
+!DefaultMonster03DDItemFlag = $00
+
+!DefaultMonster03DEParam = $04
+!DefaultMonster03DEAddr = $8bbfd0
+!DefaultMonster03DEStats = $43
+!DefaultMonster03DEItemFlag = $00
+
+!DefaultMonster03DFParam = $06
+!DefaultMonster03DFAddr = $8bbfd0
+!DefaultMonster03DFStats = $43
+!DefaultMonster03DFItemFlag = $00
+
+!DefaultMonster03E0Param = $06
+!DefaultMonster03E0Addr = $8bbfd0
+!DefaultMonster03E0Stats = $43
+!DefaultMonster03E0ItemFlag = $00
+
+!DefaultMonster03E1Param = $06
+!DefaultMonster03E1Addr = $8bbfd0
+!DefaultMonster03E1Stats = $43
+!DefaultMonster03E1ItemFlag = $00
+
+!DefaultMonster03E2Param = $06
+!DefaultMonster03E2Addr = $8BBFBB
+!DefaultMonster03E2Stats = $43
+!DefaultMonster03E2ItemFlag = $00
+
+!DefaultMonster03E3Param = $06
+!DefaultMonster03E3Addr = $8BBFBB
+!DefaultMonster03E3Stats = $43
+!DefaultMonster03E3ItemFlag = $00
+
+!DefaultMonster03E4Param = $00
+!DefaultMonster03E4Addr = $8BB817
+!DefaultMonster03E4Stats = $45
+!DefaultMonster03E4ItemFlag = $00
+
+!DefaultMonster03E5Param = $00
+!DefaultMonster03E5Addr = $8BB817
+!DefaultMonster03E5Stats = $45
+!DefaultMonster03E5ItemFlag = $00
+
+!DefaultMonster03E6Param = $00
+!DefaultMonster03E6Addr = $8BBB5C
+!DefaultMonster03E6Stats = $3A
+!DefaultMonster03E6ItemFlag = $00
+
+!DefaultMonster03E7Param = $00
+!DefaultMonster03E7Addr = $8BBB5C
+!DefaultMonster03E7Stats = $3A
+!DefaultMonster03E7ItemFlag = $00
+
+!DefaultMonster03E8Param = $02
+!DefaultMonster03E8Addr = $8bbfd0
+!DefaultMonster03E8Stats = $43
+!DefaultMonster03E8ItemFlag = $00
+
+!DefaultMonster03E9Param = $02
+!DefaultMonster03E9Addr = $8bbfd0
+!DefaultMonster03E9Stats = $43
+!DefaultMonster03E9ItemFlag = $27
+
+!DefaultMonster03EAParam = $00
+!DefaultMonster03EAAddr = $8bbd8d
+!DefaultMonster03EAStats = $42
+!DefaultMonster03EAItemFlag = $00
+
+!DefaultMonster03EBParam = $00
+!DefaultMonster03EBAddr = $8bbd8d
+!DefaultMonster03EBStats = $42
+!DefaultMonster03EBItemFlag = $00
+
+!DefaultMonster03ECParam = $00
+!DefaultMonster03ECAddr = $8bbfd0
+!DefaultMonster03ECStats = $43
+!DefaultMonster03ECItemFlag = $00
+
+!DefaultMonster03EDParam = $02
+!DefaultMonster03EDAddr = $8bbfd0
+!DefaultMonster03EDStats = $43
+!DefaultMonster03EDItemFlag = $00
+
+!DefaultMonster03EEParam = $00
+!DefaultMonster03EEAddr = $8BB825
+!DefaultMonster03EEStats = $45
+!DefaultMonster03EEItemFlag = $00
+
+!DefaultMonster03EFParam = $00
+!DefaultMonster03EFAddr = $8BB825
+!DefaultMonster03EFStats = $45
+!DefaultMonster03EFItemFlag = $00
+
+!DefaultMonster03F0Param = $00
+!DefaultMonster03F0Addr = $8BBB66
+!DefaultMonster03F0Stats = $3A
+!DefaultMonster03F0ItemFlag = $00
+
+!DefaultMonster03F1Param = $00
+!DefaultMonster03F1Addr = $8BBB66
+!DefaultMonster03F1Stats = $3A
+!DefaultMonster03F1ItemFlag = $00
+
+!DefaultMonster03F2Param = $00
+!DefaultMonster03F2Addr = $8BB1B4
+!DefaultMonster03F2Stats = $49
+!DefaultMonster03F2ItemFlag = $00
+
+!DefaultMonster03F3Param = $00
+!DefaultMonster03F3Addr = $8bb275
+!DefaultMonster03F3Stats = $46
+!DefaultMonster03F3ItemFlag = $00
+
+!DefaultMonster03F4Param = $00
+!DefaultMonster03F4Addr = $8bb275
+!DefaultMonster03F4Stats = $46
+!DefaultMonster03F4ItemFlag = $00
+
+!DefaultMonster03F5Param = $00
+!DefaultMonster03F5Addr = $8bb275
+!DefaultMonster03F5Stats = $46
+!DefaultMonster03F5ItemFlag = $00
+
+!DefaultMonster03F6Param = $00
+!DefaultMonster03F6Addr = $8bb275
+!DefaultMonster03F6Stats = $46
+!DefaultMonster03F6ItemFlag = $00
+
+!DefaultMonster03F7Param = $00
+!DefaultMonster03F7Addr = $8bbd8d
+!DefaultMonster03F7Stats = $42
+!DefaultMonster03F7ItemFlag = $00
+
+!DefaultMonster03F8Param = $00
+!DefaultMonster03F8Addr = $8bbd8d
+!DefaultMonster03F8Stats = $42
+!DefaultMonster03F8ItemFlag = $00
+
+!DefaultMonster03F9Param = $00
+!DefaultMonster03F9Addr = $8bbd8d
+!DefaultMonster03F9Stats = $42
+!DefaultMonster03F9ItemFlag = $00
+
+!DefaultMonster03FAParam = $00
+!DefaultMonster03FAAddr = $8bbd8d
+!DefaultMonster03FAStats = $42
+!DefaultMonster03FAItemFlag = $00
+
+!DefaultMonster03FBParam = $06
+!DefaultMonster03FBAddr = $8bbfd0
+!DefaultMonster03FBStats = $43
+!DefaultMonster03FBItemFlag = $00
+
+!DefaultMonster03FCParam = $06
+!DefaultMonster03FCAddr = $8bbfd0
+!DefaultMonster03FCStats = $43
+!DefaultMonster03FCItemFlag = $00
+
+!DefaultMonster03FDParam = $00
+!DefaultMonster03FDAddr = $8bbd8d
+!DefaultMonster03FDStats = $42
+!DefaultMonster03FDItemFlag = $00
+
+!DefaultMonster03FEParam = $00
+!DefaultMonster03FEAddr = $8bbd8d
+!DefaultMonster03FEStats = $42
+!DefaultMonster03FEItemFlag = $00
+
+!DefaultMonster03FFParam = $06
+!DefaultMonster03FFAddr = $8bbfd0
+!DefaultMonster03FFStats = $43
+!DefaultMonster03FFItemFlag = $00
+
+!DefaultMonster0400Param = $02
+!DefaultMonster0400Addr = $8bbfd0
+!DefaultMonster0400Stats = $43
+!DefaultMonster0400ItemFlag = $00
+
+!DefaultMonster0401Param = $00
+!DefaultMonster0401Addr = $8bbfd0
+!DefaultMonster0401Stats = $43
+!DefaultMonster0401ItemFlag = $00
+
+!DefaultMonster0402Param = $00
+!DefaultMonster0402Addr = $8bbfd0
+!DefaultMonster0402Stats = $43
+!DefaultMonster0402ItemFlag = $00
+
+!DefaultMonster0403Param = $02
+!DefaultMonster0403Addr = $8bbfd0
+!DefaultMonster0403Stats = $43
+!DefaultMonster0403ItemFlag = $00
+
+!DefaultMonster0404Param = $00
+!DefaultMonster0404Addr = $8bbd8d
+!DefaultMonster0404Stats = $42
+!DefaultMonster0404ItemFlag = $00
+
+!DefaultMonster0405Param = $00
+!DefaultMonster0405Addr = $8bbd8d
+!DefaultMonster0405Stats = $42
+!DefaultMonster0405ItemFlag = $00
+
+!DefaultMonster0406Param = $00
+!DefaultMonster0406Addr = $8bbd8d
+!DefaultMonster0406Stats = $42
+!DefaultMonster0406ItemFlag = $00
+
+!DefaultMonster0407Param = $06
+!DefaultMonster0407Addr = $8BBFBB
+!DefaultMonster0407Stats = $43
+!DefaultMonster0407ItemFlag = $00
+
+!DefaultMonster0408Param = $04
+!DefaultMonster0408Addr = $8BBFBB
+!DefaultMonster0408Stats = $43
+!DefaultMonster0408ItemFlag = $00
+
+!DefaultMonster0409Param = $04
+!DefaultMonster0409Addr = $8BBFBB
+!DefaultMonster0409Stats = $43
+!DefaultMonster0409ItemFlag = $00
+
+!DefaultMonster040AParam = $04
+!DefaultMonster040AAddr = $8BBFBB
+!DefaultMonster040AStats = $43
+!DefaultMonster040AItemFlag = $00
+
+!DefaultMonster040BParam = $04
+!DefaultMonster040BAddr = $8BBFBB
+!DefaultMonster040BStats = $43
+!DefaultMonster040BItemFlag = $00
+
+!DefaultMonster040CParam = $00
+!DefaultMonster040CAddr = $8BB817
+!DefaultMonster040CStats = $45
+!DefaultMonster040CItemFlag = $00
+
+!DefaultMonster040DParam = $00
+!DefaultMonster040DAddr = $8BB825
+!DefaultMonster040DStats = $45
+!DefaultMonster040DItemFlag = $00
+
+!DefaultMonster040EParam = $00
+!DefaultMonster040EAddr = $8BB825
+!DefaultMonster040EStats = $45
+!DefaultMonster040EItemFlag = $00
+
+!DefaultMonster040FParam = $04
+!DefaultMonster040FAddr = $8BBFBB
+!DefaultMonster040FStats = $43
+!DefaultMonster040FItemFlag = $00
+
+!DefaultMonster0410Param = $04
+!DefaultMonster0410Addr = $8BBFBB
+!DefaultMonster0410Stats = $43
+!DefaultMonster0410ItemFlag = $00
+
+!DefaultMonster0411Param = $04
+!DefaultMonster0411Addr = $8BBFBB
+!DefaultMonster0411Stats = $43
+!DefaultMonster0411ItemFlag = $00
+
+!DefaultMonster0412Param = $04
+!DefaultMonster0412Addr = $8BBFBB
+!DefaultMonster0412Stats = $43
+!DefaultMonster0412ItemFlag = $00
+
+!DefaultMonster0413Param = $06
+!DefaultMonster0413Addr = $8BBFBB
+!DefaultMonster0413Stats = $43
+!DefaultMonster0413ItemFlag = $00
+
+!DefaultMonster0414Param = $00
+!DefaultMonster0414Addr = $8bbd8d
+!DefaultMonster0414Stats = $42
+!DefaultMonster0414ItemFlag = $00
+
+!DefaultMonster0415Param = $00
+!DefaultMonster0415Addr = $8BB825
+!DefaultMonster0415Stats = $45
+!DefaultMonster0415ItemFlag = $00
+
+!DefaultMonster0416Param = $00
+!DefaultMonster0416Addr = $8BC65F
+!DefaultMonster0416Stats = $4F
+!DefaultMonster0416ItemFlag = $00
+
+!DefaultMonster0417Param = $00
+!DefaultMonster0417Addr = $8BC65F
+!DefaultMonster0417Stats = $4F
+!DefaultMonster0417ItemFlag = $28
+
+!DefaultMonster0418Param = $00
+!DefaultMonster0418Addr = $8BC39D
+!DefaultMonster0418Stats = $4E
+!DefaultMonster0418ItemFlag = $00
+
+!DefaultMonster0419Param = $00
+!DefaultMonster0419Addr = $8BC5A3
+!DefaultMonster0419Stats = $4F
+!DefaultMonster0419ItemFlag = $00
+
+!DefaultMonster041AParam = $00
+!DefaultMonster041AAddr = $8BC5A3
+!DefaultMonster041AStats = $4F
+!DefaultMonster041AItemFlag = $00
+
+!DefaultMonster041BParam = $00
+!DefaultMonster041BAddr = $8BC5A3
+!DefaultMonster041BStats = $4F
+!DefaultMonster041BItemFlag = $00
+
+!DefaultMonster041CParam = $00
+!DefaultMonster041CAddr = $8BC5A3
+!DefaultMonster041CStats = $4F
+!DefaultMonster041CItemFlag = $00
+
+!DefaultMonster041DParam = $00
+!DefaultMonster041DAddr = $8BC5A3
+!DefaultMonster041DStats = $4F
+!DefaultMonster041DItemFlag = $00
+
+!DefaultMonster041EParam = $00
+!DefaultMonster041EAddr = $8BC5FC
+!DefaultMonster041EStats = $4F
+!DefaultMonster041EItemFlag = $00
+
+!DefaultMonster041FParam = $00
+!DefaultMonster041FAddr = $8BC5FC
+!DefaultMonster041FStats = $4F
+!DefaultMonster041FItemFlag = $00
+
+!DefaultMonster0420Param = $00
+!DefaultMonster0420Addr = $8BC5FC
+!DefaultMonster0420Stats = $4F
+!DefaultMonster0420ItemFlag = $00
+
+!DefaultMonster0421Param = $00
+!DefaultMonster0421Addr = $8BC5FC
+!DefaultMonster0421Stats = $4F
+!DefaultMonster0421ItemFlag = $00
+
+!DefaultMonster0422Param = $00
+!DefaultMonster0422Addr = $8BC5FC
+!DefaultMonster0422Stats = $4F
+!DefaultMonster0422ItemFlag = $00
+
+!DefaultMonster0423Param = $00
+!DefaultMonster0423Addr = $8BC5FC
+!DefaultMonster0423Stats = $4F
+!DefaultMonster0423ItemFlag = $00
+
+!DefaultMonster0424Param = $00
+!DefaultMonster0424Addr = $8BC5FC
+!DefaultMonster0424Stats = $4F
+!DefaultMonster0424ItemFlag = $00
+
+!DefaultMonster0425Param = $00
+!DefaultMonster0425Addr = $8BC5FC
+!DefaultMonster0425Stats = $4F
+!DefaultMonster0425ItemFlag = $00
+
+!DefaultMonster0426Param = $00
+!DefaultMonster0426Addr = $8BC5FC
+!DefaultMonster0426Stats = $4F
+!DefaultMonster0426ItemFlag = $00
+
+!DefaultMonster0427Param = $00
+!DefaultMonster0427Addr = $8BC5FC
+!DefaultMonster0427Stats = $4F
+!DefaultMonster0427ItemFlag = $00
+
+!DefaultMonster0428Param = $00
+!DefaultMonster0428Addr = $8BC5A3
+!DefaultMonster0428Stats = $4F
+!DefaultMonster0428ItemFlag = $00
+
+!DefaultMonster0429Param = $00
+!DefaultMonster0429Addr = $8BC5A3
+!DefaultMonster0429Stats = $4F
+!DefaultMonster0429ItemFlag = $00
+
+!DefaultMonster042AParam = $00
+!DefaultMonster042AAddr = $8BC65F
+!DefaultMonster042AStats = $4F
+!DefaultMonster042AItemFlag = $00
+
+!DefaultMonster042BParam = $00
+!DefaultMonster042BAddr = $8BC65F
+!DefaultMonster042BStats = $4F
+!DefaultMonster042BItemFlag = $00
+
+!DefaultMonster042CParam = $00
+!DefaultMonster042CAddr = $8BC65F
+!DefaultMonster042CStats = $4F
+!DefaultMonster042CItemFlag = $00
+
+!DefaultMonster042DParam = $00
+!DefaultMonster042DAddr = $8BC65F
+!DefaultMonster042DStats = $4F
+!DefaultMonster042DItemFlag = $00
+
+!DefaultMonster042EParam = $00
+!DefaultMonster042EAddr = $8BC65F
+!DefaultMonster042EStats = $4F
+!DefaultMonster042EItemFlag = $00
+
+!DefaultMonster042FParam = $00
+!DefaultMonster042FAddr = $8BC65F
+!DefaultMonster042FStats = $4F
+!DefaultMonster042FItemFlag = $00
+
+!DefaultMonster0430Param = $00
+!DefaultMonster0430Addr = $8BC39D
+!DefaultMonster0430Stats = $4E
+!DefaultMonster0430ItemFlag = $00
+
+!DefaultMonster0431Param = $00
+!DefaultMonster0431Addr = $8BC39D
+!DefaultMonster0431Stats = $4E
+!DefaultMonster0431ItemFlag = $00
+
+!DefaultMonster0432Param = $00
+!DefaultMonster0432Addr = $8BC65F
+!DefaultMonster0432Stats = $4F
+!DefaultMonster0432ItemFlag = $00
+
+!DefaultMonster0433Param = $00
+!DefaultMonster0433Addr = $8BC65F
+!DefaultMonster0433Stats = $4F
+!DefaultMonster0433ItemFlag = $00
+
+!DefaultMonster0434Param = $00
+!DefaultMonster0434Addr = $8BC5FC
+!DefaultMonster0434Stats = $4F
+!DefaultMonster0434ItemFlag = $00
+
+!DefaultMonster0435Param = $00
+!DefaultMonster0435Addr = $8BC5FC
+!DefaultMonster0435Stats = $4F
+!DefaultMonster0435ItemFlag = $00
+
+!DefaultMonster0436Param = $00
+!DefaultMonster0436Addr = $8BC5FC
+!DefaultMonster0436Stats = $4F
+!DefaultMonster0436ItemFlag = $00
+
+!DefaultMonster0437Param = $00
+!DefaultMonster0437Addr = $8BC5FC
+!DefaultMonster0437Stats = $4F
+!DefaultMonster0437ItemFlag = $00
+
+!DefaultMonster0438Param = $00
+!DefaultMonster0438Addr = $8BC5FC
+!DefaultMonster0438Stats = $4F
+!DefaultMonster0438ItemFlag = $00
+
+!DefaultMonster0439Param = $00
+!DefaultMonster0439Addr = $8BC39D
+!DefaultMonster0439Stats = $4E
+!DefaultMonster0439ItemFlag = $00
+
+!DefaultMonster043AParam = $00
+!DefaultMonster043AAddr = $8BC65F
+!DefaultMonster043AStats = $4F
+!DefaultMonster043AItemFlag = $00
+
+!DefaultMonster043BParam = $00
+!DefaultMonster043BAddr = $8BC65F
+!DefaultMonster043BStats = $4F
+!DefaultMonster043BItemFlag = $00
+
+!DefaultMonster043CParam = $00
+!DefaultMonster043CAddr = $8BC65F
+!DefaultMonster043CStats = $4F
+!DefaultMonster043CItemFlag = $00
+
+!DefaultMonster043DParam = $00
+!DefaultMonster043DAddr = $8BC65F
+!DefaultMonster043DStats = $4F
+!DefaultMonster043DItemFlag = $00
+
+!DefaultMonster043EParam = $00
+!DefaultMonster043EAddr = $8BC65F
+!DefaultMonster043EStats = $4F
+!DefaultMonster043EItemFlag = $00
+
+!DefaultMonster043FParam = $00
+!DefaultMonster043FAddr = $8BC65F
+!DefaultMonster043FStats = $4F
+!DefaultMonster043FItemFlag = $00
+
+!DefaultMonster0440Param = $00
+!DefaultMonster0440Addr = $8BC65F
+!DefaultMonster0440Stats = $4F
+!DefaultMonster0440ItemFlag = $00
+
+!DefaultMonster0441Param = $00
+!DefaultMonster0441Addr = $8BC65F
+!DefaultMonster0441Stats = $4F
+!DefaultMonster0441ItemFlag = $00
+
+!DefaultMonster0442Param = $00
+!DefaultMonster0442Addr = $8BC65F
+!DefaultMonster0442Stats = $4F
+!DefaultMonster0442ItemFlag = $00
+
+!DefaultMonster0443Param = $00
+!DefaultMonster0443Addr = $8BC65F
+!DefaultMonster0443Stats = $4F
+!DefaultMonster0443ItemFlag = $00
+
+!DefaultMonster0444Param = $00
+!DefaultMonster0444Addr = $8BC5A3
+!DefaultMonster0444Stats = $4F
+!DefaultMonster0444ItemFlag = $00
+
+!DefaultMonster0445Param = $00
+!DefaultMonster0445Addr = $8BC5A3
+!DefaultMonster0445Stats = $4F
+!DefaultMonster0445ItemFlag = $00
+
+!DefaultMonster0446Param = $00
+!DefaultMonster0446Addr = $8BC5A3
+!DefaultMonster0446Stats = $4F
+!DefaultMonster0446ItemFlag = $00
+
+!DefaultMonster0447Param = $00
+!DefaultMonster0447Addr = $8BC5FC
+!DefaultMonster0447Stats = $4F
+!DefaultMonster0447ItemFlag = $00
+
+!DefaultMonster0448Param = $00
+!DefaultMonster0448Addr = $8BC5FC
+!DefaultMonster0448Stats = $4F
+!DefaultMonster0448ItemFlag = $00
+
+!DefaultMonster0449Param = $00
+!DefaultMonster0449Addr = $8BC5FC
+!DefaultMonster0449Stats = $4F
+!DefaultMonster0449ItemFlag = $00
+
+!DefaultMonster044AParam = $00
+!DefaultMonster044AAddr = $8BC39D
+!DefaultMonster044AStats = $4E
+!DefaultMonster044AItemFlag = $00
+
+!DefaultMonster044BParam = $00
+!DefaultMonster044BAddr = $8BC39D
+!DefaultMonster044BStats = $4E
+!DefaultMonster044BItemFlag = $00
+
+!DefaultMonster044CParam = $00
+!DefaultMonster044CAddr = $8BC39D
+!DefaultMonster044CStats = $4E
+!DefaultMonster044CItemFlag = $00
+
+!DefaultMonster044DParam = $00
+!DefaultMonster044DAddr = $8BC184
+!DefaultMonster044DStats = $4C
+!DefaultMonster044DItemFlag = $00
+
+!DefaultMonster044EParam = $00
+!DefaultMonster044EAddr = $8BC184
+!DefaultMonster044EStats = $4C
+!DefaultMonster044EItemFlag = $00
+
+!DefaultMonster044FParam = $00
+!DefaultMonster044FAddr = $8BC184
+!DefaultMonster044FStats = $4C
+!DefaultMonster044FItemFlag = $00
+
+!DefaultMonster0450Param = $00
+!DefaultMonster0450Addr = $8BC184
+!DefaultMonster0450Stats = $4C
+!DefaultMonster0450ItemFlag = $00
+
+!DefaultMonster0451Param = $00
+!DefaultMonster0451Addr = $8BC184
+!DefaultMonster0451Stats = $4C
+!DefaultMonster0451ItemFlag = $00
+
+!DefaultMonster0452Param = $00
+!DefaultMonster0452Addr = $8BC184
+!DefaultMonster0452Stats = $4C
+!DefaultMonster0452ItemFlag = $00
+
+!DefaultMonster0453Param = $00
+!DefaultMonster0453Addr = $8BC184
+!DefaultMonster0453Stats = $4C
+!DefaultMonster0453ItemFlag = $00
+
+!DefaultMonster0454Param = $00
+!DefaultMonster0454Addr = $8BC184
+!DefaultMonster0454Stats = $4C
+!DefaultMonster0454ItemFlag = $00
+
+!DefaultMonster0455Param = $00
+!DefaultMonster0455Addr = $8BC184
+!DefaultMonster0455Stats = $4C
+!DefaultMonster0455ItemFlag = $00
+
+!DefaultMonster0456Param = $00
+!DefaultMonster0456Addr = $8BC184
+!DefaultMonster0456Stats = $4C
+!DefaultMonster0456ItemFlag = $00
+
+!DefaultMonster0457Param = $00
+!DefaultMonster0457Addr = $8BC184
+!DefaultMonster0457Stats = $4C
+!DefaultMonster0457ItemFlag = $00
+
+!DefaultMonster0458Param = $00
+!DefaultMonster0458Addr = $8BC5A3
+!DefaultMonster0458Stats = $4F
+!DefaultMonster0458ItemFlag = $00
+
+!DefaultMonster0459Param = $00
+!DefaultMonster0459Addr = $8BC5A3
+!DefaultMonster0459Stats = $4F
+!DefaultMonster0459ItemFlag = $00
+
+!DefaultMonster045AParam = $00
+!DefaultMonster045AAddr = $8BC5FC
+!DefaultMonster045AStats = $4F
+!DefaultMonster045AItemFlag = $00
+
+!DefaultMonster045BParam = $00
+!DefaultMonster045BAddr = $8BC5FC
+!DefaultMonster045BStats = $4F
+!DefaultMonster045BItemFlag = $00
+
+!DefaultMonster045CParam = $00
+!DefaultMonster045CAddr = $8BC5FC
+!DefaultMonster045CStats = $4F
+!DefaultMonster045CItemFlag = $00
+
+!DefaultMonster045DParam = $00
+!DefaultMonster045DAddr = $8BC5FC
+!DefaultMonster045DStats = $4F
+!DefaultMonster045DItemFlag = $00
+
+!DefaultMonster045EParam = $00
+!DefaultMonster045EAddr = $8BC5FC
+!DefaultMonster045EStats = $4F
+!DefaultMonster045EItemFlag = $00
+
+!DefaultMonster045FParam = $00
+!DefaultMonster045FAddr = $8BC798
+!DefaultMonster045FStats = $51
+!DefaultMonster045FItemFlag = $00
+
+!DefaultMonster0460Param = $00
+!DefaultMonster0460Addr = $8BC798
+!DefaultMonster0460Stats = $51
+!DefaultMonster0460ItemFlag = $00
+
+!DefaultMonster0461Param = $00
+!DefaultMonster0461Addr = $8BC798
+!DefaultMonster0461Stats = $51
+!DefaultMonster0461ItemFlag = $00
+
+!DefaultMonster0462Param = $00
+!DefaultMonster0462Addr = $8BC39D
+!DefaultMonster0462Stats = $4E
+!DefaultMonster0462ItemFlag = $00
+
+!DefaultMonster0463Param = $00
+!DefaultMonster0463Addr = $8BC184
+!DefaultMonster0463Stats = $4C
+!DefaultMonster0463ItemFlag = $00
+
+!DefaultMonster0464Param = $00
+!DefaultMonster0464Addr = $8BC184
+!DefaultMonster0464Stats = $4C
+!DefaultMonster0464ItemFlag = $00
+
+!DefaultMonster0465Param = $00
+!DefaultMonster0465Addr = $8BC184
+!DefaultMonster0465Stats = $4C
+!DefaultMonster0465ItemFlag = $00
+
+!DefaultMonster0466Param = $00
+!DefaultMonster0466Addr = $8BC184
+!DefaultMonster0466Stats = $4C
+!DefaultMonster0466ItemFlag = $00
+
+!DefaultMonster0467Param = $00
+!DefaultMonster0467Addr = $8BC184
+!DefaultMonster0467Stats = $4C
+!DefaultMonster0467ItemFlag = $00
+
+!DefaultMonster0468Param = $00
+!DefaultMonster0468Addr = $8BC184
+!DefaultMonster0468Stats = $4C
+!DefaultMonster0468ItemFlag = $00
+
+!DefaultMonster0469Param = $00
+!DefaultMonster0469Addr = $8BC184
+!DefaultMonster0469Stats = $4C
+!DefaultMonster0469ItemFlag = $00
+
+!DefaultMonster046AParam = $00
+!DefaultMonster046AAddr = $8BC184
+!DefaultMonster046AStats = $4C
+!DefaultMonster046AItemFlag = $00
+
+!DefaultMonster046BParam = $00
+!DefaultMonster046BAddr = $8BC184
+!DefaultMonster046BStats = $4C
+!DefaultMonster046BItemFlag = $00
+
+!DefaultMonster046CParam = $00
+!DefaultMonster046CAddr = $8BC5A3
+!DefaultMonster046CStats = $4F
+!DefaultMonster046CItemFlag = $00
+
+!DefaultMonster046DParam = $00
+!DefaultMonster046DAddr = $8BC5A3
+!DefaultMonster046DStats = $4F
+!DefaultMonster046DItemFlag = $00
+
+!DefaultMonster046EParam = $00
+!DefaultMonster046EAddr = $8BC5A3
+!DefaultMonster046EStats = $4F
+!DefaultMonster046EItemFlag = $00
+
+!DefaultMonster046FParam = $00
+!DefaultMonster046FAddr = $8BC5A3
+!DefaultMonster046FStats = $4F
+!DefaultMonster046FItemFlag = $00
+
+!DefaultMonster0470Param = $00
+!DefaultMonster0470Addr = $8BC5FC
+!DefaultMonster0470Stats = $4F
+!DefaultMonster0470ItemFlag = $00
+
+!DefaultMonster0471Param = $00
+!DefaultMonster0471Addr = $8BC798
+!DefaultMonster0471Stats = $51
+!DefaultMonster0471ItemFlag = $00
+
+!DefaultMonster0472Param = $00
+!DefaultMonster0472Addr = $8BC39D
+!DefaultMonster0472Stats = $4E
+!DefaultMonster0472ItemFlag = $00
+
+!DefaultMonster0473Param = $00
+!DefaultMonster0473Addr = $8BC39D
+!DefaultMonster0473Stats = $4E
+!DefaultMonster0473ItemFlag = $00
+
+!DefaultMonster0474Param = $00
+!DefaultMonster0474Addr = $8BC5A3
+!DefaultMonster0474Stats = $4F
+!DefaultMonster0474ItemFlag = $00
+
+!DefaultMonster0475Param = $00
+!DefaultMonster0475Addr = $8BC5A3
+!DefaultMonster0475Stats = $4F
+!DefaultMonster0475ItemFlag = $00
+
+!DefaultMonster0476Param = $00
+!DefaultMonster0476Addr = $8BC5A3
+!DefaultMonster0476Stats = $4F
+!DefaultMonster0476ItemFlag = $00
+
+!DefaultMonster0477Param = $00
+!DefaultMonster0477Addr = $8BC5A3
+!DefaultMonster0477Stats = $4F
+!DefaultMonster0477ItemFlag = $00
+
+!DefaultMonster0478Param = $00
+!DefaultMonster0478Addr = $8BC5FC
+!DefaultMonster0478Stats = $4F
+!DefaultMonster0478ItemFlag = $00
+
+!DefaultMonster0479Param = $00
+!DefaultMonster0479Addr = $8BC5FC
+!DefaultMonster0479Stats = $4F
+!DefaultMonster0479ItemFlag = $00
+
+!DefaultMonster047AParam = $00
+!DefaultMonster047AAddr = $8BC5FC
+!DefaultMonster047AStats = $4F
+!DefaultMonster047AItemFlag = $00
+
+!DefaultMonster047BParam = $00
+!DefaultMonster047BAddr = $8BC5FC
+!DefaultMonster047BStats = $4F
+!DefaultMonster047BItemFlag = $00
+
+!DefaultMonster047CParam = $00
+!DefaultMonster047CAddr = $8BC5FC
+!DefaultMonster047CStats = $4F
+!DefaultMonster047CItemFlag = $00
+
+!DefaultMonster047DParam = $00
+!DefaultMonster047DAddr = $8BC5FC
+!DefaultMonster047DStats = $4F
+!DefaultMonster047DItemFlag = $00
+
+!DefaultMonster047EParam = $00
+!DefaultMonster047EAddr = $8BC39D
+!DefaultMonster047EStats = $4E
+!DefaultMonster047EItemFlag = $00
+
+!DefaultMonster047FParam = $00
+!DefaultMonster047FAddr = $8BC39D
+!DefaultMonster047FStats = $4E
+!DefaultMonster047FItemFlag = $00
+
+!DefaultMonster0480Param = $00
+!DefaultMonster0480Addr = $8BC39D
+!DefaultMonster0480Stats = $4E
+!DefaultMonster0480ItemFlag = $00
+
+!DefaultMonster0481Param = $00
+!DefaultMonster0481Addr = $8BC798
+!DefaultMonster0481Stats = $51
+!DefaultMonster0481ItemFlag = $00
+
+!DefaultMonster0482Param = $00
+!DefaultMonster0482Addr = $8BC798
+!DefaultMonster0482Stats = $51
+!DefaultMonster0482ItemFlag = $00
+
+!DefaultMonster0483Param = $00
+!DefaultMonster0483Addr = $8BC798
+!DefaultMonster0483Stats = $51
+!DefaultMonster0483ItemFlag = $00
+
+!DefaultMonster0484Param = $00
+!DefaultMonster0484Addr = $8BC5FC
+!DefaultMonster0484Stats = $4F
+!DefaultMonster0484ItemFlag = $00
+
+!DefaultMonster0485Param = $00
+!DefaultMonster0485Addr = $8BC5A3
+!DefaultMonster0485Stats = $4F
+!DefaultMonster0485ItemFlag = $00
+
+!DefaultMonster0486Param = $00
+!DefaultMonster0486Addr = $8BC1A7
+!DefaultMonster0486Stats = $4C
+!DefaultMonster0486ItemFlag = $00
+
+!DefaultMonster0487Param = $00
+!DefaultMonster0487Addr = $8BC1A7
+!DefaultMonster0487Stats = $4C
+!DefaultMonster0487ItemFlag = $00
+
+!DefaultMonster0488Param = $00
+!DefaultMonster0488Addr = $8BC184
+!DefaultMonster0488Stats = $4C
+!DefaultMonster0488ItemFlag = $00
+
+!DefaultMonster0489Param = $00
+!DefaultMonster0489Addr = $8BC184
+!DefaultMonster0489Stats = $4C
+!DefaultMonster0489ItemFlag = $00
+
+!DefaultMonster048AParam = $00
+!DefaultMonster048AAddr = $8BC184
+!DefaultMonster048AStats = $4C
+!DefaultMonster048AItemFlag = $00
+
+!DefaultMonster048BParam = $00
+!DefaultMonster048BAddr = $8BC184
+!DefaultMonster048BStats = $4C
+!DefaultMonster048BItemFlag = $00
+
+!DefaultMonster048CParam = $00
+!DefaultMonster048CAddr = $8BC184
+!DefaultMonster048CStats = $4C
+!DefaultMonster048CItemFlag = $00
+
+!DefaultMonster048DParam = $00
+!DefaultMonster048DAddr = $8BC184
+!DefaultMonster048DStats = $4C
+!DefaultMonster048DItemFlag = $00
+
+!DefaultMonster048EParam = $00
+!DefaultMonster048EAddr = $8BC184
+!DefaultMonster048EStats = $4C
+!DefaultMonster048EItemFlag = $00
+
+!DefaultMonster048FParam = $00
+!DefaultMonster048FAddr = $8BC184
+!DefaultMonster048FStats = $4C
+!DefaultMonster048FItemFlag = $00
+
+!DefaultMonster0490Param = $00
+!DefaultMonster0490Addr = $8BC184
+!DefaultMonster0490Stats = $4C
+!DefaultMonster0490ItemFlag = $00
+
+!DefaultMonster0491Param = $00
+!DefaultMonster0491Addr = $8BC184
+!DefaultMonster0491Stats = $4C
+!DefaultMonster0491ItemFlag = $00
+
+!DefaultMonster0492Param = $00
+!DefaultMonster0492Addr = $8BC39D
+!DefaultMonster0492Stats = $4E
+!DefaultMonster0492ItemFlag = $00
+
+!DefaultMonster0493Param = $00
+!DefaultMonster0493Addr = $8BC39D
+!DefaultMonster0493Stats = $4E
+!DefaultMonster0493ItemFlag = $00
+
+!DefaultMonster0494Param = $00
+!DefaultMonster0494Addr = $8BC39D
+!DefaultMonster0494Stats = $4E
+!DefaultMonster0494ItemFlag = $00
+
+!DefaultMonster0495Param = $00
+!DefaultMonster0495Addr = $8BC39D
+!DefaultMonster0495Stats = $4E
+!DefaultMonster0495ItemFlag = $00
+
+!DefaultMonster0496Param = $00
+!DefaultMonster0496Addr = $8BC798
+!DefaultMonster0496Stats = $51
+!DefaultMonster0496ItemFlag = $00
+
+!DefaultMonster0497Param = $00
+!DefaultMonster0497Addr = $8BC798
+!DefaultMonster0497Stats = $51
+!DefaultMonster0497ItemFlag = $00
+
+!DefaultMonster0498Param = $00
+!DefaultMonster0498Addr = $8BC65F
+!DefaultMonster0498Stats = $4F
+!DefaultMonster0498ItemFlag = $00
+
+!DefaultMonster0499Param = $00
+!DefaultMonster0499Addr = $8BC65F
+!DefaultMonster0499Stats = $4F
+!DefaultMonster0499ItemFlag = $00
+
+!DefaultMonster049AParam = $00
+!DefaultMonster049AAddr = $8BC65F
+!DefaultMonster049AStats = $4F
+!DefaultMonster049AItemFlag = $00
+
+!DefaultMonster049BParam = $00
+!DefaultMonster049BAddr = $8BC65F
+!DefaultMonster049BStats = $4F
+!DefaultMonster049BItemFlag = $00
+
+!DefaultMonster049CParam = $00
+!DefaultMonster049CAddr = $8BC5A3
+!DefaultMonster049CStats = $4F
+!DefaultMonster049CItemFlag = $00
+
+!DefaultMonster049DParam = $00
+!DefaultMonster049DAddr = $8BC5FC
+!DefaultMonster049DStats = $4F
+!DefaultMonster049DItemFlag = $00
+
+!DefaultMonster049EParam = $00
+!DefaultMonster049EAddr = $8BC5FC
+!DefaultMonster049EStats = $4F
+!DefaultMonster049EItemFlag = $00
+
+!DefaultMonster049FParam = $00
+!DefaultMonster049FAddr = $8BC5FC
+!DefaultMonster049FStats = $4F
+!DefaultMonster049FItemFlag = $00
+
+!DefaultMonster04A0Param = $00
+!DefaultMonster04A0Addr = $8BC5FC
+!DefaultMonster04A0Stats = $4F
+!DefaultMonster04A0ItemFlag = $00
+
+!DefaultMonster04A1Param = $00
+!DefaultMonster04A1Addr = $8BC39D
+!DefaultMonster04A1Stats = $4E
+!DefaultMonster04A1ItemFlag = $00
+
+!DefaultMonster04A2Param = $00
+!DefaultMonster04A2Addr = $8BC39D
+!DefaultMonster04A2Stats = $4E
+!DefaultMonster04A2ItemFlag = $00
+
+!DefaultMonster04A3Param = $00
+!DefaultMonster04A3Addr = $8BC39D
+!DefaultMonster04A3Stats = $4E
+!DefaultMonster04A3ItemFlag = $00
+
+!DefaultMonster04A4Param = $00
+!DefaultMonster04A4Addr = $8BC798
+!DefaultMonster04A4Stats = $51
+!DefaultMonster04A4ItemFlag = $00
+
+!DefaultMonster04A5Param = $00
+!DefaultMonster04A5Addr = $8BC798
+!DefaultMonster04A5Stats = $51
+!DefaultMonster04A5ItemFlag = $00
+
+!DefaultMonster04A6Param = $00
+!DefaultMonster04A6Addr = $8BC798
+!DefaultMonster04A6Stats = $51
+!DefaultMonster04A6ItemFlag = $00
+
+!DefaultMonster04A7Param = $00
+!DefaultMonster04A7Addr = $8BC798
+!DefaultMonster04A7Stats = $51
+!DefaultMonster04A7ItemFlag = $00
+
+!DefaultMonster04A8Param = $00
+!DefaultMonster04A8Addr = $8BC798
+!DefaultMonster04A8Stats = $51
+!DefaultMonster04A8ItemFlag = $00
+
+!DefaultMonster04A9Param = $00
+!DefaultMonster04A9Addr = $8BC5FC
+!DefaultMonster04A9Stats = $4F
+!DefaultMonster04A9ItemFlag = $00
+
+!DefaultMonster04AAParam = $00
+!DefaultMonster04AAAddr = $8BC5FC
+!DefaultMonster04AAStats = $4F
+!DefaultMonster04AAItemFlag = $00
+
+!DefaultMonster04ABParam = $00
+!DefaultMonster04ABAddr = $8BC65F
+!DefaultMonster04ABStats = $4F
+!DefaultMonster04ABItemFlag = $00
+
+!DefaultMonster04ACParam = $00
+!DefaultMonster04ACAddr = $8BC65F
+!DefaultMonster04ACStats = $4F
+!DefaultMonster04ACItemFlag = $00
+
+!DefaultMonster04ADParam = $00
+!DefaultMonster04ADAddr = $8BC65F
+!DefaultMonster04ADStats = $4F
+!DefaultMonster04ADItemFlag = $00
+
+!DefaultMonster04AEParam = $00
+!DefaultMonster04AEAddr = $8BC65F
+!DefaultMonster04AEStats = $4F
+!DefaultMonster04AEItemFlag = $00
+
+!DefaultMonster04AFParam = $00
+!DefaultMonster04AFAddr = $8BC65F
+!DefaultMonster04AFStats = $4F
+!DefaultMonster04AFItemFlag = $00
+
+!DefaultMonster04B0Param = $00
+!DefaultMonster04B0Addr = $8BC65F
+!DefaultMonster04B0Stats = $4F
+!DefaultMonster04B0ItemFlag = $00
+
+!DefaultMonster04B1Param = $00
+!DefaultMonster04B1Addr = $8BC65F
+!DefaultMonster04B1Stats = $4F
+!DefaultMonster04B1ItemFlag = $00
+
+!DefaultMonster04B2Param = $00
+!DefaultMonster04B2Addr = $8BC65F
+!DefaultMonster04B2Stats = $4F
+!DefaultMonster04B2ItemFlag = $00
+
+!DefaultMonster04B3Param = $00
+!DefaultMonster04B3Addr = $8BC65F
+!DefaultMonster04B3Stats = $4F
+!DefaultMonster04B3ItemFlag = $00
+
+!DefaultMonster04B4Param = $00
+!DefaultMonster04B4Addr = $8BC65F
+!DefaultMonster04B4Stats = $4F
+!DefaultMonster04B4ItemFlag = $00
+
+!DefaultMonster04B5Param = $00
+!DefaultMonster04B5Addr = $8BC65F
+!DefaultMonster04B5Stats = $4F
+!DefaultMonster04B5ItemFlag = $00
+
+!DefaultMonster04B6Param = $00
+!DefaultMonster04B6Addr = $8BC798
+!DefaultMonster04B6Stats = $51
+!DefaultMonster04B6ItemFlag = $00
+
+!DefaultMonster04B7Param = $00
+!DefaultMonster04B7Addr = $8BC798
+!DefaultMonster04B7Stats = $51
+!DefaultMonster04B7ItemFlag = $00
+
+!DefaultMonster04B8Param = $00
+!DefaultMonster04B8Addr = $8BC798
+!DefaultMonster04B8Stats = $51
+!DefaultMonster04B8ItemFlag = $00
+
+!DefaultMonster04B9Param = $00
+!DefaultMonster04B9Addr = $8BC184
+!DefaultMonster04B9Stats = $4C
+!DefaultMonster04B9ItemFlag = $00
+
+!DefaultMonster04BAParam = $00
+!DefaultMonster04BAAddr = $8BC184
+!DefaultMonster04BAStats = $4C
+!DefaultMonster04BAItemFlag = $00
+
+!DefaultMonster04BBParam = $00
+!DefaultMonster04BBAddr = $8BC184
+!DefaultMonster04BBStats = $4C
+!DefaultMonster04BBItemFlag = $00
+
+!DefaultMonster04BCParam = $00
+!DefaultMonster04BCAddr = $8BC184
+!DefaultMonster04BCStats = $4C
+!DefaultMonster04BCItemFlag = $00
+
+!DefaultMonster04BDParam = $00
+!DefaultMonster04BDAddr = $8BC184
+!DefaultMonster04BDStats = $4C
+!DefaultMonster04BDItemFlag = $00
+
+!DefaultMonster04BEParam = $00
+!DefaultMonster04BEAddr = $8BC184
+!DefaultMonster04BEStats = $4C
+!DefaultMonster04BEItemFlag = $00
+
+!DefaultMonster04BFParam = $00
+!DefaultMonster04BFAddr = $8BC184
+!DefaultMonster04BFStats = $4C
+!DefaultMonster04BFItemFlag = $00
+
+!DefaultMonster04C0Param = $00
+!DefaultMonster04C0Addr = $8BC184
+!DefaultMonster04C0Stats = $4C
+!DefaultMonster04C0ItemFlag = $00
+
+!DefaultMonster04C1Param = $00
+!DefaultMonster04C1Addr = $8BC184
+!DefaultMonster04C1Stats = $4C
+!DefaultMonster04C1ItemFlag = $00
+
+!DefaultMonster04C2Param = $00
+!DefaultMonster04C2Addr = $8BC184
+!DefaultMonster04C2Stats = $4C
+!DefaultMonster04C2ItemFlag = $00
+
+!DefaultMonster04C3Param = $00
+!DefaultMonster04C3Addr = $8BC184
+!DefaultMonster04C3Stats = $4C
+!DefaultMonster04C3ItemFlag = $00
+
+!DefaultMonster04C4Param = $00
+!DefaultMonster04C4Addr = $8BC184
+!DefaultMonster04C4Stats = $4C
+!DefaultMonster04C4ItemFlag = $00
+
+!DefaultMonster04C5Param = $00
+!DefaultMonster04C5Addr = $8BC5A3
+!DefaultMonster04C5Stats = $4F
+!DefaultMonster04C5ItemFlag = $00
+
+!DefaultMonster04C6Param = $00
+!DefaultMonster04C6Addr = $8BC5A3
+!DefaultMonster04C6Stats = $4F
+!DefaultMonster04C6ItemFlag = $00
+
+!DefaultMonster04C7Param = $00
+!DefaultMonster04C7Addr = $8BC5A3
+!DefaultMonster04C7Stats = $4F
+!DefaultMonster04C7ItemFlag = $00
+
+!DefaultMonster04C8Param = $00
+!DefaultMonster04C8Addr = $8BC5A3
+!DefaultMonster04C8Stats = $4F
+!DefaultMonster04C8ItemFlag = $00
+
+!DefaultMonster04C9Param = $00
+!DefaultMonster04C9Addr = $8BC5FC
+!DefaultMonster04C9Stats = $4F
+!DefaultMonster04C9ItemFlag = $00
+
+!DefaultMonster04CAParam = $00
+!DefaultMonster04CAAddr = $8BC5FC
+!DefaultMonster04CAStats = $4F
+!DefaultMonster04CAItemFlag = $00
+
+!DefaultMonster04CBParam = $00
+!DefaultMonster04CBAddr = $8BC5FC
+!DefaultMonster04CBStats = $4F
+!DefaultMonster04CBItemFlag = $00
+
+!DefaultMonster04CCParam = $00
+!DefaultMonster04CCAddr = $8BC5FC
+!DefaultMonster04CCStats = $4F
+!DefaultMonster04CCItemFlag = $00
+
+!DefaultMonster04CDParam = $00
+!DefaultMonster04CDAddr = $8BC5FC
+!DefaultMonster04CDStats = $4F
+!DefaultMonster04CDItemFlag = $00
+
+!DefaultMonster04CEParam = $00
+!DefaultMonster04CEAddr = $8BC5FC
+!DefaultMonster04CEStats = $4F
+!DefaultMonster04CEItemFlag = $00
+
+!DefaultMonster04CFParam = $00
+!DefaultMonster04CFAddr = $8BC5FC
+!DefaultMonster04CFStats = $4F
+!DefaultMonster04CFItemFlag = $00
+
+!DefaultMonster04D0Param = $00
+!DefaultMonster04D0Addr = $8BC5FC
+!DefaultMonster04D0Stats = $4F
+!DefaultMonster04D0ItemFlag = $00
+
+!DefaultMonster04D1Param = $00
+!DefaultMonster04D1Addr = $8BC1A7
+!DefaultMonster04D1Stats = $4C
+!DefaultMonster04D1ItemFlag = $00
+
+!DefaultMonster04D2Param = $00
+!DefaultMonster04D2Addr = $8BC1A7
+!DefaultMonster04D2Stats = $4C
+!DefaultMonster04D2ItemFlag = $00
+
+!DefaultMonster04D3Param = $00
+!DefaultMonster04D3Addr = $8BC1A7
+!DefaultMonster04D3Stats = $4C
+!DefaultMonster04D3ItemFlag = $00
+
+!DefaultMonster04D4Param = $00
+!DefaultMonster04D4Addr = $8BC1A7
+!DefaultMonster04D4Stats = $4C
+!DefaultMonster04D4ItemFlag = $00
+
+!DefaultMonster04D5Param = $00
+!DefaultMonster04D5Addr = $8BC39D
+!DefaultMonster04D5Stats = $4E
+!DefaultMonster04D5ItemFlag = $00
+
+!DefaultMonster04D6Param = $00
+!DefaultMonster04D6Addr = $8BC39D
+!DefaultMonster04D6Stats = $4E
+!DefaultMonster04D6ItemFlag = $00
+
+!DefaultMonster04D7Param = $00
+!DefaultMonster04D7Addr = $8BC39D
+!DefaultMonster04D7Stats = $4E
+!DefaultMonster04D7ItemFlag = $00
+
+!DefaultMonster04D8Param = $00
+!DefaultMonster04D8Addr = $8BC798
+!DefaultMonster04D8Stats = $51
+!DefaultMonster04D8ItemFlag = $00
+
+!DefaultMonster04D9Param = $00
+!DefaultMonster04D9Addr = $8BC798
+!DefaultMonster04D9Stats = $51
+!DefaultMonster04D9ItemFlag = $00
+
+!DefaultMonster04DAParam = $00
+!DefaultMonster04DAAddr = $8BC798
+!DefaultMonster04DAStats = $51
+!DefaultMonster04DAItemFlag = $00
+
+!DefaultMonster04DBParam = $00
+!DefaultMonster04DBAddr = $8BC798
+!DefaultMonster04DBStats = $51
+!DefaultMonster04DBItemFlag = $00
+
+!DefaultMonster04DCParam = $00
+!DefaultMonster04DCAddr = $8BC65F
+!DefaultMonster04DCStats = $4F
+!DefaultMonster04DCItemFlag = $00
+
+!DefaultMonster04DDParam = $00
+!DefaultMonster04DDAddr = $8BC65F
+!DefaultMonster04DDStats = $4F
+!DefaultMonster04DDItemFlag = $00
+
+!DefaultMonster04DEParam = $00
+!DefaultMonster04DEAddr = $8BC65F
+!DefaultMonster04DEStats = $4F
+!DefaultMonster04DEItemFlag = $00
+
+!DefaultMonster04DFParam = $00
+!DefaultMonster04DFAddr = $8BC65F
+!DefaultMonster04DFStats = $4F
+!DefaultMonster04DFItemFlag = $00
+
+!DefaultMonster04E0Param = $00
+!DefaultMonster04E0Addr = $8BC65F
+!DefaultMonster04E0Stats = $4F
+!DefaultMonster04E0ItemFlag = $00
+
+!DefaultMonster04E1Param = $00
+!DefaultMonster04E1Addr = $8BC5A3
+!DefaultMonster04E1Stats = $4F
+!DefaultMonster04E1ItemFlag = $00
+
+!DefaultMonster04E2Param = $00
+!DefaultMonster04E2Addr = $8BC5A3
+!DefaultMonster04E2Stats = $4F
+!DefaultMonster04E2ItemFlag = $00
+
+!DefaultMonster04E3Param = $00
+!DefaultMonster04E3Addr = $8BC5FC
+!DefaultMonster04E3Stats = $4F
+!DefaultMonster04E3ItemFlag = $00
+
+!DefaultMonster04E4Param = $00
+!DefaultMonster04E4Addr = $8BC5FC
+!DefaultMonster04E4Stats = $4F
+!DefaultMonster04E4ItemFlag = $00
+
+!DefaultMonster04E5Param = $00
+!DefaultMonster04E5Addr = $8BC5FC
+!DefaultMonster04E5Stats = $4F
+!DefaultMonster04E5ItemFlag = $00
+
+!DefaultMonster04E6Param = $00
+!DefaultMonster04E6Addr = $8BC5FC
+!DefaultMonster04E6Stats = $4F
+!DefaultMonster04E6ItemFlag = $00
+
+!DefaultMonster04E7Param = $00
+!DefaultMonster04E7Addr = $8BC5FC
+!DefaultMonster04E7Stats = $4F
+!DefaultMonster04E7ItemFlag = $00
+
+!DefaultMonster04E8Param = $00
+!DefaultMonster04E8Addr = $8BC798
+!DefaultMonster04E8Stats = $51
+!DefaultMonster04E8ItemFlag = $00
+
+!DefaultMonster04E9Param = $00
+!DefaultMonster04E9Addr = $8BC798
+!DefaultMonster04E9Stats = $51
+!DefaultMonster04E9ItemFlag = $00
+
+!DefaultMonster04EAParam = $00
+!DefaultMonster04EAAddr = $8BC798
+!DefaultMonster04EAStats = $51
+!DefaultMonster04EAItemFlag = $00
+
+!DefaultMonster04EBParam = $00
+!DefaultMonster04EBAddr = $8BC798
+!DefaultMonster04EBStats = $51
+!DefaultMonster04EBItemFlag = $00
+
+!DefaultMonster04ECParam = $00
+!DefaultMonster04ECAddr = $8BC39D
+!DefaultMonster04ECStats = $4E
+!DefaultMonster04ECItemFlag = $00
+
+!DefaultMonster04EDParam = $00
+!DefaultMonster04EDAddr = $8BC1A7
+!DefaultMonster04EDStats = $4C
+!DefaultMonster04EDItemFlag = $00
+
+!DefaultMonster04EEParam = $00
+!DefaultMonster04EEAddr = $8BC1A7
+!DefaultMonster04EEStats = $4C
+!DefaultMonster04EEItemFlag = $00
+
+!DefaultMonster04EFParam = $00
+!DefaultMonster04EFAddr = $8BC1A7
+!DefaultMonster04EFStats = $4C
+!DefaultMonster04EFItemFlag = $00
+
+!DefaultMonster04F0Param = $00
+!DefaultMonster04F0Addr = $8BC1A7
+!DefaultMonster04F0Stats = $4C
+!DefaultMonster04F0ItemFlag = $00
+
+!DefaultMonster04F1Param = $00
+!DefaultMonster04F1Addr = $8BC1A7
+!DefaultMonster04F1Stats = $4C
+!DefaultMonster04F1ItemFlag = $00
+
+!DefaultMonster04F2Param = $00
+!DefaultMonster04F2Addr = $8BC1A7
+!DefaultMonster04F2Stats = $4C
+!DefaultMonster04F2ItemFlag = $00
+
+!DefaultMonster04F3Param = $00
+!DefaultMonster04F3Addr = $8BC798
+!DefaultMonster04F3Stats = $51
+!DefaultMonster04F3ItemFlag = $00
+
+!DefaultMonster04F4Param = $00
+!DefaultMonster04F4Addr = $8BC798
+!DefaultMonster04F4Stats = $51
+!DefaultMonster04F4ItemFlag = $00
+
+!DefaultMonster04F5Param = $00
+!DefaultMonster04F5Addr = $8BC5A3
+!DefaultMonster04F5Stats = $4F
+!DefaultMonster04F5ItemFlag = $00
+
+!DefaultMonster04F6Param = $00
+!DefaultMonster04F6Addr = $8BC5A3
+!DefaultMonster04F6Stats = $4F
+!DefaultMonster04F6ItemFlag = $00
+
+!DefaultMonster04F7Param = $30
+!DefaultMonster04F7Addr = $8ba6b6
+!DefaultMonster04F7Stats = $50
+!DefaultMonster04F7ItemFlag = $00
+
+!DefaultMonster04F8Param = $00
+!DefaultMonster04F8Addr = $8CEEAA
+!DefaultMonster04F8Stats = $54
+!DefaultMonster04F8ItemFlag = $00
+
+!DefaultMonster04F9Param = $00
+!DefaultMonster04F9Addr = $8AAACA
+!DefaultMonster04F9Stats = $61
+!DefaultMonster04F9ItemFlag = $00
+
+!DefaultMonster04FAParam = $00
+!DefaultMonster04FAAddr = $8AAACA
+!DefaultMonster04FAStats = $61
+!DefaultMonster04FAItemFlag = $29
+
+!DefaultMonster04FBParam = $00
+!DefaultMonster04FBAddr = $8AAACA
+!DefaultMonster04FBStats = $61
+!DefaultMonster04FBItemFlag = $00
+
+!DefaultMonster04FCParam = $00
+!DefaultMonster04FCAddr = $8AAACA
+!DefaultMonster04FCStats = $61
+!DefaultMonster04FCItemFlag = $00
+
+!DefaultMonster04FDParam = $00
+!DefaultMonster04FDAddr = $8AAACA
+!DefaultMonster04FDStats = $61
+!DefaultMonster04FDItemFlag = $00
+
+!DefaultMonster04FEParam = $00
+!DefaultMonster04FEAddr = $8AAACA
+!DefaultMonster04FEStats = $61
+!DefaultMonster04FEItemFlag = $00
+
+!DefaultMonster04FFParam = $00
+!DefaultMonster04FFAddr = $8AAACA
+!DefaultMonster04FFStats = $61
+!DefaultMonster04FFItemFlag = $00
+
+!DefaultMonster0500Param = $00
+!DefaultMonster0500Addr = $8AAACA
+!DefaultMonster0500Stats = $61
+!DefaultMonster0500ItemFlag = $00
+
+!DefaultMonster0501Param = $00
+!DefaultMonster0501Addr = $8AAACA
+!DefaultMonster0501Stats = $61
+!DefaultMonster0501ItemFlag = $00
+
+!DefaultMonster0502Param = $00
+!DefaultMonster0502Addr = $8AAACA
+!DefaultMonster0502Stats = $61
+!DefaultMonster0502ItemFlag = $00
+
+!DefaultMonster0503Param = $00
+!DefaultMonster0503Addr = $8AAACA
+!DefaultMonster0503Stats = $61
+!DefaultMonster0503ItemFlag = $00
+
+!DefaultMonster0504Param = $00
+!DefaultMonster0504Addr = $8AAACA
+!DefaultMonster0504Stats = $61
+!DefaultMonster0504ItemFlag = $00
+
+!DefaultMonster0505Param = $00
+!DefaultMonster0505Addr = $8AB103
+!DefaultMonster0505Stats = $62
+!DefaultMonster0505ItemFlag = $2a
+
+!DefaultMonster0506Param = $00
+!DefaultMonster0506Addr = $8AB103
+!DefaultMonster0506Stats = $62
+!DefaultMonster0506ItemFlag = $00
+
+!DefaultMonster0507Param = $00
+!DefaultMonster0507Addr = $8AB103
+!DefaultMonster0507Stats = $62
+!DefaultMonster0507ItemFlag = $00
+
+!DefaultMonster0508Param = $00
+!DefaultMonster0508Addr = $8AB103
+!DefaultMonster0508Stats = $62
+!DefaultMonster0508ItemFlag = $00
+
+!DefaultMonster0509Param = $00
+!DefaultMonster0509Addr = $8AB103
+!DefaultMonster0509Stats = $62
+!DefaultMonster0509ItemFlag = $00
+
+!DefaultMonster050AParam = $00
+!DefaultMonster050AAddr = $8AB103
+!DefaultMonster050AStats = $62
+!DefaultMonster050AItemFlag = $00
+
+!DefaultMonster050BParam = $00
+!DefaultMonster050BAddr = $8AB103
+!DefaultMonster050BStats = $62
+!DefaultMonster050BItemFlag = $00
+
+!DefaultMonster050CParam = $00
+!DefaultMonster050CAddr = $8AB103
+!DefaultMonster050CStats = $62
+!DefaultMonster050CItemFlag = $00
+
+!DefaultMonster050DParam = $00
+!DefaultMonster050DAddr = $8AB103
+!DefaultMonster050DStats = $62
+!DefaultMonster050DItemFlag = $00
+
+!DefaultMonster050EParam = $00
+!DefaultMonster050EAddr = $8AB103
+!DefaultMonster050EStats = $62
+!DefaultMonster050EItemFlag = $00
+
+!DefaultMonster050FParam = $00
+!DefaultMonster050FAddr = $8AB103
+!DefaultMonster050FStats = $62
+!DefaultMonster050FItemFlag = $00
+
+!DefaultMonster0510Param = $00
+!DefaultMonster0510Addr = $8AB103
+!DefaultMonster0510Stats = $62
+!DefaultMonster0510ItemFlag = $00
+
+!DefaultMonster0511Param = $00
+!DefaultMonster0511Addr = $8AB103
+!DefaultMonster0511Stats = $62
+!DefaultMonster0511ItemFlag = $00
+
+!DefaultMonster0512Param = $00
+!DefaultMonster0512Addr = $8AB0D8
+!DefaultMonster0512Stats = $62
+!DefaultMonster0512ItemFlag = $00
+
+!DefaultMonster0513Param = $00
+!DefaultMonster0513Addr = $8AB0D8
+!DefaultMonster0513Stats = $62
+!DefaultMonster0513ItemFlag = $00
+
+!DefaultMonster0514Param = $00
+!DefaultMonster0514Addr = $8AB0D8
+!DefaultMonster0514Stats = $62
+!DefaultMonster0514ItemFlag = $00
+
+!DefaultMonster0515Param = $00
+!DefaultMonster0515Addr = $8AB0D8
+!DefaultMonster0515Stats = $62
+!DefaultMonster0515ItemFlag = $00
+
+!DefaultMonster0516Param = $00
+!DefaultMonster0516Addr = $8AAFF5
+!DefaultMonster0516Stats = $63
+!DefaultMonster0516ItemFlag = $00
+
+!DefaultMonster0517Param = $00
+!DefaultMonster0517Addr = $8AAFF5
+!DefaultMonster0517Stats = $63
+!DefaultMonster0517ItemFlag = $00
+
+!DefaultMonster0518Param = $00
+!DefaultMonster0518Addr = $8AAFF5
+!DefaultMonster0518Stats = $63
+!DefaultMonster0518ItemFlag = $00
+
+!DefaultMonster0519Param = $00
+!DefaultMonster0519Addr = $8AAFF5
+!DefaultMonster0519Stats = $63
+!DefaultMonster0519ItemFlag = $00
+
+!DefaultMonster051AParam = $00
+!DefaultMonster051AAddr = $8AAFF5
+!DefaultMonster051AStats = $63
+!DefaultMonster051AItemFlag = $00
+
+!DefaultMonster051BParam = $00
+!DefaultMonster051BAddr = $8AAFF5
+!DefaultMonster051BStats = $63
+!DefaultMonster051BItemFlag = $00
+
+!DefaultMonster051CParam = $00
+!DefaultMonster051CAddr = $8AAFF5
+!DefaultMonster051CStats = $63
+!DefaultMonster051CItemFlag = $00
+
+!DefaultMonster051DParam = $00
+!DefaultMonster051DAddr = $8AAFF5
+!DefaultMonster051DStats = $63
+!DefaultMonster051DItemFlag = $00
+
+!DefaultMonster051EParam = $00
+!DefaultMonster051EAddr = $8AAFF5
+!DefaultMonster051EStats = $63
+!DefaultMonster051EItemFlag = $00
+
+!DefaultMonster051FParam = $00
+!DefaultMonster051FAddr = $88F709
+!DefaultMonster051FStats = $5F
+!DefaultMonster051FItemFlag = $00

@@ -1,0 +1,41 @@
+arch 65816
+hirom
+fillbyte $ff
+
+; Named routine addresses.
+LR_SetFlag20A = $80B481
+LR_SecOnFlag20A = $80B489
+LR_ClearMonsterKilledFlags = $80b4cc
+LR_ParseDialogueScriptAtY = $82f048
+SR_RemoveHeldItem = $839fb2
+
+; Currently dummy defines.
+{
+!CombatLevel = 2
+!SettingEarlyFirebird = 1
+!ModeFlagZ3 = 0
+!DiffExpertSetFlag1 = $0000
+!DiffExpertSetFlag2 = $0000
+!DiffExpertSetFlag3 = $0000
+!DiffExpertSetFlag4 = $0000
+!DiffExpertSetFlag5 = $0000
+!DiffExpertSetFlag6 = $0000
+!DiffAdvancedSetFlag1 = $0000
+!DiffAdvancedSetFlag2 = $0000
+!DiffAdvancedSetFlag3 = $0000
+!DiffAdvancedSetFlag4 = $0000
+!DiffAdvancedSetFlag5 = $0000
+!DiffAdvancedSetFlag6 = $0000
+!DiffInterSetFlag1 = $0000
+!DiffInterSetFlag2 = $0000
+!DiffInterSetFlag3 = $0000
+!DiffInterSetFlag4 = $0000
+!DiffInterSetFlag5 = $0000
+!DiffInterSetFlag6 = $0000
+}
+
+
+
+
+
+

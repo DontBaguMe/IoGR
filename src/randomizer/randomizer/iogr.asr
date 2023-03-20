@@ -1,0 +1,6325 @@
+arch 65816
+hirom
+bank noassume
+
+
+
+; todo:
+; - blue book
+; - z3, ohko, rjm, fluteless, enemizer
+
+
+
+macro MTryGiveItemAndFlag(Item16,Flag)
+  lda.w #<Item16>
+  jsl LR_GiveAnyItemA16OrSec
+  bcs $03
+    cop #$CC
+    db <Flag>
+endmacro
+
+
+
+org $80c312
+Lut_BossClearRoomSets:
+{
+db $29,$0c,$29,$00
+db $55,$3d,$55,$00
+db $67,$5a,$74,$00
+db $8a,$82,$a9,$00
+db $dd,$cc,$dd,$00
+db $f6,$b0,$bf,$00 ; BabelMummyQueen gives rewards.
+db $29,$00,$00,$00
+db $29,$00,$00,$00
+db $29,$00,$00,$00
+db $29,$00,$00,$00
+db $29,$00,$00,$00
+}
+
+
+
+org $80c381
+jsr SR_IncreaseHpByThree   ; replaces inc $0aca in boss reward code
+
+
+org $80c66f
+db $00 : dw $3000
+ERedJewelPickup:
+cop #$C0 : dw .OnInteract
+cop #$88 : dl $8ee000
+cop #$8D : db $00
+cop #$C1
+rtl
+.OnInteract:
+lda $0E : clc : adc #$0080 : jsl LR_SecOnFlag20A : bcs .Done
+jsr SR_GiveRJPickupItemOrSec : bcs .Done
+lda $0e : clc : adc #$0080 : jsl LR_SetFlag20A
+.Done:
+rtl
+
+
+
+org $80DC23 
+; For key rando, dead monster checks whether its item has been given,
+; but doesn't set the item-given flag; EMonsterDeathDoorOrItem does that,
+; since it can more easily verify inventory free space.
+if !SettingKeyRando == 1
+lda $7F0024,x : beq ++
+jsl LR_SecOnMonsterItemFlagA : bcs ++
+nop : nop : nop : nop : nop : nop : nop : nop ; lda $7F0024,x : jsl LR_SetFlag10A
+cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
+lda $0012,y : ora #$1000 : sta $0012,y
+phx
+  lda $7F0024,x
+  tyx
+  sta $7F0024,x
+plx
+++:    ; org $80DC54
+endif
+
+
+
+
+org $80e03c
+inc $0aca : inc $0aca : inc $0aca   ; HP jewel gives 3 HP now.
+nop : nop : nop   ; Replaces (unused) lda #$0255
+lda $0aca
+
+
+; For Early Firebird, we spawn the Firebird palette manager via the camera actor.
+org $80eaed
+db $00 : dw $2c00
+ECameraEtc:
+if !SettingEarlyFirebird == 1
+jsl LR_SpawnFirebirdPaletteManager
+nop
+endif
+
+
+org $80f49a
+; roominit.bin, difficulty-specific room initialization
+{
+lda $0b24 : beq +++
+  dec : beq ++
+  dec : beq +
+cop #$CD : dw !DiffExpertSetFlag1
+cop #$CD : dw !DiffExpertSetFlag2
+cop #$CD : dw !DiffExpertSetFlag3
+cop #$CD : dw !DiffExpertSetFlag4
+cop #$CD : dw !DiffExpertSetFlag5
+cop #$CD : dw !DiffExpertSetFlag6
++:
+cop #$CD : dw !DiffAdvancedSetFlag1
+cop #$CD : dw !DiffAdvancedSetFlag2
+cop #$CD : dw !DiffAdvancedSetFlag3
+cop #$CD : dw !DiffAdvancedSetFlag4
+cop #$CD : dw !DiffAdvancedSetFlag5
+cop #$CD : dw !DiffAdvancedSetFlag6
+++:
+cop #$CD : dw !DiffInterSetFlag1
+cop #$CD : dw !DiffInterSetFlag2
+cop #$CD : dw !DiffInterSetFlag3
+cop #$CD : dw !DiffInterSetFlag4
+cop #$CD : dw !DiffInterSetFlag5
+cop #$CD : dw !DiffInterSetFlag6
++++:
+rtl
+}
+
+
+org $80f500
+; custom actor for RJ pickup spots
+db $00 : dw $3000
+ERedJewelSpot:
+{
+cop #$C0 : dw .Interact
+cop #$88 : dl $8ee000
+cop #$8D : db $00
+cop #$C1
+rtl
+.Interact:
+lda $0e : clc : adc #$0080 : jsl LR_SecOnFlag20A : bcc .TryGiveItem
+  rtl
+.TryGiveItem:
+pea.w .GaveItemSuccess-1
+lda $0e : sta $0000
+cop #$D9 : dw $0000, ..Choices
+..Choices:
+  dw .Spot00,.Spot01,.Spot02,.Spot03,.Spot04,.Spot05,.Spot06,.Spot07
+  dw .Spot08,.Spot09,.Spot0A,.Spot0B,.Spot0C,.Spot0D,.Spot0E,.Spot0F
+.Spot00:
+lda.w #!CapeLancesHouseItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+rts
+.Spot01:
+lda.w #!CapeTowerItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+rts
+.Spot02:
+lda.w #!EDEndBarrelsItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+rts
+.Spot03:
+lda.w #!ItoryLogsItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+rts
+.Spot04:
+lda.w #!DiamondCoastJarItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+rts
+.Spot05:
+lda.w #!FrejHotelItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+rts
+.Spot06:
+lda.w #!AnglDanceHallItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+rts
++:
+bra .InvFull
+.Spot07:
+lda.w #!AnglIshtarSidePotItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot08:
+lda.w #!WtrmWestJarItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot09:
+lda.w #!WtrmDesertJarItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot0A:
+lda.w #!EuroAlleyItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot0B:
+lda.w #!EuroSlaveRoomBarrelItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot0C:
+lda.w #!NativesPotItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot0D:
+lda.w #!DaoGrassItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot0E:
+lda.w #!PyramidFoyerItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.Spot0F:
+lda.w #!BabelPillowItem : jsl LR_GiveAnyItemA16OrSec
+bcs .InvFull
+rts
+.GaveItemSuccess:
+lda $0e : clc : adc #$0080 : jsl LR_SetFlag20A
+rtl
+.InvFull:
+pla   ; reverse earlier pea
+rtl
+}
+
+SR_IncreaseHpByThree:   ; For boss room reward code.
+inc $0aca
+inc $0aca
+inc $0aca
+rts
+
+
+
+org $80ffd1
+db $52,$41,$4E,$44,$4F    ; Append "Rando" to ROM title
+
+
+
+
+org $818234
+incsrc "iogr_81_exit_table.asr"
+warnpc $81aade
+org $81aade
+Lut_RoomClearRewards:
+{
+db !RoomClearReward00,!RoomClearReward01,!RoomClearReward02,!RoomClearReward03,!RoomClearReward04,!RoomClearReward05,!RoomClearReward06,!RoomClearReward07,!RoomClearReward08,!RoomClearReward09,!RoomClearReward0A,!RoomClearReward0B,!RoomClearReward0C,!RoomClearReward0D,!RoomClearReward0E,!RoomClearReward0F
+db !RoomClearReward10,!RoomClearReward11,!RoomClearReward12,!RoomClearReward13,!RoomClearReward14,!RoomClearReward15,!RoomClearReward16,!RoomClearReward17,!RoomClearReward18,!RoomClearReward19,!RoomClearReward1A,!RoomClearReward1B,!RoomClearReward1C,!RoomClearReward1D,!RoomClearReward1E,!RoomClearReward1F
+db !RoomClearReward20,!RoomClearReward21,!RoomClearReward22,!RoomClearReward23,!RoomClearReward24,!RoomClearReward25,!RoomClearReward26,!RoomClearReward27,!RoomClearReward28,!RoomClearReward29,!RoomClearReward2A,!RoomClearReward2B,!RoomClearReward2C,!RoomClearReward2D,!RoomClearReward2E,!RoomClearReward2F
+db !RoomClearReward30,!RoomClearReward31,!RoomClearReward32,!RoomClearReward33,!RoomClearReward34,!RoomClearReward35,!RoomClearReward36,!RoomClearReward37,!RoomClearReward38,!RoomClearReward39,!RoomClearReward3A,!RoomClearReward3B,!RoomClearReward3C,!RoomClearReward3D,!RoomClearReward3E,!RoomClearReward3F
+db !RoomClearReward40,!RoomClearReward41,!RoomClearReward42,!RoomClearReward43,!RoomClearReward44,!RoomClearReward45,!RoomClearReward46,!RoomClearReward47,!RoomClearReward48,!RoomClearReward49,!RoomClearReward4A,!RoomClearReward4B,!RoomClearReward4C,!RoomClearReward4D,!RoomClearReward4E,!RoomClearReward4F
+db !RoomClearReward50,!RoomClearReward51,!RoomClearReward52,!RoomClearReward53,!RoomClearReward54,!RoomClearReward55,!RoomClearReward56,!RoomClearReward57,!RoomClearReward58,!RoomClearReward59,!RoomClearReward5A,!RoomClearReward5B,!RoomClearReward5C,!RoomClearReward5D,!RoomClearReward5E,!RoomClearReward5F
+db !RoomClearReward60,!RoomClearReward61,!RoomClearReward62,!RoomClearReward63,!RoomClearReward64,!RoomClearReward65,!RoomClearReward66,!RoomClearReward67,!RoomClearReward68,!RoomClearReward69,!RoomClearReward6A,!RoomClearReward6B,!RoomClearReward6C,!RoomClearReward6D,!RoomClearReward6E,!RoomClearReward6F
+db !RoomClearReward70,!RoomClearReward71,!RoomClearReward72,!RoomClearReward73,!RoomClearReward74,!RoomClearReward75,!RoomClearReward76,!RoomClearReward77,!RoomClearReward78,!RoomClearReward79,!RoomClearReward7A,!RoomClearReward7B,!RoomClearReward7C,!RoomClearReward7D,!RoomClearReward7E,!RoomClearReward7F
+db !RoomClearReward80,!RoomClearReward81,!RoomClearReward82,!RoomClearReward83,!RoomClearReward84,!RoomClearReward85,!RoomClearReward86,!RoomClearReward87,!RoomClearReward88,!RoomClearReward89,!RoomClearReward8A,!RoomClearReward8B,!RoomClearReward8C,!RoomClearReward8D,!RoomClearReward8E,!RoomClearReward8F
+db !RoomClearReward90,!RoomClearReward91,!RoomClearReward92,!RoomClearReward93,!RoomClearReward94,!RoomClearReward95,!RoomClearReward96,!RoomClearReward97,!RoomClearReward98,!RoomClearReward99,!RoomClearReward9A,!RoomClearReward9B,!RoomClearReward9C,!RoomClearReward9D,!RoomClearReward9E,!RoomClearReward9F
+db !RoomClearRewardA0,!RoomClearRewardA1,!RoomClearRewardA2,!RoomClearRewardA3,!RoomClearRewardA4,!RoomClearRewardA5,!RoomClearRewardA6,!RoomClearRewardA7,!RoomClearRewardA8,!RoomClearRewardA9,!RoomClearRewardAA,!RoomClearRewardAB,!RoomClearRewardAC,!RoomClearRewardAD,!RoomClearRewardAE,!RoomClearRewardAF
+db !RoomClearRewardB0,!RoomClearRewardB1,!RoomClearRewardB2,!RoomClearRewardB3,!RoomClearRewardB4,!RoomClearRewardB5,!RoomClearRewardB6,!RoomClearRewardB7,!RoomClearRewardB8,!RoomClearRewardB9,!RoomClearRewardBA,!RoomClearRewardBB,!RoomClearRewardBC,!RoomClearRewardBD,!RoomClearRewardBE,!RoomClearRewardBF
+db !RoomClearRewardC0,!RoomClearRewardC1,!RoomClearRewardC2,!RoomClearRewardC3,!RoomClearRewardC4,!RoomClearRewardC5,!RoomClearRewardC6,!RoomClearRewardC7,!RoomClearRewardC8,!RoomClearRewardC9,!RoomClearRewardCA,!RoomClearRewardCB,!RoomClearRewardCC,!RoomClearRewardCD,!RoomClearRewardCE,!RoomClearRewardCF
+db !RoomClearRewardD0,!RoomClearRewardD1,!RoomClearRewardD2,!RoomClearRewardD3,!RoomClearRewardD4,!RoomClearRewardD5,!RoomClearRewardD6,!RoomClearRewardD7,!RoomClearRewardD8,!RoomClearRewardD9,!RoomClearRewardDA,!RoomClearRewardDB,!RoomClearRewardDC,!RoomClearRewardDD,!RoomClearRewardDE,!RoomClearRewardDF
+db !RoomClearRewardE0,!RoomClearRewardE1,!RoomClearRewardE2,!RoomClearRewardE3,!RoomClearRewardE4,!RoomClearRewardE5,!RoomClearRewardE6,!RoomClearRewardE7,!RoomClearRewardE8,!RoomClearRewardE9,!RoomClearRewardEA,!RoomClearRewardEB,!RoomClearRewardEC,!RoomClearRewardED,!RoomClearRewardEE,!RoomClearRewardEF
+db !RoomClearRewardF0,!RoomClearRewardF1,!RoomClearRewardF2,!RoomClearRewardF3,!RoomClearRewardF4,!RoomClearRewardF5,!RoomClearRewardF6,!RoomClearRewardF7,!RoomClearRewardF8,!RoomClearRewardF9,!RoomClearRewardFA,!RoomClearRewardFB,!RoomClearRewardFC,!RoomClearRewardFD,!RoomClearRewardFE,!RoomClearRewardFF
+}
+warnpc $81abde
+
+
+org $81ADA8
+Lut_Chests:
+.Pointers:
+{
+dw .Nothing    ; Map $00
+dw .Nothing    ; Map $01
+dw .Nothing    ; Map $02
+dw .Nothing    ; Map $03
+dw .Nothing    ; Map $04
+dw .Nothing    ; Map $05
+dw .Nothing    ; Map $06
+dw .Nothing    ; Map $07
+dw .Nothing    ; Map $08
+dw .Nothing    ; Map $09
+dw .Nothing    ; Map $0A
+dw .Nothing    ; Map $0B
+dw .Nothing    ; Map $0C
+dw .Nothing    ; Map $0D
+dw .Map0E      ; Map $0E
+dw .Nothing    ; Map $0F
+dw .Map10      ; Map $10
+dw .Nothing    ; Map $11
+dw .Map12      ; Map $12
+dw .Nothing    ; Map $13
+dw .Nothing    ; Map $14
+dw .Nothing    ; Map $15
+dw .Nothing    ; Map $16
+dw .Nothing    ; Map $17
+dw .Nothing    ; Map $18
+dw .Nothing    ; Map $19
+dw .Nothing    ; Map $1A
+dw .Nothing    ; Map $1B
+dw .Nothing    ; Map $1C
+dw .Map1D      ; Map $1D
+dw .Nothing    ; Map $1E
+dw .Nothing    ; Map $1F
+dw .Nothing    ; Map $20
+dw .Map21      ; Map $21
+dw .Nothing    ; Map $22
+dw .Nothing    ; Map $23
+dw .Nothing    ; Map $24
+dw .Nothing    ; Map $25
+dw .Map26      ; Map $26
+dw .Nothing    ; Map $27
+dw .Nothing    ; Map $28
+dw .Nothing    ; Map $29
+dw .Nothing    ; Map $2A
+dw .Nothing    ; Map $2B
+dw .Nothing    ; Map $2C
+dw .Nothing    ; Map $2D
+dw .Map2E      ; Map $2E
+dw .Nothing    ; Map $2F
+dw .Nothing    ; Map $30
+dw .Nothing    ; Map $31
+dw .Nothing    ; Map $32
+dw .Nothing    ; Map $33
+dw .Nothing    ; Map $34
+dw .Nothing    ; Map $35
+dw .Nothing    ; Map $36
+dw .Nothing    ; Map $37
+dw .Nothing    ; Map $38
+dw .Nothing    ; Map $39
+dw .Nothing    ; Map $3A
+dw .Nothing    ; Map $3B
+dw .Nothing    ; Map $3C
+dw .Nothing    ; Map $3D
+dw .Nothing    ; Map $3E
+dw .Map3F      ; Map $3F
+dw .Nothing    ; Map $40
+dw .Nothing    ; Map $41
+dw .Nothing    ; Map $42
+dw .Nothing    ; Map $43
+dw .Nothing    ; Map $44
+dw .Nothing    ; Map $45
+dw .Nothing    ; Map $46
+dw .Nothing    ; Map $47
+dw .Nothing    ; Map $48
+dw .Nothing    ; Map $49
+dw .Nothing    ; Map $4A
+dw .Nothing    ; Map $4B
+dw .Nothing    ; Map $4C
+dw .Map4D      ; Map $4D
+dw .Nothing    ; Map $4E
+dw .Nothing    ; Map $4F
+dw .Map50      ; Map $50
+dw .Map51      ; Map $51
+dw .Map52      ; Map $52
+dw .Map53      ; Map $53
+dw .Nothing    ; Map $54
+dw .Nothing    ; Map $55
+dw .Nothing    ; Map $56
+dw .Nothing    ; Map $57
+dw .Nothing    ; Map $58
+dw .Nothing    ; Map $59
+dw .Map5A      ; Map $5A
+dw .Map5B      ; Map $5B
+dw .Map5C      ; Map $5C
+dw .Nothing    ; Map $5D
+dw .Nothing    ; Map $5E
+dw .Map5F      ; Map $5F
+dw .Map60      ; Map $60
+dw .Map61      ; Map $61
+dw .Nothing    ; Map $62
+dw .Nothing    ; Map $63
+dw .Nothing    ; Map $64
+dw .Nothing    ; Map $65
+dw .Nothing    ; Map $66
+dw .Nothing    ; Map $67
+dw .Nothing    ; Map $68
+dw .Nothing    ; Map $69
+dw .Nothing    ; Map $6A
+dw .Nothing    ; Map $6B
+dw .Nothing    ; Map $6C
+dw .Nothing    ; Map $6D
+dw .Nothing    ; Map $6E
+dw .Nothing    ; Map $6F
+dw .Map70      ; Map $70
+dw .Nothing    ; Map $71
+dw .Nothing    ; Map $72
+dw .Nothing    ; Map $73
+dw .Map74      ; Map $74
+dw .Map75      ; Map $75
+dw .Nothing    ; Map $76
+dw .Nothing    ; Map $77
+dw .Nothing    ; Map $78
+dw .Nothing    ; Map $79
+dw .Nothing    ; Map $7A
+dw .Nothing    ; Map $7B
+dw .Nothing    ; Map $7C
+dw .Nothing    ; Map $7D
+dw .Nothing    ; Map $7E
+dw .Nothing    ; Map $7F
+dw .Nothing    ; Map $80
+dw .Nothing    ; Map $81
+dw .Nothing    ; Map $82
+dw .Map83      ; Map $83
+dw .Nothing    ; Map $84
+dw .Map85      ; Map $85
+dw .Nothing    ; Map $86
+dw .Nothing    ; Map $87
+dw .Nothing    ; Map $88
+dw .Nothing    ; Map $89
+dw .Nothing    ; Map $8A
+dw .Nothing    ; Map $8B
+dw .Nothing    ; Map $8C
+dw .Nothing    ; Map $8D
+dw .Nothing    ; Map $8E
+dw .Nothing    ; Map $8F
+dw .Nothing    ; Map $90
+dw .Nothing    ; Map $91
+dw .Nothing    ; Map $92
+dw .Nothing    ; Map $93
+dw .Nothing    ; Map $94
+dw .Nothing    ; Map $95
+dw .Nothing    ; Map $96
+dw .Nothing    ; Map $97
+dw .Nothing    ; Map $98
+dw .Nothing    ; Map $99
+dw .Nothing    ; Map $9A
+dw .Nothing    ; Map $9B
+dw .Nothing    ; Map $9C
+dw .Nothing    ; Map $9D
+dw .Nothing    ; Map $9E
+dw .Nothing    ; Map $9F
+dw .Nothing    ; Map $A0
+dw .Nothing    ; Map $A1
+dw .MapA2      ; Map $A2
+dw .Nothing    ; Map $A3
+dw .MapA4      ; Map $A4
+dw .Nothing    ; Map $A5
+dw .MapA6      ; Map $A6
+dw .MapA7      ; Map $A7
+dw .Nothing    ; Map $A8
+dw .MapA9      ; Map $A9
+dw .Nothing    ; Map $AA
+dw .Nothing    ; Map $AB
+dw .Nothing    ; Map $AC
+dw .Nothing    ; Map $AD
+dw .Nothing    ; Map $AE
+dw .Nothing    ; Map $AF
+dw .Nothing    ; Map $B0
+dw .MapB1      ; Map $B1
+dw .Nothing    ; Map $B2
+dw .Nothing    ; Map $B3
+dw .Nothing    ; Map $B4
+dw .MapB5      ; Map $B5
+dw .Nothing    ; Map $B6
+dw .Nothing    ; Map $B7
+dw .Nothing    ; Map $B8
+dw .MapB9      ; Map $B9
+dw .Nothing    ; Map $BA
+dw .MapBB      ; Map $BB
+dw .Nothing    ; Map $BC
+dw .Nothing    ; Map $BD
+dw .MapBE      ; Map $BE
+dw .Nothing    ; Map $BF
+dw .Nothing    ; Map $C0
+dw .Nothing    ; Map $C1
+dw .Nothing    ; Map $C2
+dw .Nothing    ; Map $C3
+dw .Nothing    ; Map $C4
+dw .Nothing    ; Map $C5
+dw .Nothing    ; Map $C6
+dw .Nothing    ; Map $C7
+dw .Nothing    ; Map $C8
+dw .Nothing    ; Map $C9
+dw .Nothing    ; Map $CA
+dw .Nothing    ; Map $CB
+dw .Nothing    ; Map $CC
+dw .Nothing    ; Map $CD
+dw .Nothing    ; Map $CE
+dw .Nothing    ; Map $CF
+dw .Nothing    ; Map $D0
+dw .MapD1      ; Map $D1
+dw .Nothing    ; Map $D2
+dw .Nothing    ; Map $D3
+dw .MapD4      ; Map $D4
+dw .Nothing    ; Map $D5
+dw .MapD6      ; Map $D6
+dw .Nothing    ; Map $D7
+dw .Nothing    ; Map $D8
+dw .MapD9      ; Map $D9
+dw .Nothing    ; Map $DA
+dw .Nothing    ; Map $DB
+dw .Nothing    ; Map $DC
+dw .Nothing    ; Map $DD
+dw .Nothing    ; Map $DE
+dw .Nothing    ; Map $DF
+dw .Nothing    ; Map $E0
+dw .Nothing    ; Map $E1
+dw .Nothing    ; Map $E2
+dw .Nothing    ; Map $E3
+dw .Nothing    ; Map $E4
+dw .Nothing    ; Map $E5
+dw .Nothing    ; Map $E6
+dw .Nothing    ; Map $E7
+dw .Nothing    ; Map $E8
+dw .MapE9      ; Map $E9
+dw .Nothing    ; Map $EA
+dw .Nothing    ; Map $EB
+dw .Nothing    ; Map $EC
+dw .Nothing    ; Map $ED
+dw .Nothing    ; Map $EE
+dw .Nothing    ; Map $EF
+dw .Nothing    ; Map $F0
+dw .Nothing    ; Map $F1
+dw .Nothing    ; Map $F2
+dw .Nothing    ; Map $F3
+dw .Nothing    ; Map $F4
+dw .Nothing    ; Map $F5
+dw .Nothing    ; Map $F6
+dw .Nothing    ; Map $F7
+dw .Nothing    ; Map $F8
+dw .Nothing    ; Map $F9
+dw .Nothing    ; Map $FA
+dw .Nothing    ; Map $FB
+dw .Nothing    ; Map $FC
+dw .Nothing    ; Map $FD
+dw .Nothing    ; Map $FE
+; No map $FF pointer.
+}
+;org $81AFA6
+{
+.Nothing:
+db $ff
+.Map0E:
+db $04,$1A : dw !EDSpikeChestItem : db $01 : db $ff
+.Map10:
+db $07,$08 : dw !EDSmallRoomChestItem : db $02 : db $ff
+.Map12:
+db $11,$1E : dw !EDEndChestItem : db $03 : db $ff
+.Map1D:
+db $06,$06 : dw !MPDiamondBlockChestItem : db $04 : db $ff
+.Map21:
+db $02,$17 : dw !MPStatueChestItem : db $05 : db $ff
+.Map26:
+db $10,$1B : dw !MPMazeChestItem : db $06
+db $08,$1F : dw !MPWormChestItem : db $07
+db $ff
+.Map2E:
+db $25,$19 : dw $0038 : db $08 : db $ff
+.Map3F:
+db $38,$27 : dw !MineChestItem : db $09 : db $ff
+.Map4D:
+db $39,$31 : dw !HGNEStatueChestItem : db $0A
+db $09,$33 : dw !HGNEWestChestItem : db $0B
+db $34,$05 : dw !HGNENorthChestItem : db $0C
+db $ff
+.Map50:
+db $37,$06 : dw !HGSEChestItem : db $0D : db $ff
+.Map51:
+db $03,$2F : dw !HGSWTopChestItem : db $0E : db $ff
+.Map52:
+db $07,$08 : dw !HGSWBotChestItem : db $0F : db $ff
+.Map53:
+db $35,$32 : dw !HGNWTopChestItem : db $10
+db $31,$36 : dw !HGNWBotChestItem : db $11
+db $ff
+.Map5A:
+db $37,$1A : dw !SeaPalSideChestItem : db $12 : db $ff
+.Map5B:
+db $07,$07 : dw !SeaPalTopChestItem : db $13 : db $ff
+.Map5C:
+db $09,$17 : dw !SeaPalBotChestItem : db $14 : db $ff
+.Map5F:
+db $20,$19 : dw !MuRamaChestNItem : db $15
+db $2F,$27 : dw !MuHopeRoomChestItem : db $16
+db $ff
+.Map60:
+db $1E,$18 : dw !MuEmptyChest1Item : db $2E
+db $2D,$1C : dw !MuRamaChestEItem : db $17
+db $ff
+.Map61:
+db $0A,$33 : dw !MuEmptyChest2Item : db $18 : db $ff
+.Map70:
+db $07,$28 : dw !AnglSliderChestItem : db $19 : db $ff
+.Map74:
+db $27,$08 : dw !AnglIshtarWinChestItem : db $1A : db $ff
+.Map75:
+db $47,$08 : dw !AnglPuzzleChest1Item : db $1B
+db $57,$08 : dw !AnglPuzzleChest2Item : db $1C
+db $ff
+}
+warnpc $81B086
+
+org $81c3c4
+{
+Lut_Chests_Map83:
+db $1A,$59 : dw !GtWlChest1Item : db $1D : db $ff
+Lut_Chests_Map85:
+db $05,$1A : dw !GtWlChest2Item : db $1E : db $ff
+Lut_Chests_MapA2:
+db $18,$36 : dw !KressChest1Item : db $1F : db $ff
+Lut_Chests_MapA4:
+db $12,$0B : dw !KressChest2Item : db $20 : db $ff
+Lut_Chests_MapA6:
+db $05,$08 : dw !KressChest3Item : db $21 : db $ff
+Lut_Chests_MapA7:
+db $22,$10 : dw !KressChest4Item : db $22 : db $ff
+Lut_Chests_MapA9:
+db $0E,$05 : dw !KressChest5Item : db $23 : db $ff
+Lut_Chests_MapB1:
+db $67,$05 : dw !WatChest1Item : db $24 : db $ff
+Lut_Chests_MapB5:
+db $07,$4E : dw !WatChest2Item : db $25 : db $ff
+Lut_Chests_MapB9:
+db $07,$06 : dw !WatChest3Item : db $26 : db $ff
+Lut_Chests_MapBB:
+db $11,$20 : dw !WatChest4Item : db $27 : db $ff
+Lut_Chests_MapBE:
+db $05,$16 : dw !WatChest5Item : db $28 : db $ff
+Lut_Chests_MapD1:
+db $37,$59 : dw !PyramidRoom2ChestItem : db $29 : db $ff
+Lut_Chests_MapD4:
+db $46,$49 : dw !PyramidRoom5ChestItem : db $2A : db $ff
+Lut_Chests_MapD6:
+db $47,$09 : dw !PyramidRoom3ChestItem : db $2B : db $ff
+Lut_Chests_MapD9:
+db $75,$29 : dw !PyramidRoom4ChestItem : db $2C : db $ff
+Lut_Chests_MapE9:
+db $37,$16 : dw !MansionChestItem : db $2D : db $ff
+}
+warnpc $81c455
+
+
+
+
+org $81da4c
+table "table_invtext.txt",rtl
+db "RANDO CODE: ",!RandoTitleScreenHashString
+
+
+;org $81dabf
+Text_ItemNamesBig:
+.Pointers:
+{
+dw .Null             ; $DB3F
+dw .RedJewel         ; $DB40
+dw .PrisonKey        ; $DB4B
+dw .IncaStatueA      ; $DB51
+dw .IncaStatueB      ; $DB5C
+dw .IncaMelody       ; $DB68
+dw .Herb             ; $DB78
+dw .DiamondBlock     ; $DB81
+dw .WindMelody       ; $DB8C
+dw .LolasMelody      ; $DB9B
+dw .Meat             ; $DBAC
+dw .MineKeyA         ; $DBB2
+dw .MineKeyB         ; $DBBD
+dw .MemoryMelody     ; $DBC8
+dw .CrystalBall      ; $DBD8
+dw .MineElevatorKey  ; $DBE7
+dw .MuPalaceKey      ; $DBF8 = Item $10
+dw .PurifyStone      ; $DC05
+dw .HopeStatue       ; $DC14
+dw .RamaStatue       ; $DC20
+dw .MagicPowder      ; $DC2E
+dw .BlueJournal      ; $DC3B
+dw .LancesLetter     ; $DC4A
+dw .Necklace         ; $DC5C
+dw .RussianGlassWill ; $DC6E
+dw .Teapot           ; $DC73
+dw .MushroomDrops    ; $DC7C
+dw .BagOfGold        ; $DC8C
+dw .BlackGlasses     ; $DC9A
+dw .GorgonFlower     ; $DCAC
+dw .Hieroglyph1E     ; $DCBD
+dw .Hieroglyph1F     ; $DCC8
+dw .Hieroglyph20     ; $DCD3 = Item $20
+dw .Hieroglyph21     ; $DCDE
+dw .Hieroglyph22     ; $DCE9
+dw .Hieroglyph23     ; $DCF4
+dw .Aura             ; $DCFF
+dw .LolasLetter      ; $DD06
+dw .FathersJournal   ; $DD17
+dw .CrystalRing      ; $DD2B
+dw .Apple            ; $DD3A
+dw .HpItem           ; $DD47
+dw .DefItem          ; $DD53
+dw .StrItem          ; $DD60
+dw .LightJewel       ; $DD6D
+dw .DarkJewel        ; $DD7C
+dw .TwoRedJewels     ; $DD8A
+dw .ThreeRedJewels   ; $DD9A
+dw .Blank1           ; $DDAC = Item $30
+dw .Blank1           ; $DDAC
+dw .Blank1           ; $DDAC
+dw .Blank1           ; $DDAC
+dw .Blank2           ; $DDAA
+dw .Blank3           ; $DDB3
+dw .Blank4           ; $DDBC
+dw .Blank5           ; $DDC5
+dw .MysticStatue1    ; $DDCE
+dw .MysticStatue2    ; $DDD8
+dw .MysticStatue3    ; $DDE2
+dw .MysticStatue4    ; $DDEC
+dw .MysticStatue5    ; $DDF6
+dw .MysticStatue6    ; $DE00
+dw .MysticStatue7    ; $DE0A
+dw .MysticStatue8    ; $DE14 = Item $3f
+}
+{
+.Null:
+db $00
+.RedJewel:
+db $52,$65,$64,$40,$4A,$65,$77,$65,$6C,$40,$00
+.PrisonKey:
+db $10,$06,$4B,$65,$79,$00
+.IncaStatueA:
+db $49,$6E,$63,$61,$6E,$11,$40,$10,$0C,$41,$00
+.IncaStatueB:
+db $49,$6E,$63,$61,$6E,$11,$40,$10,$0C,$42,$40,$00
+.IncaMelody:
+db $49,$6E,$63,$61,$6E,$40,$11,$40,$4D,$65,$6C,$6F,$64,$79,$40,$00
+.Herb:
+db $48,$65,$72,$62,$40,$40,$40,$40,$00
+.DiamondBlock:
+db $42,$6C,$75,$65,$40,$42,$6C,$6F,$63,$6B,$00
+.WindMelody:
+db $57,$69,$6E,$64,$40,$11,$40,$4D,$65,$6C,$6F,$64,$79,$40,$00
+.LolasMelody:
+db $4C,$6F,$6C,$61,$5C,$73,$40,$11,$40,$4D,$65,$6C,$6F,$64,$79,$40,$00
+.Meat:
+db $4D,$65,$61,$74,$40,$00
+.MineKeyA:
+db $4D,$69,$6E,$65,$40,$4B,$65,$79,$40,$41,$00
+.MineKeyB:
+db $4D,$69,$6E,$65,$40,$4B,$65,$79,$40,$42,$00
+.MemoryMelody:
+db $4D,$65,$6D,$6F,$72,$79,$40,$11,$40,$4D,$65,$6C,$6F,$64,$79,$00
+.CrystalBall:
+db $43,$72,$79,$73,$74,$61,$6C,$40,$11,$40,$42,$61,$6C,$6C,$00
+.MineElevatorKey:
+db $45,$6C,$65,$76,$61,$74,$6F,$72,$40,$11,$40,$4B,$65,$79,$40,$40,$00
+.MuPalaceKey:
+db $50,$61,$6C,$61,$63,$65,$40,$11,$40,$4B,$65,$79,$00
+.PurifyStone:
+db $50,$75,$72,$69,$66,$79,$40,$11,$40,$53,$74,$6F,$6E,$65,$00
+.HopeStatue:
+db $10,$0C,$6F,$66,$11,$40,$48,$6F,$70,$65,$40,$00
+.RamaStatue:
+db $52,$61,$6D,$61,$40,$11,$40,$53,$74,$61,$74,$75,$65,$00
+.MagicPowder:
+db $4D,$61,$67,$69,$63,$40,$11,$40,$44,$75,$73,$74,$00
+.BlueJournal:
+db $42,$6C,$75,$65,$40,$11,$40,$4A,$6F,$75,$72,$6E,$61,$6C,$00
+.LancesLetter:
+db $4C,$61,$6E,$63,$65,$5C,$73,$40,$11,$40,$40,$4C,$65,$74,$74,$65,$72,$00
+.Necklace:
+db $4E,$65,$63,$6B,$6C,$61,$63,$65,$40,$11,$40,$53,$74,$6F,$6E,$65,$73,$00
+.RussianGlassWill:
+db $57,$69,$6C,$6C,$00
+.Teapot:
+db $54,$65,$61,$70,$6F,$74,$40,$40,$00
+.MushroomDrops:
+db $4D,$75,$73,$68,$72,$6F,$6F,$6D,$40,$11,$40,$44,$72,$6F,$70,$00
+.BagOfGold:
+db $42,$61,$67,$40,$6F,$66,$40,$11,$40,$47,$6F,$6C,$64,$00
+.BlackGlasses:
+db $42,$6C,$61,$63,$6B,$40,$11,$40,$47,$6C,$61,$73,$73,$65,$73,$40,$40,$00
+.GorgonFlower:
+db $47,$6F,$72,$67,$6F,$6E,$40,$11,$40,$46,$6C,$6F,$77,$65,$72,$40,$00
+.Hieroglyph1E:
+db $48,$69,$65,$72,$6F,$67,$6C,$79,$70,$68,$00
+.Hieroglyph1F:
+db $48,$69,$65,$72,$6F,$67,$6C,$79,$70,$68,$00
+.Hieroglyph20:
+db $48,$69,$65,$72,$6F,$67,$6C,$79,$70,$68,$00
+.Hieroglyph21:
+db $48,$69,$65,$72,$6F,$67,$6C,$79,$70,$68,$00
+.Hieroglyph22:
+db $48,$69,$65,$72,$6F,$67,$6C,$79,$70,$68,$00
+.Hieroglyph23:
+db $48,$69,$65,$72,$6F,$67,$6C,$79,$70,$68,$00
+.Aura:
+db $41,$75,$72,$61,$40,$40,$00
+.LolasLetter:
+db $4C,$6F,$6C,$61,$5C,$73,$40,$11,$40,$4C,$65,$74,$74,$65,$72,$40,$00
+.FathersJournal:
+db $46,$61,$74,$68,$65,$72,$5C,$73,$40,$11,$40,$4A,$6F,$75,$72,$6E,$61,$6C,$40,$00
+.CrystalRing:
+db $43,$72,$79,$73,$74,$61,$6C,$40,$11,$40,$52,$69,$6E,$67,$00
+.Apple:
+db $52,$65,$64,$40,$11,$40,$41,$70,$70,$6C,$65,$40,$00
+.HpItem:
+db $48,$50,$40,$11,$40,$4A,$65,$77,$65,$6C,$40,$00
+.DefItem:
+db $44,$45,$46,$40,$11,$40,$4A,$65,$77,$65,$6C,$40,$00
+.StrItem:
+db $53,$54,$52,$40,$11,$40,$4A,$65,$77,$65,$6C,$40,$00
+.LightJewel:
+db $4C,$69,$67,$68,$74,$40,$11,$40,$4A,$65,$77,$65,$6C,$40,$00
+.DarkJewel:
+db $44,$61,$72,$6B,$40,$11,$40,$4A,$65,$77,$65,$6C,$40,$00
+.TwoRedJewels:
+db $32,$40,$52,$65,$64,$40,$11,$40,$4A,$65,$77,$65,$6C,$73,$40,$00
+.ThreeRedJewels:
+db $33,$40,$52,$65,$64,$40,$11,$40,$4A,$65,$77,$65,$6C,$73,$40,$00
+.Blank1:
+db $73,$40,$00
+.Blank2:
+db $40,$40,$40,$40,$40,$00
+.Blank3:
+db $40,$40,$40,$40,$40,$40,$40,$40,$00
+.Blank4:
+db $40,$40,$40,$40,$40,$40,$40,$40,$00
+.Blank5:
+db $40,$40,$40,$40,$40,$40,$40,$40,$00
+.MysticStatue1:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+.MysticStatue2:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+.MysticStatue3:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+.MysticStatue4:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+.MysticStatue5:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+.MysticStatue6:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+.MysticStatue7:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+.MysticStatue8:
+db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
+}
+warnpc $81de1e
+
+org $81e12a
+Lut_ItemDroppableFlags:
+db $9f,$ff
+if !Statue3Required == 1
+db $9f
+else
+db $97
+endif
+if !Statue5Required == 1
+db $ff,$ff
+else
+db $3f,$b0
+endif
+db $01,$00,$00
+
+;org $81e132
+Text_ItemDescriptions:
+.Pointers:
+{
+dw .Null             ; $E192
+dw .RedJewel         ; $E19A
+dw .PrisonKey        ; $E1B4
+dw .IncaStatueA      ; $E1CA
+dw .IncaStatueB      ; $E1CA
+dw .IncaMelody       ; $E199
+dw .Herb             ; $E1E3
+dw .DiamondBlock     ; $E1F0
+dw .WindMelody       ; $E208
+dw .LolasMelody      ; $E227
+dw .Meat             ; $E248
+dw .MineKeyA         ; $E260
+dw .MineKeyB         ; $E260
+dw .MemoryMelody     ; $E277
+dw .CrystalBall      ; $E282
+dw .MineElevatorKey  ; $E29B
+dw .MuPalaceKey      ; $E2B1
+dw .PurifyStone      ; $E2C4
+dw .HopeStatue       ; $E2E2
+dw .RamaStatue       ; $E304
+dw .MagicPowder      ; $E326
+dw .BlueJournal      ; $E351
+dw .LancesLetter     ; $E36A
+dw .Necklace         ; $E37C
+dw .RussianGlassWill ; $E39C
+dw .Teapot           ; $E3C3
+dw .MushroomDrops    ; $E3EF
+dw .BagOfGold        ; $E199
+dw .BlackGlasses     ; $E40F
+dw .GorgonFlower     ; $E43B
+dw .Hieroglyph1E     ; $E456
+dw .Hieroglyph1F     ; $E456
+dw .Hieroglyph20     ; $E456
+dw .Hieroglyph21     ; $E456
+dw .Hieroglyph22     ; $E456
+dw .Hieroglyph23     ; $E456
+dw .Aura             ; $E46A
+dw .LolasLetter      ; $E492
+dw .FathersJournal   ; $E4AE
+dw .CrystalRing      ; $E4DA
+dw .Apple            ; $E500
+dw .HpItem           ; $E51C
+dw .DefItem          ; $E51C
+dw .StrItem          ; $E51C
+dw .LightJewel       ; $E535
+dw .DarkJewel        ; $E54C
+dw .TwoRedJewels     ; $E562
+dw .ThreeRedJewels   ; $E562
+}
+{
+.Null:
+db $4E,$6F,$74,$68,$69,$6E,$67
+.BagOfGold:
+.IncaMelody:
+db $00
+.RedJewel:
+db $0D,$54,$72,$61,$64,$65,$40,$66,$6F,$72,$40,$67,$6F,$6F,$64,$73,$0D,$69,$6E,$40,$74,$6F,$77,$6E,$20,$00
+.PrisonKey:
+db $0D,$45,$64,$77,$61,$72,$64,$40,$43,$61,$73,$74,$6C,$65,$0D,$10,$06,$4B,$65,$79,$20,$00
+.IncaStatueA:
+.IncaStatueB:
+db $0D,$10,$0C,$73,$68,$61,$70,$65,$64,$0D,$6C,$69,$6B,$65,$40,$61,$40,$73,$70,$69,$72,$69,$74,$20,$00
+.Herb:
+db $0D,$10,$09,$73,$74,$72,$65,$6E,$67,$74,$68,$20,$00
+.DiamondBlock:
+db $0D,$44,$69,$61,$6D,$6F,$6E,$64,$2E,$73,$68,$61,$70,$65,$64,$40,$0D,$62,$6C,$6F,$63,$6B,$20,$00
+.WindMelody:
+db $0D,$4D,$65,$6C,$6F,$64,$79,$40,$70,$6C,$61,$79,$65,$64,$40,$62,$79,$40,$0D,$49,$6E,$63,$61,$6E,$40,$57,$69,$6E,$64,$20,$00
+.LolasMelody:
+db $0D,$41,$6C,$6C,$6F,$77,$73,$40,$61,$63,$63,$65,$73,$73,$40,$74,$6F,$0D,$49,$74,$6F,$72,$79,$40,$56,$69,$6C,$6C,$61,$67,$65,$20,$00
+.Meat:
+db $0D,$46,$65,$65,$64,$73,$40,$61,$0D,$68,$75,$6E,$67,$72,$79,$40,$70,$65,$72,$73,$6F,$6E,$20,$00
+.MineKeyA:
+.MineKeyB:
+db $0D,$55,$73,$65,$40,$69,$6E,$40,$74,$68,$65,$40,$6D,$69,$6E,$65,$20,$0D,$44,$75,$68,$20,$00
+.MemoryMelody:
+db $0D,$10,$09,$4D,$65,$6D,$6F,$72,$79,$20,$00
+.CrystalBall:
+db $0D,$46,$69,$74,$73,$40,$69,$6E,$74,$6F,$0D,$43,$72,$79,$73,$74,$61,$6C,$40,$54,$69,$6C,$65,$20,$00
+.MineElevatorKey:
+db $0D,$10,$01,$4D,$69,$6E,$65,$0D,$45,$6C,$65,$76,$61,$74,$6F,$72,$40,$4B,$65,$79,$20,$00
+.MuPalaceKey:
+db $0D,$4B,$65,$79,$40,$74,$6F,$0D,$4D,$75,$40,$74,$75,$6E,$6E,$65,$6C,$20,$00
+.PurifyStone:
+db $0D,$50,$75,$72,$69,$66,$69,$65,$73,$40,$66,$6F,$75,$6E,$74,$61,$69,$6E,$0D,$69,$6E,$40,$70,$61,$6C,$61,$63,$65,$20,$00
+.HopeStatue:
+db $0D,$10,$0C,$63,$6F,$6E,$74,$61,$69,$6E,$69,$6E,$67,$0D,$68,$6F,$70,$65,$73,$40,$6F,$66,$0D,$4D,$75,$40,$70,$65,$6F,$70,$6C,$65,$20,$00
+.RamaStatue:
+db $0D,$10,$0C,$77,$68,$69,$63,$68,$0D,$62,$72,$65,$61,$6B,$73,$40,$74,$68,$65,$40,$73,$65,$61,$6C,$0D,$6F,$66,$40,$52,$61,$6D,$61,$20,$00
+.MagicPowder:
+db $0D,$4D,$61,$67,$69,$63,$40,$70,$6F,$77,$64,$65,$72,$20,$0D,$52,$65,$6C,$65,$61,$73,$65,$73,$40,$70,$65,$72,$73,$6F,$6E,$0D,$10,$0E,$70,$61,$69,$6E,$74,$69,$6E,$67,$20,$00
+.BlueJournal:
+db $0D,$4C,$65,$61,$72,$6E,$40,$74,$6F,$40,$70,$6C,$61,$79,$0D,$74,$68,$65,$40,$67,$61,$6D,$65,$20,$00
+.LancesLetter:
+db $0D,$4C,$65,$74,$74,$65,$72,$40,$10,$0E,$0D,$4C,$61,$6E,$63,$65,$20,$00
+.Necklace:
+db $0D,$4E,$65,$63,$6B,$6C,$61,$63,$65,$40,$4C,$61,$6E,$63,$65,$0D,$6D,$61,$64,$65,$40,$66,$6F,$72,$40,$4C,$69,$6C,$6C,$79,$20,$00
+.RussianGlassWill:
+db $0D,$57,$69,$6C,$6C,$40,$67,$69,$76,$65,$6E,$40,$74,$6F,$0D,$52,$75,$73,$73,$69,$61,$6E,$40,$47,$6C,$61,$73,$73,$0D,$4F,$70,$70,$6F,$6E,$65,$6E,$74,$20,$00
+.Teapot:
+db $0D,$4A,$61,$72,$40,$66,$69,$6C,$6C,$65,$64,$0D,$77,$69,$74,$68,$40,$74,$65,$61,$72,$73,$40,$66,$6F,$72,$0D,$68,$65,$61,$6C,$69,$6E,$67,$40,$73,$70,$69,$72,$69,$74,$73,$20,$00
+.MushroomDrops:
+db $0D,$47,$72,$6F,$77,$73,$40,$70,$6C,$61,$6E,$74,$73,$0D,$10,$0E,$65,$6E,$64,$73,$40,$6F,$66,$0D,$73,$74,$61,$6C,$6B,$73,$20,$00
+.BlackGlasses:
+db $0D,$42,$6C,$61,$63,$6B,$40,$67,$6C,$61,$73,$73,$65,$73,$20,$0D,$50,$72,$6F,$74,$65,$63,$74,$73,$40,$66,$72,$6F,$6D,$0D,$62,$72,$69,$67,$68,$74,$40,$6C,$69,$67,$68,$74,$20,$00
+.GorgonFlower:
+db $0D,$10,$09,$74,$68,$69,$6E,$67,$73,$0D,$74,$75,$72,$6E,$65,$64,$40,$74,$6F,$40,$73,$74,$6F,$6E,$65,$20,$00
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+db $0D,$10,$07,$77,$69,$74,$68,$0D,$68,$69,$65,$72,$6F,$67,$6C,$79,$70,$68,$20,$00
+.Aura:
+db $0D,$10,$02,$4B,$6E,$69,$67,$68,$74,$0D,$53,$68,$61,$64,$6F,$77,$5C,$73,$40,$42,$6F,$64,$79,$0D,$74,$75,$72,$6E,$73,$40,$74,$6F,$40,$77,$61,$74,$65,$72,$20,$00
+.LolasLetter:
+db $0D,$4C,$65,$74,$74,$65,$72,$40,$66,$72,$6F,$6D,$0D,$4C,$6F,$6C,$61,$40,$61,$6E,$64,$40,$42,$69,$6C,$6C,$20,$00
+.FathersJournal:
+db $0D,$57,$69,$6C,$6C,$5C,$73,$40,$66,$61,$74,$68,$65,$72,$5C,$73,$0D,$6A,$6F,$75,$72,$6E,$61,$6C,$20,$40,$49,$6E,$66,$6F,$40,$6F,$6E,$40,$0D,$50,$79,$72,$61,$6D,$69,$64,$20,$00
+.CrystalRing:
+db $0D,$49,$66,$40,$79,$6F,$75,$40,$6C,$69,$6B,$65,$40,$69,$74,$20,$20,$20,$0D,$59,$6F,$75,$40,$6B,$6E,$6F,$77,$40,$74,$68,$65,$40,$72,$65,$73,$74,$20,$00
+.Apple:
+db $0D,$49,$72,$6F,$6E,$69,$63,$61,$6C,$6C,$79,$40,$6E,$6F,$74,$40,$66,$6F,$72,$0D,$65,$61,$74,$69,$6E,$67,$20,$00
+.HpItem:
+.DefItem:
+.StrItem:
+db $0D,$55,$73,$65,$40,$66,$6F,$72,$40,$61,$0D,$73,$74,$61,$74,$40,$75,$70,$67,$72,$61,$64,$65,$20,$00
+.LightJewel:
+db $0D,$49,$6D,$70,$72,$6F,$76,$65,$73,$0D,$50,$73,$79,$63,$68,$6F,$40,$44,$61,$73,$68,$20,$00
+.DarkJewel:
+db $0D,$49,$6D,$70,$72,$6F,$76,$65,$73,$0D,$44,$61,$72,$6B,$40,$46,$72,$69,$61,$72,$20,$00
+.TwoRedJewels:
+.ThreeRedJewels:
+db $0D,$53,$65,$6E,$64,$73,$40,$52,$65,$64,$40,$4A,$65,$77,$65,$6C,$73,$0D,$74,$6F,$40,$4A,$65,$77,$65,$6C,$65,$72,$20,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 
+}
+warnpc $81e5ec
+
+;org $81fd24
+Bg3_ItemGetText:
+.Pointers:
+{
+dw .Null             ; $FDA4
+dw .RedJewel         ; $FDA7
+dw .PrisonKey        ; $FDB1
+dw .IncaStatueA      ; $FDBC
+dw .IncaStatueB      ; $FDBC
+dw .IncaMelody       ; $FDA4
+dw .Herb             ; $FDC1
+dw .DiamondBlock     ; $FDC6
+dw .WindMelody       ; $FDCE
+dw .LolasMelody      ; $FDD3
+dw .Meat             ; $FDD8
+dw .MineKeyA         ; $FDE4
+dw .MineKeyB         ; $FDE4
+dw .MemoryMelody     ; $FDED
+dw .CrystalBall      ; $FDF2
+dw .MineElevatorKey  ; $FDF9
+dw .MuPalaceKey      ; $FE03
+dw .PurifyStone      ; $FE0C
+dw .HopeStatue       ; $FE11
+dw .RamaStatue       ; $FE19
+dw .MagicPowder      ; $FE21
+dw .BlueJournal      ; $FDA5
+dw .LancesLetter     ; $FE2C
+dw .Necklace         ; $FE37
+dw .RussianGlassWill ; $FE40
+dw .Teapot           ; $FE45
+dw .MushroomDrops    ; $FE4C
+dw .BagOfGold        ; $FDA5
+dw .BlackGlasses     ; $FE5B
+dw .GorgonFlower     ; $FE65
+dw .Hieroglyph1E     ; $FE6F
+dw .Hieroglyph1F     ; $FE6F
+dw .Hieroglyph20     ; $FE6F
+dw .Hieroglyph21     ; $FE6F
+dw .Hieroglyph22     ; $FE6F
+dw .Hieroglyph23     ; $FE6F
+dw .Aura             ; $FE72
+dw .LolasLetter      ; $FE75
+dw .FathersJournal   ; $FE7A
+dw .CrystalRing      ; $FE86
+dw .Apple            ; $FE8D
+dw .HpItem           ; $FE93
+dw .DefItem          ; $FE96
+dw .StrItem          ; $FE9A
+dw .LightJewel       ; $FE9E
+dw .DarkJewel        ; $FEAA
+dw .TwoRedJewels     ; $FEB2
+dw .ThreeRedJewels   ; $FEB2
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+}
+;org $81fda4
+{
+.Null:
+db $AC,$AC,$CA
+.RedJewel:
+db $62,$84,$83,$AC,$49,$84,$A7,$84,$8B,$CA
+.PrisonKey:
+db $60,$A2,$88,$A3,$8E,$8D,$AC,$4A,$84,$A9,$CA
+.IncaStatueA:
+.IncaStatueB:
+db $D6,$1E,$D6,$48,$CA
+.Herb:
+db $47,$84,$A2,$81,$CA
+.DiamondBlock:
+db $D6,$0E,$41,$8B,$8E,$82,$8A,$CA
+.WindMelody:
+db $D7,$3D,$D6,$34,$CA
+.LolasMelody:
+db $D6,$2D,$D6,$34,$CA
+.Meat:
+db $4B,$80,$A2,$86,$84,$AC,$62,$8E,$80,$A3,$A4,$CA
+.MineKeyA:
+.MineKeyB:
+db $4C,$88,$8D,$84,$AC,$4A,$84,$A9,$CA
+.MemoryMelody:
+db $D7,$1D,$D6,$34,$CA
+.CrystalBall:
+db $D6,$07,$41,$80,$8B,$8B,$CA
+.MineElevatorKey:
+db $64,$87,$84,$AC,$D7,$5E,$8A,$84,$A9,$CA
+.MuPalaceKey:
+db $4C,$A5,$AC,$D7,$93,$8A,$84,$A9,$CA
+.PurifyStone:
+db $D6,$40,$D7,$9D,$CA
+.HopeStatue:
+db $47,$8E,$A0,$84,$AC,$D6,$48,$CA
+.RamaStatue:
+db $62,$80,$8C,$80,$AC,$D6,$48,$CA
+.MagicPowder:
+db $4C,$80,$86,$88,$82,$AC,$43,$A5,$A3,$A4,$CA
+.LancesLetter:
+db $4B,$80,$8D,$82,$84,$0E,$A3,$AC,$D7,$7F,$CA
+.Necklace:
+db $4D,$84,$82,$8A,$8B,$80,$82,$84,$CA
+.RussianGlassWill:
+db $67,$88,$8B,$8B,$CA
+.Teapot:
+db $64,$84,$80,$A0,$8E,$A4,$CA
+.MushroomDrops:
+db $4C,$A5,$A3,$87,$A2,$8E,$8E,$8C,$AC,$43,$A2,$8E,$A0,$A3,$CA
+.BlackGlasses:
+db $D6,$05,$46,$8B,$80,$A3,$A3,$84,$A3,$CA
+.GorgonFlower:
+db $46,$8E,$A2,$86,$8E,$8D,$AC,$D7,$68,$CA
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+db $D6,$1B,$CA
+.Aura:
+db $D6,$03,$CA
+.LolasLetter:
+db $D6,$2D,$D7,$7F,$CA
+.FathersJournal:
+db $D6,$68,$D6,$92,$89,$8E,$A5,$A2,$8D,$80,$8B,$CA
+.CrystalRing:
+db $D6,$07,$62,$88,$8D,$86,$CA
+.Apple:
+db $40,$A0,$A0,$8B,$84,$CA
+.HpItem:
+db $47,$60,$CA
+.DefItem:
+db $43,$44,$45,$CA
+.StrItem:
+db $63,$64,$62,$CA
+.LightJewel:
+db $4B,$88,$86,$87,$A4,$AC,$49,$84,$A7,$84,$8B,$CA
+.DarkJewel:
+db $D6,$0C,$49,$84,$A7,$84,$8B,$CA
+.TwoRedJewels:
+db $62,$84,$83,$AC,$D6,$22,$CA
+.ThreeRedJewels:
+db $4C,$A9,$A3,$A4,$88,$82,$AC,$D6,$48,$CA
+}
+
+warnpc $81ff02
+
+
+
+org $81ff9b
+; "Write code for clearing enemy tally data"
+phy
+pha
+ldy #$0000
+lda #$0000
+-:
+sta $0A80,y
+iny : iny : cpy #$0020 : bne -
+pla
+ply
+rtl
+
+
+org $81ffed
+table "table_dialogue.txt",rtl
+db "Already maxed out!"
+
+
+
+org $82a5f9
+; Part of LR_UpdateTilemapOpenChests, updated for 2-byte item IDs.
+skip 3   ; lda $0000,x
+skip 3   ; bit #$0080
+skip 2   ; bne B_82A65B
+phx
+lda $0004,x : and #$007f : jsl $80B489 : bcc UpdateTilemapChestsCheckNext
+org $82a652
+UpdateTilemapChestsCheckNext:
+rep #$21
+pla : adc #$0005 : tax
+
+org $82a65d
+SR_CheckChestCollide:
+org $82a6e4
+{
+.GetChestListForRoom:
+ldy $0646
+ldx.w Lut_Chests,y
+.CheckNextChest:
+lda $0000,x : bmi .NoMatchedChest
+cmp $18 : bne ..NotMatchedX
+lda $0001,x : cmp $1C : beq .GotMatchedChest
+..NotMatchedX:
+inx : inx : inx : inx : inx
+bra .CheckNextChest
+.NoMatchedChest:
+rep #$20
+ldy #$FF48
+jsl LR_ParseDialogueScriptAtY
+rts
+.GotMatchedChest:
+rep #$20
+phx
+lda #$0080 : tsb $09EC
+lda #$00FC : sta $06
+jsr $A8B2    ; Set chest tiles to "open"
+lda $01,s : tax
+lda $0002,x : beq .ChestEmpty
+sep #$20
+lda #$2A : sta $06F9
+rep #$20
+lda $0002,x : jsl LR_GiveAnyItemA16OrSec : bcc .GaveItemSuccess
+.CannotGiveItem:
+lda $01,s : tax
+lda #$00F8 : sta $06
+jsr $A8B2
+bra .ReturnControl
+.ChestEmpty:
+ldy #$FF36
+jsl LR_ParseDialogueScriptAtY
+lda $01,s : tax
+lda $0004,x : and #$007F : jsl LR_SetFlag20A
+bra .ReturnControl
+.GaveItemSuccess:
+lda $01,s
+phx
+tax
+lda #$0080 : trb $09EC
+plx
+.SetItemFlagAndReturn:
+lda $01,s : tax
+lda $0004,x : and #$007F : jsl LR_SetFlag20A
+plx
+rts
+.ReturnControl:
+lda #$0080 : trb $09EC
+plx
+rts
+}
+
+
+
+org $82b871
+db $30   ; Prevent Earthquaker and AB from implicitly allowing Friar
+
+
+; Early Firebird checks.
+; Replaces "lda $0644 : cmp #$00e8 : bne .PostFirebird"
+org $82cd07
+nop : nop : nop : jsr SR_SecIfFirebirdAllowed : bcc $09
+org $82cd88
+nop : nop : nop : jsr SR_SecIfFirebirdAllowed : bcc $09
+org $82ce06
+nop : nop : nop : jsr SR_SecIfFirebirdAllowed : bcc $09
+org $82ce84
+nop : nop : nop : jsr SR_SecIfFirebirdAllowed : bcc $09
+
+
+
+org $82f0c0
+SR_SecIfFirebirdAllowed:
+{
+lda $0644 : cmp #$00e8 : beq .OkayFirebird
+if !SettingEarlyFirebird == 0
+bra .NoFirebird
+else
+lda $0ad4 : cmp #$0002 : bne .NoFirebird
+cop #$D0 : db $3e,$00 : dw .NoFirebird
+cop #$D0 : db $8a,$00 : dw .NoFirebird
+endif
+.OkayFirebird:
+lda $213f : adc $2137 : adc $213c : adc $0036
+  and #$000f : sec : sbc #$0004 : sta $09e2   ; Firebird damage randomizer.
+sec
+rts
+.NoFirebird:
+clc
+rts
+}
+
+
+org $82f130
+; enemystats.bin, the new way of doing stat blocks
+if (!ModeFlagZ3 == 1)
+{
+db $00,$00,$00,$00
+db $04,$01,$00,$02
+db $03,$01,$00,$01
+db $07,$01,$00,$03
+db $02,$01,$00,$01
+db $02,$01,$00,$01
+db $55,$00,$00,$00
+db $05,$01,$00,$00
+db $02,$01,$00,$00
+db $04,$01,$00,$00
+db $05,$01,$00,$02
+db $04,$01,$00,$01
+db $06,$01,$00,$01
+db $07,$01,$00,$02
+db $05,$01,$00,$03
+db $04,$01,$00,$01
+db $09,$01,$00,$00
+db $07,$01,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$02,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $07,$02,$00,$02
+db $03,$02,$00,$01
+db $03,$02,$00,$03
+db $08,$02,$00,$01
+db $08,$02,$00,$02
+db $0B,$02,$00,$01
+db $0D,$02,$00,$03
+db $03,$01,$00,$00
+db $03,$01,$00,$00
+db $AA,$02,$00,$00
+db $AA,$02,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$04,$7F,$00
+db $11,$03,$00,$02
+db $0F,$03,$00,$03
+db $08,$03,$00,$01
+db $05,$03,$00,$01
+db $0D,$04,$00,$02
+db $03,$04,$00,$01
+db $07,$04,$00,$03
+db $28,$03,$7F,$00
+db $28,$04,$7F,$00
+db $21,$05,$7F,$00
+db $0A,$04,$00,$01
+db $11,$04,$00,$02
+db $0F,$04,$00,$03
+db $0F,$04,$00,$02
+db $28,$05,$7F,$00
+db $02,$04,$7F,$00
+db $0D,$02,$00,$03
+db $0D,$02,$00,$00
+db $0D,$02,$00,$01
+db $0B,$03,$00,$00
+db $0B,$04,$00,$02
+db $0C,$04,$00,$01
+db $0C,$04,$00,$01
+db $0A,$05,$00,$03
+db $08,$02,$00,$02
+db $04,$02,$00,$01
+db $11,$05,$00,$02
+db $0D,$06,$00,$01
+db $14,$05,$00,$03
+db $13,$06,$00,$02
+db $0D,$05,$FF,$00
+db $0D,$05,$00,$03
+db $07,$05,$00,$00
+db $0A,$05,$00,$02
+db $05,$05,$00,$01
+db $04,$02,$00,$01
+db $08,$05,$00,$02
+db $13,$06,$00,$00
+db $14,$06,$00,$03
+db $0D,$05,$00,$02
+db $28,$08,$7F,$00
+db $11,$05,$00,$02
+db $05,$02,$00,$00
+db $03,$02,$00,$01
+db $0D,$08,$7F,$00
+db $28,$08,$7F,$00
+db $07,$09,$7F,$00
+db $01,$08,$7F,$00
+db $0D,$0A,$7F,$00
+db $0B,$03,$00,$02
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $0D,$08,$00,$02
+db $0B,$08,$00,$02
+db $14,$08,$00,$02
+db $07,$02,$00,$00
+db $01,$07,$7F,$00
+db $07,$09,$7F,$00
+db $0D,$08,$7F,$00
+db $28,$07,$7F,$00
+db $28,$09,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $FF,$FF,$FF,$FF
+db $FF,$FF,$FF,$FF
+db $00,$00,$00,$00
+db $06,$01,$00,$02
+db $05,$01,$00,$01
+db $0A,$01,$00,$03
+db $03,$01,$00,$01
+db $03,$01,$00,$01
+db $7F,$00,$00,$00
+db $08,$01,$00,$00
+db $03,$01,$00,$00
+db $06,$01,$00,$00
+db $08,$01,$00,$02
+db $06,$01,$00,$01
+db $09,$01,$00,$01
+db $0B,$01,$00,$02
+db $08,$01,$00,$03
+db $06,$01,$00,$01
+db $0E,$01,$00,$00
+db $0A,$01,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$02,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $0A,$02,$00,$02
+db $05,$02,$00,$01
+db $05,$02,$00,$03
+db $0C,$02,$00,$01
+db $0C,$02,$00,$02
+db $10,$02,$00,$01
+db $14,$02,$00,$03
+db $05,$01,$00,$00
+db $05,$01,$00,$00
+db $FF,$02,$00,$00
+db $FF,$02,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$04,$7F,$00
+db $1A,$03,$00,$02
+db $16,$03,$00,$03
+db $0C,$03,$00,$01
+db $08,$03,$00,$01
+db $14,$04,$00,$02
+db $05,$04,$00,$01
+db $0A,$04,$00,$03
+db $28,$03,$7F,$00
+db $28,$04,$7F,$00
+db $32,$05,$7F,$00
+db $0F,$04,$00,$01
+db $19,$04,$00,$02
+db $16,$04,$00,$03
+db $16,$04,$00,$02
+db $28,$05,$7F,$00
+db $03,$04,$7F,$00
+db $14,$02,$00,$03
+db $14,$02,$00,$00
+db $14,$02,$00,$01
+db $10,$03,$00,$00
+db $10,$04,$00,$02
+db $12,$04,$00,$01
+db $12,$04,$00,$01
+db $0F,$05,$00,$03
+db $0C,$02,$00,$02
+db $06,$02,$00,$01
+db $19,$05,$00,$02
+db $14,$06,$00,$01
+db $1E,$05,$00,$03
+db $1C,$06,$00,$02
+db $14,$05,$FF,$00
+db $14,$05,$00,$03
+db $0A,$05,$00,$00
+db $0F,$05,$00,$02
+db $08,$05,$00,$01
+db $06,$02,$00,$01
+db $0C,$05,$00,$02
+db $1C,$06,$00,$00
+db $1E,$06,$00,$03
+db $14,$05,$00,$02
+db $28,$08,$7F,$00
+db $19,$05,$00,$02
+db $08,$02,$00,$00
+db $05,$02,$00,$01
+db $14,$08,$7F,$00
+db $28,$08,$7F,$00
+db $0A,$09,$7F,$00
+db $01,$08,$7F,$00
+db $14,$0A,$7F,$00
+db $10,$03,$00,$02
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $28,$08,$7F,$00
+db $14,$08,$00,$02
+db $10,$08,$00,$02
+db $1E,$08,$00,$02
+db $0A,$02,$00,$00
+db $01,$07,$7F,$00
+db $0A,$09,$7F,$00
+db $14,$08,$7F,$00
+db $28,$07,$7F,$00
+db $28,$09,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $FF,$FF,$FF,$FF
+db $FF,$FF,$FF,$FF
+db $00,$00,$00,$00
+db $06,$02,$00,$02
+db $05,$02,$00,$01
+db $0A,$02,$00,$03
+db $03,$02,$00,$01
+db $03,$02,$00,$01
+db $7F,$00,$00,$00
+db $08,$02,$04,$00
+db $03,$02,$03,$00
+db $06,$02,$03,$00
+db $08,$02,$00,$02
+db $06,$02,$00,$01
+db $09,$02,$00,$01
+db $0B,$03,$00,$02
+db $08,$02,$00,$03
+db $06,$02,$00,$01
+db $0E,$02,$00,$00
+db $0A,$03,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$04,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $0A,$05,$00,$02
+db $05,$04,$00,$01
+db $05,$04,$00,$03
+db $0C,$05,$00,$01
+db $0C,$05,$00,$02
+db $10,$05,$00,$01
+db $14,$05,$00,$03
+db $05,$02,$00,$00
+db $05,$02,$00,$00
+db $FF,$05,$00,$00
+db $FF,$05,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$07,$7F,$00
+db $1A,$07,$00,$02
+db $16,$06,$00,$03
+db $0C,$07,$00,$01
+db $08,$07,$00,$01
+db $14,$08,$00,$02
+db $05,$07,$01,$01
+db $0A,$08,$01,$03
+db $28,$07,$7F,$00
+db $28,$07,$7F,$00
+db $32,$0A,$7F,$00
+db $0F,$07,$01,$01
+db $19,$08,$01,$02
+db $16,$09,$00,$03
+db $16,$07,$00,$02
+db $28,$09,$7F,$00
+db $03,$08,$7F,$00
+db $14,$05,$00,$03
+db $14,$05,$00,$00
+db $14,$05,$00,$01
+db $10,$07,$00,$00
+db $10,$08,$01,$02
+db $12,$09,$01,$01
+db $12,$08,$01,$01
+db $0F,$09,$01,$03
+db $0C,$05,$00,$02
+db $06,$05,$00,$01
+db $19,$0A,$01,$02
+db $14,$0B,$01,$01
+db $1E,$0A,$01,$03
+db $1C,$0B,$01,$02
+db $14,$0A,$FF,$00
+db $14,$0A,$01,$03
+db $0A,$0A,$01,$00
+db $0F,$0A,$01,$02
+db $08,$0A,$01,$01
+db $06,$05,$00,$01
+db $0C,$0A,$01,$02
+db $1C,$0B,$01,$00
+db $1E,$0B,$01,$03
+db $14,$0A,$01,$02
+db $28,$0F,$7F,$00
+db $19,$09,$01,$02
+db $08,$05,$00,$00
+db $05,$05,$00,$01
+db $14,$0F,$7F,$00
+db $28,$09,$7F,$00
+db $0A,$10,$7F,$00
+db $01,$0F,$7F,$00
+db $14,$12,$7F,$00
+db $10,$07,$00,$02
+db $28,$0F,$7F,$00
+db $28,$0F,$7F,$00
+db $28,$0F,$7F,$00
+db $28,$0F,$7F,$00
+db $28,$0F,$7F,$00
+db $28,$0F,$7F,$00
+db $28,$0F,$7F,$00
+db $14,$0F,$01,$02
+db $10,$0F,$01,$02
+db $1E,$0F,$01,$02
+db $0A,$04,$00,$00
+db $01,$08,$7F,$00
+db $0A,$0A,$7F,$00
+db $14,$09,$7F,$00
+db $28,$08,$7F,$00
+db $28,$11,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $FF,$FF,$FF,$FF
+db $FF,$FF,$FF,$FF
+db $00,$00,$00,$00
+db $06,$04,$00,$02
+db $05,$03,$00,$01
+db $0A,$04,$00,$03
+db $03,$04,$00,$01
+db $03,$03,$00,$01
+db $7F,$00,$00,$00
+db $08,$04,$06,$00
+db $03,$04,$05,$00
+db $06,$04,$04,$00
+db $08,$04,$00,$02
+db $06,$04,$00,$01
+db $09,$04,$00,$01
+db $0B,$05,$00,$02
+db $08,$04,$00,$03
+db $06,$04,$00,$01
+db $0E,$04,$00,$00
+db $0A,$05,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$06,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $0A,$07,$00,$02
+db $05,$06,$00,$01
+db $05,$06,$00,$03
+db $0C,$07,$00,$01
+db $0C,$07,$00,$02
+db $10,$07,$00,$01
+db $14,$07,$00,$03
+db $05,$03,$00,$00
+db $05,$03,$00,$00
+db $FF,$07,$00,$00
+db $FF,$07,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$09,$7F,$00
+db $1A,$09,$01,$02
+db $16,$08,$00,$03
+db $0C,$09,$00,$01
+db $08,$09,$00,$01
+db $14,$0A,$01,$02
+db $05,$09,$01,$01
+db $0A,$0A,$01,$03
+db $28,$09,$7F,$00
+db $28,$09,$7F,$00
+db $32,$0C,$7F,$00
+db $0F,$09,$01,$01
+db $19,$0A,$01,$02
+db $16,$0B,$01,$03
+db $16,$09,$01,$02
+db $28,$0B,$7F,$00
+db $03,$0A,$7F,$00
+db $14,$07,$01,$03
+db $14,$07,$01,$00
+db $14,$07,$01,$01
+db $10,$09,$01,$00
+db $10,$0A,$01,$02
+db $12,$0B,$01,$01
+db $12,$0A,$01,$01
+db $0F,$0B,$01,$03
+db $0C,$07,$01,$02
+db $06,$07,$00,$01
+db $19,$0C,$01,$02
+db $14,$0D,$01,$01
+db $1E,$0C,$01,$03
+db $1C,$0D,$01,$02
+db $14,$0C,$FF,$00
+db $14,$0C,$01,$03
+db $0A,$0C,$01,$00
+db $0F,$0C,$01,$02
+db $08,$0C,$01,$01
+db $06,$07,$00,$01
+db $0C,$0C,$01,$02
+db $1C,$0D,$01,$00
+db $1E,$0D,$01,$03
+db $14,$0C,$01,$02
+db $28,$11,$7F,$00
+db $19,$0B,$02,$02
+db $08,$07,$01,$00
+db $05,$07,$00,$01
+db $14,$11,$7F,$00
+db $28,$0A,$7F,$00
+db $0A,$12,$7F,$00
+db $01,$11,$7F,$00
+db $14,$14,$7F,$00
+db $10,$09,$01,$02
+db $28,$11,$7F,$00
+db $28,$11,$7F,$00
+db $28,$11,$7F,$00
+db $28,$11,$7F,$00
+db $28,$11,$7F,$00
+db $28,$11,$7F,$00
+db $28,$11,$7F,$00
+db $14,$11,$02,$02
+db $10,$11,$02,$02
+db $1E,$11,$02,$02
+db $0A,$06,$01,$00
+db $01,$09,$7F,$00
+db $0A,$0B,$7F,$00
+db $14,$0A,$7F,$00
+db $28,$09,$7F,$00
+db $28,$13,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+}
+else
+{
+db $00,$00,$00,$00
+db $02,$01,$00,$02
+db $02,$01,$00,$01
+db $04,$02,$00,$03
+db $02,$01,$00,$01
+db $02,$01,$00,$01
+db $7F,$00,$00,$00
+db $08,$01,$46,$00
+db $03,$01,$33,$00
+db $06,$01,$30,$00
+db $03,$01,$00,$02
+db $02,$02,$00,$01
+db $03,$01,$00,$01
+db $04,$02,$00,$02
+db $03,$02,$00,$03
+db $02,$02,$00,$01
+db $06,$02,$00,$00
+db $04,$03,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$04,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $02,$04,$00,$03
+db $04,$04,$00,$01
+db $04,$05,$00,$02
+db $06,$04,$00,$01
+db $08,$05,$00,$03
+db $02,$01,$00,$00
+db $02,$01,$00,$00
+db $FF,$04,$00,$00
+db $FF,$05,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$07,$7F,$00
+db $10,$06,$00,$02
+db $0C,$06,$00,$03
+db $04,$06,$00,$01
+db $03,$06,$00,$01
+db $08,$08,$00,$02
+db $02,$07,$00,$01
+db $04,$08,$00,$03
+db $28,$06,$7F,$00
+db $28,$07,$7F,$00
+db $32,$0A,$7F,$00
+db $06,$07,$00,$01
+db $10,$08,$00,$02
+db $0C,$09,$00,$03
+db $0C,$07,$00,$02
+db $28,$09,$7F,$00
+db $03,$08,$7F,$00
+db $08,$04,$00,$03
+db $08,$04,$00,$00
+db $08,$04,$00,$01
+db $06,$06,$00,$00
+db $06,$08,$00,$02
+db $08,$09,$00,$01
+db $08,$08,$00,$01
+db $06,$09,$00,$03
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $10,$0A,$00,$02
+db $08,$0B,$00,$01
+db $18,$0A,$00,$03
+db $14,$0B,$00,$02
+db $08,$0A,$FF,$00
+db $08,$0A,$00,$03
+db $04,$0A,$00,$00
+db $06,$0A,$00,$02
+db $03,$0A,$00,$01
+db $02,$04,$00,$01
+db $08,$0A,$00,$02
+db $14,$0B,$00,$00
+db $18,$0B,$00,$03
+db $0A,$0A,$00,$02
+db $28,$0F,$7F,$00
+db $10,$09,$00,$02
+db $03,$04,$00,$00
+db $02,$04,$00,$01
+db $14,$10,$7F,$00
+db $28,$0F,$7F,$00
+db $0A,$10,$7F,$00
+db $01,$0F,$7F,$00
+db $14,$12,$7F,$00
+db $06,$06,$00,$02
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $10,$10,$00,$02
+db $0A,$10,$00,$02
+db $18,$10,$00,$02
+db $04,$04,$00,$00
+db $01,$0D,$7F,$00
+db $0A,$10,$7F,$00
+db $14,$0F,$7F,$00
+db $28,$0D,$7F,$00
+db $28,$11,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $FF,$FF,$FF,$FF
+db $FF,$FF,$FF,$FF
+db $00,$00,$00,$00
+db $02,$01,$00,$02
+db $02,$01,$00,$01
+db $04,$02,$00,$03
+db $02,$01,$00,$01
+db $02,$01,$00,$01
+db $7F,$00,$00,$00
+db $08,$01,$46,$00
+db $03,$01,$33,$00
+db $06,$01,$30,$00
+db $03,$01,$00,$02
+db $02,$02,$00,$01
+db $03,$01,$00,$01
+db $04,$02,$00,$02
+db $03,$02,$00,$03
+db $02,$02,$00,$01
+db $06,$02,$00,$00
+db $04,$03,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$04,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $02,$04,$00,$03
+db $04,$04,$00,$01
+db $04,$05,$00,$02
+db $06,$04,$00,$01
+db $08,$05,$00,$03
+db $02,$01,$00,$00
+db $02,$01,$00,$00
+db $FF,$04,$00,$00
+db $FF,$05,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$07,$7F,$00
+db $10,$06,$00,$02
+db $0C,$06,$00,$03
+db $04,$06,$00,$01
+db $03,$06,$00,$01
+db $08,$08,$00,$02
+db $02,$07,$00,$01
+db $04,$08,$00,$03
+db $28,$06,$7F,$00
+db $28,$07,$7F,$00
+db $32,$0A,$7F,$00
+db $06,$07,$00,$01
+db $10,$08,$00,$02
+db $0C,$09,$00,$03
+db $0C,$07,$00,$02
+db $28,$09,$7F,$00
+db $03,$08,$7F,$00
+db $08,$04,$00,$03
+db $08,$04,$00,$00
+db $08,$04,$00,$01
+db $06,$06,$00,$00
+db $06,$08,$00,$02
+db $08,$09,$00,$01
+db $08,$08,$00,$01
+db $06,$09,$00,$03
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $10,$0A,$00,$02
+db $08,$0B,$00,$01
+db $18,$0A,$00,$03
+db $14,$0B,$00,$02
+db $08,$0A,$FF,$00
+db $08,$0A,$00,$03
+db $04,$0A,$00,$00
+db $06,$0A,$00,$02
+db $03,$0A,$00,$01
+db $02,$04,$00,$01
+db $08,$0A,$00,$02
+db $14,$0B,$00,$00
+db $18,$0B,$00,$03
+db $0A,$0A,$00,$02
+db $28,$0F,$7F,$00
+db $10,$09,$00,$02
+db $03,$04,$00,$00
+db $02,$04,$00,$01
+db $14,$10,$7F,$00
+db $28,$0F,$7F,$00
+db $0A,$10,$7F,$00
+db $01,$0F,$7F,$00
+db $14,$12,$7F,$00
+db $06,$06,$00,$02
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $10,$10,$00,$02
+db $0A,$10,$00,$02
+db $18,$10,$00,$02
+db $04,$04,$00,$00
+db $01,$0D,$7F,$00
+db $0A,$10,$7F,$00
+db $14,$0F,$7F,$00
+db $28,$0D,$7F,$00
+db $28,$11,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $FF,$FF,$FF,$FF
+db $FF,$FF,$FF,$FF
+db $00,$00,$00,$00
+db $02,$01,$00,$02
+db $02,$01,$00,$01
+db $04,$02,$00,$03
+db $02,$01,$00,$01
+db $02,$01,$00,$01
+db $7F,$00,$00,$00
+db $08,$01,$46,$00
+db $03,$01,$33,$00
+db $06,$01,$30,$00
+db $03,$01,$00,$02
+db $02,$02,$00,$01
+db $03,$01,$00,$01
+db $04,$02,$00,$02
+db $03,$02,$00,$03
+db $02,$02,$00,$01
+db $06,$02,$00,$00
+db $04,$03,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$04,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $02,$04,$00,$03
+db $04,$04,$00,$01
+db $04,$05,$00,$02
+db $06,$04,$00,$01
+db $08,$05,$00,$03
+db $02,$01,$00,$00
+db $02,$01,$00,$00
+db $FF,$04,$00,$00
+db $FF,$05,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$07,$7F,$00
+db $10,$06,$00,$02
+db $0C,$06,$00,$03
+db $04,$06,$00,$01
+db $03,$06,$00,$01
+db $08,$08,$00,$02
+db $02,$07,$00,$01
+db $04,$08,$00,$03
+db $28,$06,$7F,$00
+db $28,$07,$7F,$00
+db $32,$0A,$7F,$00
+db $06,$07,$00,$01
+db $10,$08,$00,$02
+db $0C,$09,$00,$03
+db $0C,$07,$00,$02
+db $28,$09,$7F,$00
+db $03,$08,$7F,$00
+db $08,$04,$00,$03
+db $08,$04,$00,$00
+db $08,$04,$00,$01
+db $06,$06,$00,$00
+db $06,$08,$00,$02
+db $08,$09,$00,$01
+db $08,$08,$00,$01
+db $06,$09,$00,$03
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $10,$0A,$00,$02
+db $08,$0B,$00,$01
+db $18,$0A,$00,$03
+db $14,$0B,$00,$02
+db $08,$0A,$FF,$00
+db $08,$0A,$00,$03
+db $04,$0A,$00,$00
+db $06,$0A,$00,$02
+db $03,$0A,$00,$01
+db $02,$04,$00,$01
+db $08,$0A,$00,$02
+db $14,$0B,$00,$00
+db $18,$0B,$00,$03
+db $0A,$0A,$00,$02
+db $28,$0F,$7F,$00
+db $10,$09,$00,$02
+db $03,$04,$00,$00
+db $02,$04,$00,$01
+db $14,$10,$7F,$00
+db $28,$0F,$7F,$00
+db $0A,$10,$7F,$00
+db $01,$0F,$7F,$00
+db $14,$12,$7F,$00
+db $06,$06,$00,$02
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $10,$10,$00,$02
+db $0A,$10,$00,$02
+db $18,$10,$00,$02
+db $04,$04,$00,$00
+db $01,$0D,$7F,$00
+db $0A,$10,$7F,$00
+db $14,$0F,$7F,$00
+db $28,$0D,$7F,$00
+db $28,$11,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $FF,$FF,$FF,$FF
+db $FF,$FF,$FF,$FF
+db $00,$00,$00,$00
+db $02,$01,$00,$02
+db $02,$01,$00,$01
+db $04,$02,$00,$03
+db $02,$01,$00,$01
+db $02,$01,$00,$01
+db $7F,$00,$00,$00
+db $08,$01,$46,$00
+db $03,$01,$33,$00
+db $06,$01,$30,$00
+db $03,$01,$00,$02
+db $02,$02,$00,$01
+db $03,$01,$00,$01
+db $04,$02,$00,$02
+db $03,$02,$00,$03
+db $02,$02,$00,$01
+db $06,$02,$00,$00
+db $04,$03,$00,$03
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$04,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $02,$04,$00,$03
+db $04,$04,$00,$01
+db $04,$05,$00,$02
+db $06,$04,$00,$01
+db $08,$05,$00,$03
+db $02,$01,$00,$00
+db $02,$01,$00,$00
+db $FF,$04,$00,$00
+db $FF,$05,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $28,$07,$7F,$00
+db $10,$06,$00,$02
+db $0C,$06,$00,$03
+db $04,$06,$00,$01
+db $03,$06,$00,$01
+db $08,$08,$00,$02
+db $02,$07,$00,$01
+db $04,$08,$00,$03
+db $28,$06,$7F,$00
+db $28,$07,$7F,$00
+db $32,$0A,$7F,$00
+db $06,$07,$00,$01
+db $10,$08,$00,$02
+db $0C,$09,$00,$03
+db $0C,$07,$00,$02
+db $28,$09,$7F,$00
+db $03,$08,$7F,$00
+db $08,$04,$00,$03
+db $08,$04,$00,$00
+db $08,$04,$00,$01
+db $06,$06,$00,$00
+db $06,$08,$00,$02
+db $08,$09,$00,$01
+db $08,$08,$00,$01
+db $06,$09,$00,$03
+db $04,$04,$00,$02
+db $02,$04,$00,$01
+db $10,$0A,$00,$02
+db $08,$0B,$00,$01
+db $18,$0A,$00,$03
+db $14,$0B,$00,$02
+db $08,$0A,$FF,$00
+db $08,$0A,$00,$03
+db $04,$0A,$00,$00
+db $06,$0A,$00,$02
+db $03,$0A,$00,$01
+db $02,$04,$00,$01
+db $08,$0A,$00,$02
+db $14,$0B,$00,$00
+db $18,$0B,$00,$03
+db $0A,$0A,$00,$02
+db $28,$0F,$7F,$00
+db $10,$09,$00,$02
+db $03,$04,$00,$00
+db $02,$04,$00,$01
+db $14,$10,$7F,$00
+db $28,$0F,$7F,$00
+db $0A,$10,$7F,$00
+db $01,$0F,$7F,$00
+db $14,$12,$7F,$00
+db $06,$06,$00,$02
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $28,$10,$7F,$00
+db $10,$10,$00,$02
+db $0A,$10,$00,$02
+db $18,$10,$00,$02
+db $04,$04,$00,$00
+db $01,$0D,$7F,$00
+db $0A,$10,$7F,$00
+db $14,$0F,$7F,$00
+db $28,$0D,$7F,$00
+db $28,$11,$7F,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+db $00,$00,$00,$00
+}
+endif
+
+
+
+
+; More "Early Firebird"
+org $82f828
+LR_SpawnFirebirdPaletteManager:
+cop #$3B : db $71 : dl TFirebirdPaletteManager
+lda #$1000 : tsb $12
+rtl
+-:
+cop #$C1
+TFirebirdPaletteManager:
+lda $0AD4 : cmp #$0002 : beq +
+  rtl
++:
+cop #$36
+cop #$39
+bra -
+
+
+
+org $838294
+lda $81adac,x   ; radar screen chest counter, update for new chest table
+rep #$20
+and #$007f : jsl $80b489
+sep #$20 : bcs +
+org $8382f9
+inc $0002
++:
+inx : inx : inx : inx : inx : jmp $828e
+
+
+org $83848d
+dw SR_UseItemCrystalRing    ; Item $27
+dw SR_UseItemApple    ; Item $28
+dw SR_UseItemHpUpgrade    ; Item $29 
+dw $f792    ; Item $2a 
+dw $f7cd    ; Item $2b 
+dw SR_UseItemPsychoDashUpgrade    ; Item $2c 
+dw SR_UseItemFriarUpgrade    ; Item $2d 
+dw $9d90    ; Item $2e 
+dw $9dd0    ; Item $2f 
+dw $ffa0    ; Item $30 
+
+
+org $8385cf
+db $13    ; Allow Prison Key use from south of door.
+org $8385dc
+cop #$D5 : db $02   ; No need to check whether the key is being re-used. Just remove it here.
+nop : nop : nop
+
+
+org $83881d
+; Unused Inca Melody block, used now for upgrade items
+{
+SR_UseItemStrUpgrade:
+cop #$BF : dw .Text
+inc $0ade
+jsr $9fb2    ; jsr SR_RemoveHeldItem
+rts
+.Text:
+; "Your STR increased!"
+db $D3,$D6,$68,$63,$64,$62,$AC,$88,$8D,$82,$A2,$84,$80,$A3,$84,$83,$4F,$C0
+
+SR_UseItemPsychoDashUpgrade:
+cop #$BF : dw .Text
+inc $0b16
+jmp $f07d
+.Text:
+; "Psycho Dash has been improved!"
+db $D6,$3C,$43,$80,$A3,$87,$AC,$87,$80,$A3,$AC,$D6,$70,$CB,$88,$8C,$A0,$A2,$8E,$A6,$84,$83,$4F,$AC,$C0
+
+SR_UseItemFriarUpgrade:
+cop #$BF : dw .Text
+inc $0b1c
+jmp $f07d
+.Text:
+; "Dark Friar has been improved!"
+db $D3,$D6,$0C,$45,$A2,$88,$80,$A2,$AC,$87,$80,$A3,$AC,$D6,$70,$CB,$88,$8C,$A0,$A2,$8E,$A6,$84,$83,$4F,$AC,$C0
+}
+
+
+org $83889e
+jsr SR_GetHerbHealAmount    ; Instead of lda #$0008, uses difficulty level to set heal amount.
+
+org $8388a4
+jmp $ffda
+
+org $8388ae
+db $c6 : dw $0002, $0aaa    ; <number>
+db $ac,$d6,$ae,$6d,$aca,$d6,$e7,$8e,$8d,$84,$0d,$ac,$ac
+
+
+org $838BA4
+SR_UseItemLolasMelody:
+{
+lda $0AD4 : beq +
+  jmp .NoFlute
++:
+jsl $82a10a : bcc +
+  rts
++:
+lda $0644 : cmp #$0015 : bne .NothingHappened
+.InItory:    ; org $838bd6
+cop #$D0 : db $40, $01 : dw .NothingHappened
+.DoPlaySong:    ; org $838bef
+lda #$0080 : tsb $09EC
+cop #$BF : dw $8C79
+phx
+ldx #$0000
+cop #$A5 : dl $839FCA : dw $0000, $2000
+cpy #$1FC0 : bne +
+  jmp ++
++:
+lda #$CFF0 : tsb $065A
+++:
+lda $0012,y : ora #$1000 : sta $0012,y
+lda #$0018 : sta $0026,y
+lda #$0001 : sta $0020,y
+plx
+rts
+.NothingHappened:
+cop #$BF : dw $8CDB
+rts
+.NoFlute:
+cop #$BF : dw $8F82
+rts
+}
+
+{
+org $838c35
+EFluteSongPlayer_PostLolasMelody:
+lda $0644 : cmp #$0015 : bne EFluteSongPlayer_PostLolasMelody_ButNothingHappened
+cop #$CC : db $40
+cop #$BF : dw Text_LayDownDatFunkCat
+cop #$D5 : db $09
+cop #$C5
+EFluteSongPlayer_PostLolasMelody_ButNothingHappened:
+cop #$BF : dw $8d05
+cop #$C5
+
+Text_LayDownDatFunkCat:
+db $D3,$4B,$80,$A9,$AC,$83,$8E,$A7,$8D,$AC,$83,$80,$A4,$AC,$85,$A5,$8D,$8A,$2B,$AC,$82,$80,$A4,$2A,$C0
+}
+
+org $838f17
+; item0d.bin, memory melody
+{
+lda $0ad4 : beq +
+  cop #$BF : dw $8f82
+  rts
++:
+lda $0644 : cmp #$0049 : beq +
+  bra ++
++:
+cop #$D0 : db $14,$01 : dw $8f7d
+cop #$45 : db $00,$00,$0f,$0f : dw $8f3b
+bra ++
+lda #$0080 : tsb $09ec
+cop #$BF : dw $8fcd
+phx
+ldx #$0000
+cop #$A5 : dl $839fca : db $00,$00 : dw $2000
+lda $0012,y : ora #$1000 : sta $0012,y
+lda #$001d : sta $0026,y
+lda #$0002 : sta $0020,y
+plx
+lda #$000e : sta $06f2
+rts
+
+cop #$D5 : db $0d
+cop #$3B : db $1b : dl $80b519
+cop #$CC : db $14
+cop #$C5
+
+++:
+cop #$BF : dw $8f98
+rts
+
+; "He doesn't have the Flute."
+db $D3,$47,$84,$AC,$D6,$84,$87,$80,$A6,$84,$CB,$A4,$87,$84,$AC,$45,$8B,$A5,$A4,$84,$2A,$C0
+
+; "Will began playing the melody he remembered. But nothing happened."
+db $D3,$67,$88,$8B,$8B,$AC,$81,$84,$86,$80,$8D,$AC,$D6,$C4,$A4,$87,$84,$AC,$CB,$D6,$B4,$87,$84,$AC,$A2,$84,$8C,$84,$8C,$81,$84,$A2,$84,$83,$2A,$AC,$CF,$41,$A5,$A4,$AC,$D6,$B9,$87,$80,$A0,$A0,$84,$8D,$84,$83,$2A,$C0
+
+; "Will began playing the melody he remembered."
+db $D3,$CE,$67,$88,$8B,$8B,$AC,$81,$84,$86,$80,$8D,$AC,$D6,$C4,$A4,$87,$84,$AC,$CB,$D6,$B4,$87,$84,$AC,$A2,$84,$8C,$84,$8C,$81,$84,$A2,$84,$83,$2A,$AC,$C0
+}
+
+org $839174
+rts   ; End Mu key use before excessive text.
+
+org $8391d7
+db $c0    ; Shorten Mu door text.
+
+org $8393a5
+; Magic Dust check.
+{
+lda $0644
+if !KaraLocation == 0
+cmp #$0013 : bne $08
+cop #$45 : db $0b,$0b,$0d,$0d
+elseif !KaraLocation == 1
+cmp #$0047 : bne $08
+cop #$45 : db $0b,$24,$0d,$26
+elseif !KaraLocation == 2
+cmp #$0074 : bne $08
+cop #$45 : db $07,$08,$09,$0a
+elseif !KaraLocation == 3
+cmp #$00a9 : bne $08
+cop #$45 : db $12,$06,$14,$08
+else
+cmp #$00bf : bne $08
+cop #$45 : db $1a,$10,$1c,$12
+endif
+}
+
+org $8393c3
+; Magic Dust sets unique flag
+db $8a
+
+org $839427
+SR_UseItemBlueJournal:
+cop #$BF : dw $944d
+cop #$BE : db $03,$01 : dw $9431
+  dw $9439
+  dw $943e, $9443, $9448
+cop #$BF : dw $94f0
+rts
+cop #$BF : dw $f210
+rts
+cop #$BF : dw $f800
+rts
+cop #$BF : dw $fb00
+rts
+
+
+org $83950c
+; Lance's letter
+{
+cop #$BF : dw Text_LancesLetter    ; $9514
+cop #$CC : db $8e
+rts
+
+Text_LancesLetter:
+; "Will, Kara is in"
+db $D3,$C2,$04,$D6,$5C,$D6,$26,$88,$A3,$AC,$88,$8D,$CB
+if !KaraLocation == 0   ; Edward's
+db $44,$83,$a7,$80,$a2,$83,$0e,$a3,$ac,$60,$a2,$88,$a3,$8e,$8d
+elseif !KaraLocation == 1   ; Mine
+db $43,$88,$80,$8c,$8e,$8d,$83,$ac,$4c,$88,$8d,$84
+elseif !KaraLocation == 2   ; Angel Village
+db $40,$8d,$86,$84,$8b,$ac,$66,$88,$8b,$8b,$80,$86,$84
+elseif !KaraLocation == 3   ; Kress
+db $4c,$a4,$2a,$ac,$4a,$a2,$84,$a3,$a3
+else   ; Angkor Wat
+db $40,$8d,$8a,$8e,$a2,$ac,$67,$80,$a4
+endif
+db $CB 
+; "        -Lance"
+db $AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$6D,$4B,$80,$8D,$82,$84,$C0
+}
+
+org $83983d
+; Teapot
+{
+cop #$BF : dw $9861
+lda $0644 : cmp #$001a : bne +
+  cop #$45 : db $07,$05,$17,$10 : dw DoUseTeapot
++:
+cop #$BF : dw $9880
+rts
+DoUseTeapot:
+cop #$BF : dw $9890
+cop #$D5 : db $19
+cop #$CC : db $2a
+rts
+}
+
+org $83997f
+SR_UseItemBlackGlasses:
+{
+cop #$BF : dw .TextPutOn
+cop #$CC : db $f5
+cop #$D5 : db $1c
+rts
+.TextPutOn:
+table "table_dialogue.txt",rtl
+db $d3
+db "Coolness intensifies!"
+db $c0
+}
+
+
+org $839b89
+; "which tiles are called when hieroglyph is placed"
+db !HieroItemTile1
+skip 4
+db !HieroItemTile2
+skip 4
+db !HieroItemTile3
+skip 4
+db !HieroItemTile4
+skip 4
+db !HieroItemTile5
+skip 4
+db !HieroItemTile6
+
+
+org $839CDC    ; In SR_UseItemAura, this is the not-Shadow branch.
+cop #$BF : dw TextShadowsFormUnlocked
+cop #$CC : db $b4
+rts
+TextShadowsFormUnlocked:
+table "table_dialogue.txt",rtl
+db $d3
+db $d6,$4c  ; "Shadow's "
+db "form unlocked!"
+db $c0
+warnpc $839ce1
+
+
+org $839d09
+; item25.bin, nominally Lola's letter but also includes 2+3 RJ items
+{
+cop #$CC : db $11
+cop #$D5 : db $25
+cop #$BF : dw Text_LolasLetter
+rts
+Text_LolasLetter:
+db $D3,$C2,$03,$D6,$5C,$48,$AC,$D6,$99,$A9,$8E,$A5,$AC,$D6,$BA,$A4,$8E,$CB
+db $8B,$84,$80,$A2,$8D,$AC,$4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$2A,$AC,$41,$88,$8B,$8B,$CB
+db $8A,$8D,$8E,$A7,$A3,$AC,$88,$A4,$2B,$AC,$D6,$20,$84,$8D,$82,$8B,$8E,$A3,$84,$83,$CB
+db $87,$88,$A3,$AC,$84,$A8,$A0,$8B,$80,$8D,$80,$A4,$88,$8E,$8D,$2A,$AC,$6D,$4B,$8E,$8B,$80,$CF
+db $C3,$00,$69,$8E,$A5,$AC,$8D,$8E,$A7,$AC,$D6,$A4,$4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$4F,$C0
+
+SR_UseItemTwoJewels:
+jsr SR_RemoveHeldItem
+sed
+  lda $0ab0 : clc : adc #$0002 : sta $0ab0
+cld
+cop #$BF : dw Text_TwoJewelsSent
+rts
+Text_TwoJewelsSent:
+db $D3,$22,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F,$C0
+
+SR_UseItemThreeJewels:
+jsr SR_RemoveHeldItem
+sed
+  lda $0ab0 : clc : adc #$0003 : sta $0ab0
+cld
+cop #$BF : dw Text_ThreeJewelsSent
+rts
+Text_ThreeJewelsSent:
+db $D3,$23,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F,$C0
+}
+
+
+org $839e9a
+; Father's Journal hiero text.
+db !HieroJournalText1,!HieroJournalText2,!HieroJournalText3
+db !HieroJournalText4,!HieroJournalText5,!HieroJournalText6
+
+org $839ea8
+db $cd : dl TextFathersJournalSubstitute
+db $c0
+
+
+org $839f30
+SR_UseItemCrystalRing:
+cop #$BF : dw .TextBlingBling
+cop #$CC : db $3e
+cop #$D5 : db $27
+rts
+.TextBlingBling:
+table "table_dialogue.txt",rtl
+db $d3
+db "Bling bling."
+db $c0
+
+org $839f5d
+; item28.bin, nominally the apple but also includes upgrade items
+{
+SR_UseItemApple:
+cop #$BF : dw .Text
+rts
+.Text:
+; "Great an apple."
+db $D3,$D6,$16,$80,$8D,$AC,$80,$A0,$A0,$8B,$84,$2A,$C0
+
+SR_UseItemHpUpgrade:
+cop #$BF : dw .Text
+inc $0aca
+jsr $fe70 : sta $0b22
+jsr $9fb2    ; jsr SR_RemoveHeldItem
+rts
+.Text:
+; "Your HP increased!"
+db $D3,$D6,$68,$47,$60,$AC,$88,$8D,$82,$A2,$84,$80,$A3,$84,$83,$4F,$C0
+
+SR_UseItemDefUpgrade:
+cop #$BF : dw .Text
+inc $0adc
+jsr $9fb2    ; jsr SR_RemoveHeldItem
+rts
+.Text:
+; "Your DEF increased!"
+db $D3,$D6,$68,$43,$44,$45,$AC,$88,$8D,$82,$A2,$84,$80,$A3,$84,$83,$4F,$C0
+}
+
+
+
+
+
+org $83b401
+;mapchoices.bin
+Lut_MapChoices:
+{
+.Pointers:
+{
+dw .Index00
+dw .Cape2Ed
+dw .Cape2It
+dw .Ed2Cape
+dw .It2Cape
+dw .MP2It
+dw .It2MP
+dw .Frja2Mn
+dw .Mn2Frja
+dw .Frja2X
+dw .Angl2Wtma
+dw .Wtma2X
+dw .Wtma2GtWl
+dw .GtWl2Wtma
+dw .Wtma2Euro
+dw .Euro2Wtma
+dw .Euro2Krss
+dw .Krss2Euro
+dw .NtVl2X
+dw .NtVl2AW
+dw .AW2NtVl
+dw .Angl2X
+dw .Dao2NtVl
+dw .Dao2Pymd
+dw .Pymd2Dao
+dw .NtVl2Dao
+dw .Euro2NtVl
+dw .Cape2X
+}
+; Continent SE.
+{
+.Index00:
+.Frja2Mn:
+.Mn2Frja:
+.Frja2X:
+.ContinentSE:
+cop #$BF : dw ..Text
+cop #$BE : db $53,$00 : dw ..Options
+cop #$C5
+..Options:
+dw OverworldMapChoices_Frej
+dw OverworldMapChoices_Frej
+dw OverworldMapChoices_Nzca
+dw OverworldMapChoices_Neil
+dw OverworldMapChoices_DCst
+dw OverworldMapChoices_Mine
+..Text:
+db $C2,$11,$D2,$00,$AC,$45,$A2,$84,$84,$89,$88,$80,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$42,$8E,$80,$A3,$A4
+db $CB
+db $AC,$4D,$80,$AA,$82,$80,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$4C,$88,$8D,$84
+db $CB
+db $AC,$D6,$37,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC
+db $CA
+}
+; Continent NE.
+{
+.Angl2Wtma:
+.Wtma2X:
+.Wtma2GtWl:
+.GtWl2Wtma:
+.Wtma2Euro:
+.Angl2X:
+.ContinentNE:
+cop #$BF : dw ..Text
+cop #$BE : db $32,$01 : dw ..Options
+cop #$C5
+..Options:
+dw OverworldMapChoices_Wtma
+dw OverworldMapChoices_Wtma
+dw OverworldMapChoices_GtWl
+dw OverworldMapChoices_Angl
+..Text:
+db $C2,$11,$D2,$00,$AC,$67,$80,$A4,$84,$A2,$8C,$88,$80,$AC,$AC,$AC,$AC,$D6,$01,$66,$88,$8B,$8B,$80,$86,$84
+db $CB
+db $AC,$D6,$16,$67,$80,$8B,$8B
+db $CA
+}
+; Continent N.
+{
+.Euro2Wtma:
+.Euro2Krss:
+.Krss2Euro:
+.NtVl2X:
+.NtVl2AW:
+.AW2NtVl:
+.NtVl2Dao:
+.Euro2NtVl:
+.ContinentNN:
+cop #$BF : dw ..Text
+cop #$BE : db $42,$01 : dw ..Options
+cop #$C5
+..Options:
+dw OverworldMapChoices_Euro
+dw OverworldMapChoices_Euro
+dw OverworldMapChoices_NtVl
+dw OverworldMapChoices_Kres
+dw OverworldMapChoices_Ankr
+..Text:
+db $C2,$11,$D2,$00,$AC,$44,$A5,$A2,$8E,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$4C,$A4,$2A,$AC,$64,$84,$8C,$A0,$8B,$84
+db $CB
+db $AC,$D7,$22,$AC,$AC,$AC,$D6,$04,$67,$80,$A4,$AC
+db $CA
+}
+; Continent NW.
+{
+.Dao2NtVl:
+.Dao2Pymd:
+.Pymd2Dao:
+.ContinentNW:
+cop #$BF : dw ..Text
+cop #$BE : db $02,$01 : dw ..Options
+cop #$C5
+..Options:
+dw OverworldMapChoices_Dao
+dw OverworldMapChoices_Dao
+dw OverworldMapChoices_Pymd
+..Text:
+db $C2,$11,$D2,$00,$AC,$43,$80,$8E
+db $CB
+db $AC,$D6,$3F
+db $CA
+}
+; Continent SW.
+{
+.Cape2Ed:
+.Cape2It:
+.Ed2Cape:
+.It2Cape:
+.MP2It:
+.It2MP:
+.Cape2X:
+.ContinentSW:
+cop #$BF : dw ..Text
+cop #$BE : db $53,$00 : dw ..Options
+cop #$C5
+..Options:
+dw OverworldMapChoices_Cape
+dw OverworldMapChoices_Cape
+dw OverworldMapChoices_Ed
+dw OverworldMapChoices_Moon
+dw OverworldMapChoices_Inca
+dw OverworldMapChoices_ItryS
+..Text:
+db $C2,$11,$D2,$00,$AC,$D6,$47,$42,$80,$A0,$84,$AC,$AC,$D6,$1E
+db $CB
+db $AC,$44,$83,$A7,$80,$A2,$83,$0E,$A3,$AC,$AC,$AC,$AC,$48,$A4,$8E,$A2,$A9
+db $CB
+db $AC,$D6,$31,$64,$A2,$88,$81,$84,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC
+db $CA
+}
+
+}
+
+
+org $83b955
+; mapdest.bin, where options in Lut_MapChoices take you
+OverworldMapChoices:
+{
+.Cape:
+cop #$67 : db $00,$02
+cop #$26 : db $01 : dw $0178,$0040 : db $03,$00,$43
+cop #$C5
+.Ed:
+cop #$67 : db $00,$01
+cop #$26 : db $0A : dw $01F8,$02C0 : db $00,$20,$34
+cop #$C5
+.ItryN:
+cop #$67 : db $00,$03
+cop #$26 : db $15 : dw $02D8,$02B0 : db $00,$00,$35
+cop #$C5
+.Moon:
+cop #$67 : db $00,$07
+cop #$26 : db $1A : dw $0150,$01A0 : db $00,$00,$22
+cop #$C5
+.Inca:
+cop #$67 : db $00,$07
+cop #$26 : db $1C : dw $0070,$0160 : db $00,$00,$22
+cop #$C5
+.DCst:
+cop #$67 : db $00,$0B
+cop #$26 : db $30 : dw $0048,$0020 : db $03,$00,$21
+cop #$C5
+.Frej:
+cop #$67 : db $00,$0B
+cop #$26 : db $32 : dw $0130,$0350 : db $00,$00,$45
+cop #$C5
+.Mine:
+cop #$67 : db $00,$0A
+cop #$26 : db $3E : dw $00A8,$03D0 : db $80,$00,$42
+cop #$C5
+.Neil:
+cop #$67 : db $00,$0B
+cop #$26 : db $49 : dw $0088,$00C0 : db $00,$00,$11
+cop #$C5
+.Nzca:
+cop #$67 : db $00,$0B
+cop #$26 : db $4B : dw $0120,$0080 : db $00,$00,$44
+cop #$C5
+.SeaP:
+cop #$67 : db $00,$02
+cop #$26 : db $5A : dw $0090,$0070 : db $83,$00,$14
+cop #$C5
+.Mu:
+cop #$67 : db $00,$02
+cop #$26 : db $5F : dw $0088,$0050 : db $07,$00,$44
+cop #$C5
+.Angl:
+cop #$67 : db $00,$12
+cop #$26 : db $69 : dw $02A0,$00C0 : db $00,$00,$13
+cop #$C5
+.Wtma:
+cop #$67 : db $00,$11
+cop #$26 : db $78 : dw $0278,$0390 : db $00,$00,$45
+cop #$C5
+.GtWl:
+cop #$67 : db $00,$13
+cop #$26 : db $82 : dw $0020,$0090 : db $87,$00,$18
+cop #$C5
+.Euro:
+cop #$67 : db $00,$18
+cop #$26 : db $91 : dw $03D0,$0430 : db $06,$00,$54
+cop #$C5
+.Kres:
+cop #$67 : db $00,$17
+cop #$26 : db $A0 : dw $02C8,$01B0 : db $86,$00,$23
+cop #$C5
+.NtVl:
+cop #$67 : db $00,$19
+cop #$26 : db $AC : dw $01C0,$01D0 : db $06,$00,$22
+cop #$C5
+.Ankr:
+cop #$67 : db $00,$1B
+cop #$26 : db $B0 : dw $01F8,$04C0 : db $80,$00,$54
+cop #$C5
+.Dao:
+cop #$67 : db $00,$1D
+cop #$26 : db $C3 : dw $0010,$00E0 : db $07,$00,$23
+cop #$C5
+.Pymd:
+cop #$67 : db $00,$1E
+cop #$26 : db $CC : dw $0010,$00D0 : db $87,$00,$44
+cop #$C5
+.Babl:
+cop #$67 : db $00,$1E
+cop #$26 : db $DE : dw $0078,$00C0 : db $00,$00,$11
+cop #$C5
+.ItryS:
+cop #$67 : db $00,$03
+cop #$26 : db $15 : dw $02D8,$0370 : db $00,$00,$45
+cop #$C5
+}
+
+
+org $83cf79
+if !SettingKeyRando == 1:
+nop : nop : sec    ; In key rando, don't auto-reward a flag if monster's already dead.
+endif
+
+
+org $83e03a
+nop : nop    ; Load Firebird assets in every map, in case Early Firebird is enabled.
+
+
+org $83ef97
+LR_GiveNormalItemA8OrSec:
+{
+php
+sep #$20
+bit #$80 : bne .IsStatOrPickup
+pha
+ldy #$0000
+.CheckInvSlotEmpty:
+lda $0AB4,y : bne ..NotEmpty
+jmp .GotEmptyInvSlot
+..NotEmpty:
+iny : cpy #$0010 : bne .CheckInvSlotEmpty
+jmp .InvFull
+
+.IsStatOrPickup:
+sec : sbc #$80 : beq .IsHpJewel   ; $80 or $87
+  dec : beq .IsStrJewel  ; $81 or $88
+  dec : beq .IsDefJewel  ; $82 or $89
+  dec : beq .IsSmallDp   ; $83
+  dec : beq .IsMediumDp  ; $84
+  dec : beq .IsBigDp     ; $85
+  ;dec : beq .IsHpPickup  ; $86
+.IsHpPickup:
+rep #$20
+lda #$0005 : clc : adc $0B22 : sta $0B22
+phd
+  txa : tcd
+  cop #$A5 : dl $80dd03 : dw $0000, $2F00    ; EHpPickupCounter
+pld
+cop #$06 : db $22
+jmp .ClcAndRtl
+.IsSmallDp:
+lda #$01 : bra .DoAwardDp
+.IsMediumDp:
+lda #$02 : bra .DoAwardDp
+.IsBigDp:
+lda #$05
+.DoAwardDp:
+rep #$20
+and #$00FF : clc : adc $0AD6 : cmp #$03E7 : bcc +
+  lda #$03E7
++:
+sta $0AD6
+cop #$06 : db $22
+bra .ClcAndRtl
+.IsHpJewel:
+lda #$80 : trb $09EC
+lda $0ACA : inc : sta $0ACA
+  sec : sbc $0ACE : sta $0B22
+ldy #$0000
+bra .ClcAndRtl
+.IsStrJewel:
+lda #$80 : trb $09EC
+inc $0ADE
+ldy #$0000
+bra .ClcAndRtl
+.IsDefJewel:
+lda #$80 : trb $09EC
+inc $0ADC
+ldy #$0000
+bra .ClcAndRtl
+
+.GotEmptyInvSlot:
+pla : sta $0AB4,y
+  sta $0DB8
+  stz $0DB9
+ldy #$FF1F
+.ClcAndRtl:
+plp
+clc
+rtl
+.InvFull:
+pla : sta $0DB8
+  stz $0DB9
+ldy #$FF02
+plp
+sec
+rtl
+}
+warnpc $83f08d
+
+org $83ffda
+sec
+sed
+lda $0aaa : sbc #$0001 : sta $0aaa
+cld
+bne +
+  jsr $9fb2
+  rts
++:
+lda #$0000 : sta $0ac6
+  dec : sta $0ac4
+rts
+
+
+org $83fe50
+SR_GetHerbHealAmount:
+lda $0B24 : beq +++
+  dec : beq ++
+  dec : beq +
+lda #$0004 : bra ++++
++:
+lda #$0006 : bra ++++
+++:
+lda #$0008 : bra ++++
++++:
+lda #$0028 ;: bra ++++
+++++:
+rts
+warnpc $83fe6e
+
+
+;org $83ffb1
+;J_83FFB1:
+;php
+;sep #$20
+;pha
+;cmp #$06 : bne B_83FFC9
+;jsl S_83F0B3 : bcc B_83FFCD
+;lda #$01 : sta $0AAA
+;stz $0AAB
+;lda #$06
+;B_83FFC9:    ; org $83ffc9
+;pla
+;jmp J_83EF9A
+;B_83FFCD:    ; org $83ffcd
+;sed
+;lda $0AAA : adc #$01 : sta $0AAA
+;pla
+;jmp J_83F074
+;warnpc $83ffda
+
+
+
+
+
+org $83fd70
+; rjm.bin, decrease health for RJM mode
+{
+pha
+lda #$0001 : bra +
+pha
+lda #$0002 : bra +
+pha
+lda #$0003
++:
+pha
+pha
+cop #$BF : dw Text_UseJewelRJM
+-:
+jsl LR_DecMaxHp   ; $83fda0
+pla : dec : beq +
+  pha : bra -
++:
+-:
+jsl LR_DecMaxHp   ; $83fda9
+pla : dec : beq +
+  pha : bra -
+pla
+jmp $83d9
+LR_DecMaxHp:
+lda $0aca : beq +
+  dec $0aca
++:
+rtl
+LR_DecCurHp:
+lda $0ace : beq +
+  dec $0ace
++:
+rtl
+LR_IncJewelCounter:
+sed
+clc
+lda $0ab0 : adc #$0001 : sta $0ab0
+cld
+rtl
+}
+
+org $83fdc0
+; startmenu.bin
+{
+pha
+cop #$D0 : db $F5,$01 : dw $fdd4
+cop #$D0 : db $F5,$01 : dw $fdd4   ; repetition is an IOGR bug.
+pla
+lda #$2EE1
+jmp $81d9
+; org $83ffd4, show room reward type
+phb
+lda #$7f00 : pha : plb : plb
+lda #$2ee1 : sta $0406
+inc : sta $0408
+inc : sta $0446
+lda #$6ee0 : sta $040c
+inc : sta $040a
+inc : sta $044c
+lda #$aee1 : sta $04c6
+inc : sta $04c8
+inc : sta $0486
+lda #$eee1 : sta $04cc
+inc : sta $04ca
+inc : sta $048c
+lda #$32e8 : sta $0448
+inc : sta $044a
+inc : sta $0488
+inc : sta $048a
+plb
+pla
+ldx #$0000
+dec : beq ++
+dec : beq +
+cop #$BD : dl $81ff90
+bra +++
++:
+cop #$BD : dl $81ff80
+bra +++
+++:
+cop #$BD : dl $81ff70
++++:
+jmp $8248
+}
+
+
+table "table_dialogue.txt",rtl
+org $83ff00
+Text_UseJewelOHKO:
+db $d3
+db "Will drops the HP Jewel.",$cb
+db "It shatters into a",$cb
+db "million pieces.",$cb
+db "Whoops."
+db $c0
+warnpc $83ff50
+org $83ff50
+Text_UseJewelRJM:
+db $d3
+db "As the Jewel disappears,",$cb
+db "Will feels his strength",$cb
+db "draining!"
+db $c0
+warnpc $83ff90
+
+org $83ff90
+pha
+lda $0b24 : bit #$02 : beq B1D
+lda $0a1e : bit #$80 : bne B18
+ora #$80 : sta $0a1e
+bra J21
+B18:
+eor #$80 : sta $0a1e
+B1D:
+pla
+jmp $F00C
+J21:
+pla
+rts
+
+;org $83ffb1
+php
+sep #$20
+pha
+cmp #$06 : bne B18
+jsl $83f0b3 : bcc B1C
+lda #$01 : sta $0aaa
+stz $0aab
+lda #$06
+B18:
+pla
+jmp $ef9a
+B1C:
+sed
+lda $0aaa : adc #$01 : sta $0aaa
+pla
+jmp $f074
+
+
+
+org $848377    ; Fisherman only appears at the east side of the docks.
+cop #$D0 : db $10,$01 : dw $83aa
+nop
+
+org $848468
+; Fisherman
+%MTryGiveItemAndFlag(!CapeFisherItem, $d7)
+rtl
+
+org $848a03
+db $10   ; Seth's house flag
+
+org $848a8c
+db $35 : dw $1000
+ECapeTeacher:
+lda #$0200 : tsb $12
+cop #$C0 : dw .OnInteract
+cop #$0B
+cop #$C1
+rtl
+.OnInteract:
+cop #$BF : dw .Text
+cop #$CC : db $38
+rtl
+.Text:
+db $d3
+if !StatuesRequiredCount == 0
+db "No statues required!"
+elseif !StatuesRequiredCount == 1
+db "You need Statue "
+else
+db "You need Statues ",$cb
+endif
+db "!TextTeacherStatuesString",$c0
+
+org $84922f
+cop #$C0 : dw TutorialNpcOnInteract
+
+org $84928a
+db $10   ; Lola flag 1
+
+org $849873
+db $10   ; Lola flag 2
+
+org $849985
+rtl      ; Skip Lola's Melody cutscene
+
+org $8499d8
+; Lola
+{
+cop #$D0 : db $35,$01 : dw LolaGotItem
+%MTryGiveItemAndFlag(!CapeLolaItem, $35)
+rtl
+LolaGotItem:
+cop #$BF : dw $9d94
+rtl
+}
+
+org $84b067
+db $10,$00   ; Disable Cape cave friend 1
+
+org $84b465
+db $10,$00   ; Disable Cape cave friend 2
+
+org $84b8b4
+cop #$D0 : db $10,$01 : dw $b962   ; Change Erik's code path in Cape
+org $84b968
+cop #$C0 : dw $b9a5    ; Change Erik's interaction in Cape
+
+org $84b9a5
+; seaside.bin, Erik's dialogue in Seaside Cave
+{
+ErikOnInteract:
+cop #$D0 : db $12,$01 : dw ErikAskWhere
+cop #$D0 : db $11,$01 : dw ErikSetTravelFlag
+cop #$BF : dw TextErikNoTravel
+rtl
+ErikSetTravelFlag:
+cop #$CC : db $12
+cop #$BF : dw TextErikFirstTravel
+ErikAskWhere:
+cop #$BF : dw TextErikWhereTravel
+cop #$BE : db $42,$01 : dw ErikTravelOptions
+ErikTravelOptions:
+dw ErikCancel
+dw ErikCancel,        ErikToWatermia
+dw ErikToDiamondCoast,ErikToSouthCape
+dw ErikToSouthCape    ; unused, does not appear due to 4x2 restriction
+ErikCancel:
+cop #$BF : dw TextErikCancel
+rtl
+ErikToWatermia:
+cop #$26 : db $78 : dw $0278,$0390 : db $00,$00,$45
+cop #$C5
+ErikToSeaPalace:
+cop #$26 : db $5a : dw $0090,$0070 : db $83,$00,$14
+cop #$C5
+ErikToDiamondCoast:
+cop #$26 : db $30 : dw $0048,$0110 : db $03,$00,$21
+cop #$C5
+ErikToSouthCape:
+cop #$26 : db $02 : dw $0070,$0080 : db $03,$00,$11
+cop #$C5
+TextErikNoTravel:
+db $C2,$0A,$C2,$03,$44,$A2,$88,$8A,$2F,$AC,$48,$AC,$82,$80,$8D,$AC,$D6,$9B,$63,$84,$A4,$87,$AC
+db $CB
+db $D6,$8E,$D6,$D6,$82,$80,$A6,$84,$2B,$AC,$81,$A5,$A4,$AC,$48,$AC
+db $CB
+db $D6,$82,$D6,$A4,$4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$2A
+db $C0
+TextErikFirstTravel:
+db $C2,$0A,$C2,$03,$44,$A2,$88,$8A,$2F,$AC,$4E,$87,$AC,$86,$A2,$84,$80,$A4,$2B,$AC,$A9,$8E,$A5,$AC,$D6,$A4
+db $CB
+db $4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$0D,$AC,$D6,$2B,$A3,$84,$84,$AC
+db $CB
+db $D6,$F7,$63,$84,$A4,$87,$AC,$88,$A3,$AC,$A3,$80,$A9,$88,$8D,$86,$4F,$AC,$CF,$CE,$C2,$0A,$C2,$05,$D5,$00,$63,$84,$A4,$87,$2F,$AC,$D6,$5C,$48,$AC,$82,$80,$8D,$AC,$D6,$E7
+db $CB
+db $A9,$8E,$A5,$AC,$80,$82,$A2,$8E,$A3,$A3,$AC,$A4,$87,$84,$AC,$A3,$84,$80,$2A,$2A,$2A,$AC
+db $C0
+TextErikWhereTravel:
+db $D3,$C2,$05,$D5,$00,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D
+db $CB
+db $AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$82,$8E,$80,$A3,$A4
+db $CB
+db $AC,$67,$80,$A4,$84,$A2,$8C,$88,$80,$AC,$AC,$AC,$AC,$D6,$47,$42,$80,$A0,$84
+db $CA
+TextErikUnusedJunk:
+db $8E,$A7,$84,$A2,$AC
+db $CB
+db $AC,$63,$84,$80,$AC,$D7,$93,$AC,$AC,$AC
+db $CA
+TextErikCancel:
+db $CE,$C2,$05,$D5,$00,$63,$84,$A4,$87,$2F,$AC,$D6,$63,$A4,$87,$80,$8D,$8A,$A3,$AC,$85,$8E,$A2
+db $CB
+db $8D,$8E,$A4,$88,$82,$88,$8D,$86,$AC,$8C,$84,$2A,$2A,$2A,$AC,$AC,$AC
+db $C0
+}
+
+org $84bca9
+db $10   ; Will's house flag 1
+
+org $84bccc
+db $10   ; Will's house flag 2
+
+org $84bcda
+db $10   ; Lance's house flag
+
+org $84bce8
+db $10   ; Erik's house flag
+
+org $84bcf6
+db $10   ; Seaside cave flag another one
+
+org $84be3d
+db $10   ; Seaside cave flag
+
+org $84c20e
+%MTryGiveItemAndFlag(!ECHiddenGuardItem, $d8)
+rtl
+
+org $84c3d4
+cop #$C0 : dw $c406    ; Skip first half of Edward interaction
+
+org $84c4fb
+; edward.bin, Edward's dialogue
+{
+db $D3,$46,$8E,$AC,$A4,$8E,$AC,$89,$80,$88,$8B,$2A
+db $CB
+db $46,$8E,$AC,$83,$88,$A2,$84,$82,$A4,$8B,$A9,$AC,$A4,$8E,$AC,$89,$80,$88,$8B,$2A,$CF,$43,$8E,$AC,$8D,$8E,$A4,$AC,$A0,$80,$A3,$A3,$AC,$46,$8E,$2A
+db $CB
+db $43,$8E,$AC,$8D,$8E,$A4,$AC,$82,$8E,$8B,$8B,$84,$82,$A4,$AC,$22,$20,$20
+db $CB
+db $83,$8E,$8B,$8B,$80,$A2,$A3,$2A
+db $C0
+}
+
+org $84c6af    ; edward2.bin, Edward interaction QoL
+cop #$9C : dl $84c721 : dw $2000
+cop #$0C
+cop #$C0 : dw $0000
+cop #$85 : db $20, $04, $12
+cop #$8A
+cop #$86 : db $1f, $04, $12
+cop #$8A
+cop #$81 : db $20,$12
+cop #$89
+cop #$80 : db $1c
+cop #$89
+lda #$0800 : trb $10
+bra +
+nop : nop
++:
+cop $CC : db $0b
+cop #$D2 : db $0c,$01
+cop #$DA : db $0b
+
+org $84c746
+db $10    ; Don't set a flag upon talking to Edward
+
+org $84caf5   ; Castle guard top floor text
+db $d3
+db "!SpoilerTextCastleGuard"
+db $c0
+
+org $84d0da
+; Castle basement barrel
+{
+cop #$C0 : dw CastleBasementBarrelInteract
+cop #$C1
+rtl
+CastleBasementBarrelInteract:
+cop #$D0 : db $46,$00 : dw CastleBasementBarrelGiveItem
+cop #$E0
+CastleBasementBarrelGiveItem:
+%MTryGiveItemAndFlag(!ECBasementItem, $46)
+rtl
+}
+
+org $84d1a0
+; castleguard.bin, the jailer's dialogue
+{
+cop #$C0 : dw $d1ce
+cop #$BC : db $00,$08
+---:
+cop #$0B
+cop #$0D : db $00,$01
+cop #$0D : db $00,$FF
+cop #$D2 : db $01,$01
+cop #$0C
+cop #$10 : db $10,$3b
+cop #$10 : db $10,$3c
+lda #$0008 : sta $09b2
+cop #$DA : db $1d
+cop #$CE : db $01
+bra ---
+cop #$BF : dw $d1d6
+cop #$CC : db $01
+rtl
+db $C2,$0B,$64,$87,$88,$A3,$AC,$88,$A3,$AC,$A4,$87,$84,$AC,$A0,$A2,$88,$A3,$8E,$8D,$2A
+db $CB
+db $48,$8D,$8D,$8E,$82,$84,$8D,$A4,$A3,$AC,$D6,$78,$84,$8D,$A4,$84,$A2,$2A
+db $C0
+}
+
+; Several tweaks to skip the prison cell cutscene.
+org $84d209
+dw $d234
+org $84d22a
+bra $02
+org $84d329
+; Hamlet
+%MTryGiveItemAndFlag(!EDHamletItem,$23)
+cop #$D0 : db $23,$01 : dw HamletItemGiverDie
+rtl
+HamletItemGiverDie:
+cop #$E0
+org $84db15
+cop #$E0
+
+org $84dc5e
+db $d3,$60,$8b,$84,$80,$a3,$84,$2a,$2a,$2a,$ac,$d7,$ad,$cb,$63,$8c,$80,$a3,$87,$4c,$80,$8d,$88,$80,$82,$ac,$48,$0e,$8c,$ac,$d6,$fd,$cb,$85,$8e,$a2,$ac,$87,$88,$8c,$2a,$2a,$2a,$c0
+
+org $84e2a3
+; itory.bin, modified itory entrance handler
+{
+db $00 : dw $3000
+cop #$45 : db $20,$30,$40,$40 : dw $e2b0
+cop #$E0
+cop #$C1
+cop #$D0 : db $40,$01 : dw $e2bf
+cop #$40 : dw $0f01 : dw $e396
+rtl
+lda #$1000 : tsb $10
+lda #$eff0 : tsb $065a
+sep #$20
+lda #$80 : sta $2130
+rep #$20
+cop #$3C : dl $80b7ce
+cop #$DA : db $7f
+cop #$CC : db $01
+cop #$CA : db $10
+lda $06c2 : sec : sbc #$0010 : sta $06c2
+ldy $09aa
+lda $0016,y : sec : sbc #$0010 : sta $0016,y
+lda $16 : sec : sbc #$0010 : sta $16
+cop #$CB
+lda #$0300 : sta $06dc
+cop #$CE : db $01
+cop #$DA : db $3b
+cop #$3C : dl $80b7d8
+cop #$DA : db $9d
+cop #$DA : db $59
+lda #$eff0 : trb $065a
+lda #$0800 : tsb $10
+cop #$82 : db $1e,$11
+cop #$89
+cop #$81 : db $21,$01
+cop #$89
+cop #$86 : db $1e,$02,$01
+cop #$8A
+lda #$cff0 : trb $065a
+cop #$85 : db $21,$06,$01
+cop #$8A
+cop #$82 : db $1e,$11
+cop #$89
+cop #$85 : db $21,$02,$01
+cop #$8A
+cop #$86 : db $1f,$06,$12
+cop #$8A
+cop #$81 : db $21,$11
+cop #$89
+cop #$80 : db $1d
+cop #$89
+lda #$0800 : trb $10
+cop #$D2 : db $04,$01
+lda #$0001 : jsl $80c6e4
+cop #$80 : db $1a
+cop #$89
+cop #$BF : dw $e53c
+lda #$0800 : tsb $10
+cop #$86 : db $1f,$02,$12
+cop #$8A
+cop #$86 : db $1f,$04,$12
+cop #$8A
+cop #$E0
+cop #$45 : db $2c,$36,$2f,$39 : dw $e3a7
+cop #$66 : dw $00c0,$02c0 : db $01
+cop #$C1
+rtl
+}
+
+org $84e5a6
+db $6f    ; Lilly change 1
+org $84e5ac
+dw $e5ff  ; Lilly changes 2
+cop #$0B
+rtl
+
+org $84e5ff
+; lilly.bin, Lilly NPC
+{
+cop #$D6 : db $17 : dw $e60c
+cop #$BF : dw $e617
+rtl
+cop #$CC : db $37
+cop #$CC : db $6f
+cop #$D5 : db $17
+cop #$BF : dw $e653
+rtl
+db $C2,$0B,$C2,$02,$D6,$2A,$48,$AC,$D7,$7A,$A4,$87,$84,$AC,$8D,$84,$82,$8A,$8B,$80,$82,$84
+db $CB
+db $4B,$80,$8D,$82,$84,$AC,$86,$80,$A6,$84,$AC,$8C,$84,$4F,$AC,$48,$AC,$D6,$91
+db $CB
+db $A3,$8E,$AC,$80,$A7,$85,$A5,$8B,$2A,$2A,$2A,$AC,$AC,$AC,$AC,$AC
+db $C0
+db $C2,$0B,$C2,$02,$D6,$2A,$4E,$87,$2B,$AC,$A9,$8E,$A5,$AC,$D6,$8F,$8C,$A9
+db $CB
+db $8D,$84,$82,$8A,$8B,$80,$82,$84,$4F,$AC,$D6,$58,$A9,$8E,$A5,$AC,$A3,$8E
+db $CB
+db $8C,$A5,$82,$87,$4F,$AC,$AC,$CF,$CE,$C2,$02,$4B,$84,$A4,$AC,$8C,$84,$AC,$89,$8E,$88,$8D,$AC,$A9,$8E,$A5,$2B,$AC,$48,$AC,$8C,$80,$A9,$AC,$81,$84
+db $CB
+db $8E,$85,$AC,$87,$84,$8B,$A0,$AC,$83,$8E,$A7,$8D,$AC,$A4,$87,$84,$AC,$A2,$8E,$80,$83,$4F
+db $C0
+db $CE,$C2,$02,$4B,$84,$A4,$AC,$8C,$84,$AC,$A0,$80,$82,$8A,$AC,$8C,$A9,$AC,$A4,$87,$88,$8D,$86,$A3,$2B
+db $CB
+db $D6,$1F,$85,$8B,$A9,$AC,$D6,$A1,$D6,$FE,$A0,$8E,$82,$8A,$84,$A4
+db $CB
+db $D6,$F6,$D6,$FF,$8D,$8E,$A4,$AC,$D6,$AB,$2F,$6F
+db $C0
+}
+
+org $84e933
+db $10   ; Itory elder is always visible
+
+org $84e97a
+cop #$BF : dw $e9ff    ; Itory elder just talks upon interaction
+rtl
+
+org $84e9ff
+TextSpoilerItoryElder:
+db $d3
+db "!SpoilerTextItoryElder"
+db $c0
+
+org $84f373
+; Itory cave statue
+%MTryGiveItemAndFlag(!ItoryCaveItem, $2d)
+rtl
+
+org $84f441
+db $00 : dw $3000
+EMoonTribeExit:    ; re-purposed Lilly code
+cop #$45 : db $14,$1c,$17,$1d : dw .DoExit
+rtl
+.DoExit:
+cop #$66 : dw $0090,$0260 : db $01
+cop #$C1
+rtl
+
+org $84fadf
+; Moon Tribe cave statue
+%MTryGiveItemAndFlag(!MoonTribeCaveItem, $48)
+rtl
+
+org $84fb50
+; tutorial.bin, NPC who gives tutorial book
+{
+TutorialNpcOnInteract:
+cop #$BF : dw $fb80
+cop #$BE : db $02,$01 : dw $fb5a
+dw $fb60
+dw $fb60
+dw $fb65
+cop #$BF : dw $fba0
+rtl
+cop #$D6 : db $15 : dw $fb79
+cop #$D4 : db $15 : dw $fb74
+cop #$BF : dw $fbf0
+rtl
+cop #$BF : dw $fc10
+rtl
+cop #$BF : dw $fbd0
+rtl
+db $ff,$ff   ; padding
+db $D3,$67,$80,$8D,$A4,$AC,$80,$AC,$A4,$A5,$A4,$8E,$A2,$88,$80,$8B,$0D
+db $CB
+db $AC,$4D,$8E
+db $CB
+db $AC,$69,$84,$A3
+db $CA
+db $FF,$FF,$FF,$FF,$FF   ; padding
+db $CE,$D6,$69,$A2,$88,$86,$87,$A4,$AB,$AC,$A2,$84,$80,$83,$88,$8D,$86,$0E,$A3,$AC
+db $CB
+db $85,$8E,$A2,$AC,$8D,$84,$A2,$83,$A3,$2A
+db $C0
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF   ; padding
+db $CE,$69,$8E,$A5,$AC,$80,$8B,$A2,$84,$80,$83,$A9,$AC,$D6,$98,$8E,$8D,$84,$4F,$AC
+db $CB
+db $46,$A2,$84,$84,$83,$A9,$2A,$2A,$2A
+db $C0
+db $FF   ; padding
+db $CE,$69,$8E,$A5,$AC,$86,$8E,$A4,$AC,$A4,$87,$84,$AC,$41,$8B,$A5,$84,$AC,$49,$8E,$A5,$A2,$8D,$80,$8B,$4F
+db $C0
+db $FF,$FF,$FF,$FF,$FF   ; padding
+db $CE,$D6,$68,$88,$8D,$A6,$84,$8D,$A4,$8E,$A2,$A9,$0E,$A3,$AC,$85,$A5,$8B,$8B,$AB,$AC
+db $CB
+db $8C,$80,$A4,$84,$2A
+db $C0
+}
+
+
+
+
+
+org $858188
+nop : nop : nop : nop    ; Don't lock out Castoth on gold ship
+
+org $8583c9
+db $80,$0a    ; Gold Ship ladder NPC spawns away from ladder
+
+org $8583cb
+db $10   ; Gold Ship ladder NPC checks for Mystic Statue get
+
+org $8584a9
+; goldship.bin
+{
+EGoldShipPilot_OnInteract:
+cop #$BF : dw Text_GoldShipOfferTravel
+cop #$BE : db $02,$01 : dw .Options
+.Options:
+  dw .SayNo
+  dw .SayNo, .SayYes
+.SayNo:
+cop #$BF : dw Text_GoldShipDeclineTravel
+rtl
+.SayYes:
+cop #$26 : db $30 : dw $0048,$0110 : db $03,$00,$21
+cop #$C5
+Text_GoldShipOfferTravel:    ; "Ready to set sail?" etc.
+db $D3,$62,$84,$80,$83,$A9,$AC,$A4,$8E,$AC,$A3,$84,$A4,$AC,$A3,$80,$88,$8B,$0D,$CB
+db $AC,$4D,$8E,$CB
+db $AC,$69,$84,$A3,$CA
+Text_GoldShipDeclineTravel:    ; "Come back when you're ready"
+db $CE,$D6,$09,$D6,$73,$D6,$F6,$CB
+db $D6,$FF,$A2,$84,$80,$83,$A9,$2A,$C0
+Text_GoldShipCantTravel:    ; "I'd offer you passage, but" etc.
+db $D3,$48,$0E,$83,$AC,$8E,$85,$85,$84,$A2,$AC,$A9,$8E,$A5,$AC,$A0,$80,$A3,$A3,$80,$86,$84,$2B,$AC,$81,$A5,$A4,$CB
+db $80,$AC,$D6,$9C,$8C,$8E,$8D,$A3,$A4,$84,$A2,$AC,$88,$A3,$AC,$82,$A5,$A4,$A4,$88,$8D,$86,$CB
+db $8E,$85,$85,$AC,$80,$82,$82,$84,$A3,$A3,$AC,$A4,$8E,$AC,$8C,$A9,$AC,$A3,$87,$88,$A0,$2A,$C0
+
+EGoldShipPilotAlternate:
+db $02 : dw $1000
+cop #$0B
+cop #$C0 : dw EGoldShipPilot_OnInteract
+rtl
+}
+
+org $8586a3   ; Map transition upon sleeping in Inca ship
+cop #$26 : db $30 : dw $0048,$0020 : db $03,$00,$21
+
+org $858a04
+dw $0010 ; Gold Ship queen flag
+
+org $858a1f
+db $10   ; Gold Ship queen flag
+
+org $858a29
+db $10   ; Gold Ship queen flag
+
+org $858ac0   ; Gold Ship queen text
+db $d3
+db "!SpoilerTextGoldShipQueen"
+db $c0
+
+org $859643
+db $10,$00    ; "Seth" actor flag
+
+org $859652
+%MTryGiveItemAndFlag(!MPGoldShipItem, $e0)
+rtl
+
+org $85aa9e
+; Re-purpose Coast Kara as an overworld exit.
+{
+db $00 : dw $3000
+cop #$45 : db $03,$00,$06,$01 : dw CoastKaraTryExit
+rtl
+CoastKaraDoExit:
+cop #$66 : dw $0250,$0350 : db $07
+cop #$C1
+rtl
+}
+
+org $85ad6b
+db $d3
+db "!SpoilerTextDiamondCoast"
+db $c0
+
+org $85b6d2
+%MTryGiveItemAndFlag(!FrejEastSlaverItem, $e1)
+rtl
+
+org $85b880
+FrejSnitchSlaverInteraction:
+cop #$BF : dw TextFrejSnitchGreeting
+cop #$BE : db $02,$02 : dw .HaveYouSeenOptions
+.HaveYouSeenOptions:
+  dw ..SayNo, ..SayYes, ..SayNo
+..SayNo:
+cop #$BF : dw TextFrejSayNotSeen
+rtl
+..SayYes:
+cop #$BF : dw TextFrejSaySeen
+cop #$BE : db $02,$02 : dw .TellWhereOptions
+.TellWhereOptions:
+  dw ..SayNo, ..SayYes, ..SayNo
+..SayNo:
+cop #$BF : dw $b9cb
+rtl
+..SayYes:
+cop #$D0 : db $59,$00 : dw .PlayerDoesNotKnow
+%MTryGiveItemAndFlag(!FrejSnitchItem, $5a)
+cop #$D0 : db $5a,$00 : dw .InvFull
+cop #$CC : db $5a
+lda #$eff0 : tsb $065a
+.InvFull:
+rtl
+.PlayerDoesNotKnow:
+cop #$BF : dw $b9af
+rtl
+TextFrejSnitchGreeting:
+db $d3
+db "A 'FRIEND' escaped.",$cb
+db "Have you seen him?",$cb
+db " Yes",$cb
+db " No",$ca
+TextFrejSayNotSeen:
+db $ce
+db "Useless.",$c0
+TextFrejSaySeen:
+db $ce
+db "I'll give you something",$cb
+db "if you tell me where.",$cb
+db " Yes, I'm a bad person",$cb
+db " Snitches get stitches yo",$ca
+warnpc $85ba0c
+
+org $85bfdb
+dw $bfde    ; Slave text target
+
+
+
+org $85cf31
+EFreejiaBin2_OnInteract:
+cop #$D0 : db $53,$01 : dw .GotItemAlready
+%MTryGiveItemAndFlag(!FrejBin2Item, $53)
+.GotItemAlready:
+rtl
+
+org $85cf85
+{
+db $25 : dw $1000
+EFreejiaBin1:
+lda #$0200 : tsb $12
+cop #$C0 : dw .OnInteract
+cop #$0B
+cop #$C1
+rtl
+.OnInteract:
+cop #$D0 : db $54,$01 : dw .GotItemAlready
+%MTryGiveItemAndFlag(!FrejBin1Item, $54)
+.GotItemAlready:
+rtl
+}
+
+org $85d223
+if !KaraLocation != 1
+db $28
+else
+db $1a
+endif
+dw $1000
+EMineSam:
+nop : nop : nop : nop : nop : nop
+lda #$0200 : tsb $12
+cop #$0B
+if !KaraLocation != 1
+cop #$9C : dl $85D49E : dw $0100   ; slave chain
+cop #$C0 : dw $D299
+else
+cop #$C1
+jmp $D24B
+endif
+
+org $85d24f
+rtl   ; No singing Sam.
+
+org $85d2a4
+%MTryGiveItemAndFlag(!MineSamItem, $5e)
+rtl
+
+org $85d4d0
+EMorgueItemPickup_OnInteract:
+cop #$D0 : db $5d,$01 : dw .GotItemAlready
+%MTryGiveItemAndFlag(!MineMorgueItem, $5d)
+.GotItemAlready:
+cop #$E0
+
+org $85d62d
+; Allow Mine DS to contain an ability.
+cop #$9C : dl $88d6ac : dw $2b00
+lda $0e : sta $24
+lda #$2000 : sta $0e
+cop #$E0    ; Possibly unsafe?
+
+org $85d796
+cop #$CC : db $05   ; Use temp flag to trigger caved-in miner.
+
+org $85d7cb
+{  ; Caved-in slave miner.
+cop #$BC : db $08,$00
+lda #$2000 : tsb $10
+cop #$80 : db $0c
+cop #$89
+cop #$D2 : db $05,$01
+lda #$2000 : trb $10
+lda #$eff0 : tsb $065a
+cop #$DA : db $77
+cop #$CE : db $00
+%MTryGiveItemAndFlag(!MineWallSlaveItem, $d9)
+lda #$EFF0 : trb $065A
+lda #$0080 : tsb $09EC
+cop #$86 : db $0D, $08, $01
+cop #$8A
+lda #$0080 : trb $09EC
+cop #$E0
+}
+
+org $85d89a
+; neilscottage.bin, Neil in his cottage
+{
+db $13 : dw $1000
+cop #$0B
+cop #$C0 : dw $d8a6
+cop #$C1
+rtl
+cop #$D0 : db $15,$01 : dw $d8be
+cop #$D0 : db $14,$01 : dw $d8b7
+cop #$BF : dw $d909
+rtl
+cop #$CC : db $15
+cop #$BF : dw $d99f
+cop #$BF : dw $d9da
+cop #$BE : db $53,$01 : dw $d8c8
+dw $d8d4
+dw $d8d4
+dw $d8d9
+dw $d8e5
+dw $d8f1
+dw $d8fd
+cop #$BF : dw $da24
+rtl
+cop #$26 : db $95 : dw $0260,$0080 : db $03,01,13
+cop #$C5
+cop #$26 : db $C8 : dw $0078,$00C0 : db $00,00,11
+rtl
+db $C5 ; bug and/or padding
+cop #$26 : db $49 : dw $0088,$00C0 : db $00,00,11
+cop #$C5
+cop #$26 : db $DE : dw $0078,$00C0 : db $00,00,11
+rtl
+db $C5 ; bug and/or padding
+db $C2,$0A,$C2,$06,$D6,$36,$D6,$1C,$D7,$39,$48,$0E,$83,$AC,$8B,$8E,$A6,$84,$CB
+db $A4,$8E,$AC,$D6,$E7,$A9,$8E,$A5,$AC,$A5,$A0,$AC,$88,$8D,$AC,$8C,$A9,$CB
+db $A0,$8B,$80,$8D,$84,$2B,$AC,$81,$A5,$A4,$2A,$2A,$2A,$AC,$AC,$AC
+db $CF
+db $D7,$01,$48,$AC,$85,$8E,$A2,$86,$8E,$A4,$AC,$87,$8E,$A7,$CB
+db $A4,$8E,$AC,$85,$8B,$A9,$AC,$88,$A4,$4F,$AC,$D6,$1D,$D7,$95,$CB
+db $A1,$A5,$88,$A4,$84,$AC,$84,$8C,$81,$80,$A2,$A2,$80,$A3,$A3,$88,$8D,$86,$2A,$2A,$2A,$AC,$AC
+db $CF
+db $67,$88,$A3,$87,$AC,$D6,$D9,$A7,$80,$A3,$AC,$80,$AC,$A7,$80,$A9,$AC,$A4,$8E,$CB
+db $89,$8E,$86,$AC,$8C,$A9,$AC,$8C,$84,$8C,$8E,$A2,$A9,$2A,$2A,$2A,$AC,$AC,$AC,$AC
+db $C0
+db $C2,$0A,$C2,$06,$D6,$36,$D6,$1C,$48,$AC,$A2,$84,$8C,$84,$8C,$81,$84,$A2,$AC,$87,$8E,$A7,$CB
+db $A4,$8E,$AC,$A0,$88,$8B,$8E,$A4,$AC,$8C,$A9,$AC,$A0,$8B,$80,$8D,$84,$4F,$AC,$64,$87,$80,$8D,$8A,$A3,$CB
+db $80,$AC,$8B,$8E,$A4,$4F,$AC,$AC,$AC
+db $C0
+db $D3,$C2,$06,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D,$CB
+db $AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$37,$AC,$AC,$AC,$CB
+db $AC,$44,$A5,$A2,$8E,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$41,$80,$81,$84,$8B,$AC,$64,$8E,$A7,$84,$A2,$AC,$CB
+db $AC,$43,$80,$8E,$AC,$AC,$AC
+db $CA
+db $CE,$C2,$06,$48,$AC,$A4,$A2,$80,$A6,$84,$8B,$AC,$D7,$92,$A2,$84,$86,$A5,$8B,$80,$A2,$8B,$A9,$CB
+db $81,$84,$A4,$A7,$84,$84,$8D,$AC,$8C,$A9,$AC,$A0,$8B,$80,$82,$84,$2B,$AC,$44,$A5,$A2,$8E,$2B,$CB
+db $80,$8D,$83,$AC,$43,$80,$8E,$2A,$AC,$D6,$09,$A6,$88,$A3,$88,$A4,$AC,$8C,$84,$CB
+db $80,$8D,$A9,$A4,$88,$8C,$84,$4F
+db $C0
+}
+
+org $85e305
+db $00 : dw $3000    ; Neil's invention converted to overworld exit
+cop #$45 : db $07,$0d,$0a,$0e : dw NeilsCottageDoExit
+rtl
+NeilsCottageDoExit:
+cop #$66 : dw $0270,$0270 : db $07
+cop #$C1
+rtl
+
+
+org $85e647
+; nazca.bin, the tile that ports you to the sky
+{
+db $00 : dw $3000
+cop #$9C : dl $85e7d0 : dw $2000
+cop #$D2 : db $10,$01
+cop #$C0 : dw $e6ad
+cop #$D2 : db $0f,$01
+lda #$eff0 : tsb $065a
+lda #$00e0 : sta $7f0010,x
+cop #$CA : db $08
+lda $7f0010,x
+  sep #$20
+    sta $2132
+  rep #$20
+  inc : sta $7f0010,x
+cop #$DA : db $01
+cop #$CB
+cop #$C1
+cop #$C1
+cop #$C1
+cop #$C1
+cop #$C1
+cop #$9C : dl $85e7a6 : dw $0300
+cop #$DA : db $3b
+cop #$C1
+cop #$C1
+lda #$0404 : sta $064a
+cop #$26 : db $4c : dw $0168,$0040 : db $83,$00,$22
+cop #$C1
+rtl
+
+cop #$BF : dw $e721
+cop #$BE : db $02,$01 : dw $e6b7
+  dw $e6bd
+  dw $e6bd,$e6c1
+cop #$BF : dw $e6c6
+rtl
+
+db $CE,$D6,$63,$8E,$8A,$80,$A9,$2A
+db $C0
+db $A4,$88,$8B,$84,$AC,$81,$A5,$A2,$88,$84,$83
+db $CB
+db $88,$8D,$AC,$A4,$87,$84,$AC,$A3,$80,$8D,$83,$2A,$2A,$2A,$CF,$D6,$61,$67,$88,$8B,$8B,$0E,$A3,$AC,$45,$8B,$A5,$A4,$84,$AC,$CB,$A4,$8E,$A5,$82,$87,$84,$83,$AC,$88,$A4,$2B,$AC,$D6,$D9,$CB,$A7,$80,$A3,$AC,$80,$AC,$A2,$A5,$8C,$81,$8B,$88,$8D,$86,$AC,$A3,$8E,$A5,$8D,$83,$4F,$C3,$00
+db $C0
+db $D3,$67,$80,$A2,$A0,$AC,$A4,$8E,$AC,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$0D
+db $CB
+db $AC,$69,$84,$A3
+db $CB
+db $AC,$4D,$8E
+db $CA
+}
+
+org $85e80c
+; Nazca exit to world map at edges.
+cop #$66 : dw $0310,$0290 : db $07
+cop #$C1
+rtl
+
+org $85f356
+; skygarden.bin, "Allow travel from Sky Garden to other locations"
+{
+db $3c : dw $1000
+lda #$0200 : tsb $12
+cop #$D0 : db $2a,$01 : dw $f367
+cop #$E0
+
+rtl
+
+cop #$C0 : dw $f375
+cop #$0B
+cop #$C1
+cop #$80 : db $3C : cop #$89
+rtl
+
+cop #$BF : dw $f3bf
+cop #$BE : db $42,$01 : dw $f47f
+  dw $f38d
+  dw $f38d,$f464
+  dw $f482,$f491
+  dw $f491,$f4a0
+
+cop #$BF : dw $f392
+rtl
+
+db $CE,$4A,$A5,$AC,$8A,$A5,$AC,$8A,$A5,$2A,$2A,$2A,$C0
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+
+db $00 : dw $3000
+cop #$45 : db $15,$03,$18,$05 : dw $f420
+rtl
+
+db $00,$00,$00,$00,$00
+
+db $D3,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D
+db $CB
+db $AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$4C,$8E,$8E,$8D,$AC,$64,$A2,$88,$81,$84
+db $CB
+db $AC,$4D,$80,$AA,$82,$80,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$63,$84,$80,$AC,$D7,$93
+db $CA
+db $88,$8B,$8B,$80,$86,$84
+db $CB
+db $AC,$4D,$80,$A4,$88,$A6,$84,$A3,$0E,$AC,$AC,$AC,$AC,$AC,$AC
+db $CA
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+
+cop #$40 : dw $0800 : dw $f427
+rtl
+
+cop #$66 : dw $0300,$0290 : db $07
+cop #$C1
+rtl
+
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00
+
+db $3C : dw $1000
+lda #$0200 : tsb $12
+cop #$D0 : db $2a,$01 : dw $f367
+cop #$E0
+rtl
+
+cop #$26 : db $4b : dw $0120,$0080 : db $00,$00,$44
+stz $0ad4
+cop #$C5
+
+cop #$26 : db $ac : dw $01c0,$01d0 : db $06,$00,$22
+stz $0ad4
+cop #$C5
+
+cop #$26 : db $1a : dw $0110,$00d0 : db $03,$00,$22
+stz $0ad4
+cop #$C5
+
+cop #$26 : db $5a : dw $0090,$0070 : db $83,$00,$14
+stz $0ad4
+cop #$C5
+
+cop #$26 : db $cc : dw $0010,$00d0 : db $87,$00,$44
+stz $0ad4
+cop #$C5
+
+}
+
+
+org $85fed2
+TurboOnInteract:
+{
+cop #$CC : db $01
+cop #$D0 : db $11,$01 : dw .CanTravel
+.NoTravel:
+cop #$BF : dw .TextNoTravel
+rtl
+.CanTravel:
+cop #$D0 : db $12,$01 : dw .OfferTravel
+..FirstTravel:
+cop #$CC : db $12
+cop #$BF : dw .TextFirstTravel
+.OfferTravel:
+jml ErikAskWhere
+.TextNoTravel:
+db $d3
+db "Woof woof!",$cb
+db "(You don't happen to",$cb
+db "know Morse Code, do you?)",$c0
+.TextFirstTravel:
+db $d3
+db "Woof woof!",$cb
+db "(Oh good, you know Morse",$cb
+db "Code. Let's see what",$cb
+db "Seth's up to!)",$c0
+}
+
+
+
+org $8686fa
+db $10   ; Lilly at Seaside Palace flag
+
+org $868af5
+%MTryGiveItemAndFlag(!SeaPalBuffyItem, $85)
+rtl
+
+org $868b01
+rtl   ; Shorten Seaside NPC item get
+
+org $869167
+db $d3
+db "!SpoilerTextSeaPalCoffin"
+db $c0
+
+org $86922b
+; Coffin gets special handling due to Lilly and a 2-byte flag.
+lda.w #!SeaPalCoffinItem : jsl LR_GiveAnyItemA16OrSec
+bcs +
+jmp $9261
++:
+jmp $9293
+
+org $869267
+bra $04   ; Coffin
+
+org $869406
+db $10    ; Lilly at Seaside Palace flag
+
+org $869418
+cop #$DA : db $01
+nop : nop : nop : nop    ; "Purification event won't softlock if you don't have Lilly"
+
+org $869739
+; mudoor.bin
+{
+cop #$28 : dw $0388, $00c8 : dw $9742
+rtl
+cop #$D1 : dw $0138 : db $01 : dw $9757
+cop #$D6 : db $10 : dw $9750
+cop #$E0
+cop #$CD : dw $0138
+cop #$D5 : db $10
+cop #$26 : db $5a : dw $0090,$0070 : db $83,$00,$14
+cop #$C5
+}
+
+org $8698b2
+%MTryGiveItemAndFlag(!MuHopeStatue1Item, $79)
+rtl
+
+org $86995a
+%MTryGiveItemAndFlag(!MuHopeStatue2Item, $7f)
+rtl
+
+org $8699c7
+db $0e : dw $3000
+EMuHopeRoomListener:   ; Speed this along for QoL.
+{
+EMuHopeRoomFlame = $869c14
+EMuHopeRoomWizard = $869BDA
+
+cop #$45 : db $10, $00, $20, $10 : dw EMuHopeRoomListenerRight
+cop #$D0 : db $7B, $01 : dw .StatueAlreadyPlaced
+cop #$D2 : db $7B, $01
+cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0080, $0058, $1000
+lda #$CFF0 : tsb $065A
+cop #$DA : db $0F
+cop #$04 : db $1B
+cop #$DA : db $10
+cop #$3C : dl $80B7E2
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0020, $00C0, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $00E0, $00C0, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0040, $0090, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $00C0, $0090, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0070, $0070, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0090, $0070, $1800
+cop #$DA : db $3B
+cop #$A0 : dl EMuHopeRoomWizard : dw $0050, $00C8, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomWizard : dw $0070, $00C8, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomWizard : dw $0090, $00C8, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomWizard : dw $00B0, $00C8, $1800
+cop #$DA : db $77
+cop #$BF : dw TextMuHopeRoomWizard
+cop #$08 : db $25, $25
+cop #$DA : db $10
+cop #$CC : db $02
+cop #$DA : db $10
+cop #$3C : dl $80B7EC
+cop #$DA : db $10
+stz $0688
+lda #$CFF0 : trb $065A
+cop #$E0
+.StatueAlreadyPlaced:    ; org $869aae
+cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0080, $0058, $1000
+cop #$E0
+
+EMuHopeRoomStatueSprite:    ; org $869abb
+cop #$80 : db $30
+cop #$89
+rtl
+
+EMuHopeRoomListenerRight:    ; org $869ac1
+cop #$D0 : db $7E, $01 : dw .StatueAlreadyPlaced
+cop #$D2 : db $7E, $01
+cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0180, $0058, $1000
+lda #$CFF0 : tsb $065A
+cop #$DA : db $0F
+cop #$04 : db $1B
+cop #$DA : db $10
+cop #$3C : dl $80B7E2
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0120, $00C0, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $01E0, $00C0, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0140, $0090, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $01C0, $0090, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0170, $0070, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomFlame : dw $0190, $0070, $1800
+cop #$DA : db $3B
+cop #$A0 : dl EMuHopeRoomWizard : dw $0150, $00C8, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomWizard : dw $0170, $00C8, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomWizard : dw $0190, $00C8, $1800
+cop #$DA : db $10
+cop #$A0 : dl EMuHopeRoomWizard : dw $01B0, $00C8, $1800
+cop #$DA : db $77
+cop #$BF : dw TextMuHopeRoomWizard
+cop #$08 : db $25, $25
+cop #$DA : db $10
+cop #$CC : db $02
+cop #$DA : db $10
+cop #$3C : dl $80B7EC
+cop #$DA : db $10
+stz $0688
+lda #$CFF0 : trb $065A
+cop #$E0
+.StatueAlreadyPlaced:    ; org $869b9d
+cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0180, $0058, $1000
+cop #$E0
+
+TextMuHopeRoomWizard:
+db $d3 : db "Hey." : db $c0    ; Hope Room text
+}
+
+org $869c60
+cop #$26 : db $67 : dw $0178,$01d0 : db $80,$01,$22   ; Vamps exit change.
+
+; "Shorten Rama statue event"
+org $869e50
+db $10
+org $869f26
+db $00
+
+; Prevent softlocks due to Rama spirits.
+{
+org $86a07a
+rtl
+org $86a082
+rtl
+org $86a08a
+rtl
+org $86a092
+rtl
+org $86a09a
+rtl
+org $86a0a2
+rtl
+}
+
+org $86a2cb
+cop #$E0   ; Faux-remove Erik from vamps' room.
+
+org $86a43b
+jsl LR_ForceChangeToWill    ; After vamps.
+cop #$C1
+lda $09AE : bit #$0800 : beq +
+  rtl
++:
+jmp $a466
+
+org $86a4c9
+cop #$26 : db $66 : dw $00f8,$01d8 : db $00,$00,$22   ; Vamps exit change.
+cop #$C1
+rtl
+
+org $86bff7
+; Clear monster killed flags and force change to Will in Angel's exterior.
+db $00 : dw $3000
+jsl $80b4cc    ; i.e. jsl LR_ClearMonsterKilledFlags
+jsl LR_ForceChangeToWill
+cop #$E0
+
+org $86ba36
+; angelsign.bin, "Update sign to read "Passage to Mu""
+{
+db $D3
+db $CB
+db $AC,$AC,$AC,$AC,$6D,$AC,$60,$80,$A3,$A3,$80,$86,$84,$AC,$A4,$8E,$AC,$4C,$A5,$AC,$6D
+db $CB
+db $AC,$AC,$AC,$41,$84,$A7,$80,$A2,$84,$AC,$8E,$85,$AC,$A6,$80,$8C,$A0,$88,$A2,$84,$A3
+db $C0
+}
+
+org $86cede
+stz $0aa6    ; Ishtar's game never closes.
+rtl
+
+org $86cef6
+db $40,$86,$80,$88,$8d,$4f,$c0   ; Ishtar's post-win text.
+
+; Kara's Portrait mods.
+org $86d153
+{
+db $8a   ; Flag
+org $86d15b
+if !KaraLocation == 2
+cop #$B6 : db $10
+else
+cop #$B6 : db $30 ; Portrait sprite needs high priority.
+endif
+org $86d169
+cop #$D2 : db $8a,$01  ; Flag check
+cop #$E0
+org $86d25c
+db $8a   ; Flag
+org $86d27e
+db "Hurry boy, she's waiting",$cb
+db "there for you!",$c0
+org $86d305
+db "Kara's portrait. If only",$cb
+db "you had Magic Dust...",$c0
+}
+
+org $86d978
+dw $db2c    ; Ishtar puzzle 1 success text
+
+org $86d9ce
+dw $db2c    ; Ishtar puzzle 3 success text
+
+org $86d9fc
+db $10   ; Ishtar's game never closes.
+
+org $86dc97
+db $d3
+db "!SpoilerTextIshtarsApprentice"
+db $c0
+
+org $86dd30
+; collectioncheck.bin
+{
+sed
+lda $1f70,x : clc : adc #$0001 : sta $1f70,x
+cld
+rts
+db $ff,$ff,$ff    ; Filler.
+
+db $D3
+db $AC,$48,$A4,$84,$8C,$A3,$AC,$42,$8E,$8B,$8B,$84,$82,$A4,$84,$83,$2F,$AC
+db $C6,$02,$00,$70,$1F
+db $CB
+db $AC,$AC,$AC,$AC,$AC,$64,$8E,$A4,$80,$8B,$AC,$48,$A4,$84,$8C,$A3,$2F,$AC
+db $C6,$02,$00,$A0,$1F
+db $CB
+db $AC,$AC,$AC,$AC,$AC,$D6,$0C,$63,$A0,$80,$82,$84,$A3,$2F,$AC
+db $C6,$02,$00,$D0,$1F
+db $C0
+
+dw $0000,$0000,$0000,$0000,$0000,$0000,$0004,$0007
+dw $0002,$0001,$0006,$0001,$0005,$0006,$0000,$0008
+dw $0005,$0007,$0006,$0004,$0004,$0007,$0005,$0002
+dw $0007,$0004,$0012,$0002,$0000,$0000,$0001,$0002
+dw $0001,$0000,$0003,$0000,$0001,$0003,$0000,$0004
+dw $0001,$0002,$0001,$0001,$0003,$0001,$0003,$0001
+dw $0003,$0001,$0002,$0002,$0000,$0000,$0000,$0000
+dw $0000,$0000,$0000,$0000,$0000
+
+db $00 : dw $3000
+cop #$D0 : db $03,$01 : dw $de30
+ldx #$0002
+-:
+lda $86dd90,x : sta $1fa0,x
+lda $86ddc0,x : sta $1fd0,x
+lda #$0000 : sta $1f70,x
+jsr ($dfa0,x)
+inx : inx : cpx #$002e : bne -
+cop #$CC : db $03
+rtl
+
+db $00,$00    ; filler
+
+cop #$40 : db $01,$0f : dw $de37
+rtl
+
+cop #$45 : db $0C,$39,$0E,$3B : dw $DF03
+cop #$45 : db $0F,$32,$11,$34 : dw $DF08
+cop #$45 : db $0B,$2A,$0D,$2C : dw $DF0D
+cop #$45 : db $08,$26,$0B,$28 : dw $DF12
+cop #$45 : db $12,$27,$14,$29 : dw $DF17
+cop #$45 : db $24,$34,$26,$36 : dw $DF1C
+cop #$45 : db $24,$2C,$26,$2E : dw $DF21
+cop #$45 : db $32,$32,$34,$34 : dw $DF26
+cop #$45 : db $26,$25,$28,$27 : dw $DF2B
+cop #$45 : db $2F,$28,$31,$2A : dw $DF30
+cop #$45 : db $37,$08,$39,$0A : dw $DF35
+cop #$45 : db $32,$07,$34,$09 : dw $DF3A
+cop #$45 : db $37,$15,$39,$17 : dw $DF3F
+cop #$45 : db $2C,$19,$2E,$1B : dw $DF44
+cop #$45 : db $29,$11,$2B,$13 : dw $DF49
+cop #$45 : db $1C,$12,$1E,$14 : dw $DF4E
+cop #$45 : db $20,$0C,$22,$0E : dw $DF53
+cop #$45 : db $11,$19,$13,$1B : dw $DF58
+cop #$45 : db $12,$14,$14,$16 : dw $DF5D
+cop #$45 : db $08,$10,$0A,$12 : dw $DF62
+cop #$45 : db $06,$0A,$08,$0C : dw $DF67
+cop #$45 : db $1F,$1F,$21,$21 : dw $DF6C
+cop #$D0 : db $01,$00 : dw $DF02
+lda #$0000
+  sta $1F60
+  sta $1F70
+  sta $1FA0
+  sta $1FD0
+cop #$CE : db $01
+cop #$CE : db $02
+rtl
+
+ldx #$0001 : bra +
+ldx #$0002 : bra +
+ldx #$0003 : bra +
+ldx #$0004 : bra +
+ldx #$0005 : bra +
+ldx #$0006 : bra +
+ldx #$0007 : bra +
+ldx #$0008 : bra +
+ldx #$0009 : bra +
+ldx #$000A : bra +
+ldx #$000B : bra +
+ldx #$000C : bra +
+ldx #$000D : bra +
+ldx #$000E : bra +
+ldx #$000F : bra +
+ldx #$0010 : bra +
+ldx #$0011 : bra +
+ldx #$0012 : bra +
+ldx #$0013 : bra +
+ldx #$0014 : bra +
+ldx #$0015 : bra +
+ldx #$0016 
++:
+txa : asl : tax
+cop #$D0 : db $02,$01 : dw $df02
+cop #$D0 : db $01,$01 : dw $df97
+stx $1f60
+lda $1f70,x : sta $1f70
+lda $1fa0,x : sta $1fa0
+lda $1fd0,x : sta $1fd0
+cop #$CC : db $01
+rtl
+
+cop #$BF : dw $dd40
+cop #$CC : db $02
+rtl
+
+db $00    ; filler
+
+dw $0000,$DFD0,$E000,$E050,$E070,$E080,$E0C0,$E0D0
+dw $E100,$DFF4,$E140,$E1A0,$E1E0,$E230,$E270,$E2A0
+dw $E2D0,$E310,$E350,$E370,$E3C0,$E3E0,$E460,$0000
+
+cop #$D0 : db $13,$00 : dw $DFD9
+jsr $DD30             
+cop #$D0 : db $18,$00 : dw $DFE2
+jsr $DD30             
+cop #$D0 : db $35,$00 : dw $DFEB
+jsr $DD30             
+cop #$D0 : db $D7,$00 : dw $DFF4
+jsr $DD30
+rts
+
+; filler
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
+cop #$D0 : db $23,$00 : dw $E009
+jsr $DD30             
+cop #$D0 : db $33,$00 : dw $E012
+jsr $DD30             
+cop #$D0 : db $46,$00 : dw $E01B
+jsr $DD30             
+cop #$D0 : db $D8,$00 : dw $E024
+jsr $DD30
+cop #$D1 : dw $0201 : db $00 : dw $E02E
+jsr $DD30                 
+cop #$D1 : dw $0202 : db $00 : dw $E038
+jsr $DD30                 
+cop #$D1 : dw $0203 : db $00 : dw $E042
+jsr $DD30
+rts
+
+; filler
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
+cop #$D0 : db $2d,$00 : dw $e059
+jsr $dd30
+cop #$D0 : db $34,$00 : dw $e062
+jsr $dd30
+rts
+
+; filler
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
+cop #$D0 : db $48,$00 : dw $e079
+jsr $dd30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $32,$00 : dw $E089
+jsr $DD30             
+cop #$D0 : db $E0,$00 : dw $E092
+jsr $DD30
+cop #$D1 : dw $0204 : db $00 : dw $E09C
+jsr $DD30               
+cop #$D1 : dw $0205 : db $00 : dw $E0A6
+jsr $DD30               
+cop #$D1 : dw $0206 : db $00 : dw $E0B0
+jsr $DD30               
+cop #$D1 : dw $0207 : db $00 : dw $E0BA
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $36,$00 : dw $e0c9
+jsr $dd30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $3A,$00 : dw $E0D9
+jsr $DD30
+cop #$D0 : db $53,$00 : dw $E0E2
+jsr $DD30
+cop #$D0 : db $54,$00 : dw $E0EB
+jsr $DD30
+cop #$D0 : db $5A,$00 : dw $E0F4
+jsr $DD30
+cop #$D0 : db $E1,$00 : dw $E0FD
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff
+cop #$D0 : db $5D,$00 : dw $E109
+jsr $DD30
+cop #$D0 : db $5E,$00 : dw $E112
+jsr $DD30
+cop #$D0 : db $A2,$00 : dw $E11B
+jsr $DD30
+cop #$D0 : db $A3,$00 : dw $E124
+jsr $DD30
+cop #$D0 : db $D9,$00 : dw $E12D
+jsr $DD30
+cop #$D1 : dw $0209 : db $00 : dw $E137
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+cop #$D1 : dw $020A : db $00 : dw $E14A
+jsr $DD30
+cop #$D1 : dw $020B : db $00 : dw $E154
+jsr $DD30
+cop #$D1 : dw $020C : db $00 : dw $E15E
+jsr $DD30
+cop #$D1 : dw $020D : db $00 : dw $E168
+jsr $DD30
+cop #$D1 : dw $020E : db $00 : dw $E172
+jsr $DD30
+cop #$D1 : dw $020F : db $00 : dw $E17C
+jsr $DD30
+cop #$D1 : dw $0210 : db $00 : dw $E186
+jsr $DD30
+cop #$D1 : dw $0211 : db $00 : dw $E190
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $85,$00 : dw $E1A9
+jsr $DD30
+cop #$D1 : dw $013B : db $00 : dw $E1B3
+jsr $DD30
+cop #$D1 : dw $0212 : db $00 : dw $E1BD
+jsr $DD30
+cop #$D1 : dw $0213 : db $00 : dw $E1C7
+jsr $DD30
+cop #$D1 : dw $0214 : db $00 : dw $E168
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+cop #$D0 : db $79,$00 : dw $E1E9
+jsr $DD30
+cop #$D0 : db $7F,$00 : dw $E1F2
+jsr $DD30
+cop #$D1 : dw $0215 : db $00 : dw $E1FC
+jsr $DD30
+cop #$D1 : dw $0216 : db $00 : dw $E206
+jsr $DD30
+cop #$D1 : dw $0217 : db $00 : dw $E210
+jsr $DD30
+cop #$D1 : dw $0218 : db $00 : dw $E21A
+jsr $DD30
+cop #$D1 : dw $022E : db $00 : dw $E224
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $9B,$00 : dw $E239
+jsr $DD30
+cop #$D0 : db $9C,$00 : dw $E242
+jsr $DD30
+cop #$D1 : dw $0219 : db $00 : dw $E24C
+jsr $DD30
+cop #$D1 : dw $021A : db $00 : dw $E256
+jsr $DD30
+cop #$D1 : dw $021B : db $00 : dw $E2EA
+jsr $DD30
+cop #$D1 : dw $021C : db $00 : dw $E26A
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $4E,$00 : dw $E279
+jsr $DD30
+cop #$D0 : db $BC,$00 : dw $E282
+jsr $DD30
+cop #$D0 : db $E2,$00 : dw $E28B
+jsr $DD30
+cop #$D0 : db $95,$00 : dw $E294
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $98,$00 : dw $E2A9
+jsr $DD30
+cop #$D0 : db $99,$00 : dw $E2B2
+jsr $DD30
+cop #$D1 : dw $021D : db $00 : dw $E2BC
+jsr $DD30
+cop #$D1 : dw $021E : db $00 : dw $E2C6
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $9A,$00 : dw $E2D9
+jsr $DD30
+cop #$D0 : db $A6,$00 : dw $E2E2
+jsr $DD30
+cop #$D0 : db $C9,$00 : dw $E2EB
+jsr $DD30
+cop #$D0 : db $CB,$00 : dw $E2F4
+jsr $DD30
+cop #$D0 : db $E5,$00 : dw $E2FD
+jsr $DD30
+cop #$D0 : db $F0,$00 : dw $E306
+jsr $DD30
+cop #$D0 : db $F1,$00 : dw $E30F
+jsr $DD30
+rts
+
+cop #$D1 : dw $021F : db $00 : dw $E31A
+jsr $DD30
+cop #$D1 : dw $0220 : db $00 : dw $E324
+jsr $DD30
+cop #$D1 : dw $0221 : db $00 : dw $E32E
+jsr $DD30
+cop #$D1 : dw $0222 : db $00 : dw $E338
+jsr $DD30
+cop #$D1 : dw $0223 : db $00 : dw $E342
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $CC,$00 : dw $E359
+jsr $DD30
+cop #$D0 : db $E6,$00 : dw $E362
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $BA,$00 : dw $E379
+jsr $DD30
+cop #$D0 : db $BE,$00 : dw $E382
+jsr $DD30
+cop #$D1 : dw $0224 : db $00 : dw $E38C
+jsr $DD30
+cop #$D1 : dw $0225 : db $00 : dw $E396
+jsr $DD30
+cop #$D1 : dw $0226 : db $00 : dw $E3A0
+jsr $DD30
+cop #$D1 : dw $0227 : db $00 : dw $E3AA
+jsr $DD30
+cop #$D1 : dw $0228 : db $00 : dw $E3B4
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $B8,$00 : dw $E3CC
+jsr $DD30
+jsr $DD30
+cop #$D0 : db $CD,$00 : dw $E3D5
+jsr $DD30
+cop #$D0 : db $E7,$00 : dw $E3DE
+jsr $DD30
+rts
+
+; filler
+db $ff
+
+cop #$D0 : db $BD,$00 : dw $E3E9
+jsr $DD30
+cop #$D0 : db $D5,$00 : dw $E3F2
+jsr $DD30
+cop #$D0 : db $C2,$00 : dw $E3FB
+jsr $DD30
+cop #$D0 : db $C3,$00 : dw $E404
+jsr $DD30
+cop #$D0 : db $C4,$00 : dw $E40D
+jsr $DD30
+cop #$D0 : db $C5,$00 : dw $E416
+jsr $DD30
+cop #$D0 : db $C6,$00 : dw $E41F
+jsr $DD30
+cop #$D0 : db $C7,$00 : dw $E428
+jsr $DD30
+cop #$D1 : dw $0229 : db $00 : dw $E432
+jsr $DD30
+cop #$D1 : dw $022A : db $00 : dw $E43C
+jsr $DD30
+cop #$D1 : dw $022B : db $00 : dw $E446
+jsr $DD30
+cop #$D1 : dw $022C : db $00 : dw $E450
+jsr $DD30
+rts
+
+; filler
+db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+cop #$D0 : db $DA,$00 : dw $E469
+jsr $DD30
+cop #$D0 : db $DC,$00 : dw $E472
+jsr $DD30
+rts
+
+; copy-paste error?
+db $DC,$00,$72,$E4,$20,$30,$DD,$60
+}
+
+org $86e500
+; vampchange.bin, "Instant form change after Vamps are defeated"
+{
+lda $0ad4 : cmp #$0000 : bne +
+  bra +++
++:
+lda $0ad4 : cmp #$0001 : bne ++
+ldy $09aa
+lda #$0088 : sta $0002,y
+lda #$f37d : sta $0000,y
+lda #$0000 : sta $0008,y
+lda #$0800 : tsb $09ae
+bra $1b
+++:
+ldy $09aa
+lda #$0088 : sta $0002,y
+lda #$f3b1 : sta $0000,y
+lda #$0000 : sta $0008,y
+lda #$0800 : tsb $09ae
+cop #$C1
+lda $09ae : bit #$0800 : beq +++
+  rtl
++++:
+jmp $a466
+}
+
+
+
+
+org $878569
+; watermia1.bin
+{
+cop #$BF : dw $86c1
+cop #$BE : db $21,$03 : dw $8573
+  dw $8579
+  dw $8579,$857e
+cop #$BF : dw $8724
+rtl
+cop #$D6 : db $18 : dw $8756
+cop #$D0 : db $1f,$01 : dw $875c
+cop #$BF : dw $8732
+rtl
+}
+
+org $8786c1
+; watermia2.bin, text and actors
+{
+; "Do you own one of these Kruks" etc.
+db $D3,$43,$8E,$AC,$A9,$8E,$A5,$AC,$8E,$A7,$8D,$AC,$8E,$8D,$84,$AC,$8E,$85,$AC,$D6,$E4,$CB,$4A,$A2,$A5,$8A,$A3,$0D,$AC,$69,$8E,$A5,$0E,$8B,$8B,$AC,$D6,$BA,$8E,$8D,$84,$CB,$A4,$8E,$AC,$86,$8E,$AC,$A4,$8E,$AC,$44,$A5,$A2,$8E,$2A,$CB,$AC,$4D,$8E,$CC,$14,$69,$84,$A3,$CA,$A9,$8E,$A5,$AC,$D6,$F1,$A4,$8E,$CB,$86,$8E,$AC,$A4,$8E,$AC,$D6,$47,$42,$80,$A0,$84,$0D,$CB,$AC,$61,$A5,$88,$A4,$CB,$AC,$46,$8E,$CA,$CE,$D6,$09,$D6,$73,$80,$8D,$A9,$A4,$88,$8C,$84,$4F,$C0,$CE,$69,$8E,$A5,$AC,$D6,$82,$D7,$9E,$A4,$8E,$AC,$D6,$98,$CB,$A4,$87,$84,$AC,$A0,$A2,$8E,$A0,$84,$A2,$AC,$A0,$80,$A0,$84,$A2,$A3,$2A,$2A,$2A,$C0
+
+cop #$CC : db $1f
+cop #$D5 : db $18
+cop #$26 : db $91 : dw $0330,$0430 : db $03,$00,$54
+cop #$C5
+}
+
+org $878d76
+db $10   ; Flag for Russian Glass opponent in his house
+
+org $878d91
+db $10   ; Flag for Russian Glass opponent in his house
+
+org $879237
+; russianglass.bin
+{
+cop #$D0 : db $95,$00 : dw RussianGlassTryGiveItem
+cop #$BF : dw TextRussianGlassGotItemAlready
+rtl
+RussianGlassTryGiveItem:
+cop #$BF : dw TextRussianGlassGreeting
+%MTryGiveItemAndFlag(!WtrmRussianGlassItem, $95)
+rtl
+TextRussianGlassGotItemAlready:
+db $D3,$D6,$53,$80,$8B,$8B,$AC,$48,$AC,$86,$8E,$A4,$2B,$AC,$81,$A5,$83,$2A,$AC,$C0
+TextRussianGlassGreeting:
+db $D3,$63,$8E,$8C,$84,$AC,$86,$A5,$A9,$AC,$D6,$AE,$D6,$D6,$85,$8E,$A2,$AC,$CB
+db $A9,$8E,$A5,$2A,$AC,$AC,$AC,$CF,$CA
+}
+
+org $879c81
+db $d3
+db "!SpoilerTextKarasJournal"
+db $c0
+
+org $87ad1b
+nop : nop : nop : nop   ; "cop #$BF : dw $...." Skip Lance's speech.
+%MTryGiveItemAndFlag(!WtrmLanceItem, $e2)
+rtl
+
+org $87b59e
+; Necklace stones.
+{
+db $02 : dw $1001
+ENecklaceStone1:
+cop #$D0 : db $98,$01 : dw .Die
+lda #$0200 : tsb $12
+cop #$88 : dl $8ee000
+cop #$C0 : dw .OnInteract
+-:
+cop #$80 : db $02 : cop #$89
+cop #$DA : db $3b
+bra -
+.OnInteract:
+%MTryGiveItemAndFlag(!GtWlNecklace1Item, $98)
+cop #$D0 : db $98,$01 : dw .Die
+rtl
+.Die:
+cop #$E0
+
+db $02 : dw $1001
+ENecklaceStone2:
+cop #$D0 : db $99,$01 : dw .Die
+lda #$0200 : tsb $12
+cop #$88 : dl $8ee000
+cop #$C0 : dw .OnInteract
+-:
+cop #$80 : db $02 : cop #$89
+cop #$DA : db $3b
+bra -
+.OnInteract:
+%MTryGiveItemAndFlag(!GtWlNecklace2Item, $99)
+cop #$D0 : db $99,$01 : dw .Die
+rtl
+.Die:
+cop #$E0
+}
+
+org $87be09
+cop #$A0 : dl $88d6ac : dw $01c8,$0280 : dw $2b00
+lda $0e : sta $24
+lda #$2000 : sta $0e
+cop #$E0    ; Unsafe?
+
+org $87c0a7
+cop #$D0 : db $9a,$01 : dw AppleVendorGotItemAlready
+%MTryGiveItemAndFlag(!EuroAppleVendorItem, $9a)
+rtl
+AppleVendorGotItemAlready:
+cop #$BF : dw $c0dd
+rtl
+
+org $87c4d0
+; euro2.bin
+{
+cop #$CC : db $1f
+cop #$D5 : db $18
+cop #$26 : db $78 : dw $0300,$0340 : db $03,$00,$45
+cop #$C5
+
+db $A4,$A0,$8B,$80,$82,$84,$2A,$CB,$69,$8E,$A5,$AC,$82,$80,$8D,$AC,$D6,$90,$80,$8D,$A9,$A4,$87,$88,$8D,$86,$CB,$A9,$8E,$A5,$AC,$D6,$F1,$87,$84,$A2,$84,$2A,$C0,$CE,$69,$8E,$A5,$AC,$D6,$82,$D7,$9E,$A4,$8E,$AC,$D6,$98,$CB,$A4,$87,$84,$AC,$A0,$A2,$8E,$A0,$84,$A2,$AC,$A0,$80,$A0,$84,$A2,$A3,$2A,$2A,$2A,$C0,$80,$8D,$A9,$2A,$CF,$64,$87,$84,$A2,$84,$AC,$80,$A2,$84,$AC,$8B,$8E,$A4,$A3,$AC,$8E,$85,$AC,$81,$80,$83,$CB,$A2,$A5,$8C,$8E,$A2,$A3,$2B,$AC,$81,$A5,$A4,$AC,$48,$AC,$A4,$87,$88,$8D,$8A,$CB,$A4,$87,$84,$AC,$D6,$7C,$88,$A3,$AC,$86,$A2,$84,$80,$A4,$2A,$C0,$D3,$64,$87,$88,$A3,$AC,$88,$A3,$AC,$A4,$87,$84,$AC,$A3,$87,$A2,$88,$8D,$84,$2A,$AC,$64,$87,$84,$AC,$CB,$D7,$8D,$8E,$85,$AC,$A4,$87,$84,$AC,$CB,$D6,$7C,$80,$8D,$83,$AC,$87,$88,$A3,$AC,$CB,$A7,$88,$85,$84,$AC,$D6,$79,$D7,$73,$8E,$85,$A4,$84,$8D,$2A,$C0,$D3,$64,$87,$88,$A3,$AC,$88,$A3,$AC,$A4,$87,$84,$AC,$62,$8E,$8B,$84,$8A,$CB,$82,$8E,$A2,$A0,$8E,$A2,$80,$A4,$84,$AC,$8E,$85,$85,$88,$82,$84,$2A,$CF,$40,$8B,$8C,$8E,$A3,$A4,$AC,$84,$A6,$84,$A2,$A9,$A4,$87,$88,$8D,$86,$AC,$A9,$8E,$A5,$AC,$CB,$81,$A5,$A9,$AC,$88,$8D,$AC,$A4,$87,$84,$AC,$D6,$E2,$82,$8E,$8C,$84,$A3,$AC,$CB,$D6,$DC,$A4,$87,$84,$AC,$82,$8E,$8C,$A0,$80,$8D,$A9,$2A,$C0,$D3,$D6,$32,$D6,$6A,$A4,$87,$84,$AC,$82,$8E,$8C,$A0,$80,$8D,$A9,$CB,$87,$80,$8D,$83,$8B,$84,$A3,$AC,$D7,$47,$80,$8D,$A9,$A4,$87,$88,$8D,$86,$CB,$A9,$8E,$A5,$AC,$82,$80,$8D,$AC,$88,$8C,$80,$86,$88,$8D,$84,$2A,$C0,$D3,$48,$AC,$A2,$A5,$8D,$AC,$A4,$87,$84,$AC,$A3,$A4,$80,$81,$8B,$84,$A3,$2A,$AC,$48,$AC,$82,$80,$8D,$CB,$86,$84,$A4,$AC,$D6,$FE,$4A,$A2,$A5,$8A,$A3,$AC,$88,$85,$AC,$A9,$8E,$A5,$CB,$D6,$F1,$A4,$8E,$AC,$86,$8E,$AC,$A4,$8E,$AC,$D7,$43,$CB,$AC,$4D,$8E,$CC,$14,$69,$84,$A3,$CA,$80,$8D,$83,$CB,$A0,$8B,$80,$8D,$A4,$A3,$AC,$86,$A2,$8E,$A7,$AC,$88,$8D,$AC,$82,$88,$A2,$82,$8B,$84,$A3,$CB,$D6,$A5,$80,$AC,$8C,$80,$AA,$84,$2A,$CF,$67,$80,$A4,$84,$A2,$AC,$D6,$8E,$A4,$87,$84,$AC,$8C,$A5,$A3,$87,$A2,$8E,$8E,$8C,$A3,$CB,$83,$A2,$88,$A0,$A3,$AC,$8E,$8D,$A4,$8E,$AC,$81,$A2,$8E,$8A,$84,$8D,$AC,$A3,$A4,$84,$8C,$A3,$2A,$CB,$4D,$84,$A7,$AC,$86,$A2,$8E,$A7,$A4,$87,$AC,$A3,$A0,$A2,$8E,$A5,$A4,$A3,$AC,$A5,$A0,$2B,$CB,$85,$8E,$A2,$8C,$88,$8D,$86,$AC,$80,$AC,$A0,$80,$A4,$87,$2A,$C0,$CE,$D6,$09,$D6,$73,$80,$8D,$A9,$A4,$88,$8C,$84,$4F,$C0
+
+}
+
+org $87c432
+; euro1.bin
+{
+dw $C45D 
+dw $C449 
+dw $C444 
+dw $C444 
+dw $C44E 
+dw $C453 
+dw $C458 
+dw $C444 
+dw $C444 
+
+cop #$BF : dw $C482 
+rtl
+cop #$BF : dw $C4AA 
+rtl
+cop #$BF : dw $C56C 
+rtl
+cop #$BF : dw $C5AB 
+rtl
+cop #$BF : dw $C60A 
+rtl
+
+cop #$BF : dw $c63f
+cop #$BE : db $21,$03 : dw $c467
+  dw $c46d
+  dw $c46d, $c472
+cop #$BF : dw $c6fe
+rtl
+cop #$D6 : db $18 : dw $c40d
+cop #$D0 : db $1f, $01 : dw $c4d6
+cop #$BF : dw $c509
+rtl
+}
+
+org $87cd03
+cop #$D0 : db $f0,$01 : dw ShopItem1Die
+cop #$C0 : dw ShopItem1OnInteract
+cop #$C1
+rtl
+ShopItem1OnInteract:
+%MTryGiveItemAndFlag(!EuroShop1Item, $f0)
+cop #$D0 : db $f0,$01 : dw ShopItem1Die
+rtl
+ShopItem1Die:
+cop #$E0
+
+org $87cdf7
+%MTryGiveItemAndFlag(!EuroShop2Item, $f1)
+cop #$D0 : db $f1,$01 : dw ShopItem2Die
+rtl
+ShopItem2Die:
+cop #$E0
+
+org $87d5e1
+dw $0100   ; Euro shop line delay, reduced from vanilla.
+
+org $87d60a
+dw $d614   ; "Old men text no longer checks for Teapot"
+
+org $87d7a5
+dw $d7bd   ; "Old men text no longer checks for Teapot"
+
+org $87d7b1
+db $10    ; Reveal Mt. Kress on map
+
+org $87d892
+db $d3
+db "!SpoilerTextEuroOldMan"
+db $c0
+
+org $87df43
+cop #$D5 : db $28
+%MTryGiveItemAndFlag(!EuroAnnItem, $e5)
+rtl
+
+org $87e37a
+db $12   ; Neil sprite
+
+org $87e37f
+db $14,$00   ; Neil flag 1
+
+org $87e394
+db $10,$00   ; Neil flag 2
+
+org $87e398
+; euroneil.bin
+{
+cop #$D0 : db $14,$01 : dw $e3a1
+cop #$E0
+
+rtl
+
+cop #$BF : dw $e3ec
+cop #$BE : db $53,$01 : dw $e3ab
+  dw $e3b7
+  dw $E3B7  
+  dw $E3BC  
+  dw $E3C8  
+  dw $E3D4  
+  dw $E3E0 
+
+cop #$BF : dw $e436
+rtl
+
+cop #$26 : db $95 : dw $0260,$0080 : db $03,$01,$13
+cop #$C5
+
+cop #$26 : db $c8 : dw $0078,$00c0 : db $00,$00,$11
+cop #$C5
+
+cop #$26 : db $49 : dw $0088,$00c0 : db $00,$00,$11
+cop #$C5
+
+cop #$26 : db $de : dw $0078,$00c0 : db $00,$00,$11
+cop #$C5
+
+db $D3,$C2,$06,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D,$CB,$AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$37,$AC,$AC,$AC,$CB,$AC,$44,$A5,$A2,$8E,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$41,$80,$81,$84,$8B,$AC,$64,$8E,$A7,$84,$A2,$AC,$CB,$AC,$43,$80,$8E,$AC,$AC,$AC,$CA,$CE,$C2,$06,$48,$AC,$A4,$A2,$80,$A6,$84,$8B,$AC,$D7,$92,$A2,$84,$86,$A5,$8B,$80,$A2,$8B,$A9,$CB,$81,$84,$A4,$A7,$84,$84,$8D,$AC,$8C,$A9,$AC,$A0,$8B,$80,$82,$84,$2B,$AC,$44,$A5,$A2,$8E,$2B,$CB,$80,$8D,$83,$AC,$43,$80,$8E,$2A,$AC,$D6,$09,$A6,$88,$A3,$88,$A4,$AC,$8C,$84,$CB,$80,$8D,$A9,$A4,$88,$8C,$84,$4F,$C0
+
+}
+
+org $87e517
+; Euro secret house
+{
+cop #$D0 : db $a6,$01 : dw EuroSecretGotItemAlready
+%MTryGiveItemAndFlag(!EuroHiddenHouseItem, $a6)
+rtl
+EuroSecretGotItemAlready:
+cop #$BF : dw Text_EuroSecretGotItemAlready
+rtl
+Text_EuroSecretGotItemAlready:
+db $d3,$d6,$63,$86,$8e,$2a,$c0
+}
+
+org $87e927
+SethWatermiaOnInteract:
+cop #$D0 : db $11,$01 : dw .CanTravel
+.NoTravel:
+cop #$BF : dw .TextNoTravel
+rtl
+.CanTravel:
+cop #$D0 : db $12,$01 : dw .OfferTravel
+..FirstTravel:
+cop #$CC : db $12
+cop #$BF : dw .TextFirstTravel
+.OfferTravel:
+jml ErikAskWhere
+.TextNoTravel:
+db $d3
+db "Only town folk may cross",$cb
+db "this river!",$cb
+db "(Or if you can talk to",$cb
+db "fish, I guess.)",$c0
+.TextFirstTravel:
+db $d3
+db "Oh, you know Bagu? Then",$cb
+db "I can help you cross.",$cb
+db "(And by Bagu I mean",$cb
+db "Morse Code.)",$c0
+
+
+
+org $888fc4
+; natives.bin, "Native can guide you to Dao if you give him the roast"
+{
+cop #$D0 : db $41,$01 : dw $8ff3
+cop #$D6 : db $0a : dw $8fd4
+cop #$BF : dw $9014
+rtl
+cop #$BF : dw $9040
+cop #$BE : db $02,$01 : dw $8fde
+  dw $8fe4,$8fe4,$8fe9
+cop #$BF : dw $9098
+rtl
+cop #$CC : db $41
+cop #$D5 : db $0a
+cop #$BF : dw $90b1
+cop #$BF : dw $90d5
+cop #$BE : db $02,$01 : dw $8ffd
+  dw $9003,$9003,$9008
+cop #$BF : dw $90ff
+rtl
+cop #$26 : db $c3 : dw $0010,$00e0 : db $07,$00,$23
+cop #$C5
+
+db $D0,$85,$8E,$8E,$83,$0D,$AC,$AC,$AC,$AC,$AC,$C0
+db $D3,$47,$84,$AC,$A0,$8E,$88,$8D,$A4,$A3,$AC,$85,$A2,$80,$8D,$A4,$88,$82,$80,$8B,$8B,$A9,$CB
+db $A4,$8E,$AC,$D6,$FE,$A0,$80,$82,$8A,$2B,$AC,$D7,$B6,$A4,$8E,$CB
+db $87,$88,$A3,$AC,$8C,$8E,$A5,$A4,$87,$2A,$CF,$CE,$46,$88,$A6,$84,$AC,$87,$88,$8C,$AC,$A4,$87,$84,$AC,$A2,$8E,$80,$A3,$A4,$0D,$CB
+db $AC,$4D,$8E,$CB
+db $AC,$69,$84,$A3,$CA
+db $AC,$AC,$AC,$AC,$AC,$AC,$AC,$CA
+db $CE,$43,$A5,$83,$84,$2B,$AC,$A4,$87,$80,$A4,$0E,$A3,$AC,$82,$8E,$8B,$83,$2A,$AC,$AC,$AC,$AC,$AC,$C0
+db $CE,$47,$84,$AC,$A0,$8E,$88,$8D,$A4,$A3,$AC,$A4,$8E,$AC,$43,$80,$8E,$AC,$8E,$8D,$CB
+db $A9,$8E,$A5,$A2,$AC,$8C,$80,$A0,$2A,$AC,$AC,$AC,$AC,$AC,$C0
+db $D3,$4B,$84,$A4,$AC,$87,$88,$8C,$AC,$86,$A5,$88,$83,$84,$AC,$A9,$8E,$A5,$AC,$A4,$8E,$AC,$43,$80,$8E,$0D,$CB
+db $AC,$4D,$8E,$CB
+db $AC,$69,$84,$A3,$AC,$AC,$AC,$AC,$AC,$AC,$CA
+db $CE,$47,$84,$AC,$85,$8B,$80,$A3,$87,$84,$A3,$AC,$A9,$8E,$A5,$AC,$80,$AC,$CB
+db $A4,$87,$A5,$8C,$81,$A3,$6D,$A5,$A0,$2A,$C0
+
+}
+
+org $8893a9
+nop : nop : nop : nop   ; "cop #$BF : dw $...." Skip girl's speech.
+%MTryGiveItemAndFlag(!NativesGirlItem, $e6)
+rtl
+
+org $889a31
+; ankorwat.bin, "Bright room looks at switch 4f rather than equipment"
+{
+cop #$BF : dw $9a68
+lda #$cff0 : trb $065a
+cop #$D0 : db $f5,$01 : dw $9a5d
+cop #$DA : db $13
+cop #$3C
+-:    ; oops
+dl $80b7ce
+cop #$DA : db $b3
+cop #$C1
+cop #$D0 : db $f5,$01 : dw $9a55
+rtl
+cop #$3C : dl $80b7d8
+cop #$DA : db $b3
+cop #$C1
+cop #$D0 : db $f5,$01 : dw $9a67
+bra -
+rtl
+
+db $D3
+db $63,$84,$A4,$A4,$88,$8D,$86,$AC,$8E,$8D,$84,$AC,$85,$8E,$8E,$A4,$AC,$88,$8D,$A3,$88,$83,$84,$2B,$CB
+db $A4,$87,$84,$AC,$85,$8B,$8E,$80,$A4,$88,$8D,$86,$AC,$82,$A2,$A9,$A3,$A4,$80,$8B,$CB
+db $D6,$CB,$A4,$8E,$AC,$86,$8B,$8E,$A7,$4F,$C0
+
+}
+
+org $889abf
+; ankorwat.bin the spirit's item
+{
+WatSpirit:
+cop #$C0 : dw .OnInteract
+cop #$BC : db $08,$00
+cop #$C1
+cop #$89
+rtl
+.OnInteract:
+cop #$D0 : db $be,$01 : dw .GotItemAlready
+%MTryGiveItemAndFlag(!WatSpiritItem, $be)
+rtl
+.GotItemAlready:
+cop #$BF : dw $9b2a
+rtl
+}
+
+org $889b2a
+db $d3
+db "!SpoilerTextAngkorWatSpirit"
+db $c0
+
+org $889fa1
+%MTryGiveItemAndFlag(!WatGlassesItem, $ba)
+rtl
+
+org $88a5b3
+db $14,$00   ; Neil Dao flag
+
+org $88a5bd
+; daoneil.bin
+{
+cop #$D0 : db $10,$01 : dw $a5ea
+cop #$CC : db $b4
+lda #$cff0 : tsb $065a
+cop #$DA : db $0f
+cop #$0C
+cop #$82 : db $16,$01 : cop #$89
+cop #$0B
+cop #$C1
+cop #$8B
+cop #$DA : db $1d
+cop #$BF : dw $a61d
+lda #$cff0 : trb $065a
+cop #$C1
+rtl
+
+cop #$E0
+
+cop #$D0 : db $14,$01 : dw $a5fe
+cop #$D0 : db $14,$01 : dw $a5fe
+cop #$E0
+
+rtl
+
+cop #$BF : dw $a649
+cop #$BE : db $53,$01 : dw $a608
+dw $A614  
+dw $A614  
+dw $A619  
+dw $A625  
+dw $A631  
+dw $A63D  
+
+cop #$BF : dw $a693
+rtl
+
+cop #$26 : db $95 : dw $0260,$0080 : db $03,$01,$13
+cop #$C5
+
+cop #$26 : db $C8 : dw $0078,$00C0 : db $00,$00,$11
+cop #$C5
+
+cop #$26 : db $49 : dw $0088,$00C0 : db $00,$00,$11
+cop #$C5
+
+cop #$26 : db $DE : dw $0078,$00C0 : db $00,$00,$11
+cop #$C5
+
+$D3,$C2,$06,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D,$CB,$AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$37,$AC,$AC,$AC,$CB,$AC,$44,$A5,$A2,$8E,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$41,$80,$81,$84,$8B,$AC,$64,$8E,$A7,$84,$A2,$AC,$CB,$AC,$43,$80,$8E,$AC,$AC,$AC,$CA,$CE,$C2,$06,$48,$AC,$A4,$A2,$80,$A6,$84,$8B,$AC,$D7,$92,$A2,$84,$86,$A5,$8B,$80,$A2,$8B,$A9,$CB,$81,$84,$A4,$A7,$84,$84,$8D,$AC,$8C,$A9,$AC,$A0,$8B,$80,$82,$84,$2B,$AC,$44,$A5,$A2,$8E,$2B,$CB,$80,$8D,$83,$AC,$43,$80,$8E,$2A,$AC,$D6,$09,$A6,$88,$A3,$88,$A4,$AC,$8C,$84,$CB,$80,$8D,$A9,$A4,$88,$8C,$84,$4F,$C0
+
+}
+
+org $88ad0c
+db $d3
+db "!SpoilerTextDaoGirl"
+db $c0
+
+org $88b010
+; snakegame.bin
+{
+cop #$BF : dw Text_SnakeGameWon
+%MTryGiveItemAndFlag(!DaoSnakeGameItem, $e7)
+cop #$E0
+Text_SnakeGameLost:
+db $D5,$02,$4E,$4A,$4F,$AC,$63,$A4,$8E,$A0,$4F,$CB
+db $D6,$67,$87,$88,$A4,$AC,$C6,$03,$00,$AC,$0A,$AC,$A3,$8D,$80,$8A,$84,$A3,$2A,$CB
+db $64,$A2,$A9,$AC,$80,$86,$80,$88,$8D,$4F,$C0
+Text_SnakeGameWon:
+db $C2,$0A,$D5,$00,$67,$8E,$A7,$AC,$C6,$03,$00,$AC,$0A,$AC,$A3,$8D,$80,$8A,$84,$A3,$2A,$AC,$66,$84,$A2,$A9,$CB
+db $86,$8E,$8E,$83,$4F,$C0
+
+cop #$BF : dw $b090
+cop #$E0
+}
+
+org $88b16d
+jmp DaoOfferTravelToNatives
+
+org $88b1ae   ; Inventory freespace check is handled by NPC's code earlier.
+%MTryGiveItemAndFlag(!DaoEntrance1Item, $b8)
+%MTryGiveItemAndFlag(!DaoEntrance2Item, $b8)
+cop #$BF : dw DaoOfferTravelToNatives_TextPostGiveItem
+rtl
+
+org $88c20b
+cop #$C1   ; Pyramid book guy never disappears.
+rtl
+
+; Hieroglyph locations.
+org $88c7ac
+%MTryGiveItemAndFlag(!PyramidHiero1Item, $c2)
+rtl
+org $88c873
+%MTryGiveItemAndFlag(!PyramidHiero2Item, $c3)
+rtl
+org $88c91b
+%MTryGiveItemAndFlag(!PyramidHiero3Item, $c4)
+rtl
+org $88c9c3
+%MTryGiveItemAndFlag(!PyramidHiero4Item, $c5)
+rtl
+org $88ca6b
+%MTryGiveItemAndFlag(!PyramidHiero5Item, $c6)
+rtl
+org $88cb13
+%MTryGiveItemAndFlag(!PyramidHiero6Item, $c7)
+rtl
+
+org $88cb94
+; "which tiles are called from placement flags"
+db !HieroItemTile1
+db !HieroItemTile2
+db !HieroItemTile3
+db !HieroItemTile4
+db !HieroItemTile5
+db !HieroItemTile6
+
+org $88cd71
+db $10,$00   ; Pyramid boss doesn't disappear on death.
+
+org $88cea5
+db $10,$00   ; Jeweler doesn't disappear when defeated.
+
+org $88cec9
+; jeweler.bin
+{
+EJeweler_OnChat:
+cop #$BF : dw EJeweler_Text_Greeting
+lda $0AB0 : beq J_88CED6
+  cop #$BF : dw EJeweler_Text_ImHolding
+J_88CED6:
+cop #$D0 : db $E9, $01 : dw J_88CEE7
+lda $0AB0 : cmp #!Jeweler1Cost : bcc J_88CEE7
+jmp J_88D017
+J_88CEE7:
+cop #$D0 : db $EA, $01 : dw J_88CEF8
+lda $0AB0 : cmp #!Jeweler2Cost : bcc J_88CEF8
+jmp J_88D02A
+J_88CEF8:
+cop #$D0 : db $EB, $01 : dw J_88CF09
+lda $0AB0 : cmp #!Jeweler3Cost : bcc J_88CF09
+jmp J_88D037
+J_88CF09:
+cop #$D0 : db $EC, $01 : dw J_88CF1A
+lda $0AB0 : cmp #!Jeweler4Cost : bcc J_88CF1A
+jmp J_88D04A
+J_88CF1A:
+cop #$D0 : db $ED, $01 : dw J_88CF2B
+lda $0AB0 : cmp #!Jeweler5Cost : bcc J_88CF2B
+jmp J_88D057
+J_88CF2B:
+cop #$D0 : db $EE, $01 : dw J_88CF3C
+lda $0AB0 : cmp #!Jeweler6Cost : bcc J_88CF3C
+jmp J_88D067
+J_88CF3C: 
+lda $0AB0 : cmp #!Jeweler7Cost : bcc B_88CF47
+jmp J_88D077
+B_88CF47:
+cop #$BF : dw EJeweler_Text_MenuWithConfig
+J_88CF4B:
+cop #$BE : db $03,$01 : dw EJeweler_Text_MenuOptions
+EJeweler_Text_MenuOptions:
+  dw B_88CF59
+  dw B_88CF59, B_88CF5E, B_88CFA6
+B_88CF59:
+cop #$BF : dw EJeweler_Text_Goodbye
+rtl
+B_88CF5E:
+cop #$D6 : db $01 : dw B_88CF68
+cop #$D6 : db $2e : dw B_88CF68
+cop #$D6 : db $2f : dw B_88CF68
+cop #$BF : dw EJeweler_Text_GiveZeroJewels
+rtl
+B_88CF68:
+sed
+sep #$20
+ldy #$0000
+-:
+lda $0ab4,y
+  cmp #$01 : beq .IsOne
+  cmp #$2e : beq .IsTwo
+  cmp #$2f : beq .IsThree
+--:
+iny : cpy #$0010 : bne -
+bra B_88CF97
+.IsThree:
+lda #$03 : bra +
+.IsTwo:
+lda #$02 : bra +
+.IsOne:
+lda #$01 ;: bra +
++:
+clc : adc $0ab0 : sta $0ab0
+lda #$00 : sta $0ab4,y
+bra --
+B_88CF97:
+rep #$20
+cld
+cop #$BF : dw EJeweler_Text_GiveJewels
+jmp J_88CED6
+B_88CFA6:
+cop #$BF : dw EJeweler_Text_SeeInventory
+cop #$BF : dw EJeweler_Text_DrawInventoryBox
+cop #$D0 : db $E9, $00 : dw B_88CFB8
+cop #$BF : dw EJeweler_Text_SetRedPalette
+B_88CFB8:
+cop #$BF : dw EJeweler_Text_Inventory_Reward1
+cop #$D0 : db $EA, $00 : dw B_88CFC6
+cop #$BF : dw EJeweler_Text_SetRedPalette
+B_88CFC6:
+cop #$BF : dw EJeweler_Text_Inventory_Reward2
+cop #$D0 : db $EB, $00 : dw B_88CFD4
+cop #$BF : dw EJeweler_Text_SetRedPalette
+B_88CFD4:
+cop #$BF : dw EJeweler_Text_Inventory_Reward3
+cop #$D0 : db $EC, $00 : dw B_88CFE2
+cop #$BF : dw EJeweler_Text_SetRedPalette
+B_88CFE2:
+cop #$BF : dw EJeweler_Text_Inventory_Reward4
+cop #$D0 : db $ED, $00 : dw B_88CFF0
+cop #$BF : dw EJeweler_Text_SetRedPalette
+B_88CFF0:
+cop #$BF : dw EJeweler_Text_Inventory_Reward5
+cop #$D0 : db $EE, $00 : dw B_88CFFE
+cop #$BF : dw EJeweler_Text_SetRedPalette
+B_88CFFE:
+cop #$BF : dw EJeweler_Text_Inventory_Reward6
+cop #$BF : dw EJeweler_Text_Inventory_Secrets
+cop #$BF : dw EJeweler_Text_MenuWithConfig
+jmp J_88CF4B
+B_88D012:
+cop #$BF : dw EJeweler_Text_YourInventoryFull
+rtl
+J_88D017:
+%MTryGiveItemAndFlag(!Jeweler1Item, $e9)
+cop #$D0 : db $e9,$00 : dw B_88D012
+jmp J_88CEE7
+J_88D02A:
+%MTryGiveItemAndFlag(!Jeweler2Item, $ea)
+cop #$D0 : db $ea,$00 : dw B_88D012
+jmp J_88CEF8
+J_88D037:
+%MTryGiveItemAndFlag(!Jeweler3Item, $eb)
+cop #$D0 : db $eb,$00 : dw B_88D012
+jmp J_88CF09
+J_88D04A:
+%MTryGiveItemAndFlag(!Jeweler4Item, $ec)
+cop #$D0 : db $ec,$00 : dw B_88D012
+jmp J_88CF1A
+J_88D057:
+%MTryGiveItemAndFlag(!Jeweler5Item, $ed)
+cop #$D0 : db $ed,$00 : dw B_88D012
+jmp J_88CF2B
+J_88D067:
+%MTryGiveItemAndFlag(!Jeweler6Item, $ee)
+cop #$D0 : db $ee,$00 : dw B_88D012
+jmp J_88CF3C
+J_88D077:
+cop #$BF : dw EJeweler_Text_GetSecrets
+lda #$0202 : sta $0648
+lda #$0404 : sta $064A
+stz $0ad4
+cop #$26 : db $E9 : dw $0330, $03d0 : db $80,$00,$44
+rtl
+EJeweler_Die:
+cop #$E0
+
+EJeweler_Text_Greeting:
+db $D3,$48,$0E,$8C,$AC,$D6,$FE,$87,$A5,$82,$8A,$8B,$84,$81,$84,$A2,$A2,$A9,$2A,$AC,$CF,$CA
+EJeweler_Text_ImHolding:
+EJeweler_Text_GiveJewels:
+db $CE,$48,$AC,$D6,$98,$C6,$02,$00,$B0,$0A,$AC,$49,$84,$A7,$84,$8B,$A3,$2B,$CB
+db $8E,$8D,$84,$AC,$85,$8E,$A2,$AC,$84,$80,$82,$87,$AC,$8E,$85,$AC,$A9,$80,$2A,$CF,$CA
+EJeweler_Text_MenuWithConfig:
+db $D3,$C3,$00
+EJeweler_Text_Menu:
+db $CE,$D6,$62,$83,$88,$83,$AC,$A9,$8E,$A5,$AC,$84,$A6,$84,$A2,$AC,$A7,$80,$8D,$A4,$0D,$CB
+db $AC,$D6,$24,$D6,$FC,$A4,$8E,$AC,$A3,$84,$84,$AC,$A9,$8E,$A5,$CB
+db $AC,$46,$88,$A6,$84,$AC,$A9,$8E,$A5,$AC,$62,$84,$83,$AC,$49,$84,$A7,$84,$8B,$A3,$CB
+db $AC,$63,$84,$84,$AC,$D6,$FE,$88,$8D,$A6,$84,$8D,$A4,$8E,$A2,$A9,$CA
+EJeweler_Text_Goodbye:
+db $CE,$45,$8E,$A2,$86,$88,$A6,$84,$AC,$8C,$84,$AC,$88,$85,$AC,$48,$AC,$D6,$82,$AC,$CB
+db $A3,$87,$80,$8A,$84,$AC,$87,$80,$8D,$83,$A3,$2A,$AC,$C0
+EJeweler_Text_GiveZeroJewels:
+db $CE,$48,$AC,$80,$A0,$8E,$8B,$8E,$86,$88,$AA,$84,$2B,$AC,$48,$AC,$85,$8E,$A2,$86,$8E,$A4,$AC,$A9,$8E,$A5,$CB
+db $D6,$F2,$A4,$87,$84,$A2,$84,$2A,$AC,$69,$8E,$A5,$AC,$8C,$80,$A9,$AC,$86,$8E,$CB
+db $8D,$8E,$A7,$2A,$AC,$C0
+EJeweler_Text_YourInventoryFull:
+db $D3,$D6,$30,$A0,$8E,$8A,$84,$A2,$0E,$A3,$AC,$D6,$A3,$8D,$8E,$A4,$AC,$CB
+db $D6,$FE,$86,$80,$8C,$84,$2B,$AC,$48,$8A,$84,$2A,$AC,$AC,$C0
+EJeweler_Text_GetSecrets:
+db $D3,$D6,$69,$8D,$8E,$AC,$83,$80,$88,$A3,$A9,$4F,$AC,$D6,$69,$CB
+db $8D,$8E,$AC,$83,$80,$88,$A3,$A9,$AC,$80,$A4,$AC,$80,$8B,$8B,$4F,$AC,$C0
+EJeweler_Text_SetRedPalette:
+db $C3,$04,$CA
+EJeweler_Text_SetBluePalette:
+db $C3,$00,$CA
+EJeweler_Text_DrawInventoryBox:
+db $C1,$03,$0B,$C7,$08,$07,$CE,$D2,$00,$CA
+EJeweler_Text_Inventory:
+.Reward1:
+db $CE
+db "!Jeweler1RowText",$CB,$C3,$00,$CA
+.Reward2:
+db "!Jeweler2RowText",$CB,$C3,$00,$CA
+.Reward3:
+db "!Jeweler3RowText",$CB,$C3,$00,$CA
+.Reward4:
+db "!Jeweler4RowText",$CB,$C3,$00,$CA
+.Reward5:
+db "!Jeweler5RowText",$CB,$C3,$00,$CA
+.Reward6:
+db "!Jeweler6RowText",$CB,$C3,$00,$CA
+.Secrets:
+db "!Jeweler7RowText",$C0
+EJeweler_Text_SeeInventory:
+db $CE,$D6,$69,$80,$AC,$83,$80,$88,$A3,$A9,$AC,$88,$85,$AC,$A9,$8E,$A5,$AC,$83,$8E,$2A,$C0
+
+warnpc $88d6a9
+}
+
+
+org $88daf0
+; Skip a lot of Gaia chatter.
+{
+EGaia_TryChat:
+lda #$fff0 : tsb $065a
+cop #$DA : db $05
+lda #$fff0 : trb $065a
+ldy $06
+lda #$FFFF : sta $0024,y
+lda $0ace : cmp $0aca : beq +
+EGaia_TryChat_DoHeal:
+  cop #$BF : dw $de4d
+  lda #$FFF0 : tsb $065a
+  lda #$0028 : sta $0b22
+  cop #$C1
+  lda $0ace : cmp $0aca : beq +
+  rtl
++:
+EGaia_FindChatMapping:
+; IOGR only has one special chat mapping.
+lda #$FFF0 : trb $065A
+lda $0b12 : cmp #$00cc : bne EGaia_MaybeOfferDarkGaia
+lda $0aac : beq EGaia_MaybeOfferDarkGaia   ; Bottom DS has $0aac = 0, top has it = 1.
+cop #$D0 : db $bd,$01 : dw EGaia_MaybeOfferDarkGaia
+%MTryGiveItemAndFlag(!PyramidGaiaItem, $bd)
+EGaia_MaybeOfferDarkGaia:
+lda $306400 : and #$0001 : beq EGaia_OfferSave
+EGaia_OfferDarkGaia:
+cop #$BF : dw EGaia_TextOfferDarkGaia
+cop #$BE : db $02,$01 : dw .Options
+.Options:
+  dw .SayNo, .SayNo, .SayYes
+.SayYes:
+cop #$26 : db $e4 : dw $00f0,$0140 : db $80,$00,$22
+cop #$C1
+rtl
+.SayNo:
+EGaia_OfferSave:
+cop #$BF : dw EGaia_TextOfferSave
+cop #$BE : db $02,$02 : dw .Options
+.Options:
+  dw .SayYes, .SayYes, .SayNo
+.SayYes:
+lda $0D8C    ; Save file index.
+jsl $83D916  ; Save game routine.
+cop #$07 : db $29
+lda #$FFF0 : tsb $065A
+cop #$DA : db $3B
+lda #$FFF0 : trb $065A
+cop #$BF : dw EGaia_TextFinishedRecordingOfferWarp
+bra +
+.SayNo:
+EGaia_OfferWarp:
+cop #$BF : dw EGaia_TextOfferWarp
++:
+cop #$BE : db $02,$01 : dw .Options
+.Options:
+  dw .SayNo, .SayNo, .SayYes
+.SayYes:
+stz $0ad4
+jsl LR_ClearMonsterKilledFlags
+cop #$26 : db $01 : dw $00e0,$0070 : db $83,$00,$43
+cop #$C5
+.SayNo:
+cop #$BF : dw EGaia_TextThenGo
+ldy $06
+lda #$0000 : sta $0024,y
+cop #$C5
+
+EGaia_TextOfferDarkGaia:
+db $D3,$45,$80,$82,$84,$AC,$D6,$0C,$46,$80,$88,$80,$0D,$CB
+db $AC,$4D,$8E,$CB
+db $AC,$69,$84,$A3,$CA
+EGaia_TextOfferSave:
+db $D3,$CE,$62,$84,$82,$8E,$A2,$83,$AC,$A7,$87,$80,$A4,$0E,$A3,$AC,$87,$80,$A0,$A0,$84,$8D,$84,$83,$CB
+db $A3,$8E,$AC,$85,$80,$A2,$0D,$CB,$AC,$62,$84,$82,$8E,$A2,$83,$CB,$AC,$D6,$0D,$A2,$84,$82,$8E,$A2,$83,$CA
+EGaia_TextFinishedRecordingOfferWarp:
+db $CE,$45,$88,$8D,$88,$A3,$87,$84,$83,$AC,$A2,$84,$82,$8E,$A2,$83,$88,$8D,$86,$2A,$2A,$2A,$CF
+EGaia_TextOfferWarp:
+db $CE,$62,$84,$A4,$A5,$A2,$8D,$AC,$A4,$8E,$AC,$D6,$47,$42,$80,$A0,$84,$0D,$CB
+db $AC,$4D,$8E,$CB,$AC,$69,$84,$A3,$AC,$AC,$CA
+EGaia_TextThenGo:
+db $CE,$64,$87,$84,$8D,$AC,$86,$8E,$2A,$C0
+
+}
+
+org $88eb15
+; "Cut out ability explanation text"
+ldy $26
+lda #$0000 : sta $0024,y
+cop #$04 : db $16
+cop #$DA : db $01
+lda #$FFF0 : trb $065A
+cop #$E0
+
+org $88eb5a
+EDarkSpace_MapAbilityMappings:    ; format=map,ability
+{
+db !DSPsychoDashMap,$01
+db !DSPsychoSliderMap,$02
+db !DSSpinDashMap,$04
+db !DSDarkFriarMap,$10
+db !DSAuraBarrierMap,$20
+db !DSEarthquakerMap,$40
+db $00,$00
+}
+
+org $88eb81
+db $c0   ; "Shorten ability acquisition text"
+
+org $88f0a1
+db $10   ; Meet Freedan
+
+org $88fa25
+jmp SolidArmDeathOverride
+
+org $88fa32
+; Solid Arm intro text.
+db "Weave a circle",$cb
+db "  round him thrice,",$cb
+db "And close your eyes",$cb
+db "  with holy dread,",$cf
+db "For he on honey-dew",$cb
+db "  hath fed,",$cb
+db "And drunk the milk",$cb
+db "  of Paradise.",$c0
+
+org $88fbc9
+; Solid Arm death text.
+db $d5,$02
+db "Ed, what an ugly thing",$cb
+db "to say... does this",$cb
+db "mean we're not friends",$cb
+db "anymore?",$cf
+db "You know, Ed, if I thought",$cb
+db "you weren't my friend,",$cb
+db "I just don't think",$cb
+db "I could bear it.",$c0
+
+org $88fcb2
+; Exit to Dao from Mansion
+cop #$26 : db $c3 : dw $0140,$0088 : db $00,$00,$23
+
+org $88fd16
+; Force change back to Will.
+{
+LR_ForceChangeToWill:
+lda $0AD4 : beq .Done
+cop #$9C : dl EForceChangeToWill : dw $2000
+.Done:
+rtl
+EForceChangeToWill:
+cop #$C8 : dw $f309   ; Effect of saying Yes at Will transform statue.
+cop #$E0
+}
+
+DaoOfferTravelToNatives:
+{
+cop #$BF : dw .TextOfferTravel
+cop #$BE : db $02,$01 : dw .Options
+.Options:
+  dw .SayNo, .SayNo, .SayYes
+.SayNo:
+cop #$BF : dw .TextDeclinedTravel
+rtl
+.SayYes:
+cop #$26 : db $ac : dw $01c0,$01d0 : db $06,$00,$22
+cop #$C1
+rtl
+.TextOfferTravel:
+db $d3
+db "Go to Natives' Village?",$cb
+db "_No",$cb
+db "_Yes",$ca
+.TextDeclinedTravel:
+db $ce
+db "Come back any time!",$c0
+.TextPostGiveItem:
+db $d3
+db "If you want a guide to",$cb
+db "take you to the Natives'",$cb
+db "Village, I can get one",$cb
+db "for you.",$c0
+}
+
+SolidArmDeathOverride:
+cop #$CC : db $f6
+cop #$26 : db $e3 : dw $0280,$01a0 : db $80,$10,$23
+cop #$E0
+
+;org $88fd80
+;; jeweler2.bin
+;{
+;cop #$D6 : db $2e : dw $fd92
+;cop #$D6 : db $2f : dw $fd9a
+;cop #$D6 : db $01 : dw $cf68
+;jmp $cf63
+;
+;cop #$D5 : db $2e
+;lda #$0002 : bra +
+;cop #$D5 : db $2f
+;lda #$0003
+;+:
+;if (!ModeFlagRjm == 0)
+;{
+;sed
+;clc : adc $0ab0 : sta $0ab0
+;cld
+;cop #$D6 : db $2f : dw $fd9a
+;cop #$D6 : db $01 : dw $cf68
+;jmp $cf9f
+;
+;; filler
+;db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+;
+;}
+;else   ; RJM handler
+;{
+;pha
+;pha
+;-:
+;jsl $83fdb2
+;jsl $83fda0
+;pla : dec : beq +
+;  pha : bra -
+;+:
+;-:
+;jsl $83fda9
+;pla : dec : beq +
+;  pha : bra -
+;+:
+;cop #$D6 : db $2f : dw $fd9a
+;cop #$D6 : db $01 : dw $cf68
+;jmp $cf9f
+;
+;cop #$D5 : db $01
+;jsl $83fda0
+;jsl $83fda9
+;jmp $cf9a
+;}
+;endif
+;}
+
+
+
+
+org $8980cb
+jmp DaoSpiritLogicOverride
+
+org $89884c
+db $01,$00   ; "Shorten Olman text boxes"
+
+org $898891
+cop #$0B
+rtl      ; Stop Olman's dialogue early
+
+org $898903
+db $d3 : db "heya.",$c0
+
+org $8989a2
+db $d3 : db "you've been busy, huh?",$c0
+
+org $898fad
+cop #$CC : db $0e
+cop #$CC : db $0f
+rtl     ; Speed up rooftop sequence
+
+org $89999b
+jmp CrystalRingBarrierLogicOverride
+
+org $8999aa
+jmp CrystalRingBarrierLogicOverride2
+
+org $899a49
+%MTryGiveItemAndFlag(!BabelForceFieldItem, $dc)
+cop #$D0 : db $dc,$01 : dw BabelForceFieldGotItem
+rtl
+BabelForceFieldGotItem:
+cop #$E0
+
+org $899a70
+db $d3,"Well, lookie here.",$c0   ; Crystal Ring popped off text.
+
+org $899b8f
+db $d3
+db "!SpoilerTextBabelSpirit"
+db $c0
+
+
+
+; Lilly button is available if Lilly is with you due to Necklace.
+org $89aa40
+db $15 : dw $1000
+cop #$D0 : db $6f,$00 : dw $aa6c
+cop #$CC : db $02
+org $89be74
+db $d7,$18    ; Dialogue to say "Lilly's" instead of Strange.
+
+org $89bf7d
+; Allow Edward's to spawn a DS containing an ability.
+cop #$A0 : dl $88d6ac : dw $00a8,$04c0 : dw $0b00
+jmp EDarkSpaceSpawnerMemoryShuffler
+
+org $89bf95
+db $10   ; Meet Lilly
+
+org $89c037
+jsl LR_ForceChangeToWill   ; At Edward's dungeon exit.
+cop #$E0
+
+org $89c5bb
+; Singing Statue
+%MTryGiveItemAndFlag(!MPCliffItem, $32)
+lda #$eff0 : trb $065a
+cop #$E0
+
+org $89c660
+; Remove Wind Melody when door opens.
+WindMelodyOpenAndRemove:
+cop #$CD : dw $0112
+cop #$D5 : db $08
+cop #$E0
+org $89c676
+db $67
+org $89c681   ; Change Inca glowing tile check area (but not graphic location).
+cop #$45 : db !IncaTileWest,!IncaTileNorth,!IncaTileEast,!IncaTileSouth
+org $89c6a3
+cop #$D0 : db $10,$01 : dw WindMelodyOpenAndRemove
+
+org $89ca02
+; incaship.bin
+{
+cop #$80 : db $1a : cop #$89
+cop #$25 : db $16,$13
+cop #$0B
+cop #$C0 : dw $ca31
+lda $0ad4 : beq +
+ldy $09aa
+sep #$20
+lda #$88 : sta $0002,y
+rep #$20
+lda #$F37d : sta $0000,y
+lda #$0800 : tsb $09ae
++:
+cop #$C1
+rtl
+
+cop #$BF : dw $ca89
+cop #$BE : db $21,$03 : dw $ca3b
+  dw $ca41
+  dw $ca41,$ca46
+
+cop #$BF : dw $cae0
+rtl
+
+cop #$D6 : db $1b : dw $ca50
+cop #$BF : dw $cb06
+rtl
+
+cop #$BF : dw $cb30
+cop #$BE : db $42,$01 : dw $ca5a
+  dw $ca41
+  dw $ca41,$ca65,$ca71,$ca7d
+rtl
+
+cop #$26 : db $78 : dw $0278,$0390 : db $00,$00,$45
+cop #$C5
+
+cop #$26 : db $30 : dw $0048,$0110 : db $03,$00,$21
+cop #$C5
+
+cop #$26 : db $5A : dw $0090,$0070 : db $83,$00,$14
+cop #$C5
+
+db $C1,$03,$06,$C7,$0D,$04,$C2,$02,$48,$AC,$89,$A5,$A3,$A4,$AC,$8C,$84,$A4,$AC,$80,$AC,$82,$80,$A0,$A4,$80,$88,$8D,$CB,$8E,$85,$85,$84,$A2,$88,$8D,$86,$AC,$A0,$80,$A3,$A3,$80,$86,$84,$AC,$80,$82,$A2,$8E,$A3,$A3,$CB,$A4,$87,$84,$AC,$A3,$84,$80,$2A,$AC,$48,$8D,$A4,$84,$A2,$84,$A3,$A4,$84,$83,$0D,$CB,$C3,$00,$AC,$4D,$8E,$CC,$14,$69,$84,$A3,$AC,$AC,$CA,$C1,$03,$06,$C7,$0D,$04,$C2,$02,$4B,$84,$A4,$AC,$8C,$84,$AC,$D6,$A4,$88,$85,$AC,$A9,$8E,$A5,$AC,$D7,$52,$CB,$D6,$FE,$8C,$88,$8D,$83,$2A,$AC,$AC,$AC,$C0,$C1,$03,$06,$C7,$0D,$04,$C2,$02,$D6,$63,$48,$AC,$D6,$DA,$87,$84,$0E,$A3,$AC,$80,$A3,$8A,$88,$8D,$86,$CB,$85,$8E,$A2,$AC,$86,$8E,$8B,$83,$2A,$2A,$2A,$AC,$AC,$AC,$AC,$C0,$C1,$03,$06,$C7,$0D,$04,$C2,$02,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D,$CB,$C3,$00,$AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$42,$8E,$80,$A3,$A4,$CB,$AC,$67,$80,$A4,$84,$A2,$8C,$88,$80,$AC,$AC,$AC,$AC,$63,$84,$80,$AC,$60,$80,$8B,$80,$82,$84,$CA
+
+}
+
+org $89cfaa
+jsl LR_ForceChangeToWill   ; After Castoth.
+lda #$EFF0 : trb $065a
+cop #$E0
+
+org $89d0f5
+; moontribe
+{
+db $00 : dw $3000
+EMoonTribeSpirit:
+lda #$0200 : tsb $12
+cop #$D0 : db $2a,$01 : dw .TeapotApplied
+cop #$D0 : db $08,$01 : dw .SeenTeapotMessage
+cop #$21 : db $03 : dw .ShowTeapotMessage
+rtl
+.ShowTeapotMessage:
+cop #$BF : dw Text_MoonTribeHealUs
+cop #$CC : db $08
+.SeenTeapotMessage:
+rtl
+.TeapotApplied:
+cop #$CC : db $10
+cop #$3C : dl $80b800
+cop #$C2
+lda #$2000 : trb $10
+cop #$0B
+cop #$C0 : dw .OnInteract
+cop #$C1
+cop #$82 : db $27,$3b
+cop #$89
+rtl
+.OnInteract:
+cop #$BF : dw Text_MoonTribeOffer
+cop #$BE : db $02,$01 : dw ..Options
+..Options:
+  dw ..SayNo,..SayNo,..SayYes
+..SayNo:
+cop #$BF : dw Text_MoonTribeLaugh
+rtl
+..SayYes:
+cop #$26 : db $4c : dw $0168,$0040 : db $83,$00,$22
+cop #$C1
+rtl
+; "Heal us" etc.
+Text_MoonTribeHealUs:
+db $D3,$D6,$31,$64,$A2,$88,$81,$84,$2F,$CB
+db $47,$84,$80,$8B,$AC,$A5,$A3,$2A,$2A,$2A,$AC,$AC,$AC,$AC,$CB
+db $64,$87,$84,$AC,$64,$84,$80,$A0,$8E,$A4,$2A,$2A,$2A,$AC,$C0
+; "Want a lift?" etc.
+Text_MoonTribeOffer:
+db $D3,$D6,$31,$64,$A2,$88,$81,$84,$2F,$AC,$67,$80,$8D,$A4,$AC,$80,$AC,$8B,$88,$85,$A4,$0D,$CB
+db $AC,$4D,$8E,$AC,$CB
+db $AC,$69,$84,$A3,$AC,$CA
+Text_MoonTribeLaugh:
+db $CE,$4A,$A5,$AC,$8A,$A5,$AC,$8A,$A5,$2A,$2A,$2A,$C0
+}
+
+org $89f710
+EDarkSpaceSpawnerMemoryShuffler:
+lda $0e : sta $24
+lda #$2000 : sta $0e
+cop #$C2    ; Stay alive for 1 frame so spawned DS can access us.
+cop #$E0
+
+DaoSpiritLogicOverride:   ; Appears if either BabelMQ or Solid Arm is beaten.
+cop #$D0 : db $f6,$01 : dw $80d1
+cop #$D1 : dw $0179 : db $01 : dw $80d1
+cop #$E0
+
+CrystalRingBarrierLogicOverride:
+cop #$D0 : db $dc,$00 : dw $99a0
+cop #$D0 : db $3e,$00 : dw $99a0
+cop #$D0 : db $b4,$01 : dw $999a
+jmp $99a0
+CrystalRingBarrierLogicOverride2:
+cop #$D0 : db $dc,$01 : dw $999a
+jmp $99af
+}
+
+
+
+
+
+; Speed up the Mine elevator
+org $8aa5d6
+cop #$83 : db $34,$0f,$07
+
+org $8aa615
+cop #$83 : db $34,$10,$08
+
+org $8aa6b6
+db $0c : dw $1000
+EMineSlave:
+
+org $8aa751
+%MTryGiveItemAndFlag(!MineCombatSlaveItem, $a2)
+cop #$D0 : db $a2,$00 : dw MineSlaveInvFullResponse
+rtl
+MineSlaveInvFullResponse:
+lda #$a6f9 : sta $00
+rtl
+
+org $8aa771
+%MTryGiveItemAndFlag(!MineRampSlaveItem, $a3)
+cop #$D0 : db $a3,$00 : dw MineSlaveInvFullResponse
+rtl
+
+org $8ace9b
+; Expedite transform and map change after Viper.
+jsl LR_ForceChangeToWill
+cop #$C2
+lda $09AE : bit #$0800 : beq +
+  rtl
++:
+cop #$26 : db $5a : dw $0090,$0070 : db $83,$00,$14
+cop #$C1
+rtl
+
+
+
+; Replace sound type selection with difficulty selection.
+table "table_invtext.txt",rtl
+org $8be43f
+lda #$0001 : sta $0d8e    ; Default is Intermediate
+org $8be4ae
+db $03    ; 3 difficulty levels available
+
+; Entr'acte: upon starting a new game, set IOGR flags.
+org $8be515
+cop #$26 : db $08 : dw $0050, $00a0 : db $80, $00, $12
+jmp $fd00
+
+; Back to difficulty settings.
+org $8be7b5
+db $03    ; --- and on the other menu too
+org $8bf5d2
+db "Level"    ; Change "Sound" to "Level"
+org $8bf55a
+db "Level"    ; --- and on the other menu too
+org $8bf667    ; Pointers to level name texts
+dw TextDifficultyLevel0
+dw TextDifficultyLevel1
+dw TextDifficultyLevel2
+dw TextDifficultyLevel3
+
+org $8bfcc0    ; Use some free space for difficulty level names
+TextDifficultyLevel0:
+db "Beginner",$ca
+TextDifficultyLevel1:
+db "Intermediate",$ca
+TextDifficultyLevel2:
+db "Advanced",$ca
+TextDifficultyLevel3:
+db "Expert",$ca
+
+
+org $8bfd00
+; switches.bin, game initialization
+{
+lda #$0201 : sta $0a58
+lda #$0403 : sta $0a5a
+lda #$0605 : sta $0a5c
+lda #$0003 : sta $0a5e
+cop #$CD : dw $0010
+cop #$CD : dw $0010
+cop #$CD : dw $0010
+cop #$CD : dw $0010
+cop #$CD : dw $0010
+cop #$CD : dw $0010
+lda #$0300 : sta $0a48
+lda #$0805 : sta $0a4a
+lda #$2012 : sta $0a4c
+lda #$5030 : sta $0a4e
+cop #$CD : dw $0010
+if !SettingOpenMode == 1
+cop #$CD : dw $02ff    ; Flag for autotracker.
+else
+cop #$CD : dw $0010
+endif
+cop #$CC : db $16
+cop #$CC : db $17
+cop #$CC : db $19
+cop #$CC : db $1A
+cop #$CC : db $1B
+cop #$CC : db $1C
+cop #$CC : db $1D
+cop #$CC : db $26
+cop #$CC : db $27
+cop #$CC : db $3B
+cop #$CC : db $3D
+cop #$CC : db $3F
+cop #$CC : db $47
+cop #$CC : db $49
+cop #$CC : db $4A
+cop #$CC : db $56
+cop #$CC : db $57
+cop #$CC : db $58
+cop #$CC : db $64
+cop #$CC : db $65
+cop #$CC : db $66
+cop #$CC : db $67
+cop #$CC : db $68
+cop #$CC : db $6A
+cop #$CC : db $6B
+cop #$CC : db $6C
+cop #$CC : db $6E
+cop #$CC : db $71
+cop #$CC : db $72
+cop #$CC : db $73
+cop #$CC : db $74
+cop #$CC : db $75
+cop #$CC : db $76
+cop #$CC : db $77
+cop #$CC : db $7A
+cop #$CC : db $7C
+cop #$CC : db $7D
+cop #$CC : db $82
+cop #$CC : db $83
+cop #$CC : db $84
+cop #$CC : db $86
+cop #$CC : db $87
+cop #$CC : db $8B
+cop #$CC : db $8C
+cop #$CC : db $8D
+cop #$CC : db $8F
+cop #$CC : db $90
+cop #$CC : db $91
+cop #$CC : db $92
+cop #$CC : db $93
+cop #$CC : db $94
+cop #$CC : db $97
+cop #$CC : db $9D
+cop #$CC : db $A4
+cop #$CC : db $A5
+cop #$CC : db $A7
+cop #$CC : db $A9
+cop #$CC : db $AC
+cop #$CC : db $AD
+cop #$CC : db $AE
+cop #$CC : db $AF
+cop #$CC : db $B0
+cop #$CC : db $B1
+cop #$CC : db $B2
+cop #$CC : db $B3
+cop #$CC : db $B6
+cop #$CC : db $D0
+cop #$CC : db $D2
+cop #$CC : db $D3
+cop #$CC : db $D6
+cop #$CC : db $DD
+cop #$CC : db $DE
+cop #$CC : db $DF
+cop #$CC : db $10
+cop #$CE : db $F4   ; For Apocalypse Gaia.
+lda #$2800 : trb $09ae
+jsl $81ffb0
+jsl $80f49a
+cop #$E0
+}
+
+org $8bfe40
+; infdeath.bin, text for winning RJM with 0 HP
+{
+db $C1
+db $03,$04
+db $C7
+db $0D,$03,$D2,$00
+db $C2
+db $13,$D2,$00,$D5,$06,$D6,$63,$A9,$8E,$A5,$AC,$D6,$B3,$88,$A4,$AC,$87,$84,$A2,$84,$2A
+db $C9
+db $B4
+db $CB
+db $CB
+db $48,$AC,$A3,$A5,$A0,$A0,$8E,$A3,$84,$AC,$48,$AC,$D6
+db $CA
+db $CB
+db $82,$8E,$8D,$86,$A2,$80,$A4,$A5,$8B,$80,$A4,$84,$AC,$D7
+db $C7
+db $69,$8E,$A5,$AC
+db $CB
+db $D6,$80,$A3,$8E,$AC,$82,$8B,$8E,$A3,$84,$AC,$A4,$8E,$AC,$A7,$88,$8D,$8D,$88,$8D,$86,$2A
+db $C9
+db $B4
+db $CB
+db $CB
+db $D6,$62,$87,$80,$A0,$A0,$84,$8D,$A3,$AC,$8D,$8E,$A7,$AB,$AC,$A9,$8E,$A5,$AC
+db $CB
+db $80,$A3,$8A,$0D,$AC,$D6,$63,$80,$85,$A4,$84,$A2,$AC,$D6,$D6
+db $CB
+db $A4,$84,$A8,$A4,$AC,$88,$A3,$AC,$85,$88,$8D,$88,$A3,$87,$84,$83,$AB,$AC,$A9,$8E,$A5,$AC
+db $CB
+db $D6,$EF,$83,$88,$84,$2A
+db $C9
+db $B4
+db $CB
+db $CB
+db $4E,$A6,$84,$A2,$2A,$AC,$40,$8D,$83,$AC,$8E,$A6,$84,$A2,$2A,$AC,$40,$8D,$83,$AC,$8E,$A6,$84,$A2,$2A
+db $C9
+db $B4
+db $CB
+db $CB
+db $48,$AC,$D6,$D8,$D6,$6B,$85,$88,$A8,$88,$8D,$86,$AC
+db $CB
+db $A4,$87,$88,$A3,$2A,$AC,$D6,$50,$D7,$8F
+db $CB
+db $D6
+db $C8
+db $48,$AC,$D6,$7A,$83,$8E,$AC,$A4,$8E,$AC
+db $CB
+db $A3,$A4,$8E,$A0,$AC,$D6,$D6,$A0,$A5,$A2,$86,$80,$A4,$8E,$A2,$A9,$AC,$8E,$85,$AC
+db $CB
+db $88,$8D,$85,$88,$8D,$88,$A4,$84,$AC,$83,$84,$80,$A4,$87,$2A
+db $C9
+db $B4
+db $CB
+db $CB
+db $D6,$30,$A3,$8E,$8C,$84,$83,$80,$A9,$AC,$48,$AC,$D6,$EF,$85,$88,$A8,$AC
+db $CB
+db $88,$A4,$2A
+db $C9
+db $B4
+db $CB
+db $CB
+db $41,$A5,$A4,$AC,$A9,$8E,$A5,$AC,$A3,$84,$84,$AB,$AC,$48,$0E,$8C,$AC,$D7,$95
+db $CB
+db $A1,$A5,$88,$A4,$84,$AC,$8B,$80,$AA,$A9,$2A
+db $C9
+db $B4
+db $CB
+db $CB
+db $2D,$41,$A5,$A4,$AC,$41,$80,$86,$A5,$AB,$2E,$AC,$A9,$8E,$A5,$AC,$A3,$80,$A9,$AB,$AC,$2D,$A9,$8E,$A5,$AC
+db $CB
+db $A4,$8E,$8E,$8A,$AC,$A4,$87,$84,$AC,$D6,$DF,$A4,$8E,$AC,$82,$8E,$83,$84,$AC
+db $CB
+db $D6,$D6,$A4,$84,$A8,$A4,$2A,$2E
+db $C9
+db $B4
+db $CB
+db $CB
+db $69,$84,$A3,$2A,$AC,$69,$84,$A3,$AC,$48,$AC,$83,$88,$83,$2A
+db $C9
+db $B4
+db $C8
+db $CA
+db $FF,$FF,$FF,$FF,$FF,$FF
+lda $0aca : beq +
+cop #$BF : dw $d558
+jmp $d32f
++:
+cop #$BF : dw $fe40
+cop #$E0
+}
+
+
+
+org $8c8000
+
+incsrc "iogr_8C_actor_table.asr"
+
+warnpc $8CE5E5
+
+
+
+
+org $90803c
+; Inventory sprite pointers for hieroglyphs.
+dw !HieroSpritePointer1
+dw !HieroSpritePointer2
+dw !HieroSpritePointer3
+dw !HieroSpritePointer4
+dw !HieroSpritePointer5
+dw !HieroSpritePointer6
+
+org $908052    ; Add anim pointer for inventory multijewel sprite.
+dw $819c
+dw $819c
+dw $819c
+dw $819c
+dw $819c
+dw AAnimInvMultijewel
+dw AAnimInvMultijewel
+dw $819c
+
+org $908376
+AAnimInvMultijewel:
+dw $0007 : dw AMetaspriteInvMultijewel1
+dw $0007 : dw AMetaspriteInvMultijewel2
+dw $ffff
+
+org $908ea3
+AMetaspriteInvMultijewel1:
+db $0A,$08,$11,$00
+db $F8,$F0,$01,$01,$F8,$10,$F0,$10
+db $03
+db $00,$08,$03,$0A,$01,$F2,$0C
+db $01,$03,$00,$03,$00,$02,$0C
+db $01,$00,$00,$00,$00,$02,$0C
+AMetaspriteInvMultijewel2:
+db $0A,$08,$11,$00
+db $F8,$F0,$01,$01,$F8,$10,$F0,$10
+db $03
+db $00,$07,$03,$09,$01,$F4,$0C
+db $01,$03,$00,$03,$00,$02,$0C
+db $01,$00,$00,$00,$00,$02,$0C
+
+
+
+
+org $da5a37
+; Remove a rock, preventing a Spin Dash softlock.
+incbin "Tilemap6D.bin"
+
+org $de28a5
+; Add door to Mu Passage tilemap.
+incbin "TilemapMuPassage.bin"
+
+org $df3ea0
+ATlMpIncaTileRoomTile:
+db 2,2
+dw $0400
+db !IncaTileRoomCompTilemap
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

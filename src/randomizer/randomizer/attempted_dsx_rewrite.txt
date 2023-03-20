@@ -1,0 +1,510 @@
+# Attempted hybrid algorithm, final state before giving up
+            if self.entrance_shuffle != "Uncoupled":
+                # The shuffler needs some help assembling closed, contiguous, playable dungeons.
+                dc_exits_from_kara = [73,247,543,599]
+                dc_exits_behind_drops = [130,302,303,307,568,572]
+                dc_exits_behind_reflexive_gates = [126,234,534]
+                dc_exits_from_difficult_corridors = [[465,466], [529,530], [565,566], [575,576], [594,596]]
+                dc_exits_from_boring_corridors = [[61,62], [123,124], [143,144], [403,404], [405,406], [411,412], [541,542]]
+                dc_exits_from_interesting_corridors = [[63,64], [121,122], [139,140], [223,226], [227,228], [229,232], [274,281], [280,301], [290,291], [304,305], [333,334], [524,526], [569,570], [573,574], [577,578], [581,582]]
+                dc_exits_from_t_junctions = [[65,66,68], [127,128], [133,134], [145,146], [147,148,150], [241,242,244], [276,287,289], [282,283,285], [335,336,338], [525,528,532], [535,536,540], [587,588,590]]
+                dc_exits_from_pyramid_junction = [636,642,648,654,662,668]
+                #dc_exits_from_dead_ends = [67,125,129,141,149,231,235,243,245,288,294,296,298,300,339,531,533,537,539,589,641,647,653,661,667,673]
+                dc_exits_from_dead_ends = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x02})
+                dc_dungeon_entrances_to_link = [60,120,222,402,462,522,562]
+                dc_preferred_ledge_targets = [71,73,149,153,233,235,288,471,539,567]
+                random.shuffle(dc_exits_from_kara)
+                random.shuffle(dc_exits_behind_drops)
+                random.shuffle(dc_exits_behind_reflexive_gates)
+                random.shuffle(dc_exits_from_difficult_corridors)
+                random.shuffle(dc_exits_from_boring_corridors )
+                random.shuffle(dc_exits_from_interesting_corridors)
+                random.shuffle(dc_exits_from_t_junctions)
+                random.shuffle(dc_exits_from_pyramid_junction)
+                random.shuffle(dc_exits_from_dead_ends)
+                random.shuffle(dc_dungeon_entrances_to_link)
+                random.shuffle(dc_preferred_ledge_targets)
+                for sublist in dc_exits_from_difficult_corridors+dc_exits_from_boring_corridors+dc_exits_from_interesting_corridors+dc_exits_from_t_junctions:
+                    random.shuffle(sublist)
+                
+                # Dungeon entrances need easy access to interesting corridors and junctions.
+                for dc_next_dungeon_entrance_to_link in dc_dungeon_entrances_to_link:
+                    dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                    self.join_exits(dc_next_dungeon_entrance_to_link,dc_next_exits_from_interesting_corridor[0],print_log)
+                    dc_first_exit = dc_next_exits_from_interesting_corridor[1]
+                    if random.randint(0,10) < 3 and len(dc_exits_from_boring_corridors) > 0:
+                        dc_next_exits_from_boring_corridor = dc_exits_from_boring_corridors.pop()
+                        self.join_exits(dc_first_exit,dc_next_exits_from_boring_corridor[0],print_log)
+                        dc_first_exit = dc_next_exits_from_boring_corridor[1]
+                    dc_next_exits_from_t_junction = dc_exits_from_t_junctions.pop()
+                    self.join_exits(dc_first_exit,dc_next_exits_from_t_junction[0],print_log)
+                    dc_second_exit = dc_next_exits_from_t_junction[1]
+                    if random.randint(0,10) < 1 and len(dc_exits_from_t_junctions) > 0:
+                        dc_next_exits_from_somewhere = dc_exits_from_t_junctions.pop()
+                    elif random.randint(0,10) < 4 and len(dc_exits_from_difficult_corridors) > 0:
+                        dc_next_exits_from_somewhere = dc_exits_from_difficult_corridors.pop()
+                    else:
+                        dc_next_exits_from_somewhere = dc_exits_from_interesting_corridors.pop()
+                    self.join_exits(dc_second_exit,dc_next_exits_from_somewhere[0],print_log)
+                
+                # Link the Pyramid rooms as in vanilla.
+                dc_exits_within_pyramid_rooms = [638, 644, 650, 656, 658, 664, 670]
+                for exitnum in dc_exits_within_pyramid_rooms:
+                    self.link_exits(exitnum, exitnum, print_log, True)
+                # Pyramid rooms lead to dead-end items.
+                dc_pyramid_room_terminal_exits = [640,646,652,660,666,672]
+                for exitnum in dc_pyramid_room_terminal_exits:
+                    self.join_exits(dc_exits_from_dead_ends.pop(),exitnum,print_log)
+                # Pyramid rooms 3 and 5 need easy Dark Space access. Put other Pyramid rooms behind gates.
+                dc_vanilla_exits_to_pyramid_junction = [637,643,649,655,663,669]
+                for pyramid_exit in dc_vanilla_exits_to_pyramid_junction:
+                    for candidate_exit in self.exits:
+                        if self.exits[candidate_exit][1] < 0 and ( (pyramid_exit in [649,663] and candidate_exit in [273,275,277,279,636,642,648,654,662,668]) or (pyramid_exit not in [649,663] and self.exits[candidate_exit][11] & 0x30) ):
+                            self.join_exits(pyramid_exit,candidate_exit,print_log)
+                            break
+                # The Diamond Block door leads to a dead end, ledge, or Pyramid room.
+                if self.exits[126][1] < 0:
+                    for candidate_exit in dc_all_shuffled_exits:
+                        if self.exits[candidate_exit][1] < 0 and self.exits[candidate_exit][11] & 0x42:
+                            self.join_exits(126,candidate_exit,print_log)
+                            break
+                            
+                ## Ledges must drop into other ledges, large junctions, or specific rooms.
+                #dc_ledge_bots = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x80})
+                #dc_ledge_tops = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x40})
+                #dc_preferred_ledge_targets = [exitnum for exitnum in dc_preferred_ledge_targets if self.exits[exitnum][1] < 0]
+                #dc_candidate_large_junction_exits = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x08 and len(self.exits[exitnum][12]) > 1})
+                #dc_candidate_large_junction_groups = []
+                #visited = []
+                #for exit in dc_candidate_large_junction_exits:
+                #    if exit not in visited:
+                #        this_junction_group = [exit]
+                #        visited.append(exit)
+                #        for nearby_exit in self.exits[exit][12]:
+                #            visited.append(nearby_exit)
+                #            this_junction_group.append(nearby_exit)
+                #        if len(this_junction_group) > 1:
+                #            dc_candidate_large_junction_groups.append(this_junction_group)
+                #for ledge_bot in dc_ledge_bots:
+                #    room_type_roll = random.randint(0,10)
+                #    if (room_type_roll < 1 and len(dc_ledge_tops) > 0) or ( len(dc_candidate_large_junction_groups) == 0 and len(dc_preferred_ledge_targets) == 0 ):
+                #        self.join_exits(ledge_bot,dc_ledge_tops.pop(),print_log)
+                #    elif (room_type_roll < 5 and len(dc_candidate_large_junction_groups) > 0) or ( len(dc_preferred_ledge_targets) == 0 ):
+                #        self.join_exits(ledge_bot,(dc_candidate_large_junction_groups.pop())[0],print_log)
+                #    elif room_type_roll < 10 and len(dc_preferred_ledge_targets) > 0:
+                #        self.join_exits(ledge_bot,dc_preferred_ledge_targets.pop(),print_log)
+                #    else:
+                #        continue
+                
+                # Randomly insert corridors within the skeleton, or attach them to dead ends.
+                dc_skeleton_exits = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] > 0 and self.exits[exitnum][11] > 0x01 and exitnum not in dc_exits_within_pyramid_rooms and exitnum not in dc_pyramid_room_terminal_exits})
+                dc_dangling_dead_ends = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x02})
+                dc_free_corridors = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x04 and len(self.exits[exitnum][12]) == 1 and self.exits[self.exits[exitnum][12][0]][1] < 0 and exitnum < self.exits[exitnum][12][0]})
+                random.shuffle(dc_skeleton_exits)
+                random.shuffle(dc_dangling_dead_ends)
+                random.shuffle(dc_free_corridors)
+                for corridor_exit in dc_free_corridors:
+                    other_corridor_exit = self.exits[corridor_exit][12][0]
+                    room_type_roll = random.randint(0,10)
+                    if False:# len(dc_skeleton_exits) > 0 and ( room_type_roll < 4 or len(dc_dangling_dead_ends) == 0 ):
+                        internal_exit = dc_skeleton_exits.pop()
+                        joined_exit = self.exits[self.exits[internal_exit][1]][0]
+                        self.unlink_exits(internal_exit, self.exits[internal_exit][1], print_log)
+                        self.join_exits(internal_exit, corridor_exit, print_log)
+                        self.join_exits(joined_exit, other_corridor_exit, print_log)
+                        for exit_to_remove in [internal_exit, joined_exit, corridor_exit, other_corridor_exit]:
+                            if exit_to_remove in dc_skeleton_exits:
+                                dc_skeleton_exits.remove(exit_to_remove)
+                            if exit_to_remove in dc_free_corridors:
+                                dc_free_corridors.remove(exit_to_remove)
+                    elif len(dc_dangling_dead_ends) > 0:
+                        dead_end_exit = dc_dangling_dead_ends.pop()
+                        self.join_exits(dead_end_exit, corridor_exit, print_log)
+                        for exit_to_remove in [dead_end_exit, corridor_exit, other_corridor_exit]:
+                            if exit_to_remove in dc_dangling_dead_ends:
+                                dc_dangling_dead_ends.remove(exit_to_remove)
+                            if exit_to_remove in dc_free_corridors:
+                                dc_free_corridors.remove(exit_to_remove)
+                
+                ## Attach the remaining dead ends to remaining identified exits.
+                #for exit in dc_exits_from_kara + dc_exits_from_dead_ends:
+                #    room_type_roll = random.randint(0,10)
+                #    if room_type_roll < 5 and len(dc_exits_from_boring_corridors) > 0:
+                #        dc_next_exits_from_boring_corridor = dc_exits_from_boring_corridors.pop()
+                #        random.shuffle(dc_next_exits_from_boring_corridor)
+                #        self.link_exits(dc_next_exits_from_boring_corridor[0],self.exits[exit][0],print_log,True)
+                #    elif room_type_roll < 6 and len(dc_exits_from_interesting_corridors) > 0:
+                #        dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                #        random.shuffle(dc_next_exits_from_interesting_corridor)
+                #        self.link_exits(dc_next_exits_from_interesting_corridor[0],self.exits[exit][0],print_log,True)
+                #    elif room_type_roll < 7 and len(dc_exits_behind_reflexive_gates) > 0:
+                #        self.link_exits(dc_exits_behind_reflexive_gates.pop(),self.exits[exit][0],print_log,True)
+                #    elif room_type_roll < 10 and len(dc_exits_from_difficult_corridors) > 0:
+                #        dc_next_exits_from_difficult_corridor = dc_exits_from_difficult_corridors.pop()
+                #        random.shuffle(dc_next_exits_from_difficult_corridor)
+                #        self.link_exits(dc_next_exits_from_difficult_corridor[0],self.exits[exit][0],print_log,True)
+                #    else:
+                #        continue
+
+
+
+
+
+
+
+
+
+
+# New algorithm, turned out not to be better than the old one
+                #dc_corridor_exit_pairs = []
+                #visited = []
+                #for corridor_exit in dc_all_shuffled_exits:
+                #    if corridor_exit in visited or not self.exits[corridor_exit][11] & 0x04 or len(self.exits[corridor_exit][12]) < 1:
+                #        continue
+                #    corridor_opposite_exit = self.exits[corridor_exit][12][0]
+                #    if random.randint(0,1):
+                #        dc_corridor_exit_pairs.append([corridor_exit,corridor_opposite_exit])
+                #    else:
+                #        dc_corridor_exit_pairs.append([corridor_opposite_exit,corridor_exit])
+                #    visited.append(corridor_exit)
+                #    visited.append(corridor_opposite_exit)
+                #random.shuffle(dc_corridor_exit_pairs)
+                ## Shuffle "nearby exit" orderings.
+                #for exit in self.exits:
+                #    random.shuffle(self.exits[exit][12])
+                #
+                ## Ledges must lead to specific targets, a large junction, or other ledges.
+                #if print_log:
+                #    print("DSX: Building ledges...")
+                #dc_preferred_ledge_targets = [71,73,149,153,233,235,288,471,539,567]
+                #dc_ledge_bots = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x80})
+                #dc_ledge_tops = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x40})
+                #dc_passable_junction_exits = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x08 and len(self.exits[exitnum][12]) > 1})
+                #dc_passable_junctions = []
+                #visited = []
+                #for junction_exit in dc_passable_junction_exits:
+                #    if junction_exit not in visited:
+                #        visited.append(junction_exit)
+                #        this_junction_exits = [junction_exit]
+                #        for other_exit in dc_passable_junction_exits:
+                #            if other_exit in self.exits[junction_exit][12]:
+                #                this_junction_exits.append(other_exit)
+                #                visited.append(other_exit)
+                #        dc_passable_junctions.append(this_junction_exits)
+                #random.shuffle(dc_passable_junctions)
+                #random.shuffle(dc_preferred_ledge_targets)
+                #random.shuffle(dc_ledge_bots)
+                #random.shuffle(dc_ledge_tops)
+                #random.shuffle(dc_large_junctions)
+                #for ledge_bot in dc_ledge_bots:
+                #    corridor = dc_corridor_exit_pairs.pop()
+                #    self.join_exits(ledge_bot,corridor[0],print_log)
+                #    room_type_roll = random.randint(0,10)
+                #    if room_type_roll < 1 and len(dc_ledge_tops) > 0:
+                #        next_exit = dc_ledge_tops.pop()
+                #    elif (room_type_roll < 4 and len(dc_preferred_ledge_targets) > 0) or (len(dc_passable_junctions) == 0):
+                #        next_exit = dc_preferred_ledge_targets.pop()
+                #    else:
+                #        next_exit = (dc_passable_junctions.pop())[0]
+                #
+                #
+                ## Assemble junction clusters around ledges.
+                #if print_log:
+                #    print("DSX: Building clusters...")
+                #selected_dangling_cluster_exits = []
+                #dc_preferred_ledge_targets = [71,73,149,153,233,235,288,471,539,567]
+                #dc_passable_ledge_bots = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] < 0 and self.exits[exitnum][11] & 0x80 and self.exits[exitnum][12] != []})
+                #random.shuffle(dc_passable_ledge_bots)
+                #if print_log:
+                #    count_eligible_junctions = 0
+                #    counted_eligible_junctions = []
+                #    for exit in self.exits:
+                #        if self.exits[exit][11] & 0x08 and len(self.exits[exit][12]) > 1 and exit not in counted_eligible_junctions:
+                #            count_eligible_junctions += 1
+                #            for visited in [exit]+self.exits[exit][12]:
+                #                counted_eligible_junctions.append(visited)
+                #    print("Will build",len(dc_passable_ledge_bots),"clusters from",count_eligible_junctions,"passable junctions.")
+                #    breakpoint()
+                #this_cluster_index = 0
+                #for ledge_bot in dc_passable_ledge_bots:  # Ledge bottoms empty to two 3-way passable junctions and a preferred target.
+                #    selected_dangling_cluster_exits.append([0, 0])
+                #    waiting_exit = ledge_bot
+                #    handled_one_junction_side = False
+                #    for candidate_junction_exit in dc_all_shuffled_exits:
+                #        junction_already_clustered = False
+                #        if self.exits[candidate_junction_exit][1] >= 0 or not self.exits[candidate_junction_exit][11] & 0x18 or not len(self.exits[candidate_junction_exit][12]) > 1:
+                #            continue
+                #        for other_junction_exit in self.exits[candidate_junction_exit][12]:
+                #            if self.exits[other_junction_exit][1] >= 0:
+                #                junction_already_clustered = True
+                #        if not junction_already_clustered:
+                #            if not handled_one_junction_side:
+                #                self.join_exits(waiting_exit, candidate_junction_exit, print_log)
+                #                dc_all_shuffled_exits.remove(candidate_junction_exit)
+                #                dc_all_shuffled_exits.remove(waiting_exit)
+                #                waiting_exit = self.exits[candidate_junction_exit][12][0]
+                #                selected_dangling_cluster_exits[this_cluster_index][0] = self.exits[candidate_junction_exit][12][1]
+                #                this_cluster_index += 1
+                #                handled_one_junction_side = True
+                #            else:
+                #                self.join_exits(waiting_exit, candidate_junction_exit, print_log)
+                #                dc_all_shuffled_exits.remove(candidate_junction_exit)
+                #                dc_all_shuffled_exits.remove(waiting_exit)
+                #                if len(dc_preferred_ledge_targets) > 0:  # If possible, a preferred ledge target should be near the bottom of a ledge.
+                #                    preferred_ledge_target = dc_preferred_ledge_targets.pop()
+                #                    for exit_to_preferred in self.exits[candidate_junction_exit][12]:
+                #                        if self.exits[exit_to_preferred][1] < 0:
+                #                            self.join_exits(preferred_ledge_target,exit_to_preferred,print_log)
+                #                            dc_all_shuffled_exits.remove(preferred_ledge_target)
+                #                            dc_all_shuffled_exits.remove(exit_to_preferred)
+                #                            break
+                #                if print_log:
+                #                    print(" Cluster",this_cluster_index-1,"bottom kernel complete.")
+                #                break
+                #this_cluster_index = 0
+                #for ledge_bot in dc_passable_ledge_bots:  # Ledge tops come from a passable junction or from behind a gate.
+                #    ledge_top = self.exits[ledge_bot][12][0]
+                #    for candidate_junction_exit in dc_all_shuffled_exits:
+                #        junction_already_clustered = False
+                #        if self.exits[candidate_junction_exit][1] >= 0 or not self.exits[candidate_junction_exit][11] & 0x38:
+                #            continue
+                #        for other_junction_exit in self.exits[candidate_junction_exit][12]:
+                #            if self.exits[other_junction_exit][1] >= 0:
+                #                junction_already_clustered = True
+                #        if not junction_already_clustered:
+                #            self.join_exits(ledge_top, candidate_junction_exit, print_log)
+                #            dc_all_shuffled_exits.remove(ledge_top)
+                #            dc_all_shuffled_exits.remove(candidate_junction_exit)
+                #            if len(self.exits[candidate_junction_exit][12]) > 0:
+                #                selected_dangling_cluster_exits[this_cluster_index][1] = self.exits[candidate_junction_exit][12][0]
+                #            if print_log:
+                #                print(" Cluster",this_cluster_index,"top kernel complete.")
+                #            this_cluster_index += 1
+                #            break
+                ## We'll be linking 8 dungeon entrances, so we need to reduce the cluster count to 8 or 7.
+                #if print_log:
+                #    print("DSX: Merging clusters...")
+                #random.shuffle(selected_dangling_cluster_exits)
+                #while len(selected_dangling_cluster_exits) > 8:
+                #    breakpoint()
+                #    first_dangling_exit_pair = selected_dangling_cluster_exits.pop()
+                #    second_dangling_exit_pair = selected_dangling_cluster_exits.pop()
+                #    random.shuffle(first_dangling_exit_pair)
+                #    random.shuffle(second_dangling_exit_pair)
+                #    first_dangling_exit = first_dangling_exit_pair.pop()
+                #    if first_dangling_exit == 0:
+                #        first_dangling_exit = first_dangling_exit_pair.pop()
+                #    second_dangling_exit = second_dangling_exit_pair.pop()
+                #    if second_dangling_exit == 0:
+                #        second_dangling_exit = second_dangling_exit_pair.pop()
+                #    self.join_exits(first_dangling_exit, second_dangling_exit, print_log)
+                #    dc_all_shuffled_exits.remove(first_dangling_exit)
+                #    dc_all_shuffled_exits.remove(second_dangling_exit)
+                #            
+                #count_isolated_passable_junctions = 0
+                #counted_isolated_passable_junction_exits = []
+                #for exit in self.exits:
+                #    is_isolated = True
+                #    if self.exits[exit][11] & 0x08 and len(self.exits[exit][12]) > 0:
+                #        breakpoint()
+                #        for nearby in [exit]+self.exits[exit][12]:
+                #            if self.exits[nearby][1] > 0:
+                #                is_isolated = False
+                #        if is_isolated == True and exit not in counted_isolated_passable_junction_exits:
+                #            count_isolated_passable_junctions += 1
+                #            for nearby in [exit]+self.exits[exit][12]:
+                #                counted_isolated_passable_junction_exits.append(nearby)
+                #print("There are",count_isolated_passable_junctions,"unclustered passable junctions.")
+                #breakpoint()
+                #            
+                ##dc_forbidden_cluster_corridors = [131,132,465,466,469,470]
+                ##for corridor_exit in dc_all_shuffled_exits:
+                ##    if corridor_exit in dc_forbidden_cluster_corridors or not self.exits[corridor_exit][11] & 0x04 or not self.exits[corridor_exit][1] < 0 or self.exits[corridor_exit][12] == [] or not self.exits[self.exits[corridor_exit][12][0]][1] < 0:
+                ##        continue
+                ##    corridor_opposite_exit = self.exits[corridor_exit][12][0]
+                ##    dc_all_shuffled_exits.remove(corridor_exit)
+                ##    dc_all_shuffled_exits.remove(corridor_opposite_exit)
+                ##    handled_one_corridor_side = False
+                ##    for candidate_junction_exit in dc_all_shuffled_exits:
+                ##        junction_already_clustered = False
+                ##        if self.exits[candidate_junction_exit][1] >= 0 or not self.exits[candidate_junction_exit][11] & 0x08:
+                ##            continue
+                ##        for other_junction_exit in self.exits[candidate_junction_exit][12]:
+                ##            if self.exits[other_junction_exit][1] >= 0:
+                ##                junction_already_clustered = True
+                ##        if not junction_already_clustered:
+                ##            if not handled_one_corridor_side:
+                ##                self.join_exits(corridor_exit, candidate_junction_exit, print_log)
+                ##                dc_all_shuffled_exits.remove(candidate_junction_exit)
+                ##                handled_one_corridor_side = True
+                ##            else:
+                ##                self.join_exits(corridor_opposite_exit, candidate_junction_exit, print_log)
+                ##                dc_all_shuffled_exits.remove(candidate_junction_exit)
+                ##                break
+                #
+                ## Attach dungeon entrances to junctions (but not to the Sky Garden or Pyramid lobbies).
+                #if print_log:
+                #    print("DSX: Attaching dungeon entrances...")
+                #dc_dungeon_entrances_to_link = [60,120,222,332,402,462,522,562]
+                #dc_forbidden_dungeon_entrance_junctions = [273,275,277,279,636,642,648,654,662,668]
+                #for dungeon_entrance in dc_dungeon_entrances_to_link:
+                #    for candidate_exit in dc_all_shuffled_exits:
+                #        junction_already_entrance_linked = False
+                #        for other_junction_exit in self.exits[candidate_exit][12]:
+                #            if self.exits[other_junction_exit][11] & 0x01:
+                #                junction_already_entrance_linked = True
+                #        if not junction_already_entrance_linked and candidate_exit not in dc_forbidden_dungeon_entrance_junctions and self.exits[candidate_exit][11] & 0x08:
+                #            self.join_exits(dungeon_entrance,candidate_exit,print_log)
+                #            dc_all_shuffled_exits.remove(candidate_exit)
+                #            self.exits[candidate_exit][11] |= 0x01
+                #            if dungeon_entrance in dc_all_shuffled_exits:
+                #                dc_all_shuffled_exits.remove(dungeon_entrance)
+                #            break
+                #count_dangling_dead_ends = 0
+                #for exit in self.exits:
+                #    if self.exits[exit][1] < 0 and self.exits[exit][11] & 0x02:
+                #        count_dangling_dead_ends += 1
+                #print("There are",count_dangling_dead_ends,"dangling dead ends.")
+                #breakpoint()
+                ### Attach ledge tops to junctions, and ledge bottoms to Dark Spaces and junctions.
+                ##if print_log:
+                ##    print("DSX: Attaching ledges...")
+                ##dc_preferred_ledge_targets = [71,73,149,153,233,235,288,471,539,567]
+                ##for ledge_target in dc_preferred_ledge_targets:
+                ##    for ledge_exit in dc_all_shuffled_exits:
+                ##        if not self.exits[ledge_exit][11] & 0x80:
+                ##            continue
+                ##        self.join_exits(ledge_exit,ledge_target,print_log)
+                ##        dc_all_shuffled_exits.remove(ledge_target)
+                ##        dc_all_shuffled_exits.remove(ledge_exit)
+                ##        break
+                ##for ledge_exit in dc_all_shuffled_exits:
+                ##    if not self.exits[ledge_exit][11] & (0x40 | 0x80):
+                ##        continue
+                ##    for candidate_exit in dc_all_shuffled_exits:
+                ##        if self.exits[ledge_exit][11] | self.exits[candidate_exit][11] == 0xC0:   # Can chain ledges together.
+                ##            self.join_exits(ledge_exit, candidate_exit, print_log)
+                ##            dc_all_shuffled_exits.remove(candidate_exit)
+                ##            dc_all_shuffled_exits.remove(ledge_exit)
+                ##            break
+                ##        elif self.exits[candidate_exit][11] & 0x18 or (self.exits[ledge_exit][11] & 0x40 and self.exits[candidate_exit][11] & 0x38):
+                ##            self.join_exits(ledge_exit,candidate_exit,print_log)
+                ##            dc_all_shuffled_exits.remove(candidate_exit)
+                ##            dc_all_shuffled_exits.remove(ledge_exit)
+                ##            break
+                ##        else:
+                ##            continue
+                ##count_dangling_dead_ends = 0
+                ##for exit in self.exits:
+                ##    if self.exits[exit][1] < 0 and self.exits[exit][11] & 0x02:
+                ##        count_dangling_dead_ends += 1
+                ##print("There are",count_dangling_dead_ends,"dangling dead ends.")
+                ##breakpoint()
+                ## Attach dead ends to remaining junction exits.
+                #if print_log:
+                #    print("DSX: Attaching dead ends...")
+                #for dead_end_exit in dc_all_shuffled_exits:
+                #    if not self.exits[dead_end_exit][11] & 0x02:
+                #        continue
+                #    for candidate_exit in dc_all_shuffled_exits:
+                #        if self.exits[candidate_exit][11] & 0x38:
+                #            self.join_exits(dead_end_exit, candidate_exit, print_log)
+                #            dc_all_shuffled_exits.remove(dead_end_exit)
+                #            dc_all_shuffled_exits.remove(candidate_exit)
+                #            break
+                #count_dangling_dead_ends = 0
+                #for exit in self.exits:
+                #    if self.exits[exit][1] < 0 and self.exits[exit][11] & 0x02:
+                #        count_dangling_dead_ends += 1
+                #print("There are",count_dangling_dead_ends,"dangling dead ends.")
+                #breakpoint()
+                ## The dungeon skeleton is complete. Insert corridors.
+                #if print_log:
+                #    print("DSX: Inserting corridors...")
+                #dc_skeleton_exits = list({exitnum for exitnum in self.exits.keys() if self.exits[exitnum][1] > 0 and self.exits[exitnum][11] > 0 and exitnum not in dc_exits_within_pyramid_rooms and exitnum not in dc_pyramid_room_terminal_exits})
+                #for dangling_exit in dc_all_shuffled_exits:  # Uncoupled junction exits get first pick of corridors.
+                #    if not self.exits[dangling_exit][11] & 0x38:
+                #        continue
+                #    for corridor_exit in dc_all_shuffled_exits:
+                #        if self.exits[corridor_exit][11] & 0x04:
+                #            self.join_exits(dangling_exit, corridor_exit, print_log)
+                #            dc_all_shuffled_exits.remove(dangling_exit)
+                #            dc_all_shuffled_exits.remove(corridor_exit)
+                #            break
+                #count_dangling_dead_ends = 0
+                #for exit in self.exits:
+                #    if self.exits[exit][1] < 0 and self.exits[exit][11] & 0x02:
+                #        count_dangling_dead_ends += 1
+                #print("There are",count_dangling_dead_ends,"dangling dead ends.")
+                #breakpoint()
+                #for internal_exit in dc_skeleton_exits:  # Remaining corridors are inserted between doors.
+                #    joined_exit = self.exits[self.exits[internal_exit][1]][0]
+                #    for corridor_exit in dc_all_shuffled_exits:
+                #        if self.exits[corridor_exit][11] & 0x04 and len(self.exits[corridor_exit][12]) > 0 and self.exits[self.exits[corridor_exit][12][0]][1] < 0:
+                #            self.unlink_exits(internal_exit, self.exits[internal_exit][1], print_log)
+                #            self.join_exits(internal_exit, corridor_exit, print_log)
+                #            self.join_exits(joined_exit, self.exits[corridor_exit][12][0], print_log)
+                #            for exit_to_remove in [internal_exit, joined_exit, corridor_exit, self.exits[corridor_exit][12][0]]:
+                #                if exit_to_remove in dc_skeleton_exits:
+                #                    dc_skeleton_exits.remove(exit_to_remove)
+                #                if exit_to_remove in dc_all_shuffled_exits:
+                #                    dc_all_shuffled_exits.remove(exit_to_remove)
+                #            break
+                #            
+                
+                
+                
+                
+                
+                
+                
+                
+                
+# Old algorithm, retired code
+                ## Drops drop into a junction or a dead end with a DS.
+                #for candidate_dead_end_exit in dc_exits_from_dead_ends:
+                #    if candidate_dead_end_exit in dc_subset_exits_from_ds_dead_ends:
+                #        dc_exits_from_dead_ends.remove(candidate_dead_end_exit)
+                #        self.link_exits(candidate_dead_end_exit,self.exits[dc_exits_behind_drops.pop()][0],print_log,True)
+                #        break
+                #for exit_behind_drop in dc_exits_behind_drops:
+                #    if random.randint(0,6) < 1 and len(dc_exits_from_boring_corridors) > 0:
+                #        dc_next_exits_from_boring_corridor = dc_exits_from_boring_corridors.pop()
+                #        random.shuffle(dc_next_exits_from_boring_corridor)
+                #        self.link_exits(exit_behind_drop,self.exits[dc_next_exits_from_boring_corridor[0]][0],print_log,True)
+                #        exit_behind_drop = dc_next_exits_from_boring_corridor[1]
+                #    elif random.randint(0,6) < 1 and len(dc_exits_from_difficult_corridors) > 0:
+                #        dc_next_exits_from_difficult_corridor = dc_exits_from_difficult_corridors.pop()
+                #        random.shuffle(dc_next_exits_from_difficult_corridor)
+                #        self.link_exits(exit_behind_drop,self.exits[dc_next_exits_from_difficult_corridor[0]][0],print_log,True)
+                #        exit_behind_drop = dc_next_exits_from_difficult_corridor[1]
+                #    for exits_from_t_junction in dc_exits_from_t_junctions:
+                #        if len(exits_from_t_junction) < 3:
+                #            continue
+                #        random.shuffle(exits_from_t_junction)
+                #        junction_exit = exits_from_t_junction.pop()
+                #        self.link_exits(exit_behind_drop,self.exits[junction_exit][0],print_log,True)
+                #        break
+                
+                ## Link Pyramid rooms to non-corridors.
+                #self.link_exits(dc_exits_from_pyramid_junction.pop(),self.exits[dc_vanilla_exits_to_pyramid_junction.pop()][0],print_log,True)
+                #self.link_exits(dc_exits_from_pyramid_junction.pop(),self.exits[dc_vanilla_exits_to_pyramid_junction.pop()][0],print_log,True)
+                #random.shuffle(dc_exits_from_t_junctions)
+                #this_t_junction_index = 0
+                #for exit in dc_vanilla_exits_to_pyramid_junction:
+                #    room_type_roll = random.randint(0,10)
+                #    if room_type_roll < 3 and len(dc_exits_from_t_junctions) > 5:
+                #        while len(dc_exits_from_t_junctions[this_t_junction_index]) < 3:
+                #            this_t_junction_index += 1
+                #        random.shuffle(dc_exits_from_t_junctions[this_t_junction_index])
+                #        dc_exit_from_t_junction = dc_exits_from_t_junctions[this_t_junction_index].pop(0)
+                #        self.link_exits(exit,self.exits[dc_exit_from_t_junction][0],print_log,True)
+                #        this_t_junction_index += 1
+                #    elif room_type_roll < 6 and len(dc_exits_behind_reflexive_gates) > 0:
+                #        self.link_exits(exit,self.exits[dc_exits_behind_reflexive_gates.pop()][0],print_log,True)
+                #    else:
+                #        self.link_exits(exit,self.exits[dc_exits_from_pyramid_junction.pop()][0],print_log,True)
+                
+                
+                
+                
