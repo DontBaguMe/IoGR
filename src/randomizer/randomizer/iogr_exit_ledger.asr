@@ -295,7 +295,7 @@ hirom
 
 !DefaultMap5DExit01 = $5C,$50,$03,$80,$03,$03,$30,$44
 
-!DefaultMap5EExit01 = $5A,$90,$00,$70,$00,$03,$00,$14
+!DefaultMap5EExit01 = $69,$a0,$02,$38,$00,$00,$00,$13
 !DefaultMap5EExit02 = $5F,$80,$00,$40,$00,$83,$00,$44
 
 !DefaultMap5FExit01 = $5E,$60,$00,$B0,$00,$00,$00,$14
@@ -343,13 +343,13 @@ hirom
 
 !DefaultMap66Exit01 = $65,$B8,$00,$80,$02,$03,$00,$44
 !DefaultMap66Exit02 = $65,$B8,$00,$80,$02,$03,$00,$44
-!DefaultMap66Exit03 = $67,$78,$01,$D0,$01,$00,$01,$22
+!DefaultMap66Exit03 = $5F,$80,$00,$50,$00,$03,$00,$44    ; Vamp exits changed for IOGR.
 
-!DefaultMap67Exit01 = $66,$F8,$00,$20,$00,$03,$00,$22
+!DefaultMap67Exit01 = $65,$B8,$00,$80,$02,$03,$00,$44    ; Vamp exits changed for IOGR.
 !DefaultMap67Exit02 = $67,$78,$00,$D0,$01,$00,$00,$21
 !DefaultMap67Exit03 = $67,$78,$01,$50,$00,$03,$01,$22
 
-!DefaultMap69Exit01 = $6A,$A0,$01,$30,$00,$00,$00,$12
+!DefaultMap69Exit01 = $5E,$48,$00,$90,$00,$01,$00,$14    ; Angel Village to Mu Passage.
 !DefaultMap69Exit02 = $6B,$50,$00,$30,$00,$00,$00,$13
 
 !DefaultMap6AExit01 = $69,$A0,$02,$38,$00,$00,$00,$13
@@ -456,7 +456,7 @@ hirom
 !DefaultMap88Exit02 = $8A,$50,$00,$90,$00,$87,$00,$33
 
 !DefaultMap8AExit01 = $88,$E0,$03,$90,$00,$06,$00,$14
-!DefaultMap8AExit02 = $8B,$10,$00,$90,$00,$07,$00,$12
+!DefaultMap8AExit02 = $82,$10,$00,$90,$00,$07,$00,$18    ; Fanger's east exit returns to the start.
 
 !DefaultMap8BExit01 = $8A,$B0,$02,$90,$00,$06,$00,$33
 

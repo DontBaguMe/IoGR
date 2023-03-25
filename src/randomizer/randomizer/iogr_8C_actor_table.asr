@@ -287,6 +287,7 @@ ActorList_MapC1:
 ActorList_MapC2:
 ActorList_MapCA:
 ActorList_MapCB:
+ActorList_MapF1:
 ActorList_MapF8:
 ActorList_MapF9:
 db $02,$09,$02 : dl $82C38C : db $00
@@ -983,7 +984,7 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $80C667 : db $00
 db $07,$06,$00 : dl $85AA6C : db $00
-db $06,$06,$00 : dl $85AA9E : db $00
+db $06,$01,$00 : dl $85AA9E : db $00
 db $0F,$0A,$09 : dl $80C66F : db $00
 db $FF,$CA 
 
@@ -1313,7 +1314,7 @@ db $10,$09,$00 : dl $85EFE9 : db $00
 db $11,$09,$00 : dl $85EEA1 : db $00
 db $13,$09,$00 : dl $85EC8B : db $00
 db $14,$09,$00 : dl $85F1F9 : db $00
-db $04,$3C,$00 : dl $85F2EF : db $00
+db $1d,$2C,$00 : dl $85F2EF : db $00
 db $1D,$2C,$00 : dl $85E647 : db $00
 db $FF,$4D,$80,$AA,$82,$80,$AC,$60,$8B,$80,$88,$8D,$AC,$CA 
 
@@ -3016,7 +3017,7 @@ db $07,$12,$00 : dl $888C6D : db $00
 db $09,$14,$00 : dl $888D6B : db $00
 db $04,$13,$00 : dl $888E86 : db $00
 db $0C,$12,$00 : dl $888F88 : db $00
-db $0C,$14,$00 : dl $88908A : db $00
+db $0C,$14,$00 : dl $888F88 : db $00    ; Slightly different actor, to make room for other changes.
 db $06,$0F,$00 : dl $889200 : db $00
 db $08,$0F,$00 : dl $889248 : db $00
 db $0A,$0F,$00 : dl $88925C : db $00
@@ -3818,21 +3819,19 @@ db $4B,$0A,$01 : dl $899B2E : db $00
 db $2B,$0A,$05 : dl $899B2E : db $00
 db $28,$0A,$07 : dl $899B2E : db $00
 db $3F,$1A,$1F : dl $80C66F : db $00
-db $79,$1A,!DkSpBabelBotType : dl $88D6A9 : db $00    ; Added for IOGR.
+db $79,$1A,!DkSpBabelBotType : dl $88D6A9 : db $00    ; Moved here from $E0 for IOGR.
 db $FF,$CA 
 
 ActorList_MapE0:
 db $07,$0E,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $46,$3A,$01 : dl $88D6A9 : db $00
 db $00,$01,$00 : dl $898718 : db $00
 db $00,$01,$00 : dl $898748 : db $00
 db $00,$01,$00 : dl $898778 : db $00
 db $00,$01,$00 : dl $8987A8 : db $00
 db $00,$01,$00 : dl $898620 : db $00
-db $27,$3A,$03 : dl $899B2E : db $00
-db $3A,$3A,$09 : dl $899B2E : db $00
+db $27,$1A,$03 : dl $899B2E : db $00
 db $FF,$CA 
 
 ActorList_MapE1:
@@ -4032,13 +4031,8 @@ db $1B,$0C,$30 : dl $8BADBE : db $00
 db $1B,$1B,$30 : dl $8BADCC : db $00
 db $0F,$0C,!Monster0525Param : dl !Monster0525Addr : db !Monster0525Stats,$05,!Monster0525ItemFlag
 db $00,$01,$01 : dl $8BA5DF : db $00
+db $00,$01,$01 : dl $80c2bb : db $00    ; Boss reward stat upgrade giver.
 db $FF,$CA 
-
-ActorList_MapF1:
-db $05,$0A,$02 : dl $82C38C : db $00
-db $00,$00,$00 : dl $80EAED : db $00
-db $81,$02,$00 : dl $80E9EC : db $00
-db $FF,$43,$84,$8C,$8E,$8D,$AC,$60,$80,$8B,$80,$82,$84,$CA 
 
 ActorList_MapFA:
 db $00,$01,$00 : dl $8be237 : db $00
