@@ -1671,6 +1671,7 @@ class World:
                     print("ERROR: Entrance rando failed")
                 return False
 
+        breakpoint()
         self.reset_progress(True)
         #self.initialize_ds()
         self.update_graph(True,True,True)
@@ -1805,6 +1806,7 @@ class World:
             for i in range(random.randint(100, 1000)):
                 _ = random.randint(0,10000)
 
+        breakpoint()
         if not self.initialize(print_log):
             if print_log:
                 print("ERROR: Could not initialize world")
@@ -2277,16 +2279,16 @@ class World:
         i = 0
         while i < 0x100:
             self.asar_defines["RoomClearReward"+format(i,"02X")] = 0
-            i++
+            i += 1
         idx_tier2 = 1
         idx_tier3 = 1
         idx_tier4 = 1
         i = 1
         while i <= 6:
-            self.asar_defines["RemovedRoomRewardExpertFlag"+i] = 0
-            self.asar_defines["RemovedRoomRewardAdvancedFlag"+i] = 0
-            self.asar_defines["RemovedRoomRewardIntermediateFlag"+i] = 0
-            i++
+            self.asar_defines["RemovedRoomRewardExpertFlag"+str(i)] = 0
+            self.asar_defines["RemovedRoomRewardAdvancedFlag"+str(i)] = 0
+            self.asar_defines["RemovedRoomRewardIntermediateFlag"+str(i)] = 0
+            i += 1
         for map in self.maps:
             reward_tier = self.maps[map][2][1]
             if reward_tier > 0:
@@ -2295,13 +2297,13 @@ class World:
 
                 # Populate player level logic
                 if reward_tier == 2:
-                    self.asar_defines["RemovedRoomRewardIntermediateFlag"+idx_tier2] = 0x300 + map
+                    self.asar_defines["RemovedRoomRewardIntermediateFlag"+str(idx_tier2)] = 0x300 + map
                     idx_tier2 += 1
                 elif reward_tier == 3:
-                    self.asar_defines["RemovedRoomRewardAdvancedFlag"+idx_tier3] = 0x300 + map
+                    self.asar_defines["RemovedRoomRewardAdvancedFlag"+str(idx_tier3)] = 0x300 + map
                     idx_tier3 += 1
                 elif reward_tier == 4:
-                    self.asar_defines["RemovedRoomRewardExpertFlag"+idx_tier4] = 0x300 + map
+                    self.asar_defines["RemovedRoomRewardExpertFlag"+str(idx_tier4)] = 0x300 + map
                     idx_tier4 += 1
         #print("maps done")
 
@@ -2367,7 +2369,7 @@ class World:
         while i <= 0x0525:
             for word in ["Param","Addr","Stats","ItemFlag"]:
                 self.asar_defines["Monster"+format(i,"04X")+word] = "!DefaultMonster"+format(i,"04X")+word
-            i++
+            i += 1
         #if self.enemizer != "None":
         #    # "Fix" Ankor Wat Gorgons so they don't fall from the ceiling
         #    f.seek(int("bb825", 16) + rom_offset)
@@ -3335,8 +3337,8 @@ class World:
             # Jeweler's Mansion
             147: [715, 1, False, 0, [], "MansionChestItem", "", "", "", "Jeweler's Mansion: Chest            "],
 
-            740: [480, 5, False, 0, [], "MansionEastGateItem", "", "", "", "Jeweler's Mansion: Enemy for East Gate"]
-            741: [714, 5, False, 0, [], "MansionWestGateItem", "", "", "", "Jeweler's Mansion: Enemy for West Gate"]
+            740: [480, 5, False, 0, [], "MansionEastGateItem", "", "", "", "Jeweler's Mansion: Enemy for East Gate"],
+            741: [714, 5, False, 0, [], "MansionWestGateItem", "", "", "", "Jeweler's Mansion: Enemy for West Gate"],
 
             # Mystic Statues
             148: [101, 3, False, 0, [101, 102, 103, 104, 105], "", "", "", "", "Castoth Prize                       "],

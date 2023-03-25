@@ -15,7 +15,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-import asar
+from . import asar
 
 VERSION = "4.4.9"
 
@@ -168,8 +168,8 @@ class Randomizer:
         self.logger = logging.getLogger("IOGR")
 
     def generate_rom(self, filename: str, settings: RandomizerData):
-        patch = self.__generate_patch__()
-        rom_offset = self.__get_offset__(patch)
+        #patch = self.__generate_patch__()
+        #rom_offset = self.__get_offset__(patch)
         asar_defines = { "DummyRandomizerDefine": "DummyRandomizerDefine" }
 
         random.seed(settings.seed)
@@ -401,7 +401,7 @@ class Randomizer:
         i = 0
         while i < len(incamap_compressed):
             asar_defines["IncaTileRoomCompTilemap"] += "$"+format(incamap_compressed[i],"02X")
-            i++
+            i += 1
             if i < len(incamap_compressed):
                 asar_defines["IncaTileRoomCompTilemap"] += ","
         # The other defines are normal.
@@ -421,20 +421,22 @@ class Randomizer:
             5: [0xc9c8, 0x81f6, 0x8d],
             6: [0xcbca, 0x81fc, 0x8e]
         }
-        hieroglyph_positions = [1, 2, 3, 4, 5, 6]
-        random.shuffle(hieroglyph_positions)
+        hieroglyph_order = [1, 2, 3, 4, 5, 6]
+        random.shuffle(hieroglyph_order)
         this_pos = 1
         while this_pos < 7:
-            this_hiero = hieroglyph_info[hieroglyph_positions[this_pos]]
+            this_hiero = hieroglyph_order[this_pos-1]
             asar_defines["HieroOrder"+str(this_pos)] = this_hiero
             asar_defines["HieroSpritePointer"+str(this_pos)] = hieroglyph_info[this_hiero][1]
             asar_defines["HieroItemTile"+str(this_pos)] = hieroglyph_info[this_hiero][2]
             asar_defines["HieroJournalText"+str(this_pos)] = hieroglyph_info[this_hiero][0]
+            this_pos += 1
 
         ##########################################################################
         #                          Randomize Snake Game
         ##########################################################################
         # Randomize snake game duration/goal
+        breakpoint()
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
         if settings.fluteless:
             snakes_per_sec = [i/4.0 for i in snakes_per_sec]
@@ -455,10 +457,10 @@ class Randomizer:
 
         # Update snake game logic and text with new values
         asar_defines["SnakeGameTimeLimitSeconds"] = snake_timer
-        asar_defines["SnakeGameTargetEasy"] = int(snake_timer * snakes_per_sec[0] * snake_adj))
-        asar_defines["SnakeGameTargetIntermediate"] = int(snake_timer * snakes_per_sec[1] * snake_adj))
-        asar_defines["SnakeGameTargetAdvanced"] = int(snake_timer * snakes_per_sec[2] * snake_adj))
-        asar_defines["SnakeGameTargetExpert"] = int(snake_timer * snakes_per_sec[3] * snake_adj))
+        asar_defines["SnakeGameTargetEasy"] = int(snake_timer * snakes_per_sec[0] * snake_adj)
+        asar_defines["SnakeGameTargetIntermediate"] = int(snake_timer * snakes_per_sec[1] * snake_adj)
+        asar_defines["SnakeGameTargetAdvanced"] = int(snake_timer * snakes_per_sec[2] * snake_adj)
+        asar_defines["SnakeGameTargetExpert"] = int(snake_timer * snakes_per_sec[3] * snake_adj)
         # The initial space forces the define to resolve as text instead of a number.
         asar_defines["SnakeGameTimeLimitSecondsString"] = "_" + str(snake_timer)
         asar_defines["SnakeGameTargetEasyString"] = "_" + str(int(snake_timer * snakes_per_sec[0] * snake_adj))
@@ -511,11 +513,39 @@ class Randomizer:
         i = 1
         while i <= 7:
             asar_defines["Jeweler"+str(i)+"Cost"] = gem[i-1]
-            i++
+            i += 1
 
         ##########################################################################
         #                    Randomize Mystic Statue requirement
         ##########################################################################
+        breakpoint()
+        statueOrder = [1, 2, 3, 4, 5, 6]
+        random.shuffle(statueOrder)
+        statues = []
+        statues_hex = []
+
+        if statue_req != StatueReq.PLAYER_CHOICE.value:
+            i = 0
+            while i < statues_required:
+                if statueOrder[i] == 1:
+                    statues.append(1)
+                    statues_hex.append(b"\x21")
+                if statueOrder[i] == 2:
+                    statues.append(2)
+                    statues_hex.append(b"\x22")
+                if statueOrder[i] == 3:
+                    statues.append(3)
+                    statues_hex.append(b"\x23")
+                if statueOrder[i] == 4:
+                    statues.append(4)
+                    statues_hex.append(b"\x24")
+                if statueOrder[i] == 5:
+                    statues.append(5)
+                    statues_hex.append(b"\x25")
+                if statueOrder[i] == 6:
+                    statues.append(6)
+                    statues_hex.append(b"\x26")
+                i += 1
 
         ## Can't face Dark Gaia in Red Jewel hunts
         #if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
@@ -556,14 +586,14 @@ class Randomizer:
         i = 0
         while i < len(statue_str):
             asar_defines["TextTeacherStatuesString"] += "$" + format(statue_str[i],"02x")
-            i++
+            i += 1
             if i < len(statue_str):
                 asar_defines["TextTeacherStatuesString"] += ","
 
         ##########################################################################
         #                           Determine Boss Order
         ##########################################################################
-        #boss_order = [*range(1,8)]
+        boss_order = [*range(1,8)]
         #if settings.boss_shuffle:
         #    non_will_bosses = [5]               # Can't be forced to play Mummy Queen as Will
         #    if settings.difficulty.value < 3:   # Solid Arm cannot be shuffled in non-Extreme seeds
@@ -851,8 +881,8 @@ class Randomizer:
         asar_defines["PlayerDeathText"] = ""
         i = 0
         while i < len(death_str):
-            asar_defines["PlayerDeathText"] += "$" + format(death_str,"02x")
-            i++
+            asar_defines["PlayerDeathText"] += "$" + format(death_str[i],"02x")
+            i += 1
             if i < len(death_str):
                 asar_defines["PlayerDeathText"] += ","
 
@@ -870,6 +900,7 @@ class Randomizer:
         ##########################################################################
         done = False
         seed_adj = 0
+        breakpoint()
         while not done:
             if seed_adj > MAX_RANDO_RETRIES:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
@@ -1329,7 +1360,7 @@ class Randomizer:
         i = 0
         while i < len(ishtarmapcomp):
             asar_defines["IshtarRoomCompTilemap"] += "$" + format(ishtarmapcomp[i],"02x")
-            i++
+            i += 1
             if i < len(ishtarmapcomp):
                 asar_defines["IshtarRoomCompTilemap"] += ","
 
@@ -1399,9 +1430,9 @@ class Randomizer:
         
         breakpoint()
         asar.init()
-        asar.patch("x.sfc", romdata, [], True, asar_defines)
+        asar_patch_result = asar.patch("iogr.asr", romdata, [], True, asar_defines)
 
-        return True
+        return asar_patch_result
 
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)

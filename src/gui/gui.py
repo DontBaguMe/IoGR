@@ -203,49 +203,49 @@ def write_patch(patch, rom_path, filename, settings):
     original = open(rom_path, "rb")
 
     randomized = open(os.path.dirname(rom_path) + os.path.sep + filename, "wb")
-    randomized.write(original.read())
+    randomized.write(patch[1])
 
     original.close()
-    data = json.loads(patch)
-    data.sort(key=sort_patch)
-
-    for k in data:
-        address = int(k['address'])
-        value = bytes(k['data'])
-
-        randomized.seek(address)
-        randomized.write(value)
-
-    # Custom sprites
-    if settings.sprite != Sprite.WILL:
-        sprite_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"randomizer","randomizer","bin","plugins","sprites",settings.sprite.value,"")
-        for binfile in os.listdir(sprite_dir):
-            if binfile.endswith(".bin"):
-                f = open(os.path.join(sprite_dir,binfile), "rb")
-                randomized.seek(int(binfile.partition(".")[0], 16))
-                randomized.write(f.read())
-                f.close
-
-    # Fluteless sprite work
-    if settings.fluteless:
-        flute_addrs = [
-            [0x1a8540,0x60],
-            [0x1a8740,0x60],
-            [0x1aa120,0x40],
-            [0x1aa560,0x20],
-            [0x1aa720,0x60],
-            [0x1aa8e0,0x80],
-            [0x1aab00,0x20],
-            [0x1aac60,0x40],
-            [0x1aae60,0x40],
-            [0x1ab400,0x80],
-            [0x1ab600,0x80],
-            [0x1ab800,0x40],
-            [0x1aba00,0x40]
-        ]
-        for [addr,l] in flute_addrs:
-            randomized.seek(addr)
-            randomized.write(b"\x00"*l)
+    #data = json.loads(patch)
+    #data.sort(key=sort_patch)
+    #
+    #for k in data:
+    #    address = int(k['address'])
+    #    value = bytes(k['data'])
+    #
+    #    randomized.seek(address)
+    #    randomized.write(value)
+    #
+    ## Custom sprites
+    #if settings.sprite != Sprite.WILL:
+    #    sprite_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"randomizer","randomizer","bin","plugins","sprites",settings.sprite.value,"")
+    #    for binfile in os.listdir(sprite_dir):
+    #        if binfile.endswith(".bin"):
+    #            f = open(os.path.join(sprite_dir,binfile), "rb")
+    #            randomized.seek(int(binfile.partition(".")[0], 16))
+    #            randomized.write(f.read())
+    #            f.close
+    #
+    ## Fluteless sprite work
+    #if settings.fluteless:
+    #    flute_addrs = [
+    #        [0x1a8540,0x60],
+    #        [0x1a8740,0x60],
+    #        [0x1aa120,0x40],
+    #        [0x1aa560,0x20],
+    #        [0x1aa720,0x60],
+    #        [0x1aa8e0,0x80],
+    #        [0x1aab00,0x20],
+    #        [0x1aac60,0x40],
+    #        [0x1aae60,0x40],
+    #        [0x1ab400,0x80],
+    #        [0x1ab600,0x80],
+    #        [0x1ab800,0x40],
+    #        [0x1aba00,0x40]
+    #    ]
+    #    for [addr,l] in flute_addrs:
+    #        randomized.seek(addr)
+    #        randomized.write(b"\x00"*l)
 
     randomized.close()
 
