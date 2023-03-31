@@ -44,10 +44,9 @@ class World:
 
         if self.is_accessible(self.item_locations[location][0]):
             self.items_collected.append(item)
-            if location in self.open_locations[0]:
-                self.open_locations[0].remove(location)
-            elif location in self.open_locations[1]:
-                self.open_locations[1].remove(location)
+            for loctype in [1,2,3,4,5,6]:
+                if location in self.open_locations[loctype-1]:
+                    self.open_locations[loctype-1].remove(location)
 
         self.placement_log.append([item, location])
 
@@ -85,6 +84,14 @@ class World:
 
         return item
 
+    # Returns whether the item and location are in the same shuffle pool
+    def are_item_loc_compatible(self, item, loc):
+        if self.item_pool[item][1] == self.item_locations[loc][1]:
+            return True
+        if self.key_rando == 2:
+            if self.item_pool[item][1] in [1,5,6] and self.item_locations[loc][1] in [1,5,6]:
+                return True
+        return False
 
     # Converts item pool into list of unique items, returns list
     def list_item_pool(self, type=0, items=[], progress_type=0):
@@ -98,8 +105,20 @@ class World:
                             item_list.append(x)
                             i += 1
         return item_list
+        
+    def list_item_pools(self, types=[], items=[], progress_type=0):
+        item_list = []
+        for x in self.item_pool:
+            if not items or x in items:
+                if not types or self.item_pool[x][1] in types:
+                    if not progress_type or progress_type == self.item_pool[x][5]:
+                        i = 0
+                        while i < self.item_pool[x][0]:
+                            item_list.append(x)
+                            i += 1
+        return item_list
 
-    # Returns a list of unfilled item locations
+    # Returns all item locations
     def list_item_locations(self):
         locations = []
         for x in self.item_locations:
@@ -132,10 +151,10 @@ class World:
 
         return True
 
-    # Returns lists of accessible item, ability, and statue locations
+    # Returns lists of accessible locations
     def find_open_locations(self):
-        # Accessible open location for items, abilities, and Mystic Statues
-        locations = [[], [], [], []]
+        # Accessible open location for each item type
+        locations = [[], [], [], [], [], []]
         for x in self.item_locations:
             region = self.item_locations[x][0]
             type = self.item_locations[x][1]
@@ -144,6 +163,10 @@ class World:
 
         self.open_locations[0] = locations[0][:]
         self.open_locations[1] = locations[1][:]
+        self.open_locations[2] = []#locations[2][:]
+        self.open_locations[3] = []#locations[3][:]
+        self.open_locations[4] = locations[4][:]
+        self.open_locations[5] = []#locations[5][:]
 
         return locations
 
@@ -168,7 +191,7 @@ class World:
             return self.item_locations[location_id][2]
 
 
-    # Zeroes out accessible flags for all world regions
+    # Returns whether the node is within the currently-accessible subgraph
     def is_accessible(self, node_id=-1):
         if node_id not in self.graph:
             return False
@@ -200,7 +223,7 @@ class World:
         self.visited.clear()
         self.items_collected.clear()
         self.item_destinations.clear()
-        self.open_locations = [[],[]]
+        self.open_locations = [[],[],[],[],[],[]]
         self.open_edges = []
 
         self.unsolve(reset_graph)
@@ -294,12 +317,8 @@ class World:
                     self.items_collected.append(self.item_locations[location][3])
                 if print_log:
                     print("  -Collected:",self.item_pool[self.item_locations[location][3]][3])
-            elif self.item_locations[location][1] == 1 and not test:
-                self.open_locations[0].append(location)
-                if print_log:
-                    print("  -Discovered:",self.item_locations[location][9])
-            elif self.item_locations[location][1] == 2 and not test:
-                self.open_locations[1].append(location)
+            elif not test:
+                self.open_locations[self.item_locations[location][1]-1].append(location)
                 if print_log:
                     print("  -Discovered:",self.item_locations[location][9])
         return items_found
@@ -344,7 +363,7 @@ class World:
                     location_type = self.item_locations[dest][1]
                     filled = self.item_locations[dest][2]
                     restrictions = self.item_locations[dest][4]
-                    if not filled and item_type == location_type and item not in restrictions:
+                    if not filled and self.are_item_loc_compatible(item,dest) and item not in restrictions:
                         if not accessible or region != INACCESSIBLE:
                             if self.fill_item(item, dest, False, False, print_log):
                                 to_fill.remove(dest)
@@ -362,17 +381,21 @@ class World:
             return False
 
         to_place = items[:]
-        to_fill =[[],[],[]]
+        to_fill =[[],[],[],[],[],[]]
         for loc in item_locations:
             if not self.item_locations[loc][2] and self.is_accessible(self.item_locations[loc][0]):
                 loc_type = self.item_locations[loc][1]
+                if self.key_rando == 2 and loc_type in [5,6]:
+                    loc_type = 1    # In keysanity, keys are pooled like normal items
                 to_fill[loc_type-1].append(loc)
 
-        quarantine = [[],[],[]]
+        quarantine = [[],[],[],[],[],[]]
         filled_locations = []
         while to_place:
             item = to_place.pop(0)
             item_type = self.item_pool[item][1]
+            if self.key_rando == 2 and item_type in [5,6]:
+                item_type = 1    # In keysanity, keys are pooled like normal items
             filled = False
             while not filled and to_fill[item_type-1]:
                 location = to_fill[item_type-1].pop(0)
@@ -425,10 +448,10 @@ class World:
     def progression_list(self,open_edges=[]):
         if not open_edges:
             open_edges = self.get_open_edges()
-        all_items = self.list_item_pool(1)
+        all_items = self.list_item_pools([1,5])
 
         #open_locations = self.find_open_locations()
-        open_locations = len(self.open_locations[0])
+        open_locations = len(self.open_locations[0]) + len(self.open_locations[4])
 
         prereq_list = [[],[],[]]    # [[available],[not enough room],[too many inventory items]]
         ds_list = []
@@ -436,7 +459,7 @@ class World:
         for edge in open_edges:
             prereq = self.items_needed(edge)
             if prereq and prereq not in prereq_list[0] and self.is_sublist(all_items, prereq):
-                if prereq not in prereq_list[1] and not self.forward_fill(prereq,self.open_locations[0],True,self.logic_mode == "Chaos"):
+                if prereq not in prereq_list[1] and not self.forward_fill(prereq,self.open_locations[0] + self.open_locations[4],True,self.logic_mode == "Chaos"):
                     prereq_list[1].append(prereq)
                 elif prereq not in prereq_list[2]:
                     dest = self.logic[edge][2]
@@ -489,7 +512,10 @@ class World:
                 type = self.item_pool[item][1]
                 prog_type = self.item_pool[item][5]
                 inv_type = self.item_pool[item][4]
-                if type <= 2:
+                type_list = [1,2]
+                if self.key_rando > 0:
+                    type_list = [1,2,5]
+                if type in [1,2,5]:
                     if prog_type == 2:
                         quest_locations[type-1].append(location)
                     elif prog_type == 3:
@@ -541,9 +567,11 @@ class World:
 
         items = self.list_item_pool(1)
         abilities = self.list_item_pool(2)
-        all_items = items + abilities
+        keys = self.list_item_pool(5)
+        all_items = items + abilities + keys
         sum_items = len(items)
         sum_abilities = len(abilities)
+        sum_keys = len(keys)
 
         probability = []
 
@@ -559,6 +587,7 @@ class World:
             probability = 1.0
             i = 0
             j = 0
+            k = 0
             while prereqs:
                 item = prereqs.pop(0)
                 if item in all_items:
@@ -568,6 +597,9 @@ class World:
                     elif self.item_pool[item][1] == 2:
                         probability *= float(self.item_pool[item][0]) / float((sum_abilities - j))
                         j += 1
+                    elif self.item_pool[item][1] == 5:
+                        probability *= float(self.item_pool[item][0]) / float((sum_keys - k))
+                        k += 1
                     if item in self.required_items:
                         probability *= PROGRESS_ADJ[self.difficulty]
             probabilities.append([probability, idx])
@@ -661,10 +693,11 @@ class World:
             if self.logic[edge][0] >-1 and self.logic[edge][3]:
                 nodes.append(self.logic[edge][1])
 
+        self.update_all_ds_access()
         for node in nodes:
-            if not self.check_ds_access(node, True):
+            if not self.check_ds_access(node, True, [1], print_log):
                 if print_log:
-                    print("ERROR: No Dark Space could be accessed ")
+                    print("Starting over: Freedan can't reach",node,self.graph[node])
                 return False
             else:
                 found_locked_ds = False
@@ -1305,6 +1338,7 @@ class World:
             self.update_ds_access(self.ds_nodes,1)
             for node in self.freedan_nodes:
                 self.update_ds_access([node],2,[node])
+            self.update_all_ds_access()
 
             if print_log:
                 print(" DS access updated")
@@ -1342,7 +1376,7 @@ class World:
 
 
     # Check if a node has Dark Space access
-    def check_ds_access(self, start_node=-1, need_freedan=False, items=[]):
+    def check_ds_access(self, start_node=-1, need_freedan=False, items=[], print_log=False, visited=[]):
         if start_node not in self.graph:
             return False
         if not self.graph[start_node][2] or self.graph[start_node][4] == 2 or (self.graph[start_node][4] == 1 and not need_freedan):
@@ -1351,26 +1385,21 @@ class World:
             return False
         else:
             to_visit = [start_node]
-            visited = []
-            ds_access =  False
+            ds_access = False
             while not ds_access and to_visit:
                 node = to_visit.pop(0)
-                visited.append(node)
-                if self.check_ds_access(node,need_freedan):
+                if start_node != node and node not in visited and self.check_ds_access(node,need_freedan,items,print_log,visited):
+                    if print_log:
+                        print("Node '",self.graph[self.graph[start_node][5]],"' has DS access via node",self.graph[self.graph[node][5]])
                     return True
                 else:
+                    visited.append(node)
                     for edge in self.graph[node][12]:
                         dest = self.logic[edge][2]
                         if dest not in visited+to_visit and not self.logic[edge][0] and self.check_edge(edge,items,False):
                             to_visit.append(dest)
 
             return False
-#            graph_copy = copy.deepcopy(self.graph)
-#            self.update_graph(False,True,False)
-#            result = self.check_ds_access(start_node, need_freedan)
-#            self.graph = graph_copy
-#            graph_copy = None
-#            return result
 
     # Update a node's DS access data - recursive for all backwards-accessible nodes
     def update_ds_access(self,nodes=[],access_mode=1,ds_nodes=[]):
@@ -1390,6 +1419,15 @@ class World:
 
         return self.update_ds_access(to_visit,access_mode,ds_nodes)
 
+    # Update all DS access based on current graph connections.
+    def update_all_ds_access(self):
+        for node in self.graph:
+            found_discrepancy = False
+            for dest_node in self.graph[node][10]:
+                if node in self.graph[dest_node][10] and self.graph[dest_node][4] < self.graph[node][4]:
+                    found_discrepancy = True                
+            if found_discrepancy:
+                self.update_ds_access(self.graph,self.graph[node][4],self.graph[node][9])
 
     # Check a logic edge to see if prerequisites have been met
     def check_edge(self, edge, items=[], update_graph=True, print_log=False):
@@ -1409,7 +1447,7 @@ class World:
             while i < req[1]:
                 req_items.append(req[0])
                 i += 1
-        if self.is_sublist(self.items_collected+items, req_items) and (not self.logic[edge][3] or self.check_ds_access(self.logic[edge][1],True)):
+        if self.is_sublist(self.items_collected+items, req_items) and (not self.logic[edge][3] or self.check_ds_access(self.logic[edge][1],True,items)):
             success = True
 
         if success and update_graph:
@@ -1470,13 +1508,23 @@ class World:
         except:
             return False
 
-
     def unrestrict_edge(self, edge=-1):
         try:
             self.logic[edge][0] = 0 if self.logic[edge][0] != 1 else self.logic[edge][0]
             return True
         except:
             return False
+
+
+    # Put keys in their default monster locations, and mark those locations occupied.
+    # Assumes that monster items and monster locations have the same numeric ID.
+    def assign_default_monster_keys(self, print_log=False):
+        for loc in self.item_locations:
+            item = loc
+            if self.item_locations[loc][1] in [5,6]:
+                self.unfill_item(loc, print_log)
+                self.fill_item(item, loc, False, True, print_log)
+
 
     # Initialize World parameters
     def initialize(self,print_log=False):
@@ -1671,7 +1719,7 @@ class World:
                     print("ERROR: Entrance rando failed")
                 return False
 
-        breakpoint()
+        #breakpoint()
         self.reset_progress(True)
         #self.initialize_ds()
         self.update_graph(True,True,True)
@@ -1700,6 +1748,7 @@ class World:
                 self.item_locations[47][3] in abilities and
                 self.item_locations[48][3] in abilities):
             self.restrict_edge(118)
+            self.restrict_edge(717)
         if (self.item_locations[58][3] in abilities and  # Sky Garden
                 self.item_locations[59][3] in abilities and
                 self.item_locations[60][3] in abilities):
@@ -1712,14 +1761,15 @@ class World:
             self.restrict_edge(150)
             self.restrict_edge(151)
         if self.item_locations[94][3] in abilities:  # Great Wall
-            self.graph[700] = [False, [], 0, [3,15,0,b"\x00"], 0, "Great Wall - Behind Spin", [], False, [], [], [], [], [], [], [], []]
-            self.logic[700] = [0, 296, 700, False, [[63, 1]]]
-            self.item_locations[93][0] = 700
+            self.graph[800] = [False, [], 0, [3,15,0,b"\x00"], 0, "Great Wall - Behind Spin", [], False, [], [], [], [], [], [], [], []]
+            self.logic[800] = [0, 296, 800, False, [[63, 1]]]
+            self.item_locations[93][0] = 800
             self.logic[222][3] = True
             if self.item_locations[93][3] in abilities:
                 inaccessible_ls += [95]
                 self.restrict_edge(223)
                 self.restrict_edge(224)
+                self.restrict_edge(225)
         if self.item_locations[122][3] in abilities:  # Ankor Wat
             inaccessible_ls += [117, 118, 119, 120, 121]
             self.restrict_edge(267)
@@ -1806,7 +1856,7 @@ class World:
             for i in range(random.randint(100, 1000)):
                 _ = random.randint(0,10000)
 
-        breakpoint()
+        #breakpoint()
         if not self.initialize(print_log):
             if print_log:
                 print("ERROR: Could not initialize world")
@@ -1821,6 +1871,8 @@ class World:
         # Fill the Mystic Statues and room-clear rewards
         self.fill_statues()
         self.map_rewards()
+        if self.key_rando == 0:
+            self.assign_default_monster_keys(print_log)
 
         # Forward fill progression items with Monte Carlo method
         # Continue to place progression items until goal is reached
@@ -1828,7 +1880,7 @@ class World:
         goal = False
         cycle = 0
         place_abilities = True
-        self.items_collected = self.list_item_pool(1)   # Assume all items for ability placement
+        self.items_collected = self.list_item_pools([1,5])   # Assume all items for ability placement
         if print_log:
             print("Beginning ability placement...")
         while not done:
@@ -1840,6 +1892,7 @@ class World:
                     print("ERROR: Max cycles exceeded")
                 return False
 
+            #breakpoint()
             self.traverse()
 
             if place_abilities:
@@ -1893,6 +1946,7 @@ class World:
                 #if print_log:
                 #    print("Open edges:",self.open_edges)
                 #    print("Open locations:",self.open_locations)
+                #breakpoint()
                 progression_result = self.progression_list()
                 if print_log:
                     print("Progression options: {")
@@ -1908,6 +1962,7 @@ class World:
                         if print_log:
                             print("ERROR: Couldn't progress any further")
                             self.print_graph()
+                            breakpoint()
                         return False
 
                     progress = False
@@ -2048,7 +2103,7 @@ class World:
 
         items = []
         for x in self.item_locations:
-            if x < 500:
+            if x < 500 or x >= 700:
                 item = self.item_locations[x][3]
                 location_name = self.item_locations[x][9].strip()
                 item_name = self.item_pool[item][3]
@@ -2330,7 +2385,7 @@ class World:
                     self.asar_defines["Jeweler"+str(x+1)+"RowText"] = item_name
                 
             # Handle abilities
-            elif type == 2:
+            elif loc_type == 2:
                 ability = self.item_locations[x][3]
                 map = self.item_locations[x][8]
 
@@ -2817,6 +2872,7 @@ class World:
         self.statues_required = statues_required
         self.statue_req = statue_req
         self.boss_order = boss_order
+        self.key_rando = 1#settings.key_rando
         self.dungeons_req = []
         for x in self.statues:
             self.dungeons_req.append(self.boss_order[x-1])
@@ -2904,7 +2960,7 @@ class World:
         self.visited = []
         self.items_collected = []
         self.item_destinations = []
-        self.open_locations = [[],[]]
+        self.open_locations = [[],[],[],[],[],[]]
         self.open_edges = []
         self.graph_viz = None
         self.asar_defines = { "DummyDefine": "DummyDefine" }
@@ -2966,8 +3022,8 @@ class World:
             50: [3, 1, 0x87, "HP Upgrade", False, 3],
             51: [1, 1, 0x89, "DEF Upgrade", False, 3],
             52: [2, 1, 0x88, "STR Upgrade", False, 3],
-            53: [1, 1, 0x8a, "Psycho Dash Upgrade", False, 3],
-            54: [2, 1, 0x8b, "Dark Friar Upgrade", False, 3],
+            53: [1, 1, 0x8a, "Dash Upgrade", False, 3],
+            54: [2, 1, 0x8b, "Friar Upgrade", False, 3],
             55: [0, 1, 0x8e, "Heart Piece", False, 3],
 
             # Abilities
@@ -2998,7 +3054,7 @@ class World:
             505: [0, 4, "", "Neil's: Memory Restored", False, 1],
             506: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1],
             507: [0, 4, "", "Sky Garden: Map 82 NE Switch", False, 1],
-            508: [0, 4, "", "Sky Garden: Map 82 NW Switch", False, 1],
+            508: [0, 4, "", "Sky Garden: Map 82 SE Switch", False, 1],
             509: [0, 4, "", "Sky Garden: Map 84 Switch", False, 1],
             510: [0, 4, "", "Seaside: Fountain Purified", False, 1],
             511: [0, 4, "", "Mu: Water Lowered 1", False, 1],
@@ -3021,32 +3077,32 @@ class World:
             602: [0, 4, "", "Early Firebird", False, 1],
             
             # Keys
-            700: [1, 5, 0x01, "U.Tunnel East Skeleton Cage", False, 3],
+            700: [1, 5, 0x01, "U.Tunnel East Cage", False, 3],
             701: [1, 5, 0x02, "U.Tunnel East Door", False, 1],
             702: [1, 5, 0x03, "U.Tunnel South Door", False, 1],
             703: [1, 5, 0x05, "U.Tunnel West Bat Door", False, 1],
-            704: [1, 5, 0x16, "U.Tunnel Appearing Dark Space", False, 1],
-            705: [1, 5, 0x17, "U.Tunnel Red Skeleton Door 1", False, 1],
-            706: [1, 5, 0x18, "U.Tunnel Red Skeleton Door 2", False, 1],
-            707: [1, 5, 0x0d, "Inca Exterior W Ladder", False, 1],
-            708: [1, 5, 0x0e, "Inca Exterior SE Ladder", False, 1],
-            709: [1, 5, 0x0f, "Inca Exterior NE Ladder", False, 1],
+            704: [1, 5, 0x16, "U.Tunnel Dark Space", False, 1],
+            705: [1, 5, 0x17, "U.Tunnel Skeleton Door 1", False, 1],
+            706: [1, 5, 0x18, "U.Tunnel Skeleton Door 2", False, 1],
+            707: [1, 5, 0x0d, "Inca Exterior W Ladder", False, 3],
+            708: [1, 5, 0x0e, "Inca Exterior SE Ladder", False, 3],
+            709: [1, 5, 0x0f, "Inca Exterior NE Ladder", False, 3],
             710: [1, 5, 0x0c, "Inca N/S Ramp Room Ramp", False, 1],
             711: [1, 5, 0x0b, "Inca E/W Ramp Room Ramp", False, 1],
-            712: [1, 5, 0x0a, "Inca Stair West of Dia.Block", False, 3],
-            713: [1, 5, 0x10, "Inca Stair Before Singing Statue", False, 1],
+            712: [1, 5, 0x0a, "Inca Diamond Block Stair", False, 3],
+            713: [1, 5, 0x10, "Inca Singing Statue Stair", False, 3],
             714: [1, 5, 0x34, "Mine Tunnel Middle Fence", False, 1],
             715: [1, 5, 0x35, "Mine Tunnel South Fence", False, 1],
             716: [1, 5, 0x36, "Mine Tunnel North Fence", False, 1],
             717: [1, 5, 0x22, "Mine Early Eye Cage", False, 3],
             718: [1, 5, 0x32, "Mine Appearing Dark Space", False, 1],
             719: [1, 5, 0x23, "Mine Friar Fence", False, 1],
-            720: [1, 5, 0x37, "Sky Garden SE Top Gate", False, 1],
-            721: [1, 5, 0x30, "Sky Garden SE Bot Chest", False, 1],
-            722: [1, 5, 0x24, "Sky Garden SW Top Robot Gate", False, 1],
-            723: [1, 5, 0x2b, "Sky Garden SW Top Robot Ramp", False, 3],
-            724: [1, 5, 0x2c, "Sky Garden SW Top Worm Gate", False, 1],
-            725: [1, 5, 0x31, "Sky Garden SW Bot Fire Cage", False, 3],
+            720: [1, 5, 0x37, "Garden SE Top Gate", False, 1],
+            721: [1, 5, 0x30, "Garden SE Darkside Chest", False, 1],
+            722: [1, 5, 0x24, "Garden SW Top Robot Gate", False, 1],
+            723: [1, 5, 0x2b, "Garden SW Top Robot Ramp", False, 3],
+            724: [1, 5, 0x2c, "Garden SW Top Worm Gate", False, 3],
+            725: [1, 5, 0x31, "Garden SW Darkside Cage", False, 3],
             726: [1, 5, 0x3d, "Mu Entrance Gate", False, 1],
             727: [1, 5, 0x3e, "Mu NE First Rock", False, 1],
             728: [1, 5, 0x3f, "Mu NE Second Rock", False, 1],
@@ -3055,11 +3111,11 @@ class World:
             731: [1, 5, 0x40, "Mu SE South-facing Head", False, 3],
             732: [1, 5, 0x53, "Great Wall Friar Gate", False, 1],
             #733: [1, 5, 0x6a, "Fanger Blocked Exit", False, 1], # Probably shouldn't randomize this...
-            734: [1, 5, 0x68, "Kress West-Side Room Shortcut", False, 3],
-            735: [1, 5, 0x6c, "Ankor Wat Outer South Stair", False, 1],
-            736: [1, 5, 0x6b, "Ankor Wat Outer East Slider Hole", False, 1],
+            734: [1, 5, 0x68, "Kress West Room Shortcut", False, 3],
+            735: [1, 5, 0x6c, "Wat Entrance Stair", False, 1],
+            736: [1, 5, 0x6b, "Wat East Slider Hole", False, 1],
             #737: [1, 5, 0x6d, "Ankor Wat Pit Exit", False, 1], # Probably shouldn't randomize this...
-            738: [1, 5, 0x6f, "Ankor Wat Inner East Hall", False, 1],
+            738: [1, 5, 0x6f, "Wat Dark Space Hall", False, 1],
             739: [1, 5, 0x73, "Pyramid Foyer Dark Space", False, 1],
             740: [1, 5, 0x9a, "Mansion East Gate", False, 1],
             741: [1, 5, 0x9b, "Mansion West Gate", False, 1]
@@ -3217,8 +3273,8 @@ class World:
             75:  [228, 2, False, 0, [], "DkSpMuSliderType",    "", "", 0x62, "Mu: Slider Dark Space               "],
 
             726: [212, 5, False, 0, [], "MuEntranceGolemItem", "", "", "", "Mu: Entrance Golem for Gate"],
-            727: [217, 5, False, 0, [], "MuDroplet1Item", "", "", "", "Mu: NE Droplet for Rock 1"],
-            728: [723, 5, False, 0, [], "MuDroplet2Item", "", "", "", "Mu: NE Droplet for Rock 2"],
+            727: [726, 5, False, 0, [], "MuDroplet1Item", "", "", "", "Mu: NE Droplet for Rock 1"],
+            728: [724, 5, False, 0, [], "MuDroplet2Item", "", "", "", "Mu: NE Droplet for Rock 2"],
             729: [227, 5, False, 0, [], "MuSlimeCageItem", "", "", "", "Mu: West Slime for Slime Cages"],
             730: [236, 5, False, 0, [], "MuEastFacingHeadGolemItem", "", "", "", "Mu: SE Golem for East-facing Head"],
             731: [236, 5, False, 0, [], "MuSouthFacingHeadGolemItem", "", "", "", "Mu: SE Golem for South-facing Head"],
@@ -3299,7 +3355,7 @@ class World:
 
             735: [362, 5, False, 0, [], "WatSouthScarabItem", "", "", "", "Ankor Wat: Scarab for Outer South Stair"],
             736: [364, 5, False, 0, [], "WatEastSliderHoleItem", "", "", "", "Ankor Wat: Scarab for Outer East Slider Hole"],
-            738: [723, 5, False, 0, [], "WatDarkSpaceHallItem", "", "", "", "Ankor Wat: Skull for Inner East DS Hall"],
+            738: [727, 5, False, 0, [], "WatDarkSpaceHallItem", "", "", "", "Ankor Wat: Skull for Inner East DS Hall"],
 
             # Dao
             125: [400, 1, False, 0, [], "DaoEntrance1Item",      "",      "", "", "Dao: Entrance Item 1                "],
@@ -3591,7 +3647,7 @@ class World:
             184: [False, [182],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 81 (SE platform)", [], False, [], [], [], [], [], [], [], []],
             185: [False, [182],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 81 (SW platform)", [], False, [], [], [], [], [], [], [], []],
             186: [False, [506],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 82 (north)", [], False, [], [], [], [], [], [], [], []],        # deal with switches
-            187: [False, [508],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 82 (south)", [], False, [], [], [], [], [], [], [], []],
+            187: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 82 (south)", [], False, [], [], [], [], [], [], [], []],
             188: [False, [],         2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 82 (NE)", [], False, [], [], [], [], [], [], [], []],
             189: [False, [188,507],  2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 82 (switch cage)", [], False, [], [], [], [], [], [], [], []],
             190: [False, [191],      2, [2,10,0,b"\x00"], 0, "Sky Garden: Map 83 (NE)", [], False, [], [], [], [], [], [], [], []],
@@ -3626,8 +3682,11 @@ class World:
             214: [False, [],         2, [3,12,1,b"\x00"], 0, "Mu: Map 95 (middle W)", [], False, [], [], [], [], [], [], [], []],
             215: [False, [213],      2, [3,12,2,b"\x00"], 0, "Mu: Map 95 (bottom E)", [], False, [], [], [], [], [], [], [], []],
             216: [False, [214],      2, [3,12,2,b"\x00"], 0, "Mu: Map 95 (bottom W)", [], False, [], [], [], [], [], [], [], []],
-            217: [False, [],         2, [3,12,0,b"\x00"], 0, "Mu: Map 96 (top N)", [], False, [], [], [], [], [], [], [], []],
-            723: [False, [],         2, [3,12,0,b"\x00"], 0, "Mu: Map 96 (top S)", [], False, [], [], [], [], [], [], [], []],
+            217: [False, [726],      2, [3,12,0,b"\x00"], 0, "Mu: Map 96 (top N)", [], False, [], [], [], [], [], [], [], []],
+            726: [False, [],         2, [3,12,0,b"\x00"], 0, "Mu: Map 96 (top monster key N)", [], False, [], [], [], [], [], [], [], []],
+            725: [False, [724,726],  2, [3,12,0,b"\x00"], 0, "Mu: Map 96 (top between rocks)", [], False, [], [], [], [], [], [], [], []],
+            724: [False, [],         2, [3,12,0,b"\x00"], 0, "Mu: Map 96 (top monster key S)", [], False, [], [], [], [], [], [], [], []],
+            723: [False, [724],      2, [3,12,0,b"\x00"], 0, "Mu: Map 96 (top S)", [], False, [], [], [], [], [], [], [], []],
             218: [False, [217],      2, [3,12,1,b"\x00"], 0, "Mu: Map 96 (middle)", [], False, [], [], [], [], [], [], [], []],
             219: [False, [],         2, [3,12,2,b"\x00"], 0, "Mu: Map 96 (bottom)", [], False, [], [], [], [], [], [], [], []],
             220: [False, [],         2, [3,12,0,b"\x00"], 0, "Mu: Map 97 (top main)", [], False, [], [], [], [], [], [], [], []],
@@ -3780,7 +3839,7 @@ class World:
             374: [False, [373], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 183 (NW)", [], False, [], [], [], [], [], [], [], []],
             375: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 183 (NE)", [], False, [], [], [], [], [], [], [], []],
             376: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 184 (S)", [], False, [], [], [], [], [], [], [], []],
-            723: [False, [376], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 184 (Wall skull)", [], False, [], [], [], [], [], [], [], []],
+            727: [False, [376], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 184 (Wall skull)", [], False, [], [], [], [], [], [], [], []],
             377: [False, [376], 2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 184 (N)", [], False, [], [], [], [], [], [], [], []],
             378: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 185", [], False, [], [], [], [], [], [], [], []],
             379: [False, [],    2, [4,19,0,b"\x00"], 0, "Ankor Wat: Map 186 (main)", [], False, [], [], [], [], [], [], [], []],
@@ -3979,7 +4038,7 @@ class World:
             702: [0,43, 719,False, [[703, 1]]],  # Bat key opens west room door
             62: [0, 45, 46, False, [[501, 1]]],  # Progression w/ Lilly
             703: [0,47, 720,False, [[704, 1]]],  # Worm key opens Dark Space
-            63: [0, 47, 704,  True, []],          # Activate Bridge w/ Freedan
+            63: [0, 720,704,  True, []],         # Activate Bridge w/ Freedan
             704: [0,704,705,False, [[705, 1]]],  # Skeleton key opens next area
             705: [0,705,706,False, [[706, 1]]],  # Next skeleton key opens final area
 
@@ -4055,6 +4114,7 @@ class World:
             141: [0, 181, 182, False, [[63, 1]]],            # Map 81 progression w/ Spin Dash
             142: [0, 181, 184, False, [[63, 1]]],            # Map 81 progression w/ Spin Dash
             143: [0, 182, 185, False, [[63, 1]]],            # Map 81 progression w/ Spin Dash
+            739: [0, 187, 508, False, [[725, 1]]],           # Map 82 switch access via fire cage key
             144: [0, 188, 189,  True, []],                   # Map 82 progression w/ Freedan
             145: [0, 188, 189, False, [[601, 1]]],           # Map 82 progression w/ Glitches
             146: [0, 192, 190, False, [[63, 1]]],            # Map 83 progression w/ Spin Dash
@@ -4080,8 +4140,10 @@ class World:
             172: [0, 213, 215, False, [[512, 1]]],            # Map 95 progression w/ water lowered 2
             173: [0, 214, 216, False, [[512, 1]]],            # Map 95 progression w/ water lowered 2
             174: [0, 217, 218, False, [[511, 1]]],            # Map 96 progression w/ water lowered 1
-            726: [0, 217, 723, False, [[727, 1], [728, 1]]],  # Mu NE (96) N/S progression via rocks
-            727: [0, 723, 217, False, [[727, 1], [728, 1]]],  # Mu NE (96) N/S progression via rocks
+            726: [0, 217, 725, False, [[727, 1]]],            # Mu NE (96) N/S semiprogression via rocks
+            737: [0, 725, 217, False, [[727, 1]]],            # Mu NE (96) N/S semiprogression via rocks
+            727: [0, 723, 725, False, [[728, 1]]],            # Mu NE (96) N/S semiprogression via rocks
+            738: [0, 725, 723, False, [[728, 1]]],            # Mu NE (96) N/S semiprogression via rocks
             175: [0, 222, 221,  True, [[511, 1], [64, 1]]],   # Map 97 progression w/ water lowered 1 & Friar
             176: [0, 222, 221,  True, [[511, 1], [67, 1]]],   # Map 97 progression w/ water lowered 1 & Firebird
             177: [0, 222, 221, False, [[511, 1], [601, 1]]],  # Map 97 progression w/ water lowered 1 & glitches
@@ -4144,8 +4206,8 @@ class World:
             268: [0, 373, 374,  True, [[64, 1], [54, 2]]],    # Map 183 progression w/ upgraded Friar
             269: [0, 373, 374,  True, [[64, 1], [601, 1]]],   # Map 183 progression w/ Friar and glitches
             270: [0, 373, 374,  True, [[67, 1]]],             # Map 183 progression w/ Firebird       -- IS THIS TRUE?
-            271: [0, 376, 723,  True, [[64, 1]]],             # Map 184 key access via Friar
-            272: [0, 376, 723,  True, [[36, 1]]],             # Map 184 key access via Shadow
+            271: [0, 376, 727,  True, [[64, 1]]],             # Map 184 key access via Friar
+            272: [0, 376, 727,  True, [[36, 1]]],             # Map 184 key access via Shadow
             731: [0, 376, 377, False, [[738, 1]]],            # Map 184 S->N w/ skull key
             273: [0, 384, 392, False, [[28, 1]]],             # Map 188 progression w/ Black Glasses
             274: [0, 385, 393, False, [[28, 1]]],             # Map 188 progression w/ Black Glasses
@@ -4160,9 +4222,9 @@ class World:
             290: [0, 410, 411, False, [[62, 1]]],             # Map 204 progression w/ Slider
             291: [0, 410, 411, False, [[63, 1]]],             # Map 204 progression w/ Spin
             292: [0, 410, 411, False, [[601, 1]]],            # Map 204 progression w/ glitches
-            731: [0, 411, 713, False, [[739, 1]]],            # Map 204 top DS w/ orb key
-            293: [0, 411, 412, False, [[36, 1]]],             # Map 204 progression w/ Aura
-            294: [0, 411, 413, False, [[36, 1]]],             # Map 204 progression w/ Aura
+            736: [0, 411, 713, False, [[739, 1]]],            # Map 204 top DS w/ orb key
+            293: [0, 411, 412, False, [[36, 1], [739, 1]]],   # Map 204 progression w/ Aura and DS
+            294: [0, 411, 413, False, [[36, 1], [739, 1]]],   # Map 204 progression w/ Aura and DS
             295: [0, 415, 449, False, [[30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [38, 1]]],
                                                               # Boss door open w/ Hieroglyphs
             296: [0, 416, 417, False, [[63, 1]]],             # Map 206 progression w/ Spin Dash
@@ -5237,9 +5299,9 @@ class World:
             63: [62, 0, 0,  0,  0, "1865a", b"", False,  True, False, "Tunnel: Map 14 to Map 13"],
             64: [65, 0, 0, 718, 43, "18666", b"", False,  True, False, "Tunnel: Map 14 to Map 15"],
             65: [64, 0, 0,  0,  0, "18680", b"", False,  True, False, "Tunnel: Map 15 to Map 14"],
-            66: [67, 0, 0, 719, 44, "1868c", b"", False,  True, False, "Tunnel: Map 15 to Map 16"],
+            66: [67, 0, 0, 43, 44, "1868c", b"", False,  True, False, "Tunnel: Map 15 to Map 16"],
             67: [66, 0, 0,  0,  0, "1869a", b"", False,  True, False, "Tunnel: Map 16 to Map 15"],
-            68: [69, 0, 0, 43, 45, "18674", b"", False,  True, False, "Tunnel: Map 15 to Map 17"],
+            68: [69, 0, 0, 719, 45, "18674", b"", False,  True, False, "Tunnel: Map 15 to Map 17"],
             69: [68, 0, 0,  0,  0, "186a8", b"", False,  True, False, "Tunnel: Map 17 to Map 15"],
             70: [71, 0, 0, 46, 47, "186b4", b"", False,  True, False, "Tunnel: Map 17 to Map 18"],
             71: [70, 0, 0,  0,  0, "186c2", b"", False,  True, False, "Tunnel: Map 18 to Map 17"],

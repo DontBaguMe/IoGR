@@ -49,8 +49,9 @@ lda $01,s : and #$00ff : cmp #$0080 : bcc +
 sta $0db8
 lda $01,s : and #$00ff : cmp #$0006 : bne ..PostHerbCheck
   cop #$D5 : db $06    ; "Remove" herb placeholder item so there's room to "give" an herb.
+  inc $0aaa
 ..PostHerbCheck:
-lda $01,s : and #$00ff : cmp #$0087 : bcc ..IsSpecial
+lda $01,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
 ..IsNotSpecial:
 lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
 ..GotItem:
@@ -98,10 +99,10 @@ plp
 bra ..GotItem
 ...LightUpgrade:
 inc $0b16
-bra ..GotItem
+jmp ..GotItem
 ...DarkUpgrade:
 inc $0b1c
-bra ..GotItem
+jmp ..GotItem
 
 .GiveUnlockedDoor:
 pla : and #$00ff
@@ -128,7 +129,8 @@ db "!",$cb
 db $ca
 .TextItsADoor:
 db $d3
-db "Opened a door!",$ca
+db $d5,$00
+db "Opened a door!",$cb
 db $c5 : dw TextDoorNames, $0db8
 db $ca
 
@@ -528,8 +530,6 @@ dw .Door9D
 .Door66:
 .Door67:
 .Door69:
-.Door6A:
-.Door6D:
 .Door6E:
 .Door70:
 .Door71:
@@ -580,12 +580,13 @@ db $ca
 
 .Door01:
 db $cd : dl TextDoorsAbbreviateEdDg
-db "__Blue Skeleton Cage"
+db "__Skeleton Cage"
 db $ca
 
 .Door02:
 db $cd : dl TextDoorsAbbreviateEdDg
 db "__East Room Worm Door"
+db $ca
 
 .Door03:
 db $cd : dl TextDoorsAbbreviateEdDg
@@ -619,12 +620,12 @@ db $ca
 
 .Door0E:
 db $cd : dl TextDoorsAbbreviateInca
-db "__Exterior Upper Ladder"
+db "__Exterior Lower Ladder"
 db $ca
 
 .Door0F:
 db $cd : dl TextDoorsAbbreviateInca
-db "__Exterior Lower Ladder"
+db "__Exterior Upper Ladder"
 db $ca
 
 .Door0C:
@@ -747,6 +748,11 @@ db $cd : dl TextDoorsAbbreviateKress
 db "__West Chest Shortcut"
 db $ca
 
+.Door6A:
+db $cd : dl TextDoorsAbbreviateGtWl
+db "__Fanger Arena Exit"
+db $ca
+
 .Door6C:
 db $cd : dl TextDoorsAbbreviateAnkr
 db "__Entrance Stairs"
@@ -755,6 +761,11 @@ db $ca
 .Door6B:
 db $cd : dl TextDoorsAbbreviateAnkr
 db "__Outer East Slider Hole"
+db $ca
+
+.Door6D:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Dark Pit Exit"
 db $ca
 
 .Door6F:
@@ -781,47 +792,47 @@ db $ca
 ; Area name abbreviations for door names.
 {
 TextDoorsAbbreviateEdDg:
-db "__Underground Tunnel:"
+db "__Underground Tunnel:",$cb
 db $ca
 
 TextDoorsAbbreviateInca:
-db "__Incan Ruins:"
+db "__Incan Ruins:",$cb
 db $ca
 
 TextDoorsAbbreviateMine:
-db "__Diamond Mine:"
+db "__Diamond Mine:",$cb
 db $ca
 
 TextDoorsAbbreviateSGSE:
-db "__Sky Garden, Southeast:"
+db "__Sky Garden, Southeast:",$cb
 db $ca
 
 TextDoorsAbbreviateSGSW:
-db "__Sky Garden, Southwest:"
+db "__Sky Garden, Southwest:",$cb
 db $ca
 
 TextDoorsAbbreviateMu:
-db "__Mu:"
+db "__Mu:",$cb
 db $ca
 
 TextDoorsAbbreviateGtWl:
-db "__Great Wall:"
+db "__Great Wall:",$cb
 db $ca
 
 TextDoorsAbbreviateKress:
-db "__Mt. Temple:"
+db "__Mt. Temple:",$cb
 db $ca
 
 TextDoorsAbbreviateAnkr:
-db "__Ankor Wat:"
+db "__Ankor Wat:",$cb
 db $ca
 
 TextDoorsAbbreviatePymd:
-db "__Pyramid:"
+db "__Pyramid:",$cb
 db $ca
 
 TextDoorsAbbreviateMansion:
-db "__Jeweler's Mansion:"
+db "__Jeweler's Mansion:",$cb
 db $ca
 }
 
@@ -836,14 +847,10 @@ cop #$B7 : db $00
 lda #$0342 : sta $10
 lda #$6000 : trb $12
 cop #$88 : dl $8EE000
-cop #$82 : db $29, $04
-cop #$89
 cop #$82 : db $29, $02
 cop #$89
 cop #$82 : db $29, $12
 cop #$89
-cop #$84 : db $29, $01
-cop #$8A
 cop #$B6 : db $30
 phx
   lda $7F0024,x : dec : asl : tax
@@ -852,53 +859,54 @@ plx
 jsl LR_GiveAnyItemA16OrSec : bcs .AnimateAndDie
 .ItemGiven:
 lda $7f0024,x : jsl LR_SetMonsterItemFlagA
+cop #$D8
 .AnimateAndDie:
 cop #$80 : db $02
 cop #$89
 cop #$E0
 .ItemList:
-db !MonsterItem01Id, !MonsterItem01Type
-db !MonsterItem02Id, !MonsterItem02Type
-db !MonsterItem03Id, !MonsterItem03Type
-db !MonsterItem04Id, !MonsterItem04Type
-db !MonsterItem05Id, !MonsterItem05Type
-db !MonsterItem06Id, !MonsterItem06Type
-db !MonsterItem07Id, !MonsterItem07Type
-db !MonsterItem08Id, !MonsterItem08Type
-db !MonsterItem09Id, !MonsterItem09Type
-db !MonsterItem0AId, !MonsterItem0AType
-db !MonsterItem0BId, !MonsterItem0BType
-db !MonsterItem0CId, !MonsterItem0CType
-db !MonsterItem0DId, !MonsterItem0DType
-db !MonsterItem0EId, !MonsterItem0EType
-db !MonsterItem0FId, !MonsterItem0FType
-db !MonsterItem10Id, !MonsterItem10Type
-db !MonsterItem11Id, !MonsterItem11Type
-db !MonsterItem12Id, !MonsterItem12Type
-db !MonsterItem13Id, !MonsterItem13Type
-db !MonsterItem14Id, !MonsterItem14Type
-db !MonsterItem15Id, !MonsterItem15Type
-db !MonsterItem16Id, !MonsterItem16Type
-db !MonsterItem17Id, !MonsterItem17Type
-db !MonsterItem18Id, !MonsterItem18Type
-db !MonsterItem19Id, !MonsterItem19Type
-db !MonsterItem1AId, !MonsterItem1AType
-db !MonsterItem1BId, !MonsterItem1BType
-db !MonsterItem1CId, !MonsterItem1CType
-db !MonsterItem1DId, !MonsterItem1DType
-db !MonsterItem1EId, !MonsterItem1EType
-db !MonsterItem1FId, !MonsterItem1FType
-db !MonsterItem20Id, !MonsterItem20Type
-db !MonsterItem21Id, !MonsterItem21Type
-db !MonsterItem22Id, !MonsterItem22Type
-db !MonsterItem23Id, !MonsterItem23Type
-db !MonsterItem24Id, !MonsterItem24Type
-db !MonsterItem25Id, !MonsterItem25Type
-db !MonsterItem26Id, !MonsterItem26Type
-db !MonsterItem27Id, !MonsterItem27Type
-db !MonsterItem28Id, !MonsterItem28Type
-db !MonsterItem29Id, !MonsterItem29Type
-db !MonsterItem2AId, !MonsterItem2AType
+dw !EDCageWormItem           ; db !MonsterItem01Id, !MonsterItem01Type
+dw !EDSoutheastWormItem      ; db !MonsterItem02Id, !MonsterItem02Type
+dw !EDSouthwestWormItem      ; db !MonsterItem03Id, !MonsterItem03Type
+dw !EDDoorBatItem            ; db !MonsterItem04Id, !MonsterItem04Type
+dw !EDDarkSpaceWormItem      ; db !MonsterItem05Id, !MonsterItem05Type
+dw !EDSkeleton1Item          ; db !MonsterItem06Id, !MonsterItem06Type
+dw !EDSkeleton2Item          ; db !MonsterItem07Id, !MonsterItem07Type
+dw !IncaWestLadderItem       ; db !MonsterItem08Id, !MonsterItem08Type
+dw !IncaSoutheastLadderItem  ; db !MonsterItem09Id, !MonsterItem09Type
+dw !IncaNortheastLadderItem  ; db !MonsterItem0AId, !MonsterItem0AType
+dw !IncaNSRampItem           ; db !MonsterItem0BId, !MonsterItem0BType
+dw !IncaEWRampItem           ; db !MonsterItem0CId, !MonsterItem0CType
+dw !IncaDBlockMonsterItem    ; db !MonsterItem0DId, !MonsterItem0DType
+dw !IncaWMelodyMonsterItem   ; db !MonsterItem0EId, !MonsterItem0EType
+dw !MineMidFenceItem         ; db !MonsterItem0FId, !MonsterItem0FType
+dw !MineNorthFenceItem       ; db !MonsterItem10Id, !MonsterItem10Type
+dw !MineSouthFenceItem       ; db !MonsterItem11Id, !MonsterItem11Type
+dw !MineWormCageItem         ; db !MonsterItem12Id, !MonsterItem12Type
+dw !MineWormDarkSpaceItem    ; db !MonsterItem13Id, !MonsterItem13Type
+dw !MineFriarFenceItem       ; db !MonsterItem14Id, !MonsterItem14Type
+dw !SGSETopBarrierItem       ; db !MonsterItem15Id, !MonsterItem15Type
+dw !SGSEBotBarrierItem       ; db !MonsterItem16Id, !MonsterItem16Type
+dw !SGSWTopPegGateItem       ; db !MonsterItem17Id, !MonsterItem17Type
+dw !SGSWTopRobotRampItem     ; db !MonsterItem18Id, !MonsterItem18Type
+dw !SGSWTopWormGateItem      ; db !MonsterItem19Id, !MonsterItem19Type
+dw !SGSWBotFireCageItem      ; db !MonsterItem1AId, !MonsterItem1AType
+dw !MuEntranceGolemItem      ; db !MonsterItem1BId, !MonsterItem1BType
+dw !MuDroplet1Item           ; db !MonsterItem1CId, !MonsterItem1CType
+dw !MuDroplet2Item           ; db !MonsterItem1DId, !MonsterItem1DType
+dw !MuSlimeCageItem          ; db !MonsterItem1EId, !MonsterItem1EType
+dw !MuEastFacingHeadGolemItem   ; db !MonsterItem1FId, !MonsterItem1FType
+dw !MuSouthFacingHeadGolemItem  ; db !MonsterItem20Id, !MonsterItem20Type
+dw !GtWlArcherItem           ; db !MonsterItem21Id, !MonsterItem21Type
+dw $106a ;!GtWlFangerItem           ; db !MonsterItem22Id, !MonsterItem22Type
+dw !KressSkullShortcutItem   ; db !MonsterItem23Id, !MonsterItem23Type
+dw !WatSouthScarabItem       ; db !MonsterItem24Id, !MonsterItem24Type
+dw !WatEastSliderHoleItem    ; db !MonsterItem25Id, !MonsterItem25Type
+dw $106d ;!WatPitExitItem           ; db !MonsterItem26Id, !MonsterItem26Type
+dw !WatDarkSpaceHallItem     ; db !MonsterItem27Id, !MonsterItem27Type
+dw !PyramidEntranceOrbsItem  ; db !MonsterItem28Id, !MonsterItem28Type
+dw !MansionEastGateItem      ; db !MonsterItem29Id, !MonsterItem29Type
+dw !MansionWestGateItem      ; db !MonsterItem2AId, !MonsterItem2AType
 
 
 

@@ -5,7 +5,7 @@ hirom
 ; Separately, we need a list of "defines" i.e. IOGR assignments, which will be of the form:
 ; !Map01Exit01 = !DefaultMapXYExitUW
 ; and so forth.
-; Both of these ledgers are also separate from iogr_exits.asr, the actual bank $81 exit table.
+; Both of these ledgers are also separate from the actual bank $81 exit table.
 
 !DefaultMap01Exit01 = $08,$B8,$01,$80,$00,$00,$00,$12
 !DefaultMap01Exit02 = $08,$B8,$01,$80,$00,$00,$00,$12

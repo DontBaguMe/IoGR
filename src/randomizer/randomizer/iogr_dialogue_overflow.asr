@@ -2,8 +2,22 @@ arch 65816
 hirom
 
 
+TextLongShadowsFormUnlocked:
+db $d6,$4c  ; "Shadow's "
+db "form unlocked!"
+db $ca
 
 
+
+TextUsedHerbOverflow:
+db $ce
+db $CE,$44,$80,$A4,$88,$8D,$86,$AC,$A4,$87,$84,$AC,$87,$84,$A2,$81,$2B,$AC,$87,$84,$AC,$CB,$A2,$84,$86,$80,$88,$8D,$84,$83,$AC,$87,$88,$A3,$AC,$A3,$A4,$A2,$84,$8D,$86,$A4,$87,$2A,$AC
+db $ca
+
+TextDeclinedHerbOverflow:
+db $ce
+db $CE,$47,$84,$AC,$A3,$A4,$8E,$A0,$A0,$84,$83,$AC,$84,$80,$A4,$88,$8D,$86,$AC,$CB,$A4,$87,$84,$AC,$87,$84,$A2,$81,$2A,$AC,$C0
+db $ca
 
 TextFathersJournalSubstitute:
 db "It reads: ",$2d,"He who is",$cb
@@ -20,7 +34,13 @@ db $ca
 
 
 TextBlueJournalIntro:
-db $D3,$CE,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$67,$84,$8B,$82,$8E,$8C,$84,$AC,$A4,$8E,$CB,$CB,$AC,$AC,$41,$80,$86,$A5,$0E,$A3,$AC,$63,$A5,$A0,$84,$A2,$6D,$47,$84,$8B,$A0,$85,$A5,$8B,$CB,$AC,$AC,$48,$8D,$6D,$46,$80,$8C,$84,$AC,$64,$A5,$A4,$8E,$A2,$88,$80,$8B,$4F,$6E,$64,$4C,$6F,$CF,$67,$87,$80,$83,$80,$A9,$80,$AC,$A7,$80,$8D,$8D,$80,$AC,$D6,$A4,$80,$81,$8E,$A5,$A4,$0D,$CB,$AC,$41,$84,$80,$A4,$88,$8D,$86,$AC,$A4,$87,$84,$AC,$46,$80,$8C,$84,$CB,$AC,$44,$A8,$A0,$8B,$8E,$A2,$88,$8D,$86,$AC,$A4,$87,$84,$AC,$67,$8E,$A2,$8B,$83,$CB,$AC,$D6,$62,$48,$85,$AC,$48,$0E,$8C,$AC,$63,$A4,$A5,$82,$8A,$0D,$CA
+db $D3,$CE,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$67,$84,$8B,$82,$8E,$8C,$84,$AC,$A4,$8E,$CB,$CB,$AC,$AC,$41,$80,$86,$A5,$0E,$A3,$AC,$63,$A5,$A0,$84,$A2,$6D,$47,$84,$8B,$A0,$85,$A5,$8B,$CB,$AC,$AC,$48,$8D,$6D,$46,$80,$8C,$84,$AC,$64,$A5,$A4,$8E,$A2,$88,$80,$8B,$4F,$6E,$64,$4C,$6F
+db $CF
+db $67,$87,$80,$83,$80,$A9,$80,$AC,$A7,$80,$8D,$8D,$80,$AC,$D6,$A4,$80,$81,$8E,$A5,$A4,$0D,$CB
+db $AC,$41,$84,$80,$A4,$88,$8D,$86,$AC,$A4,$87,$84,$AC,$46,$80,$8C,$84,$CB
+db $AC,$44,$A8,$A0,$8B,$8E,$A2,$88,$8D,$86,$AC,$A4,$87,$84,$AC,$67,$8E,$A2,$8B,$83,$CB
+db $AC,$D6,$62,$48,$85,$AC,$48,$0E,$8C,$AC,$63,$A4,$A5,$82,$8A,$0D
+db $CA
 
 TextBlueJournalDecline:
 db $CE,$47,$84,$AC,$82,$8B,$8E,$A3,$84,$83,$AC,$A4,$87,$84,$AC,$89,$8E,$A5,$A2,$8D,$80,$8B,$2A,$ca

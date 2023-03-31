@@ -20,7 +20,104 @@ hirom
 
 
 
+!DefaultMap01CardMusic = !CardMusicCape
+!DefaultMap02CardMusic = !CardMusicCape
+!DefaultMap03CardMusic = !CardMusicCape
+!DefaultMap04CardMusic = !CardMusicCape
+!DefaultMap05CardMusic = !CardMusicCape
+!DefaultMap06CardMusic = !CardMusicCape
+!DefaultMap09CardMusic = $D57329
+!DefaultMap08CardMusic = !CardMusicCape
+!DefaultMap0ACardMusic = !CardMusicCastle
+!DefaultMapMinorDungeonCardMusic = !CardMusicMinorDungeon
+!DefaultMap15CardMusic = !CardMusicSmallTown
+!DefaultMap16CardMusic = !CardMusicSmallTown
+!DefaultMap17CardMusic = !CardMusicSmallTown
+!DefaultMap18CardMusic = !CardMusicSmallTown
+!DefaultMap19CardMusic = !CardMusicSpooky
+!DefaultMap1ACardMusic = !CardMusicSpooky
+!DefaultMap1BCardMusic = !CardMusicMinorDungeon
+!DefaultMap1CCardMusic = !CardMusicSpooky
+!DefaultMap1DCardMusic = !CardMusicInca
+!DefaultMapIncaCardMusic = !CardMusicInca
+!DefaultMap2CCardMusic = !CardMusicSpooky
+!DefaultMap2ECardMusic = !CardMusicSpooky
+!DefaultMap32CardMusic = !CardMusicCity
+!DefaultMap33CardMusic = !CardMusicCity
+!DefaultMap34CardMusic = !CardMusicCity
+!DefaultMap35CardMusic = !CardMusicCity
+!DefaultMap36CardMusic = !CardMusicCity
+!DefaultMap37CardMusic = !CardMusicCity
+!DefaultMap38CardMusic = !CardMusicCity
+!DefaultMap39CardMusic = !CardMusicCity
+!DefaultMap3ACardMusic = !CardMusicCity
+!DefaultMap3BCardMusic = !CardMusicCity
+!DefaultMap47CardMusic = !CardMusicSpooky
+!DefaultMap49CardMusic = !CardMusicSmallTown
+!DefaultMap4BCardMusic = !CardMusicSpooky
+!DefaultMapSkGnCardMusic = !CardMusicSkGn
+!DefaultMap5ACardMusic = !CardMusicSpooky
+!DefaultMap5BCardMusic = !CardMusicSpooky
+!DefaultMap5CCardMusic = !CardMusicSpooky
+!DefaultMap5DCardMusic = !CardMusicSpooky
+!DefaultMap5ECardMusic = !CardMusicSpooky
+!DefaultMapMuCardMusic = !CardMusicMu
+!DefaultMap63CardMusic = !CardMusicSpooky
+!DefaultMap66CardMusic = !CardMusicSpooky
+!DefaultMap67CardMusic = !CardMusicSpooky
+!DefaultMap69CardMusic = !CardMusicSmallTown
+!DefaultMap6ACardMusic = !CardMusicSmallTown
+!DefaultMap6BCardMusic = !CardMusicSmallTown
+!DefaultMap6CCardMusic = !CardMusicSmallTown
+!DefaultMap74CardMusic = !CardMusicSpooky
+!DefaultMap75CardMusic = !CardMusicSpooky
+!DefaultMap78CardMusic = !CardMusicCity
+!DefaultMap79CardMusic = !CardMusicCity
+!DefaultMap7ACardMusic = !CardMusicCity
+!DefaultMap7CCardMusic = !CardMusicCity
+!DefaultMap7DCardMusic = !CardMusicCity
+!DefaultMap7ECardMusic = !CardMusicCity
+!DefaultMapGtWlCardMusic = !CardMusicGtWl
+!DefaultMap91CardMusic = !CardMusicCity
+!DefaultMap92CardMusic = !CardMusicCity
+!DefaultMap93CardMusic = !CardMusicCity
+!DefaultMap94CardMusic = !CardMusicCity
+!DefaultMap95CardMusic = !CardMusicCastle
+!DefaultMap96CardMusic = !CardMusicCastle
+!DefaultMap97CardMusic = !CardMusicCity
+!DefaultMap98CardMusic = !CardMusicCity
+!DefaultMap99CardMusic = !CardMusicCity
+!DefaultMap9ACardMusic = !CardMusicCity
+!DefaultMap9BCardMusic = !CardMusicCity
+!DefaultMap9CCardMusic = !CardMusicCity
+!DefaultMap9DCardMusic = !CardMusicSpooky
+!DefaultMapACCardMusic = !CardMusicSmallTown
+!DefaultMapB0CardMusic = !CardMusicSpooky
+!DefaultMapAnkrCardMusic = !CardMusicAnkr
+!DefaultMapBFCardMusic = !CardMusicSpooky
+!DefaultMapC3CardMusic = !CardMusicCity
+!DefaultMapC4CardMusic = !CardMusicCity
+!DefaultMapC5CardMusic = !CardMusicSpooky
+!DefaultMapC6CardMusic = !CardMusicCity
+!DefaultMapC7CardMusic = !CardMusicCity
+!DefaultMapC8CardMusic = !CardMusicCity
+!DefaultMapC9CardMusic = !CardMusicCity
+!DefaultMapCCCardMusic = !CardMusicSpooky
+!DefaultMapCDCardMusic = !CardMusicSpooky
+!DefaultMapPymdCardMusic = !CardMusicPymd
+!DefaultMapDECardMusic = !CardMusicSpooky
+!DefaultMapDFCardMusic = !CardMusicSpooky
+!DefaultMapE0CardMusic = !CardMusicSpooky
+!DefaultMapE1CardMusic = !CardMusicSpooky
+!DefaultMapE2CardMusic = !CardMusicSpooky
+!DefaultMapE3CardMusic = !CardMusicSpooky
 
+
+
+
+
+
+if 0
 
 db $00 : db $00
 db $02 : db $00
@@ -2624,8 +2721,7 @@ db $17,$80,$E1,$54,$D4
 db $12
 db $00
 
-
-warnpc $8DB001
+endif
 
 
 
