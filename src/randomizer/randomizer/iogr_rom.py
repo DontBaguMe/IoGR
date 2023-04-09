@@ -15,7 +15,7 @@ from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
-VERSION = "4.4.8"
+VERSION = "4.4.9.1"
 
 MAX_RANDO_RETRIES = 9
 PRINT_LOG = False
@@ -1174,6 +1174,10 @@ class Randomizer:
         patch.seek(int("5c331", 16) + rom_offset)
         patch.write(b"\x42\xa2\x80\xa0\x2b\xac\x48\xac\xd6\xae\xa4\x87\x84\xac\xd7\x58\xcb\xa5")
         patch.write(b"\x8d\x8b\x8e\x82\x8a\x84\x83\xac\x80\x86\x80\x88\x8d\x2a\x2a\x2a\xc0")
+
+        # Update NPC dialogue to Neomatamune's quote (congrats tourney winner 2023)
+        patch.seek(int("5bdbf", 16) + rom_offset)
+        patch.write(qt_encode("French don't say Sacre Bleu!") + b"\xc0")
 
         # Add inventory full option to Creepy Guy event
         patch.seek(int("5b6df", 16) + rom_offset)
