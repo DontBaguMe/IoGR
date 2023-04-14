@@ -19,12 +19,31 @@ macro MTryGiveItemAndFlag(Item16,Flag)
     db <Flag>
 endmacro
 
+
+; Important routine labels.
+{
 LR_SetFlag20A = $80b481
 LR_SecOnFlag20A = $80B489
 LR_ParseDialogueScriptAtY = $82f048
 SR_RemoveHeldItem = $839FB2
 LR_ClearMonsterKilledFlags = $80b4cc
+}
 
+
+
+; Bank $80
+{
+
+org $808067
+if !SettingRedJewelMadness == 1
+lda #$0028
+elseif !SettingOHKO == 1
+lda #$0001
+elseif !SettingZ3 == 1
+lda #$0006    ; Start with 6 HP instead of 8
+else
+lda #$0008    ; Default, vanilla
+endif
 
 
 org $80c312
@@ -44,7 +63,6 @@ db $29,$00,$00,$00
 }
 
 
-
 org $80c381
 if !SettingZ3 == 0
 jsr SR_IncreaseHpByThree   ; replaces inc $0aca in boss reward code
@@ -53,18 +71,8 @@ endif
 
 org $80c66f
 db $00 : dw $3000
-ERedJewelPickup:
-;cop #$C0 : dw .OnInteract
-;cop #$88 : dl $8ee000
-;cop #$8D : db $00
-;cop #$C1
-;rtl
-;.OnInteract:
-;lda $0E : clc : adc #$0080 : jsl LR_SecOnFlag20A : bcs .Done
-;jsr SR_GiveRJPickupItemOrSec : bcs .Done
-;lda $0e : clc : adc #$0080 : jsl LR_SetFlag20A
-;.Done:
-rtl
+;ERedJewelPickup:    ; Not enough space here for IOGR implementation,
+rtl                  ; so this is nulled out and the new code is elsewhere.
 
 
 org $80cd12
@@ -83,7 +91,7 @@ jsl $83fea1
 
 
 org $80dbf2
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
@@ -92,7 +100,7 @@ org $80DC23
 ; For key rando, dead monster checks whether its item has been given,
 ; but doesn't set the item-given flag; EMonsterDeathDoorOrItem does that,
 ; since it can more easily verify inventory free space.
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -103,9 +111,6 @@ cop #$D8
 +++:
 jmp $dc54
 endif
-
-
-
 
 
 org $80e03c
@@ -251,11 +256,13 @@ pla   ; reverse earlier pea
 rtl
 }
 
+
 SR_IncreaseHpByThree:   ; For boss room reward code.
 inc $0aca
 inc $0aca
 inc $0aca
 rts
+
 
 LR_PrepareMonsterDeathDoorOrb:
 lda $0012,y : ora #$1000 : sta $0012,y
@@ -272,12 +279,16 @@ plx
 rtl
 
 
-
 org $80ffd1
 db $52,$41,$4E,$44,$4F    ; Append "Rando" to ROM title
 
 
+} ; end bank $80
 
+
+
+; Bank $81
+{
 
 org $818234
 incsrc "iogr_81_exit_table.asr"
@@ -857,7 +868,7 @@ db $ff
 }
 warnpc $81B086
 
-org $81c3c4
+org $81c3c4    ; Due to new 2-byte chest IDs, some chests are moved to this freespace block.
 {
 Lut_Chests_Map83:
 db $1A,$59 : dw !GtWlChest1Item : db $1D : db $ff
@@ -895,8 +906,6 @@ Lut_Chests_MapE9:
 db $37,$16 : dw !MansionChestItem : db $2D : db $ff
 }
 warnpc $81c455
-
-
 
 
 org $81da4c
@@ -1101,6 +1110,7 @@ db $4D,$79,$73,$74,$69,$63,$40,$10,$0C,$00
 }
 warnpc $81de1e
 
+
 org $81de1e
 table "table_invtext.txt",rtl
 Text_ItemNamesInv:
@@ -1283,6 +1293,7 @@ db $10,$05,$44,$6f,$6c,$6c,$00
 }
 warnpc $81e12a
 
+
 org $81e12a
 Lut_ItemDroppableFlags:
 db $9f,$ff
@@ -1297,6 +1308,7 @@ else
 db $3f,$b0
 endif
 db $01,$00,$00
+
 
 org $81e132
 table "table_invtext.txt",rtl
@@ -1444,6 +1456,7 @@ db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$
 db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 
 }
 warnpc $81e5ec
+
 
 org $81fd24
 table "table_dialogue.txt",rtl
@@ -1642,6 +1655,8 @@ table "table_dialogue.txt",rtl
 db "Already maxed out!"
 
 
+} ; end bank $81
+
 
 org $82a5f9
 ; Part of LR_UpdateTilemapOpenChests, updated for 2-byte item IDs.
@@ -1685,6 +1700,7 @@ lda $0002,x : beq .ChestEmpty
 sep #$20
 lda #$2A : sta $06F9
 rep #$20
+lda #$0001 : sta $0bfc    ; Slow item get text speed.
 lda $0002,x : jsl LR_GiveAnyItemA16OrSec : bcc .GaveItemSuccess
 .CannotGiveItem:
 lda $01,s : tax
@@ -1713,7 +1729,7 @@ lda #$0080 : trb $09EC
 plx
 rts
 }
-
+warnpc $82a7b8
 
 
 
@@ -1728,6 +1744,12 @@ jmp BR_CheckDarkFriar
 
 
 
+org $82ca63
+if !SettingFluteless == 1
+jsr SR_AllowBlockIfNotWill    ; Instead of lda #$0100.
+endif
+
+
 
 ; Early Firebird checks.
 ; Replaces "lda $0644 : cmp #$00e8 : bne .PostFirebird"
@@ -1740,6 +1762,35 @@ nop : nop : nop : jsr SR_SecIfFirebirdAllowed : bcc $09
 org $82ce84
 nop : nop : nop : jsr SR_SecIfFirebirdAllowed : bcc $09
 
+
+org $82ceee
+SR_PlayerAttackFreezeAndSound:
+lda $0656 : and #$0F00 : sta $0656
+  ora #$8000 : sta $0658
+if !SettingFluteless == 1
+lda $0AD4 : beq .AsWill
+lda #$0100 : trb $10
+cop #$06 : db $02
+rts
+.AsWill:
+jsr SR_DisableAttackDamage
+rts
+else
+lda #$0100 : trb $10
+lda $0AD4 : beq .AsWill
+cop #$06 : db $02
+rts
+.AsWill:
+cop #$06 : db $01
+rts
+endif
+warnpc $82cf0f
+
+
+org $82cf58
+if !SettingZ3 == 1
+lda $0ade    ; Instead of lda #$0001, doubles jump-slash damage
+endif
 
 
 org $82f0c0
@@ -2696,6 +2747,22 @@ lda #$bb3b : jsr $b926
 +:
 jmp $b901
 
+SR_AllowBlockIfNotWill:   ; assumed to be $82f845
+lda $0ad4 : beq +
+lda #$0100
++:
+rts
+SR_DisableAttackDamage:
+lda #$0400 : tsb $10
+lda #$0200 : trb $10
+rts
+SR_AllowChargeIfInSnakeGame:
+lda $0644 : cmp #$00C6 : beq +
+lda $09AE : bit #$0008 : beq +
+cop #$E0
++:
+jmp $B7BD
+
 
 
 
@@ -2725,6 +2792,33 @@ dw SR_UseItemFriarUpgrade    ; Item $2d
 dw SR_UseItemTwoJewels    ; Item $2e 
 dw SR_UseItemThreeJewels    ; Item $2f 
 dw $ffa0    ; Item $30 
+
+
+
+org $8384d5
+SR_UseItemRedJewel:
+if !SettingRedJewelMadness == 1
+cop #$BF : dw .UseText
+jsr SR_RemoveHeldItem
+jsl LR_IncJewelCounter
+jsl LR_DecHP
+phx
+phd
+  lda $09AA : tcd : tax
+  cop #$A5 : dl $838566 : dw $0000,$2000
+  tyx
+  lda #$0000 : sta $0012,x
+  lda #$3000 : sta $000E,x
+  lda $1014 : sta $0014,x
+  lda $1016 : sta $0016,x
+pld
+plx
+rts
+.UseText:
+db $cd : dl TextUsedRedJewelRJM
+db $c0
+endif
+warnpc $838566
 
 
 org $8385cf
@@ -2774,9 +2868,11 @@ cop #$BE : db $02,$01 : dw .UseOptions
   dw .ChooseAccept, .ChooseDecline
 .ChooseAccept:
 cop #$BF : dw ..Text
-jsr SR_GetHerbHealAmount    ; Instead of lda #$0008, uses difficulty level to set heal amount.
-  sta $0B22
-dec $0aaa : bne +
+jsr SR_GetHerbHealAmount : sta $0b22    ; Instead of lda #$0008, uses difficulty level to set heal amount.
+sed
+  lda $0aaa : sec : sbc #$0001 : sta $0aaa
+cld
+bne +
   jsr SR_RemoveHeldItem
 +:
 rts
@@ -2797,13 +2893,6 @@ db "_Yes",$cb
 db "_No"
 db $ca
 warnpc $838917
-
-org $83889e
-
-org $8388a4
-jmp $ffda
-
-org $8388ae
 
 
 org $838BA4
@@ -3069,23 +3158,37 @@ db $C3,$00,$69,$8E,$A5,$AC,$8D,$8E,$A7,$AC,$D6,$A4,$4C,$8E,$A2,$A3,$84,$AC,$42,$
 
 SR_UseItemTwoJewels:
 jsr SR_RemoveHeldItem
-sed
-  lda $0ab0 : clc : adc #$0002 : sta $0ab0
-cld
-cop #$BF : dw Text_TwoJewelsSent
+phx
+ldx #$0002
+-:
+jsl LR_IncJewelCounter
+if !SettingRedJewelMadness == 1
+jsl LR_DecHP
+endif
+dex : bne -
+plx
+cop #$BF : dw .Text
 rts
-Text_TwoJewelsSent:
-db $D3,$22,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F,$C0
+.Text:
+db $cd : dl TextUsedTwoRedJewels
+db $C0
 
 SR_UseItemThreeJewels:
 jsr SR_RemoveHeldItem
-sed
-  lda $0ab0 : clc : adc #$0003 : sta $0ab0
-cld
-cop #$BF : dw Text_ThreeJewelsSent
+phx
+ldx #$0003
+-:
+jsl LR_IncJewelCounter
+if !SettingRedJewelMadness == 1
+jsl LR_DecHP
+endif
+dex : bne -
+plx
+cop #$BF : dw .Text
 rts
-Text_ThreeJewelsSent:
-db $D3,$23,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F,$C0
+.Text:
+db $cd : dl TextUsedThreeRedJewels
+db $C0
 }
 
 
@@ -3393,9 +3496,15 @@ jsr $fe8b
 
 
 
+org $83c464
+if !SettingZ3 == 1
+jsr SR_HalveAPerDef    ; Instead of sbc $0adc, halves damage per DEF instead of reducing it by 1 per DEF
+endif
+
+
 
 org $83d10b
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 nop : nop : nop : sec    ; In key rando, already-dead monsters don't trigger map rearrangement.
 endif
 
@@ -3460,8 +3569,10 @@ cop #$06 : db $22
 bra .ClcAndRtl
 .IsHpJewel:
 lda #$80 : trb $09EC
+if !SettingOHKO == 0
 lda $0ACA : inc : sta $0ACA
   sec : sbc $0ACE : sta $0B22
+endif
 ldy #$0000
 bra .ClcAndRtl
 .IsStrJewel:
@@ -3500,54 +3611,58 @@ org $83f208
 cop #$BF : dw $9e1a
 rtl
 
-org $83fd70
-; rjm.bin, decrease health for RJM mode
-{
-pha
-lda #$0001 : bra +
-pha
-lda #$0002 : bra +
-pha
-lda #$0003
-+:
-pha
-pha
-cop #$BF : dw Text_UseJewelRJM
+
+org $83f779
+; Z3 status upgrade routines
+if 0
+
+0C F0 
+32 F0 
+51 F0 
+E9 EF 
+ED EF 
+F1 EF 
+CA EF 
+0C F0 
+32 F0 
+51 F0 
+C0 EF 
+C5 EF 
+90 FF 
+C1 FF 
+48 38 E9 57 8D B8 0D 68 38 E9 80 60 
+E0 0E 00 D0 0F 48 A9 03 CD 24 0B F0 06 68 18 69 02 80 04 68 18 69 01 60 
+08 00 04 00 02 00 01 00 
+DA 48 AD 24 0B 0A AA 68 DF B9 F7 83 F0 04 FA 18 0A 60 
+A2 36 00 8E B8 0D FA 60 
+02 00 02 00 01 00 00 00 
+DA 48 AD 24 0B 0A AA 68 DF DB F7 83 F0 05 FA 18 69 01 60 
+A2 36 00 8E B8 0D FA 60 
+
+endif
+
+
+org $83faee
+SR_HalveAPerDef:
+phx
+ldx $0ADC
 -:
-jsl LR_DecMaxHp   ; $83fda0
-pla : dec : beq +
-  pha : bra -
+cpx #$0000 : beq +
+lsr a
+dex
+bra -
 +:
--:
-jsl LR_DecMaxHp   ; $83fda9
-pla : dec : beq +
-  pha : bra -
-pla
-jmp $83d9
-LR_DecMaxHp:
-lda $0aca : beq +
-  dec $0aca
-+:
-rtl
-LR_DecCurHp:
-lda $0ace : beq +
-  dec $0ace
-+:
-rtl
-LR_IncJewelCounter:
-sed
-clc
-lda $0ab0 : adc #$0001 : sta $0ab0
-cld
-rtl
-}
+plx
+cmp #$0000  
+rts
+
 
 org $83fdc0
 ; startmenu.bin
 {
 pha
 cop #$D0 : db $F5,$01 : dw $fdd4
-cop #$D0 : db $F5,$01 : dw $fdd4   ; repetition is an IOGR bug.
+cop #$D0 : db $F5,$01 : dw $fdd4   ; repetition is a bug
 pla
 lda #$2EE1
 jmp $81d9
@@ -3591,11 +3706,26 @@ SR_GetHerbHealAmount:
 lda $0B24 : beq +++
   dec : beq ++
   dec : beq +
-lda #$0004 : bra ++++
+if !SettingZ3 == 0
+lda #$0004
+else
+lda #$0008
+endif
+bra ++++
 +:
-lda #$0006 : bra ++++
+if !SettingZ3 == 0
+lda #$0006
+else
+lda #$000e
+endif
+bra ++++
 ++:
-lda #$0008 : bra ++++
+if !SettingZ3 == 0
+lda #$0008
+else
+lda #$0028
+endif
+bra ++++
 +++:
 lda #$0028 ;: bra ++++
 ++++:
@@ -3672,14 +3802,6 @@ db "million pieces.",$cb
 db "Whoops."
 db $c0
 warnpc $83ff50
-org $83ff50
-Text_UseJewelRJM:
-db $d3
-db "As the Jewel disappears,",$cb
-db "Will feels his strength",$cb
-db "draining!"
-db $c0
-warnpc $83ff90
 
 org $83ff90
 pha
@@ -3913,6 +4035,9 @@ db $10   ; Seaside cave flag another one
 org $84be3d
 db $10   ; Seaside cave flag
 
+org $84be6a
+db !Map02Exit01
+
 org $84c20e
 %MTryGiveItemAndFlag(!ECHiddenGuardItem, $d8)
 rtl
@@ -3958,6 +4083,9 @@ cop #$DA : db $0b
 
 org $84c746
 db $10    ; Don't set a flag upon talking to Edward
+
+org $84c755
+db !MapPrisonWarpString
 
 org $84caf5   ; Castle guard top floor text
 db $d3
@@ -4184,6 +4312,9 @@ cop #$66 : dw $0090,$0260 : db $01
 cop #$C1
 rtl
 
+org $84f8b7
+lda.w #!MoonTribeTimeLimit
+
 org $84fadf
 ; Moon Tribe cave statue
 %MTryGiveItemAndFlag(!MoonTribeCaveItem, $48)
@@ -4261,7 +4392,7 @@ cop #$BE : db $02,$01 : dw .Options
 cop #$BF : dw Text_GoldShipDeclineTravel
 rtl
 .SayYes:
-cop #$26 : db $30 : dw $0048,$0110 : db $03,$00,$21
+cop #$26 : db !MapShipExitString ; $30 : dw $0048,$0110 : db $03,$00,$21
 cop #$C5
 Text_GoldShipOfferTravel:    ; "Ready to set sail?" etc.
 db $D3,$62,$84,$80,$83,$A9,$AC,$A4,$8E,$AC,$A3,$84,$A4,$AC,$A3,$80,$88,$8B,$0D,$CB
@@ -4473,6 +4604,7 @@ org $85d4d0
 EMorgueItemPickup_OnInteract:
 cop #$D0 : db $5d,$01 : dw .GotItemAlready
 %MTryGiveItemAndFlag(!MineMorgueItem, $5d)
+rtl
 .GotItemAlready:
 cop #$E0
 
@@ -4497,13 +4629,20 @@ lda #$2000 : trb $10
 lda #$eff0 : tsb $065a
 cop #$DA : db $77
 cop #$CE : db $00
+EMineWallSlave_TryGiveItem:
 %MTryGiveItemAndFlag(!MineWallSlaveItem, $d9)
+cop #$D0 : db $d9,$00 : dw EMineWallSlave_InvWasFull
 lda #$EFF0 : trb $065A
 lda #$0080 : tsb $09EC
 cop #$86 : db $0D, $08, $01
 cop #$8A
 lda #$0080 : trb $09EC
 cop #$E0
+EMineWallSlave_InvWasFull:
+lda #$0200 : tsb $12
+cop #$C0 : dw EMineWallSlave_TryGiveItem
+cop #$C1
+rtl
 }
 
 org $85d89a
@@ -4608,7 +4747,7 @@ cop #$DA : db $3b
 cop #$C1
 cop #$C1
 lda #$0404 : sta $064a
-cop #$26 : db $4c : dw $0168,$0040 : db $83,$00,$22
+cop #$26 : db !MapGardenEntranceString ; $4c : dw $0168,$0040 : db $83,$00,$22
 cop #$C1
 rtl
 
@@ -4717,7 +4856,7 @@ rtl
 cop #$40 : dw $0800 : dw .DoPort
 rtl
 .DoPort:
-cop #$26 : db $4b : dw $01e0,$02c0 : db $03,$00,$44
+cop #$26 : db !MapGardenExitString ; $4b : dw $01e0,$02c0 : db $03,$00,$44
 cop #$C1
 rtl
 
@@ -4784,16 +4923,70 @@ db $d3
 db "!SpoilerTextSeaPalCoffin"
 db $c0
 
-org $86922b
-; Coffin gets special handling due to Lilly and a 2-byte flag.
-lda.w #!SeaPalCoffinItem : jsl LR_GiveAnyItemA16OrSec
-bcs +
-jmp $9261
-+:
-jmp $9293
 
-org $869267
-bra $04   ; Coffin
+org $8691AC
+db $00 : dw $3002
+ESeaPLillyAtCoffin:
+cop #$D1 : dw $013B : db $01 : dw .CoffinOpenDoDie
+cop #$BC : db $08, $00
+cop #$C0 : dw .OnInteract
+.AwaitInteractWithLilly:
+cop #$D2 : db $02, $01
+lda #$CFF0 : tsb $065A
+lda #$2000 : trb $10
+cop #$88 : dl $8EE000
+lda $1014 : sta $14
+lda $1016 : sec : sbc #$0010 : sta $16
+cop #$85 : db $33, $04, $14
+cop #$8A
+cop #$84 : db $33, $04
+cop #$8A
+lda #$02C0 : sta $7F0018,x
+lda #$009C : sta $7F001A,x
+cop #$22 : db $33, $01
+lda #$2000 : tsb $10
+cop #$DA : db $3B
+cop #$32 : db $3B
+cop #$33
+cop #$CD : dw $013B
+cop #$DA : db $3B
+lda #$00A0 : sta $16
+lda #$2000 : trb $10
+%MTryGiveItemAndFlag(!SeaPalCoffinItem, $13)    ; Surrogate flag $13 for this item.
+cop #$D0 : db $13,$00 : dw .CancelItemGet
+cop #$DA : db $03
+lda #$CFF0 : tsb $065A
+cop #$84 : db $33, $04
+cop #$8A
+lda $1014 : sta $7F0018,x
+lda $1016 : sec : sbc #$0010 : sta $7F001A,x
+cop #$22 : db $33, $01
+lda #$2000 : tsb $10
+lda #$CFF0 : trb $065A
+.CoffinOpenDoDie:
+cop #$E0
+.CancelItemGet:
+cop #$CF : dw $013B
+cop #$CE : db $02
+cop #$84 : db $33, $04
+cop #$8A
+lda $1014 : sta $7F0018,x
+lda $1016 : sec : sbc #$0010 : sta $7F001A,x
+cop #$22 : db $33, $01
+lda #$2000 : tsb $10
+lda #$CFF0 : trb $065A
+cop #$25 : db $2B, $0A
+jmp .AwaitInteractWithLilly
+.OnInteract:
+cop #$D0 : db $6f,$01 : dw ..WithLilly
+cop #$BF : dw $92e2
+rtl
+..WithLilly:
+cop #$BF : dw $930a
+cop #$CC : db $02
+rtl
+warnpc $8692E2
+
 
 org $869406
 db $10    ; Lilly at Seaside Palace flag
@@ -4941,7 +5134,7 @@ db $d3 : db "Hey." : db $c0    ; Hope Room text
 }
 
 org $869c60
-cop #$26 : db $67 : dw $0178,$01d0 : db $80,$01,$22   ; Vamps exit change.
+cop #$26 : db !MapVampEntranceString ; $67 : dw $0178,$01d0 : db $80,$01,$22   ; Vamps exit change.
 
 ; "Shorten Rama statue event"
 org $869e50
@@ -5103,434 +5296,334 @@ cop #$45 : db $50,$00, $60,$10 : dw !HairCheckAddr3
 cop #$45 : db $70,$00, $80,$10 : dw !HairCheckAddr4
 jmp IshtarRoomDifferenceIsNotHair
 
-org $86dd30
-; collectioncheck.bin
+; Item collection tracker in map room.
 {
-sed
-lda $1f70,x : clc : adc #$0001 : sta $1f70,x
-cld
-rts
-db $ff,$ff,$ff    ; Filler.
-
+table "table_dialogue.txt",rtl
+TextItemCounterDisplay:
 db $D3
-db $AC,$48,$A4,$84,$8C,$A3,$AC,$42,$8E,$8B,$8B,$84,$82,$A4,$84,$83,$2F,$AC
-db $C6,$02,$00,$70,$1F
+db "_Items Collected:_"
+db $C6 : dw $0002, $00f0
+db "/"
+db $C6 : dw $0002, $00f2
 db $CB
-db $AC,$AC,$AC,$AC,$AC,$64,$8E,$A4,$80,$8B,$AC,$48,$A4,$84,$8C,$A3,$2F,$AC
-db $C6,$02,$00,$A0,$1F
+if !SettingOrbRando == 1
+db "__Orbs Collected:_"
+db $C6 : dw $0002, $00f4
+db "/"
+db $C6 : dw $0002, $00f6
 db $CB
-db $AC,$AC,$AC,$AC,$AC,$D6,$0C,$63,$A0,$80,$82,$84,$A3,$2F,$AC
-db $C6,$02,$00,$D0,$1F
+endif
+db "_____Dark Spaces:_"
+db $C6 : dw $0002, $00f8
 db $C0
 
-dw $0000,$0000,$0000,$0000,$0000,$0000,$0004,$0007
-dw $0002,$0001,$0006,$0001,$0005,$0006,$0000,$0008
-dw $0005,$0007,$0006,$0004,$0004,$0007,$0005,$0002
-dw $0007,$0004,$0012,$0002,$0000,$0000,$0001,$0002
-dw $0001,$0000,$0003,$0000,$0001,$0003,$0000,$0004
-dw $0001,$0002,$0001,$0001,$0003,$0001,$0003,$0001
-dw $0003,$0001,$0002,$0002,$0000,$0000,$0000,$0000
-dw $0000,$0000,$0000,$0000,$0000
+; Format is:
+; db <flags with high byte $00: normal items>
+; db $ff
+; db <flags with high byte $02: chests are $01-$2E, RJs are $80-$8f>
+; db $ff
+; db <monster orb numbers, $01 - $2A>
+; db $ff
+Lut_TrackerItemFlagsByArea:
+.Pointers:
+{
+dw .Cape
+dw .EdDg
+dw .Itry
+dw .Moon
+dw .Inca
+dw .Coast
+dw .Frej
+dw .Mine
+dw .Neil
+dw .SkGn
+dw .SeaP
+dw .Mu
+dw .Angl
+dw .Wtma
+dw .GtWl
+dw .Euro
+dw .Kres
+dw .NtVl
+dw .Ankr
+dw .Dao
+dw .Pymd
+dw .Babl
+}
+{
+.Cape:
+db $35,$d7
+db $ff
+db $80,$81
+db $ff
+db $ff
+.EdDg:
+db $23,$46,$d8
+db $ff
+db $01,$02,$03,$82
+db $ff
+db $01,$02,$03,$04,$05,$06,$07
+db $ff
+.Itry:
+db $2d
+db $ff
+db $83
+db $ff
+db $ff
+.Moon:
+db $48
+db $ff
+db $ff
+db $ff
+.Inca:
+db $32,$e0
+db $ff
+db $04,$05,$06,$07
+db $ff
+db $08,$09,$0a,$0b,$0c,$0d,$0e
+db $ff
+.Coast:
+db $ff
+db $84
+db $ff
+db $ff
+.Frej:
+db $53,$54,$5a,$e1
+db $ff
+db $85
+db $ff
+db $ff
+.Mine:
+db $5d,$5e,$a2,$a3,$d9
+db $ff
+db $09
+db $ff
+db $0f,$10,$11,$12,$13,$14
+db $ff
+.Neil:
+db $ff
+db $ff
+db $ff
+.SkGn:
+db $ff
+db $0a,$0b,$0c,$0d,$0e,$0f,$10,$11
+db $ff
+db $15,$16,$17,$18,$19,$1a
+db $ff
+.SeaP:
+db $13,$85
+db $ff
+db $12,$13,$14
+db $ff
+db $ff
+.Mu:
+db $79,$7f
+db $ff
+db $15,$16,$17,$18,$2e
+db $ff
+db $1b,$1c,$1d,$1e,$1f,$20
+db $ff
+.Angl:
+db $ff
+db $19,$1a,$1b,$1c,$86,$87
+db $ff
+db $ff
+.Wtma:
+db $e2,$95
+db $ff
+db $88,$89
+db $ff
+db $ff
+.GtWl:
+db $98,$99
+db $ff
+db $1d,$1e
+db $ff
+db $21
+db $ff
+.Euro:
+db $9a,$a6,$e5,$f0,$f1
+db $ff
+db $8a,$8b
+db $ff
+db $ff
+.Kres:
+db $ff
+db $1f,$20,$21,$22,$23
+db $ff
+db $23
+db $ff
+.NtVl:
+db $e6
+db $ff
+db $8c
+db $ff
+db $ff
+.Ankr:
+db $ba,$be
+db $ff
+db $24,$25,$26,$27,$28
+db $ff
+db $24,$25,$27
+db $ff
+.Dao:
+db $b8,$b8,$e7
+db $ff
+db $8d
+db $ff
+db $ff
+.Pymd:
+db $bd,$c2,$c3,$c4,$c5,$c6,$c7
+db $ff
+db $29,$2a,$2b,$2c,$8e
+db $ff
+db $28
+db $ff
+.Babl:
+db $dc
+db $ff
+db $8f
+db $ff
+db $ff
+}
+
+TblTrackerDarkSpaceCountsByArea:
+{
+db $01   ; South Cape
+db $02   ; Edward's
+db $01   ; Itory
+db $00   ; Moon Tribe
+db $03   ; Inca
+db $00   ; Coast
+db $01   ; Freejia
+db $03   ; Mine
+db $00   ; Neil's
+db $04   ; SkGn
+db $01   ; SeaP
+db $02   ; Mu
+db $01   ; Angl
+db $01   ; Wtma
+db $03   ; GtWl
+db $01   ; Euro
+db $03   ; Kres
+db $01   ; NtVl
+db $03   ; Ankr
+db $01   ; Dao
+db $02   ; Pymd
+db $02   ; Babl
+}
 
 db $00 : dw $3000
-cop #$D0 : db $03,$01 : dw $de30
-ldx #$0002
--:
-lda $86dd90,x : sta $1fa0,x
-lda $86ddc0,x : sta $1fd0,x
-lda #$0000 : sta $1f70,x
-jsr ($dfa0,x)
-inx : inx : cpx #$002e : bne -
-cop #$CC : db $03
-rtl
-
-db $00,$00    ; filler
-
-cop #$40 : db $01,$0f : dw $de37
-rtl
-
-cop #$45 : db $0C,$39,$0E,$3B : dw $DF03
-cop #$45 : db $0F,$32,$11,$34 : dw $DF08
-cop #$45 : db $0B,$2A,$0D,$2C : dw $DF0D
-cop #$45 : db $08,$26,$0B,$28 : dw $DF12
-cop #$45 : db $12,$27,$14,$29 : dw $DF17
-cop #$45 : db $24,$34,$26,$36 : dw $DF1C
-cop #$45 : db $24,$2C,$26,$2E : dw $DF21
-cop #$45 : db $32,$32,$34,$34 : dw $DF26
-cop #$45 : db $26,$25,$28,$27 : dw $DF2B
-cop #$45 : db $2F,$28,$31,$2A : dw $DF30
-cop #$45 : db $37,$08,$39,$0A : dw $DF35
-cop #$45 : db $32,$07,$34,$09 : dw $DF3A
-cop #$45 : db $37,$15,$39,$17 : dw $DF3F
-cop #$45 : db $2C,$19,$2E,$1B : dw $DF44
-cop #$45 : db $29,$11,$2B,$13 : dw $DF49
-cop #$45 : db $1C,$12,$1E,$14 : dw $DF4E
-cop #$45 : db $20,$0C,$22,$0E : dw $DF53
-cop #$45 : db $11,$19,$13,$1B : dw $DF58
-cop #$45 : db $12,$14,$14,$16 : dw $DF5D
-cop #$45 : db $08,$10,$0A,$12 : dw $DF62
-cop #$45 : db $06,$0A,$08,$0C : dw $DF67
-cop #$45 : db $1F,$1F,$21,$21 : dw $DF6C
-cop #$D0 : db $01,$00 : dw $DF02
-lda #$0000
-  sta $1F60
-  sta $1F70
-  sta $1FA0
-  sta $1FD0
-cop #$CE : db $01
+EInGameCollectionTracker:
+stz $26
+cop #$45 : db $0C,$39,$0E,$3B : dw .InSomeArea
+inc $26
+cop #$45 : db $0F,$32,$11,$34 : dw .InSomeArea
+inc $26
+cop #$45 : db $0B,$2A,$0D,$2C : dw .InSomeArea
+inc $26
+cop #$45 : db $08,$26,$0B,$28 : dw .InSomeArea
+inc $26
+cop #$45 : db $12,$27,$14,$29 : dw .InSomeArea
+inc $26
+cop #$45 : db $24,$34,$26,$36 : dw .InSomeArea
+inc $26
+cop #$45 : db $24,$2C,$26,$2E : dw .InSomeArea
+inc $26
+cop #$45 : db $32,$32,$34,$34 : dw .InSomeArea
+inc $26
+cop #$45 : db $26,$25,$28,$27 : dw .InSomeArea
+inc $26
+cop #$45 : db $2F,$28,$31,$2A : dw .InSomeArea
+inc $26
+cop #$45 : db $37,$08,$39,$0A : dw .InSomeArea
+inc $26
+cop #$45 : db $32,$07,$34,$09 : dw .InSomeArea
+inc $26
+cop #$45 : db $37,$15,$39,$17 : dw .InSomeArea
+inc $26
+cop #$45 : db $2C,$19,$2E,$1B : dw .InSomeArea
+inc $26
+cop #$45 : db $29,$11,$2B,$13 : dw .InSomeArea
+inc $26
+cop #$45 : db $1C,$12,$1E,$14 : dw .InSomeArea
+inc $26
+cop #$45 : db $20,$0C,$22,$0E : dw .InSomeArea
+inc $26
+cop #$45 : db $11,$19,$13,$1B : dw .InSomeArea
+inc $26
+cop #$45 : db $12,$14,$14,$16 : dw .InSomeArea
+inc $26
+cop #$45 : db $08,$10,$0A,$12 : dw .InSomeArea
+inc $26
+cop #$45 : db $06,$0A,$08,$0C : dw .InSomeArea
+inc $26
+cop #$45 : db $1F,$1F,$21,$21 : dw .InSomeArea
+.OutsideAreasClearFlags:
 cop #$CE : db $02
+.DoNothing:
 rtl
-
-ldx #$0001 : bra +
-ldx #$0002 : bra +
-ldx #$0003 : bra +
-ldx #$0004 : bra +
-ldx #$0005 : bra +
-ldx #$0006 : bra +
-ldx #$0007 : bra +
-ldx #$0008 : bra +
-ldx #$0009 : bra +
-ldx #$000A : bra +
-ldx #$000B : bra +
-ldx #$000C : bra +
-ldx #$000D : bra +
-ldx #$000E : bra +
-ldx #$000F : bra +
-ldx #$0010 : bra +
-ldx #$0011 : bra +
-ldx #$0012 : bra +
-ldx #$0013 : bra +
-ldx #$0014 : bra +
-ldx #$0015 : bra +
-ldx #$0016 
-+:
-txa : asl : tax
-cop #$D0 : db $02,$01 : dw $df02
-cop #$D0 : db $01,$01 : dw $df97
-stx $1f60
-lda $1f70,x : sta $1f70
-lda $1fa0,x : sta $1fa0
-lda $1fd0,x : sta $1fd0
-cop #$CC : db $01
-rtl
-
-cop #$BF : dw $dd40
+.InSomeArea:
+cop #$D0 : db $02,$01 : dw .DoNothing
 cop #$CC : db $02
+stz $00f0
+stz $00f2
+stz $00f4
+stz $00f6
+stz $00f8
+phx
+lda $26 : tax
+lda.l TblTrackerDarkSpaceCountsByArea,x : and #$00ff : sta $00f8
+lda $26 : asl : tax
+lda.l Lut_TrackerItemFlagsByArea,x : tax
+.CountNextLowFlag:
+lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : and #$00ff : cmp #$00ff : beq ..DoneCountingLowFlags
+jsl LR_SecOnAnyFlagA : bcc ..PostCollectionCheck
+  jsr SR_IncrementCollectedItems
+..PostCollectionCheck:
+jsr SR_IncrementTotalItems
+inx
+bra .CountNextLowFlag
+..DoneCountingLowFlags:
+inx
+.CountNextHighFlag:
+lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : and #$00ff : cmp #$00ff : beq ..DoneCountingHighFlags
+lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : jsl LR_SecOnFlag20A : bcc ..PostCollectionCheck
+  jsr SR_IncrementCollectedItems
+..PostCollectionCheck:
+jsr SR_IncrementTotalItems
+inx
+bra .CountNextHighFlag
+..DoneCountingHighFlags:
+inx
+.CountNextOrbFlag:
+lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : and #$00ff : cmp #$00ff : beq ..DoneCountingOrbFlags
+jsl LR_SecOnMonsterItemFlagA : bcc ..PostCollectionCheck
+sed
+  lda $00f4 : clc : adc #$0001 : sta $00f4
+cld
+..PostCollectionCheck:
+sed
+  lda $00f6 : clc : adc #$0001 : sta $00f6
+cld
+inx
+bra .CountNextOrbFlag
+..DoneCountingOrbFlags:
+plx
+cop #$BF : dw TextItemCounterDisplay
 rtl
 
-db $00    ; filler
 
-dw $0000,$DFD0,$E000,$E050,$E070,$E080,$E0C0,$E0D0
-dw $E100,$DFF4,$E140,$E1A0,$E1E0,$E230,$E270,$E2A0
-dw $E2D0,$E310,$E350,$E370,$E3C0,$E3E0,$E460,$0000
-
-cop #$D0 : db $13,$00 : dw $DFD9
-jsr $DD30             
-cop #$D0 : db $18,$00 : dw $DFE2
-jsr $DD30             
-cop #$D0 : db $35,$00 : dw $DFEB
-jsr $DD30             
-cop #$D0 : db $D7,$00 : dw $DFF4
-jsr $DD30
+SR_IncrementCollectedItems:
+sed
+  lda $00f0 : clc : adc #$0001 : sta $00f0
+cld
 rts
-
-; filler
-db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-
-cop #$D0 : db $23,$00 : dw $E009
-jsr $DD30             
-cop #$D0 : db $33,$00 : dw $E012
-jsr $DD30             
-cop #$D0 : db $46,$00 : dw $E01B
-jsr $DD30             
-cop #$D0 : db $D8,$00 : dw $E024
-jsr $DD30
-cop #$D1 : dw $0201 : db $00 : dw $E02E
-jsr $DD30                 
-cop #$D1 : dw $0202 : db $00 : dw $E038
-jsr $DD30                 
-cop #$D1 : dw $0203 : db $00 : dw $E042
-jsr $DD30
+SR_IncrementTotalItems:
+sed
+  lda $00f2 : clc : adc #$0001 : sta $00f2
+cld
 rts
-
-; filler
-db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-
-cop #$D0 : db $2d,$00 : dw $e059
-jsr $dd30
-cop #$D0 : db $34,$00 : dw $e062
-jsr $dd30
-rts
-
-; filler
-db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-
-cop #$D0 : db $48,$00 : dw $e079
-jsr $dd30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $32,$00 : dw $E089
-jsr $DD30             
-cop #$D0 : db $E0,$00 : dw $E092
-jsr $DD30
-cop #$D1 : dw $0204 : db $00 : dw $E09C
-jsr $DD30               
-cop #$D1 : dw $0205 : db $00 : dw $E0A6
-jsr $DD30               
-cop #$D1 : dw $0206 : db $00 : dw $E0B0
-jsr $DD30               
-cop #$D1 : dw $0207 : db $00 : dw $E0BA
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $36,$00 : dw $e0c9
-jsr $dd30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $3A,$00 : dw $E0D9
-jsr $DD30
-cop #$D0 : db $53,$00 : dw $E0E2
-jsr $DD30
-cop #$D0 : db $54,$00 : dw $E0EB
-jsr $DD30
-cop #$D0 : db $5A,$00 : dw $E0F4
-jsr $DD30
-cop #$D0 : db $E1,$00 : dw $E0FD
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff
-cop #$D0 : db $5D,$00 : dw $E109
-jsr $DD30
-cop #$D0 : db $5E,$00 : dw $E112
-jsr $DD30
-cop #$D0 : db $A2,$00 : dw $E11B
-jsr $DD30
-cop #$D0 : db $A3,$00 : dw $E124
-jsr $DD30
-cop #$D0 : db $D9,$00 : dw $E12D
-jsr $DD30
-cop #$D1 : dw $0209 : db $00 : dw $E137
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-cop #$D1 : dw $020A : db $00 : dw $E14A
-jsr $DD30
-cop #$D1 : dw $020B : db $00 : dw $E154
-jsr $DD30
-cop #$D1 : dw $020C : db $00 : dw $E15E
-jsr $DD30
-cop #$D1 : dw $020D : db $00 : dw $E168
-jsr $DD30
-cop #$D1 : dw $020E : db $00 : dw $E172
-jsr $DD30
-cop #$D1 : dw $020F : db $00 : dw $E17C
-jsr $DD30
-cop #$D1 : dw $0210 : db $00 : dw $E186
-jsr $DD30
-cop #$D1 : dw $0211 : db $00 : dw $E190
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $85,$00 : dw $E1A9
-jsr $DD30
-cop #$D1 : dw $013B : db $00 : dw $E1B3
-jsr $DD30
-cop #$D1 : dw $0212 : db $00 : dw $E1BD
-jsr $DD30
-cop #$D1 : dw $0213 : db $00 : dw $E1C7
-jsr $DD30
-cop #$D1 : dw $0214 : db $00 : dw $E168
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-cop #$D0 : db $79,$00 : dw $E1E9
-jsr $DD30
-cop #$D0 : db $7F,$00 : dw $E1F2
-jsr $DD30
-cop #$D1 : dw $0215 : db $00 : dw $E1FC
-jsr $DD30
-cop #$D1 : dw $0216 : db $00 : dw $E206
-jsr $DD30
-cop #$D1 : dw $0217 : db $00 : dw $E210
-jsr $DD30
-cop #$D1 : dw $0218 : db $00 : dw $E21A
-jsr $DD30
-cop #$D1 : dw $022E : db $00 : dw $E224
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $9B,$00 : dw $E239
-jsr $DD30
-cop #$D0 : db $9C,$00 : dw $E242
-jsr $DD30
-cop #$D1 : dw $0219 : db $00 : dw $E24C
-jsr $DD30
-cop #$D1 : dw $021A : db $00 : dw $E256
-jsr $DD30
-cop #$D1 : dw $021B : db $00 : dw $E260
-jsr $DD30
-cop #$D1 : dw $021C : db $00 : dw $E26A
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $4E,$00 : dw $E279
-jsr $DD30
-cop #$D0 : db $BC,$00 : dw $E282
-jsr $DD30
-cop #$D0 : db $E2,$00 : dw $E28B
-jsr $DD30
-cop #$D0 : db $95,$00 : dw $E294
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $98,$00 : dw $E2A9
-jsr $DD30
-cop #$D0 : db $99,$00 : dw $E2B2
-jsr $DD30
-cop #$D1 : dw $021D : db $00 : dw $E2BC
-jsr $DD30
-cop #$D1 : dw $021E : db $00 : dw $E2C6
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $9A,$00 : dw $E2D9
-jsr $DD30
-cop #$D0 : db $A6,$00 : dw $E2E2
-jsr $DD30
-cop #$D0 : db $C9,$00 : dw $E2EB
-jsr $DD30
-cop #$D0 : db $CB,$00 : dw $E2F4
-jsr $DD30
-cop #$D0 : db $E5,$00 : dw $E2FD
-jsr $DD30
-cop #$D0 : db $F0,$00 : dw $E306
-jsr $DD30
-cop #$D0 : db $F1,$00 : dw $E30F
-jsr $DD30
-rts
-
-cop #$D1 : dw $021F : db $00 : dw $E31A
-jsr $DD30
-cop #$D1 : dw $0220 : db $00 : dw $E324
-jsr $DD30
-cop #$D1 : dw $0221 : db $00 : dw $E32E
-jsr $DD30
-cop #$D1 : dw $0222 : db $00 : dw $E338
-jsr $DD30
-cop #$D1 : dw $0223 : db $00 : dw $E342
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $CC,$00 : dw $E359
-jsr $DD30
-cop #$D0 : db $E6,$00 : dw $E362
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $BA,$00 : dw $E379
-jsr $DD30
-cop #$D0 : db $BE,$00 : dw $E382
-jsr $DD30
-cop #$D1 : dw $0224 : db $00 : dw $E38C
-jsr $DD30
-cop #$D1 : dw $0225 : db $00 : dw $E396
-jsr $DD30
-cop #$D1 : dw $0226 : db $00 : dw $E3A0
-jsr $DD30
-cop #$D1 : dw $0227 : db $00 : dw $E3AA
-jsr $DD30
-cop #$D1 : dw $0228 : db $00 : dw $E3B4
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $B8,$00 : dw $E3CC
-jsr $DD30
-jsr $DD30
-cop #$D0 : db $CD,$00 : dw $E3D5
-jsr $DD30
-cop #$D0 : db $E7,$00 : dw $E3DE
-jsr $DD30
-rts
-
-; filler
-db $ff
-
-cop #$D0 : db $BD,$00 : dw $E3E9
-jsr $DD30
-cop #$D0 : db $D5,$00 : dw $E3F2
-jsr $DD30
-cop #$D0 : db $C2,$00 : dw $E3FB
-jsr $DD30
-cop #$D0 : db $C3,$00 : dw $E404
-jsr $DD30
-cop #$D0 : db $C4,$00 : dw $E40D
-jsr $DD30
-cop #$D0 : db $C5,$00 : dw $E416
-jsr $DD30
-cop #$D0 : db $C6,$00 : dw $E41F
-jsr $DD30
-cop #$D0 : db $C7,$00 : dw $E428
-jsr $DD30
-cop #$D1 : dw $0229 : db $00 : dw $E432
-jsr $DD30
-cop #$D1 : dw $022A : db $00 : dw $E43C
-jsr $DD30
-cop #$D1 : dw $022B : db $00 : dw $E446
-jsr $DD30
-cop #$D1 : dw $022C : db $00 : dw $E450
-jsr $DD30
-rts
-
-; filler
-db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-
-cop #$D0 : db $DA,$00 : dw $E469
-jsr $DD30
-cop #$D0 : db $DC,$00 : dw $E472
-jsr $DD30
-rts
-
-; copy-paste error?
-db $DC,$00,$72,$E4,$20,$30,$DD,$60
 }
 
 org $86e500
@@ -5804,6 +5897,65 @@ org $87c860
 db $cd : dl TextEuroNobodyExpects
 db $c0
 
+
+
+org $87CB95
+db $04 : dw $1000
+EEuroShopExitNpc:
+cop #$0B
+cop #$C0 : dw .OnInteract
+cop #$28 : db $70,$01, $d0,$00 : dw .PlayerEnteredThroughExit
+cop #$C1
+rtl
+.PlayerEnteredThroughExit:
+lda #$CFF0 : tsb $065a
+cop #$81 : db $08,$02
+cop #$89
+cop #$80 : db $02
+cop #$89
+cop #$BF : dw ..TextGreeting
+if !SettingEntranceShuffle > 0
+cop #$BE : db $02,$01 : dw ..Options
+..Options:
+  dw ...ChooseNo
+  dw ...ChooseNo, ...ChooseYes
+
+endif
+cop #$9C : dl EEuroShopPlayerPusher : dw $2000
+cop #$82 : db $06, $01
+cop #$89
+cop #$80 : db $02
+cop #$89
+cop #$C1
+rtl
+..TextGreeting:
+if !SettingEntranceShuffle == 0
+db $cd : dl TextEuroPlayerEnteredShopExitNormal
+db $c0
+else
+db $cd : dl TextEuroPlayerEnteredShopExitOfferWarp
+db $ca
+..TextDeclinedWarp:
+db $cd : dl TextEuroPlayerEnteredShopExitAndDeclinedWarp
+db $c0
+endif
+
+.OnInteract:
+cop #$BF : dw ..Text
+rtl
+..Text:
+db $cd : dl TextEuroShopExitNpcOnInteract
+db $c0
+
+EEuroShopPlayerPusher:
+ldy $09aa
+lda $0016,y : inc : sta $0016,y
+rtl
+
+warnpc $87CC39
+
+
+
 org $87cd03
 cop #$D0 : db $f0,$01 : dw ShopItem1Die
 cop #$C0 : dw ShopItem1OnInteract
@@ -5862,21 +6014,15 @@ cop #$D5 : db $28
 rtl
 
 org $87e37a
-db $1e   ; Neil sprite
-
-org $87e37f
-db $14,$00   ; Neil flag 1
-
-org $87e394
-db $10,$00   ; Neil flag 2
-
-org $87e398
 ; Neil in Euro
+db $1e : dw $1000
+ENeilInEuro:
 {
 cop #$D0 : db $14,$01 : dw EuroNeilCanTravel
 cop #$E0
 EuroNeilCanTravel:
-cop #$C7 : dl ENeilInCottage_OnInteract
+cop #$BC : db $00,$fe
+cop #$C7 : dl ENeilInCottage
 }
 
 org $87e517
@@ -6033,9 +6179,25 @@ db $d3
 db "!SpoilerTextAngkorWatSpirit"
 db $c0
 
-org $889fa1
+
+org $889f7c
+db $02 : dw $1001
+EWatBushSparkleItem:
+cop #$D0 : db $ba,$01 : dw .Die
+lda #$0200 : tsb $12
+cop #$88 : dl $8ee000
+cop #$C0 : dw .OnInteract
+-:
+cop #$80 : db $02
+cop #$89
+cop #$DA : db $3b
+bra -
+.OnInteract:
 %MTryGiveItemAndFlag(!WatGlassesItem, $ba)
+cop #$D0 : db $ba,$01 : dw .Die
 rtl
+.Die:
+cop #$E0
 
 ; Disable Dao friends (redundant?)
 org $88a4af
@@ -6050,57 +6212,12 @@ org $88a5bf
 db $10       ; Other Neil Dao flag
 
 org $88a5bd
-; daoneil.bin
+; Neil in Dao
 {
-cop #$D0 : db $10,$01 : dw $a5ea
-cop #$CC : db $b4
-lda #$cff0 : tsb $065a
-cop #$DA : db $0f
-cop #$0C
-cop #$82 : db $16,$01 : cop #$89
-cop #$0B
-cop #$C1
-cop #$8B
-cop #$DA : db $1d
-cop #$BF : dw $a61d
-lda #$cff0 : trb $065a
-cop #$C1
-rtl
-
+cop #$D0 : db $14,$01 : dw DaoNeilCanTravel
 cop #$E0
-
-cop #$D0 : db $14,$01 : dw $a5fe
-cop #$D0 : db $14,$01 : dw $a5fe
-cop #$E0
-
-rtl
-
-cop #$BF : dw $a649
-cop #$BE : db $53,$01 : dw $a608
-dw $A614  
-dw $A614  
-dw $A619  
-dw $A625  
-dw $A631  
-dw $A63D  
-
-cop #$BF : dw $a693
-rtl
-
-cop #$26 : db $95 : dw $0260,$0080 : db $03,$01,$13
-cop #$C5
-
-cop #$26 : db $C8 : dw $0078,$00C0 : db $00,$00,$11
-cop #$C5
-
-cop #$26 : db $49 : dw $0088,$00C0 : db $00,$00,$11
-cop #$C5
-
-cop #$26 : db $DE : dw $0078,$00C0 : db $00,$00,$11
-cop #$C5
-
-db $D3,$C2,$06,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D,$CB,$AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$37,$AC,$AC,$AC,$CB,$AC,$44,$A5,$A2,$8E,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$41,$80,$81,$84,$8B,$AC,$64,$8E,$A7,$84,$A2,$AC,$CB,$AC,$43,$80,$8E,$AC,$AC,$AC,$CA,$CE,$C2,$06,$48,$AC,$A4,$A2,$80,$A6,$84,$8B,$AC,$D7,$92,$A2,$84,$86,$A5,$8B,$80,$A2,$8B,$A9,$CB,$81,$84,$A4,$A7,$84,$84,$8D,$AC,$8C,$A9,$AC,$A0,$8B,$80,$82,$84,$2B,$AC,$44,$A5,$A2,$8E,$2B,$CB,$80,$8D,$83,$AC,$43,$80,$8E,$2A,$AC,$D6,$09,$A6,$88,$A3,$88,$A4,$AC,$8C,$84,$CB,$80,$8D,$A9,$A4,$88,$8C,$84,$4F,$C0
-
+DaoNeilCanTravel:
+cop #$C7 : dl ENeilInCottage
 }
 
 org $88ad0c
@@ -6237,6 +6354,19 @@ db !HieroItemTile6
 org $88cd71
 db $10,$00   ; Pyramid boss doesn't disappear on death.
 
+org $88cdcf
+db !MapMQEntranceString
+
+org $88ce30
+; The warp after receiving MQ's statue is different, since it doesn't return to MQ's map.
+lda.w !MQPostStatueExitMap : sta $0b12
+lda.w !MQPostStatueExitX : sta $0b08
+  sta $0b0a
+lda.w !MQPostStatueExitY : sta $0b0c
+  sta $0b0e
+lda.w !MQPostStatueExitCam : sta $0b10
+cop #$26 : db $fd : dw $0000, $0000 : db $00,$00,$11
+
 org $88cea5
 db $10,$00   ; Jeweler doesn't disappear when defeated.
 
@@ -6303,13 +6433,23 @@ lda $0ab4,y
 iny : cpy #$0010 : bne -
 bra B_88CF97
 .IsThree:
+if !SettingRedJewelMadness == 1
+jsr SR_JewelerDecHP
+jsr SR_JewelerDecHP
+endif
 lda #$03 : bra +
 .IsTwo:
+if !SettingRedJewelMadness == 1
+jsr SR_JewelerDecHP
+endif
 lda #$02 : bra +
 .IsOne:
 lda #$01 ;: bra +
 +:
 clc : adc $0ab0 : sta $0ab0
+if !SettingRedJewelMadness == 1
+jsr SR_JewelerDecHP
+endif
 lda #$00 : sta $0ab4,y
 bra --
 B_88CF97:
@@ -6379,7 +6519,11 @@ cop #$BF : dw EJeweler_Text_GetSecrets
 lda #$0202 : sta $0648
 lda #$0404 : sta $064A
 stz $0ad4
-cop #$26 : db $E9 : dw $0330, $03d0 : db $80,$00,$44
+if !SettingRedJewelHunt == 1
+cop #$26 : db $E5 : dw $0000,$0000 : db $00,$00,$11
+else
+cop #$26 : db !MapMansionEntranceString ; $E9 : dw $0330,$03d0 : db $80,$00,$44
+endif
 rtl
 EJeweler_Die:
 cop #$E0
@@ -6435,6 +6579,12 @@ db "!Jeweler7RowText",$C0
 EJeweler_Text_SeeInventory:
 db $CE,$D6,$69,$80,$AC,$83,$80,$88,$A3,$A9,$AC,$88,$85,$AC,$A9,$8E,$A5,$AC,$83,$8E,$2A,$C0
 
+SR_JewelerDecHP:
+php
+rep #$20
+jsl LR_DecHP
+plp
+rts
 warnpc $88d6a9
 }
 
@@ -6465,6 +6615,7 @@ lda $0aac : beq EGaia_MaybeOfferDarkGaia   ; Bottom DS has $0aac = 0, top has it
 cop #$D0 : db $bd,$01 : dw EGaia_MaybeOfferDarkGaia
 %MTryGiveItemAndFlag(!PyramidGaiaItem, $bd)
 EGaia_MaybeOfferDarkGaia:
+if !SettingRedJewelHunt == 0
 cop #$D0 : db $8a,$00 : dw EGaia_OfferSave    ; Rescued Kara
 cop #$D0 : db $b4,$00 : dw EGaia_OfferSave    ; Used Aura
 if !SettingStatuesPlayerChoice == 1
@@ -6510,6 +6661,7 @@ cop #$26 : db $e4 : dw $00f0,$0140 : db $80,$00,$22
 cop #$C1
 rtl
 .SayNo:
+endif
 EGaia_OfferSave:
 cop #$BF : dw EGaia_TextOfferSave
 cop #$BE : db $02,$02 : dw .Options
@@ -6522,6 +6674,7 @@ cop #$07 : db $29
 lda #$FFF0 : tsb $065A
 cop #$DA : db $3B
 lda #$FFF0 : trb $065A
+stz $0bfc   ; Restore default fast item-get text speed after the save routine uses this.
 cop #$BF : dw EGaia_TextFinishedRecordingOfferWarp
 EGaia_OfferWarp:
 cop #$BE : db $02,$01 : dw .Options
@@ -6530,7 +6683,7 @@ cop #$BE : db $02,$01 : dw .Options
 .SayYes:
 stz $0ad4
 jsl LR_ClearMonsterKilledFlags
-cop #$26 : db $01 : dw $00e0,$0070 : db $83,$00,$43
+cop #$26 : db !StartWarpString
 cop #$C5
 .SayNo:
 EGaia_ThenGo:
@@ -6542,15 +6695,20 @@ cop #$C5
 EGaia_TextOfferDarkGaia:
 db $D3,$45,$80,$82,$84,$AC,$D6,$0C,$46,$80,$88,$80,$0D,$CB
 db $AC,$4D,$8E,$CB
-db $AC,$69,$84,$A3,$CA
+db $AC,$69,$84,$A3
+db $CA
 EGaia_TextOfferSave:
 db $D3,$CE,$62,$84,$82,$8E,$A2,$83,$AC,$A7,$87,$80,$A4,$0E,$A3,$AC,$87,$80,$A0,$A0,$84,$8D,$84,$83,$CB
 db $A3,$8E,$AC,$85,$80,$A2,$0D,$CB,$AC,$62,$84,$82,$8E,$A2,$83,$CB,$AC,$D6,$0D,$A2,$84,$82,$8E,$A2,$83,$CA
 EGaia_TextFinishedRecordingOfferWarp:
 db $CE,$45,$88,$8D,$88,$A3,$87,$84,$83,$AC,$A2,$84,$82,$8E,$A2,$83,$88,$8D,$86,$2A,$2A,$2A,$CF
-EGaia_TextOfferWarp:
-db $CE,$62,$84,$A4,$A5,$A2,$8D,$AC,$A4,$8E,$AC,$D6,$47,$42,$80,$A0,$84,$0D,$CB
-db $AC,$4D,$8E,$CB,$AC,$69,$84,$A3,$AC,$AC,$CA
+db $CE
+db $62,$84,$A4,$A5,$A2,$8D,$AC,$A4,$8E,$AC    ; "Return to "
+db "!StartLocationName"
+db $0D,$CB    ; "?"
+db $AC,$4D,$8E,$CB
+db $AC,$69,$84,$A3
+db $CA
 EGaia_TextThenGo:
 db $CE,$64,$87,$84,$8D,$AC,$86,$8E,$2A,$C0
 
@@ -6611,7 +6769,7 @@ db "I could bear it.",$c0
 
 org $88fcb2
 ; Exit to Dao from Mansion
-cop #$26 : db $c3 : dw $0140,$0088 : db $00,$00,$23
+cop #$26 : db !MapMansionExitString ; $c3 : dw $0140,$0088 : db $00,$00,$23
 
 org $88fd16
 ; Force change back to Will.
@@ -6770,6 +6928,9 @@ jmp $AFF9
 
 org $898045
 jsr SR_BabelSpiritTransformAndRespawnEnemies
+
+org $89804a
+db !MapBabelWarpString
 
 org $898055
 db $cd : dl TextBabelBabylonJoke
@@ -7021,7 +7182,7 @@ cop #$BE : db $02,$01 : dw ..Options
 cop #$BF : dw Text_MoonTribeLaugh
 rtl
 ..SayYes:
-cop #$26 : db $4c : dw $0168,$0040 : db $83,$00,$22
+cop #$26 : db !MapMoonWarpString ; $4c : dw $0168,$0040 : db $83,$00,$22
 cop #$C1
 rtl
 ; "Heal us" etc.
@@ -7090,12 +7251,12 @@ rts
 
 ; Boss monster death copies some of EBasicMonsterDeath.
 org $8aa4a6
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
 org $8aa4b8
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -7143,7 +7304,7 @@ cop #$C2
 lda $09AE : bit #$0800 : beq +
   rtl
 +:
-cop #$26 : db $5a : dw $0090,$0070 : db $83,$00,$14
+cop #$26 : db !MapViperExitString ; $5a : dw $0090,$0070 : db $83,$00,$14
 cop #$C1
 rtl
 
@@ -7165,12 +7326,12 @@ db $01,$2c,$3f,$3f
 
 ; Wat scarab death copies some of EBasicMonsterDeath.
 org $8BC14d
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
 org $8BC15A
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -7186,12 +7347,12 @@ endif
 
 ; Pyramid orb death copies some of EBasicMonsterDeath.
 org $8BC761
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
 org $8bc76e
-if !SettingKeyRando == 1
+if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -7258,7 +7419,11 @@ db $03    ; 3 difficulty levels available
 
 ; Entr'acte: upon starting a new game, set IOGR flags.
 org $8be515
+if !StartAtWarpLocation == 1
+cop #$26 : db !StartWarpString
+else
 cop #$26 : db $08 : dw $0050, $00a0 : db $80, $00, $12
+endif
 jmp $fd00
 
 ; Back to difficulty settings.
@@ -7307,83 +7472,50 @@ lda.w #(($!Jeweler4Cost)+(($!Jeweler5Cost)<<8)) : sta $0a4c
 lda.w #(($!Jeweler6Cost)+(($!Jeweler7Cost)<<8)) : sta $0a4e
 cop #$CD : dw (!SettingStatuesPlayerChoice*$02fe)    ; Flag for autotracker.
 cop #$CD : dw (!SettingOpenMode*$02ff)    ; Flag for autotracker.
-cop #$CC : db $16
-cop #$CC : db $17
-cop #$CC : db $19
-cop #$CC : db $1A
-cop #$CC : db $1B
-cop #$CC : db $1C
-cop #$CC : db $1D
+if !SettingOpenMode == 1
+lda.w #%1011111011010011 : tsb $0a02   ; Flags $10/6/7/9/a/b/c/d + OpenMode $11/4/f
+else
+lda.w #%0011111011000001 : tsb $0a02   ; Flags $10/6/7/9/a/b/c/d
+endif
 cop #$CC : db $26
 cop #$CC : db $27
-cop #$CC : db $3B
-cop #$CC : db $3D
-cop #$CC : db $3F
-cop #$CC : db $47
-cop #$CC : db $49
-cop #$CC : db $4A
-cop #$CC : db $56
-cop #$CC : db $57
-cop #$CC : db $58
-cop #$CC : db $64
-cop #$CC : db $65
-cop #$CC : db $66
-cop #$CC : db $67
-cop #$CC : db $68
-cop #$CC : db $6A
-cop #$CC : db $6B
-cop #$CC : db $6C
-cop #$CC : db $6E
-cop #$CC : db $71
-cop #$CC : db $72
-cop #$CC : db $73
-cop #$CC : db $74
-cop #$CC : db $75
-cop #$CC : db $76
-cop #$CC : db $77
-cop #$CC : db $7A
-cop #$CC : db $7C
-cop #$CC : db $7D
-cop #$CC : db $82
-cop #$CC : db $83
-cop #$CC : db $84
-cop #$CC : db $86
-cop #$CC : db $87
-cop #$CC : db $8B
-cop #$CC : db $8C
-cop #$CC : db $8D
-cop #$CC : db $8F
-cop #$CC : db $90
-cop #$CC : db $91
-cop #$CC : db $92
-cop #$CC : db $93
-cop #$CC : db $94
-cop #$CC : db $97
-cop #$CC : db $9D
-cop #$CC : db $A4
-cop #$CC : db $A5
-cop #$CC : db $A7
-cop #$CC : db $A9
-cop #$CC : db $AC
-cop #$CC : db $AD
-cop #$CC : db $AE
-cop #$CC : db $AF
-cop #$CC : db $B0
-cop #$CC : db $B1
-cop #$CC : db $B2
-cop #$CC : db $B3
-cop #$CC : db $B6
-cop #$CC : db $D0
-cop #$CC : db $D2
-cop #$CC : db $D3
-cop #$CC : db $D6
-cop #$CC : db $DD
-cop #$CC : db $DE
-cop #$CC : db $DF
-cop #$CC : db $10
+if !SettingOpenMode == 1
+cop #$CC : db $2a
+endif
+lda.w #%1010100000000000 : tsb $0a06   ; Flags $3b/d/f
+if !SettingOpenMode == 1
+lda.w #%0000011010000010 : tsb $0a08   ; Flags $47/9/a + OpenMode $41
+else
+lda.w #%0000011010000000 : tsb $0a08   ; Flags $47/9/a
+endif
+lda.w #%0000000111000000 : tsb $0a0a   ; Flags $56/7/8
+lda.w #%0101110111110000 : tsb $0a0c   ; Flags $64/5/6/7/8/a/b/c/e
+lda.w #%0011010011111110 : tsb $0a0e   ; Flags $71/2/3/4/5/6/7/a/c/d
+lda.w #%1011100011011100 : tsb $0a10   ; Flags $82/3/4/6/7/b/c/d/f
+lda.w #%0010000010011111 : tsb $0a12   ; Flags $90/1/2/3/4/7/d
+lda.w #%1111001010110000 : tsb $0a14   ; Flags $a4/5/7/9/c/d/e/f
+if !SettingEnemizer >= 2
+cop #$CC : db $a0
+cop #$CC : db $a1
+endif
+lda.w #%0000000001001111 : tsb $0a16   ; Flags $b0/1/2/3/6
+lda.w #%1110000001001101 : tsb $0a1a   ; Flags $d0/2/3/6/d/e/f
+if !StartLocationId == 19    ; Lilly's door and DS are open if starting at back of Edward's
+cop #$CD : dw $0113
+cop #$CD : dw $0116
+elseif !StartLocationId == 46   ; Mine hidden DS is open if starting there
+cop #$CD : dw $0132
+elseif !StartLocationId == 47   ; Mine fences open if starting at back of Mine
+cop #$CD : dw $0134
+cop #$CD : dw $0135
+cop #$CD : dw $0136
+;elseif !StartLocationId == 122 || !StartLocationId == 124
+;; Wat entrance stairs are open if starting in Wat
+;cop #$CD : dw $016c
+endif
 cop #$CE : db $F4   ; For Apocalypse Gaia.
+stz $0bfc   ; Default to fast item-get text speed.
 lda #$2800 : trb $09ae
-;jsl $81ffb0
 jsl $80f49a
 cop #$E0
 }
@@ -7484,18 +7616,17 @@ cop #$E0
 
 
 org $8c8000
-
 incsrc "iogr_8C_actor_table.asr"
-
 warnpc $8CE5E5
 
 org $8d8000
-
 incsrc "iogr_8D_asset_table.asr"
-
 warnpc $8DB001
 
-
+org $8f8fa4
+if !SettingFluteless == 1
+incbin "iogr_fluteless_melody_anim.bin"    ; So Will whistles instead of playing his flute.
+endif
 
 
 org $90803c
@@ -7566,7 +7697,7 @@ db !IshtarRoomCompTilemap
 
 org $a08000
 
-incsrc "iogr_give_item.asr"
+incsrc "iogr_code_overflow.asr"
 
 incsrc "iogr_dialogue_overflow.asr"
 

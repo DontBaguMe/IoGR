@@ -88,7 +88,7 @@ class World:
     def are_item_loc_compatible(self, item, loc):
         if self.item_pool[item][1] == self.item_locations[loc][1]:
             return True
-        if self.key_rando == 2:
+        if self.orb_rando == 2:
             if self.item_pool[item][1] in [1,5,6] and self.item_locations[loc][1] in [1,5,6]:
                 return True
         return False
@@ -246,6 +246,10 @@ class World:
             visited.append(node)
             if print_log:
                 print("  Visiting:",self.graph[node][5])
+            
+            # Update DS access of accessible nodes
+            if self.graph[node][4] > 0:
+                self.update_ds_access([node],self.graph[node][4],self.graph[node][9])
 
             # If we haven't been here yet...
             if not self.graph[node][0]:
@@ -261,15 +265,16 @@ class World:
 
             # If we've run out of places to visit, check if logic has opened up any new nodes
             if not to_visit:
-                open_edges = self.get_open_edges(visited)
+                open_edges = self.get_open_edges(visited,True)
                 bad_edges = []
                 if print_log:
                     print(" Ran out of places - updating logic:")
                 for edge in open_edges:
                     dest = self.logic[edge][2]
-                    if self.check_edge(edge,[],False) and dest not in to_visit:
+                    if self.check_edge(edge,[],False):
                         self.logic[edge][0] = 1
-                        to_visit.append(dest)
+                        if dest not in to_visit:
+                            to_visit.append(dest)
                         if print_log:
                             print("  -Discovered:",self.graph[dest][5])
                     else:
@@ -280,8 +285,9 @@ class World:
         return [visited,new_items]
 
 
-    # Return list of logic edges that originate in an accessible node and end in an inaccessible node
-    def get_open_edges(self,nodes=[]):
+    # Return list of untraversed logic edges that originate in an accessible node.
+    # include_redundant to include edges whose destination is already traversed.
+    def get_open_edges(self,nodes=[],include_redundant=False):
         test_edges = self.open_edges[:]
         open_edges = []
         for x in nodes:
@@ -290,7 +296,7 @@ class World:
         for edge in test_edges:
             origin = self.logic[edge][1]
             dest = self.logic[edge][2]
-            if self.logic[edge][0] >= 0 and not self.is_accessible(dest) and dest not in nodes:
+            if self.logic[edge][0] >= 0 and (include_redundant or not self.is_accessible(dest)) and dest not in nodes:
                 open_edges.append(edge)
         return open_edges
 
@@ -385,7 +391,7 @@ class World:
         for loc in item_locations:
             if not self.item_locations[loc][2] and self.is_accessible(self.item_locations[loc][0]):
                 loc_type = self.item_locations[loc][1]
-                if self.key_rando == 2 and loc_type in [5,6]:
+                if self.orb_rando == 2 and loc_type in [5,6]:
                     loc_type = 1    # In keysanity, keys are pooled like normal items
                 to_fill[loc_type-1].append(loc)
 
@@ -394,7 +400,7 @@ class World:
         while to_place:
             item = to_place.pop(0)
             item_type = self.item_pool[item][1]
-            if self.key_rando == 2 and item_type in [5,6]:
+            if self.orb_rando == 2 and item_type in [5,6]:
                 item_type = 1    # In keysanity, keys are pooled like normal items
             filled = False
             while not filled and to_fill[item_type-1]:
@@ -513,7 +519,7 @@ class World:
                 prog_type = self.item_pool[item][5]
                 inv_type = self.item_pool[item][4]
                 type_list = [1,2]
-                if self.key_rando > 0:
+                if self.orb_rando > 0:
                     type_list = [1,2,5]
                 if type in [1,2,5]:
                     if prog_type == 2:
@@ -690,14 +696,13 @@ class World:
     def lock_dark_spaces(self,print_log=False):
         nodes = []
         for edge in self.logic:
-            if self.logic[edge][0] >-1 and self.logic[edge][3]:
+            if self.logic[edge][0] >-1 and self.logic[edge][3] and self.logic[edge][1] not in nodes:
                 nodes.append(self.logic[edge][1])
 
-        self.update_all_ds_access()
         for node in nodes:
             if not self.check_ds_access(node, True, [1], print_log):
                 if print_log:
-                    print("Starting over: Freedan can't reach",node,self.graph[node])
+                    print("Error: Freedan can't reach",node,self.graph[node])
                 return False
             else:
                 found_locked_ds = False
@@ -1258,15 +1263,21 @@ class World:
 
         # Find nodes that contain Dark Spaces
         pyramid_ds_id = 130          # Special case for Pyramid DS
+        completable_guaranteed_freedan_locations = [19,29,74,94,122,142]
         self.ds_locations = [pyramid_ds_id]
         self.ds_nodes = [self.item_locations[pyramid_ds_id][0]]
         self.freedan_locations = self.ds_locations[:]
-        self.freedan_nodes = self.ds_nodes[:]
+        if self.logic_mode == "Completable":
+            for loc in completable_guaranteed_freedan_locations:
+                self.freedan_locations.append(loc)
+        self.freedan_nodes = []
+        for loc in self.freedan_locations:
+            self.freedan_nodes.append(self.item_locations[loc][0])
         for x in self.item_locations:
             if self.item_locations[x][1] == 2:
                 self.ds_locations.append(x)
                 self.ds_nodes.append(self.item_locations[x][0])
-                if not self.is_sublist(self.item_locations[x][4], [64, 65, 66]) and self.item_locations[x][3] not in [61,62,63,64,65,66]:
+                if not self.is_sublist(self.item_locations[x][4], [64, 65, 66]) and self.item_locations[x][3] not in [61,62,63,64,65,66] and x not in self.freedan_locations:
                     self.freedan_locations.append(x)
                     self.freedan_nodes.append(self.item_locations[x][0])
         return True
@@ -1338,7 +1349,6 @@ class World:
             self.update_ds_access(self.ds_nodes,1)
             for node in self.freedan_nodes:
                 self.update_ds_access([node],2,[node])
-            self.update_all_ds_access()
 
             if print_log:
                 print(" DS access updated")
@@ -1351,16 +1361,12 @@ class World:
             if print_log:
                 print(" Logic updated (DS access)")
 
-        #for x in self.graph:
-        #    print(x,self.graph[x][11],self.graph[x][5])
-            #print(x,self.graph[x][4],self.graph[x][9],self.graph[x][5])
-
         return True
 
 
     # Check whether a node's DS access data needs to be updated
     def consider_ds_node(self,node,access_mode=1,ds_nodes=[]):
-        if access_mode == 2:
+        if access_mode & 0x02:
             if not self.graph[node][2] or self.graph[node][7]:
                 return False
             success = False
@@ -1369,17 +1375,19 @@ class World:
                     success = True
             return success
 
-        if not self.graph[node][4]:
-            return True
+        if access_mode == 0 or access_mode == self.graph[node][4] or self.graph[node][4] == 3:
+            return False
 
-        return False
+        return True
 
 
-    # Check if a node has Dark Space access
-    def check_ds_access(self, start_node=-1, need_freedan=False, items=[], print_log=False, visited=[]):
+    # Check if a node can reach a Dark Space
+    def check_ds_access(self, start_node=-1, for_transform=False, items=[], print_log=False, visited=[]):
         if start_node not in self.graph:
             return False
-        if not self.graph[start_node][2] or self.graph[start_node][4] == 2 or (self.graph[start_node][4] == 1 and not need_freedan):
+        if not self.graph[start_node][2] or self.graph[start_node][4] == 3:
+            return True
+        elif (not for_transform and self.graph[start_node][4] & 0x01) or (for_transform and self.graph[start_node][4] & 0x02):
             return True
         elif not items:
             return False
@@ -1388,46 +1396,69 @@ class World:
             ds_access = False
             while not ds_access and to_visit:
                 node = to_visit.pop(0)
-                if start_node != node and node not in visited and self.check_ds_access(node,need_freedan,items,print_log,visited):
+                if start_node != node and node not in visited and self.check_ds_access(node,for_transform,items,print_log,visited):
                     if print_log:
-                        print("Node '",self.graph[self.graph[start_node][5]],"' has DS access via node",self.graph[self.graph[node][5]])
+                        print("Node",self.graph[start_node][5],"has DS access via node",self.graph[node][5])
                     return True
                 else:
                     visited.append(node)
-                    for edge in self.graph[node][12]:
-                        dest = self.logic[edge][2]
-                        if dest not in visited+to_visit and not self.logic[edge][0] and self.check_edge(edge,items,False):
-                            to_visit.append(dest)
+                    if for_transform:
+                        for edge in self.graph[node][13]:
+                            origin = self.logic[edge][1]
+                            if origin not in visited+to_visit and self.logic[edge][0]:
+                                to_visit.append(origin)
+                    else:
+                        for edge in self.graph[node][12]:
+                            dest = self.logic[edge][2]
+                            if dest not in visited+to_visit and self.logic[edge][0]:
+                                to_visit.append(dest)
 
             return False
 
-    # Update a node's DS access data - recursive for all backwards-accessible nodes
+    # Update DS access data for nodes; recursive for all connected nodes
     def update_ds_access(self,nodes=[],access_mode=1,ds_nodes=[]):
         if not nodes:
             return True
 
-        to_visit = []
+        to_visit_forward = []
+        to_visit_reverse = []
         for node in nodes:
-            if self.graph[node][4] < access_mode:
-                self.graph[node][4] = access_mode
+            self.graph[node][4] |= access_mode
             for ds_node in ds_nodes:
                 if ds_node not in self.graph[node][9]:
                     self.graph[node][9].append(ds_node)
-            for x in self.graph[node][8]:
-                if self.consider_ds_node(x,access_mode,ds_nodes):
-                    to_visit.append(x)
+            if access_mode & 0x01:    # "Can reach DS from here"
+                for x in self.graph[node][8]:
+                    if self.consider_ds_node(x,0x01,ds_nodes):
+                        to_visit_reverse.append(x)
+            if access_mode & 0x02:    # "Freedan can reach here"
+                possible_dests = []
+                for dest in self.graph[node][10]:
+                    possible_dests.append(dest)
+                for forward_edge in self.graph[node][12]:
+                    if self.check_edge(forward_edge,[],False):
+                        passage_item_sets = self.logic[forward_edge][4]
+                        will_ability_or_aura_required = False
+                        for s in passage_item_sets:
+                            if s[0] in [36,61,62,63]:
+                                will_ability_or_aura_required = True
+                        if not will_ability_or_aura_required:
+                            possible_dests.append(self.logic[forward_edge][2])
+                for x in possible_dests:
+                    if self.consider_ds_node(x,0x02,ds_nodes):
+                        to_visit_forward.append(x)
 
-        return self.update_ds_access(to_visit,access_mode,ds_nodes)
+        return (self.update_ds_access(to_visit_forward,access_mode,ds_nodes) | self.update_ds_access(to_visit_reverse,access_mode,ds_nodes))
 
-    # Update all DS access based on current graph connections.
-    def update_all_ds_access(self):
-        for node in self.graph:
-            found_discrepancy = False
-            for dest_node in self.graph[node][10]:
-                if node in self.graph[dest_node][10] and self.graph[dest_node][4] < self.graph[node][4]:
-                    found_discrepancy = True                
-            if found_discrepancy:
-                self.update_ds_access(self.graph,self.graph[node][4],self.graph[node][9])
+    ## Update all DS access based on current graph connections.
+    #def update_all_ds_access(self):
+    #    for node in self.graph:
+    #        found_discrepancy = False
+    #        for dest_node in self.graph[node][10]:
+    #            if node in self.graph[dest_node][10] and self.graph[dest_node][4] < self.graph[node][4]:
+    #                found_discrepancy = True                
+    #        if found_discrepancy:
+    #            self.update_ds_access(self.graph,self.graph[node][4],self.graph[node][9])
 
     # Check a logic edge to see if prerequisites have been met
     def check_edge(self, edge, items=[], update_graph=True, print_log=False):
@@ -1481,8 +1512,10 @@ class World:
                 self.graph[dest][8].append(origin)
 
             # Dark Space access data
-            if self.graph[dest][4] > self.graph[origin][4]:
-                self.update_ds_access([origin],self.graph[dest][4],self.graph[dest][9])
+            if self.graph[dest][4] & 0x01 and not self.graph[origin][4] & 0x01:
+                self.update_ds_access([origin],0x01,self.graph[dest][9])
+            if self.graph[origin][4] & 0x02 and not self.graph[dest][4] & 0x02:
+                self.update_ds_access([dest],0x02,self.graph[origin][9])
 
         # Return list of newly-accessible nodes
         if self.is_accessible(origin) and not self.is_accessible(dest):
@@ -1516,9 +1549,9 @@ class World:
             return False
 
 
-    # Put keys in their default monster locations, and mark those locations occupied.
+    # Put orbs (monster keys) in their default locations, and mark those locations occupied.
     # Assumes that monster items and monster locations have the same numeric ID.
-    def assign_default_monster_keys(self, print_log=False):
+    def assign_default_monster_orbs(self, print_log=False):
         for loc in self.item_locations:
             item = loc
             if self.item_locations[loc][1] in [5,6]:
@@ -1638,6 +1671,7 @@ class World:
             self.graph[150][6].append(20)
             # Change "Sam" to "Samlet"
             self.location_text[45] = b"\x63\x80\x8c\x8b\x84\xa4"
+            self.area_short_name[45] = "Samlet"
         elif self.kara == 3:
             self.unrestrict_edge(402)
             self.graph[270][6].append(20)
@@ -1721,15 +1755,14 @@ class World:
 
         #breakpoint()
         self.reset_progress(True)
-        #self.initialize_ds()
         self.update_graph(True,True,True)
 
-        # Initialize Dark Space information
-        if self.logic_mode == "Completable":
-            if not self.lock_dark_spaces(print_log):
-                if print_log:
-                    print("ERROR: Could not lock Dark Spaces")
-                return False
+        ## Initialize Dark Space information
+        #if self.logic_mode == "Completable":
+        #    if not self.lock_dark_spaces(print_log):
+        #        if print_log:
+        #            print("ERROR: Could not lock Dark Spaces")
+        #        return False
         return True
 
     # Update item placement logic after abilities are placed
@@ -1871,8 +1904,8 @@ class World:
         # Fill the Mystic Statues and room-clear rewards
         self.fill_statues()
         self.map_rewards()
-        if self.key_rando == 0:
-            self.assign_default_monster_keys(print_log)
+        if self.orb_rando == 0:
+            self.assign_default_monster_orbs(print_log)
 
         # Forward fill progression items with Monte Carlo method
         # Continue to place progression items until goal is reached
@@ -1880,7 +1913,12 @@ class World:
         goal = False
         cycle = 0
         place_abilities = True
-        self.items_collected = self.list_item_pools([1,5])   # Assume all items for ability placement
+        self.items_collected = self.list_item_pools([1,2,5])   # Assume all items for ability placement
+        #breakpoint()
+        self.traverse()
+        if self.logic_mode == "Completable" and not self.lock_dark_spaces(print_log):
+            print("Error: Couldn't lock DSes with open graph")
+            return False
         if print_log:
             print("Beginning ability placement...")
         while not done:
@@ -1906,7 +1944,7 @@ class World:
                         ability = to_place.pop(0)
                         progress = self.forward_fill([ability],item_locations,False,self.logic_mode == "Chaos",print_log)
                     if progress:
-                        self.check_logic()
+                        self.update_graph(False, True, False, print_log)
                     else:
                         if print_log:
                             print("ERROR: Could not place any abilities")
@@ -1962,7 +2000,7 @@ class World:
                         if print_log:
                             print("ERROR: Couldn't progress any further")
                             self.print_graph()
-                            breakpoint()
+                            #breakpoint()
                         return False
 
                     progress = False
@@ -1998,6 +2036,7 @@ class World:
         if print_log:
             print("Item placement complete, beginning final traversal...")
 
+        #breakpoint() # 585682
         self.reset_progress(True)
         self.update_graph()
         self.traverse([],False,print_log)
@@ -2404,8 +2443,8 @@ class World:
                     if ability == 66:  # Earthquaker
                         ds_label = "DSEarthquakerMap"
                     self.asar_defines[ds_label] = map
-                elif self.is_sublist(self.item_locations[x][4], [64, 65, 66]):
-                    # If the DS can't contain a Freedan ability, then it's not a transforming DS
+                elif x in [10,14,22,39,57,66,77,88,103,114,129,145,146]:
+                    # Non-ability DSes in towns are empty
                     self.asar_defines[loc_label] = 0x01
                 else:
                     self.asar_defines[loc_label] = 0x03
@@ -2434,25 +2473,17 @@ class World:
         #    self.enemize(f, rom_offset)
         #    # self.parse_maps(f,rom_offset)
 
-        ## Random start location
-        #if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
-        #    # print self.start_loc
-        #    map_str = self.item_locations[self.start_loc][8] + self.item_locations[self.start_loc][7]
-        #
-        #    # Change game start location
-        #    f.seek(int("be517", 16) + rom_offset)
-        #    f.write(map_str)
-        #
-        #    # Change Dark Space warp location
-        #    f.seek(int("8dbea", 16) + rom_offset)
-        #    f.write(map_str)
-        #
-        #    # Change Dark Space warp text
-        #    map_name = self.location_text[self.start_loc]
-        #    f.seek(int("8de1f", 16) + rom_offset)
-        #    f.write(map_name + b"\x0D\xCB\xAC\x4D\x8E\xCB\xAC\x69\x84\xA3\xCA")
-        ##print("random start done")
-        #
+        # Random start location (or entrance shuffle) spawn handling
+        self.asar_defines["StartAtWarpLocation"] = 0
+        self.asar_defines["StartWarpString"] = "$01,$e0,$00,$70,$00,$83,$00,$43"
+        self.asar_defines["StartLocationName"] = "South Cape"
+        self.asar_defines["StartLocationId"] = 10
+        if self.start_mode != "South Cape" or self.entrance_shuffle != "None":
+            self.asar_defines["StartAtWarpLocation"] = 1
+            self.asar_defines["StartWarpString"] = str(self.item_locations[self.start_loc][8]) + "," + self.item_locations[self.start_loc][7]
+            self.asar_defines["StartLocationName"] = self.area_short_name[self.start_loc]
+            self.asar_defines["StartLocationId"] = self.start_loc
+        
         ## Overworld shuffle
         #if "Overworld Shuffle" in self.variant:
         #    ow_patch_data = []
@@ -2514,46 +2545,6 @@ class World:
         #        if print_log:
         #            print("ERROR: Not a valid address", x)
         ##print("entrance shuffle done")
-        #
-        ## Check for additional switches that need to be set
-        #switch_str = []
-        #if self.start_loc == 19:  # Open Lily's door when starting in Underground Tunnel
-        #    switch_str.append(b"\x02\xcd\x13\x01")
-#       # elif self.start_loc == 30:  # Inca ramp can hardlock you -- NEW FIX MAKES THIS OBSELETE
-#       #     switch_str.append(b"\x02\xcd\x0c\x01")
-        #elif self.start_loc == 47:  # Diamond Mine behind fences
-        #    switch_str.append(b"\x02\xcd\x34\x01\x02\xcd\x35\x01\x02\xcd\x36\x01")
-        #
-        #if "Open Mode" in self.variant:
-        #    switch_str.append(b"\x02\xcc\x11\x02\xcc\x14\x02\xcc\x1f\x02\xcc\x2a\x02\xcc\x41")
-        #
-        #if self.enemizer != "None" and self.enemizer != "Limited":
-        #    switch_str.append(b"\x02\xcc\xa0\x02\xcc\xa1")
-        #
-        ## Non-enemy sprite handling in enemizer
-        #if self.enemizer != "None" and self.enemizer != "Limited":
-        #    # Disable all non-enemy sprites in enemizer
-        #    for sprite in self.nonenemy_sprites:
-        #        f.seek(int(self.nonenemy_sprites[sprite][1], 16) + rom_offset + 3)
-        #        f.write(b"\x02\xe0")
-        #    # Disable non-essential sword statues in Sky Garden
-        #    statue_addrs = [0xc9ffc,0xca003,0xca2e6]
-        #    for addr in statue_addrs:
-        #        f.seek(addr + rom_offset)
-        #        f.write(b"\x35\x88\x8a")  # Address for movable statue in Tunnel (disabled above)
-        #
-        ## Disable non-enemy sprites that have softlock potential in fluteless
-        #if self.fluteless:
-        #    softlock_sprites = [4,5,6,7,61,62,63,64,65]
-        #    for sprite in softlock_sprites:
-        #        f.seek(int(self.nonenemy_sprites[sprite][1], 16) + rom_offset + 3)
-        #        f.write(b"\x02\xe0")
-        #
-        #f.seek(int("1ffb0", 16) + rom_offset)
-        #for x in switch_str:
-        #    f.write(x)
-        #f.write(b"\x6b")
-        ##print("switches done")
 
         # Swapped exits
 #        for exit in self.exits:
@@ -2872,7 +2863,7 @@ class World:
         self.statues_required = statues_required
         self.statue_req = statue_req
         self.boss_order = boss_order
-        self.key_rando = 1#settings.key_rando
+        self.orb_rando = 1#settings.orb_rando
         self.dungeons_req = []
         for x in self.statues:
             self.dungeons_req.append(self.boss_order[x-1])
@@ -3076,17 +3067,17 @@ class World:
             601: [0, 4, "", "Glitches", False, 1],
             602: [0, 4, "", "Early Firebird", False, 1],
             
-            # Keys
-            700: [1, 5, 0x01, "U.Tunnel East Cage", False, 3],
-            701: [1, 5, 0x02, "U.Tunnel East Door", False, 1],
-            702: [1, 5, 0x03, "U.Tunnel South Door", False, 1],
-            703: [1, 5, 0x05, "U.Tunnel West Bat Door", False, 1],
+            # Orbs that open doors
+            700: [1, 5, 0x01, "U.Tunnel Skeleton Cage", False, 3],
+            701: [1, 5, 0x02, "U.Tunnel First Door", False, 1],
+            702: [1, 5, 0x03, "U.Tunnel Second Door", False, 1],
+            703: [1, 5, 0x05, "U.Tunnel Bat Door", False, 1],
             704: [1, 5, 0x16, "U.Tunnel Dark Space", False, 1],
             705: [1, 5, 0x17, "U.Tunnel Skeleton Door 1", False, 1],
             706: [1, 5, 0x18, "U.Tunnel Skeleton Door 2", False, 1],
-            707: [1, 5, 0x0d, "Inca Exterior W Ladder", False, 3],
-            708: [1, 5, 0x0e, "Inca Exterior SE Ladder", False, 3],
-            709: [1, 5, 0x0f, "Inca Exterior NE Ladder", False, 3],
+            707: [1, 5, 0x0d, "Inca West Ladder", False, 3],
+            708: [1, 5, 0x0e, "Inca Entrance Ladder", False, 3],
+            709: [1, 5, 0x0f, "Inca Final Ladder", False, 3],
             710: [1, 5, 0x0c, "Inca N/S Ramp Room Ramp", False, 1],
             711: [1, 5, 0x0b, "Inca E/W Ramp Room Ramp", False, 1],
             712: [1, 5, 0x0a, "Inca Diamond Block Stair", False, 3],
@@ -3094,7 +3085,7 @@ class World:
             714: [1, 5, 0x34, "Mine Tunnel Middle Fence", False, 1],
             715: [1, 5, 0x35, "Mine Tunnel South Fence", False, 1],
             716: [1, 5, 0x36, "Mine Tunnel North Fence", False, 1],
-            717: [1, 5, 0x22, "Mine Early Eye Cage", False, 3],
+            717: [1, 5, 0x22, "Mine Big Room Cage", False, 3],
             718: [1, 5, 0x32, "Mine Appearing Dark Space", False, 1],
             719: [1, 5, 0x23, "Mine Friar Fence", False, 1],
             720: [1, 5, 0x37, "Garden SE Top Gate", False, 1],
@@ -3106,7 +3097,7 @@ class World:
             726: [1, 5, 0x3d, "Mu Entrance Gate", False, 1],
             727: [1, 5, 0x3e, "Mu NE First Rock", False, 1],
             728: [1, 5, 0x3f, "Mu NE Second Rock", False, 1],
-            729: [1, 5, 0x42, "Mu W Slime Cages", False, 3],
+            729: [1, 5, 0x42, "Mu West Slime Cages", False, 3],
             730: [1, 5, 0x41, "Mu SE East-facing Head", False, 3],
             731: [1, 5, 0x40, "Mu SE South-facing Head", False, 3],
             732: [1, 5, 0x53, "Great Wall Friar Gate", False, 1],
@@ -3115,10 +3106,10 @@ class World:
             735: [1, 5, 0x6c, "Wat Entrance Stair", False, 1],
             736: [1, 5, 0x6b, "Wat East Slider Hole", False, 1],
             #737: [1, 5, 0x6d, "Ankor Wat Pit Exit", False, 1], # Probably shouldn't randomize this...
-            738: [1, 5, 0x6f, "Wat Dark Space Hall", False, 1],
+            738: [1, 5, 0x6f, "Wat Dark Space Corridor", False, 1],
             739: [1, 5, 0x73, "Pyramid Foyer Dark Space", False, 1],
-            740: [1, 5, 0x9a, "Mansion East Gate", False, 1],
-            741: [1, 5, 0x9b, "Mansion West Gate", False, 1]
+            740: [1, 5, 0x9a, "Mansion First Gate", False, 1],
+            741: [1, 5, 0x9b, "Mansion Second Gate", False, 1]
         }
 
         # Define Item/Ability/Statue locations
@@ -3142,7 +3133,7 @@ class World:
             8:   [26, 1, False, 0, [], "CapeLancesHouseItem", "F5AD", "F5C3", "", "South Cape: Lance's House           "],
             9:   [23, 1, False, 0, [], "CapeLolaItem",       "49be5",     "", "", "South Cape: Lola                    "],
 
-            10:  [21, 2, False, 0, [64, 65, 66], "DkSpSouthCapeType", "Safe", b"\xE0\x00\x70\x00\x83\x00\x43", 1, "South Cape: Dark Space              "],
+            10:  [21, 2, False, 0, [64, 65, 66], "DkSpSouthCapeType", "Safe", "$E0,$00,$70,$00,$83,$00,$43", 0x01, "South Cape: Dark Space              "],
 
             # Edward's
             11:  [30, 1, False, 0, [], "ECHiddenGuardItem", "4c299", "", "", "Edward's Castle: Hidden Guard       "],
@@ -3157,7 +3148,7 @@ class World:
             17:  [705,1, False, 0, [], "EDEndChestItem",    "",     "", "", "Underground Tunnel: Ribber's Chest  "],
             18:  [49, 1, False, 0, [], "EDEndBarrelsItem", "F62D", "F643", "", "Underground Tunnel: Barrels         "],
 
-            19:  [720,2, False, 0, [], "DkSpPrisonEndType", "Unsafe", b"\xA0\x00\xD0\x04\x83\x00\x74", 0x12, "Underground Tunnel: Dark Space      "],  # Always open
+            19:  [720,2, False, 0, [61, 62, 63, 64, 65, 66], "DkSpPrisonEndType", "Unsafe", "$A0,$00,$D0,$04,$83,$00,$74", 0x12, "Underground Tunnel: Dark Space      "],  # Always open
             
             700: [41, 5, False, 0, [],  "EDCageWormItem", "", "", "", "Underground Tunnel: Worm for East Skeleton Cage"],
             701: [41, 5, False, 0, [],  "EDSoutheastWormItem", "", "", "", "Underground Tunnel: Worm for East Door"],
@@ -3171,7 +3162,7 @@ class World:
             20:  [51, 1, False, 0, [], "ItoryLogsItem",  "F6AD",  "F6C3", "", "Itory Village: Logs                 "],
             21:  [58, 1, False, 0, [], "ItoryCaveItem", "4f38d", "4f3a8", "", "Itory Village: Cave                 "],
 
-            22:  [51, 2, False, 0, [64, 65, 66], "DkSpItoryType", "Safe", b"\x30\x04\x90\x00\x83\x00\x35", 0x15, "Itory Village: Dark Space           "],
+            22:  [51, 2, False, 0, [64, 65, 66], "DkSpItoryType", "Safe", "$30,$04,$90,$00,$83,$00,$35", 0x15, "Itory Village: Dark Space           "],
 
             # Moon Tribe
             23:  [62, 1, False, 0, [], "MoonTribeCaveItem", "4faf9", "4fb16", "", "Moon Tribe: Cave                    "],
@@ -3183,8 +3174,8 @@ class World:
             27:  [93, 1, False, 0, [], "IncaWormChestItem",      "",      "", "", "Inca Ruins: Slugger Chest           "],
             28:  [76, 1, False, 0, [], "IncaCliffItem", "9c614", "9c637", "", "Inca Ruins: Singing Statue          "],
 
-            29:  [96, 2, False, 0, [], "DkSpInca1Type", "Unsafe", b"\x10\x01\x90\x00\x83\x00\x32", 0x28, "Inca Ruins: Dark Space 1            "],  # Always open
-            30:  [93, 2, False, 0, [], "DkSpInca2Type", "Unsafe", b"\xC0\x01\x50\x01\x83\x00\x32", 0x26, "Inca Ruins: Dark Space 2            "],
+            29:  [96, 2, False, 0, [61, 62, 63, 64, 65, 66], "DkSpInca1Type", "Unsafe", "$10,$01,$90,$00,$83,$00,$32", 0x28, "Inca Ruins: Dark Space 1            "],  # Always open
+            30:  [93, 2, False, 0, [], "DkSpInca2Type", "Unsafe", "$C0,$01,$50,$01,$83,$00,$32", 0x26, "Inca Ruins: Dark Space 2            "],
             31:  [77, 2, False, 0, [], "DkSpIncaEndType",     "",                              "", 0x1e, "Inca Ruins: Final Dark Space        "],
 
             707: [74, 5, False, 0, [],  "IncaWestLadderItem", "", "", "", "Inca Ruins: 4-Way for West Ladder"],
@@ -3208,7 +3199,7 @@ class World:
             37:  [110, 1, False, 0, [], "FrejBin2Item", "5cf49",      "", "", "Freejia: Trash Can 2                "],  # text2 was 5cf5b
             38:  [115, 1, False, 0, [], "FrejSnitchItem", "5b962", "5b9ee", "", "Freejia: Snitch                     "],  # text1 was @5b94d
 
-            39:  [125, 2, False, 0, [64, 65, 66], "DkSpFreejiaType", "Safe", b"\x40\x00\xa0\x00\x83\x00\x11", 0x34, "Freejia: Dark Space                 "],
+            39:  [125, 2, False, 0, [64, 65, 66], "DkSpFreejiaType", "Safe", "$40,$00,$a0,$00,$83,$00,$11", 0x34, "Freejia: Dark Space                 "],
 
             # Diamond Mine
             40:  [134, 1, False, 0, [], "MineChestItem",      "",      "", "", "Diamond Mine: Chest                 "],
@@ -3218,8 +3209,8 @@ class World:
             44:  [149, 1, False, 0, [], "MineCombatSlaveItem", "aa7ef",      "", "", "Diamond Mine: Laborer w/Mine Key    "],  # text1 was aa7b4
             45:  [150, 1, False, 0, [], "MineSamItem", "5d2da",      "", "", "Diamond Mine: Sam                   "],
 
-            46:  [721, 2, False, 0, [], "DkSpMineAppearingType", "Unsafe", b"\xb0\x01\x70\x01\x83\x00\x32", 0x40, "Diamond Mine: Appearing Dark Space  "],  # Always open
-            47:  [131, 2, False, 0, [], "DkSpMineAtWallType",    "Unsafe", b"\xd0\x00\xc0\x00\x83\x00\x61", 0x3d, "Diamond Mine: Dark Space at Wall    "],
+            46:  [721, 2, False, 0, [], "DkSpMineAppearingType", "Unsafe", "$b0,$01,$70,$01,$83,$00,$32", 0x40, "Diamond Mine: Appearing Dark Space  "],  # Always open
+            47:  [131, 2, False, 0, [], "DkSpMineAtWallType",    "Unsafe", "$d0,$00,$c0,$00,$83,$00,$61", 0x3d, "Diamond Mine: Dark Space at Wall    "],
             48:  [142, 2, False, 0, [], "DkSpMineBehindType",          "",                              "", 0x42, "Diamond Mine: Dark Space behind Wall"],
 
             714: [708, 5, False, 0, [], "MineMidFenceItem", "", "", "", "Diamond Mine: Lizard for Tunnel Middle Fence"],
@@ -3239,10 +3230,10 @@ class World:
             55:  [194, 1, False, 0, [], "SGNWTopChestItem", "", "", "", "Sky Garden: (NW) Top Chest          "],
             56:  [194, 1, False, 0, [], "SGNWBotChestItem", "", "", "", "Sky Garden: (NW) Bottom Chest       "],
 
-            57:  [170, 2, False, 0, [64, 65, 66], "DkSpSGFoyerType",   "Safe", b"\x90\x00\x70\x00\x83\x00\x22", 0x4c, "Sky Garden: Dark Space (Foyer)      "],
-            58:  [169, 2, False, 0,           [], "DkSpSGSEType",    "Unsafe", b"\x70\x00\xa0\x00\x83\x00\x11", 0x56, "Sky Garden: Dark Space (SE)         "],  # in the room
+            57:  [170, 2, False, 0, [64, 65, 66], "DkSpSGFoyerType",   "Safe", "$90,$00,$70,$00,$83,$00,$22", 0x4c, "Sky Garden: Dark Space (Foyer)      "],
+            58:  [169, 2, False, 0,           [], "DkSpSGSEType",    "Unsafe", "$70,$00,$a0,$00,$83,$00,$11", 0x56, "Sky Garden: Dark Space (SE)         "],  # in the room
             59:  [183, 2, False, 0,           [], "DkSpSGSWType",          "",                              "", 0x51, "Sky Garden: Dark Space (SW)         "],
-            60:  [195, 2, False, 0,           [], "DkSpSGNWType",    "Unsafe", b"\x20\x00\x70\x00\x83\x00\x44", 0x54, "Sky Garden: Dark Space (NW)         "],
+            60:  [195, 2, False, 0,           [], "DkSpSGNWType",    "Unsafe", "$20,$00,$70,$00,$83,$00,$44", 0x54, "Sky Garden: Dark Space (NW)         "],
 
             720: [711, 5, False, 0, [], "SGSETopBarrierItem", "", "", "", "Sky Garden: (SE) Top Robot for Center Barrier"],
             721: [180, 5, False, 0, [], "SGSEBotBarrierItem", "", "", "", "Sky Garden: (SE) Bottom Robot for Chest"],
@@ -3258,7 +3249,7 @@ class World:
             64:  [206, 1, False, 0, [], "SeaPalBuffyItem", "68ea9", "68f02", "", "Seaside Palace: Buffy               "],
             65:  [208, 1, False, 0, [], "SeaPalCoffinItem", "6939e", "693b7", "", "Seaside Palace: Coffin              "],  # text1 was 69377
 
-            66:  [200, 2, False, 0, [64, 65, 66], "DkSpSeaPalType", "Safe", b"\xf0\x02\x90\x00\x83\x00\x64", 0x5a, "Seaside Palace: Dark Space          "],
+            66:  [200, 2, False, 0, [64, 65, 66], "DkSpSeaPalType", "Safe", "$f0,$02,$90,$00,$83,$00,$64", 0x5a, "Seaside Palace: Dark Space          "],
 
             # Mu
             67:  [217, 1, False, 0, [], "MuEmptyChest1Item",      "", "", "", "Mu: Empty Chest 1                   "],
@@ -3269,7 +3260,7 @@ class World:
             72:  [214, 1, False, 0, [], "MuRamaChestNItem",      "", "", "", "Mu: Rama Chest N                    "],
             73:  [219, 1, False, 0, [], "MuRamaChestEItem",      "", "", "", "Mu: Rama Chest E                    "],
 
-            74:  [218, 2, False, 0, [], "DkSpMuTransformType", "", "", 0x60, "Mu: Open Dark Space                 "],  # Always open
+            74:  [218, 2, False, 0, [61, 62, 63, 64, 65, 66], "DkSpMuTransformType", "", "", 0x60, "Mu: Open Dark Space                 "],  # Always open
             75:  [228, 2, False, 0, [], "DkSpMuSliderType",    "", "", 0x62, "Mu: Slider Dark Space               "],
 
             726: [212, 5, False, 0, [], "MuEntranceGolemItem", "", "", "", "Mu: Entrance Golem for Gate"],
@@ -3281,7 +3272,7 @@ class World:
 
             # Angel Village
             76:  [254, 1, False, 0, [], "AnglDanceHallItem", "F82D", "F843", "", "Angel Village: Dance Hall           "],
-            77:  [255, 2, False, 0, [64, 65, 66], "DkSpAngelVillageType", "Safe", b"\x90\x01\xb0\x00\x83\x01\x12", 0x6c, "Angel Village: Dark Space           "],
+            77:  [255, 2, False, 0, [64, 65, 66], "DkSpAngelVillageType", "Safe", "$90,$01,$b0,$00,$83,$01,$12", 0x6c, "Angel Village: Dark Space           "],
 
             # Angel Dungeon
             78:  [265, 1, False, 0, [], "AnglSliderChestItem",    "",     "", "", "Angel Dungeon: Slider Chest         "],
@@ -3296,7 +3287,7 @@ class World:
             86:  [283, 1, False, 0, [], "WtrmDesertJarItem",  "F9AD",  "F9C3", "", "Watermia: Gambling House            "],
             87:  [280, 1, False, 0, [], "WtrmRussianGlassItem", "79288", "792a1", "", "Watermia: Russian Glass             "],
 
-            88:  [282, 2, False, 0, [64, 65, 66], "DkSpWatermiaType", "Safe", b"\x40\x00\xa0\x00\x83\x00\x11", 0x7c, "Watermia: Dark Space                "],
+            88:  [282, 2, False, 0, [64, 65, 66], "DkSpWatermiaType", "Safe", "$40,$00,$a0,$00,$83,$00,$11", 0x7c, "Watermia: Dark Space                "],
 
             # Great Wall
             89:  [290, 1, False, 0, [], "GtWlNecklace1Item", "7b5d1", "", "", "Great Wall: Necklace 1              "],
@@ -3304,8 +3295,8 @@ class World:
             91:  [292, 1, False, 0, [], "GtWlChest1Item",      "", "", "", "Great Wall: Chest 1                 "],
             92:  [294, 1, False, 0, [], "GtWlChest2Item",      "", "", "", "Great Wall: Chest 2                 "],
 
-            93:  [295, 2, False, 0, [], "DkSpGreatWall1Type",    "Unsafe", b"\x60\x00\xc0\x02\x83\x20\x38", 0x85, "Great Wall: Archer Dark Space       "],
-            94:  [297, 2, False, 0, [], "DkSpGreatWallSpinType", "Unsafe", b"\x50\x01\x80\x04\x83\x00\x63", 0x86, "Great Wall: Platform Dark Space     "],  # Always open
+            93:  [295, 2, False, 0, [], "DkSpGreatWall1Type",    "Unsafe", "$60,$00,$c0,$02,$83,$20,$38", 0x85, "Great Wall: Archer Dark Space       "],
+            94:  [297, 2, False, 0, [61, 62, 63, 64, 65, 66], "DkSpGreatWallSpinType", "Unsafe", "$50,$01,$80,$04,$83,$00,$63", 0x86, "Great Wall: Platform Dark Space     "],  # Always open
             95:  [300, 2, False, 0, [], "DkSpGreatWallEndType",        "",                              "", 0x88, "Great Wall: Appearing Dark Space    "],
 
             732: [712, 5, False, 0, [], "GtWlArcherItem", "", "", "", "Great Wall: Archer for Friar Gate"],
@@ -3319,7 +3310,7 @@ class World:
             101: [321, 1, False, 0, [], "EuroSlaveRoomBarrelItem",  "FAAD",  "FAC3", "", "Euro: Shrine                        "],
             102: [315, 1, False, 0, [], "EuroAnnItem", "7e10a",      "", "", "Euro: Ann                           "],
 
-            103: [325, 2, False, 0, [64, 65, 66], "DkSpEuroType", "Safe", b"\xb0\x00\xb0\x00\x83\x00\x11", 0x99, "Euro: Dark Space                    "],
+            103: [325, 2, False, 0, [64, 65, 66], "DkSpEuroType", "Safe", "$b0,$00,$b0,$00,$83,$00,$11", 0x99, "Euro: Dark Space                    "],
 
             # Mt Temple
             104: [336, 1, False, 0, [], "KressChest1Item", "", "", "", "Mt. Temple: Red Jewel Chest         "],
@@ -3328,8 +3319,8 @@ class World:
             107: [343, 1, False, 0, [], "KressChest4Item", "", "", "", "Mt. Temple: Drops Chest 3           "],
             108: [345, 1, False, 0, [], "KressChest5Item", "", "", "", "Mt. Temple: Final Chest             "],
 
-            109: [332, 2, False, 0, [], "DkSpKress1Type", "Unsafe", b"\xf0\x01\x10\x03\x83\x00\x44", 0xa1, "Mt. Temple: Dark Space 1            "],
-            110: [337, 2, False, 0, [], "DkSpKress2Type", "Unsafe", b"\xc0\x07\xc0\x00\x83\x00\x28", 0xa3, "Mt. Temple: Dark Space 2            "],
+            109: [332, 2, False, 0, [], "DkSpKress1Type", "Unsafe", "$f0,$01,$10,$03,$83,$00,$44", 0xa1, "Mt. Temple: Dark Space 1            "],
+            110: [337, 2, False, 0, [], "DkSpKress2Type", "Unsafe", "$c0,$07,$c0,$00,$83,$00,$28", 0xa3, "Mt. Temple: Dark Space 2            "],
             111: [343, 2, False, 0, [], "DkSpKress3Type",       "",                              "", 0xa7, "Mt. Temple: Dark Space 3            "],
 
             734: [338, 5, False, 0, [], "KressSkullShortcutItem", "", "", "", "Mt. Temple: Skull for Drops Chest 1 Shortcut"],
@@ -3338,7 +3329,7 @@ class World:
             112: [353, 1, False, 0, [],  "NativesPotItem",  "FB2D", "FB43", "", "Natives' Village: Statue Room       "],
             113: [354, 1, False, 0, [], "NativesGirlItem", "8942a",     "", "", "Natives' Village: Statue            "],
 
-            114: [350, 2, False, 0, [64, 65, 66], "DkSpNativesType", "Safe", b"\xc0\x01\x50\x00\x83\x00\x22", 0xac, "Natives' Village: Dark Space        "],
+            114: [350, 2, False, 0, [64, 65, 66], "DkSpNativesType", "Safe", "$c0,$01,$50,$00,$83,$00,$22", 0xac, "Natives' Village: Dark Space        "],
 
             # Ankor Wat
             115: [361, 1, False, 0, [], "WatChest1Item",      "",      "", "", "Ankor Wat: Ramp Chest               "],
@@ -3349,9 +3340,9 @@ class World:
             120: [380, 1, False, 0, [], "WatGlassesItem", "89fbb",      "", "", "Ankor Wat: Glasses Location         "],  # slow text @89fdc
             121: [391, 1, False, 0, [], "WatSpiritItem", "89af1", "89b07", "", "Ankor Wat: Spirit                   "],  # item was 89b0d, text was 89e2e
 
-            122: [372, 2, False, 0, [], "DkSpWatGardenType", "Unsafe", b"\x20\x04\x30\x03\x83\x00\x46", 0xb6, "Ankor Wat: Garden Dark Space        "],  # Always open
+            122: [372, 2, False, 0, [61, 62, 63, 64, 65, 66], "DkSpWatGardenType", "Unsafe", "$20,$04,$30,$03,$83,$00,$46", 0xb6, "Ankor Wat: Garden Dark Space        "],  # Always open
             123: [377, 2, False, 0, [], "DkSpWatQuakeType",        "",                              "", 0xb8, "Ankor Wat: Earthquaker Dark Space   "],
-            124: [383, 2, False, 0, [], "DkSpWatDropType",   "Unsafe", b"\xb0\x02\xc0\x01\x83\x00\x33", 0xbb, "Ankor Wat: Drop Down Dark Space     "],  # Always open
+            124: [383, 2, False, 0, [], "DkSpWatDropType",   "Unsafe", "$b0,$02,$c0,$01,$83,$00,$33", 0xbb, "Ankor Wat: Drop Down Dark Space     "],  # Always open
 
             735: [362, 5, False, 0, [], "WatSouthScarabItem", "", "", "", "Ankor Wat: Scarab for Outer South Stair"],
             736: [364, 5, False, 0, [], "WatEastSliderHoleItem", "", "", "", "Ankor Wat: Scarab for Outer East Slider Hole"],
@@ -3363,7 +3354,7 @@ class World:
             127: [400, 1, False, 0, [],  "DaoGrassItem",  "FBAD",  "FBC3", "", "Dao: East Grass                     "],
             128: [403, 1, False, 0, [], "DaoSnakeGameItem", "8b073", "8b090", "", "Dao: Snake Game                     "],
 
-            129: [400, 2, False, 0, [64, 65, 66], "DkSpDaoType", "Safe", b"\x20\x00\x80\x00\x83\x00\x23", 0xc3, "Dao: Dark Space                     "],
+            129: [400, 2, False, 0, [64, 65, 66], "DkSpDaoType", "Safe", "$20,$00,$80,$00,$83,$00,$23", 0xc3, "Dao: Dark Space                     "],
 
             # Pyramid
             130: [713, 1, False, 0, [], "PyramidGaiaItem", "8e66c", "8e800", "", "Pyramid: Dark Space Top             "],  # text2 was 8e800
@@ -3379,7 +3370,7 @@ class World:
             140: [446, 1, False, 0, [], "PyramidHiero5Item", "8ca84",      "", "", "Pyramid: Hieroglyph 5               "],
             141: [447, 1, False, 0, [], "PyramidHiero6Item", "8cb2c",      "", "", "Pyramid: Hieroglyph 6               "],
 
-            142: [413, 2, True, 0, [], "DkSpPyramidBotType", "Unsafe", b"\xc0\x01\x90\x03\x83\x00\x44", 0xcc, "Pyramid: Dark Space Bottom          "],  # Always open
+            142: [413, 2, True, 0, [61, 62, 63, 64, 65, 66], "DkSpPyramidBotType", "Unsafe", "$c0,$01,$90,$03,$83,$00,$44", 0xcc, "Pyramid: Dark Space Bottom          "],  # Always open
 
             739: [411, 5, False, 0, [], "PyramidEntranceOrbsItem", "", "", "", "Pyramid: Entrance Orbs for DS Gate"],
 
@@ -3387,8 +3378,8 @@ class World:
             143: [461, 1, False, 0, [],  "BabelPillowItem",  "FCAD",  "FCC3", "", "Babel: Pillow                       "],
             144: [461, 1, False, 0, [], "BabelForceFieldItem", "99ae4", "99afe", "", "Babel: Force Field                  "],  # item was  99a61
 
-            145: [461, 2, False, 0, [64, 65, 66], "DkSpBabelBotType", "Forced Unsafe", b"\x90\x07\xb0\x01\x83\x10\x28", 0xdf, "Babel: Dark Space Bottom            "],
-            146: [472, 2, False, 0, [64, 65, 66], "DkSpBabelTopType",          "Safe", b"\xb0\x02\xb0\x01\x83\x10\x23", 0xe3, "Babel: Dark Space Top               "],
+            145: [461, 2, False, 0, [64, 65, 66], "DkSpBabelBotType", "Forced Unsafe", "$90,$07,$b0,$01,$83,$10,$28", 0xdf, "Babel: Dark Space Bottom            "],
+            146: [472, 2, False, 0, [64, 65, 66], "DkSpBabelTopType",          "Safe", "$b0,$02,$b0,$01,$83,$10,$23", 0xe3, "Babel: Dark Space Top               "],
 
             # Jeweler's Mansion
             147: [715, 1, False, 0, [], "MansionChestItem", "", "", "", "Jeweler's Mansion: Chest            "],
@@ -3440,7 +3431,7 @@ class World:
         # World graph
         # Format: { Region ID:
         #                   Traversed_flag, [AccessibleRegions], type(0=other/misc,1=exterior,2=interior), [continentID,areaID,layer,MapID],
-        #                   4: DS_access (0=no_access,1=any_DS,2=form_change_DS),
+        #                   4: DS_access (0x01 = can reach DS from here; 0x02 = Freedan can reach here),
         #                   5: RegionName,
         #                   6: [ItemsToRemove],
         #                   7: ForceFormChange,
@@ -3543,6 +3534,7 @@ class World:
             77: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (first area)", [3, 4], False, [], [], [], [], [], [], [], []],
             78: [False, [77],     2, [1,5,0,b"\x00"], 0, "Inca: Map 30 (second area)", [], False, [], [], [], [], [], [], [], []],
             79: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 31", [], False, [], [], [], [], [], [], [], []],
+            69: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 31 (U-turn)", [], False, [], [], [], [], [], [], [], []],
             80: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 32 (entrance)", [], False, [], [], [], [], [], [], [], []],
             81: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 32 (behind statue)", [], False, [], [], [], [], [], [], [], []],
             82: [False, [],       2, [1,5,0,b"\x00"], 0, "Inca: Map 33 (entrance)", [], False, [], [], [], [], [], [], [], []],
@@ -3729,6 +3721,7 @@ class World:
             #256: [False, [],   2, [3,13,0,b"\x00"], 0, "Angel Village: Room 3", [], False, [], [], [], [], [], [], [], []],
 
             # Angel Dungeon
+            259: [False,    [], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 112 (entryway)", [], False, [], [], [], [], [], [], [], []],
             260: [False,    [], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 109", [], False, [], [], [], [], [], [], [], []],
             261: [False, [278], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 110 (main)", [], False, [], [], [], [], [], [], [], []],
             262: [False,    [], 2, [3,13,0,b"\x00"], 0, "Angel Dungeon: Map 111", [], False, [], [], [], [], [], [], [], []],
@@ -3884,6 +3877,7 @@ class World:
             422: [False, [423],     2, [5,21,0,b"\x00"], 0, "Pyramid: Map 209 (W)", [], False, [], [], [], [], [], [], [], []],
             423: [False, [422,411], 2, [5,21,0,b"\x00"], 0, "Pyramid: Map 209 (E)", [], False, [], [], [], [], [], [], [], []],
             424: [False, [],        2, [5,21,0,b"\x00"], 0, "Pyramid: Map 210", [], False, [], [], [], [], [], [], [], []],
+            10424: [False, [],      2, [5,21,0,b"\x00"], 0, "Pyramid: Map 210 x 211", [], False, [], [], [], [], [], [], [], []],  # Artificial node to restrict this room in logic
             425: [False, [411],     2, [5,21,0,b"\x00"], 0, "Pyramid: Map 211", [], False, [], [], [], [], [], [], [], []],
             426: [False, [],        2, [5,21,0,b"\x00"], 0, "Pyramid: Map 212 (N)", [], False, [], [], [], [], [], [], [], []],
             427: [False, [426],     2, [5,21,0,b"\x00"], 0, "Pyramid: Map 212 (center)", [], False, [], [], [], [], [], [], [], []],
@@ -4038,7 +4032,7 @@ class World:
             702: [0,43, 719,False, [[703, 1]]],  # Bat key opens west room door
             62: [0, 45, 46, False, [[501, 1]]],  # Progression w/ Lilly
             703: [0,47, 720,False, [[704, 1]]],  # Worm key opens Dark Space
-            63: [0, 720,704,  True, []],         # Activate Bridge w/ Freedan
+            63: [0, 47 ,704,  True, []],         # Activate Bridge w/ Freedan
             704: [0,704,705,False, [[705, 1]]],  # Skeleton key opens next area
             705: [0,705,706,False, [[706, 1]]],  # Next skeleton key opens final area
 
@@ -4063,6 +4057,9 @@ class World:
             91:  [0,  80,  81, False, [[61, 1]]],         # Map 32 progression w/ Psycho Dash
             92:  [0,  80,  81, False, [[62, 1]]],         # Map 32 progression w/ Psycho Slider
             93:  [0,  80,  81, False, [[63, 1]]],         # Map 32 progression w/ Spin Dash
+            505: [0,  81,  80, False, [[61, 1]]],         # Map 32 backwards w/ Psycho Dash
+            506: [0,  81,  80, False, [[62, 1]]],         # Map 32 backwards w/ Psycho Slider
+            507: [0,  81,  80, False, [[63, 1]]],         # Map 32 backwards w/ Spin Dash
             710: [0,  82,  83, False, [[710, 1]]],        # Inca N/S ramp (33) via whirligig key
             94:  [0,  85, 707,  True, []],                # Map 35 progression w/ Freedan
             709: [0,  85,  86, False, [[711, 1]]],        # Inca E/W ramp (35) via whirligig key
@@ -4106,8 +4103,8 @@ class World:
             133: [0, 168, 182, False, [[506, 1]]],           # Map 81 progression w/ switch 1
             134: [0, 182, 183, False, [[507, 1]]],           # Map 81 progression w/ switch 2
             135: [0, 182, 184, False, [[61, 1]]],            # Map 81 progression w/ Psycho Dash
-            136: [0, 182, 184, False, [[62, 1]]],            # Map 81 progression w/ Psycho Dash
-            137: [0, 182, 184, False, [[63, 1]]],            # Map 81 progression w/ Psycho Dash
+            136: [0, 182, 184, False, [[62, 1]]],            # Map 81 progression w/ Psycho Slider
+            137: [0, 182, 184, False, [[63, 1]]],            # Map 81 progression w/ Spin Dash
             138: [0, 184, 185, False, [[508, 1], [61, 1]]],  # Map 81 progression w/ switch 3 & Psycho Dash
             139: [0, 184, 185, False, [[508, 1], [62, 1]]],  # Map 81 progression w/ switch 3 & Psycho Slider
             140: [0, 184, 185, False, [[508, 1], [63, 1]]],  # Map 81 progression w/ switch 3 & Spin Dash
@@ -4121,8 +4118,8 @@ class World:
             147: [0, 195, 199,  True, [[64, 1]]],            # Map 84 progression w/ Dark Friar
             148: [0, 195, 199,  True, [[67, 1]]],            # Map 84 progression w/ Firebird
             149: [0, 195, 199,  True, [[65, 1]]],            # Map 84 progression w/ Aura Barrier
-            150: [0, 197, 199,  True, [[64, 1]]],            # Map 84 progression w/ Dark Friar
-            151: [0, 197, 199,  True, [[67, 1]]],            # Map 84 progression w/ Firebird
+            #150: [0, 197, 199,  True, [[64, 1]]],            # Map 84 progression w/ Dark Friar
+            #151: [0, 197, 199,  True, [[67, 1]]],            # Map 84 progression w/ Firebird
             152: [0, 170,  16, False, [[502, 1]]],           # Moon Tribe passage w/ spirits healed
 
             # Seaside Palace
@@ -4231,6 +4228,10 @@ class World:
             297: [0, 417, 416, False, [[63, 1]]],             # Map 206 progression w/ Spin Dash
             298: [0, 418, 419, False, [[63, 1]]],             # Map 206 progression w/ Spin Dash
             299: [0, 419, 418, False, [[63, 1]]],             # Map 206 progression w/ Spin Dash
+            500: [0,420,421, False, []       ],             # Map 208 traversal is free except in Dungeon Chaos
+            501: [0,421,420, False, []       ],             # Map 208 traversal is free except in Dungeon Chaos
+            502: [0,10424,425,False,[]       ],             # Map 210 to Map 211 is free except in Dungeon Chaos
+            503: [0,425,10424,False,[]       ],             # Map 211 to Map 210 is free except in Dungeon Chaos
             300: [0, 426, 427,  True, [[36, 1]]],             # Map 212 progression w/ Aura
             301: [0, 426, 427,  True, [[66, 1]]],             # Map 212 progression w/ Earthquaker
             302: [0, 427, 428,  True, [[36, 1]]],             # Map 212 progression w/ Aura
@@ -5108,61 +5109,6 @@ class World:
         # Database of non-enemy sprites to disable in enemizer
         # FORMAT: { ID: [Enemyset, Event addr, Name]}
         self.nonenemy_sprites = {
-            # Underground Tunnel
-            0: [0, "a8835", "Movable statue"],
-            1: [0, "a87ce", "Falling spear 1"],
-            2: [0, "a87c3", "Falling spear 2"],
-            3: [0, "a8aae", "Spike ball 1"],
-            4: [0, "a8a0f", "Spike ball 2"],
-            5: [0, "a8a7d", "Spike ball 3"],
-            6: [0, "a8a46", "Spike ball 4"],
-            7: [0, "a89de", "Spike ball 5"],
-
-            # Inca Ruins
-            10: [1, "9c26f", "Skeleton 1"],
-            11: [1, "9c798", "Skeleton 2"],
-            #            12: [1,"9c89d","Skeleton 3"],   # Spriteset already restricted for this room
-            13: [1, "9c8f7", "Skeleton 4"],
-            14: [1, "a8896", "Broken statue (chest)"],
-            15: [1, "a88de", "Broken statue (blockade)"],
-
-            # Diamond Mine
-            20: [3, "5d6a8", "Elevator sign"],
-            21: [3, "aa4f5", "Elevator platform 1"],
-            22: [3, "aa50c", "Elevator platform 2"],
-            23: [3, "aa4e2", "Elevator platform 3"],
-
-            # Sky Garden
-            30: [4, "5f8c0", "Broken statue"],
-            31: [4, "ac0fe", "Sword statue 1"],
-
-         #            32: [4,"ac150","Sword statue 2"],
-            33: [4, "ac3b3", "Sword statue 3"],
-            #            34: [4,"ac409","Sword statue 4"],
-            35: [4, "accd4", "Fire snake (top)"],
-            36: [5, "accf1", "Fire snake (bottom)"],
-
-            # Mu
-            40: [6, "69ce9", "Floor spikes 1"],
-            41: [6, "69d1f", "Floor spikes 2"],
-            42: [6, "ae943", "Fire snake"],
-            #            43: [6,"69d4d","Donut"],
-
-            # Angel
-            50: [7, "6d56f", "Flame 1"],
-            51: [7, "6d57e", "Flame 2"],
-            52: [7, "6d58f", "Flame 3"],
-
-            # Great Wall
-            60: [8, "b8c30", "Wall spike 1"],
-            61: [8, "b8bf8", "Wall spike 2"],
-            62: [8, "7bd17", "Wall spike 3"],
-            63: [8, "7bd46", "Wall spike 4"],
-            64: [8, "7bd75", "Wall spike 5"],
-            65: [8, "7bce8", "Wall spike 5"],
-
-            # Mt Kress (nothing)
-
             # Ankor Wat
             80: [11, "89f2c", "Floating crystal"],
             81: [11, "89ffc", "Skeleton 1"],
@@ -5213,599 +5159,601 @@ class World:
         # Database of special map exits that don't conform to the typical "02 26" format, IDs correspond to self.exits
         # FORMAT: { ID: [MapAddr, Xaddr, Yaddr, FaceDirAddr, CameraAddr]}
         self.exits_detailed = {
-            15: ["8ce31", "8ce37", "8ce40", "", "8ce49"]    # Mummy Queen exit
+            15: ["MQPostStatueExitMap", "MQPostStatueExitX", "MQPostStatueExitY", "", "MQPostStatueExitCam"]    # Mummy Queen exit
         }
 
 
         # Database of map exits
-        # FORMAT: { ID: [CoupleID (0 if one-way), ShuffleTo (0 if no shuffle), ShuffleFrom (0 if no shuffle), FromRegion, ToRegion,
-        #           ROM_Location, DestString,BossFlag, DungeonFlag, DungeonEntranceFlag, Name]}
+        # FORMAT: { ID: [CoupleID (0 if one-way), ShuffleTo/ActLike (0 if no shuffle), ShuffleFrom/BeActedLikeBy (0 if no shuffle), FromRegion, ToRegion,
+        #           ROM_Location, DestString,BossFlag, DungeonID, DungeonEntranceFlag, Name]}
+        # FOR DUNGEON SHUFFLE: Dungeon IDs begin with 1 (Tunnel) and end with 12 (Mansion)
         self.exits = {
             # Bosses
-            1:  [ 2, 0, 0,  78,  97, "18872", b"\x29\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Castoth entrance (in)"],
-            2:  [ 1, 0, 0,   0,   0, "189e4", b"\x1E\x68\x00\x00\x01\x03\x00\x24", True, True, False, "Castoth entrance (out)"],
-            3:  [ 0, 0, 0, 104, 102, "584cc", b"\x30\x48\x00\x10\x01\x83\x00\x21", True, True, False, "Diamond Coast passage (Gold Ship)"],
+            1:  [ 2, 0, 0,  78,  97, "Map1EExit02", b"\x29\x78\x00\xC0\x00\x00\x00\x11", True, 2, False, "Castoth entrance (in)"],
+            2:  [ 1, 0, 0,   0,   0, "Map29Exit01", b"\x1E\x68\x00\x00\x01\x03\x00\x24", True, 2, False, "Castoth entrance (out)"],
+            3:  [ 0, 0, 0, 104, 102, "MapShipExitString", b"\x30\x48\x00\x10\x01\x83\x00\x21", True, 2, False, "Diamond Coast passage (Gold Ship)"],
+            
+            4:  [ 5, 0, 0, 171, 198, "Map4CExit01", b"\x55\x70\x00\xE0\x01\x00\x00\x22", True, 4, False, "Viper entrance (in)"],
+            5:  [ 4, 0, 0,   0,   0, "Map55Exit01", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", True, 4, False, "Viper entrance (out)"],
+            6:  [ 0, 0, 0, 198, 200, "MapViperExitString", b"\x5A\x90\x00\x70\x00\x83\x00\x14", True, 4, False, "Seaside Palace passage (Viper)"],
+            
+            7:  [ 8, 0, 0, 241, 243, "MapVampEntranceString", b"\x67\x78\x01\xd0\x01\x80\x01\x22", True, 5, False, "Vampires entrance (in)"],
+            8:  [ 7, 0, 0,   0,   0, "Map67Exit01", b"\x65\xb8\x00\x80\x02\x03\x00\x44", True, 5, False, "Vampires entrance (out)"],
+            9:  [ 0, 0, 0, 242, 212, "Map66Exit03", b"\x5f\x80\x00\x50\x00\x83\x00\x44", True, 5, False, "Vampires exit"],
+            
+            10: [11, 0, 0, 301, 302, "Map88Exit02", b"\x8A\x50\x00\x90\x00\x87\x00\x33", True, 7, False, "Sand Fanger entrance (in)"],
+            11: [10, 0, 0,   0,   0, "Map8AExit01", b"\x88\xE0\x03\x90\x00\x06\x00\x14", True, 7, False, "Sand Fanger entrance (out)"],
+            12: [ 0, 0, 0, 303, 290, "Map8AExit02", b"\x82\x10\x00\x90\x00\x87\x00\x18", True, 7, False, "Sand Fanger exit"],
+            
+            13: [14, 0, 0, 414, 448, "MapMQEntranceString", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, 10, False, "Mummy Queen entrance (in)"],
+            14: [13, 0, 0,   0,   0,      "", b"\xCC\xF8\x01\x20\x01\x03\x00\x44", True, 10, False, "Mummy Queen entrance (out)"],  # fake
+            15: [ 0, 0, 0, 448, 415,      "", b"\xCD\x70\x00\x90\x00\x83\x00\x11", True, 10, False, "Mummy Queen exit"],     # This one's dumb, see exits_detailed
 
-            4:  [ 5, 0, 0, 171, 198, "18e20", b"\x55\x70\x00\xE0\x01\x00\x00\x22", True, True, False, "Viper entrance (in)"],
-            5:  [ 4, 0, 0,   0,   0, "19006", b"\x4C\xF8\x00\x30\x00\x03\x00\x22", True, True, False, "Viper entrance (out)"],
-            6:  [ 0, 0, 0, 198, 200, "acece", b"\x5A\x90\x00\x70\x00\x83\x00\x14", True, True, False, "Seaside Palace passage (Viper)"],
-
-            7:  [ 8, 0, 0, 241, 243, "69c62", b"\x67\x78\x01\xd0\x01\x80\x01\x22", True, True, False, "Vampires entrance (in)"],
-            8:  [ 7, 0, 0,   0,   0, "193f8", b"\x65\xb8\x00\x80\x02\x03\x00\x44", True, True, False, "Vampires entrance (out)"],
-            9:  [ 0, 0, 0, 242, 212, "193ea", b"\x5f\x80\x00\x50\x00\x83\x00\x44", True, True, False, "Vampires exit"],
-
-            10: [11, 0, 0, 301, 302, "19c2a", b"\x8A\x50\x00\x90\x00\x87\x00\x33", True, True, False, "Sand Fanger entrance (in)"],
-            11: [10, 0, 0,   0,   0, "19c78", b"\x88\xE0\x03\x90\x00\x06\x00\x14", True, True, False, "Sand Fanger entrance (out)"],
-            12: [ 0, 0, 0, 303, 290, "19c84", b"\x82\x10\x00\x90\x00\x87\x00\x18", True, True, False, "Sand Fanger exit"],
-
-            13: [14, 0, 0, 414, 448, "8cdcf", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, True, False, "Mummy Queen entrance (in)"],
-            14: [13, 0, 0,   0,   0,      "", b"\xCC\xF8\x01\x20\x01\x03\x00\x44", True, True, False, "Mummy Queen entrance (out)"],  # fake
-            15: [ 0, 0, 0, 448, 415,      "", b"\xCD\x70\x00\x90\x00\x83\x00\x11", True, True, False, "Mummy Queen exit"],     # This one's dumb, see exits_detailed
-
-            16: [17, 0, 0, 470, 471, "1a8c2", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", True, True, False, "Babel entrance (in)"],
-            17: [16, 0, 0,   0,   0, "1a8d0", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", True, True, False, "Babel entrance (out)"],
-            18: [ 0, 0, 0, 472, 400, "9804a", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, True, False, "Dao passage (Babel)"],
-
-            19: [20, 0, 0, 481, 482, "1a94e", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, True, False, "Solid Arm entrance (in)"],
-            20: [19, 0, 0,   0,   0,      "", b"\xE9\x78\x03\x90\x00\x03\x00\x44", True, True, False, "Solid Arm entrance (out)"],  # fake
-            21: [ 0, 0, 0, 472, 400,      "", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, True, False, "Dao passage (Solid Arm)"],  # fake
-#            21: [ 0, 0, 0, 482, 472,      "", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", True, True, False, "Babel passage (Solid Arm)"],  # This one stays, @98115
+            16: [17, 0, 0, 470, 471, "MapE2Exit02", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", True, 11, False, "Babel entrance (in)"],
+            17: [16, 0, 0,   0,   0, "MapE3Exit01", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", True, 11, False, "Babel entrance (out)"],
+            18: [ 0, 0, 0, 472, 400, "MapBabelWarpString", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, 11, False, "Dao passage (Babel)"],
+            19: [20, 0, 0, 481, 482, "MapE9Exit01", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, 12, False, "Solid Arm entrance (in)"],
+            20: [19, 0, 0,   0,   0,      "", b"\xE9\x78\x03\x90\x00\x03\x00\x44", True, 12, False, "Solid Arm entrance (out)"],  # fake
+            21: [ 0, 0, 0, 472, 400,      "", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, 12, False, "Dao passage (Solid Arm)"],  # fake
+#            21: [ 0, 0, 0, 482, 472,      "", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", True, True, False, "Babel passage (Solid Arm)", []],  # This one stays, @98115
 
             # Passage Menus
-            22: [0, 0, 0, 15,  28, "", b"", False, False, False, "Seth: Passage 1 (South Cape)"],
-            23: [0, 0, 0, 15, 102, "", b"", False, False, False, "Seth: Passage 2 (Diamond Coast)"],
-            24: [0, 0, 0, 15, 280, "", b"", False, False, False, "Seth: Passage 3 (Watermia)"],
-
-            25: [0, 0, 0, 16,  60, "", b"", False, False, False, "Moon Tribe: Passage 1 (Moon Tribe)"],
-            26: [0, 0, 0, 16, 200, "", b"", False, False, False, "Moon Tribe: Passage 2 (Seaside Palace)"],
-
-            27: [0, 0, 0, 17, 161, "", b"", False, False, False, "Neil: Passage 1 (Neil's)"],
-            28: [0, 0, 0, 17, 314, "", b"", False, False, False, "Neil: Passage 2 (Euro)"],
-            29: [0, 0, 0, 17, 402, "", b"", False, False, False, "Neil: Passage 3 (Dao)"],
-            30: [0, 0, 0, 17, 460, "", b"", False, False, False, "Neil: Passage 4 (Babel)"],
+            22: [0, 0, 0, 15,  28, "", b"", False, 0, False, "Seth: Passage 1 (South Cape)"],
+            23: [0, 0, 0, 15, 102, "", b"", False, 0, False, "Seth: Passage 2 (Diamond Coast)"],
+            24: [0, 0, 0, 15, 280, "", b"", False, 0, False, "Seth: Passage 3 (Watermia)"],
+            25: [0, 0, 0, 16,  60, "", b"", False, 0, False, "Moon Tribe: Passage 1 (Moon Tribe)"],
+            26: [0, 0, 0, 16, 200, "", b"", False, 0, False, "Moon Tribe: Passage 2 (Seaside Palace)"],
+            27: [0, 0, 0, 17, 161, "", b"", False, 0, False, "Neil: Passage 1 (Neil's)"],
+            28: [0, 0, 0, 17, 314, "", b"", False, 0, False, "Neil: Passage 2 (Euro)"],
+            29: [0, 0, 0, 17, 402, "", b"", False, 0, False, "Neil: Passage 3 (Dao)"],
+            30: [0, 0, 0, 17, 460, "", b"", False, 0, False, "Neil: Passage 4 (Babel)"],
 
             # South Cape
-            31: [32, 0, 0, 20, 22, "18444", b"", False, False, False, "South Cape: School main (in)"],  # Duplicate exit at 18438?
-            32: [31, 0, 0,  0,  0, "1856c", b"", False, False, False, "South Cape: School main (out)"],
-            33: [34, 0, 0, 21, 22, "18498", b"", False, False, False, "South Cape: School roof (in)"],
-            34: [33, 0, 0,  0,  0, "18560", b"", False, False, False, "South Cape: School roof (out)"],
-            35: [36, 0, 0, 20, 23, "18474", b"", False, False, False, "South Cape: Will's House (in)"],
-            36: [35, 0, 0,  0,  0, "1852a", b"", False, False, False, "South Cape: Will's House (out)"],
-            37: [38, 0, 0, 20, 24, "18480", b"", False, False, False, "South Cape: East House (in)"],
-            38: [37, 0, 0,  0,  0, "18552", b"", False, False, False, "South Cape: East House (out)"],
-            39: [40, 0, 0, 20, 27, "1845c", b"", False, False, False, "South Cape: Erik's House main (in)"],
-            40: [39, 0, 0,  0,  0, "184e8", b"", False, False, False, "South Cape: Erik's House main (out)"],
-            41: [42, 0, 0, 20, 27, "184a4", b"", False, False, False, "South Cape: Erik's House roof (in)"],
-            42: [41, 0, 0,  0,  0, "184f4", b"", False, False, False, "South Cape: Erik's House roof (out)"],
-            43: [44, 0, 0, 20, 26, "18450", b"", False, False, False, "South Cape: Lance's House (in)"],
-            44: [43, 0, 0,  0,  0, "184c0", b"", False, False, False, "South Cape: Lance's House (out)"],
-            45: [46, 0, 0, 20, 25, "18468", b"", False, False, False, "South Cape: Seth's House (in)"],
-            46: [45, 0, 0,  0,  0, "1851c", b"", False, False, False, "South Cape: Seth's House (out)"],
-            47: [48, 0, 0, 20, 28, "1848c", b"", False, False, False, "South Cape: Seaside Cave (in)"],
-            48: [47, 0, 0,  0,  0, "4be6a", b"", False, False, False, "South Cape: Seaside Cave (out)"],
+            31: [32, 0, 0, 20, 22, "Map01Exit02", b"", False, 0, False, "South Cape: School main (in)"],  # Duplicate exit at 18438?
+            32: [31, 0, 0,  0,  0, "Map08Exit02", b"", False, 0, False, "South Cape: School main (out)"],
+            33: [34, 0, 0, 21, 22, "Map01Exit09", b"", False, 0, False, "South Cape: School roof (in)"],
+            34: [33, 0, 0,  0,  0, "Map08Exit01", b"", False, 0, False, "South Cape: School roof (out)"],
+            35: [36, 0, 0, 20, 23, "Map01Exit06", b"", False, 0, False, "South Cape: Will's House (in)"],
+            36: [35, 0, 0,  0,  0, "Map06Exit01", b"", False, 0, False, "South Cape: Will's House (out)"],
+            37: [38, 0, 0, 20, 24, "Map01Exit07", b"", False, 0, False, "South Cape: East House (in)"],
+            38: [37, 0, 0,  0,  0, "Map07Exit01", b"", False, 0, False, "South Cape: East House (out)"],
+            39: [40, 0, 0, 20, 27, "Map01Exit04", b"", False, 0, False, "South Cape: Erik's House main (in)"],
+            40: [39, 0, 0,  0,  0, "Map04Exit01", b"", False, 0, False, "South Cape: Erik's House main (out)"],
+            41: [42, 0, 0, 20, 27, "Map01Exit0A", b"", False, 0, False, "South Cape: Erik's House roof (in)"],
+            42: [41, 0, 0,  0,  0, "Map04Exit02", b"", False, 0, False, "South Cape: Erik's House roof (out)"],
+            43: [44, 0, 0, 20, 26, "Map01Exit03", b"", False, 0, False, "South Cape: Lance's House (in)"],
+            44: [43, 0, 0,  0,  0, "Map03Exit01", b"", False, 0, False, "South Cape: Lance's House (out)"],
+            45: [46, 0, 0, 20, 25, "Map01Exit05", b"", False, 0, False, "South Cape: Seth's House (in)"],
+            46: [45, 0, 0,  0,  0, "Map05Exit01", b"", False, 0, False, "South Cape: Seth's House (out)"],
+            47: [48, 0, 0, 20, 28, "Map01Exit08", b"", False, 0, False, "South Cape: Seaside Cave (in)"],
+            48: [47, 0, 0,  0,  0, "Map02Exit01", b"", False, 0, False, "South Cape: Seaside Cave (out)"],
 
             # Edward's / Prison
-            50: [51, 0, 0, 31, 49, "1857c", b"", False, True, True, "Tunnel back entrance (in)"],
-            51: [50, 0, 0,  0,  0, "186f4", b"", False, True, True, "Tunnel back entrance (out)"],
-            52: [53, 0, 0, 33, 40, "1860c", b"\x0C\x58\x00\x50\x00\x83\x00\x12", False, True, True, "Tunnel entrance (in)"],  # set checkpoint
-            53: [52, 0, 0,  0,  0, "18626", b"", False, True, True, "Tunnel entrance (out)"],
-            54: [ 0, 0, 0, 30, 32, "4c755", b"", False, False, False, "Prison entrance (king)"],
-            #55: [54, 0, 0,  0,  2,      "", b"\x0a\xe0\x01\x60\x01\x03\x20\x34", False, False, False, "Prison exit (king), fake"],
+            50: [51, 0, 0, 31, 49, "Map0AExit01", b"", False, 1, True, "Tunnel back entrance (in)"],
+            51: [50, 0, 0,  0,  0, "Map13Exit02", b"", False, 1, True, "Tunnel back entrance (out)"],
+            52: [53, 0, 0, 33, 40, "Map0BExit01", b"\x0C\x58\x00\x50\x00\x83\x00\x12", False, 1, True, "Tunnel entrance (in)"],  # set checkpoint
+            53: [52, 0, 0,  0,  0, "Map0CExit01", b"", False, 1, True, "Tunnel entrance (out)"],
+            54: [ 0, 0, 0, 30, 32, "MapPrisonWarpString", b"", False, 0, False, "Prison entrance (king)"],
+            #55: [54, 0, 0,  0,  2,      "", b"\x0a\xe0\x01\x60\x01\x03\x20\x34", False, 0, False, "Prison exit (king), fake"],
 
             # Tunnel
-            60: [61, 0, 0, 40, 41, "18632", b"", False,  True, False, "Tunnel: Map 12 to Map 13"],
-            61: [60, 0, 0,  0,  0, "18640", b"", False,  True, False, "Tunnel: Map 13 to Map 12"],
-            62: [63, 0, 0, 717, 42, "1864c", b"", False,  True, False, "Tunnel: Map 13 to Map 14"],
-            63: [62, 0, 0,  0,  0, "1865a", b"", False,  True, False, "Tunnel: Map 14 to Map 13"],
-            64: [65, 0, 0, 718, 43, "18666", b"", False,  True, False, "Tunnel: Map 14 to Map 15"],
-            65: [64, 0, 0,  0,  0, "18680", b"", False,  True, False, "Tunnel: Map 15 to Map 14"],
-            66: [67, 0, 0, 43, 44, "1868c", b"", False,  True, False, "Tunnel: Map 15 to Map 16"],
-            67: [66, 0, 0,  0,  0, "1869a", b"", False,  True, False, "Tunnel: Map 16 to Map 15"],
-            68: [69, 0, 0, 719, 45, "18674", b"", False,  True, False, "Tunnel: Map 15 to Map 17"],
-            69: [68, 0, 0,  0,  0, "186a8", b"", False,  True, False, "Tunnel: Map 17 to Map 15"],
-            70: [71, 0, 0, 46, 47, "186b4", b"", False,  True, False, "Tunnel: Map 17 to Map 18"],
-            71: [70, 0, 0,  0,  0, "186c2", b"", False,  True, False, "Tunnel: Map 18 to Map 17"],
-            72: [73, 0, 0, 706, 49, "186ce", b"", False,  True, False, "Tunnel: Map 18 to Map 19"],
-            73: [72, 0, 0,  0,  0, "186e8", b"", False,  True, False, "Tunnel: Map 19 to Map 18"],
-
+            60: [61, 0, 0, 40, 41, "Map0CExit02", b"", False, 1, False, "Tunnel: Map 12 to Map 13"],
+            61: [60, 0, 0,  0,  0, "Map0DExit01", b"", False, 1, False, "Tunnel: Map 13 to Map 12"],
+            62: [63, 0, 0, 717, 42, "Map0DExit02", b"", False, 1, False, "Tunnel: Map 13 to Map 14"],
+            63: [62, 0, 0,  0,  0, "Map0EExit01", b"", False, 1, False, "Tunnel: Map 14 to Map 13"],
+            64: [65, 0, 0, 718, 43, "Map0EExit02", b"", False, 1, False, "Tunnel: Map 14 to Map 15"],
+            65: [64, 0, 0,  0,  0, "Map0FExit02", b"", False, 1, False, "Tunnel: Map 15 to Map 14"],
+            66: [67, 0, 0, 43, 44, "Map0FExit03", b"", False, 1, False, "Tunnel: Map 15 to Map 16"],
+            67: [66, 0, 0,  0,  0, "Map10Exit01", b"", False, 1, False, "Tunnel: Map 16 to Map 15"],
+            68: [69, 0, 0, 719, 45, "Map0FExit01", b"", False, 1, False, "Tunnel: Map 15 to Map 17"],
+            69: [68, 0, 0,  0,  0, "Map11Exit01", b"", False, 1, False, "Tunnel: Map 17 to Map 15"],
+            70: [71, 0, 0, 46, 47, "Map11Exit02", b"", False, 1, False, "Tunnel: Map 17 to Map 18"],
+            71: [70, 0, 0,  0,  0, "Map12Exit01", b"", False, 1, False, "Tunnel: Map 18 to Map 17"],
+            72: [73, 0, 0, 706, 49, "Map12Exit02", b"", False, 1, False, "Tunnel: Map 18 to Map 19"],
+            73: [72, 0, 0,  0,  0, "Map13Exit01", b"", False, 1, False, "Tunnel: Map 19 to Map 18"],
+            
             # Itory
-            80: [81, 0, 0, 51, 53, "18704", b"", False, False, False, "Itory: West House (in)"],
-            81: [80, 0, 0,  0,  0, "1874e", b"", False, False, False, "Itory: West House (out)"],
-            82: [83, 0, 0, 51, 54, "18728", b"", False, False, False, "Itory: North House (in)"],
-            83: [82, 0, 0,  0,  0, "18776", b"", False, False, False, "Itory: North House (out)"],
-            84: [85, 0, 0, 51, 55, "18710", b"", False, False, False, "Itory: Lilly Front Door (in)"],
-            85: [84, 0, 0,  0,  0, "1875c", b"", False, False, False, "Itory: Lilly Front Door (out)"],
-            86: [87, 0, 0, 52, 55, "1871c", b"", False, False, False, "Itory: Lilly Back Door (in)"],
-            87: [86, 0, 0,  0,  0, "18768", b"", False, False, False, "Itory: Lilly Back Door (out)"],
-            88: [89, 0, 0, 51, 56, "18734", b"", False, False, False, "Itory Cave (in)"],
-            89: [88, 0, 0,  0,  0, "18784", b"", False, False, False, "Itory Cave (out)"],
-            90: [91, 0, 0, 57, 58, "18790", b"", False, False, False, "Itory Cave Hidden Room (in)"],  # always linked?
-            91: [90, 0, 0,  0,  0, "1879c", b"", False, False, False, "Itory Cave Hidden Room (out)"],
-
+            80: [81, 0, 0, 51, 53, "Map15Exit01", b"", False, 0, False, "Itory: West House (in)"],
+            81: [80, 0, 0,  0,  0, "Map16Exit01", b"", False, 0, False, "Itory: West House (out)"],
+            82: [83, 0, 0, 51, 54, "Map15Exit04", b"", False, 0, False, "Itory: North House (in)"],
+            83: [82, 0, 0,  0,  0, "Map18Exit01", b"", False, 0, False, "Itory: North House (out)"],
+            84: [85, 0, 0, 51, 55, "Map15Exit02", b"", False, 0, False, "Itory: Lilly Front Door (in)"],
+            85: [84, 0, 0,  0,  0, "Map17Exit01", b"", False, 0, False, "Itory: Lilly Front Door (out)"],
+            86: [87, 0, 0, 52, 55, "Map15Exit03", b"", False, 0, False, "Itory: Lilly Back Door (in)"],
+            87: [86, 0, 0,  0,  0, "Map17Exit02", b"", False, 0, False, "Itory: Lilly Back Door (out)"],
+            88: [89, 0, 0, 51, 56, "Map15Exit05", b"", False, 0, False, "Itory Cave (in)"],
+            89: [88, 0, 0,  0,  0, "Map19Exit01", b"", False, 0, False, "Itory Cave (out)"],
+            90: [91, 0, 0, 57, 58, "Map19Exit02", b"", False, 0, False, "Itory Cave Hidden Room (in)"],  # always linked?
+            91: [90, 0, 0,  0,  0, "Map19Exit03", b"", False, 0, False, "Itory Cave Hidden Room (out)"],
+            
             # Moon Tribe
-            100: [101, 0, 0, 60,  61, "187b6", b"", False, False, False, "Moon Tribe Cave (in)"],
-            101: [100, 0, 0,  0,   0, "187c4", b"", False, False, False, "Moon Tribe Cave (out)"],
-            102: [  0, 0, 0, 64, 170, "9d1ea", b"", False,  True,  True, "Moon Tribe: Sky Garden passage"],
-
+            100: [101, 0, 0, 60,  61, "Map1AExit02", b"", False, 0, False, "Moon Tribe Cave (in)"],
+            101: [100, 0, 0,  0,   0, "Map1BExit01", b"", False, 0, False, "Moon Tribe Cave (out)"],
+            102: [  0, 0, 0, 64, 170, "MapMoonWarpString", b"", False, 4,  True, "Moon Tribe: Sky Garden passage"],
+            
             # Inca
-            110: [111, 0, 0, 63,  70, "187d2", b"", False, True, True, "Inca Ruins entrance (in)"],
-            111: [110, 0, 0,  0,   0, "187e0", b"", False, True, True, "Inca Ruins entrance (out)"],
+            110: [111, 0, 0, 63,  70, "Map1CExit01", b"", False, 2, True, "Inca Ruins entrance (in)"],
+            111: [110, 0, 0,  0,   0, "Map1DExit01", b"", False, 2, True, "Inca Ruins entrance (out)"],
             #114: [  0, 0, 0, 65, 102, "", b"", False, False,  True, "Inca: Diamond Coast passage"],
-
+            118: [119, 0, 0, 79,  69, "Map1FExit02", b"", False,  2, False, "Inca: Map 31 to Map 31 (U-turn)"],
+            119: [118, 0, 0,  0,   0, "Map1FExit03", b"", False,  2, False, "Inca: Map 31 (U-turn) to Map 31"],
+            
             # Inca Ruins
-            120: [121, 0, 0, 70,  89, "", b"", False,  True, False, "Inca: Map 29 to Map 37 (E)"],
-            121: [120, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 37 to Map 29 (E)"],
-            122: [123, 0, 0, 89,  94, "", b"", False,  True, False, "Inca: Map 37 to Map 39"],
-            123: [122, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 39 to Map 37"],
-            124: [125, 0, 0, 94,  71, "", b"", False,  True, False, "Inca: Map 39 to Map 29"],
-            125: [124, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 29 to Map 39"],
-            126: [127, 0, 0, 90,  72, "", b"", False,  True, False, "Inca: Map 37 to Map 29 (W)"],
-            127: [126, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 29 to Map 37 (W)"],
-            128: [129, 0, 0, 72,  91, "", b"", False,  True, False, "Inca: Map 29 to Map 38"],
-            129: [128, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 38 to Map 29"],
-            130: [131, 0, 0, 73,  80, "", b"", False,  True, False, "Inca: Map 29 to Map 32"],
-            131: [130, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 32 to Map 29"],
-            132: [133, 0, 0, 81,  85, "", b"", False,  True, False, "Inca: Map 32 to Map 35"],
-            133: [132, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 35 to Map 32"],
-            134: [135, 0, 0, 85,  74, "", b"", False,  True, False, "Inca: Map 35 to Map 29"],
-            135: [134, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 35 to Map 29"],
-            136: [137, 0, 0, 74,  79, "", b"", False,  True, False, "Inca: Map 29 to Map 31"],
-            137: [136, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 31 to Map 29"],
-            138: [139, 0, 0, 79,  95, "", b"", False,  True, False, "Inca: Map 31 to Map 40"],
-            139: [138, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 40 to Map 31"],
-            140: [141, 0, 0, 96,  76, "", b"", False,  True, False, "Inca: Map 40 to Map 29"],
-            141: [140, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 29 to Map 40"],
-            142: [143, 0, 0, 86,  82, "", b"", False,  True, False, "Inca: Map 35 to Map 33"],
-            143: [142, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 33 to Map 35"],
-            144: [145, 0, 0, 83,  75, "", b"", False,  True, False, "Inca: Map 33 to Map 29"],
-            145: [144, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 29 to Map 33"],
-            146: [147, 0, 0, 99,  84, "", b"", False,  True, False, "Inca: Map 29 to Map 34"],  # Special case to allow for Z-ladder glitch
-            147: [146, 0, 0, 84,  75, "", b"", False,  True, False, "Inca: Map 34 to Map 29"],
-            148: [149, 0, 0, 84,  93, "", b"", False,  True, False, "Inca: Map 34 to Map 38"],
-            149: [148, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 38 to Map 34"],
-            150: [151, 0, 0, 84,  87, "", b"", False,  True, False, "Inca: Map 34 to Map 36"],
-            151: [150, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 36 to Map 34"],
-            152: [153, 0, 0, 88,  77, "", b"", False,  True, False, "Inca: Map 36 to Map 30"],
-            153: [152, 0, 0,  0,   0, "", b"", False,  True, False, "Inca: Map 30 to Map 36"],
-            154: [  0, 0, 0, 98, 100, "", b"", False,  True, False, "Gold Ship entrance"],
-
+            120: [121, 0, 0, 70,  89, "Map1DExit07", b"", False,  2, False, "Inca: Map 29 to Map 37 (E)"],
+            121: [120, 0, 0,  0,   0, "Map25Exit01", b"", False,  2, False, "Inca: Map 37 to Map 29 (E)"],
+            122: [123, 0, 0, 89,  94, "Map25Exit03", b"", False,  2, False, "Inca: Map 37 to Map 39"],
+            123: [122, 0, 0,  0,   0, "Map27Exit01", b"", False,  2, False, "Inca: Map 39 to Map 37"],
+            124: [125, 0, 0, 94,  71, "Map27Exit02", b"", False,  2, False, "Inca: Map 39 to Map 29"],
+            125: [124, 0, 0,  0,   0, "Map1DExit0A", b"", False,  2, False, "Inca: Map 29 to Map 39"],
+            126: [127, 0, 0, 90,  72, "Map25Exit02", b"", False,  2, False, "Inca: Map 37 to Map 29 (W)"],
+            127: [126, 0, 0,  0,   0, "Map1DExit08", b"", False,  2, False, "Inca: Map 29 to Map 37 (W)"],
+            128: [129, 0, 0, 72,  91, "Map1DExit09", b"", False,  2, False, "Inca: Map 29 to Map 38"],
+            129: [128, 0, 0,  0,   0, "Map26Exit02", b"", False,  2, False, "Inca: Map 38 to Map 29"],
+            130: [131, 0, 0, 73,  80, "Map1DExit03", b"", False,  2, False, "Inca: Map 29 to Map 32"],
+            131: [130, 0, 0,  0,   0, "Map20Exit01", b"", False,  2, False, "Inca: Map 32 to Map 29"],
+            132: [133, 0, 0, 81,  85, "Map20Exit02", b"", False,  2, False, "Inca: Map 32 to Map 35"],
+            133: [132, 0, 0,  0,   0, "Map23Exit01", b"", False,  2, False, "Inca: Map 35 to Map 32"],
+            134: [135, 0, 0, 85,  74, "Map23Exit03", b"", False,  2, False, "Inca: Map 35 to Map 29"],
+            135: [134, 0, 0,  0,   0, "Map1DExit06", b"", False,  2, False, "Inca: Map 29 to Map 35"],
+            136: [137, 0, 0, 74,  79, "Map1DExit02", b"", False,  2, False, "Inca: Map 29 to Map 31"],
+            137: [136, 0, 0,  0,   0, "Map1FExit04", b"", False,  2, False, "Inca: Map 31 to Map 29"],
+            138: [139, 0, 0, 69,  95, "Map1FExit01", b"", False,  2, False, "Inca: Map 31 to Map 40"],
+            139: [138, 0, 0,  0,   0, "Map28Exit01", b"", False,  2, False, "Inca: Map 40 to Map 31"],
+            140: [141, 0, 0, 96,  76, "Map28Exit02", b"", False,  2, False, "Inca: Map 40 to Map 29"],
+            141: [140, 0, 0,  0,   0, "Map1DExit0B", b"", False,  2, False, "Inca: Map 29 to Map 40"],
+            142: [143, 0, 0, 86,  82, "Map23Exit02", b"", False,  2, False, "Inca: Map 35 to Map 33"],
+            143: [142, 0, 0,  0,   0, "Map21Exit02", b"", False,  2, False, "Inca: Map 33 to Map 35"],
+            144: [145, 0, 0, 83,  75, "Map21Exit01", b"", False,  2, False, "Inca: Map 33 to Map 29"],
+            145: [144, 0, 0,  0,   0, "Map1DExit04", b"", False,  2, False, "Inca: Map 29 to Map 33"],
+            146: [147, 0, 0, 99,  84, "Map1DExit05", b"", False,  2, False, "Inca: Map 29 to Map 34"],  # Special case to allow for Z-ladder glitch
+            147: [146, 0, 0, 84,  75, "Map22Exit01", b"", False,  2, False, "Inca: Map 34 to Map 29"],
+            148: [149, 0, 0, 84,  93, "Map22Exit03", b"", False,  2, False, "Inca: Map 34 to Map 38"],
+            149: [148, 0, 0,  0,   0, "Map26Exit01", b"", False,  2, False, "Inca: Map 38 to Map 34"],
+            150: [151, 0, 0, 84,  87, "Map22Exit02", b"", False,  2, False, "Inca: Map 34 to Map 36"],
+            151: [150, 0, 0,  0,   0, "Map24Exit01", b"", False,  2, False, "Inca: Map 36 to Map 34"],
+            152: [153, 0, 0, 88,  77, "Map24Exit02", b"", False,  2, False, "Inca: Map 36 to Map 30"],
+            153: [152, 0, 0,  0,   0, "Map1EExit01", b"", False,  2, False, "Inca: Map 30 to Map 36"],
+            154: [  0, 0, 0, 98, 100, "", b"", False,  0, False, "Gold Ship entrance"],
+            
             # Gold Ship
-            160: [161, 0, 0, 100, 101, "", b"", False, False, False, "Gold Ship Interior (in)"],
-            161: [160, 0, 0,   0,   0, "", b"", False, False, False, "Gold Ship Interior (out)"],
-
+            160: [161, 0, 0, 100, 101, "", b"", False, 0, False, "Gold Ship Interior (in)"],
+            161: [160, 0, 0,   0,   0, "", b"", False, 0, False, "Gold Ship Interior (out)"],
+            
             # Diamond Coast
-            172: [173, 0, 0, 102, 103, "18aa0", b"", False, False, False, "Coast House (in)"],
-            173: [172, 0, 0,   0,   0, "18aae", b"", False, False, False, "Coast House (out)"],
-
+            172: [173, 0, 0, 102, 103, "Map30Exit01", b"", False, 0, False, "Coast House (in)"],
+            173: [172, 0, 0,   0,   0, "Map31Exit01", b"", False, 0, False, "Coast House (out)"],
+            
             # Freejia
-            182: [183, 0, 0, 110, 116, "18aec", b"", False, False, False, "Freejia: West House (in)"],
-            183: [182, 0, 0,   0,   0, "18b9c", b"", False, False, False, "Freejia: West House (out)"],
-            184: [185, 0, 0, 110, 117, "18af8", b"", False, False, False, "Freejia: 2-story House (in)"],
-            185: [184, 0, 0,   0,   0, "18bc4", b"", False, False, False, "Freejia: 2-story House (out)"],
-            186: [187, 0, 0, 111, 117, "18b04", b"", False, False, False, "Freejia: 2-story Roof (in)"],
-            187: [186, 0, 0,   0,   0, "18bd0", b"", False, False, False, "Freejia: 2-story Roof (out)"],
-            188: [189, 0, 0, 110, 118, "18b10", b"", False, False, False, "Freejia: Lovers' House (in)"],
-            189: [188, 0, 0,   0,   0, "18bf8", b"", False, False, False, "Freejia: Lovers' House (out)"],
-            190: [191, 0, 0, 110, 119, "18b1c", b"", False, False, False, "Freejia: Hotel (in)"],
-            191: [190, 0, 0,   0,   0, "18c20", b"", False, False, False, "Freejia: Hotel (out)"],
-            192: [193, 0, 0, 119, 120, "18c2c", b"", False, False, False, "Freejia: Hotel West Room (in)"],
-            193: [192, 0, 0,   0,   0, "18c44", b"", False, False, False, "Freejia: Hotel West Room (out)"],
-            194: [195, 0, 0, 119, 121, "18c38", b"", False, False, False, "Freejia: Hotel East Room (in)"],
-            195: [194, 0, 0,   0,   0, "18c50", b"", False, False, False, "Freejia: Hotel East Room (out)"],
-            196: [197, 0, 0, 110, 122, "18b28", b"", False, False, False, "Freejia: Laborer House (in)"],    # might take this out?
-            197: [196, 0, 0,   0,   0, "18c84", b"", False, False, False, "Freejia: Laborer House (out)"],
-            198: [199, 0, 0, 112, 122, "18b34", b"", False, False, False, "Freejia: Laborer Roof (in)"],
-            199: [198, 0, 0,   0,   0, "18c78", b"", False, False, False, "Freejia: Laborer Roof (out)"],
-            200: [201, 0, 0, 110, 123, "18b40", b"", False, False, False, "Freejia: Messy House (in)"],
-            201: [200, 0, 0,   0,   0, "18c92", b"", False, False, False, "Freejia: Messy House (out)"],
-            202: [203, 0, 0, 110, 124, "18abc", b"", False, False, False, "Freejia: Erik House (in)"],
-            203: [202, 0, 0,   0,   0, "18b5a", b"", False, False, False, "Freejia: Erik House (out)"],
-            204: [205, 0, 0, 110, 125, "18ac8", b"", False, False, False, "Freejia: Dark Space House (in)"],
-            205: [204, 0, 0,   0,   0, "18b68", b"", False, False, False, "Freejia: Dark Space House (out)"],
-            206: [207, 0, 0, 110, 126, "18ad4", b"", False, False, False, "Freejia: Labor Trade House (in)"],
-            207: [206, 0, 0,   0,   0, "18b82", b"", False, False, False, "Freejia: Labor Trade House (out)"],
-            208: [209, 0, 0, 113, 126, "18ae0", b"", False, False, False, "Freejia: Labor Trade Roof (in)"],
-            209: [208, 0, 0,   0,   0, "18b8e", b"", False, False, False, "Freejia: Labor Trade Roof (out)"],
-            210: [211, 0, 0, 114, 127, "18b4c", b"", False, False, False, "Freejia: Labor Market (in)"],
-            211: [210, 0, 0,   0,   0, "18ca0", b"", False, False, False, "Freejia: Labor Market (out)"],
-
+            182: [183, 0, 0, 110, 116, "Map32Exit05", b"", False, 0, False, "Freejia: West House (in)"],
+            183: [182, 0, 0,   0,   0, "Map36Exit01", b"", False, 0, False, "Freejia: West House (out)"],
+            184: [185, 0, 0, 110, 117, "Map32Exit06", b"", False, 0, False, "Freejia: 2-story House (in)"],
+            185: [184, 0, 0,   0,   0, "Map37Exit01", b"", False, 0, False, "Freejia: 2-story House (out)"],
+            186: [187, 0, 0, 111, 117, "Map32Exit07", b"", False, 0, False, "Freejia: 2-story Roof (in)"],
+            187: [186, 0, 0,   0,   0, "Map37Exit02", b"", False, 0, False, "Freejia: 2-story Roof (out)"],
+            188: [189, 0, 0, 110, 118, "Map32Exit08", b"", False, 0, False, "Freejia: Lovers' House (in)"],
+            189: [188, 0, 0,   0,   0, "Map38Exit01", b"", False, 0, False, "Freejia: Lovers' House (out)"],
+            190: [191, 0, 0, 110, 119, "Map32Exit09", b"", False, 0, False, "Freejia: Hotel (in)"],
+            191: [190, 0, 0,   0,   0, "Map39Exit01", b"", False, 0, False, "Freejia: Hotel (out)"],
+            192: [193, 0, 0, 119, 120, "Map39Exit02", b"", False, 0, False, "Freejia: Hotel West Room (in)"],
+            193: [192, 0, 0,   0,   0, "Map39Exit04", b"", False, 0, False, "Freejia: Hotel West Room (out)"],
+            194: [195, 0, 0, 119, 121, "Map39Exit03", b"", False, 0, False, "Freejia: Hotel East Room (in)"],
+            195: [194, 0, 0,   0,   0, "Map39Exit05", b"", False, 0, False, "Freejia: Hotel East Room (out)"],
+            196: [197, 0, 0, 110, 122, "Map32Exit0A", b"", False, 0, False, "Freejia: Laborer House (in)"],    # might take this out?
+            197: [196, 0, 0,   0,   0, "Map3AExit02", b"", False, 0, False, "Freejia: Laborer House (out)"],
+            198: [199, 0, 0, 112, 122, "Map32Exit0B", b"", False, 0, False, "Freejia: Laborer Roof (in)"],
+            199: [198, 0, 0,   0,   0, "Map3AExit01", b"", False, 0, False, "Freejia: Laborer Roof (out)"],
+            200: [201, 0, 0, 110, 123, "Map32Exit0C", b"", False, 0, False, "Freejia: Messy House (in)"],
+            201: [200, 0, 0,   0,   0, "Map3BExit01", b"", False, 0, False, "Freejia: Messy House (out)"],
+            202: [203, 0, 0, 110, 124, "Map32Exit01", b"", False, 0, False, "Freejia: Erik House (in)"],
+            203: [202, 0, 0,   0,   0, "Map33Exit01", b"", False, 0, False, "Freejia: Erik House (out)"],
+            204: [205, 0, 0, 110, 125, "Map32Exit02", b"", False, 0, False, "Freejia: Dark Space House (in)"],
+            205: [204, 0, 0,   0,   0, "Map34Exit01", b"", False, 0, False, "Freejia: Dark Space House (out)"],
+            206: [207, 0, 0, 110, 126, "Map32Exit03", b"", False, 0, False, "Freejia: Labor Trade House (in)"],
+            207: [206, 0, 0,   0,   0, "Map35Exit01", b"", False, 0, False, "Freejia: Labor Trade House (out)"],
+            208: [209, 0, 0, 113, 126, "Map32Exit04", b"", False, 0, False, "Freejia: Labor Trade Roof (in)"],
+            209: [208, 0, 0,   0,   0, "Map35Exit02", b"", False, 0, False, "Freejia: Labor Trade Roof (out)"],
+            210: [211, 0, 0, 114, 127, "Map32Exit0D", b"", False, 0, False, "Freejia: Labor Market (in)"],
+            211: [210, 0, 0,   0,   0, "Map3CExit01", b"", False, 0, False, "Freejia: Labor Market (out)"],
+            
             # Diamond Mine
-            222: [223, 0, 0, 133, 134, "", b"", False,  True, False, "Diamond Mine: Map 62 to Map 63"],
-            223: [222, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 63 to Map 62"],
-            224: [225, 0, 0, 135, 140, "", b"", False,  True, False, "Diamond Mine: Map 63 to Map 66"],
-            225: [224, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 66 to Map 63"],
-            226: [227, 0, 0, 134, 136, "", b"", False,  True, False, "Diamond Mine: Map 63 to Map 64"],
-            227: [226, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 64 to Map 63"],
-            228: [229, 0, 0, 136, 138, "", b"", False,  True, False, "Diamond Mine: Map 64 to Map 65"],
-            229: [228, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 65 to Map 64"],
-            230: [231, 0, 0, 139, 143, "", b"", False,  True, False, "Diamond Mine: Map 65 to Map 66"],
-            231: [230, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 66 to Map 65"],
-            232: [233, 0, 0, 138, 130, "", b"", False,  True, False, "Diamond Mine: Map 65 to Map 61"],
-            233: [232, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 61 to Map 65"],
-            234: [235, 0, 0, 132, 142, "", b"", False,  True, False, "Diamond Mine: Map 61 to Map 66"],
-            235: [234, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 66 to Map 61"],
-            236: [237, 0, 0, 140, 144, "", b"", False,  True, False, "Diamond Mine: Map 66 to Map 67 (1)"],
-            237: [236, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 67 to Map 66 (1)"],
-            238: [239, 0, 0, 145, 141, "", b"", False,  True, False, "Diamond Mine: Map 67 to Map 66 (2)"],
-            239: [238, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 66 to Map 67 (2)"],
-            240: [241, 0, 0, 141, 146, "", b"", False,  True, False, "Diamond Mine: Map 66 to Map 68"],
-            241: [240, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 68 to Map 66"],
-            242: [243, 0, 0, 146, 148, "", b"", False,  True, False, "Diamond Mine: Map 68 to Map 69"],
-            243: [242, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 69 to Map 68"],
-            244: [245, 0, 0, 146, 149, "", b"", False,  True, False, "Diamond Mine: Map 68 to Map 70"],
-            245: [244, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 70 to Map 68"],
-            246: [247, 0, 0, 147, 150, "", b"", False,  True, False, "Diamond Mine: Map 68 to Map 71"],
-            247: [246, 0, 0,   0,   0, "", b"", False,  True, False, "Diamond Mine: Map 71 to Map 68"],
-
+            222: [223, 0, 0, 133, 134, "Map3EExit01", b"", False,  3, False, "Diamond Mine: Map 62 to Map 63"],
+            223: [222, 0, 0,   0,   0, "Map3FExit01", b"", False,  3, False, "Diamond Mine: Map 63 to Map 62"],
+            224: [225, 0, 0, 135, 140, "Map3FExit03", b"", False,  3, False, "Diamond Mine: Map 63 to Map 66"],
+            225: [224, 0, 0,   0,   0, "Map42Exit01", b"", False,  3, False, "Diamond Mine: Map 66 to Map 63"],
+            226: [227, 0, 0, 134, 136, "Map3FExit02", b"", False,  3, False, "Diamond Mine: Map 63 to Map 64"],
+            227: [226, 0, 0,   0,   0, "Map40Exit01", b"", False,  3, False, "Diamond Mine: Map 64 to Map 63"],
+            228: [229, 0, 0, 136, 138, "Map40Exit02", b"", False,  3, False, "Diamond Mine: Map 64 to Map 65"],
+            229: [228, 0, 0,   0,   0, "Map41Exit01", b"", False,  3, False, "Diamond Mine: Map 65 to Map 64"],
+            230: [231, 0, 0, 139, 143, "Map41Exit02", b"", False,  3, False, "Diamond Mine: Map 65 to Map 66"],
+            231: [230, 0, 0,   0,   0, "Map42Exit06", b"", False,  3, False, "Diamond Mine: Map 66 to Map 65"],
+            232: [233, 0, 0, 138, 130, "Map41Exit03", b"", False,  3, False, "Diamond Mine: Map 65 to Map 61"],
+            233: [232, 0, 0,   0,   0, "Map3DExit01", b"", False,  3, False, "Diamond Mine: Map 61 to Map 65"],
+            234: [235, 0, 0, 132, 142, "Map3DExit02", b"", False,  3, False, "Diamond Mine: Map 61 to Map 66"],
+            235: [234, 0, 0,   0,   0, "Map42Exit05", b"", False,  3, False, "Diamond Mine: Map 66 to Map 61"],
+            236: [237, 0, 0, 140, 144, "Map42Exit02", b"", False,  3, False, "Diamond Mine: Map 66 to Map 67 (1)"],
+            237: [236, 0, 0,   0,   0, "Map43Exit01", b"", False,  3, False, "Diamond Mine: Map 67 to Map 66 (1)"],
+            238: [239, 0, 0, 145, 141, "Map43Exit02", b"", False,  3, False, "Diamond Mine: Map 67 to Map 66 (2)"],
+            239: [238, 0, 0,   0,   0, "Map42Exit03", b"", False,  3, False, "Diamond Mine: Map 66 to Map 67 (2)"],
+            240: [241, 0, 0, 141, 146, "Map42Exit04", b"", False,  3, False, "Diamond Mine: Map 66 to Map 68"],
+            241: [240, 0, 0,   0,   0, "Map44Exit01", b"", False,  3, False, "Diamond Mine: Map 68 to Map 66"],
+            242: [243, 0, 0, 146, 148, "Map44Exit02", b"", False,  3, False, "Diamond Mine: Map 68 to Map 69"],
+            243: [242, 0, 0,   0,   0, "Map45Exit01", b"", False,  3, False, "Diamond Mine: Map 69 to Map 68"],
+            244: [245, 0, 0, 146, 149, "Map44Exit04", b"", False,  3, False, "Diamond Mine: Map 68 to Map 70"],
+            245: [244, 0, 0,   0,   0, "Map46Exit01", b"", False,  3, False, "Diamond Mine: Map 70 to Map 68"],
+            246: [247, 0, 0, 147, 150, "Map44Exit03", b"", False,  3, False, "Diamond Mine: Map 68 to Map 71"],
+            247: [246, 0, 0,   0,   0, "Map47Exit01", b"", False,  3, False, "Diamond Mine: Map 71 to Map 68"],
+            
             # Nazca
-            260: [261, 0, 0, 162, 170, "5e6a2", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False, True, True, "Nazca: Sky Garden entrance"],
-            261: [260, 0, 0,   0,   0, "5f429", b"\x4B\xe0\x01\xc0\x02\x03\x00\x44", False, True, True, "Nazca: Sky Garden exit"],
-
+            260: [261, 0, 0, 162, 170, "MapGardenEntranceString", b"\x4C\x68\x01\x40\x00\x83\x00\x22", False, True, True, "Nazca: Sky Garden entrance"],
+            261: [260, 0, 0,   0,   0, "MapGardenExitString", b"\x4B\xe0\x01\xc0\x02\x03\x00\x44", False, True, True, "Nazca: Sky Garden exit"],
+            
             # Sky Garden
-            #270: [  0, 0, 0, 171,  16, "", b"", False,  True,  True, "Moon Tribe: Sky Garden passage"],
-            273: [274, 0, 0, 170, 172, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 77"],
-            274: [273, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 76"],
-            275: [276, 0, 0, 170, 176, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 79"],
-            276: [275, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 76"],
-            277: [278, 0, 0, 170, 181, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 81"],
-            278: [277, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 76"],
-            279: [280, 0, 0, 170, 190, "", b"", False,  True, False, "Sky Garden: Map 76 to Map 83"],
-            280: [279, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 76"],
-            281: [282, 0, 0, 172, 175, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 78 (E)"],   # Room 1
-            282: [281, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (W)"],
-            283: [284, 0, 0, 175, 173, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (SE)"],
-            284: [283, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 78 (SW)"],
-            285: [286, 0, 0, 175, 174, "", b"", False,  True, False, "Sky Garden: Map 78 to Map 77 (SW)"],
-            286: [285, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 77 to Map 78 (SE)"],
-            287: [288, 0, 0, 176, 169, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 86"],       # Room 2
-            288: [287, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 86 to Map 79"],
-            289: [290, 0, 0, 176, 179, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (NE)"],
-            290: [289, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 80 to Map 79 (NW)"],
-            291: [292, 0, 0, 179, 177, "", b"", False,  True, False, "Sky Garden: Map 80 to Map 79 (N)"],
-            292: [291, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (N)"],
-            293: [294, 0, 0, 178, 180, "", b"", False,  True, False, "Sky Garden: Map 79 to Map 80 (S)"],
-            294: [293, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 80 to Map 79 (S)"],
-            295: [296, 0, 0, 168, 186, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (NE)"],   # Room 3
-            296: [295, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 82 to Map 81 (NW)"],
-            297: [298, 0, 0, 182, 188, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (NW)"],
-            298: [297, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 82 to Map 81 (NE)"],
-            299: [300, 0, 0, 184, 187, "", b"", False,  True, False, "Sky Garden: Map 81 to Map 82 (SE)"],
-            300: [299, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 82 to Map 81 (SW)"],
-            301: [302, 0, 0, 191, 196, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (NW)"],   # Room 4
-            302: [301, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (NE)"],
-            303: [304, 0, 0, 192, 195, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (C)"],
-            304: [303, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (C)"],
-            305: [306, 0, 0, 197, 193, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (SE)"],
-            306: [305, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (SW)"],
-            307: [308, 0, 0, 167, 195, "", b"", False,  True, False, "Sky Garden: Map 83 to Map 84 (E)"],
-            308: [307, 0, 0,   0,   0, "", b"", False,  True, False, "Sky Garden: Map 84 to Map 83 (W)"],
-
+            #270: [  0, 0, 0, 171,  16, "", b"", False,  4,  True, "Moon Tribe: Sky Garden passage"],
+            273: [274, 0, 0, 170, 172, "Map4CExit02", b"", False,  4, False, "Sky Garden: Map 76 to Map 77"],
+            274: [273, 0, 0,   0,   0, "Map4DExit01", b"", False,  4, False, "Sky Garden: Map 77 to Map 76"],
+            275: [276, 0, 0, 170, 176, "Map4CExit03", b"", False,  4, False, "Sky Garden: Map 76 to Map 79"],
+            276: [275, 0, 0,   0,   0, "Map4FExit01", b"", False,  4, False, "Sky Garden: Map 79 to Map 76"],
+            277: [278, 0, 0, 170, 181, "Map4CExit05", b"", False,  4, False, "Sky Garden: Map 76 to Map 81"],
+            278: [277, 0, 0,   0,   0, "Map51Exit01", b"", False,  4, False, "Sky Garden: Map 81 to Map 76"],
+            279: [280, 0, 0, 170, 190, "Map4CExit04", b"", False,  4, False, "Sky Garden: Map 76 to Map 83"],
+            280: [279, 0, 0,   0,   0, "Map53Exit01", b"", False,  4, False, "Sky Garden: Map 83 to Map 76"],
+            281: [282, 0, 0, 172, 175, "Map4DExit02", b"", False,  4, False, "Sky Garden: Map 77 to Map 78 (E)"],   # Room 1
+            282: [281, 0, 0,   0,   0, "Map4EExit01", b"", False,  4, False, "Sky Garden: Map 78 to Map 77 (W)"],
+            283: [284, 0, 0, 175, 173, "Map4EExit03", b"", False,  4, False, "Sky Garden: Map 78 to Map 77 (SE)"],
+            284: [283, 0, 0,   0,   0, "Map4DExit04", b"", False,  4, False, "Sky Garden: Map 77 to Map 78 (SW)"],
+            285: [286, 0, 0, 175, 174, "Map4EExit02", b"", False,  4, False, "Sky Garden: Map 78 to Map 77 (SW)"],
+            286: [285, 0, 0,   0,   0, "Map4DExit03", b"", False,  4, False, "Sky Garden: Map 77 to Map 78 (SE)"],
+            287: [288, 0, 0, 176, 169, "Map4FExit05", b"", False,  4, False, "Sky Garden: Map 79 to Map 86"],       # Room 2
+            288: [287, 0, 0,   0,   0, "Map56Exit01", b"", False,  4, False, "Sky Garden: Map 86 to Map 79"],
+            289: [290, 0, 0, 176, 179, "Map4FExit02", b"", False,  4, False, "Sky Garden: Map 79 to Map 80 (NE)"],
+            290: [289, 0, 0,   0,   0, "Map50Exit01", b"", False,  4, False, "Sky Garden: Map 80 to Map 79 (NW)"],
+            291: [292, 0, 0, 179, 177, "Map50Exit02", b"", False,  4, False, "Sky Garden: Map 80 to Map 79 (N)"],
+            292: [291, 0, 0,   0,   0, "Map4FExit03", b"", False,  4, False, "Sky Garden: Map 79 to Map 80 (N)"],
+            293: [294, 0, 0, 178, 180, "Map4FExit04", b"", False,  4, False, "Sky Garden: Map 79 to Map 80 (S)"],
+            294: [293, 0, 0,   0,   0, "Map50Exit03", b"", False,  4, False, "Sky Garden: Map 80 to Map 79 (S)"],
+            295: [296, 0, 0, 168, 186, "Map51Exit02", b"", False,  4, False, "Sky Garden: Map 81 to Map 82 (NE)"],   # Room 3
+            296: [295, 0, 0,   0,   0, "Map52Exit01", b"", False,  4, False, "Sky Garden: Map 82 to Map 81 (NW)"],
+            297: [298, 0, 0, 182, 188, "Map51Exit03", b"", False,  4, False, "Sky Garden: Map 81 to Map 82 (NW)"],
+            298: [297, 0, 0,   0,   0, "Map52Exit02", b"", False,  4, False, "Sky Garden: Map 82 to Map 81 (NE)"],
+            299: [300, 0, 0, 184, 187, "Map51Exit04", b"", False,  4, False, "Sky Garden: Map 81 to Map 82 (SE)"],
+            300: [299, 0, 0,   0,   0, "Map52Exit03", b"", False,  4, False, "Sky Garden: Map 82 to Map 81 (SW)"],
+            301: [302, 0, 0, 191, 196, "Map53Exit05", b"", False,  4, False, "Sky Garden: Map 83 to Map 84 (NW)"],   # Room 4
+            302: [301, 0, 0,   0,   0, "Map54Exit04", b"", False,  4, False, "Sky Garden: Map 84 to Map 83 (NE)"],
+            303: [304, 0, 0, 192, 195, "Map53Exit02", b"", False,  4, False, "Sky Garden: Map 83 to Map 84 (C)"],
+            304: [303, 0, 0,   0,   0, "Map54Exit01", b"", False,  4, False, "Sky Garden: Map 84 to Map 83 (C)"],
+            305: [306, 0, 0, 197, 193, "Map54Exit02", b"", False,  4, False, "Sky Garden: Map 84 to Map 83 (SE)"],
+            306: [305, 0, 0,   0,   0, "Map53Exit03", b"", False,  4, False, "Sky Garden: Map 83 to Map 84 (SW)"],
+            307: [308, 0, 0, 167, 195, "Map53Exit04", b"", False,  4, False, "Sky Garden: Map 83 to Map 84 (E)"],
+            308: [307, 0, 0,   0,   0, "Map54Exit03", b"", False,  4, False, "Sky Garden: Map 84 to Map 83 (W)"],
+            
             # Seaside Palace
-            310: [311, 0, 0, 211, 201, "69759", b"", False, False, False, "Seaside entrance"],  # ALWAYS LINKED
-            311: [310, 0, 0,   0,   0, "1906a", b"", False, False, False, "Seaside exit"],
-            312: [313, 0, 0, 200, 202, "19046", b"", False, False, False, "Seaside: Area 1 NE Room (in)"],
-            313: [312, 0, 0,   0,   0, "19114", b"", False, False, False, "Seaside: Area 1 NE Room (out)"],
-            314: [315, 0, 0, 200, 203, "19052", b"", False, False, False, "Seaside: Area 1 NW Room (in)"],
-            315: [314, 0, 0,   0,   0, "19120", b"", False, False, False, "Seaside: Area 1 NW Room (out)"],
-            316: [317, 0, 0, 200, 204, "1905e", b"", False, False, False, "Seaside: Area 1 SE Room (in)"],
-            317: [316, 0, 0,   0,   0, "1912c", b"", False, False, False, "Seaside: Area 1 SE Room (out)"],
-            318: [319, 0, 0, 200, 205, "1903a", b"", False, False, False, "Seaside: Area 2 entrance"],
-            319: [318, 0, 0,   0,   0, "19146", b"", False, False, False, "Seaside: Area 2 exit"],
-            320: [321, 0, 0, 205, 207, "1915e", b"", False, False, False, "Seaside: Area 2 SW Room (in)"],
-            321: [320, 0, 0,   0,   0, "19138", b"", False, False, False, "Seaside: Area 2 SW Room (out)"],
-            322: [323, 0, 0, 205, 209, "19152", b"", False, False, False, "Seaside: Fountain (in)"],
-            323: [322, 0, 0,   0,   0, "191d4", b"", False, False, False, "Seaside: Fountain (out)"],
-
+            310: [311, 0, 0, 211, 201, "", b"", False, 0, False, "Seaside entrance"],  # ALWAYS LINKED (69759)
+            311: [310, 0, 0,   0,   0, "", b"", False, 0, False, "Seaside exit"],      # ALWAYS LINKED (1906a)
+            312: [313, 0, 0, 200, 202, "Map5AExit02", b"", False, 0, False, "Seaside: Area 1 NE Room (in)"],
+            313: [312, 0, 0,   0,   0, "Map5BExit01", b"", False, 0, False, "Seaside: Area 1 NE Room (out)"],
+            314: [315, 0, 0, 200, 203, "Map5AExit03", b"", False, 0, False, "Seaside: Area 1 NW Room (in)"],
+            315: [314, 0, 0,   0,   0, "Map5BExit02", b"", False, 0, False, "Seaside: Area 1 NW Room (out)"],
+            316: [317, 0, 0, 200, 204, "Map5AExit04", b"", False, 0, False, "Seaside: Area 1 SE Room (in)"],
+            317: [316, 0, 0,   0,   0, "Map5BExit03", b"", False, 0, False, "Seaside: Area 1 SE Room (out)"],
+            318: [319, 0, 0, 200, 205, "Map5AExit01", b"", False, 0, False, "Seaside: Area 2 entrance"],
+            319: [318, 0, 0,   0,   0, "Map5CExit01", b"", False, 0, False, "Seaside: Area 2 exit"],
+            320: [321, 0, 0, 205, 207, "Map5CExit03", b"", False, 0, False, "Seaside: Area 2 SW Room (in)"],
+            321: [320, 0, 0,   0,   0, "Map5BExit04", b"", False, 0, False, "Seaside: Area 2 SW Room (out)"],
+            322: [323, 0, 0, 205, 209, "Map5CExit02", b"", False, 0, False, "Seaside: Fountain (in)"],
+            323: [322, 0, 0,   0,   0, "Map5DExit01", b"", False, 0, False, "Seaside: Fountain (out)"],
+            
             # Mu
-            330: [331, 0, 0, 210, 212, "191ee", b"", False,  True,  True, "Mu entrance"],
-            331: [330, 0, 0,   0,   0, "191fc", b"", False,  True,  True, "Mu exit"],
-            332: [333, 0, 0, 722, 217, "", b"", False,  True, False, "Mu: Map 95 to Map 96"],
-            333: [332, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 96 to Map 95"],
-            334: [335, 0, 0, 723, 220, "", b"", False,  True, False, "Mu: Map 96 to Map 97 (top)"],
-            335: [334, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 97 to Map 96 (top)"],
-            336: [337, 0, 0, 220, 231, "", b"", False,  True, False, "Mu: Map 97 to Map 99"],
-            337: [336, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 99 to Map 97"],
-            338: [339, 0, 0, 220, 225, "", b"", False,  True, False, "Mu: Map 97 to Map 98 (top)"],
-            339: [338, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 97 (top)"],
-            340: [341, 0, 0, 218, 222, "", b"", False,  True, False, "Mu: Map 96 to Map 97 (middle)"],
-            341: [340, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 97 to Map 96 (middle)"],
-            342: [343, 0, 0, 223, 227, "", b"", False,  True, False, "Mu: Map 97 to Map 98 (middle)"],
-            343: [342, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 97 (middle)"],
-#            344: [345, 0, 0, 000, 000, "", b"", False,  True, False, "Mu: Map 95 to Map 98 (middle)"],
-#            345: [344, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 95 (middle)"],
-            346: [347, 0, 0, 227, 233, "", b"", False,  True, False, "Mu: Map 98 to Map 100 (middle E)"],
-            347: [346, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 100 to Map 98 (middle E)"],
-            348: [349, 0, 0, 233, 237, "", b"", False,  True, False, "Mu: Map 100 to Map 101 (middle N)"],
-            349: [348, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 101 to Map 100 (middle N)"],
-            350: [351, 0, 0, 237, 234, "", b"", False,  True, False, "Mu: Map 101 to Map 100 (middle S)"],
-            351: [350, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 100 to Map 101 (middle S)"],
-            352: [353, 0, 0, 234, 228, "", b"", False,  True, False, "Mu: Map 100 to Map 98 (middle W)"],
-            353: [352, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 100 (middle W)"],
-            354: [355, 0, 0, 213, 232, "", b"", False,  True, False, "Mu: Map 95 to Map 99"],
-            355: [354, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 99 to Map 95"],
-            356: [357, 0, 0, 245, 246, "", b"", False,  True, False, "Mu: Map 95 to Map 98 (top)"],
-            357: [356, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 98 to Map 95 (top)"],
-            358: [359, 0, 0, 229, 224, "", b"", False,  True, False, "Mu: Map 98 to Map 97 (bottom)"],
-            359: [358, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 97 to Map 98 (bottom)"],
-            360: [361, 0, 0, 224, 219, "", b"", False,  True, False, "Mu: Map 97 to Map 96 (bottom)"],
-            361: [360, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 96 to Map 97 (bottom)"],
-            362: [363, 0, 0, 230, 216, "", b"", False,  True, False, "Mu: Map 98 to Map 95 (bottom)"],
-            363: [362, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 95 to Map 98 (bottom)"],
-            364: [365, 0, 0, 230, 235, "", b"", False,  True, False, "Mu: Map 98 to Map 100 (bottom)"],
-            365: [364, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 100 to Map 98 (bottom)"],
-            366: [367, 0, 0, 235, 239, "", b"", False,  True, False, "Mu: Map 100 to Map 101 (bottom)"],
-            367: [366, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 101 to Map 100 (bottom)"],
-            368: [369, 0, 0, 239, 240, "", b"", False,  True, False, "Mu: Map 101 to Map 102"],
-            369: [368, 0, 0,   0,   0, "", b"", False,  True, False, "Mu: Map 102 to Map 101"],
-
+            330: [331, 0, 0, 210, 212, "Map5EExit02", b"", False,  5,  True, "Mu entrance"],
+            331: [330, 0, 0,   0,   0, "Map5FExit01", b"", False,  5,  True, "Mu exit"],
+            332: [333, 0, 0, 722, 217, "Map5FExit02", b"", False,  5, False, "Mu: Map 95 to Map 96"],
+            333: [332, 0, 0,   0,   0, "Map60Exit01", b"", False,  5, False, "Mu: Map 96 to Map 95"],
+            334: [335, 0, 0, 723, 220, "Map60Exit02", b"", False,  5, False, "Mu: Map 96 to Map 97 (top)"],
+            335: [334, 0, 0,   0,   0, "Map61Exit01", b"", False,  5, False, "Mu: Map 97 to Map 96 (top)"],
+            336: [337, 0, 0, 220, 231, "Map61Exit07", b"", False,  5, False, "Mu: Map 97 to Map 99"],
+            337: [336, 0, 0,   0,   0, "Map63Exit01", b"", False,  5, False, "Mu: Map 99 to Map 97"],
+            338: [339, 0, 0, 220, 225, "Map61Exit04", b"", False,  5, False, "Mu: Map 97 to Map 98 (top)"],
+            339: [338, 0, 0,   0,   0, "Map62Exit02", b"", False,  5, False, "Mu: Map 98 to Map 97 (top)"],
+            340: [341, 0, 0, 218, 222, "Map60Exit03", b"", False,  5, False, "Mu: Map 96 to Map 97 (middle)"],
+            341: [340, 0, 0,   0,   0, "Map61Exit02", b"", False,  5, False, "Mu: Map 97 to Map 96 (middle)"],
+            342: [343, 0, 0, 223, 227, "Map61Exit05", b"", False,  5, False, "Mu: Map 97 to Map 98 (middle)"],
+            343: [342, 0, 0,   0,   0, "Map62Exit03", b"", False,  5, False, "Mu: Map 98 to Map 97 (middle)"],
+#            344: [345, 0, 0, 000, 000, "", b"", False,  5, False, "Mu: Map 95 to Map 98 (middle)"],
+#            345: [344, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 95 (middle)"],
+            346: [347, 0, 0, 227, 233, "Map62Exit06", b"", False,  5, False, "Mu: Map 98 to Map 100 (middle E)"],
+            347: [346, 0, 0,   0,   0, "Map64Exit01", b"", False,  5, False, "Mu: Map 100 to Map 98 (middle E)"],
+            348: [349, 0, 0, 233, 237, "Map64Exit04", b"", False,  5, False, "Mu: Map 100 to Map 101 (middle N)"],
+            349: [348, 0, 0,   0,   0, "Map65Exit01", b"", False,  5, False, "Mu: Map 101 to Map 100 (middle N)"],
+            350: [351, 0, 0, 237, 234, "Map65Exit03", b"", False,  5, False, "Mu: Map 101 to Map 100 (middle S)"],
+            351: [350, 0, 0,   0,   0, "Map64Exit06", b"", False,  5, False, "Mu: Map 100 to Map 101 (middle S)"],
+            352: [353, 0, 0, 234, 228, "Map64Exit03", b"", False,  5, False, "Mu: Map 100 to Map 98 (middle W)"],
+            353: [352, 0, 0,   0,   0, "Map62Exit08", b"", False,  5, False, "Mu: Map 98 to Map 100 (middle W)"],
+            354: [355, 0, 0, 213, 232, "Map5FExit05", b"", False,  5, False, "Mu: Map 95 to Map 99"],
+            355: [354, 0, 0,   0,   0, "Map63Exit02", b"", False,  5, False, "Mu: Map 99 to Map 95"],
+            356: [357, 0, 0, 245, 246, "", b"", False,  5, False, "Mu: Map 95 to Map 98 (top)"], # Slider, ALWAYS LINKED (19220)
+            357: [356, 0, 0,   0,   0, "", b"", False,  5, False, "Mu: Map 98 to Map 95 (top)"], # Slider, ALWAYS LINKED (192fe)
+            358: [359, 0, 0, 229, 224, "Map62Exit04", b"", False,  5, False, "Mu: Map 98 to Map 97 (bottom)"],
+            359: [358, 0, 0,   0,   0, "Map61Exit06", b"", False,  5, False, "Mu: Map 97 to Map 98 (bottom)"],
+            360: [361, 0, 0, 224, 219, "Map61Exit03", b"", False,  5, False, "Mu: Map 97 to Map 96 (bottom)"],
+            361: [360, 0, 0,   0,   0, "Map60Exit04", b"", False,  5, False, "Mu: Map 96 to Map 97 (bottom)"],
+            362: [363, 0, 0, 230, 216, "Map62Exit01", b"", False,  5, False, "Mu: Map 98 to Map 95 (bottom)"],
+            363: [362, 0, 0,   0,   0, "Map5FExit03", b"", False,  5, False, "Mu: Map 95 to Map 98 (bottom)"],
+            364: [365, 0, 0, 230, 235, "Map62Exit07", b"", False,  5, False, "Mu: Map 98 to Map 100 (bottom)"],
+            365: [364, 0, 0,   0,   0, "Map64Exit02", b"", False,  5, False, "Mu: Map 100 to Map 98 (bottom)"],
+            366: [367, 0, 0, 235, 239, "Map64Exit05", b"", False,  5, False, "Mu: Map 100 to Map 101 (bottom)"],
+            367: [366, 0, 0,   0,   0, "Map65Exit02", b"", False,  5, False, "Mu: Map 101 to Map 100 (bottom)"],
+            368: [369, 0, 0, 239, 240, "Map65Exit04", b"", False,  5, False, "Mu: Map 101 to Map 102"],
+            369: [368, 0, 0,   0,   0, "Map66Exit02", b"", False,  5, False, "Mu: Map 102 to Map 101"],
+            
             # Angel Village
-            382: [383, 0, 0, 250, 210, "1941e", b"", False, False, False, "Angel: Mu Passage (in)"],
-            383: [382, 0, 0,   0,   0, "191e2", b"", False, False, False, "Angel: Mu Passage (out)"], #custom
-            384: [385, 0, 0, 250, 251, "1942a", b"", False, False, False, "Angel: Underground entrance (in)"],
-            385: [384, 0, 0,   0,   0, "19446", b"", False, False, False, "Angel: Underground entrance (out)"],
-            386: [387, 0, 0, 251, 252, "19452", b"", False, False, False, "Angel: Room 1 (in)"],
-            387: [386, 0, 0,   0,   0, "194de", b"", False, False, False, "Angel: Room 1 (out)"],
-            388: [389, 0, 0, 251, 253, "19476", b"", False, False, False, "Angel: Room 2 (in)"],
-            389: [388, 0, 0,   0,   0, "19502", b"", False, False, False, "Angel: Room 2 (out)"],
-            390: [391, 0, 0, 251, 254, "1945e", b"", False, False, False, "Angel: Dance Hall (in)"],
-            391: [390, 0, 0,   0,   0, "1950e", b"", False, False, False, "Angel: Dance Hall (out)"],
-            392: [393, 0, 0, 251, 255, "1946a", b"", False, False, False, "Angel: DS Room (in)"],
-            393: [392, 0, 0,   0,   0, "194f6", b"", False, False, False, "Angel: DS Room (out)"],
-
+            382: [383, 0, 0, 250, 210, "Map69Exit01", b"", False, 0, False, "Angel: Mu Passage (in)"],
+            383: [382, 0, 0,   0,   0, "Map5EExit01", b"", False, 0, False, "Angel: Mu Passage (out)"], #custom
+            384: [385, 0, 0, 250, 251, "Map69Exit02", b"", False, 0, False, "Angel: Underground entrance (in)"],
+            385: [384, 0, 0,   0,   0, "Map6BExit01", b"", False, 0, False, "Angel: Underground entrance (out)"],
+            386: [387, 0, 0, 251, 252, "Map6BExit02", b"", False, 0, False, "Angel: Room 1 (in)"],
+            387: [386, 0, 0,   0,   0, "Map6CExit01", b"", False, 0, False, "Angel: Room 1 (out)"],
+            388: [389, 0, 0, 251, 253, "Map6BExit05", b"", False, 0, False, "Angel: Room 2 (in)"],
+            389: [388, 0, 0,   0,   0, "Map6CExit04", b"", False, 0, False, "Angel: Room 2 (out)"],
+            390: [391, 0, 0, 251, 254, "Map6BExit03", b"", False, 0, False, "Angel: Dance Hall (in)"],
+            391: [390, 0, 0,   0,   0, "Map6CExit05", b"", False, 0, False, "Angel: Dance Hall (out)"],
+            392: [393, 0, 0, 251, 255, "Map6BExit04", b"", False, 0, False, "Angel: DS Room (in)"],
+            393: [392, 0, 0,   0,   0, "Map6CExit03", b"", False, 0, False, "Angel: DS Room (out)"],
+            
             # Angel Dungeon
-            400: [401, 0, 0, 251, 260, "19482", b"", False,  True,  True, "Angel Dungeon entrance"],
-            401: [400, 0, 0,   0,   0, "19534", b"", False,  True,  True, "Angel Dungeon exit"],
-            402: [403, 0, 0, 260, 261, "19528", b"", False,  True, False, "Angel Dungeon: Map 109 to Map 110"],
-            403: [402, 0, 0,   0,   0, "", b"", False,  True, False, "Angel Dungeon: Map 110 to Map 109"],
-            404: [405, 0, 0, 278, 262, "", b"", False,  True, False, "Angel Dungeon: Map 110 to Map 111"],
-            405: [404, 0, 0,   0,   0, "", b"", False,  True, False, "Angel Dungeon: Map 111 to Map 110"],
-            406: [407, 0, 0, 262, 263, "", b"", False,  True, False, "Angel Dungeon: Map 111 to Map 112"],
-            407: [406, 0, 0,   0,   0, "", b"", False,  True, False, "Angel Dungeon: Map 112 to Map 111"],
-            408: [409, 0, 0, 264, 265, "", b"", False,  True, False, "Angel Dungeon: Map 112 to Chest"],
-            409: [408, 0, 0,   0,   0, "", b"", False,  True, False, "Angel Dungeon: Chest to Map 112"],
-            410: [411, 0, 0, 279, 266, "", b"", False,  True, False, "Angel Dungeon: Map 112 to Map 113"],
-            411: [410, 0, 0,   0,   0, "", b"", False,  True, False, "Angel Dungeon: Map 113 to Map 112"],
-            412: [413, 0, 0, 266, 267, "", b"", False,  True, False, "Angel Dungeon: Map 113 to Map 114"],
-            413: [412, 0, 0,   0,   0, "", b"", False,  True, False, "Angel Dungeon: Map 114 to Map 113"],
-            414: [415, 0, 0, 268, 276, "", b"", False,  True, False, "Angel Dungeon: Map 114 to Ishtar Foyer"],
-            415: [414, 0, 0,   0,   0, "", b"", False,  True, False, "Angel Dungeon: Ishtar Foyer to Map 114"],
-
+            398: [399, 0, 0, 259, 263, "Map70Exit04", b"", False, 6, False, "Angel Dungeon: Map 112(N) to Map 112(main)"],
+            399: [398, 0, 0,   0,   0, "Map70Exit05", b"", False, 6, False, "Angel Dungeon: Map 112(main) to Map 112(N)"],
+            400: [401, 0, 0, 251, 260, "Map6BExit06", b"", False, 6,  True, "Angel Dungeon entrance"],
+            401: [400, 0, 0,   0,   0, "Map6DExit02", b"", False, 6,  True, "Angel Dungeon exit"],
+            402: [403, 0, 0, 260, 261, "Map6DExit01", b"", False, 6, False, "Angel Dungeon: Map 109 to Map 110"],
+            403: [402, 0, 0,   0,   0, "Map6EExit01", b"", False, 6, False, "Angel Dungeon: Map 110 to Map 109"],
+            404: [405, 0, 0, 278, 262, "Map6EExit02", b"", False, 6, False, "Angel Dungeon: Map 110 to Map 111"],
+            405: [404, 0, 0,   0,   0, "Map6FExit01", b"", False, 6, False, "Angel Dungeon: Map 111 to Map 110"],
+            406: [407, 0, 0, 262, 259, "Map6FExit02", b"", False, 6, False, "Angel Dungeon: Map 111 to Map 112(N)"],
+            407: [406, 0, 0,   0,   0, "Map70Exit01", b"", False, 6, False, "Angel Dungeon: Map 112(N) to Map 111"],
+            408: [409, 0, 0, 264, 265, "Map70Exit02", b"", False, 6, False, "Angel Dungeon: Map 112 to Chest"],  # Slider
+            409: [408, 0, 0,   0,   0, "Map70Exit03", b"", False, 6, False, "Angel Dungeon: Chest to Map 112"],  # Slider
+            410: [411, 0, 0, 279, 266, "Map70Exit06", b"", False, 6, False, "Angel Dungeon: Map 112 to Map 113"],
+            411: [410, 0, 0,   0,   0, "Map71Exit01", b"", False, 6, False, "Angel Dungeon: Map 113 to Map 112"],
+            412: [413, 0, 0, 266, 267, "Map71Exit02", b"", False, 6, False, "Angel Dungeon: Map 113 to Map 114"],
+            413: [412, 0, 0,   0,   0, "Map72Exit01", b"", False, 6, False, "Angel Dungeon: Map 114 to Map 113"],
+            414: [415, 0, 0, 268, 276, "Map72Exit02", b"", False, 6, False, "Angel Dungeon: Map 114 to Ishtar Foyer"],  # Slider
+            415: [414, 0, 0,   0,   0, "Map73Exit01", b"", False, 6, False, "Angel Dungeon: Ishtar Foyer to Map 114"],  # Slider
+            
             # Ishtar's Studio
-            420: [421, 0, 0, 277, 269, "196b6", b"", False, False, False, "Ishtar entrance"],
-            421: [420, 0, 0,   0,   0, "196c2", b"", False, False, False, "Ishtar exit"],
-            422: [423, 0, 0, 269, 270, "196ce", b"", False, False, False, "Ishtar: Portrait room (in)"],
-            423: [422, 0, 0,   0,   0, "196f4", b"", False, False, False, "Ishtar: Portrait room (out)"],
-            424: [425, 0, 0, 269, 271, "196da", b"", False, False, False, "Ishtar: Side room (in)"],
-            425: [424, 0, 0,   0,   0, "19700", b"", False, False, False, "Ishtar: Side room (out)"],
-            426: [427, 0, 0, 269, 272, "196e6", b"", False, False, False, "Ishtar: Ishtar's room (in)"],
-            427: [426, 0, 0,   0,   0, "1970c", b"", False, False, False, "Ishtar: Ishtar's room (out)"],
-            428: [429, 0, 0, 272, 274, "19718", b"", False, False, False, "Ishtar: Puzzle room (in)"],
-            429: [428, 0, 0,   0,   0, "197e6", b"", False, False, False, "Ishtar: Puzzle room (out)"],
-
+            420: [421, 0, 0, 277, 269, "Map73Exit02", b"", False, 0, False, "Ishtar entrance"],
+            421: [420, 0, 0,   0,   0, "Map73Exit03", b"", False, 0, False, "Ishtar exit"],
+            422: [423, 0, 0, 269, 270, "Map73Exit04", b"", False, 0, False, "Ishtar: Portrait room (in)"],
+            423: [422, 0, 0,   0,   0, "Map74Exit01", b"", False, 0, False, "Ishtar: Portrait room (out)"],
+            424: [425, 0, 0, 269, 271, "Map73Exit05", b"", False, 0, False, "Ishtar: Side room (in)"],
+            425: [424, 0, 0,   0,   0, "Map74Exit02", b"", False, 0, False, "Ishtar: Side room (out)"],
+            426: [427, 0, 0, 269, 272, "Map73Exit06", b"", False, 0, False, "Ishtar: Ishtar's room (in)"],
+            427: [426, 0, 0,   0,   0, "Map74Exit03", b"", False, 0, False, "Ishtar: Ishtar's room (out)"],
+            428: [429, 0, 0, 272, 274, "Map74Exit04", b"", False, 0, False, "Ishtar: Puzzle room (in)"],
+            429: [428, 0, 0,   0,   0, "Map75Exit11", b"", False, 0, False, "Ishtar: Puzzle room (out)"],
+            
             # Watermia
-            440: [441, 0, 0, 280, 286, "197f4", b"", False, False, False, "Watermia: Lance House (in)"],
-            441: [440, 0, 0,   0,   0, "1983e", b"", False, False, False, "Watermia: Lance House (out)"],
-            442: [443, 0, 0, 280, 282, "19818", b"", False, False, False, "Watermia: DS House (in)"],
-            443: [442, 0, 0,   0,   0, "19868", b"", False, False, False, "Watermia: DS House (out)"],
-            444: [445, 0, 0, 280, 283, "1980c", b"", False, False, False, "Watermia: Gambling House (in)"],
-            445: [444, 0, 0,   0,   0, "1985a", b"", False, False, False, "Watermia: Gambling House (out)"],
-            446: [447, 0, 0, 280, 284, "19824", b"", False, False, False, "Watermia: West House (in)"],
-            447: [446, 0, 0,   0,   0, "19882", b"", False, False, False, "Watermia: West House (out)"],
-            448: [449, 0, 0, 280, 285, "19830", b"", False, False, False, "Watermia: East House (in)"],
-            449: [448, 0, 0,   0,   0, "19890", b"", False, False, False, "Watermia: East House (out)"],
-            450: [451, 0, 0, 280, 287, "19800", b"", False, False, False, "Watermia: NW House (in)"],
-            451: [450, 0, 0,   0,   0, "1984c", b"", False, False, False, "Watermia: NW House (out)"],
+            440: [441, 0, 0, 280, 286, "Map78Exit01", b"", False, 0, False, "Watermia: Lance House (in)"],
+            441: [440, 0, 0,   0,   0, "Map79Exit01", b"", False, 0, False, "Watermia: Lance House (out)"],
+            442: [443, 0, 0, 280, 282, "Map78Exit04", b"", False, 0, False, "Watermia: DS House (in)"],
+            443: [442, 0, 0,   0,   0, "Map7CExit01", b"", False, 0, False, "Watermia: DS House (out)"],
+            444: [445, 0, 0, 280, 283, "Map78Exit03", b"", False, 0, False, "Watermia: Gambling House (in)"],
+            445: [444, 0, 0,   0,   0, "Map7BExit01", b"", False, 0, False, "Watermia: Gambling House (out)"],
+            446: [447, 0, 0, 280, 284, "Map78Exit05", b"", False, 0, False, "Watermia: West House (in)"],
+            447: [446, 0, 0,   0,   0, "Map7DExit01", b"", False, 0, False, "Watermia: West House (out)"],
+            448: [449, 0, 0, 280, 285, "Map78Exit06", b"", False, 0, False, "Watermia: East House (in)"],
+            449: [448, 0, 0,   0,   0, "Map7EExit01", b"", False, 0, False, "Watermia: East House (out)"],
+            450: [451, 0, 0, 280, 287, "Map78Exit02", b"", False, 0, False, "Watermia: NW House (in)"],
+            451: [450, 0, 0,   0,   0, "Map7AExit01", b"", False, 0, False, "Watermia: NW House (out)"],
             452: [453, 0, 0, 288, 311, "", b"", False, False,  True, "Watermia: Euro passage"],
             453: [452, 0, 0,   0,   0, "", b"", False, False,  True, "Euro: Watermia passage"],
-
+            
             # Great Wall
-            462: [463, 0, 0, 290, 291, "", b"", False,  True, False, "Great Wall: Map 130 to Map 131"],
-            463: [462, 0, 0,   0,   0, "", b"", False,  True, False, "Great Wall: Map 131 to Map 130"],
-            464: [465, 0, 0, 293, 294, "", b"", False,  True, False, "Great Wall: Map 131 to Map 133"],
-            465: [464, 0, 0,   0,   0, "", b"", False,  True, False, "Great Wall: Map 133 to Map 131"],
-            466: [467, 0, 0, 296, 297, "", b"", False,  True, False, "Great Wall: Map 133 to Map 134"],
-            467: [466, 0, 0,   0,   0, "", b"", False,  True, False, "Great Wall: Map 134 to Map 133"],
-            468: [469, 0, 0, 297, 298, "", b"", False,  True, False, "Great Wall: Map 134 to Map 135"],
-            469: [468, 0, 0,   0,   0, "", b"", False,  True, False, "Great Wall: Map 135 to Map 134"],
-            470: [471, 0, 0, 299, 300, "", b"", False,  True, False, "Great Wall: Map 135 to Map 136"],
-            471: [470, 0, 0,   0,   0, "", b"", False,  True, False, "Great Wall: Map 136 to Map 135"],
-
+            462: [463, 0, 0, 290, 291, "Map82Exit01", b"", False,  7, False, "Great Wall: Map 130 to Map 131"],
+            463: [462, 0, 0,   0,   0, "Map83Exit01", b"", False,  7, False, "Great Wall: Map 131 to Map 130"],
+            464: [465, 0, 0, 293, 294, "Map83Exit02", b"", False,  7, False, "Great Wall: Map 131 to Map 133"],
+            465: [464, 0, 0,   0,   0, "Map85Exit01", b"", False,  7, False, "Great Wall: Map 133 to Map 131"],
+            466: [467, 0, 0, 296, 297, "Map85Exit02", b"", False,  7, False, "Great Wall: Map 133 to Map 134"],
+            467: [466, 0, 0,   0,   0, "Map86Exit01", b"", False,  7, False, "Great Wall: Map 134 to Map 133"],
+            468: [469, 0, 0, 297, 298, "Map86Exit02", b"", False,  7, False, "Great Wall: Map 134 to Map 135"],
+            469: [468, 0, 0,   0,   0, "Map87Exit01", b"", False,  7, False, "Great Wall: Map 135 to Map 134"],
+            470: [471, 0, 0, 299, 300, "Map87Exit02", b"", False,  7, False, "Great Wall: Map 135 to Map 136"],
+            471: [470, 0, 0,   0,   0, "Map88Exit01", b"", False,  7, False, "Great Wall: Map 136 to Map 135"],
+            
             # Euro
-            482: [483, 0, 0, 310, 312, "19cd2", b"", False, False, False, "Euro: Rolek Company (in)"],
-            483: [482, 0, 0,   0,   0, "19d74", b"", False, False, False, "Euro: Rolek Company (out)"],
-            484: [485, 0, 0, 310, 313, "19d0e", b"", False, False, False, "Euro: West House (in)"],
-            485: [484, 0, 0,   0,   0, "19e12", b"", False, False, False, "Euro: West House (out)"],
-            486: [487, 0, 0, 310, 314, "19cde", b"", False, False, False, "Euro: Rolek Mansion West (in)"],
-            487: [486, 0, 0,   0,   0, "19d9c", b"", False, False, False, "Euro: Rolek Mansion West (out)"],
-            488: [489, 0, 0, 310, 314, "19cea", b"", False, False, False, "Euro: Rolek Mansion East (in)"],
-            489: [488, 0, 0,   0,   0, "19da8", b"", False, False, False, "Euro: Rolek Mansion East (out)"],
-            490: [491, 0, 0, 310, 317, "19d26", b"", False, False, False, "Euro: Central House (in)"],
-            491: [490, 0, 0,   0,   0, "19e54", b"", False, False, False, "Euro: Central House (out)"],
-            492: [493, 0, 0, 310, 318, "19d32", b"", False, False, False, "Euro: Jeweler House (in)"],
-            493: [492, 0, 0,   0,   0, "19e62", b"", False, False, False, "Euro: Jeweler House (out)"],
-            494: [495, 0, 0, 310, 319, "19d3e", b"", False, False, False, "Euro: Twins House (in)"],
-            495: [494, 0, 0,   0,   0, "19e70", b"", False, False, False, "Euro: Twins House (out)"],
-            496: [497, 0, 0, 310, 320, "19cc6", b"", False, False, False, "Euro: Hidden House (in)"],
-            497: [496, 0, 0,   0,   0, "19d66", b"", False, False, False, "Euro: Hidden House (out)"],
-            498: [499, 0, 0, 310, 321, "19d4a", b"", False, False, False, "Euro: Shrine (in)"],
-            499: [498, 0, 0,   0,   0, "19e7e", b"", False, False, False, "Euro: Shrine (out)"],
-            500: [501, 0, 0, 310, 322, "19cba", b"", False, False, False, "Euro: Explorer's House (in)"],
-            501: [500, 0, 0,   0,   0, "19d58", b"", False, False, False, "Euro: Explorer's House (out)"],
-            502: [  0, 0, 0, 310, 323, "19cf6", b"", False, False, False, "Euro: Store Entrance (in)"],
-            #503: [502, 0, 0,   0,   0, "", b"", False, False, False, "Euro: Store Entrance (out)"], #this doesn't exist!
-            504: [505, 0, 0, 310, 324, "19d02", b"", False, False, False, "Euro: Store Exit (in)"],
-            505: [504, 0, 0,   0,   0, "19e04", b"", False, False, False, "Euro: Store Exit (out)"],
-            506: [507, 0, 0, 314, 316, "19db4", b"", False, False, False, "Euro: Guest Room (in)"],
-            507: [506, 0, 0,   0,   0, "19df6", b"", False, False, False, "Euro: Guest Room (out)"],
-            508: [509, 0, 0, 310, 325, "19d1a", b"", False, False, False, "Euro: Dark Space House (in)"],
-            509: [508, 0, 0,   0,   0, "19e20", b"", False, False, False, "Euro: Dark Space House (out)"],
-
+            482: [483, 0, 0, 310, 312, "Map91Exit03", b"", False, 0, False, "Euro: Rolek Company (in)"],
+            483: [482, 0, 0,   0,   0, "Map94Exit01", b"", False, 0, False, "Euro: Rolek Company (out)"],
+            484: [485, 0, 0, 310, 313, "Map91Exit08", b"", False, 0, False, "Euro: West House (in)"],
+            485: [484, 0, 0,   0,   0, "Map98Exit01", b"", False, 0, False, "Euro: West House (out)"],
+            486: [487, 0, 0, 310, 314, "Map91Exit04", b"", False, 0, False, "Euro: Rolek Mansion West (in)"],
+            487: [486, 0, 0,   0,   0, "Map95Exit01", b"", False, 0, False, "Euro: Rolek Mansion West (out)"],
+            488: [489, 0, 0, 310, 314, "Map91Exit05", b"", False, 0, False, "Euro: Rolek Mansion East (in)"],
+            489: [488, 0, 0,   0,   0, "Map95Exit02", b"", False, 0, False, "Euro: Rolek Mansion East (out)"],
+            490: [491, 0, 0, 310, 317, "Map91Exit0A", b"", False, 0, False, "Euro: Central House (in)"],
+            491: [490, 0, 0,   0,   0, "Map9AExit01", b"", False, 0, False, "Euro: Central House (out)"],
+            492: [493, 0, 0, 310, 318, "Map91Exit0B", b"", False, 0, False, "Euro: Jeweler House (in)"],
+            493: [492, 0, 0,   0,   0, "Map9BExit01", b"", False, 0, False, "Euro: Jeweler House (out)"],
+            494: [495, 0, 0, 310, 319, "Map91Exit0C", b"", False, 0, False, "Euro: Twins House (in)"],
+            495: [494, 0, 0,   0,   0, "Map9CExit01", b"", False, 0, False, "Euro: Twins House (out)"],
+            496: [497, 0, 0, 310, 320, "Map91Exit02", b"", False, 0, False, "Euro: Hidden House (in)"],
+            497: [496, 0, 0,   0,   0, "Map93Exit01", b"", False, 0, False, "Euro: Hidden House (out)"],
+            498: [499, 0, 0, 310, 321, "Map91Exit0D", b"", False, 0, False, "Euro: Shrine (in)"],
+            499: [498, 0, 0,   0,   0, "Map9DExit01", b"", False, 0, False, "Euro: Shrine (out)"],
+            500: [501, 0, 0, 310, 322, "Map91Exit01", b"", False, 0, False, "Euro: Explorer's House (in)"],
+            501: [500, 0, 0,   0,   0, "Map92Exit01", b"", False, 0, False, "Euro: Explorer's House (out)"],
+            502: [  0, 0, 0, 310, 323, "Map91Exit06", b"", False, 0, False, "Euro: Store Entrance (in)"],
+            #503: [502, 0, 0,   0,   0, "", b"", False, 0, False, "Euro: Store Entrance (out)"], #this doesn't exist!
+            504: [505, 0, 0, 310, 324, "Map91Exit07", b"", False, 0, False, "Euro: Store Exit (in)"],
+            505: [504, 0, 0,   0,   0, "Map97Exit01", b"", False, 0, False, "Euro: Store Exit (out)"],
+            506: [507, 0, 0, 314, 316, "Map95Exit03", b"", False, 0, False, "Euro: Guest Room (in)"],
+            507: [506, 0, 0,   0,   0, "Map96Exit01", b"", False, 0, False, "Euro: Guest Room (out)"],
+            508: [509, 0, 0, 310, 325, "Map91Exit09", b"", False, 0, False, "Euro: Dark Space House (in)"],
+            509: [508, 0, 0,   0,   0, "Map99Exit01", b"", False, 0, False, "Euro: Dark Space House (out)"],
+            
             # Mt. Kress
-            522: [523, 0, 0, 330, 331, "", b"", False,  True, False, "Mt. Kress: Map 160 to Map 161"],
-            523: [522, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 161 to Map 160"],
-            524: [525, 0, 0, 332, 333, "", b"", False,  True, False, "Mt. Kress: Map 161 to Map 162 (W)"],
-            525: [524, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 162 to Map 161 (W)"],
-            526: [527, 0, 0, 332, 334, "", b"", False,  True, False, "Mt. Kress: Map 161 to Map 162 (E)"],
-            527: [526, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 162 to Map 161 (E)"],
-            528: [529, 0, 0, 333, 337, "", b"", False,  True, False, "Mt. Kress: Map 162 to Map 163 (N)"],
-            529: [528, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 163 to Map 162 (N)"],
-            530: [531, 0, 0, 337, 336, "", b"", False,  True, False, "Mt. Kress: Map 163 to Map 162 (S)"],
-            531: [530, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 162 to Map 163 (S)"],
-            532: [533, 0, 0, 333, 338, "", b"", False,  True, False, "Mt. Kress: Map 162 to Map 164"],
-            533: [532, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 164 to Map 162"],
-            534: [535, 0, 0, 335, 339, "", b"", False,  True, False, "Mt. Kress: Map 162 to Map 165"],
-            535: [534, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 165 to Map 162"],
-            536: [537, 0, 0, 339, 342, "", b"", False,  True, False, "Mt. Kress: Map 165 to Map 166"],
-            537: [536, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 166 to Map 165"],
-            538: [539, 0, 0, 340, 343, "", b"", False,  True, False, "Mt. Kress: Map 165 to Map 167"],
-            539: [538, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 167 to Map 165"],
-            540: [541, 0, 0, 341, 344, "", b"", False,  True, False, "Mt. Kress: Map 165 to Map 168"],
-            541: [540, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 168 to Map 165"],
-            542: [543, 0, 0, 344, 345, "", b"", False,  True, False, "Mt. Kress: Map 168 to Map 169"],
-            543: [542, 0, 0,   0,   0, "", b"", False,  True, False, "Mt. Kress: Map 169 to Map 168"],
-
+            522: [523, 0, 0, 330, 331, "MapA0Exit01", b"", False,  8, False, "Mt. Kress: Map 160 to Map 161"],
+            523: [522, 0, 0,   0,   0, "MapA1Exit01", b"", False,  8, False, "Mt. Kress: Map 161 to Map 160"],
+            524: [525, 0, 0, 332, 333, "MapA1Exit02", b"", False,  8, False, "Mt. Kress: Map 161 to Map 162 (W)"],
+            525: [524, 0, 0,   0,   0, "MapA2Exit01", b"", False,  8, False, "Mt. Kress: Map 162 to Map 161 (W)"],
+            526: [527, 0, 0, 332, 334, "MapA1Exit03", b"", False,  8, False, "Mt. Kress: Map 161 to Map 162 (E)"],
+            527: [526, 0, 0,   0,   0, "MapA2Exit02", b"", False,  8, False, "Mt. Kress: Map 162 to Map 161 (E)"],
+            528: [529, 0, 0, 333, 337, "MapA2Exit04", b"", False,  8, False, "Mt. Kress: Map 162 to Map 163 (N)"],
+            529: [528, 0, 0,   0,   0, "MapA3Exit02", b"", False,  8, False, "Mt. Kress: Map 163 to Map 162 (N)"],
+            530: [531, 0, 0, 337, 336, "MapA3Exit01", b"", False,  8, False, "Mt. Kress: Map 163 to Map 162 (S)"],
+            531: [530, 0, 0,   0,   0, "MapA2Exit03", b"", False,  8, False, "Mt. Kress: Map 162 to Map 163 (S)"],
+            532: [533, 0, 0, 333, 338, "MapA2Exit05", b"", False,  8, False, "Mt. Kress: Map 162 to Map 164"],
+            533: [532, 0, 0,   0,   0, "MapA4Exit01", b"", False,  8, False, "Mt. Kress: Map 164 to Map 162"],
+            534: [535, 0, 0, 335, 339, "MapA2Exit06", b"", False,  8, False, "Mt. Kress: Map 162 to Map 165"],
+            535: [534, 0, 0,   0,   0, "MapA5Exit01", b"", False,  8, False, "Mt. Kress: Map 165 to Map 162"],
+            536: [537, 0, 0, 339, 342, "MapA5Exit02", b"", False,  8, False, "Mt. Kress: Map 165 to Map 166"],
+            537: [536, 0, 0,   0,   0, "MapA6Exit01", b"", False,  8, False, "Mt. Kress: Map 166 to Map 165"],
+            538: [539, 0, 0, 340, 343, "MapA5Exit03", b"", False,  8, False, "Mt. Kress: Map 165 to Map 167"],
+            539: [538, 0, 0,   0,   0, "MapA7Exit01", b"", False,  8, False, "Mt. Kress: Map 167 to Map 165"],
+            540: [541, 0, 0, 341, 344, "MapA5Exit04", b"", False,  8, False, "Mt. Kress: Map 165 to Map 168"],
+            541: [540, 0, 0,   0,   0, "MapA8Exit01", b"", False,  8, False, "Mt. Kress: Map 168 to Map 165"],
+            542: [543, 0, 0, 344, 345, "MapA8Exit02", b"", False,  8, False, "Mt. Kress: Map 168 to Map 169"],
+            543: [542, 0, 0,   0,   0, "MapA9Exit01", b"", False,  8, False, "Mt. Kress: Map 169 to Map 168"],
+            
             # Native's Village
-            552: [553, 0, 0, 350, 352, "19fe6", b"", False, False, False, "Native's Village: West House (in)"],
-            553: [552, 0, 0,   0,   0, "1a00c", b"", False, False, False, "Native's Village: West House (out)"],
-            554: [555, 0, 0, 350, 353, "19ff2", b"", False, False, False, "Native's Village: House w/Statues (in)"],
-            555: [554, 0, 0,   0,   0, "1a01a", b"", False, False, False, "Native's Village: House w/Statues (out)"],
+            552: [553, 0, 0, 350, 352, "MapACExit01", b"", False, 0, False, "Native's Village: West House (in)"],
+            553: [552, 0, 0,   0,   0, "MapADExit01", b"", False, 0, False, "Native's Village: West House (out)"],
+            554: [555, 0, 0, 350, 353, "MapACExit02", b"", False, 0, False, "Native's Village: House w/Statues (in)"],
+            555: [554, 0, 0,   0,   0, "MapAEExit01", b"", False, 0, False, "Native's Village: House w/Statues (out)"],
             556: [557, 0, 0, 351, 400, "", b"", False, False,  True, "Native's Village: Dao Passage"],
             557: [556, 0, 0,   0,   0, "", b"", False, False,  True, "Dao: Natives' Passage"],
-
+            
             # Ankor Wat
-            562: [563, 0, 0, 360, 361, "1a028", b"", False,  True, False, "Ankor Wat: Map 176 to Map 177"],
-            563: [562, 0, 0,   0,   0, "1a036", b"", False,  True, False, "Ankor Wat: Map 177 to Map 176"],
-            564: [565, 0, 0, 361, 363, "", b"", False,  True, False, "Ankor Wat: Map 177 to Map 178"],
-            565: [564, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 178 to Map 177"],
-            566: [567, 0, 0, 365, 366, "", b"", False,  True, False, "Ankor Wat: Map 178 to Map 179"],
-            567: [566, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 179 to Map 178"],
-            568: [569, 0, 0, 368, 367, "", b"", False,  True, False, "Ankor Wat: Map 180 to Map 179"],
-            569: [568, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 179 to Map 180"],
-            570: [571, 0, 0, 367, 369, "", b"", False,  True, False, "Ankor Wat: Map 179 to Map 181"],
-            571: [570, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 181 to Map 179"],
-            572: [573, 0, 0, 371, 362, "", b"", False,  True, False, "Ankor Wat: Map 181 to Map 177"],
-            573: [572, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 177 to Map 181"],
-            574: [575, 0, 0, 362, 372, "", b"", False,  True, False, "Ankor Wat: Map 177 to Map 182"],  # Garden
-            575: [574, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 182 to Map 177"],
-            576: [577, 0, 0, 372, 373, "", b"", False,  True, False, "Ankor Wat: Map 182 to Map 183"],
-            577: [576, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 183 to Map 182"],
-            578: [579, 0, 0, 373, 376, "", b"", False,  True, False, "Ankor Wat: Map 183 to Map 184"],
-            579: [578, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 184 to Map 183"],
-            580: [581, 0, 0, 374, 378, "", b"", False,  True, False, "Ankor Wat: Map 183 to Map 185 (W)"],
-            581: [580, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 185 to Map 183 (W)"],
-            582: [583, 0, 0, 378, 375, "", b"", False,  True, False, "Ankor Wat: Map 185 to Map 183 (E)"],
-            583: [582, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 183 to Map 185 (E)"],
-            584: [585, 0, 0, 375, 379, "", b"", False,  True, False, "Ankor Wat: Map 183 to Map 186"],
-            585: [584, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 186 to Map 183"],
-            586: [587, 0, 0, 379, 381, "", b"", False,  True, False, "Ankor Wat: Map 186 to Map 187 (W)"],
-            587: [586, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 187 to Map 186 (W)"],
-            588: [589, 0, 0, 381, 380, "", b"", False,  True, False, "Ankor Wat: Map 187 to Map 186 (E)"],
-            589: [588, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 186 to Map 187 (E)"],
-            590: [591, 0, 0, 381, 384, "", b"", False,  True, False, "Ankor Wat: Map 187 to Map 188"],
-            591: [590, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187"],
-            592: [593, 0, 0, 393, 386, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 189"],
-            593: [592, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 189 to Map 188"],
-            594: [595, 0, 0, 387, 389, "", b"", False,  True, False, "Ankor Wat: Map 189 to Map 190 (E)"],
-            595: [594, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 190 to Map 189 (E)"],
-            596: [596, 0, 0, 388, 390, "", b"", False,  True, False, "Ankor Wat: Map 189 to Map 190 (W)"],
-            597: [597, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 190 to Map 189 (W)"],
-            598: [599, 0, 0, 390, 391, "", b"", False,  True, False, "Ankor Wat: Map 190 to Map 191"],
-            599: [598, 0, 0,   0,   0, "", b"", False,  True, False, "Ankor Wat: Map 191 to Map 190"],
-            600: [  0, 0, 0, 366, 368, "", b"", False,  True, False, "Ankor Wat: Map 179 to Map 180 (drop)"],
-            601: [  0, 0, 0, 392, 381, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NW-L (drop)"],
-            602: [  0, 0, 0, 392, 381, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NW-R (drop)"],
-            603: [  0, 0, 0, 392, 383, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 NE (drop)"],
-            604: [  0, 0, 0, 393, 382, "", b"", False,  True, False, "Ankor Wat: Map 188 to Map 187 SW (drop)"],
-            605: [  0, 0, 0, 389, 388, "", b"", False,  True, False, "Ankor Wat: Map 190 to Map 189 (drop)"],
-
+            562: [563, 0, 0, 360, 361, "MapB0Exit01", b"", False,  9, False, "Ankor Wat: Map 176 to Map 177"],
+            563: [562, 0, 0,   0,   0, "MapB1Exit01", b"", False,  9, False, "Ankor Wat: Map 177 to Map 176"],
+            564: [565, 0, 0, 361, 363, "MapB1Exit02", b"", False,  9, False, "Ankor Wat: Map 177 to Map 178"],
+            565: [564, 0, 0,   0,   0, "MapB2Exit01", b"", False,  9, False, "Ankor Wat: Map 178 to Map 177"],
+            566: [567, 0, 0, 365, 366, "MapB2Exit02", b"", False,  9, False, "Ankor Wat: Map 178 to Map 179"],
+            567: [566, 0, 0,   0,   0, "MapB3Exit01", b"", False,  9, False, "Ankor Wat: Map 179 to Map 178"],
+            568: [569, 0, 0, 368, 367, "MapB4Exit01", b"", False,  9, False, "Ankor Wat: Map 180 to Map 179"],
+            569: [568, 0, 0,   0,   0, "MapB3Exit03", b"", False,  9, False, "Ankor Wat: Map 179 to Map 180"],
+            570: [571, 0, 0, 367, 369, "MapB3Exit04", b"", False,  9, False, "Ankor Wat: Map 179 to Map 181"],
+            571: [570, 0, 0,   0,   0, "MapB5Exit01", b"", False,  9, False, "Ankor Wat: Map 181 to Map 179"],
+            572: [573, 0, 0, 371, 362, "MapB5Exit02", b"", False,  9, False, "Ankor Wat: Map 181 to Map 177"],
+            573: [572, 0, 0,   0,   0, "MapB1Exit04", b"", False,  9, False, "Ankor Wat: Map 177 to Map 181"],
+            574: [575, 0, 0, 362, 372, "MapB1Exit03", b"", False,  9, False, "Ankor Wat: Map 177 to Map 182"],  # Garden
+            575: [574, 0, 0,   0,   0, "MapB6Exit01", b"", False,  9, False, "Ankor Wat: Map 182 to Map 177"],
+            576: [577, 0, 0, 372, 373, "MapB6Exit02", b"", False,  9, False, "Ankor Wat: Map 182 to Map 183"],
+            577: [576, 0, 0,   0,   0, "MapB7Exit01", b"", False,  9, False, "Ankor Wat: Map 183 to Map 182"],
+            578: [579, 0, 0, 373, 376, "MapB7Exit04", b"", False,  9, False, "Ankor Wat: Map 183 to Map 184"],
+            579: [578, 0, 0,   0,   0, "MapB8Exit01", b"", False,  9, False, "Ankor Wat: Map 184 to Map 183"],
+            580: [581, 0, 0, 374, 378, "MapB7Exit02", b"", False,  9, False, "Ankor Wat: Map 183 to Map 185 (W)"],
+            581: [580, 0, 0,   0,   0, "MapB9Exit01", b"", False,  9, False, "Ankor Wat: Map 185 to Map 183 (W)"],
+            582: [583, 0, 0, 378, 375, "MapB9Exit02", b"", False,  9, False, "Ankor Wat: Map 185 to Map 183 (E)"],
+            583: [582, 0, 0,   0,   0, "MapB7Exit03", b"", False,  9, False, "Ankor Wat: Map 183 to Map 185 (E)"],
+            584: [585, 0, 0, 375, 379, "MapB7Exit05", b"", False,  9, False, "Ankor Wat: Map 183 to Map 186"],
+            585: [584, 0, 0,   0,   0, "MapBAExit01", b"", False,  9, False, "Ankor Wat: Map 186 to Map 183"],
+            586: [587, 0, 0, 379, 381, "MapBAExit02", b"", False,  9, False, "Ankor Wat: Map 186 to Map 187 (W)"],
+            587: [586, 0, 0,   0,   0, "MapBBExit01", b"", False,  9, False, "Ankor Wat: Map 187 to Map 186 (W)"],
+            588: [589, 0, 0, 381, 380, "MapBBExit02", b"", False,  9, False, "Ankor Wat: Map 187 to Map 186 (E)"],
+            589: [588, 0, 0,   0,   0, "MapBAExit03", b"", False,  9, False, "Ankor Wat: Map 186 to Map 187 (E)"],
+            590: [591, 0, 0, 381, 384, "MapBBExit03", b"", False,  9, False, "Ankor Wat: Map 187 to Map 188"],
+            591: [590, 0, 0,   0,   0, "MapBCExit01", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187"],
+            592: [593, 0, 0, 393, 386, "MapBCExit06", b"", False,  9, False, "Ankor Wat: Map 188 to Map 189"],
+            593: [592, 0, 0,   0,   0, "MapBDExit01", b"", False,  9, False, "Ankor Wat: Map 189 to Map 188"],
+            594: [595, 0, 0, 387, 389, "MapBDExit03", b"", False,  9, False, "Ankor Wat: Map 189 to Map 190 (E)"],
+            595: [594, 0, 0,   0,   0, "MapBEExit02", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (E)"],
+            596: [597, 0, 0, 388, 390, "MapBDExit02", b"", False,  9, False, "Ankor Wat: Map 189 to Map 190 (W)"],
+            597: [596, 0, 0,   0,   0, "MapBEExit01", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (W)"],
+            598: [599, 0, 0, 390, 391, "MapBEExit04", b"", False,  9, False, "Ankor Wat: Map 190 to Map 191"],
+            599: [598, 0, 0,   0,   0, "MapBFExit01", b"", False,  9, False, "Ankor Wat: Map 191 to Map 190"],
+            600: [  0, 0, 0, 366, 368, "MapB3Exit02", b"", False,  9, False, "Ankor Wat: Map 179 to Map 180 (drop)"],
+            601: [  0, 0, 0, 392, 381, "MapBCExit02", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NW-L (drop)"],
+            602: [  0, 0, 0, 392, 381, "MapBCExit03", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NW-R (drop)"],
+            603: [  0, 0, 0, 392, 383, "MapBCExit04", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 NE (drop)"],
+            604: [  0, 0, 0, 393, 382, "MapBCExit05", b"", False,  9, False, "Ankor Wat: Map 188 to Map 187 SW (drop)"],
+            605: [  0, 0, 0, 389, 388, "MapBEExit03", b"", False,  9, False, "Ankor Wat: Map 190 to Map 189 (drop)"],
+            
             # Dao
-            612: [613, 0, 0, 400, 401, "1a27c", b"", False, False, False, "Dao: NW House (in)"],
-            613: [612, 0, 0,   0,   0, "1a2d2", b"", False, False, False, "Dao: NW House (out)"],
-            614: [615, 0, 0, 400, 402, "1a288", b"", False, False, False, "Dao: Neil's House (in)"],
-            615: [614, 0, 0,   0,   0, "1a30a", b"", False, False, False, "Dao: Neil's House (out)"],
-            616: [617, 0, 0, 400, 403, "1a294", b"", False, False, False, "Dao: Snake Game House (in)"],
-            617: [616, 0, 0,   0,   0, "1a2ee", b"", False, False, False, "Dao: Snake Game House (out)"],
-            618: [619, 0, 0, 400, 404, "1a2a0", b"", False, False, False, "Dao: SW House (in)"],
-            619: [618, 0, 0,   0,   0, "1a2fc", b"", False, False, False, "Dao: SW House (out)"],
-            620: [621, 0, 0, 400, 405, "1a2ac", b"", False, False, False, "Dao: S House (in)"],
-            621: [620, 0, 0,   0,   0, "1a2e0", b"", False, False, False, "Dao: S House (out)"],
-            622: [623, 0, 0, 400, 406, "1a2b8", b"", False, False, False, "Dao: SE House (in)"],
-            623: [622, 0, 0,   0,   0, "1a318", b"", False, False, False, "Dao: SE House (out)"],
-
+            612: [613, 0, 0, 400, 401, "MapC3Exit01", b"", False, 0, False, "Dao: NW House (in)"],
+            613: [612, 0, 0,   0,   0, "MapC4Exit01", b"", False, 0, False, "Dao: NW House (out)"],
+            614: [615, 0, 0, 400, 402, "MapC3Exit02", b"", False, 0, False, "Dao: Neil's House (in)"],
+            615: [614, 0, 0,   0,   0, "MapC8Exit01", b"", False, 0, False, "Dao: Neil's House (out)"],
+            616: [617, 0, 0, 400, 403, "MapC3Exit03", b"", False, 0, False, "Dao: Snake Game House (in)"],
+            617: [616, 0, 0,   0,   0, "MapC6Exit01", b"", False, 0, False, "Dao: Snake Game House (out)"],
+            618: [619, 0, 0, 400, 404, "MapC3Exit04", b"", False, 0, False, "Dao: SW House (in)"],
+            619: [618, 0, 0,   0,   0, "MapC7Exit01", b"", False, 0, False, "Dao: SW House (out)"],
+            620: [621, 0, 0, 400, 405, "MapC3Exit05", b"", False, 0, False, "Dao: S House (in)"],
+            621: [620, 0, 0,   0,   0, "MapC5Exit01", b"", False, 0, False, "Dao: S House (out)"],
+            622: [623, 0, 0, 400, 406, "MapC3Exit06", b"", False, 0, False, "Dao: SE House (in)"],
+            623: [622, 0, 0,   0,   0, "MapC9Exit01", b"", False, 0, False, "Dao: SE House (out)"],
+            
             # Pyramid
-            634: [635, 0, 0, 411, 415, "", b"", False,  True, False, "Pyramid: Map 204 to Map 205"],
-            635: [634, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 205 to Map 204"],
-            636: [637, 0, 0, 413, 416, "", b"", False,  True, False, "Pyramid: Map 204 to Map 206"],  # Room 1
-            637: [636, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 206 to Map 204"],
-            638: [639, 0, 0, 417, 418, "", b"", False,  True, False, "Pyramid: Map 206 to Map 207"],
-            639: [638, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 207 to Map 206"],
-            640: [641, 0, 0, 419, 442, "", b"", False,  True, False, "Pyramid: Map 207 to Map 218"],
-            641: [640, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 218 to Map 207"],
-            642: [643, 0, 0, 413, 420, "", b"", False,  True, False, "Pyramid: Map 204 to Map 208"],  # Room 2
-            643: [642, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 208 to Map 204"],
-            644: [645, 0, 0, 421, 422, "", b"", False,  True, False, "Pyramid: Map 208 to Map 209"],
-            645: [644, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 209 to Map 208"],
-            646: [647, 0, 0, 423, 443, "", b"", False,  True, False, "Pyramid: Map 209 to Map 218"],
-            647: [646, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 218 to Map 209"],
-            648: [649, 0, 0, 413, 431, "", b"", False,  True, False, "Pyramid: Map 204 to Map 214"],  # Room 3
-            649: [648, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 214 to Map 204"],
-            650: [651, 0, 0, 434, 435, "", b"", False,  True, False, "Pyramid: Map 214 to Map 215"],
-            651: [650, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 214 to Map 215"],
-            652: [653, 0, 0, 450, 444, "", b"", False,  True, False, "Pyramid: Map 215 to Map 218"],
-            653: [652, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 218 to Map 215"],
-            654: [655, 0, 0, 413, 436, "", b"", False,  True, False, "Pyramid: Map 204 to Map 216"],  # Room 4
-            655: [654, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 216 to Map 204"],
-            656: [657, 0, 0, 437, 438, "", b"", False,  True, False, "Pyramid: Map 216 to Map 217"],
-            657: [656, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 217 to Map 216"],
-            658: [659, 0, 0, 439, 440, "", b"", False,  True, False, "Pyramid: Map 217 to Map 219"],
-            659: [658, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 219 to Map 217"],
-            660: [661, 0, 0, 441, 445, "", b"", False,  True, False, "Pyramid: Map 219 to Map 218"],
-            661: [660, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 218 to Map 219"],
-            662: [663, 0, 0, 413, 426, "", b"", False,  True, False, "Pyramid: Map 204 to Map 212"],  # Room 5
-            663: [662, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 212 to Map 204"],
-            664: [665, 0, 0, 429, 430, "", b"", False,  True, False, "Pyramid: Map 212 to Map 213"],
-            665: [664, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 213 to Map 212"],
-            666: [667, 0, 0, 430, 446, "", b"", False,  True, False, "Pyramid: Map 213 to Map 218"],
-            667: [666, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 218 to Map 213"],
-            668: [669, 0, 0, 413, 424, "", b"", False,  True, False, "Pyramid: Map 204 to Map 210"],  # Room 6
-            669: [668, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 210 to Map 204"],
-            670: [671, 0, 0, 424, 425, "", b"", False,  True, False, "Pyramid: Map 210 to Map 211"],
-            671: [670, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 211 to Map 210"],
-            672: [673, 0, 0, 425, 447, "", b"", False,  True, False, "Pyramid: Map 211 to Map 218"],
-            673: [672, 0, 0,   0,   0, "", b"", False,  True, False, "Pyramid: Map 218 to Map 211"],
-
+            634: [635, 0, 0, 411, 415, "", b"", False, 10, False, "Pyramid: Map 204 to Map 205"], # Hieroglyph room, ALWAYS LINKED (1a33e)
+            635: [634, 0, 0,   0,   0, "", b"", False, 10, False, "Pyramid: Map 205 to Map 204"], # Hieroglyph room, ALWAYS LINKED (1a394)
+            636: [637, 0, 0, 413, 416, "MapCCExit02", b"", False, 10, False, "Pyramid: Map 204 to Map 206"],  # Room 1
+            637: [636, 0, 0,   0,   0, "MapCEExit01", b"", False, 10, False, "Pyramid: Map 206 to Map 204"],
+            638: [639, 0, 0, 417, 418, "MapCEExit02", b"", False, 10, False, "Pyramid: Map 206 to Map 207"],
+            639: [638, 0, 0,   0,   0, "MapCFExit01", b"", False, 10, False, "Pyramid: Map 207 to Map 206"],
+            640: [641, 0, 0, 419, 442, "MapCFExit02", b"", False, 10, False, "Pyramid: Map 207 to Map 218"],
+            641: [640, 0, 0,   0,   0, "MapDAExit01", b"", False, 10, False, "Pyramid: Map 218 to Map 207"],
+            642: [643, 0, 0, 413, 420, "MapCCExit03", b"", False, 10, False, "Pyramid: Map 204 to Map 208"],  # Room 2
+            643: [642, 0, 0,   0,   0, "MapD0Exit01", b"", False, 10, False, "Pyramid: Map 208 to Map 204"],
+            644: [645, 0, 0, 421, 422, "MapD0Exit02", b"", False, 10, False, "Pyramid: Map 208 to Map 209"],
+            645: [644, 0, 0,   0,   0, "MapD1Exit01", b"", False, 10, False, "Pyramid: Map 209 to Map 208"],
+            646: [647, 0, 0, 423, 443, "MapD1Exit02", b"", False, 10, False, "Pyramid: Map 209 to Map 218"],
+            647: [646, 0, 0,   0,   0, "MapDAExit02", b"", False, 10, False, "Pyramid: Map 218 to Map 209"],
+            648: [649, 0, 0, 413, 431, "MapCCExit04", b"", False, 10, False, "Pyramid: Map 204 to Map 214"],  # Room 3
+            649: [648, 0, 0,   0,   0, "MapD6Exit01", b"", False, 10, False, "Pyramid: Map 214 to Map 204"],
+            650: [651, 0, 0, 434, 435, "MapD6Exit02", b"", False, 10, False, "Pyramid: Map 214 to Map 215"],
+            651: [650, 0, 0,   0,   0, "MapD7Exit01", b"", False, 10, False, "Pyramid: Map 215 to Map 214"],
+            652: [653, 0, 0, 435, 444, "MapD7Exit02", b"", False, 10, False, "Pyramid: Map 215 to Map 218"],
+            653: [652, 0, 0,   0,   0, "MapDAExit05", b"", False, 10, False, "Pyramid: Map 218 to Map 215"],
+            654: [655, 0, 0, 413, 436, "MapCCExit05", b"", False, 10, False, "Pyramid: Map 204 to Map 216"],  # Room 4
+            655: [654, 0, 0,   0,   0, "MapD8Exit01", b"", False, 10, False, "Pyramid: Map 216 to Map 204"],
+            656: [657, 0, 0, 437, 438, "MapD8Exit02", b"", False, 10, False, "Pyramid: Map 216 to Map 217"],
+            657: [656, 0, 0,   0,   0, "MapD9Exit01", b"", False, 10, False, "Pyramid: Map 217 to Map 216"],
+            658: [659, 0, 0, 439, 440, "MapD9Exit02", b"", False, 10, False, "Pyramid: Map 217 to Map 219"],
+            659: [658, 0, 0,   0,   0, "MapDBExit01", b"", False, 10, False, "Pyramid: Map 219 to Map 217"],
+            660: [661, 0, 0, 441, 445, "MapDBExit02", b"", False, 10, False, "Pyramid: Map 219 to Map 218"],
+            661: [660, 0, 0,   0,   0, "MapDAExit06", b"", False, 10, False, "Pyramid: Map 218 to Map 219"],
+            662: [663, 0, 0, 413, 426, "MapCCExit06", b"", False, 10, False, "Pyramid: Map 204 to Map 212"],  # Room 5
+            663: [662, 0, 0,   0,   0, "MapD4Exit01", b"", False, 10, False, "Pyramid: Map 212 to Map 204"],
+            664: [665, 0, 0, 429, 430, "MapD4Exit02", b"", False, 10, False, "Pyramid: Map 212 to Map 213"],
+            665: [664, 0, 0,   0,   0, "MapD5Exit01", b"", False, 10, False, "Pyramid: Map 213 to Map 212"],
+            666: [667, 0, 0, 430, 446, "MapD5Exit02", b"", False, 10, False, "Pyramid: Map 213 to Map 218"],
+            667: [666, 0, 0,   0,   0, "MapDAExit04", b"", False, 10, False, "Pyramid: Map 218 to Map 213"],
+            668: [669, 0, 0, 413, 424, "MapCCExit07", b"", False, 10, False, "Pyramid: Map 204 to Map 210"],  # Room 6
+            669: [668, 0, 0,   0,   0, "MapD2Exit01", b"", False, 10, False, "Pyramid: Map 210 to Map 204"],
+            670: [671, 0, 0, 424,10424, "MapD2Exit02", b"", False, 10, False, "Pyramid: Map 210 to 210x211"],
+            671: [670, 0, 0,   0,   0, "MapD3Exit01", b"", False, 10, False, "Pyramid: 210x211 to Map 210"],
+            672: [673, 0, 0, 425, 447, "MapD3Exit02", b"", False, 10, False, "Pyramid: Map 211 to Map 218"],
+            673: [672, 0, 0,   0,   0, "MapDAExit03", b"", False, 10, False, "Pyramid: Map 218 to Map 211"],
+            
             # Babel
-            682: [683, 0, 0, 460, 461, "", b"", False,  True, False, "Babel: Map 222 to Map 223"],
-            683: [682, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 223 to Map 222"],
-            684: [685, 0, 0, 462, 463, "", b"", False,  True, False, "Babel: Map 223 to Map 224"],
-            685: [684, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 224 to Map 223"],
-            686: [687, 0, 0, 463, 474, "", b"", False,  True, False, "Babel: Map 224 to Map 242"],  # Castoth
-            687: [686, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 242 to Map 224"],
-            688: [689, 0, 0, 463, 475, "", b"", False,  True, False, "Babel: Map 224 to Map 243"],  # Viper
-            689: [688, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 243 to Map 224"],
-            690: [691, 0, 0, 463, 465, "", b"", False,  True, False, "Babel: Map 224 to Map 225 (bottom)"],
-            691: [690, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 225 to Map 224 (bottom)"],
-            692: [693, 0, 0, 466, 464, "", b"", False,  True, False, "Babel: Map 225 to Map 224 (top)"],
-            693: [692, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 224 to Map 225 (top)"],
-            694: [695, 0, 0, 464, 476, "", b"", False,  True, False, "Babel: Map 224 to Map 244"],  # Vampires
-            695: [694, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 244 to Map 224"],
-            696: [697, 0, 0, 464, 477, "", b"", False,  True, False, "Babel: Map 224 to Map 245"],  # Sand Fanger
-            697: [696, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 245 to Map 224"],
-            698: [699, 0, 0, 464, 469, "", b"", False,  True, False, "Babel: Map 224 to Map 226"],
-            699: [698, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 226 to Map 224"],
-            #700: [701, 0, 0, 470, 471, "", b"", False,  True, False, "Babel: Map 226 to Map 227"],  #DUPLICATE W/BOSS EXITS
-            #701: [700, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 227 to Map 226"],
-            702: [703, 0, 0, 471, 478, "", b"", False,  True, False, "Babel: Map 227 to Map 246"],  # Mummy Queen
-            703: [702, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 246 to Map 227"],
-            704: [705, 0, 0, 471, 467, "", b"", False,  True, False, "Babel: Map 227 to Map 225 (bottom)"],
-            705: [704, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 225 to Map 227 (bottom)"],
-            706: [707, 0, 0, 468, 472, "", b"", False,  True, False, "Babel: Map 225 to Map 227 (top)"],
-            707: [706, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 227 to Map 225 (top)"],
-            708: [709, 0, 0, 472, 473, "", b"", False,  True, False, "Babel: Map 227 to Map 222"],
-            709: [708, 0, 0,   0,   0, "", b"", False,  True, False, "Babel: Map 222 to Map 227"],
-
+            682: [683, 0, 0, 460, 461, "MapDEExit01", b"", False, 11, False, "Babel: Map 222 to Map 223"],
+            683: [682, 0, 0,   0,   0, "MapDFExit01", b"", False, 11, False, "Babel: Map 223 to Map 222"],
+            684: [685, 0, 0, 462, 463, "MapDFExit02", b"", False, 11, False, "Babel: Map 223 to Map 224"],
+            685: [684, 0, 0,   0,   0, "MapE0Exit01", b"", False, 11, False, "Babel: Map 224 to Map 223"],
+            686: [687, 0, 0, 463, 474, "", b"", False, 11, False, "Babel: Map 224 to Map 242"],  # Castoth, ALWAYS LINKED (1a81e)
+            687: [686, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 242 to Map 224"],  # Castoth, ALWAYS LINKED (a9af9)
+            688: [689, 0, 0, 463, 475, "", b"", False, 11, False, "Babel: Map 224 to Map 243"],  # Viper, ALWAYS LINKED (1a82a)
+            689: [688, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 243 to Map 224"],  # Viper, ALWAYS LINKED (ad165)
+            690: [691, 0, 0, 463, 465, "MapE0Exit02", b"", False, 11, False, "Babel: Map 224 to Map 225 (bottom)"],
+            691: [690, 0, 0,   0,   0, "MapE1Exit01", b"", False, 11, False, "Babel: Map 225 to Map 224 (bottom)"],
+            692: [693, 0, 0, 466, 464, "MapE1Exit02", b"", False, 11, False, "Babel: Map 225 to Map 224 (top)"],
+            693: [692, 0, 0,   0,   0, "MapE0Exit03", b"", False, 11, False, "Babel: Map 224 to Map 225 (top)"],
+            694: [695, 0, 0, 464, 476, "", b"", False, 11, False, "Babel: Map 224 to Map 244"],  # Vampires, ALWAYS LINKED (1a836)
+            695: [694, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 244 to Map 224"],  # Vampires, ALWAYS LINKED (af1ed)
+            696: [697, 0, 0, 464, 477, "", b"", False, 11, False, "Babel: Map 224 to Map 245"],  # Sand Fanger, ALWAYS LINKED (1a842)
+            697: [696, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 245 to Map 224"],  # Sand Fanger, ALWAYS LINKED (b8130)
+            698: [699, 0, 0, 464, 469, "MapE0Exit04", b"", False, 11, False, "Babel: Map 224 to Map 226"],
+            699: [698, 0, 0,   0,   0, "MapE2Exit01", b"", False, 11, False, "Babel: Map 226 to Map 224"],
+            #700: [701, 0, 0, 470, 471, "", b"", False, 11, False, "Babel: Map 226 to Map 227"],  #DUPLICATE W/BOSS EXITS
+            #701: [700, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 227 to Map 226"],
+            702: [703, 0, 0, 471, 478, "", b"", False, 11, False, "Babel: Map 227 to Map 246"],  # Mummy Queen -- EVERYTHING HERE DOWN ALWAYS LINKED
+            703: [702, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 246 to Map 227"],
+            704: [705, 0, 0, 471, 467, "", b"", False, 11, False, "Babel: Map 227 to Map 225 (bottom)"],
+            705: [704, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 225 to Map 227 (bottom)"],
+            706: [707, 0, 0, 468, 472, "", b"", False, 11, False, "Babel: Map 225 to Map 227 (top)"],
+            707: [706, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 227 to Map 225 (top)"],
+            708: [709, 0, 0, 472, 473, "", b"", False, 11, False, "Babel: Map 227 to Map 222"],
+            709: [708, 0, 0,   0,   0, "", b"", False, 11, False, "Babel: Map 222 to Map 227"],
+            
             # Jeweler's Mansion
-            720: [721, 0, 0,   8, 480, "8d32a", b"", False,  True, True, "Mansion entrance"],
-            721: [720, 0, 0, 480, 400, "8fcb4", b"", False,  True, True, "Mansion exit"]
+            720: [721, 0, 0,   8, 480, "MapMansionEntranceString", b"", False, 12, True, "Mansion entrance"],
+            721: [720, 0, 0, 480, 400, "MapMansionExitString", b"", False, 12, True, "Mansion exit"]
 
         }

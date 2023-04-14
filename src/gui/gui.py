@@ -165,15 +165,17 @@ def generate_ROM():
 
         patch = randomizer.generate_rom(rom_filename, settings)
 
-        write_patch(patch, rompath, rom_filename, settings)
-        if not race_mode_toggle.get():
-            spoiler = randomizer.generate_spoiler()
-            write_spoiler(spoiler, spoiler_filename, rompath)
-        if graph_viz_toggle.get():
-            graph_viz = randomizer.generate_graph_visualization()
-            write_graph_viz(graph_viz, graph_viz_filename, rompath)
-
-        tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
+        if not patch[0]:
+            tkinter.messagebox.showerror("Error", "Assembling failed. The first error was:" + str(patch[1][0]) )
+        else:
+            write_patch(patch, rompath, rom_filename, settings)
+            if not race_mode_toggle.get():
+                spoiler = randomizer.generate_spoiler()
+                write_spoiler(spoiler, spoiler_filename, rompath)
+            if graph_viz_toggle.get():
+                graph_viz = randomizer.generate_graph_visualization()
+                write_graph_viz(graph_viz, graph_viz_filename, rompath)
+            tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
         tkinter.messagebox.showerror("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
     except FileNotFoundError:

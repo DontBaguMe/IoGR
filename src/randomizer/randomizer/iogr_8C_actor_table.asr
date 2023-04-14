@@ -384,7 +384,7 @@ db $FF,$67,$88,$8B,$8B,$0E,$A3,$AC,$47,$8E,$A5,$A3,$84,$AC,$CA
 ActorList_Map07:    ; Map tracker map.
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
-db $00,$01,$00 : dl $86de00 : db $00
+db $00,$01,$00 : dl EInGameCollectionTracker-3 : db $00
 db $FF,$CA 
 
 ActorList_Map08:
@@ -514,16 +514,20 @@ db $37,$1A,!Monster001EParam : dl !Monster001EAddr : db !Monster001EStats,$1E,!M
 db $10,$04,!Monster001FParam : dl !Monster001FAddr : db !Monster001FStats,$1F,!Monster001FItemFlag
 db $19,$1C,!Monster0020Param : dl !Monster0020Addr : db !Monster0020Stats,$21,!Monster0020ItemFlag
 db $06,$08,!Monster0021Param : dl !Monster0021Addr : db !Monster0021Stats,$22,!Monster0021ItemFlag
+if !SettingEnemizer < 2
 db $3D,$11,$00 : dl $8A8835 : db $00
 db $3E,$11,$00 : dl $8A8835 : db $00
-db $17,$18,$00 : dl $8A8931 : db $00
+db $06,$1B,$00 : dl $8A8AAE : db $00
+db $27,$16,$00 : dl $8A8AAE : db $00
+db $23,$17,$80 : dl $8A8AAE : db $00
+if !SettingFluteless == 0
 db $14,$15,$00 : dl $8A89DE : db $00
 db $15,$15,$00 : dl $8A8A0F : db $00
 db $16,$1C,$00 : dl $8A8A46 : db $00
 db $16,$1D,$00 : dl $8A8A7D : db $00
-db $06,$1B,$00 : dl $8A8AAE : db $00
-db $27,$16,$00 : dl $8A8AAE : db $00
-db $23,$17,$80 : dl $8A8AAE : db $00
+endif
+endif
+db $17,$18,$00 : dl $8A8931 : db $00
 db $3D,$0E,$00 : dl $89A915 : db $00
 db $FF,$CA 
 
@@ -544,6 +548,8 @@ db $09,$07,!Monster002BParam : dl !Monster002BAddr : db !Monster002BStats,$2C,!M
 db $05,$07,!Monster002CParam : dl !Monster002CAddr : db !Monster002CStats,$2D,!Monster002CItemFlag
 db $0B,$07,!Monster002DParam : dl !Monster002DAddr : db !Monster002DStats,$2E,!Monster002DItemFlag
 db $03,$07,!Monster002EParam : dl !Monster002EAddr : db !Monster002EStats,$2F,!Monster002EItemFlag
+db $0D,$2B,$00 : dl $8A8971 : db $00
+if !SettingEnemizer < 2
 db $02,$31,$00 : dl $8A87C3 : db $00
 db $0D,$31,$00 : dl $8A87C3 : db $00
 db $06,$4C,$00 : dl $8A87CE : db $00
@@ -553,11 +559,11 @@ db $08,$48,$00 : dl $8A87CE : db $00
 db $07,$49,$00 : dl $8A87CE : db $00
 db $01,$46,$00 : dl $8A87CE : db $00
 db $02,$46,$00 : dl $8A87CE : db $00
-db $0D,$2B,$00 : dl $8A8971 : db $00
 db $0B,$32,$40 : dl $8A8AAE : db $00
 db $05,$32,$40 : dl $8A8AAE : db $00
 db $01,$39,$00 : dl $8A8AAE : db $00
 db $0E,$2E,$80 : dl $8A8AAE : db $00
+endif
 db $FF,$CA 
 
 ActorList_Map10:
@@ -603,6 +609,7 @@ db $11,$21,!Monster0041Param : dl !Monster0041Addr : db !Monster0041Stats,$42,!M
 db $12,$15,!Monster0042Param : dl !Monster0042Addr : db !Monster0042Stats,$43,!Monster0042ItemFlag
 db $03,$3A,!Monster0043Param : dl !Monster0043Addr : db !Monster0043Stats,$44,!Monster0043ItemFlag
 db $27,$13,!Monster0044Param : dl !Monster0044Addr : db !Monster0044Stats,$45,!Monster0044ItemFlag
+if !SettingEnemizer < 2
 db $16,$3E,$40 : dl $8A8AAE : db $00
 db $19,$3B,$C0 : dl $8A8AAE : db $00
 db $11,$38,$80 : dl $8A8AAE : db $00
@@ -611,6 +618,7 @@ db $1B,$12,$80 : dl $8A8AAE : db $00
 db $1E,$15,$40 : dl $8A8AAE : db $00
 db $20,$12,$00 : dl $8A8AAE : db $00
 db $1D,$0F,$C0 : dl $8A8AAE : db $00
+endif
 db $2B,$56,$00 : dl $89BF0F : db $00
 db $00,$01,!DkSpPrisonEndType : dl $89BF6B : db $00
 db $FF,$CA 
@@ -727,7 +735,9 @@ db $09,$3A,!Monster0056Param : dl !Monster0056Addr : db !Monster0056Stats,$0C,!M
 db $03,$3D,!Monster0057Param : dl !Monster0057Addr : db !Monster0057Stats,$0D,!Monster0057ItemFlag
 db $17,$41,!Monster0058Param : dl !Monster0058Addr : db !Monster0058Stats,$0E,!Monster0058ItemFlag
 db $14,$48,!Monster0059Param : dl !Monster0059Addr : db !Monster0059Stats,$0F,!Monster0059ItemFlag
+if !SettingEnemizer < 2
 db $02,$3E,$00 : dl $89C26F : db $00
+endif
 db $FF,$D7,$19,$42,$8B,$88,$85,$85,$CA 
 
 ActorList_Map1E:
@@ -766,7 +776,9 @@ db $1C,$16,!Monster0062Param : dl !Monster0062Addr : db !Monster0062Stats,$14,!M
 db $03,$0B,!Monster0063Param : dl !Monster0063Addr : db !Monster0063Stats,$15,!Monster0063ItemFlag
 db $03,$18,!Monster0064Param : dl !Monster0064Addr : db !Monster0064Stats,$16,!Monster0064ItemFlag
 db $05,$11,!Monster0065Param : dl !Monster0065Addr : db !Monster0065Stats,$17,!Monster0065ItemFlag
+if !SettingEnemizer < 2
 db $07,$17,$00 : dl $8A88DE : db $00
+endif
 db $FF,$CA 
 
 ActorList_Map21:
@@ -892,6 +904,7 @@ db $0A,$1C,!Monster00B0Param : dl !Monster00B0Addr : db !Monster00B0Stats,$65,!M
 db $0B,$1C,!Monster00B1Param : dl !Monster00B1Addr : db !Monster00B1Stats,$66,!Monster00B1ItemFlag
 db $0C,$1C,!Monster00B2Param : dl !Monster00B2Addr : db !Monster00B2Stats,$67,!Monster00B2ItemFlag
 db $0D,$1C,!Monster00B3Param : dl !Monster00B3Addr : db !Monster00B3Stats,$68,!Monster00B3ItemFlag
+if !SettingEnemizer < 2
 db $13,$1D,$00 : dl $8A8896 : db $00
 db $18,$1E,$00 : dl $8A8896 : db $00
 db $1D,$20,$00 : dl $8A8896 : db $00
@@ -899,6 +912,7 @@ db $19,$21,$00 : dl $8A8896 : db $00
 db $1A,$21,$00 : dl $8A8896 : db $00
 db $11,$28,$00 : dl $89C798 : db $00
 db $11,$16,$00 : dl $89C8F7 : db $00
+endif
 db $1C,$14,!DkSpInca2Type : dl $88D6A9 : db $00
 db $FF,$CA 
 
@@ -1189,7 +1203,9 @@ db $20,$10,$00 : dl $85D020 : db $00
 db $14,$1F,$00 : dl $85D020 : db $00
 db $2D,$1C,$00 : dl $85D020 : db $00
 db $20,$30,$00 : dl $85D020 : db $00
+if !SettingEnemizer < 2
 db $1A,$33,$00 : dl $85D6A8 : db $00
+endif
 db $18,$36,$00 : dl $85D642 : db $00
 db $FF,$CA 
 
@@ -1222,9 +1238,11 @@ db $08,$24,!Monster0105Param : dl !Monster0105Addr : db !Monster0105Stats,$59,!M
 db $16,$2E,!Monster0106Param : dl !Monster0106Addr : db !Monster0106Stats,$5A,!Monster0106ItemFlag
 db $0C,$29,!Monster0107Param : dl !Monster0107Addr : db !Monster0107Stats,$5B,!Monster0107ItemFlag
 db $26,$10,!Monster0108Param : dl !Monster0108Addr : db !Monster0108Stats,$5C,!Monster0108ItemFlag
+if !SettingEnemizer < 2
 db $02,$07,$00 : dl $8AA4E2 : db $00
 db $28,$03,$00 : dl $8AA4F5 : db $00
 db $15,$3D,$00 : dl $8AA50C : db $00
+endif
 db $16,$1C,$00 : dl $80C963 : db $00
 db $1B,$0B,$00 : dl $80C963 : db $00
 db $FF,$CA 
@@ -1360,7 +1378,9 @@ db $34,$16,!Monster0126Param : dl !Monster0126Addr : db !Monster0126Stats,$10,!M
 db $28,$20,!Monster0127Param : dl !Monster0127Addr : db !Monster0127Stats,$11,!Monster0127ItemFlag
 db $37,$1E,!Monster0128Param : dl !Monster0128Addr : db !Monster0128Stats,$12,!Monster0128ItemFlag
 db $31,$38,!Monster0129Param : dl !Monster0129Addr : db !Monster0129Stats,$13,!Monster0129ItemFlag
+if !SettingEnemizer < 2
 db $3A,$33,$00 : dl $8AC0FE : db $00
+endif
 db $00,$01,$00 : dl $8AB496 : db $00
 db $FF,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$CA 
 
@@ -1383,9 +1403,11 @@ db $20,$21,!Monster0133Param : dl !Monster0133Addr : db !Monster0133Stats,$2B,!M
 db $2C,$38,!Monster0134Param : dl !Monster0134Addr : db !Monster0134Stats,$2C,!Monster0134ItemFlag
 db $0D,$31,!Monster0135Param : dl !Monster0135Addr : db !Monster0135Stats,$2D,!Monster0135ItemFlag
 db $11,$38,!Monster0136Param : dl !Monster0136Addr : db !Monster0136Stats,$2E,!Monster0136ItemFlag
+if !SettingEnemizer < 2
 db $39,$14,$00 : dl $8ACCF1 : db $00
 db $3B,$24,$00 : dl $8ACCF1 : db $00
 db $33,$27,$00 : dl $8ACCF1 : db $00
+endif
 db $00,$01,$00 : dl $8AB496 : db $00
 db $FF,$D7,$04,$8E,$85,$AC,$46,$80,$A2,$83,$84,$8D,$CA 
 
@@ -1410,8 +1432,10 @@ db $20,$05,!Monster0140Param : dl !Monster0140Addr : db !Monster0140Stats,$4D,!M
 db $1F,$11,!Monster0141Param : dl !Monster0141Addr : db !Monster0141Stats,$4E,!Monster0141ItemFlag
 db $1A,$0B,!Monster0142Param : dl !Monster0142Addr : db !Monster0142Stats,$4F,!Monster0142ItemFlag
 db $25,$0B,!Monster0143Param : dl !Monster0143Addr : db !Monster0143Stats,$50,!Monster0143ItemFlag
+if !SettingEnemizer < 2
 db $17,$36,$00 : dl $8AC150 : db $00
 db $2E,$20,$00 : dl $8AC150 : db $00
+endif
 db $00,$01,$00 : dl $8AB496 : db $00
 db $FF,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$CA 
 
@@ -1433,8 +1457,10 @@ db $0B,$1C,!Monster014CParam : dl !Monster014CAddr : db !Monster014CStats,$68,!M
 db $0B,$1E,!Monster014DParam : dl !Monster014DAddr : db !Monster014DStats,$69,!Monster014DItemFlag
 db $0B,$20,!Monster014EParam : dl !Monster014EAddr : db !Monster014EStats,$6A,!Monster014EItemFlag
 db $37,$1C,!Monster014FParam : dl !Monster014FAddr : db !Monster014FStats,$6B,!Monster014FItemFlag
+if !SettingEnemizer < 2
 db $34,$06,$00 : dl $8ACCF1 : db $00
 db $3B,$06,$00 : dl $8ACCF1 : db $00
+endif
 db $00,$01,$00 : dl $8AB496 : db $00
 db $FF,$D7,$04,$8E,$85,$AC,$46,$80,$A2,$83,$84,$8D,$CA 
 
@@ -1456,9 +1482,11 @@ db $25,$1D,!Monster0159Param : dl !Monster0159Addr : db !Monster0159Stats,$89,!M
 db $28,$08,!Monster015AParam : dl !Monster015AAddr : db !Monster015AStats,$8A,!Monster015AItemFlag
 db $23,$0C,!Monster015BParam : dl !Monster015BAddr : db !Monster015BStats,$8B,!Monster015BItemFlag
 db $1A,$23,!Monster015CParam : dl !Monster015CAddr : db !Monster015CStats,$8C,!Monster015CItemFlag
+if !SettingEnemizer < 2
 db $18,$22,$00 : dl $8ACCD4 : db $00
 db $30,$33,$00 : dl $85F8C0 : db $00
 db $30,$34,$00 : dl $85F8C0 : db $00
+endif
 db $03,$0B,!DkSpSGSWType : dl $88D6A9 : db $00
 db $00,$01,$00 : dl $85F76B : db $00
 db $00,$01,$00 : dl $8AB496 : db $00
@@ -1476,10 +1504,12 @@ db $38,$23,!Monster0160Param : dl !Monster0160Addr : db !Monster0160Stats,$A3,!M
 db $18,$1F,!Monster0161Param : dl !Monster0161Addr : db !Monster0161Stats,$A5,!Monster0161ItemFlag
 db $25,$23,!Monster0162Param : dl !Monster0162Addr : db !Monster0162Stats,$A6,!Monster0162ItemFlag
 db $29,$1D,!Monster0163Param : dl !Monster0163Addr : db !Monster0163Stats,$A7,!Monster0163ItemFlag
+if !SettingEnemizer < 2
 db $19,$34,$00 : dl $8ACCF1 : db $00
 db $1C,$23,$00 : dl $8ACCF1 : db $00
 db $15,$1C,$00 : dl $8ACCF1 : db $00
 db $0C,$09,$00 : dl $8ACCF1 : db $00
+endif
 db $19,$0B,$00 : dl $85F5DE : db $00
 db $23,$0A,$00 : dl $85F5DE : db $00
 db $3D,$0C,$00 : dl $85F655 : db $00
@@ -1508,8 +1538,10 @@ db $03,$2D,!Monster016FParam : dl !Monster016FAddr : db !Monster016FStats,$CB,!M
 db $33,$28,!Monster0170Param : dl !Monster0170Addr : db !Monster0170Stats,$CC,!Monster0170ItemFlag
 db $36,$2A,!Monster0171Param : dl !Monster0171Addr : db !Monster0171Stats,$CD,!Monster0171ItemFlag
 db $39,$29,!Monster0172Param : dl !Monster0172Addr : db !Monster0172Stats,$CE,!Monster0172ItemFlag
+if !SettingEnemizer < 2
 db $31,$38,$00 : dl $8AC409 : db $00
 db $08,$26,$00 : dl $8AC3B3 : db $00
+endif
 db $26,$08,$03 : dl $80d348 : db $00
 db $10,$08,$03 : dl $80d348 : db $00
 db $1A,$33,$03 : dl $80d348 : db $00
@@ -1542,12 +1574,14 @@ db $16,$35,!Monster017FParam : dl !Monster017FAddr : db !Monster017FStats,$ED,!M
 db $16,$38,!Monster0180Param : dl !Monster0180Addr : db !Monster0180Stats,$EE,!Monster0180ItemFlag
 db $31,$04,!Monster0181Param : dl !Monster0181Addr : db !Monster0181Stats,$EF,!Monster0181ItemFlag
 db $36,$05,!Monster0182Param : dl !Monster0182Addr : db !Monster0182Stats,$F0,!Monster0182ItemFlag
+if !SettingEnemizer < 2
 db $0F,$06,$00 : dl $8ACCF1 : db $00
 db $18,$19,$00 : dl $8ACCF1 : db $00
 db $37,$18,$00 : dl $8ACCF1 : db $00
 db $32,$33,$00 : dl $8ACCF1 : db $00
 db $29,$34,$00 : dl $8ACCF1 : db $00
 db $3B,$0C,$00 : dl $8ACCF1 : db $00
+endif
 db $00,$01,$00 : dl $85F76B : db $00
 db $00,$01,$00 : dl $80C667 : db $00
 db $02,$06,!DkSpSGNWType : dl $88D6A9 : db $00
@@ -1738,6 +1772,7 @@ db $0A,$1A,!Monster01BCParam : dl !Monster01BCAddr : db !Monster01BCStats,$35,!M
 db $11,$1A,!Monster01BDParam : dl !Monster01BDAddr : db !Monster01BDStats,$36,!Monster01BDItemFlag
 db $0D,$16,!Monster01BEParam : dl !Monster01BEAddr : db !Monster01BEStats,$37,!Monster01BEItemFlag
 db $2C,$28,!Monster01BFParam : dl !Monster01BFAddr : db !Monster01BFStats,$38,!Monster01BFItemFlag
+if !SettingEnemizer < 2
 db $19,$26,$30 : dl $869ce9 : db $00
 db $1A,$26,$30 : dl $869ce9 : db $00
 db $1B,$26,$30 : dl $869ce9 : db $00
@@ -1745,6 +1780,7 @@ db $1C,$26,$30 : dl $869ce9 : db $00
 db $1D,$26,$30 : dl $869ce9 : db $00
 db $1E,$26,$30 : dl $869ce9 : db $00
 db $2B,$34,$30 : dl $8ae943 : db $00
+endif
 db $07,$23,!DkSpMuTransformType : dl $88D6A9 : db $00
 db $FF,$CA 
 
@@ -1780,12 +1816,14 @@ db $22,$31,!Monster01D6Param : dl !Monster01D6Addr : db !Monster01D6Stats,$56,!M
 db $22,$33,!Monster01D7Param : dl !Monster01D7Addr : db !Monster01D7Stats,$57,!Monster01D7ItemFlag
 db $22,$35,!Monster01D8Param : dl !Monster01D8Addr : db !Monster01D8Stats,$58,!Monster01D8ItemFlag
 db $22,$37,!Monster01D9Param : dl !Monster01D9Addr : db !Monster01D9Stats,$59,!Monster01D9ItemFlag
+if !SettingEnemizer < 2
 db $1A,$0A,$30 : dl $869ce9 : db $00
 db $1A,$0B,$30 : dl $869ce9 : db $00
 db $1A,$0C,$30 : dl $869ce9 : db $00
 db $1D,$0A,$30 : dl $869ce9 : db $00
 db $1D,$0B,$30 : dl $869ce9 : db $00
 db $1D,$0C,$30 : dl $869ce9 : db $00
+endif
 db $00,$01,$00 : dl $8697A6 : db $00
 db $00,$01,$00 : dl $868496 : db $00
 db $FF,$CA 
@@ -1808,7 +1846,9 @@ db $1A,$31,!Monster01E2Param : dl !Monster01E2Addr : db !Monster01E2Stats,$68,!M
 db $07,$2D,!Monster01E3Param : dl !Monster01E3Addr : db !Monster01E3Stats,$69,!Monster01E3ItemFlag
 db $1B,$26,!Monster01E4Param : dl !Monster01E4Addr : db !Monster01E4Stats,$6A,!Monster01E4ItemFlag
 db $11,$30,!Monster01E5Param : dl !Monster01E5Addr : db !Monster01E5Stats,$6B,!Monster01E5ItemFlag
+if !SettingEnemizer < 2
 db $38,$11,$30 : dl $8ae943 : db $00
+endif
 db $20,$1C,$11 : dl $80D119 : db $00
 db $28,$1C,$11 : dl $80D0D1 : db $00
 db $33,$05,$0B : dl $80d16a : db $00
@@ -1832,12 +1872,14 @@ db $16,$3B,!Monster01EAParam : dl !Monster01EAAddr : db !Monster01EAStats,$73,!M
 db $1B,$1B,!Monster01EBParam : dl !Monster01EBAddr : db !Monster01EBStats,$74,!Monster01EBItemFlag
 db $0E,$13,!Monster01ECParam : dl !Monster01ECAddr : db !Monster01ECStats,$75,!Monster01ECItemFlag
 db $0E,$31,!Monster01EDParam : dl !Monster01EDAddr : db !Monster01EDStats,$76,!Monster01EDItemFlag
-db $03,$2E,$30 : dl $8ae943 : db $00
-db $09,$2E,$30 : dl $8ae943 : db $00
 db $15,$26,$00 : dl $8A9026 : db $00
 db $1B,$2D,$00 : dl $8A9026 : db $00
+if !SettingEnemizer < 2
+db $03,$2E,$30 : dl $8ae943 : db $00
+db $09,$2E,$30 : dl $8ae943 : db $00
 db $1A,$27,$00 : dl $869D1F : db $00
 db $1B,$27,$00 : dl $869D1F : db $00
+endif
 db $FF,$CA 
 
 ActorList_Map65:
@@ -1864,12 +1906,14 @@ db $2E,$2C,!Monster01FCParam : dl !Monster01FCAddr : db !Monster01FCStats,$9E,!M
 db $06,$05,!Monster01FDParam : dl !Monster01FDAddr : db !Monster01FDStats,$9F,!Monster01FDItemFlag
 db $06,$0A,!Monster01FEParam : dl !Monster01FEAddr : db !Monster01FEStats,$A0,!Monster01FEItemFlag
 db $2A,$3E,$30 : dl $86994D : db $00
-db $39,$1C,$30 : dl $8ae943 : db $00
 db $37,$38,$30 : dl $869d4d : db $00
+if !SettingEnemizer < 2
+db $39,$1C,$30 : dl $8ae943 : db $00
 db $35,$3D,$30 : dl $869ce9 : db $00
 db $34,$3D,$30 : dl $869ce9 : db $00
 db $2D,$3D,$30 : dl $869ce9 : db $00
 db $2C,$3D,$30 : dl $869ce9 : db $00
+endif
 db $FF,$CA 
 
 ActorList_Map66:
@@ -1990,6 +2034,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $80C667 : db $00
+if !SettingEnemizer < 2
 db $12,$07,$00 : dl $86D56F : db $00
 db $1E,$05,$00 : dl $86D56F : db $00
 db $29,$05,$00 : dl $86D56F : db $00
@@ -1998,6 +2043,7 @@ db $10,$15,$00 : dl $86D57E : db $00
 db $25,$15,$00 : dl $86D57E : db $00
 db $14,$28,$00 : dl $86D56F : db $00
 db $2C,$25,$00 : dl $86D56F : db $00
+endif
 db $1F,$0C,!Monster0201Param : dl !Monster0201Addr : db !Monster0201Stats,$01,!Monster0201ItemFlag
 db $24,$19,!Monster0202Param : dl !Monster0202Addr : db !Monster0202Stats,$02,!Monster0202ItemFlag
 db $10,$19,!Monster0203Param : dl !Monster0203Addr : db !Monster0203Stats,$03,!Monster0203ItemFlag
@@ -2020,12 +2066,14 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $80C667 : db $00
+if !SettingEnemizer < 2
 db $09,$05,$00 : dl $86D56F : db $00
 db $10,$05,$00 : dl $86D56F : db $00
 db $25,$06,$00 : dl $86D56F : db $00
 db $2A,$06,$00 : dl $86D57E : db $00
 db $33,$05,$00 : dl $86D57E : db $00
 db $31,$27,$00 : dl $86D56F : db $00
+endif
 db $11,$0C,!Monster0210Param : dl !Monster0210Addr : db !Monster0210Stats,$10,!Monster0210ItemFlag
 db $33,$0C,!Monster0211Param : dl !Monster0211Addr : db !Monster0211Stats,$11,!Monster0211ItemFlag
 db $3D,$1C,!Monster0212Param : dl !Monster0212Addr : db !Monster0212Stats,$12,!Monster0212ItemFlag
@@ -2052,10 +2100,12 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $80C667 : db $00
+if !SettingEnemizer < 2
 db $0D,$06,$00 : dl $86D56F : db $00
 db $14,$07,$00 : dl $86D56F : db $00
 db $1A,$06,$00 : dl $86D56F : db $00
 db $22,$09,$00 : dl $86D56F : db $00
+endif
 db $0F,$02,!Monster0223Param : dl !Monster0223Addr : db !Monster0223Stats,$23,!Monster0223ItemFlag
 db $16,$02,!Monster0224Param : dl !Monster0224Addr : db !Monster0224Stats,$24,!Monster0224ItemFlag
 db $18,$02,!Monster0225Param : dl !Monster0225Addr : db !Monster0225Stats,$25,!Monster0225ItemFlag
@@ -2069,6 +2119,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $80C667 : db $00
+if !SettingEnemizer < 2
 db $12,$07,$00 : dl $86D56F : db $00
 db $1D,$04,$00 : dl $86D57E : db $00
 db $2A,$05,$00 : dl $86D57E : db $00
@@ -2076,6 +2127,7 @@ db $05,$16,$00 : dl $86D56F : db $00
 db $02,$27,$00 : dl $86D58F : db $00
 db $07,$26,$00 : dl $86D58F : db $00
 db $0C,$27,$00 : dl $86D58F : db $00
+endif
 db $17,$08,$00 : dl $86D59E : db $00
 db $00,$01,$00 : dl $86D62F : db $00
 db $1B,$19,!Monster0229Param : dl !Monster0229Addr : db !Monster0229Stats,$30,!Monster0229ItemFlag
@@ -2094,8 +2146,10 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $00,$01,$00 : dl $80C667 : db $00
 db $00,$01,$00 : dl $86D68D : db $00
+if !SettingEnemizer < 2
 db $1C,$09,$00 : dl $86D56F : db $00
 db $14,$07,$00 : dl $86D56F : db $00
+endif
 db $1B,$0C,!Monster0230Param : dl !Monster0230Addr : db !Monster0230Stats,$37,!Monster0230ItemFlag
 db $1E,$0E,!Monster0231Param : dl !Monster0231Addr : db !Monster0231Stats,$38,!Monster0231ItemFlag
 db $FF,$D7,$3D,$64,$A5,$8D,$8D,$84,$8B,$CA 
@@ -2316,10 +2370,12 @@ db $76,$38,!Monster025FParam : dl !Monster025FAddr : db !Monster025FStats,$23,!M
 db $70,$1A,!Monster0260Param : dl !Monster0260Addr : db !Monster0260Stats,$24,!Monster0260ItemFlag
 db $51,$19,!Monster0261Param : dl !Monster0261Addr : db !Monster0261Stats,$25,!Monster0261ItemFlag
 db $4C,$1A,!Monster0262Param : dl !Monster0262Addr : db !Monster0262Stats,$26,!Monster0262ItemFlag
+if !SettingEnemizer < 2
 db $5A,$08,$01 : dl $8B8C30 : db $00
 db $5D,$08,$01 : dl $8B8C30 : db $00
 db $60,$08,$01 : dl $8B8C30 : db $00
 db $63,$08,$01 : dl $8B8C30 : db $00
+endif
 db $54,$28,$30 : dl ENecklaceStone1-3 : db $00    ; Necklace stone pickup 1.
 db $3E,$09,$03 : dl $80d348 : db $00
 db $40,$09,$03 : dl $80d2d0 : db $00
@@ -2350,11 +2406,13 @@ db $37,$3A,!Monster0274Param : dl !Monster0274Addr : db !Monster0274Stats,$47,!M
 db $34,$39,!Monster0275Param : dl !Monster0275Addr : db !Monster0275Stats,$48,!Monster0275ItemFlag
 db $37,$2B,!Monster0276Param : dl !Monster0276Addr : db !Monster0276Stats,$49,!Monster0276ItemFlag
 db $2B,$2B,!Monster0277Param : dl !Monster0277Addr : db !Monster0277Stats,$4A,!Monster0277ItemFlag
+if !SettingEnemizer < 2
 db $29,$47,$01 : dl $8B8C30 : db $00
 db $30,$08,$01 : dl $8B8C30 : db $00
 db $31,$08,$11 : dl $8B8C30 : db $00
 db $32,$08,$21 : dl $8B8C30 : db $00
 db $33,$08,$31 : dl $8B8C30 : db $00
+endif
 db $35,$1B,$03 : dl $80C9FB : db $00
 db $35,$1B,$00 : dl $87BDA4 : db $00
 db $35,$29,$30 : dl ENecklaceStone2-3 : db $00    ; Necklace stone pickup 2.
@@ -2407,13 +2465,17 @@ db $20,$1B,!Monster028EParam : dl !Monster028EAddr : db !Monster028EStats,$6F,!M
 db $23,$1C,!Monster028FParam : dl !Monster028FAddr : db !Monster028FStats,$70,!Monster028FItemFlag
 db $10,$2B,!Monster0290Param : dl !Monster0290Addr : db !Monster0290Stats,$71,!Monster0290ItemFlag
 db $17,$2B,!Monster0291Param : dl !Monster0291Addr : db !Monster0291Stats,$72,!Monster0291ItemFlag
+if !SettingEnemizer < 2
 db $13,$29,$01 : dl $8B8C30 : db $00
 db $1A,$29,$01 : dl $8B8C30 : db $00
+if !SettingFluteless == 0
 db $12,$19,$00 : dl $87BCE8 : db $00
 db $2C,$29,$00 : dl $87BD17 : db $00
 db $34,$29,$00 : dl $87BD46 : db $00
 db $64,$19,$00 : dl $87BD75 : db $00
 db $65,$19,$00 : dl $87BD75 : db $00
+endif
+endif
 db $18,$1A,$03 : dl $80C9FB : db $00
 db $3B,$29,$05 : dl $80C9FB : db $00
 db $29,$2B,$05 : dl $80C9FB : db $00
@@ -2456,12 +2518,14 @@ db $26,$2B,!Monster02A4Param : dl !Monster02A4Addr : db !Monster02A4Stats,$98,!M
 db $2F,$2B,!Monster02A5Param : dl !Monster02A5Addr : db !Monster02A5Stats,$99,!Monster02A5ItemFlag
 db $28,$14,!Monster02A6Param : dl !Monster02A6Addr : db !Monster02A6Stats,$9A,!Monster02A6ItemFlag
 db $2F,$28,$1F : dl $80C9FB : db $00
+if !SettingEnemizer < 2
 db $27,$17,$01 : dl $8B8C30 : db $00
 db $28,$17,$21 : dl $8B8C30 : db $00
 db $29,$17,$41 : dl $8B8C30 : db $00
 db $2D,$17,$41 : dl $8B8C30 : db $00
 db $2E,$17,$21 : dl $8B8C30 : db $00
 db $2F,$17,$01 : dl $8B8C30 : db $00
+endif
 db $FF,$CA 
 
 ActorList_Map88:
@@ -2486,10 +2550,14 @@ db $36,$28,!Monster02B2Param : dl !Monster02B2Addr : db !Monster02B2Stats,$FD,!M
 db $19,$18,!Monster02B3Param : dl !Monster02B3Addr : db !Monster02B3Stats,$A8,!Monster02B3ItemFlag
 db $28,$1B,!Monster02B4Param : dl !Monster02B4Addr : db !Monster02B4Stats,$A6,!Monster02B4ItemFlag
 db $35,$1B,!Monster02B5Param : dl !Monster02B5Addr : db !Monster02B5Stats,$A7,!Monster02B5ItemFlag
+if !SettingEnemizer < 2
 db $2B,$17,$01 : dl $8B8C30 : db $00
 db $32,$17,$01 : dl $8B8C30 : db $00
+if !SettingFluteless == 0
 db $07,$17,$01 : dl $8B8BF8 : db $00
 db $17,$17,$01 : dl $8B8BF8 : db $00
+endif
+endif
 db $FF,$CA 
 
 ActorList_Map89:
@@ -3084,8 +3152,8 @@ db $22,$14,!Monster0384Param : dl !Monster0384Addr : db !Monster0384Stats,$19,!M
 db $22,$1A,!Monster0385Param : dl !Monster0385Addr : db !Monster0385Stats,$1A,!Monster0385ItemFlag
 db $27,$11,!Monster0386Param : dl !Monster0386Addr : db !Monster0386Stats,$1B,!Monster0386ItemFlag
 db $27,$18,!Monster0387Param : dl !Monster0387Addr : db !Monster0387Stats,$1C,!Monster0387ItemFlag
-db $47,$04,!Monster0388Param : dl !Monster0388Addr : db !Monster0388Stats,$1D,!Monster0388ItemFlag
-db $10,$0E,!Monster0389Param : dl !Monster0389Addr : db !Monster0389Stats,$1E,!Monster0389ItemFlag
+db $47,$04+!SettingFluteless,!Monster0388Param : dl !Monster0388Addr : db !Monster0388Stats,$1D,!Monster0388ItemFlag
+db $10,$0E+!SettingFluteless,!Monster0389Param : dl !Monster0389Addr : db !Monster0389Stats,$1E,!Monster0389ItemFlag
 db $58,$10,!Monster038AParam : dl !Monster038AAddr : db !Monster038AStats,$1F,!Monster038AItemFlag
 db $62,$12,!Monster038BParam : dl !Monster038BAddr : db !Monster038BStats,$20,!Monster038BItemFlag
 db $75,$08,!Monster038CParam : dl !Monster038CAddr : db !Monster038CStats,$21,!Monster038CItemFlag
@@ -3102,9 +3170,9 @@ db $08,$0C,!Monster038FParam : dl !Monster038FAddr : db !Monster038FStats,$31,!M
 db $06,$57,!Monster0390Param : dl !Monster0390Addr : db !Monster0390Stats,$32,!Monster0390ItemFlag
 db $03,$33,!Monster0391Param : dl !Monster0391Addr : db !Monster0391Stats,$33,!Monster0391ItemFlag
 db $0C,$33,!Monster0392Param : dl !Monster0392Addr : db !Monster0392Stats,$34,!Monster0392ItemFlag
-db $0B,$45,!Monster0393Param : dl !Monster0393Addr : db !Monster0393Stats,$35,!Monster0393ItemFlag
-db $06,$25,!Monster0394Param : dl !Monster0394Addr : db !Monster0394Stats,$36,!Monster0394ItemFlag
-db $09,$25,!Monster0395Param : dl !Monster0395Addr : db !Monster0395Stats,$37,!Monster0395ItemFlag
+db $0B,$45+!SettingFluteless,!Monster0393Param : dl !Monster0393Addr : db !Monster0393Stats,$35,!Monster0393ItemFlag
+db $06,$25+!SettingFluteless,!Monster0394Param : dl !Monster0394Addr : db !Monster0394Stats,$36,!Monster0394ItemFlag
+db $09,$25+!SettingFluteless,!Monster0395Param : dl !Monster0395Addr : db !Monster0395Stats,$37,!Monster0395ItemFlag
 db $07,$47,!Monster0396Param : dl !Monster0396Addr : db !Monster0396Stats,$38,!Monster0396ItemFlag
 db $04,$09,!Monster0397Param : dl !Monster0397Addr : db !Monster0397Stats,$39,!Monster0397ItemFlag
 db $0B,$09,!Monster0398Param : dl !Monster0398Addr : db !Monster0398Stats,$3A,!Monster0398ItemFlag
@@ -3118,10 +3186,10 @@ db $00,$01,$00 : dl $8898DA : db $00
 db $18,$13,!Monster0399Param : dl !Monster0399Addr : db !Monster0399Stats,$40,!Monster0399ItemFlag
 db $71,$05,!Monster039AParam : dl !Monster039AAddr : db !Monster039AStats,$41,!Monster039AItemFlag
 db $71,$10,!Monster039BParam : dl !Monster039BAddr : db !Monster039BStats,$42,!Monster039BItemFlag
-db $35,$05,!Monster039CParam : dl !Monster039CAddr : db !Monster039CStats,$43,!Monster039CItemFlag
-db $3B,$05,!Monster039DParam : dl !Monster039DAddr : db !Monster039DStats,$44,!Monster039DItemFlag
-db $41,$05,!Monster039EParam : dl !Monster039EAddr : db !Monster039EStats,$45,!Monster039EItemFlag
-db $47,$05,!Monster039FParam : dl !Monster039FAddr : db !Monster039FStats,$46,!Monster039FItemFlag
+db $35,$05+!SettingFluteless,!Monster039CParam : dl !Monster039CAddr : db !Monster039CStats,$43,!Monster039CItemFlag
+db $3B,$05+!SettingFluteless,!Monster039DParam : dl !Monster039DAddr : db !Monster039DStats,$44,!Monster039DItemFlag
+db $41,$05+!SettingFluteless,!Monster039EParam : dl !Monster039EAddr : db !Monster039EStats,$45,!Monster039EItemFlag
+db $47,$05+!SettingFluteless,!Monster039FParam : dl !Monster039FAddr : db !Monster039FStats,$46,!Monster039FItemFlag
 db $FF,$CA 
 
 ActorList_MapB4:
@@ -3129,7 +3197,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $00,$01,$00 : dl $88992A : db $00
 db $00,$01,$00 : dl $8897CB : db $00
-db $04,$05,!Monster03A0Param : dl !Monster03A0Addr : db !Monster03A0Stats,$50,!Monster03A0ItemFlag
+db $04,$05+!SettingFluteless,!Monster03A0Param : dl !Monster03A0Addr : db !Monster03A0Stats,$50,!Monster03A0ItemFlag
 db $24,$0D,!Monster03A1Param : dl !Monster03A1Addr : db !Monster03A1Stats,$51,!Monster03A1ItemFlag
 db $24,$15,!Monster03A2Param : dl !Monster03A2Addr : db !Monster03A2Stats,$52,!Monster03A2ItemFlag
 db $14,$11,!Monster03A3Param : dl !Monster03A3Addr : db !Monster03A3Stats,$53,!Monster03A3ItemFlag
@@ -3147,8 +3215,8 @@ db $08,$15,$11 : dl $80d16a : db $00
 db $07,$1E,$13 : dl $80D1B5 : db $00
 db $07,$27,$15 : dl $80d16a : db $00
 db $07,$4B,$11 : dl $80d428 : db $00
-db $04,$45,!Monster03A6Param : dl !Monster03A6Addr : db !Monster03A6Stats,$60,!Monster03A6ItemFlag
-db $0B,$45,!Monster03A7Param : dl !Monster03A7Addr : db !Monster03A7Stats,$61,!Monster03A7ItemFlag
+db $04,$45+!SettingFluteless,!Monster03A6Param : dl !Monster03A6Addr : db !Monster03A6Stats,$60,!Monster03A6ItemFlag
+db $0B,$45+!SettingFluteless,!Monster03A7Param : dl !Monster03A7Addr : db !Monster03A7Stats,$61,!Monster03A7ItemFlag
 db $03,$19,!Monster03A8Param : dl !Monster03A8Addr : db !Monster03A8Stats,$62,!Monster03A8ItemFlag
 db $0C,$19,!Monster03A9Param : dl !Monster03A9Addr : db !Monster03A9Stats,$63,!Monster03A9ItemFlag
 db $06,$34,!Monster03AAParam : dl !Monster03AAAddr : db !Monster03AAStats,$64,!Monster03AAItemFlag
@@ -3204,7 +3272,9 @@ db $05,$29,!Monster03D4Param : dl !Monster03D4Addr : db !Monster03D4Stats,$93,!M
 db $29,$1B,!Monster03D5Param : dl !Monster03D5Addr : db !Monster03D5Stats,$94,!Monster03D5ItemFlag
 db $2F,$15,!Monster03D6Param : dl !Monster03D6Addr : db !Monster03D6Stats,$95,!Monster03D6ItemFlag
 db $4E,$12,!Monster03D7Param : dl !Monster03D7Addr : db !Monster03D7Stats,$96,!Monster03D7ItemFlag
+if !SettingEnemizer < 2
 db $53,$28,$00 : dl $889FFC : db $00
+endif
 db $FF,$46,$80,$A2,$83,$84,$8D,$CA 
 
 ActorList_MapB7:
@@ -3213,8 +3283,8 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $03,$10,!Monster03D8Param : dl !Monster03D8Addr : db !Monster03D8Stats,$A0,!Monster03D8ItemFlag
 db $29,$15,!Monster03D9Param : dl !Monster03D9Addr : db !Monster03D9Stats,$A1,!Monster03D9ItemFlag
 db $0B,$14,!Monster03DAParam : dl !Monster03DAAddr : db !Monster03DAStats,$A2,!Monster03DAItemFlag
-db $14,$05,!Monster03DBParam : dl !Monster03DBAddr : db !Monster03DBStats,$A3,!Monster03DBItemFlag
-db $1A,$05,!Monster03DCParam : dl !Monster03DCAddr : db !Monster03DCStats,$A4,!Monster03DCItemFlag
+db $14,$05+!SettingFluteless,!Monster03DBParam : dl !Monster03DBAddr : db !Monster03DBStats,$A3,!Monster03DBItemFlag
+db $1A,$05+!SettingFluteless,!Monster03DCParam : dl !Monster03DCAddr : db !Monster03DCStats,$A4,!Monster03DCItemFlag
 db $54,$09,!Monster03DDParam : dl !Monster03DDAddr : db !Monster03DDStats,$A5,!Monster03DDItemFlag
 db $54,$15,!Monster03DEParam : dl !Monster03DEAddr : db !Monster03DEStats,$A6,!Monster03DEItemFlag
 db $49,$1B,!Monster03DFParam : dl !Monster03DFAddr : db !Monster03DFStats,$A7,!Monster03DFItemFlag
@@ -3230,8 +3300,8 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $08,$06,!DkSpWatQuakeType : dl $88D6A9 : db $00
 db $05,$56,!Monster03E4Param : dl !Monster03E4Addr : db !Monster03E4Stats,$B0,!Monster03E4ItemFlag
 db $0A,$4D,!Monster03E5Param : dl !Monster03E5Addr : db !Monster03E5Stats,$B1,!Monster03E5ItemFlag
-db $05,$25,!Monster03E6Param : dl !Monster03E6Addr : db !Monster03E6Stats,$B2,!Monster03E6ItemFlag
-db $0A,$25,!Monster03E7Param : dl !Monster03E7Addr : db !Monster03E7Stats,$B3,!Monster03E7ItemFlag
+db $05,$25+!SettingFluteless,!Monster03E6Param : dl !Monster03E6Addr : db !Monster03E6Stats,$B2,!Monster03E6ItemFlag
+db $0A,$25+!SettingFluteless,!Monster03E7Param : dl !Monster03E7Addr : db !Monster03E7Stats,$B3,!Monster03E7ItemFlag
 db $03,$3D,!Monster03E8Param : dl !Monster03E8Addr : db !Monster03E8Stats,$B4,!Monster03E8ItemFlag
 db $0C,$3D,!Monster03E9Param : dl !Monster03E9Addr : db !Monster03E9Stats,$B5,!Monster03E9ItemFlag
 db $FF,$CA 
@@ -3245,8 +3315,8 @@ db $05,$17,!Monster03ECParam : dl !Monster03ECAddr : db !Monster03ECStats,$BA,!M
 db $0A,$17,!Monster03EDParam : dl !Monster03EDAddr : db !Monster03EDStats,$BB,!Monster03EDItemFlag
 db $04,$32,!Monster03EEParam : dl !Monster03EEAddr : db !Monster03EEStats,$BC,!Monster03EEItemFlag
 db $0B,$32,!Monster03EFParam : dl !Monster03EFAddr : db !Monster03EFStats,$BD,!Monster03EFItemFlag
-db $04,$45,!Monster03F0Param : dl !Monster03F0Addr : db !Monster03F0Stats,$BE,!Monster03F0ItemFlag
-db $0B,$45,!Monster03F1Param : dl !Monster03F1Addr : db !Monster03F1Stats,$BF,!Monster03F1ItemFlag
+db $04,$45+!SettingFluteless,!Monster03F0Param : dl !Monster03F0Addr : db !Monster03F0Stats,$BE,!Monster03F0ItemFlag
+db $0B,$45+!SettingFluteless,!Monster03F1Param : dl !Monster03F1Addr : db !Monster03F1Stats,$BF,!Monster03F1ItemFlag
 db $FF,$CA 
 
 ActorList_MapBA:
@@ -3259,7 +3329,9 @@ db $15,$3C,!Monster03F3Param : dl !Monster03F3Addr : db !Monster03F3Stats,$C1,!M
 db $0F,$43,!Monster03F4Param : dl !Monster03F4Addr : db !Monster03F4Stats,$C2,!Monster03F4ItemFlag
 db $29,$3D,!Monster03F5Param : dl !Monster03F5Addr : db !Monster03F5Stats,$C3,!Monster03F5ItemFlag
 db $2F,$43,!Monster03F6Param : dl !Monster03F6Addr : db !Monster03F6Stats,$C4,!Monster03F6ItemFlag
+if !SettingEnemizer < 2
 db $03,$42,$00 : dl $88A25E : db $00
+endif
 db $FF,$62,$8E,$80,$83,$AC,$A4,$8E,$AC,$D7,$1B,$47,$80,$8B,$8B,$CA 
 
 ActorList_MapBB:
@@ -3279,10 +3351,12 @@ ActorList_MapBC:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $00,$01,$00 : dl $889A1C : db $00
+if !SettingEnemizer < 2
 db $1D,$0B,$00 : dl $889F2C : db $00
 db $0F,$1D,$00 : dl $889F2C : db $00
 db $06,$24,$00 : dl $889F2C : db $00
 db $27,$15,$00 : dl $889F2C : db $00
+endif
 db $05,$14,$0F : dl $80D1B5 : db $00
 db $05,$1B,$0F : dl $80d16a : db $00
 db $20,$1C,$0F : dl $80D1B5 : db $00
@@ -3387,8 +3461,8 @@ db $09,$09,$05 : dl $88B464 : db $00
 db $09,$0B,$07 : dl $88B464 : db $00
 db $FF,$CA 
 
-ActorList_MapC6:
-db $05,$0A,$02 : dl $82C38C : db $00
+ActorList_MapC6:    ; Snake game.
+db $05,$0A,$02*(1-!SettingFluteless) : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $07,$09,$00 : dl $88AE49 : db $00

@@ -8,11 +8,45 @@ db "form unlocked!"
 db $ca
 
 
+TextUsedRedJewelRJM:
+db $d3
+db "As the Jewel disappears,",$cb
+db "Will feels his strength",$cb
+db "draining!"
+db $ca
+
+TextUsedTwoRedJewels:
+if !SettingRedJewelMadness == 1
+db $cd : dl TextUsedRedJewelRJM
+db $ca
+else
+db $D3
+db $22,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F
+db $ca
+endif
+
+TextUsedThreeRedJewels:
+if !SettingRedJewelMadness == 1
+db $cd : dl TextUsedRedJewelRJM
+db $ca
+else
+db $D3
+db $23,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F
+db $ca
+endif
+
+
 
 TextUsedHerbOverflow:
+if !SettingOHKO == 1
+db $ce
+db "I mean... okay."
+db $ca
+else
 db $ce
 db $CE,$44,$80,$A4,$88,$8D,$86,$AC,$A4,$87,$84,$AC,$87,$84,$A2,$81,$2B,$AC,$87,$84,$AC,$CB,$A2,$84,$86,$80,$88,$8D,$84,$83,$AC,$87,$88,$A3,$AC,$A3,$A4,$A2,$84,$8D,$86,$A4,$87,$2A,$AC
 db $ca
+endif
 
 TextDeclinedHerbOverflow:
 db $ce
@@ -144,6 +178,23 @@ db $d3
 db "You're a looney."
 db $ca
 
+TextEuroShopExitNpcOnInteract:
+db $C2,$0A,$42,$8B,$84,$A2,$8A,$2F,$AC,$46,$8E,$88,$8D,$86,$AC,$87,$8E,$8C,$84,$0D,$CB,$64,$87,$80,$8D,$8A,$AC,$A9,$8E,$A5,$AC,$D6,$ED,$8C,$A5,$82,$87,$2A,$CA
+
+TextEuroPlayerEnteredShopExitNormal:
+db $C2,$0A,$42,$8B,$84,$A2,$8A,$2F,$AC,$64,$87,$88,$A3,$AC,$88,$A3,$AC,$A4,$87,$84,$CB,$84,$A8,$88,$A4,$2A,$AC,$D6,$3B,$A5,$A3,$84,$AC,$A4,$87,$84,$CB,$84,$8D,$A4,$A2,$80,$8D,$82,$84,$4F,$CA
+
+TextEuroPlayerEnteredShopExitOfferWarp:
+db $c2,$0a
+db "Warp to start?",$cb
+db "_No",$cb
+db "_Yes"
+db $ca
+
+TextEuroPlayerEnteredShopExitAndDeclinedWarp:
+db $ce
+db "NO SOUP FOR YOU!"
+db $ca
 
 
 

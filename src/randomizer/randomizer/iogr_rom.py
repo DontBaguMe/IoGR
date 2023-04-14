@@ -171,8 +171,6 @@ class Randomizer:
         self.logger = logging.getLogger("IOGR")
 
     def generate_rom(self, filename: str, settings: RandomizerData):
-        #patch = self.__generate_patch__()
-        #rom_offset = self.__get_offset__(patch)
         asar_defines = { "DummyRandomizerDefine": "DummyRandomizerDefine" }
 
         random.seed(settings.seed)
@@ -196,7 +194,7 @@ class Randomizer:
         h.update(hash_str.encode())
         hash = h.digest()
 
-        hash_dict = [ "/", ".", "!", "[", "]", "*", ",", "+", "-", 
+        hash_dict = [ "/", ".", "[", "]", "*", ",", "+", "-", 
             "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", 
             "(", ")", "?", "A", "B", "C", "D", "E", "F", "G", 
             "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", 
@@ -214,38 +212,12 @@ class Randomizer:
             hash_final += hash_dict[key]
             i += 1
 
-        # todo: pass hash_len in as !RandoTitleScreenHashScreen
         asar_defines["RandoTitleScreenHashString"] = hash_final
         
         ##########################################################################
         #                           Special Settings
         ##########################################################################
-        ## Z3 Mode - write subroutines to available space
-        #patch.seek(int("3faee", 16) + rom_offset)     # DEF halves damage subroutine
-        #patch.write(b"\xDA\xAE\xDC\x0A\xE0\x00\x00\xF0\x04\x4A\xCA\x80\xF7\xFA\xC9\x00\x00\x60")
-        #
-        asar_defines["SettingZ3"] = 0
         #if settings.z3:
-        #    # Start with 6 HP
-        #    patch.seek(int("8068", 16) + rom_offset)
-        #    patch.write(b"\x06")
-        #
-        #    # Double damage on jump slash
-        #    patch.seek(int("2cf58", 16) + rom_offset)
-        #    patch.write(b"\xAD\xDE\x0A")
-        #
-        #    # Each DEF upgrade halves damage received
-        #    patch.seek(int("3c464", 16) + rom_offset)
-        #    patch.write(b"\x20\xEE\xFA")
-        #
-        #    # Update herb/HP upgrade fill values
-        #    patch.seek(int("3fe5c", 16) + rom_offset)  # Expert #$08
-        #    patch.write(b"\x08")
-        #    patch.seek(int("3fe61", 16) + rom_offset)  # Advanced #$0E
-        #    patch.write(b"\x0E")
-        #    patch.seek(int("3fe66", 16) + rom_offset)  # Intermediate #$28
-        #    patch.write(b"\x28")
-        #
         #    # Call item upgrade subroutines
         #    patch.seek(int("3f01c", 16) + rom_offset)  # HP upgrade
         #    patch.write(b"\x20\xa1\xf7")
@@ -253,93 +225,17 @@ class Randomizer:
         #    patch.write(b"\x20\xc1\xf7")
         #    patch.seek(int("3f061", 16) + rom_offset)  # DEF upgrade
         #    patch.write(b"\x20\xe3\xf7")
-        #
-        ## In OHKO, the HP Jewels do nothing, and start @1HP
-        #if settings.ohko:
-        #    patch.seek(int("8068", 16) + rom_offset)  # Start 1 HP
-        #    patch.write(b"\x01")
-        #    patch.seek(int("3f7b1", 16) + rom_offset) # HP upgrade
-        #    patch.write(b"\x00")
-        #    patch.seek(int("3f7b7", 16) + rom_offset) # HP upgrade
-        #    patch.write(b"\x00")
-        #    patch.seek(int("3ffac", 16) + rom_offset) # heart piece
-        #    patch.write(b"\x60")
-#       #     patch.seek(int("39f71", 16) + rom_offset)
-#       #     patch.write(b"\x00\xff\x02\xd5\x29\x60")
-        #    # Also, herbs suck
-        #    patch.seek(int("388e9", 16) + rom_offset)
-        #    patch.write(b"\xce" + qt_encode("I mean... okay.") + b"\xc0")
-        #
-        ## In Red Jewel Madness, start @40 HP, Red Jewels remove -1 HP when used
-        #elif settings.red_jewel_madness:
-        #    # Start @ 40 HP
-        #    patch.seek(int("8068", 16) + rom_offset)
-        #    patch.write(b"\x28")
-        #    # Red Jewels (item #$01) remove 1 HP when used
-        #    patch.seek(int("384d5", 16) + rom_offset)
-        #    patch.write(b"\x4c\x70\xfd")
-        #    # 2 Red Jewels (item #$2e) removes 2 HP when used
-        #    patch.seek(int("39d99", 16) + rom_offset)
-        #    patch.write(b"\x01\x00\x8D\xB0\x0A\xD8\x4c\x76\xfd")
-        #    # 3 Red Jewels (item #$2f) removes 3 HP when used
-        #    patch.seek(int("39dd9", 16) + rom_offset)
-        #    patch.write(b"\x02\x00\x8D\xB0\x0A\xD8\x4c\x7c\xfd")
-        #
-        ## Fluteless - prepare subroutines
-        #patch.seek(int("2f845", 16) + rom_offset)
-        #patch.write(b"\xa9\x00\x00\xcd\xd4\x0a\xf0\x03\xa9\x00\x01\x60"     # disable blocking for Will, $2f845
-        #    + b"\xa9\x00\x04\x04\x10\xa9\x00\x02\x14\x10\x60"               # disable attack damage for Will, $2f851
-        #    + b"\xad\x44\x06\xc9\xc6\x00\xf0\x0a\xad\xae\x09\x89\x08\x00\xf0\x02\x02\xe0\x4c\xbd\xb7")  # allow charge in snake game, $2f85c
-        #if settings.fluteless:
-        #    # Change melody sprite to Will whistling
-        #    f_fluteless = open(BIN_PATH + "0f8fa4_fluteless.bin", "rb")
-        #    patch.seek(int("f8fa4", 16) + rom_offset)
-        #    patch.write(f_fluteless.read())
-        #    f_fluteless.close
-        #
-        #    # Disable blocking for Will
-        #    patch.seek(int("2ca63", 16) + rom_offset)
-        #    patch.write(b"\x20\x45\xf8")
-        #
-        #    # Disable attack damage for Will
-        #    patch.seek(int("2cefd", 16) + rom_offset)
-        #    patch.write(b"\xad\xd4\x0a\xf0\x09\xa9\x00\x01\x14\x10\x02\x06\x02\x60\x4c\x51\xf8")
-        #
-        #    # Allow charging in snake game
-        #    patch.seek(int("2b7b3", 16) + rom_offset)
-        #    patch.write(b"\x4c\x5c\xf8")
-        #
-        #    # Y-shift certain enemy positions so they can be hit without a flute
-        #    enemy_shift = [
-        #        [b"\x5c\xbb\x8b", 1],    # Tunnel: Canal Worms up 1
-        #        [b"\x5c\xbb\x8b",-1],    # Ankor Wat: Wall Bugs up 1
-        #        [b"\x66\xbb\x8b",-1]]    # Ankor Wat: Wall Bugs up 1
-        #    for [enemy_str,yshift] in enemy_shift:
-        #        done = False
-        #        addr = int("c8200", 16) + rom_offset
-        #        while not done:
-        #            addr = self.original_rom_data.find(enemy_str, addr+1)
-        #            if addr < 0 or addr > int("ce5e4", 16) + rom_offset:
-        #                done = True
-        #            else:
-        #                patch.seek(addr-2)
-        #                patch.write((self.original_rom_data[addr-2]-yshift).to_bytes(1,byteorder="little"))
-
+        
         ##########################################################################
-        #                          Modify Moon Tribe events
+        #                   Adjust Moon Tribe timer for enemizer
         ##########################################################################
-        ## Adjust timer for enemizer
-        #timer = 20
-#       # if settings.level.value == 0:
-#       #     timer += 5
-#       # elif settings.level.value >= 3:
-#       #     timer -= 5
-        #if settings.enemizer.value != Enemizer.NONE.value:
-        #    timer += 5
-        #    if settings.enemizer.value != Enemizer.LIMITED.value:
-        #        timer += 5
-        #patch.seek(int("4f8b8", 16) + rom_offset)
-        #patch.write(binascii.unhexlify(str(timer)))
+        #
+        timer = 20
+        if settings.enemizer.value != Enemizer.NONE.value:
+            timer += 5
+            if settings.enemizer.value != Enemizer.LIMITED.value:
+                timer += 5
+        asar_defines["MoonTribeTimeLimit"] = timer
 
         ##########################################################################
         #                            Modify Euro events
@@ -354,28 +250,6 @@ class Randomizer:
         #    patch.seek(int("7cc0c", 16) + rom_offset)
         #    patch.write(qt_encode("Warp to start?") + b"\xcb\xac" + qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
         #    patch.write(b"\xce" + qt_encode("NO SOUP FOR YOU!") + b"\xc0")
-
-        ##########################################################################
-        #                           Modify Jeweler event
-        ##########################################################################
-        ## Allow jeweler to take 2- and 3-jewel items
-        ## Also, jewel turn-in reduces health in RJM variant
-        #if settings.red_jewel_madness:
-        #    patch.seek(int("8cf97", 16) + rom_offset)
-        #    patch.write(b"\x4c\xc9\xfd")
-        #    f_jeweler2 = open(BIN_PATH + "08fd80_jeweler2_rjm.bin", "rb")
-        #else:
-        #    f_jeweler2 = open(BIN_PATH + "08fd80_jeweler2.bin", "rb")
-        #patch.seek(int("8fd80", 16) + rom_offset)
-        #patch.write(f_jeweler2.read())
-        #f_jeweler2.close
-
-        ## Jeweler warps you to credits for Red Jewel hunts
-        #if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-        #    patch.seek(int("8d32a", 16) + rom_offset)
-        #    patch.write(b"\xE5\x00\x00\x00\x00\x00\x00\x11")
-        #    patch.seek(int("8d2d8", 16) + rom_offset)
-        #    patch.write(qt_encode("Beat the game"))
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -522,7 +396,6 @@ class Randomizer:
         ##########################################################################
         #                    Randomize Mystic Statue requirement
         ##########################################################################
-        #breakpoint()
         statueOrder = [1, 2, 3, 4, 5, 6]
         random.shuffle(statueOrder)
         statues = []
@@ -563,11 +436,6 @@ class Randomizer:
                     statues_hex.append(b"\x26")
                     asar_defines["Statue6Required"] = 1
                 i += 1
-
-        ## Can't face Dark Gaia in Red Jewel hunts
-        #if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-        #    patch.seek(int("8dd0d", 16) + rom_offset)
-        #    patch.write(b"\x10\x01")
 
         # Teacher at start spoils required Mystic Statues
         statue_str = ""
@@ -612,39 +480,32 @@ class Randomizer:
         #                           Determine Boss Order
         ##########################################################################
         boss_order = [*range(1,8)]
-        #if settings.boss_shuffle:
-        #    non_will_bosses = [5]               # Can't be forced to play Mummy Queen as Will
-        #    if settings.difficulty.value < 3:   # Solid Arm cannot be shuffled in non-Extreme seeds
-        #        boss_order.remove(7)
-        #        if settings.difficulty.value < 2:
-        #            non_will_bosses.append(3)   # In Easy/Normal, can't be forced to play Vampires as Will
-        #    random.shuffle(non_will_bosses)
-        #
-        #    # Determine statue order for shuffle
-        #    for x in non_will_bosses:
-        #        boss_order.remove(x)
-        #    random.shuffle(boss_order)
-        #    non_will_dungeons = [0,1,2,4]
-        #    random.shuffle(non_will_dungeons)
-        #    non_will_dungeons = non_will_dungeons[:len(non_will_bosses)]
-        #    non_will_dungeons.sort()
-        #    while non_will_bosses:
-        #        boss = non_will_bosses.pop(0)
-        #        dungeon = non_will_dungeons.pop(0)
-        #        boss_order.insert(dungeon,boss)
-        #    if 7 not in boss_order:
-        #        boss_order.append(7)
-        #
+        if settings.boss_shuffle:
+            non_will_bosses = [5]               # Can't be forced to play Mummy Queen as Will
+            if settings.difficulty.value < 3:   # Solid Arm cannot be shuffled in non-Extreme seeds
+                boss_order.remove(7)
+                if settings.difficulty.value < 2:
+                    non_will_bosses.append(3)   # In Easy/Normal, can't be forced to play Vampires as Will
+            random.shuffle(non_will_bosses)
+        
+            # Determine statue order for shuffle
+            for x in non_will_bosses:
+                boss_order.remove(x)
+            random.shuffle(boss_order)
+            non_will_dungeons = [0,1,2,4]
+            random.shuffle(non_will_dungeons)
+            non_will_dungeons = non_will_dungeons[:len(non_will_bosses)]
+            non_will_dungeons.sort()
+            while non_will_bosses:
+                boss = non_will_bosses.pop(0)
+                dungeon = non_will_dungeons.pop(0)
+                boss_order.insert(dungeon,boss)
+            if 7 not in boss_order:
+                boss_order.append(7)
+        
         #    if boss_order[5] != 6:      # Prevent early access to Babel entrance
         #        patch.seek(int("ce165", 16) + rom_offset)
         #        patch.write(b"\xff\xca")
-        #
-        #    #    n = random.randint(1,6)
-        #    #    boss_order = boss_order[n:] + boss_order[:n]
-        #
-        #    #if boss_order[6] == 6:      # Prevent Babel self-loops (MQII can't be in Mansion) - NO LONGER NECESSARY
-        #    #    n = random.randint(1,6)
-        #    #    boss_order = boss_order[n:] + boss_order[:n]
         #
         #
         #    # Define music map headers
@@ -918,7 +779,6 @@ class Randomizer:
         ##########################################################################
         done = False
         seed_adj = 0
-        #breakpoint()
         while not done:
             if seed_adj > MAX_RANDO_RETRIES:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
@@ -937,7 +797,10 @@ class Randomizer:
         ##########################################################################
         #             Handle Jeweler inventory strings and tracker RAM
         ##########################################################################
-        asar_defines["Jeweler7RowText"] = "My Secrets"
+        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
+            asar_defines["Jeweler7RowText"] = "Beat the game"
+        else:
+            asar_defines["Jeweler7RowText"] = "My Secrets"
         for i in [1,2,3,4,5,6,7]:
             while len(asar_defines["Jeweler"+str(i)+"RowText"]) < 14:
                 asar_defines["Jeweler"+str(i)+"RowText"] += "_"
@@ -1453,18 +1316,28 @@ class Randomizer:
         romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
         
         # temp for testing
-        asar_defines["SettingKeyRando"] = 1
+        asar_defines["SettingOrbRando"] = 1
         asar_defines["SettingEarlyFirebird"] = 0
         asar_defines["SettingRedJewelHunt"] = 0
+        asar_defines["SettingRedJewelMadness"] = 0
         asar_defines["SettingOpenMode"] = 0
+        asar_defines["SettingOHKO"] = 0
+        asar_defines["SettingZ3"] = 0
+        asar_defines["SettingFluteless"] = 0
+        asar_defines["SettingEnemizer"] = 0
+        asar_defines["SettingEntranceShuffle"] = 0
         
         for d in asar_defines:
             asar_defines[d] = str(asar_defines[d])   # The library requires defines to be string type.
         asar.init("asar.dll")
         asar_patch_result = asar.patch(os.getcwd()+"/src/randomizer/randomizer/iogr.asr", romdata, [], True, asar_defines)
-        breakpoint()
+        #breakpoint()
         
-        return asar_patch_result
+        if asar_patch_result[0]:
+            return asar_patch_result
+        else:
+            asar_error_list = asar.geterrors()
+            return [False, asar_error_list]
 
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)

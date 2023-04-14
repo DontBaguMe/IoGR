@@ -7,6 +7,23 @@ hirom
 ; and so forth.
 ; Both of these ledgers are also separate from the actual bank $81 exit table.
 
+!DefaultMapShipExitString = $30,$48,$00,$10,$01,$83,$00,$21
+!DefaultMapViperExitString = $5a,$90,$00,$70,$00,$83,$00,$14
+!DefaultMapVampEntranceString = $67,$78,$01,$d0,$01,$80,$01,$22
+!DefaultMapMQEntranceString = $dd,$f8,$00,$b0,$01,$00,$00,$22
+!DefaultMapBabelWarpString = $c3,$10,$02,$90,$00,$83,$00,$23
+!DefaultMapPrisonWarpString = $0B,$E8,$00,$A0,$00,$83,$00,$32
+!DefaultMapMoonWarpString = $4c,$68,$01,$40,$00,$83,$00,$22
+!DefaultMapGardenEntranceString = $4c,$68,$01,$40,$00,$83,$00,$22
+!DefaultMapGardenExitString = $4b,$e0,$01,$c0,$02,$03,$00,$44
+!DefaultMapMansionEntranceString = $E9,$30,$03,$d0,$03,$80,$00,$44
+!DefaultMapMansionExitString = $c3,$40,$01,$88,$00,$00,$00,$23
+
+!DefaultMQPostStatueExitMap = #$00cd
+!DefaultMQPostStatueExitX = #$0007
+!DefaultMQPostStatueExitY = #$0009
+!DefaultMQPostStatueExitCam = #$0000   ; possibly a vanilla "bug"...
+
 !DefaultMap01Exit01 = $08,$B8,$01,$80,$00,$00,$00,$12
 !DefaultMap01Exit02 = $08,$B8,$01,$80,$00,$00,$00,$12
 !DefaultMap01Exit03 = $03,$58,$00,$C0,$00,$00,$00,$11
@@ -17,6 +34,8 @@ hirom
 !DefaultMap01Exit08 = $02,$78,$00,$C0,$00,$00,$00,$11
 !DefaultMap01Exit09 = $08,$40,$00,$70,$00,$01,$00,$12
 !DefaultMap01Exit0A = $04,$30,$00,$90,$00,$01,$00,$12
+
+!DefaultMap02Exit01 = $01,$90,$02,$B0,$02,$03,$00,$43
 
 !DefaultMap03Exit01 = $01,$20,$01,$50,$02,$03,$00,$43
 

@@ -49,7 +49,9 @@ lda $01,s : and #$00ff : cmp #$0080 : bcc +
 sta $0db8
 lda $01,s : and #$00ff : cmp #$0006 : bne ..PostHerbCheck
   cop #$D5 : db $06    ; "Remove" herb placeholder item so there's room to "give" an herb.
-  inc $0aaa
+  sed
+    lda $0aaa : clc : adc #$0001 : sta $0aaa
+  cld
 ..PostHerbCheck:
 lda $01,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
 ..IsNotSpecial:
@@ -57,6 +59,7 @@ lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
 ..GotItem:
 cop #$BF : dw ...Text
 stz $0db8
+stz $0bfc
 pla
 clc
 rtl
@@ -66,6 +69,7 @@ db $c0
 ..InvFull:
 cop #$BF : dw ...Text
 stz $0db8
+stz $0bfc
 pla
 sec
 rtl
@@ -93,10 +97,10 @@ eor #$80 : sta $0a1e
 ....DoGiveHp:
 plp
 lda #$0080 : jsl LR_GiveNormalItemA8OrSec
-bra ..GotItem
+jmp ..GotItem
 ....NoGiveHp:
 plp
-bra ..GotItem
+jmp ..GotItem
 ...LightUpgrade:
 inc $0b16
 jmp ..GotItem
@@ -123,6 +127,7 @@ db $c0
 
 .TextItsAnItem:
 db $d3
+db $c5 : dw TextItemGetSpeeds, $0bfc
 db $d6,$1d    ; "It's "
 db $c5 : dw TextItemGetNames, $0db8
 db "!",$cb
@@ -244,7 +249,7 @@ db "STR",$ca
 .LightJewel:
 db "a Light Upgrade",$ca
 .DarkJewel:
-db "a Dark Upgrade",$ca
+db "a Friar Upgrade",$ca
 .RamaStatue:
 db "a Rama Statue",$ca
 .Herb:
@@ -272,7 +277,7 @@ db "the Mu Palace Key",$ca
 .PurifyStone:
 db "the Purification",$cb,"Stone",$ca
 .MagicPowder:
-db "the Magic Powder",$ca
+db "the Magic Dust",$ca
 .Necklace:
 db "the Necklace",$ca
 .RussianGlassWill:
@@ -585,12 +590,12 @@ db $ca
 
 .Door02:
 db $cd : dl TextDoorsAbbreviateEdDg
-db "__East Room Worm Door"
+db "__First Worm Door"
 db $ca
 
 .Door03:
 db $cd : dl TextDoorsAbbreviateEdDg
-db "__South Room Worm Door"
+db "__Second Worm Door"
 db $ca
 
 .Door05:
@@ -615,17 +620,17 @@ db $ca
 
 .Door0D:
 db $cd : dl TextDoorsAbbreviateInca
-db "__Exterior West Ladder"
+db "__West Ladder"
 db $ca
 
 .Door0E:
 db $cd : dl TextDoorsAbbreviateInca
-db "__Exterior Lower Ladder"
+db "__Final Ladder"
 db $ca
 
 .Door0F:
 db $cd : dl TextDoorsAbbreviateInca
-db "__Exterior Upper Ladder"
+db "__Entrance Ladder"
 db $ca
 
 .Door0C:
@@ -635,7 +640,7 @@ db $ca
 
 .Door0B:
 db $cd : dl TextDoorsAbbreviateInca
-db "__East-West Ramp"
+db "__East-West Freedan Ramp"
 db $ca
 
 .Door0A:
@@ -690,17 +695,17 @@ db $ca
 
 .Door24:
 db $cd : dl TextDoorsAbbreviateSGSW
-db "__Topside North Barrier"
+db "__Topside Cyber Barrier"
 db $ca
 
 .Door2B:
 db $cd : dl TextDoorsAbbreviateSGSW
-db "__Topside Robot Ramp"
+db "__Topside Cyber Ledge"
 db $ca
 
 .Door2C:
 db $cd : dl TextDoorsAbbreviateSGSW
-db "__Topside West Barrier"
+db "__Topside Worm Barrier"
 db $ca
 
 .Door31:
@@ -836,9 +841,15 @@ db "__Jeweler's Mansion:",$cb
 db $ca
 }
 
-
-
-
+TextItemGetSpeeds:
+.Pointers:
+dw .Instantaneous
+dw .Fast
+.Instantaneous:
+db $ca
+.Fast:
+db $d5,$00
+db $ca
 
 
 
@@ -852,6 +863,7 @@ cop #$89
 cop #$82 : db $29, $12
 cop #$89
 cop #$B6 : db $30
+lda #$0001 : sta $0bfc    ; Slow text speed.
 phx
   lda $7F0024,x : dec : asl : tax
   lda.l .ItemList,x
@@ -861,6 +873,7 @@ jsl LR_GiveAnyItemA16OrSec : bcs .AnimateAndDie
 lda $7f0024,x : jsl LR_SetMonsterItemFlagA
 cop #$D8
 .AnimateAndDie:
+stz $0bfc
 cop #$80 : db $02
 cop #$89
 cop #$E0
@@ -911,7 +924,20 @@ dw !MansionWestGateItem      ; db !MonsterItem2AId, !MonsterItem2AType
 
 
 
-
+LR_DecHP:
+lda $0aca : beq +
+  dec $0aca
++:
+lda $0ace : cmp $0aca : beq +
+  bcc +
+    dec $0ace
++:
+rtl
+LR_IncJewelCounter:
+sed
+  lda $0ab0 : clc : adc #$0001 : sta $0ab0
+cld
+rtl
 
 
 

@@ -2,8 +2,91 @@ arch 65816
 hirom
 
 
+; Exits within Castoth's map and to/on ship
+!Map29Exit02 = !DefaultMap29Exit02
+!Map29Exit03 = !DefaultMap29Exit03
+!Map29Exit04 = !DefaultMap29Exit04
+!Map2BExit01 = !DefaultMap2BExit01
+!Map2CExit01 = !DefaultMap2CExit01
+!Map2DExit01 = !DefaultMap2DExit01
+!Map2EExit01 = !DefaultMap2EExit01
+
+; Mu tunnel and top of Sea Palace are connected
+!Map5AExit05 = !DefaultMap5AExit05
+
+; Mu NW/W slider hole is always normal
+!Map5FExit04 = !DefaultMap5FExit04
+!Map62Exit05 = !DefaultMap62Exit05
+
+; Both Rama room south exits lead to the same place
+!Map66Exit01 = !Map66Exit02
+
+; Vamp arena entrance/exit is normal
+!Map67Exit02 = !DefaultMap67Exit02
+!Map67Exit03 = !DefaultMap67Exit03
+
+; Exits within Ishtar's puzzle are normal
+!Map75Exit01 = !DefaultMap75Exit01
+!Map75Exit02 = !DefaultMap75Exit02
+!Map75Exit03 = !DefaultMap75Exit03
+!Map75Exit04 = !DefaultMap75Exit04
+!Map75Exit05 = !DefaultMap75Exit05
+!Map75Exit06 = !DefaultMap75Exit06
+!Map75Exit07 = !DefaultMap75Exit07
+!Map75Exit08 = !DefaultMap75Exit08
+!Map75Exit09 = !DefaultMap75Exit09
+!Map75Exit0A = !DefaultMap75Exit0A
+!Map75Exit0B = !DefaultMap75Exit0B
+!Map75Exit0C = !DefaultMap75Exit0C
+!Map75Exit0D = !DefaultMap75Exit0D
+!Map75Exit0E = !DefaultMap75Exit0E
+!Map75Exit0F = !DefaultMap75Exit0F
+!Map75Exit10 = !DefaultMap75Exit10
+
+; Pyramid hieroglyph room to/from are normal
+!MapCCExit01 = !DefaultMapCCExit01
+!MapCDExit01 = !DefaultMapCDExit01
+
+; Olman's room and top of Babel are normal
+!MapDEExit02 = !DefaultMapDEExit02
+!MapE3Exit04 = !DefaultMapE3Exit04
+
+; Babel connections to boss rooms are normal
+!MapE0Exit05 = !DefaultMapE0Exit05
+!MapE0Exit06 = !DefaultMapE0Exit06
+!MapE0Exit07 = !DefaultMapE0Exit07
+!MapE0Exit08 = !DefaultMapE0Exit08
+!MapE3Exit05 = !DefaultMapE3Exit05
+
+; Babel connections from entrance and elevator are normal
+!MapE1Exit03 = !DefaultMapE1Exit03
+!MapE1Exit04 = !DefaultMapE1Exit04
+!MapE3Exit02 = !DefaultMapE3Exit02
+!MapE3Exit03 = !DefaultMapE3Exit03
+
+
+
+
+
 if 1
 ; Assign default exits.
+
+!MapShipExitString = !DefaultMapShipExitString
+!MapViperExitString = !DefaultMapViperExitString
+!MapVampEntranceString = !DefaultMapVampEntranceString
+!MapMQEntranceString = !DefaultMapMQEntranceString
+!MapBabelWarpString = !DefaultMapBabelWarpString
+!MapPrisonWarpString = !DefaultMapPrisonWarpString
+!MapMoonWarpString = !DefaultMapMoonWarpString
+!MapGardenEntranceString = !DefaultMapGardenEntranceString
+!MapGardenExitString = !DefaultMapGardenExitString
+!MapMansionEntranceString = !DefaultMapMansionEntranceString
+!MapMansionExitString = !DefaultMapMansionExitString
+
+!MQPostStatueExitMap = !DefaultMQPostStatueExitMap
+!MQPostStatueExitX = !DefaultMQPostStatueExitX
+!MQPostStatueExitY = !DefaultMQPostStatueExitY
+!MQPostStatueExitCam = !DefaultMQPostStatueExitCam
 
 !Map01Exit01 = !DefaultMap01Exit01
 !Map01Exit02 = !DefaultMap01Exit02
@@ -15,6 +98,8 @@ if 1
 !Map01Exit08 = !DefaultMap01Exit08
 !Map01Exit09 = !DefaultMap01Exit09
 !Map01Exit0A = !DefaultMap01Exit0A
+
+!Map02Exit01 = !DefaultMap02Exit01
 
 !Map03Exit01 = !DefaultMap03Exit01
 
@@ -976,7 +1061,7 @@ dw .MapFE
 db $FF
 db $FF
 .Map01:
-db $11,$0D,$02,$02,!Map01Exit01
+;db $11,$0D,$02,$02,!Map01Exit01    ; Unreachable "alternate" school entrance
 db $13,$0D,$02,$01,!Map01Exit02
 db $12,$22,$01,$03,!Map01Exit03
 db $22,$1E,$01,$03,!Map01Exit04
@@ -1119,7 +1204,7 @@ db $07,$2D,$02,$01,!Map19Exit03
 db $FF
 db $FF
 .Map1A:
-db $15,$1D,$02,$02,!Map1AExit01
+;db $15,$1D,$02,$02,!Map1AExit01    ; "Unused" exit back to Itory
 db $0C,$17,$01,$02,!Map1AExit02
 db $FF
 db $FF
@@ -1588,7 +1673,7 @@ db $07,$09,$01,$01,!Map69Exit02
 db $FF
 db $FF
 .Map6A:
-db $1A,$01,$01,$01,!Map6AExit01
+;db $1A,$01,$01,$01,!Map6AExit01    ; Inaccessible in IOGR
 db $FF
 db $FF
 .Map6B:
@@ -1608,7 +1693,7 @@ db $0E,$24,$01,$02,$10,$24,$80,$00,$00,$00,$10,$FF,$01
 db $FF
 .Map6C:
 db $0A,$0C,$02,$01,!Map6CExit01
-db $0A,$1C,$02,$01,!Map6CExit02
+;db $0A,$1C,$02,$01,!Map6CExit02    ; Inaccessible
 db $1A,$0C,$02,$01,!Map6CExit03
 db $18,$1C,$02,$01,!Map6CExit04
 db $22,$0D,$02,$01,!Map6CExit05
@@ -1832,11 +1917,11 @@ db $03,$08,$01,$03,!Map8AExit01
 db $2C,$08,$01,$03,!Map8AExit02
 db $FF
 db $FF
-.Map8B:
-db $00,$08,$01,$03,!Map8BExit01
+.Map8B:   ; Not accessible in IOGR
+;db $00,$08,$01,$03,!Map8BExit01
 db $FF
-db $16,$06,$01,$01,$10,$22,$40,$02,$00,$00,$08,$01,$03
-db $16,$16,$01,$01,$00,$12,$80,$00,$00,$00,$10,$FF,$01
+;db $16,$06,$01,$01,$10,$22,$40,$02,$00,$00,$08,$01,$03
+;db $16,$16,$01,$01,$00,$12,$80,$00,$00,$00,$10,$FF,$01
 db $FF
 .Map91:
 db $34,$2F,$01,$02,!Map91Exit01
