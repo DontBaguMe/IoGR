@@ -3,107 +3,206 @@ hirom
 
 
 ; Assign default cards.
-if 1
+!Map01CardMusic ?= !DefaultMap01CardMusic
+!Map02CardMusic ?= !DefaultMap02CardMusic
+!Map03CardMusic ?= !DefaultMap03CardMusic
+!Map04CardMusic ?= !DefaultMap04CardMusic
+!Map05CardMusic ?= !DefaultMap05CardMusic
+!Map06CardMusic ?= !DefaultMap06CardMusic
+!Map07CardMusic ?= !DefaultMap07CardMusic
+!Map09CardMusic ?= !DefaultMap09CardMusic
+!Map08CardMusic ?= !DefaultMap08CardMusic
+!Map0ACardMusic ?= !DefaultMap0ACardMusic
+!Map0BCardMusic ?= !DefaultMap0BCardMusic
+!MapMinorDungeonCardMusic ?= !DefaultMapMinorDungeonCardMusic
+!Map15CardMusic ?= !DefaultMap15CardMusic
+!Map16CardMusic ?= !DefaultMap16CardMusic
+!Map17CardMusic ?= !DefaultMap17CardMusic
+!Map18CardMusic ?= !DefaultMap18CardMusic
+!Map19CardMusic ?= !DefaultMap19CardMusic
+!Map1ACardMusic ?= !DefaultMap1ACardMusic
+!Map1BCardMusic ?= !DefaultMap1BCardMusic
+!Map1CCardMusic ?= !DefaultMap1CCardMusic
+!Map1DCardMusic ?= !DefaultMap1DCardMusic
+!MapIncaCardMusic ?= !DefaultMapIncaCardMusic
+!Map2CCardMusic ?= !DefaultMap2CCardMusic
+!Map2ECardMusic ?= !DefaultMap2ECardMusic
+!Map30CardMusic ?= !DefaultMap30CardMusic
+!Map31CardMusic ?= !DefaultMap31CardMusic
+!Map32CardMusic ?= !DefaultMap32CardMusic
+!Map33CardMusic ?= !DefaultMap33CardMusic
+!Map34CardMusic ?= !DefaultMap34CardMusic
+!Map35CardMusic ?= !DefaultMap35CardMusic
+!Map36CardMusic ?= !DefaultMap36CardMusic
+!Map37CardMusic ?= !DefaultMap37CardMusic
+!Map38CardMusic ?= !DefaultMap38CardMusic
+!Map39CardMusic ?= !DefaultMap39CardMusic
+!Map3ACardMusic ?= !DefaultMap3ACardMusic
+!Map3BCardMusic ?= !DefaultMap3BCardMusic
+!Map3CCardMusic ?= !DefaultMap3CCardMusic
+!Map47CardMusic ?= !DefaultMap47CardMusic
+!Map49CardMusic ?= !DefaultMap49CardMusic
+!Map4BCardMusic ?= !DefaultMap4BCardMusic
+!MapSkGnCardMusic ?= !DefaultMapSkGnCardMusic
+!Map5ACardMusic ?= !DefaultMap5ACardMusic
+!Map5BCardMusic ?= !DefaultMap5BCardMusic
+!Map5CCardMusic ?= !DefaultMap5CCardMusic
+!Map5DCardMusic ?= !DefaultMap5DCardMusic
+!Map5ECardMusic ?= !DefaultMap5ECardMusic
+!MapMuCardMusic ?= !DefaultMapMuCardMusic
+!Map63CardMusic ?= !DefaultMap63CardMusic
+!Map66CardMusic ?= !DefaultMap66CardMusic
+!Map67CardMusic ?= !DefaultMap67CardMusic
+!Map69CardMusic ?= !DefaultMap69CardMusic
+!Map6ACardMusic ?= !DefaultMap6ACardMusic
+!Map6BCardMusic ?= !DefaultMap6BCardMusic
+!Map6CCardMusic ?= !DefaultMap6CCardMusic
+!Map74CardMusic ?= !DefaultMap74CardMusic
+!Map75CardMusic ?= !DefaultMap75CardMusic
+!Map78CardMusic ?= !DefaultMap78CardMusic
+!Map79CardMusic ?= !DefaultMap79CardMusic
+!Map7ACardMusic ?= !DefaultMap7ACardMusic
+!Map7CCardMusic ?= !DefaultMap7CCardMusic
+!Map7DCardMusic ?= !DefaultMap7DCardMusic
+!Map7ECardMusic ?= !DefaultMap7ECardMusic
+!MapGtWlCardMusic ?= !DefaultMapGtWlCardMusic
+!Map91CardMusic ?= !DefaultMap91CardMusic
+!Map92CardMusic ?= !DefaultMap92CardMusic
+!Map93CardMusic ?= !DefaultMap93CardMusic
+!Map94CardMusic ?= !DefaultMap94CardMusic
+!Map95CardMusic ?= !DefaultMap95CardMusic
+!Map96CardMusic ?= !DefaultMap96CardMusic
+!Map97CardMusic ?= !DefaultMap97CardMusic
+!Map98CardMusic ?= !DefaultMap98CardMusic
+!Map99CardMusic ?= !DefaultMap99CardMusic
+!Map9ACardMusic ?= !DefaultMap9ACardMusic
+!Map9BCardMusic ?= !DefaultMap9BCardMusic
+!Map9CCardMusic ?= !DefaultMap9CCardMusic
+!Map9DCardMusic ?= !DefaultMap9DCardMusic
+!MapACCardMusic ?= !DefaultMapACCardMusic
+!MapB0CardMusic ?= !DefaultMapB0CardMusic
+!MapAnkrCardMusic ?= !DefaultMapAnkrCardMusic
+!MapBFCardMusic ?= !DefaultMapBFCardMusic
+!MapC3CardMusic ?= !DefaultMapC3CardMusic
+!MapC4CardMusic ?= !DefaultMapC4CardMusic
+!MapC5CardMusic ?= !DefaultMapC5CardMusic
+!MapC6CardMusic ?= !DefaultMapC6CardMusic
+!MapC7CardMusic ?= !DefaultMapC7CardMusic
+!MapC8CardMusic ?= !DefaultMapC8CardMusic
+!MapC9CardMusic ?= !DefaultMapC9CardMusic
+!MapCCCardMusic ?= !DefaultMapCCCardMusic
+!MapCDCardMusic ?= !DefaultMapCDCardMusic
+!MapPymdCardMusic ?= !DefaultMapPymdCardMusic
+!MapDDCardMusic ?= !DefaultMapDDCardMusic
+!MapDECardMusic ?= !DefaultMapDECardMusic
+!MapDFCardMusic ?= !DefaultMapDFCardMusic
+!MapE0CardMusic ?= !DefaultMapE0CardMusic
+!MapE1CardMusic ?= !DefaultMapE1CardMusic
+!MapE2CardMusic ?= !DefaultMapE2CardMusic
+!MapE3CardMusic ?= !DefaultMapE3CardMusic
+!MapE4CardMusic ?= !DefaultMapE4CardMusic
+!MapE5CardMusic ?= !DefaultMapE5CardMusic
+!MapE6CardMusic ?= !DefaultMapE6CardMusic
+!MapMansionCardMusic ?= !DefaultMapMansionCardMusic
+!MapF0CardMusic ?= !DefaultMapF0CardMusic
+!MapF2CardMusic ?= !DefaultMapF2CardMusic
+!MapF3CardMusic ?= !DefaultMapF3CardMusic
+!MapF4CardMusic ?= !DefaultMapF4CardMusic
+!MapF5CardMusic ?= !DefaultMapF5CardMusic
+!MapF6CardMusic ?= !DefaultMapF6CardMusic
+!MapF7CardMusic ?= !DefaultMapF7CardMusic
+!MapFACardMusic ?= !DefaultMapFACardMusic
+!MapFBCardMusic ?= !DefaultMapFBCardMusic
+!MapFDCardMusic ?= !DefaultMapFDCardMusic
+!MapFECardMusic ?= !DefaultMapFECardMusic
 
-!Map01CardMusic = !DefaultMap01CardMusic
-!Map02CardMusic = !DefaultMap02CardMusic
-!Map03CardMusic = !DefaultMap03CardMusic
-!Map04CardMusic = !DefaultMap04CardMusic
-!Map05CardMusic = !DefaultMap05CardMusic
-!Map06CardMusic = !DefaultMap06CardMusic
-!Map09CardMusic = !DefaultMap09CardMusic
-!Map08CardMusic = !DefaultMap08CardMusic
-!Map0ACardMusic = !DefaultMap0ACardMusic
-!MapMinorDungeonCardMusic = !DefaultMapMinorDungeonCardMusic
-!Map15CardMusic = !DefaultMap15CardMusic
-!Map16CardMusic = !DefaultMap16CardMusic
-!Map17CardMusic = !DefaultMap17CardMusic
-!Map18CardMusic = !DefaultMap18CardMusic
-!Map19CardMusic = !DefaultMap19CardMusic
-!Map1ACardMusic = !DefaultMap1ACardMusic
-!Map1BCardMusic = !DefaultMap1BCardMusic
-!Map1CCardMusic = !DefaultMap1CCardMusic
-!Map1DCardMusic = !DefaultMap1DCardMusic
-!MapIncaCardMusic = !DefaultMapIncaCardMusic
-!Map2CCardMusic = !DefaultMap2CCardMusic
-!Map2ECardMusic = !DefaultMap2ECardMusic
-!Map32CardMusic = !DefaultMap32CardMusic
-!Map33CardMusic = !DefaultMap33CardMusic
-!Map34CardMusic = !DefaultMap34CardMusic
-!Map35CardMusic = !DefaultMap35CardMusic
-!Map36CardMusic = !DefaultMap36CardMusic
-!Map37CardMusic = !DefaultMap37CardMusic
-!Map38CardMusic = !DefaultMap38CardMusic
-!Map39CardMusic = !DefaultMap39CardMusic
-!Map3ACardMusic = !DefaultMap3ACardMusic
-!Map3BCardMusic = !DefaultMap3BCardMusic
-!Map47CardMusic = !DefaultMap47CardMusic
-!Map49CardMusic = !DefaultMap49CardMusic
-!Map4BCardMusic = !DefaultMap4BCardMusic
-!MapSkGnCardMusic = !DefaultMapSkGnCardMusic
-!Map5ACardMusic = !DefaultMap5ACardMusic
-!Map5BCardMusic = !DefaultMap5BCardMusic
-!Map5CCardMusic = !DefaultMap5CCardMusic
-!Map5DCardMusic = !DefaultMap5DCardMusic
-!Map5ECardMusic = !DefaultMap5ECardMusic
-!MapMuCardMusic = !DefaultMapMuCardMusic
-!Map63CardMusic = !DefaultMap63CardMusic
-!Map66CardMusic = !DefaultMap66CardMusic
-!Map67CardMusic = !DefaultMap67CardMusic
-!Map69CardMusic = !DefaultMap69CardMusic
-!Map6ACardMusic = !DefaultMap6ACardMusic
-!Map6BCardMusic = !DefaultMap6BCardMusic
-!Map6CCardMusic = !DefaultMap6CCardMusic
-!Map74CardMusic = !DefaultMap74CardMusic
-!Map75CardMusic = !DefaultMap75CardMusic
-!Map78CardMusic = !DefaultMap78CardMusic
-!Map79CardMusic = !DefaultMap79CardMusic
-!Map7ACardMusic = !DefaultMap7ACardMusic
-!Map7CCardMusic = !DefaultMap7CCardMusic
-!Map7DCardMusic = !DefaultMap7DCardMusic
-!Map7ECardMusic = !DefaultMap7ECardMusic
-!MapGtWlCardMusic = !DefaultMapGtWlCardMusic
-!Map91CardMusic = !DefaultMap91CardMusic
-!Map92CardMusic = !DefaultMap92CardMusic
-!Map93CardMusic = !DefaultMap93CardMusic
-!Map94CardMusic = !DefaultMap94CardMusic
-!Map95CardMusic = !DefaultMap95CardMusic
-!Map96CardMusic = !DefaultMap96CardMusic
-!Map97CardMusic = !DefaultMap97CardMusic
-!Map98CardMusic = !DefaultMap98CardMusic
-!Map99CardMusic = !DefaultMap99CardMusic
-!Map9ACardMusic = !DefaultMap9ACardMusic
-!Map9BCardMusic = !DefaultMap9BCardMusic
-!Map9CCardMusic = !DefaultMap9CCardMusic
-!Map9DCardMusic = !DefaultMap9DCardMusic
-!MapACCardMusic = !DefaultMapACCardMusic
-!MapB0CardMusic = !DefaultMapB0CardMusic
-!MapAnkrCardMusic = !DefaultMapAnkrCardMusic
-!MapBFCardMusic = !DefaultMapBFCardMusic
-!MapC3CardMusic = !DefaultMapC3CardMusic
-!MapC4CardMusic = !DefaultMapC4CardMusic
-!MapC5CardMusic = !DefaultMapC5CardMusic
-!MapC6CardMusic = !DefaultMapC6CardMusic
-!MapC7CardMusic = !DefaultMapC7CardMusic
-!MapC8CardMusic = !DefaultMapC8CardMusic
-!MapC9CardMusic = !DefaultMapC9CardMusic
-!MapCCCardMusic = !DefaultMapCCCardMusic
-!MapCDCardMusic = !DefaultMapCDCardMusic
-!MapPymdCardMusic = !DefaultMapPymdCardMusic
-!MapDECardMusic = !DefaultMapDECardMusic
-!MapDFCardMusic = !DefaultMapDFCardMusic
-!MapE0CardMusic = !DefaultMapE0CardMusic
-!MapE1CardMusic = !DefaultMapE1CardMusic
-!MapE2CardMusic = !DefaultMapE2CardMusic
-!MapE3CardMusic = !DefaultMapE3CardMusic
-
-endif
-
-
-
-
-
-; todo: replace monster cards with defines, to support enemizer
+!Map0CCardMonsters ?= !DefaultMap0CCardMonsters
+!Map0DCardMonsters ?= !DefaultMap0DCardMonsters
+!Map0ECardMonsters ?= !DefaultMap0ECardMonsters
+!Map0FCardMonsters ?= !DefaultMap0FCardMonsters
+!Map12CardMonsters ?= !DefaultMap12CardMonsters
+!Map1BCardMonsters ?= !DefaultMap1BCardMonsters
+!Map1DCardMonsters ?= !DefaultMap1DCardMonsters
+!Map20CardMonsters ?= !DefaultMap20CardMonsters
+!Map21CardMonsters ?= !DefaultMap21CardMonsters
+!Map22CardMonsters ?= !DefaultMap22CardMonsters
+!Map23CardMonsters ?= !DefaultMap23CardMonsters
+!Map25CardMonsters ?= !DefaultMap25CardMonsters
+!Map26CardMonsters ?= !DefaultMap26CardMonsters
+!Map27CardMonsters ?= !DefaultMap27CardMonsters
+!Map28CardMonsters ?= !DefaultMap28CardMonsters
+!Map3DCardMonsters ?= !DefaultMap3DCardMonsters
+!Map3ECardMonsters ?= !DefaultMap3ECardMonsters
+!Map3FCardMonsters ?= !DefaultMap3FCardMonsters
+!Map40CardMonsters ?= !DefaultMap40CardMonsters
+!Map41CardMonsters ?= !DefaultMap41CardMonsters
+!Map45CardMonsters ?= !DefaultMap45CardMonsters
+!Map46CardMonsters ?= !DefaultMap46CardMonsters
+!Map4DCardMonsters ?= !DefaultMap4DCardMonsters
+!Map4ECardMonsters ?= !DefaultMap4ECardMonsters
+!Map4FCardMonsters ?= !DefaultMap4FCardMonsters
+!Map50CardMonsters ?= !DefaultMap50CardMonsters
+!Map51CardMonsters ?= !DefaultMap51CardMonsters
+!Map52CardMonsters ?= !DefaultMap52CardMonsters
+!Map53CardMonsters ?= !DefaultMap53CardMonsters
+!Map54CardMonsters ?= !DefaultMap54CardMonsters
+!Map5FCardMonsters ?= !DefaultMap5FCardMonsters
+!Map60CardMonsters ?= !DefaultMap60CardMonsters
+!Map61CardMonsters ?= !DefaultMap61CardMonsters
+!Map62CardMonsters ?= !DefaultMap62CardMonsters
+!Map64CardMonsters ?= !DefaultMap64CardMonsters
+!Map65CardMonsters ?= !DefaultMap65CardMonsters
+!Map6DCardMonsters ?= !DefaultMap6DCardMonsters
+!Map6ECardMonsters ?= !DefaultMap6ECardMonsters
+!Map6FCardMonsters ?= !DefaultMap6FCardMonsters
+!Map70CardMonsters ?= !DefaultMap70CardMonsters
+!Map71CardMonsters ?= !DefaultMap71CardMonsters
+!Map72CardMonsters ?= !DefaultMap72CardMonsters
+!Map82CardMonsters ?= !DefaultMap82CardMonsters
+!Map83CardMonsters ?= !DefaultMap83CardMonsters
+!Map85CardMonsters ?= !DefaultMap85CardMonsters
+!Map86CardMonsters ?= !DefaultMap86CardMonsters
+!Map87CardMonsters ?= !DefaultMap87CardMonsters
+!Map88CardMonsters ?= !DefaultMap88CardMonsters
+!MapA0CardMonsters ?= !DefaultMapA0CardMonsters
+!MapA1CardMonsters ?= !DefaultMapA1CardMonsters
+!MapA2CardMonsters ?= !DefaultMapA2CardMonsters
+!MapA3CardMonsters ?= !DefaultMapA3CardMonsters
+!MapA4CardMonsters ?= !DefaultMapA4CardMonsters
+!MapA5CardMonsters ?= !DefaultMapA5CardMonsters
+!MapA6CardMonsters ?= !DefaultMapA6CardMonsters
+!MapA7CardMonsters ?= !DefaultMapA7CardMonsters
+!MapA8CardMonsters ?= !DefaultMapA8CardMonsters
+!MapB0CardMonsters ?= !DefaultMapB0CardMonsters
+!MapB1CardMonsters ?= !DefaultMapB1CardMonsters
+!MapB2CardMonsters ?= !DefaultMapB2CardMonsters
+!MapB3CardMonsters ?= !DefaultMapB3CardMonsters
+!MapB4CardMonsters ?= !DefaultMapB4CardMonsters
+!MapB5CardMonsters ?= !DefaultMapB5CardMonsters
+!MapB6CardMonsters ?= !DefaultMapB6CardMonsters
+!MapB7CardMonsters ?= !DefaultMapB7CardMonsters
+!MapB8CardMonsters ?= !DefaultMapB8CardMonsters
+!MapB9CardMonsters ?= !DefaultMapB9CardMonsters
+!MapBACardMonsters ?= !DefaultMapBACardMonsters
+!MapBBCardMonsters ?= !DefaultMapBBCardMonsters
+!MapBCCardMonsters ?= !DefaultMapBCCardMonsters
+!MapBDCardMonsters ?= !DefaultMapBDCardMonsters
+!MapBECardMonsters ?= !DefaultMapBECardMonsters
+!MapCCCardMonsters ?= !DefaultMapCCCardMonsters
+!MapCECardMonsters ?= !DefaultMapCECardMonsters
+!MapCFCardMonsters ?= !DefaultMapCFCardMonsters
+!MapD0CardMonsters ?= !DefaultMapD0CardMonsters
+!MapD1CardMonsters ?= !DefaultMapD1CardMonsters
+!MapD2CardMonsters ?= !DefaultMapD2CardMonsters
+!MapD3CardMonsters ?= !DefaultMapD3CardMonsters
+!MapD4CardMonsters ?= !DefaultMapD4CardMonsters
+!MapD5CardMonsters ?= !DefaultMapD5CardMonsters
+!MapD6CardMonsters ?= !DefaultMapD6CardMonsters
+!MapD7CardMonsters ?= !DefaultMapD7CardMonsters
+!MapD8CardMonsters ?= !DefaultMapD8CardMonsters
+!MapD9CardMonsters ?= !DefaultMapD9CardMonsters
+!MapDBCardMonsters ?= !DefaultMapDBCardMonsters
+!MapE9CardMonsters ?= !DefaultMapE9CardMonsters
 
 
 db $00 : db $00
@@ -212,8 +311,7 @@ db $00
 
 db $07 : db $00
 db $02 : db $08
-db $11,$00,$00,$AC,$1C,$D7
-db $11,$12,$00,$29,$73,$D5
+db !Map07CardMusic
 db $03,$00,$10,$00,$00,$00,$C1,$00
 db $04,$00,$70,$10,$93,$68,$DE
 db $05,$00,$20,$00,$01,$6E,$46,$DA
@@ -237,7 +335,7 @@ db $00
 
 db $0B : db $00
 db $02 : db $06
-db $11,$1B,$00,$1D,$2A,$DF
+db !Map0BCardMusic
 db $03,$00,$10,$00,$09,$DB,$9D,$00
 db $04,$00,$70,$10,$73,$31,$DE
 db $05,$00,$20,$00,$01,$00,$00,$D9
@@ -252,9 +350,7 @@ db $00
 
 db $0C : db $00
 db $02 : db $05
-db $03,$00,$10,$10,$EC,$59,$CD,$01
-db $04,$00,$60,$A0,$8C,$75,$DE
-db $10,$D0,$21,$00,$47,$ED,$9F
+db !Map0CCardMonsters
 db $06,$01,$E8,$17,$DF
 db $14 : db $02
 db !MapMinorDungeonCardMusic
@@ -267,9 +363,7 @@ db $00
 
 db $0D : db $00
 db $02 : db $03
-db $03,$00,$10,$10,$EC,$59,$CD,$01
-db $04,$00,$60,$A0,$8C,$75,$DE
-db $10,$D0,$21,$00,$47,$ED,$9F
+db !Map0DCardMonsters
 db $06,$01,$94,$7B,$D3
 db $06,$02,$A3,$7C,$DD
 db $15 : db $02
@@ -277,9 +371,7 @@ db $00
 
 db $0E : db $00
 db $02 : db $03
-db $03,$00,$10,$10,$EC,$59,$CD,$01
-db $04,$00,$60,$A0,$8C,$75,$DE
-db $10,$D0,$21,$00,$47,$ED,$9F
+db !Map0ECardMonsters
 db $06,$01,$20,$5F,$DA
 db $06,$02,$AC,$0C,$DE
 db $15 : db $02
@@ -287,9 +379,7 @@ db $00
 
 db $0F : db $00
 db $02 : db $03
-db $03,$00,$10,$10,$EC,$59,$CD,$01
-db $04,$00,$60,$A0,$8C,$75,$DE
-db $10,$D0,$21,$00,$47,$ED,$9F
+db !Map0FCardMonsters
 db $06,$01,$DE,$17,$DC
 db $06,$02,$F4,$70,$DE
 db $15 : db $02
@@ -312,9 +402,7 @@ db $00
 
 db $12 : db $00
 db $02 : db $03
-db $03,$00,$10,$10,$EC,$59,$CD,$01
-db $04,$00,$60,$A0,$8C,$75,$DE
-db $10,$D0,$21,$00,$47,$ED,$9F
+db !Map12CardMonsters
 db $06,$01,$A7,$1E,$D6
 db $06,$02,$7D,$78,$DC
 db $15 : db $02
@@ -407,9 +495,7 @@ db $00
 
 db $1B : db $00
 db $02 : db $05
-db $03,$00,$10,$10,$BC,$33,$C2,$01
-db $04,$00,$60,$A0,$0C,$77,$DE
-db $10,$2A,$0F,$00,$E6,$08,$D5
+db !Map1BCardMonsters
 db !Map1BCardMusic
 db $03,$00,$10,$00,$00,$80,$9E,$00
 db $04,$00,$70,$10,$13,$2D,$DE
@@ -434,9 +520,7 @@ db $00
 
 db $1D : db $00
 db $02 : db $0F
-db $03,$00,$10,$10,$BC,$33,$C2,$01
-db $04,$00,$60,$A0,$0C,$77,$DE
-db $10,$2A,$0F,$00,$E6,$08,$D5
+db !Map1DCardMonsters
 db !Map1DCardMusic
 db $03,$00,$20,$00,$BC,$A9,$99,$00
 db $04,$00,$70,$10,$D3,$35,$DE
@@ -475,36 +559,28 @@ db $00
 
 db $20 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$BC,$33,$C2,$01
-db $04,$00,$60,$A0,$0C,$77,$DE
-db $10,$2A,$0F,$00,$E6,$08,$D5
+db !Map20CardMonsters
 db $06,$01,$10,$1F,$DD
 db $15 : db $40
 db $00
 
 db $21 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$23,$4D,$C2,$01
-db $04,$00,$60,$A0,$CC,$77,$DE
-db $10,$36,$23,$00,$24,$45,$CC
+db !Map21CardMonsters
 db $06,$01,$C2,$23,$D7
 db $15 : db $40
 db $00
 
 db $22 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$23,$4D,$C2,$01
-db $04,$00,$60,$A0,$CC,$77,$DE
-db $10,$36,$23,$00,$24,$45,$CC
+db !Map22CardMonsters
 db $06,$01,$15,$27,$D8
 db $15 : db $40
 db $00
 
 db $23 : db $00
 db $02 : db $0A
-db $03,$00,$10,$10,$23,$4D,$C2,$01
-db $04,$00,$60,$A0,$CC,$77,$DE
-db $10,$36,$23,$00,$24,$45,$CC
+db !Map23CardMonsters
 db $03,$00,$10,$10,$0A,$19,$C3,$00
 db $05,$00,$20,$00,$02,$4A,$3A,$D8
 db $06,$01,$7D,$71,$D9
@@ -526,27 +602,21 @@ db $00
 
 db $25 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$BC,$33,$C2,$01
-db $04,$00,$60,$A0,$0C,$77,$DE
-db $10,$2A,$0F,$00,$E6,$08,$D5
+db !Map25CardMonsters
 db $06,$01,$2A,$73,$DC
 db $15 : db $40
 db $00
 
 db $26 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$BC,$33,$C2,$01
-db $04,$00,$60,$A0,$0C,$77,$DE
-db $10,$2A,$0F,$00,$E6,$08,$D5
+db !Map26CardMonsters
 db $06,$01,$CB,$56,$DC
 db $15 : db $40
 db $00
 
 db $27 : db $00
 db $02 : db $0A
-db $03,$00,$10,$10,$BC,$33,$C2,$01
-db $04,$00,$60,$A0,$0C,$77,$DE
-db $10,$2A,$0F,$00,$E6,$08,$D5
+db !Map27CardMonsters
 db $03,$00,$10,$10,$0A,$19,$C3,$00
 db $05,$00,$20,$00,$02,$4A,$3A,$D8
 db $06,$01,$9A,$67,$DB
@@ -556,9 +626,7 @@ db $00
 
 db $28 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$BC,$33,$C2,$01
-db $04,$00,$60,$A0,$0C,$77,$DE
-db $10,$2A,$0F,$00,$E6,$08,$D5
+db !Map28CardMonsters
 db $06,$01,$ED,$21,$DC
 db $15 : db $40
 db $00
@@ -612,7 +680,7 @@ db $00
 
 db $30 : db $00
 db $02 : db $06
-db $11,$1B,$00,$1D,$2A,$DF
+db !Map30CardMusic
 db $03,$00,$10,$00,$00,$00,$CA,$00
 db $03,$00,$10,$10,$77,$48,$CA,$00
 db $04,$00,$70,$10,$33,$2C,$DE
@@ -625,7 +693,7 @@ db $00
 
 db $31 : db $00
 db $02 : db $01
-db $11,$1B,$00,$1D,$2A,$DF
+db !Map31CardMusic
 db $04,$00,$70,$10,$D3,$2E,$DE
 db $05,$00,$20,$00,$01,$7F,$79,$CF
 db $05,$00,$20,$00,$02,$E6,$68,$DA
@@ -748,7 +816,7 @@ db $00
 
 db $3C : db $00
 db $02 : db $05
-db $11,$06,$00,$B7,$49,$DB
+db !Map3CCardMusic
 db $03,$00,$10,$00,$00,$80,$9E,$00
 db $04,$00,$70,$10,$93,$3E,$DE
 db $05,$00,$20,$00,$01,$17,$49,$D9
@@ -758,9 +826,7 @@ db $00
 
 db $3D : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$CC,$7A,$DE
-db $10,$30,$29,$00,$BE,$2F,$CB
+db !Map3DCardMonsters
 db $06,$01,$6D,$5F,$DC
 db $14 : db $10
 db !MapMinorDungeonCardMusic
@@ -771,36 +837,28 @@ db $00
 
 db $3E : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$CC,$7A,$DE
-db $10,$30,$29,$00,$BE,$2F,$CB
+db !Map3ECardMonsters
 db $06,$01,$9B,$4D,$DB
 db $15 : db $10
 db $00
 
 db $3F : db $00
 db $02 : db $05
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$CC,$7A,$DE
-db $10,$30,$29,$00,$BE,$2F,$CB
+db !Map3FCardMonsters
 db $06,$01,$50,$77,$C9
 db $15 : db $10
 db $00
 
 db $40 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$CC,$7A,$DE
-db $10,$30,$29,$00,$BE,$2F,$CB
+db !Map40CardMonsters
 db $06,$01,$D0,$5C,$DB
 db $15 : db $10
 db $00
 
 db $41 : db $00
 db $02 : db $00
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$CC,$7A,$DE
-db $10,$30,$29,$00,$BE,$2F,$CB
+db !Map41CardMonsters
 db !MapMinorDungeonCardMusic
 db $03,$00,$10,$00,$FB,$9B,$9E,$00
 db $03,$00,$10,$10,$FB,$9B,$9E,$00
@@ -844,18 +902,14 @@ db $00
 
 db $45 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$CC,$7A,$DE
-db $10,$30,$29,$00,$BE,$2F,$CB
+db !Map45CardMonsters
 db $06,$01,$A3,$59,$DD
 db $15 : db $10
 db $00
 
 db $46 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$CC,$7A,$DE
-db $10,$30,$29,$00,$BE,$2F,$CB
+db !Map46CardMonsters
 db $06,$01,$2F,$2A,$DD
 db $15 : db $10
 db $00
@@ -915,9 +969,7 @@ db $00
 
 db $4D : db $00
 db $02 : db $12
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$4C,$7C,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map4DCardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$0F,$FA,$96
 db $06,$02,$1E,$76,$DD
@@ -926,9 +978,7 @@ db $00
 
 db $4E : db $00
 db $02 : db $10
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$0C,$7D,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map4ECardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$9D,$12,$DB
 db $06,$02,$6C,$7F,$D6
@@ -941,9 +991,7 @@ db $51,$DD,$00
 
 db $4F : db $00
 db $02 : db $12
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$4C,$7C,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map4FCardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$83,$2D,$D8
 db $06,$02,$1E,$76,$DD
@@ -952,9 +1000,7 @@ db $00
 
 db $50 : db $00
 db $02 : db $10
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$0C,$7D,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map50CardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$BC,$04,$DB
 db $06,$02,$6C,$7F,$D6
@@ -963,9 +1009,7 @@ db $00
 
 db $51 : db $00
 db $02 : db $12
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$4C,$7C,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map51CardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$BC,$5A,$D6
 db $06,$02,$1E,$76,$DD
@@ -974,9 +1018,7 @@ db $00
 
 db $52 : db $00
 db $02 : db $10
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$0C,$7D,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map52CardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$0E,$79,$D8
 db $06,$02,$6C,$7F,$D6
@@ -985,9 +1027,7 @@ db $00
 
 db $53 : db $00
 db $02 : db $12
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$4C,$7C,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map53CardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$DD,$72,$D8
 db $06,$02,$1E,$76,$DD
@@ -996,9 +1036,7 @@ db $00
 
 db $54 : db $00
 db $02 : db $12
-db $03,$00,$10,$10,$62,$3D,$CF,$01
-db $04,$00,$60,$A0,$0C,$7D,$DE
-db $10,$54,$1D,$00,$EF,$EE,$9E
+db !Map54CardMonsters
 db $03,$00,$20,$00,$E5,$90,$8F,$00
 db $06,$01,$62,$77,$DA
 db $06,$02,$6C,$7F,$D6
@@ -1103,9 +1141,7 @@ db $00
 
 db $5F : db $00
 db $02 : db $14
-db $03,$00,$10,$10,$2D,$2E,$CC,$01
-db $04,$00,$60,$A0,$00,$00,$DF
-db $10,$16,$1C,$00,$41,$36,$D1
+db !Map5FCardMonsters
 db !MapMuCardMusic
 db $03,$00,$20,$00,$00,$80,$91,$00
 db $04,$00,$70,$10,$13,$49,$DE
@@ -1126,9 +1162,7 @@ db $00
 
 db $60 : db $00
 db $02 : db $14
-db $03,$00,$10,$10,$2D,$2E,$CC,$01
-db $04,$00,$60,$A0,$00,$00,$DF
-db $10,$16,$1C,$00,$41,$36,$D1
+db !Map60CardMonsters
 db !MapMuCardMusic
 db $03,$00,$20,$00,$00,$80,$91,$00
 db $04,$00,$70,$10,$13,$49,$DE
@@ -1145,9 +1179,7 @@ db $00
 
 db $61 : db $00
 db $02 : db $14
-db $03,$00,$10,$10,$2D,$2E,$CC,$01
-db $04,$00,$60,$A0,$00,$00,$DF
-db $10,$16,$1C,$00,$41,$36,$D1
+db !Map61CardMonsters
 db !MapMuCardMusic
 db $03,$00,$20,$00,$00,$80,$91,$00
 db $04,$00,$70,$10,$13,$49,$DE
@@ -1164,9 +1196,7 @@ db $00
 
 db $62 : db $00
 db $02 : db $14
-db $03,$00,$10,$10,$2D,$2E,$CC,$01
-db $04,$00,$60,$A0,$00,$00,$DF
-db $10,$16,$1C,$00,$41,$36,$D1
+db !Map62CardMonsters
 db !MapMuCardMusic
 db $03,$00,$20,$00,$00,$80,$91,$00
 db $04,$00,$70,$10,$13,$49,$DE
@@ -1196,9 +1226,7 @@ db $00
 
 db $64 : db $00
 db $02 : db $14
-db $03,$00,$10,$10,$2D,$2E,$CC,$01
-db $04,$00,$60,$A0,$00,$00,$DF
-db $10,$16,$1C,$00,$41,$36,$D1
+db !Map64CardMonsters
 db !MapMuCardMusic
 db $03,$00,$20,$00,$00,$80,$91,$00
 db $04,$00,$70,$10,$13,$49,$DE
@@ -1212,9 +1240,7 @@ db $00
 
 db $65 : db $00
 db $02 : db $14
-db $03,$00,$10,$10,$2D,$2E,$CC,$01
-db $04,$00,$60,$A0,$00,$00,$DF
-db $10,$16,$1C,$00,$41,$36,$D1
+db !Map65CardMonsters
 db !MapMuCardMusic
 db $03,$00,$20,$00,$00,$80,$91,$00
 db $04,$00,$70,$10,$13,$49,$DE
@@ -1301,9 +1327,7 @@ db $00
 
 db $6D : db $00
 db $02 : db $16
-db $03,$00,$10,$10,$D1,$14,$CF,$01
-db $04,$00,$60,$A0,$40,$02,$DF
-db $10,$7F,$0F,$00,$2C,$2B,$D5
+db !Map6DCardMonsters
 db $03,$00,$20,$00,$07,$8F,$90,$00
 db $06,$01,$37,$5A,$DA
 db $06,$02,$3F,$63,$DD
@@ -1316,9 +1340,7 @@ db $00
 
 db $6E : db $00
 db $02 : db $18
-db $03,$00,$10,$10,$D1,$14,$CF,$01
-db $04,$00,$60,$A0,$40,$02,$DF
-db $10,$7F,$0F,$00,$2C,$2B,$D5
+db !Map6ECardMonsters
 db $03,$00,$20,$00,$07,$8F,$90,$00
 db $06,$01,$02,$0E,$DB
 db $15 : db $43
@@ -1326,9 +1348,7 @@ db $00
 
 db $6F : db $00
 db $02 : db $1B
-db $03,$00,$10,$10,$D1,$14,$CF,$01
-db $04,$00,$60,$A0,$40,$02,$DF
-db $10,$7F,$0F,$00,$2C,$2B,$D5
+db !Map6FCardMonsters
 db $03,$00,$20,$00,$07,$8F,$90,$00
 db $06,$01,$13,$7A,$DD
 db $06,$02,$23,$7F,$DD
@@ -1338,9 +1358,7 @@ db $00
 
 db $70 : db $00
 db $02 : db $16
-db $03,$00,$10,$10,$D1,$14,$CF,$01
-db $04,$00,$60,$A0,$40,$02,$DF
-db $10,$7F,$0F,$00,$2C,$2B,$D5
+db !Map70CardMonsters
 db $03,$00,$20,$00,$07,$8F,$90,$00
 db $06,$01,$21,$7C,$DA
 db $06,$02,$C0,$7E,$D2
@@ -1349,9 +1367,7 @@ db $00
 
 db $71 : db $00
 db $02 : db $18
-db $03,$00,$10,$10,$D1,$14,$CF,$01
-db $04,$00,$60,$A0,$40,$02,$DF
-db $10,$7F,$0F,$00,$2C,$2B,$D5
+db !Map71CardMonsters
 db $03,$00,$20,$00,$07,$8F,$90,$00
 db $06,$01,$00,$00,$DE
 db $15 : db $43
@@ -1359,9 +1375,7 @@ db $00
 
 db $72 : db $00
 db $02 : db $18
-db $03,$00,$10,$10,$D1,$14,$CF,$01
-db $04,$00,$60,$A0,$40,$02,$DF
-db $10,$7F,$0F,$00,$2C,$2B,$D5
+db !Map72CardMonsters
 db $03,$00,$20,$00,$07,$8F,$90,$00
 db $06,$01,$DA,$4B,$DD
 db $15 : db $43
@@ -1372,7 +1386,7 @@ db $02 : db $16
 db $03,$00,$10,$10,$D1,$14,$CF,$01
 db $04,$00,$60,$A0,$40,$02,$DF
 db $10,$7F,$0F,$00,$2C,$2B,$D5
-db $11,$1D,$00,$CB,$2B,$DF
+db $11,$1D,$00,$CB,$2B,$DF    ; Waterfall; we never mute this
 db $03,$00,$20,$00,$07,$8F,$90,$00
 db $04,$00,$70,$10,$F3,$49,$DE
 db $05,$00,$20,$00,$01,$44,$53,$D6
@@ -1493,9 +1507,7 @@ db $00
 
 db $82 : db $00
 db $02 : db $1D
-db $03,$00,$10,$10,$6D,$13,$D0,$01
-db $04,$00,$60,$A0,$40,$05,$DF
-db $10,$FF,$16,$00,$F7,$F3,$99
+db !Map82CardMonsters
 db $03,$00,$20,$00,$7A,$B1,$92,$00
 db $05,$00,$20,$00,$01,$D3,$3C,$D6
 db $06,$01,$F2,$A4,$97
@@ -1508,9 +1520,7 @@ db $00
 
 db $83 : db $00
 db $02 : db $1D
-db $03,$00,$10,$10,$6D,$13,$D0,$01
-db $04,$00,$60,$A0,$40,$05,$DF
-db $10,$FF,$16,$00,$F7,$F3,$99
+db !Map83CardMonsters
 db $03,$00,$20,$00,$7A,$B1,$92,$00
 db $05,$00,$20,$00,$01,$33,$62,$D6
 db $06,$01,$54,$68,$D2
@@ -1520,9 +1530,7 @@ db $00
 
 db $85 : db $00
 db $02 : db $1D
-db $03,$00,$10,$10,$6D,$13,$D0,$01
-db $04,$00,$60,$A0,$40,$05,$DF
-db $10,$FF,$16,$00,$F7,$F3,$99
+db !Map85CardMonsters
 db $03,$00,$20,$00,$7A,$B1,$92,$00
 db $05,$00,$20,$00,$01,$D3,$3C,$D6
 db $06,$01,$AD,$09,$D4
@@ -1532,9 +1540,7 @@ db $00
 
 db $86 : db $00
 db $02 : db $1D
-db $03,$00,$10,$10,$6D,$13,$D0,$01
-db $04,$00,$60,$A0,$40,$05,$DF
-db $10,$FF,$16,$00,$F7,$F3,$99
+db !Map86CardMonsters
 db $03,$00,$20,$00,$7A,$B1,$92,$00
 db $05,$00,$20,$00,$01,$33,$62,$D6
 db $06,$01,$A0,$20,$D8
@@ -1544,9 +1550,7 @@ db $00
 
 db $87 : db $00
 db $02 : db $1D
-db $03,$00,$10,$10,$6D,$13,$D0,$01
-db $04,$00,$60,$A0,$40,$05,$DF
-db $10,$FF,$16,$00,$F7,$F3,$99
+db !Map87CardMonsters
 db $03,$00,$20,$00,$7A,$B1,$92,$00
 db $05,$00,$20,$00,$01,$33,$62,$D6
 db $06,$01,$72,$31,$DA
@@ -1556,9 +1560,7 @@ db $00
 
 db $88 : db $00
 db $02 : db $1D
-db $03,$00,$10,$10,$6D,$13,$D0,$01
-db $04,$00,$60,$A0,$40,$05,$DF
-db $10,$FF,$16,$00,$F7,$F3,$99
+db !Map88CardMonsters
 db $03,$00,$20,$00,$7A,$B1,$92,$00
 db $05,$00,$20,$00,$01,$33,$62,$D6
 db $06,$01,$C7,$10,$DA
@@ -1785,9 +1787,7 @@ db $00
 
 db $A0 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA0CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$A5,$6D,$DC
 db $06,$02,$6A,$69,$DD
@@ -1800,9 +1800,7 @@ db $00
 
 db $A1 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA1CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$1C,$66,$D9
 db $06,$02,$6A,$69,$DD
@@ -1811,9 +1809,7 @@ db $00
 
 db $A2 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA2CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$3F,$1B,$DC
 db $06,$02,$6A,$69,$DD
@@ -1822,9 +1818,7 @@ db $00
 
 db $A3 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA3CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$00,$00,$D8
 db $06,$02,$6A,$69,$DD
@@ -1833,9 +1827,7 @@ db $00
 
 db $A4 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA4CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$68,$41,$DA
 db $06,$02,$6A,$69,$DD
@@ -1844,9 +1836,7 @@ db $00
 
 db $A5 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA5CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$44,$07,$D7
 db $06,$02,$6A,$69,$DD
@@ -1855,9 +1845,7 @@ db $00
 
 db $A6 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA6CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$A1,$26,$DA
 db $06,$02,$6A,$69,$DD
@@ -1866,9 +1854,7 @@ db $00
 
 db $A7 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA7CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$D0,$2E,$D2
 db $06,$02,$6A,$69,$DD
@@ -1877,9 +1863,7 @@ db $00
 
 db $A8 : db $00
 db $02 : db $20
-db $03,$00,$10,$10,$00,$00,$D0,$01
-db $04,$00,$60,$A0,$40,$08,$DF
-db $10,$70,$0E,$00,$5C,$4D,$D8
+db !MapA8CardMonsters
 db $03,$00,$20,$00,$00,$80,$92,$00
 db $06,$01,$AF,$3B,$DC
 db $06,$02,$6A,$69,$DD
@@ -1935,9 +1919,7 @@ db $00
 
 db $B0 : db $00
 db $02 : db $2C
-db $03,$00,$10,$10,$EA,$15,$CE,$01
-db $04,$00,$70,$90,$53,$55,$DE
-db $10,$D5,$14,$00,$08,$73,$CC
+db !MapB0CardMonsters
 db !MapB0CardMusic
 db $03,$00,$20,$00,$A2,$80,$99,$00
 db $04,$00,$70,$10,$73,$54,$DE
@@ -1949,9 +1931,7 @@ db $00
 
 db $B1 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB1CardMonsters
 db $06,$01,$5B,$0F,$D6
 db $14 : db $2C
 db !MapAnkrCardMusic
@@ -1962,27 +1942,21 @@ db $00
 
 db $B2 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB2CardMonsters
 db $06,$01,$22,$72,$DB
 db $15 : db $2C
 db $00
 
 db $B3 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB3CardMonsters
 db $06,$01,$95,$72,$DA
 db $15 : db $2C
 db $00
 
 db $B4 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB4CardMonsters
 db !MapAnkrCardMusic
 db $03,$00,$10,$00,$00,$80,$9F,$00
 db $04,$00,$70,$10,$F3,$57,$DE
@@ -1992,18 +1966,14 @@ db $00
 
 db $B5 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB5CardMonsters
 db $06,$01,$D9,$41,$DC
 db $15 : db $2C
 db $00
 
 db $B6 : db $00
 db $02 : db $2C
-db $03,$00,$10,$10,$EA,$15,$CE,$01
-db $04,$00,$70,$90,$53,$55,$DE
-db $10,$D5,$14,$00,$08,$73,$CC
+db !MapB6CardMonsters
 db !MapAnkrCardMusic
 db $03,$00,$20,$00,$A2,$80,$99,$00
 db $04,$00,$70,$10,$73,$54,$DE
@@ -2015,36 +1985,28 @@ db $00
 
 db $B7 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB7CardMonsters
 db $06,$01,$00,$00,$DB
 db $15 : db $2C
 db $00
 
 db $B8 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB8CardMonsters
 db $06,$01,$F5,$04,$DD
 db $15 : db $2C
 db $00
 
 db $B9 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapB9CardMonsters
 db $06,$01,$00,$00,$DD
 db $15 : db $2C
 db $00
 
 db $BA : db $00
 db $02 : db $2C
-db $03,$00,$10,$10,$EA,$15,$CE,$01
-db $04,$00,$70,$90,$53,$55,$DE
-db $10,$D5,$14,$00,$08,$73,$CC
+db !MapBACardMonsters
 db !MapAnkrCardMusic
 db $03,$00,$20,$00,$A2,$80,$99,$00
 db $04,$00,$70,$10,$73,$54,$DE
@@ -2056,36 +2018,28 @@ db $00
 
 db $BB : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapBBCardMonsters
 db $06,$01,$00,$00,$DC
 db $15 : db $2C
 db $00
 
 db $BC : db $00
 db $02 : db $24
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapBCCardMonsters
 db $06,$01,$F1,$4A,$DC
 db $15 : db $2C
 db $00
 
 db $BD : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapBDCardMonsters
 db $06,$01,$C8,$3E,$DC
 db $15 : db $2C
 db $00
 
 db $BE : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$81,$6A,$C1,$01
-db $04,$00,$70,$90,$13,$57,$DE
-db $10,$57,$10,$00,$5F,$39,$D4
+db !MapBECardMonsters
 db $06,$01,$F4,$4D,$DC
 db $15 : db $2C
 db $00
@@ -2189,9 +2143,7 @@ db $00
 
 db $CC : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapCCCardMonsters
 db !MapCCCardMusic
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $04,$00,$70,$10,$73,$5B,$DE
@@ -2213,9 +2165,7 @@ db $00
 
 db $CE : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapCECardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$4F,$44,$D6
 db $06,$01,$24,$1A,$D8
@@ -2226,9 +2176,7 @@ db $00
 
 db $CF : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapCFCardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$4F,$44,$D6
 db $06,$01,$20,$43,$D9
@@ -2237,9 +2185,7 @@ db $00
 
 db $D0 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD0CardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$40,$26,$D6
 db $06,$01,$CB,$4B,$D6
@@ -2248,9 +2194,7 @@ db $00
 
 db $D1 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD1CardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$40,$26,$D6
 db $06,$01,$00,$00,$D5
@@ -2259,9 +2203,7 @@ db $00
 
 db $D2 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD2CardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$4F,$44,$D6
 db $06,$01,$CB,$2D,$D6
@@ -2270,9 +2212,7 @@ db $00
 
 db $D3 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD3CardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$4F,$44,$D6
 db $06,$01,$17,$37,$D9
@@ -2281,9 +2221,7 @@ db $00
 
 db $D4 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD4CardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$40,$26,$D6
 db $06,$01,$D4,$53,$D5
@@ -2292,9 +2230,7 @@ db $00
 
 db $D5 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD5CardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$40,$26,$D6
 db $06,$01,$67,$6B,$D5
@@ -2303,9 +2239,7 @@ db $00
 
 db $D6 : db $00
 db $02 : db $26
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD6CardMonsters
 db !MapPymdCardMusic
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $04,$00,$70,$10,$73,$5B,$DE
@@ -2317,9 +2251,7 @@ db $00
 
 db $D7 : db $00
 db $02 : db $28
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD7CardMonsters
 db !MapPymdCardMusic
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $04,$00,$70,$10,$73,$5B,$DE
@@ -2331,9 +2263,7 @@ db $00
 
 db $D8 : db $00
 db $02 : db $08
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD8CardMonsters
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $05,$00,$20,$00,$01,$00,$00,$D7
 db $06,$01,$33,$1A,$D5
@@ -2342,9 +2272,7 @@ db $00
 
 db $D9 : db $00
 db $02 : db $26
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapD9CardMonsters
 db !MapPymdCardMusic
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $04,$00,$70,$10,$73,$5B,$DE
@@ -2367,9 +2295,7 @@ db $00
 
 db $DB : db $00
 db $02 : db $26
-db $03,$00,$10,$10,$0D,$18,$CB,$01
-db $04,$00,$60,$90,$80,$0A,$DF
-db $10,$FB,$13,$00,$0E,$67,$D1
+db !MapDBCardMonsters
 db !MapPymdCardMusic
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $04,$00,$70,$10,$73,$5B,$DE
@@ -2381,7 +2307,7 @@ db $00
 
 db $DD : db $00
 db $02 : db $08
-db $11,$0F,$00,$AE,$73,$D2
+db !MapDDCardMusic
 db $03,$00,$20,$00,$61,$C5,$90,$00
 db $04,$00,$70,$10,$73,$5B,$DE
 db $05,$00,$20,$00,$01,$9B,$18,$D9
@@ -2466,7 +2392,7 @@ db $00
 
 db $E4 : db $00
 db $02 : db $15
-db $11,$0E,$00,$37,$60,$D8
+db !MapE4CardMusic
 db $03,$00,$20,$00,$21,$C4,$95,$00
 db $04,$00,$70,$10,$13,$5E,$DE
 db $05,$00,$20,$00,$01,$D8,$24,$D9
@@ -2478,7 +2404,7 @@ db $00
 
 db $E5 : db $00
 db $02 : db $25
-db $11,$0E,$00,$37,$60,$D8
+db !MapE5CardMusic
 db $03,$00,$20,$00,$E7,$16,$CD,$00
 db $04,$00,$80,$00,$35,$1D,$DE
 db $05,$00,$20,$00,$03,$DC,$7A,$D5
@@ -2489,7 +2415,7 @@ db $00
 
 db $E6 : db $00
 db $02 : db $0C
-db $11,$16,$00,$53,$35,$D6
+db !MapE6CardMusic
 db $06,$01,$31,$15,$DE
 db $14 : db $09
 db $03,$00,$10,$00,$86,$66,$C2,$00
@@ -2528,10 +2454,8 @@ db $00
 
 db $E9 : db $00
 db $02 : db $22
-db $03,$00,$10,$10,$16,$5C,$CC,$01
-db $04,$00,$60,$A0,$C0,$0C,$DF
-db $10,$30,$29,$00,$BE,$2F,$CB
-db !MapMinorDungeonCardMusic
+db !MapE9CardMonsters
+db !MapMansionCardMusic
 db $03,$00,$20,$00,$1E,$D5,$98,$00
 db $04,$00,$70,$10,$53,$63,$DE
 db $05,$00,$20,$00,$01,$86,$69,$D6
@@ -2555,8 +2479,8 @@ db $00
 
 db $F0 : db $00
 db $02 : db $01
-db $11,$00,$00,$AC,$1C,$D7
-db $11,$1B,$00,$1D,$2A,$DF
+db $11,$00,$00,$AC,$1C,$D7   ; Not music; sets up sound engine for post-credits cutscene
+db !MapF0CardMusic
 db $03,$00,$10,$00,$01,$F0,$8D,$00
 db $04,$00,$70,$10,$33,$64,$DE
 db $05,$00,$20,$00,$01,$2A,$65,$DC
@@ -2568,7 +2492,7 @@ db $00
 
 db $F2 : db $00
 db $02 : db $0C
-db $11,$0F,$00,$AE,$73,$D2
+db !MapF2CardMusic
 db $03,$00,$10,$00,$01,$F0,$8D,$00
 db $04,$00,$70,$10,$13,$65,$DE
 db $05,$00,$20,$00,$01,$2A,$65,$DC
@@ -2582,7 +2506,7 @@ db $00
 
 db $F3 : db $00
 db $02 : db $0C
-db $11,$0F,$00,$AE,$73,$D2
+db !MapF3CardMusic
 db $03,$00,$10,$00,$01,$F0,$8D,$00
 db $04,$00,$70,$10,$13,$65,$DE
 db $05,$00,$20,$00,$01,$2A,$65,$DC
@@ -2596,7 +2520,7 @@ db $00
 
 db $F4 : db $00
 db $02 : db $0C
-db $11,$0F,$00,$AE,$73,$D2
+db !MapF4CardMusic
 db $03,$00,$10,$00,$01,$F0,$8D,$00
 db $04,$00,$70,$10,$13,$65,$DE
 db $05,$00,$20,$00,$01,$2A,$65,$DC
@@ -2610,7 +2534,7 @@ db $00
 
 db $F5 : db $00
 db $02 : db $0C
-db $11,$0F,$00,$AE,$73,$D2
+db !MapF5CardMusic
 db $03,$00,$10,$00,$01,$F0,$8D,$00
 db $04,$00,$70,$10,$13,$65,$DE
 db $05,$00,$20,$00,$01,$2A,$65,$DC
@@ -2624,7 +2548,7 @@ db $00
 
 db $F6 : db $00
 db $02 : db $0C
-db $11,$0F,$00,$AE,$73,$D2
+db !MapF6CardMusic
 db $03,$00,$10,$00,$01,$F0,$8D,$00
 db $04,$00,$70,$10,$13,$65,$DE
 db $05,$00,$20,$00,$01,$2A,$65,$DC
@@ -2638,7 +2562,7 @@ db $00
 
 db $F7 : db $00
 db $02 : db $2E
-db $11,$1B,$00,$1D,$2A,$DF
+db !MapF7CardMusic
 db $03,$00,$20,$00,$BF,$22,$D5,$02
 db $03,$00,$10,$00,$00,$00,$D1,$01
 db $10,$2A,$14,$00,$E8,$15,$D3
@@ -2646,8 +2570,8 @@ db $00
 
 db $FA : db $00
 db $02 : db $08
-db $11,$00,$00,$AC,$1C,$D7
-db $11,$12,$00,$29,$73,$D5
+db $11,$00,$00,$AC,$1C,$D7    ; Not music; sets up the sound engine
+db !MapFACardMusic
 db $03,$00,$10,$00,$00,$00,$C1,$00
 db $04,$00,$70,$10,$93,$68,$DE
 db $05,$00,$20,$00,$01,$6E,$46,$DA
@@ -2657,7 +2581,7 @@ db $00
 
 db $FB : db $00
 db $02 : db $00
-db $11,$1B,$00,$1D,$2A,$DF
+db !MapFBCardMusic
 db $03,$00,$10,$10,$25,$73,$D1,$01
 db $04,$00,$50,$80,$76,$23,$DF
 db $10,$8F,$01,$00,$73,$77,$DD
@@ -2665,7 +2589,10 @@ db $00
 
 db $FC : db $00
 db $02 : db $25
-db $11,$14,$00,$33,$12,$D1
+db $11,$14,$00,$33,$12,$D1    ; I think this title music also sets up the sound engine...
+if !OptionMuteMusic == 1
+db !CardMusicSilence    ; ...so if we're muting music, we do so here artificially.
+endif
 db $03,$00,$20,$00,$80,$DD,$9C,$00
 db $04,$00,$20,$00,$BE,$7F,$C1
 db $05,$00,$20,$00,$01,$E2,$2C,$DB
@@ -2678,7 +2605,7 @@ db $00
 
 db $FD : db $00
 db $02 : db $00
-db $11,$1B,$00,$1D,$2A,$DF
+db !MapFDCardMusic
 db $03,$10,$20,$10,$FF,$AF,$8D,$01
 db $04,$00,$80,$80,$35,$1F,$DE
 db $15 : db $11
@@ -2686,7 +2613,7 @@ db $00
 
 db $FE : db $00
 db $02 : db $19
-db $11,$12,$00,$29,$73,$D5
+db !MapFECardMusic
 db $05,$00,$20,$00,$01,$6E,$46,$DA
 db $03,$00,$10,$00,$00,$00,$C1,$00
 db $06,$01,$19,$5E,$D3

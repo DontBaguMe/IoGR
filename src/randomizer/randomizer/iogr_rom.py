@@ -215,18 +215,6 @@ class Randomizer:
         asar_defines["RandoTitleScreenHashString"] = hash_final
         
         ##########################################################################
-        #                           Special Settings
-        ##########################################################################
-        #if settings.z3:
-        #    # Call item upgrade subroutines
-        #    patch.seek(int("3f01c", 16) + rom_offset)  # HP upgrade
-        #    patch.write(b"\x20\xa1\xf7")
-        #    patch.seek(int("3f042", 16) + rom_offset)  # STR upgrade
-        #    patch.write(b"\x20\xc1\xf7")
-        #    patch.seek(int("3f061", 16) + rom_offset)  # DEF upgrade
-        #    patch.write(b"\x20\xe3\xf7")
-        
-        ##########################################################################
         #                   Adjust Moon Tribe timer for enemizer
         ##########################################################################
         #
@@ -236,20 +224,6 @@ class Randomizer:
             if settings.enemizer.value != Enemizer.LIMITED.value:
                 timer += 5
         asar_defines["MoonTribeTimeLimit"] = timer
-
-        ##########################################################################
-        #                            Modify Euro events
-        ##########################################################################
-        ## Euro shopkeeper can warp you to start in entrance shuffle (prevents softlocks)
-        #if settings.entrance_shuffle.value != EntranceShuffle.NONE.value:
-        #    patch.seek(int("7cbba", 16) + rom_offset) #four bytes
-        #    patch.write(b"\x4c\x27\xe9")
-        #    patch.seek(int("7e927", 16) + rom_offset)
-        #    patch.write(b"\x02\xBF\x0A\xCC\x02\xBE\x02\x01\x31\xE9\x37\xE9\x37\xE9\x3E\xE9")
-        #    patch.write(b"\x02\xBF\x24\xCC\x4C\xBE\xCB\x5C\xE8\xDB\x88")
-        #    patch.seek(int("7cc0c", 16) + rom_offset)
-        #    patch.write(qt_encode("Warp to start?") + b"\xcb\xac" + qt_encode("No") + b"\xcb\xac" + qt_encode("Yes") + b"\xca")
-        #    patch.write(b"\xce" + qt_encode("NO SOUP FOR YOU!") + b"\xc0")
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -503,96 +477,21 @@ class Randomizer:
             if 7 not in boss_order:
                 boss_order.append(7)
         
-        #    if boss_order[5] != 6:      # Prevent early access to Babel entrance
-        #        patch.seek(int("ce165", 16) + rom_offset)
-        #        patch.write(b"\xff\xca")
-        #
-        #
-        #    # Define music map headers
-        #    dungeon_music = [b"\x11\x07\x00\x0f\x67\xd4"]       # Inca Ruins
-        #    dungeon_music.append(b"\x11\x08\x00\xda\x71\xd3")   # Sky Garden
-        #    dungeon_music.append(b"\x11\x09\x00\x00\x00\xd2")   # Mu
-        #    dungeon_music.append(b"\x11\x0a\x00\x17\x30\xd4")   # Great Wall
-        #    dungeon_music.append(b"\x11\x0c\x00\xa0\x71\xd0")   # Pyramid
-        #    dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Babel
-        #    dungeon_music.append(b"\x11\x06\x00\x90\x42\xd4")   # Mansion
-        #
-        #    # Find all music header locations in map data file
-        #    music_header_addrs = [[],[],[],[],[]]
-        #    i = 0
-        #    while i < 5:
-        #        done = False
-        #        addr = 0
-        #        while not done:
-        #            f_mapdata.seek(0)
-        #            addr = f_mapdata.read().find(dungeon_music[i], addr + 1)
-        #            if addr < 0:
-        #                done = True
-        #            else:
-        #                music_header_addrs[i].append(addr)
-        #        i += 1
-        #
-        #    # Patch music headers into new dungeons (beginner and intermediate modes)
-        #    if settings.difficulty.value <= 1:
-        #        i = 0
-        #        while i < 5:
-        #            boss = boss_order[i]
-        #            while music_header_addrs[i]:
-        #                addr = music_header_addrs[i].pop(0)
-        #                f_mapdata.seek(addr)
-        #                f_mapdata.write(dungeon_music[boss-1])
-        #            i += 1
-        #
-        #        # Special case for Mansion
-        #        f_mapdata.seek(0)
-        #        addr = 27 + f_mapdata.read().find(b"\x00\xE9\x00\x02\x22")
-        #        if addr < 27:
-        #            if PRINT_LOG:
-        #                print("ERROR: Couldn't find Mansion map header")
-        #        else:
-        #            f_mapdata.seek(addr)
-        #            f_mapdata.write(dungeon_music[boss_order[6]-1])
-
-        ## Change conditions and text for Pyramid boss portal
-        #pyramid_boss = boss_order[4]
-        #patch.seek(int("8cd71", 16) + rom_offset)
-        #if pyramid_boss == 5:
-        #    patch.write(b"\xfc")
-        #elif pyramid_boss == 7:
-        #    patch.write(b"\xf6")
-        #else:
-        #    patch.write(b"\x10\x00")
-        #
-        ## Change "Return to Dao" Babel spirit text
-        #babel_boss = boss_order.index(6)
-        #patch.seek(int("980a6", 16) + rom_offset)
-        #if babel_boss == 0:
-        #    patch.write(b"\x42\x8e\x80\xa3\xa4\xca")                      # "Coast"
-        #elif babel_boss == 1:
-        #    patch.write(b"\x63\x84\x80\xac\x60\x80\x8b\x80\x82\x84\xca")  # "Seaside Palace"
-        #elif babel_boss == 2:
-        #    patch.write(b"\x4c\xa5\xca")                                  # "Mu"
-        #elif babel_boss == 3:
-        #    patch.write(b"\xd6\x16\x67\x80\x8b\x8b\xca")                  # "Great Wall"
-        #elif babel_boss == 4:
-        #    patch.write(b"\xd6\x3f\xca")                                  # "Pyramid"
-        #
-        #patch.seek(int("8cddb", 16) + rom_offset)
-        #patch.write(b"\x47\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\x84\xa2\x84\x0e\xa3\xac\xcb")
-        #if pyramid_boss == 1:
-        #    patch.write(b"\x42\x80\xa3\xa4\x8e\xa4\x87\x4f\xac\xac\xac\xac\xac\xac\xac\xac")
-        #elif pyramid_boss == 2:
-        #    patch.write(b"\x66\x88\xa0\x84\xa2\x4f\xac\xac\xac\xac\xac\xac\xac\xac\xac\xac")
-        #elif pyramid_boss == 3:
-        #    patch.write(b"\x66\x80\x8c\xa0\x88\xa2\x84\xa3\x4f\xac\xac\xac\xac\xac\xac\xac")
-        #elif pyramid_boss == 4:
-        #    patch.write(b"\x63\x80\x8d\x83\xac\x45\x80\x8d\x86\x84\xa2\x4f\xac\xac\xac\xac")
-        #elif pyramid_boss == 5:
-        #    patch.write(b"\x4c\xa5\x8c\x8c\xa9\xac\x61\xa5\x84\x84\x8d\x4f\xac\xac\xac\xac")
-        #elif pyramid_boss == 6:
-        #    patch.write(b"\x4c\xa5\x8c\x8c\xa9\xac\x61\xa5\x84\x84\x8d\xac\x22\x2a\x20\x4f")
-        #elif pyramid_boss == 7:
-        #    patch.write(b"\x63\x8e\x8b\x88\x83\xac\x40\xa2\x8c\x4f\xac\xac\xac\xac\xac\xac")
+            boss_music_card_labels = ["Inca","SkGn","Mu","GtWl","Pymd","Mansion","MinorDungeon"]
+            # Patch music headers into new dungeons (beginner and intermediate modes)
+            if settings.difficulty.value <= 1:
+                i = 0
+                while i < 6:
+                    boss = boss_order[i]
+                    this_dungeon_card = "Map"+boss_music_card_labels[i]+"CardMusic"
+                    replacement_card = "DefaultMap"+boss_music_card_labels[boss]+"CardMusic"
+                    asar_defines[this_dungeon_card] = "!"+replacement_card
+                    i += 1
+        # Set up assembly defines for boss order
+        i = 1
+        while i < 8:
+            asar_defines["Boss"+str(i)+"Id"] = boss_order[i-1]
+            i += 1
 
         ##########################################################################
         #                   Randomize Location of Kara Portrait
@@ -807,19 +706,6 @@ class Randomizer:
             if gem[i-1] < 10:
                 asar_defines["Jeweler"+str(i)+"RowText"] += "_"
             asar_defines["Jeweler"+str(i)+"RowText"] += str(gem[i-1])
-
-        ##########################################################################
-        #                   Update map dataset after Enemizer
-        ##########################################################################
-        #for map_patch in self.w.map_patches:
-        #    f_mapdata.seek(0)
-        #    addr = f_mapdata.read().find(map_patch[0])
-        #    if addr < 0:
-        #        if PRINT_LOG:
-        #            print("ERROR: Couldn't find header: ", binascii.hexlify(map_patch[0]))
-        #    else:
-        #        f_mapdata.seek(addr + map_patch[2])
-        #        f_mapdata.write(map_patch[1])
 
         ##########################################################################
         #                        Randomize Ishtar puzzle
@@ -1257,15 +1143,10 @@ class Randomizer:
         #                                   Plugins
         ##########################################################################
         # Apocalypse Gaia
-        #if self.w.goal == "Apocalypse Gaia":
-        #    patch.seek(int("98de4",16)+rom_offset)
-        #    patch.write(b"\x80") # Respawn in space
-        #    for pluginfilename in os.listdir(AG_PLUGIN_PATH):
-        #        if pluginfilename[-4:] == ".bin":
-        #            f_plugin = open(AG_PLUGIN_PATH + pluginfilename, "rb")
-        #            patch.seek(int(pluginfilename[:6],16) + rom_offset)
-        #            patch.write(f_plugin.read())
-        #            f_plugin.close
+        if self.w.goal == "Apocalypse Gaia":
+            asar_defines["ApocalypseGaia"] = 1
+        else:
+            asar_defines["ApocalypseGaia"] = 0
 
         ##########################################################################
         #                          Have fun with final text
@@ -1307,24 +1188,20 @@ class Randomizer:
         asar_defines["TextShadowSuperhero"] = superhero_list[rand_idx]
 
         ##########################################################################
-        #                Finalize map headers and return patch data
+        #            Pass all defines to assembler and return patch
         ##########################################################################
-        #f_mapdata.seek(0)
-        #patch.seek(int("d8000", 16) + rom_offset)
-        #patch.write(f_mapdata.read())
-        
         romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
         
         # temp for testing
         asar_defines["SettingOrbRando"] = 1
-        asar_defines["SettingEarlyFirebird"] = 0
-        asar_defines["SettingRedJewelHunt"] = 0
-        asar_defines["SettingRedJewelMadness"] = 0
-        asar_defines["SettingOpenMode"] = 0
-        asar_defines["SettingOHKO"] = 0
-        asar_defines["SettingZ3"] = 0
-        asar_defines["SettingFluteless"] = 0
-        asar_defines["SettingEnemizer"] = 0
+        asar_defines["SettingEarlyFirebird"] = 1 if settings.firebird else 0
+        asar_defines["SettingRedJewelHunt"] = 1 if settings.goal.value is Goal.RED_JEWEL_HUNT.value else 0
+        asar_defines["SettingRedJewelMadness"] = 1 if settings.red_jewel_madness else 0
+        asar_defines["SettingOpenMode"] = 1 if settings.open_mode else 0
+        asar_defines["SettingOHKO"] = 1 if settings.ohko else 0
+        asar_defines["SettingZ3"] = 1 if settings.z3 else 0
+        asar_defines["SettingFluteless"] = 1 if settings.fluteless else 0
+        asar_defines["SettingEnemizer"] = settings.enemizer.value
         asar_defines["SettingEntranceShuffle"] = 0
         
         for d in asar_defines:

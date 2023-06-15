@@ -80,7 +80,7 @@ db $c0
 ..IsSpecial:    ; Handling for upgrades, duplicate stat items, and Heart Pieces.
 lda $01,s : cmp #$008a : bcs ..IsNotStatUpgrade
 ..IsStatUpgrade:
-sec : sbc #$0007 : jsl LR_GiveNormalItemA8OrSec
+jsl LR_GiveNormalItemA8OrSec
 bra ..GotItem
 ..IsNotStatUpgrade:
 cmp #$008a : beq ...LightUpgrade
@@ -131,6 +131,8 @@ db $c5 : dw TextItemGetSpeeds, $0bfc
 db $d6,$1d    ; "It's "
 db $c5 : dw TextItemGetNames, $0db8
 db "!",$cb
+db $c5 : dw TextZ3UpgradeMaybeMaxedOut, $0bfe
+db $cb
 db $ca
 .TextItsADoor:
 db $d3
@@ -851,6 +853,15 @@ db $ca
 db $d5,$00
 db $ca
 
+TextZ3UpgradeMaybeMaxedOut:
+.Pointers:
+dw .NotMaxedOut
+dw .IsMaxedOut
+.NotMaxedOut:
+db $ca
+.IsMaxedOut:
+db "But you're maxed out!"
+db $ca
 
 
 EMonsterDeathDoorOrItem:
@@ -938,10 +949,6 @@ sed
   lda $0ab0 : clc : adc #$0001 : sta $0ab0
 cld
 rtl
-
-
-
-
 
 
 

@@ -1450,16 +1450,6 @@ class World:
 
         return (self.update_ds_access(to_visit_forward,access_mode,ds_nodes) | self.update_ds_access(to_visit_reverse,access_mode,ds_nodes))
 
-    ## Update all DS access based on current graph connections.
-    #def update_all_ds_access(self):
-    #    for node in self.graph:
-    #        found_discrepancy = False
-    #        for dest_node in self.graph[node][10]:
-    #            if node in self.graph[dest_node][10] and self.graph[dest_node][4] < self.graph[node][4]:
-    #                found_discrepancy = True                
-    #        if found_discrepancy:
-    #            self.update_ds_access(self.graph,self.graph[node][4],self.graph[node][9])
-
     # Check a logic edge to see if prerequisites have been met
     def check_edge(self, edge, items=[], update_graph=True, print_log=False):
         success = False
@@ -1709,7 +1699,7 @@ class World:
             self.start_loc = self.random_start()
             if print_log:
                 print("Start location:",self.item_locations[self.start_loc][9])
-            if self.start_loc == 19:  # Open Lily's door when starting in Underground Tunnel
+            if self.start_loc == 19:  # Open Lilly's door when starting in Underground Tunnel
                 self.logic[62][0] = 2
             elif self.start_loc == 47:  # Diamond Mine behind fences
                 self.graph[131][1].append(130)
@@ -1717,7 +1707,7 @@ class World:
             self.graph[0][1].remove(22)
             self.graph[0][1].append(self.item_locations[self.start_loc][0])
 
-        # TEMP - grant Psycho Dash at start for fluteless seeds
+        # Grant Psycho Dash at start for fluteless seeds
         if self.fluteless:
             self.fill_item(61,self.start_loc,False,True,print_log)
 
@@ -1765,68 +1755,69 @@ class World:
         #        return False
         return True
 
-    # Update item placement logic after abilities are placed
-    def check_logic(self,location=0):
-        abilities = [61, 62, 63, 64, 65, 66]
-        inaccessible_ls = []
-
-        # Check for abilities in critical Dark Spaces
-        if self.item_locations[19][3] in abilities:  # Underground Tunnel
-            inaccessible_ls += [17, 18]
-            self.restrict_edge(63)
-        if self.item_locations[29][3] in abilities:  # Inca Ruins
-            inaccessible_ls += [26, 27, 30, 31, 32]
-            self.restrict_edge(94)
-        if (self.item_locations[46][3] in abilities and  # Diamond Mine
-                self.item_locations[47][3] in abilities and
-                self.item_locations[48][3] in abilities):
-            self.restrict_edge(118)
-            self.restrict_edge(717)
-        if (self.item_locations[58][3] in abilities and  # Sky Garden
-                self.item_locations[59][3] in abilities and
-                self.item_locations[60][3] in abilities):
-            self.restrict_edge(131)
-            self.restrict_edge(132)
-            self.restrict_edge(144)
-            self.restrict_edge(147)
-            self.restrict_edge(148)
-            self.restrict_edge(149)
-            self.restrict_edge(150)
-            self.restrict_edge(151)
-        if self.item_locations[94][3] in abilities:  # Great Wall
-            self.graph[800] = [False, [], 0, [3,15,0,b"\x00"], 0, "Great Wall - Behind Spin", [], False, [], [], [], [], [], [], [], []]
-            self.logic[800] = [0, 296, 800, False, [[63, 1]]]
-            self.item_locations[93][0] = 800
-            self.logic[222][3] = True
-            if self.item_locations[93][3] in abilities:
-                inaccessible_ls += [95]
-                self.restrict_edge(223)
-                self.restrict_edge(224)
-                self.restrict_edge(225)
-        if self.item_locations[122][3] in abilities:  # Ankor Wat
-            inaccessible_ls += [117, 118, 119, 120, 121]
-            self.restrict_edge(267)
-            self.restrict_edge(268)
-            self.restrict_edge(269)
-            self.restrict_edge(270)
-            self.restrict_edge(271)
-            self.restrict_edge(272)
-        if self.item_locations[142][3] in abilities:        # Pyramid
-            inaccessible_ls += [133,134,136,139,140]
-            self.restrict_edge(300)
-            self.restrict_edge(301)
-            self.restrict_edge(302)
-            self.restrict_edge(303)
-            self.restrict_edge(304)
-            self.restrict_edge(306)
-            self.restrict_edge(307)
-            self.restrict_edge(313)
-
-        # Change graph node for inaccessible_ls locations
-        for x in inaccessible_ls:
-            if x in self.graph[self.item_locations[x][0]][11]:
-                self.graph[self.item_locations[x][0]][11].remove(x)
-            self.item_locations[x][0] = INACCESSIBLE
+    ## This was formerly needed for manually updating edge accessibility
+    ## based on ability placement. I think the new traversal code doesn't need this.
+    #def check_logic(self,location=0):
+    #    abilities = [61, 62, 63, 64, 65, 66]
+    #    inaccessible_ls = []
+    #
+    #    # Check for abilities in critical Dark Spaces
+    #    if self.item_locations[19][3] in abilities:  # Underground Tunnel
+    #        inaccessible_ls += [17, 18]
+    #        self.restrict_edge(63)
+    #    if self.item_locations[29][3] in abilities:  # Inca Ruins
+    #        inaccessible_ls += [26, 27, 30, 31, 32]
+    #        self.restrict_edge(94)
+    #    if (self.item_locations[46][3] in abilities and  # Diamond Mine
+    #            self.item_locations[47][3] in abilities and
+    #            self.item_locations[48][3] in abilities):
+    #        self.restrict_edge(118)
+    #        self.restrict_edge(717)
+    #    if (self.item_locations[58][3] in abilities and  # Sky Garden
+    #            self.item_locations[59][3] in abilities and
+    #            self.item_locations[60][3] in abilities):
+    #        self.restrict_edge(131)
+    #        self.restrict_edge(132)
+    #        self.restrict_edge(144)
+    #        self.restrict_edge(147)
+    #        self.restrict_edge(148)
+    #        self.restrict_edge(149)
+    #        self.restrict_edge(150)
+    #        self.restrict_edge(151)
+    #    if self.item_locations[94][3] in abilities:  # Great Wall
+    #        self.graph[800] = [False, [], 0, [3,15,0,b"\x00"], 0, "Great Wall - Behind Spin", [], False, [], [], [], [], [], [], [], []]
+    #        self.logic[800] = [0, 296, 800, False, [[63, 1]]]
+    #        self.item_locations[93][0] = 800
+    #        self.logic[222][3] = True
+    #        if self.item_locations[93][3] in abilities:
+    #            inaccessible_ls += [95]
+    #            self.restrict_edge(223)
+    #            self.restrict_edge(224)
+    #            self.restrict_edge(225)
+    #    if self.item_locations[122][3] in abilities:  # Ankor Wat
+    #        inaccessible_ls += [117, 118, 119, 120, 121]
+    #        self.restrict_edge(267)
+    #        self.restrict_edge(268)
+    #        self.restrict_edge(269)
+    #        self.restrict_edge(270)
+    #        self.restrict_edge(271)
+    #        self.restrict_edge(272)
+    #    if self.item_locations[142][3] in abilities:        # Pyramid
+    #        inaccessible_ls += [133,134,136,139,140]
+    #        self.restrict_edge(300)
+    #        self.restrict_edge(301)
+    #        self.restrict_edge(302)
+    #        self.restrict_edge(303)
+    #        self.restrict_edge(304)
+    #        self.restrict_edge(306)
+    #        self.restrict_edge(307)
+    #        self.restrict_edge(313)
+    #
+    #    # Change graph node for inaccessible_ls locations
+    #    for x in inaccessible_ls:
+    #        if x in self.graph[self.item_locations[x][0]][11]:
+    #            self.graph[self.item_locations[x][0]][11].remove(x)
+    #        self.item_locations[x][0] = INACCESSIBLE
 
     # Simulate inventory
     def get_inventory(self,start_items=[],item_destinations=[],new_nodes=[]):
@@ -2152,8 +2143,9 @@ class World:
         if "Overworld Shuffle" in self.variant:
             overworld_links = []
             for continent_id, continent_data in self.overworld_menus.items():
-                continent_name = continent_data[7]
-                region_name = self.overworld_menus[continent_data[0]][8]
+                continent_name = continent_data[5]
+                region_name = self.overworld_menus[continent_data[0]][6]
+                region_name = region_name.replace('_','')
                 overworld_links.append({"region": region_name, "continent": continent_name})
             spoiler["overworld_entrances"] = overworld_links
 
@@ -2322,22 +2314,22 @@ class World:
             node_content += "</table>>"
             graph.node(region_item_node_name, node_content)
 
-    def print_enemy_locations(self, filepath, offset=0):
-        f = open(filepath, "r+b")
-        rom = f.read()
-        for enemy in self.enemies:
-            print(self.enemies[enemy][3])
-            done = False
-            addr = int("c8200", 16) + offset
-            while not done:
-                addr = rom.find(self.enemies[enemy][1], addr + 1)
-                if addr < 0 or addr > int("ce5e4", 16) + offset:
-                    done = True
-                else:
-                    f.seek(addr)
-                    # f.write(b"\x55\x87\x8a\x05")
-                    print(" ", addr, hex(addr), binascii.hexlify(f.read(4)))
-        f.close
+    #def print_enemy_locations(self, filepath, offset=0):
+    #    f = open(filepath, "r+b")
+    #    rom = f.read()
+    #    for enemy in self.enemies:
+    #        print(self.enemies[enemy][3])
+    #        done = False
+    #        addr = int("c8200", 16) + offset
+    #        while not done:
+    #            addr = rom.find(self.enemies[enemy][1], addr + 1)
+    #            if addr < 0 or addr > int("ce5e4", 16) + offset:
+    #                done = True
+    #            else:
+    #                f.seek(addr)
+    #                # f.write(b"\x55\x87\x8a\x05")
+    #                print(" ", addr, hex(addr), binascii.hexlify(f.read(4)))
+    #    f.close
 
     # Prints item and ability locations
     def print_spoiler(self):
@@ -2458,20 +2450,8 @@ class World:
         #print("spoilers done")
 
         # Enemizer
-        # Placeholder code to soft-disable enemizer for now
-        i = 1
-        while i <= 0x0525:
-            for word in ["Param","Addr","Stats","ItemFlag"]:
-                self.asar_defines["Monster"+format(i,"04X")+word] = "!DefaultMonster"+format(i,"04X")+word
-            i += 1
-        #if self.enemizer != "None":
-        #    # "Fix" Ankor Wat Gorgons so they don't fall from the ceiling
-        #    f.seek(int("bb825", 16) + rom_offset)
-        #    f.write(b"\x00\x00\x00\x02\x27\x0F\x02\xC1\x4C\xA0\xB8\x6B")
-        #
-        #    # Run enemizer
-        #    self.enemize(f, rom_offset)
-        #    # self.parse_maps(f,rom_offset)
+        if self.enemizer != "None":
+            self.enemize()
 
         # Random start location (or entrance shuffle) spawn handling
         self.asar_defines["StartAtWarpLocation"] = 0
@@ -2484,158 +2464,103 @@ class World:
             self.asar_defines["StartLocationName"] = self.area_short_name[self.start_loc]
             self.asar_defines["StartLocationId"] = self.start_loc
         
-        ## Overworld shuffle
-        #if "Overworld Shuffle" in self.variant:
-        #    ow_patch_data = []
-        #    for entry in self.overworld_menus:
-        #        # Prepare ROM edits
-        #        new_entry = self.overworld_menus[entry][0]
-        #        f.seek(int(self.overworld_menus[new_entry][4], 16) + rom_offset)
-        #        ow_patch_data.append([self.overworld_menus[entry][4], f.read(8)])
-        #        f.seek(int(self.overworld_menus[new_entry][6], 16) + rom_offset)
-        #        ow_patch_data.append([self.overworld_menus[entry][6], f.read(11)])
-        #        ow_patch_data.append([self.overworld_menus[new_entry][5], self.overworld_menus[entry][1]])
-        #
-        #    for x in ow_patch_data:
-        #        f.seek(int(x[0], 16) + rom_offset)
-        #        f.write(x[1])
-        ##print("overworld shuffle done")
-        #
-        ## Entrance shuffle
-        #er_patch_data = []
-        #for exit in self.exits:
-        #    #self.exits[exit][0] = exit   #TESTING ONLY
-        #    # Prepare ROM edits
-        #    new_exit = self.exits[exit][1]
-        #    if new_exit and self.exits[exit][5]: # and exit != new_exit:
-        #        try:
-        #            if self.exits[new_exit][6]:
-        #                new_data = self.exits[new_exit][6]
-        #            else:
-        #                f.seek(int(self.exits[new_exit][5], 16) + rom_offset)
-        #                new_data = f.read(8)
-        #            er_patch_data.append([self.exits[exit][5], new_data])
-        #        except:
-        #            if print_log:
-        #                print("ERROR: exit data invalid",exit,new_exit)
-        #
-        #for exit in self.exits_detailed:
-        #    new_exit = self.exits[exit][1]
-        #    if new_exit:
-        #        map_str = self.exits[new_exit][6]
-        #        map_id = map_str[0:1]
-        #        xcoord = int.to_bytes(int.from_bytes(map_str[1:3], byteorder="little") // 16, 2, byteorder='little')
-        #        ycoord = int.to_bytes(int.from_bytes(map_str[3:5], byteorder="little") // 16, 2, byteorder='little')
-        #        facedir = map_str[5:6]
-        #        camera = map_str[6:8]
-        #        # print(map_id,xcoord,ycoord,facedir,camera)
-        #
-        #        er_patch_data.append([self.exits_detailed[exit][0], map_id])
-        #        er_patch_data.append([self.exits_detailed[exit][1], xcoord])
-        #        er_patch_data.append([self.exits_detailed[exit][2], ycoord])
-        #        if self.exits_detailed[exit][3] != "":
-        #            er_patch_data.append([self.exits_detailed[exit][3], facedir])
-        #        er_patch_data.append([self.exits_detailed[exit][4], camera])
-        #
-        #for x in er_patch_data:
-        #    try:
-        #        f.seek(int(x[0], 16) + rom_offset)
-        #        f.write(x[1])
-        #    except:
-        #        if print_log:
-        #            print("ERROR: Not a valid address", x)
-        ##print("entrance shuffle done")
-
-        # Swapped exits
-#        for exit in self.exits:
-#            if self.exits[exit][1] > 0:
-#                to_exit = self.exits[exit][1]
-#                map_str = self.exits[to_exit][9]
-#                if self.exits[exit][8] != "":
-#                    f.seek(int(self.exits[exit][8], 16) + rom_offset)
-#                    f.write(map_str)
-#                else:
-#                    map_id = map_str[0:1]
-#                    xcoord = int.to_bytes(int.from_bytes(map_str[1:3], byteorder="little") // 16, 2, byteorder='little')
-#                    ycoord = int.to_bytes(int.from_bytes(map_str[3:5], byteorder="little") // 16, 2, byteorder='little')
-#                    facedir = map_str[5:6]
-#                    camera = map_str[6:8]
-#                    # print(map_id,xcoord,ycoord,facedir,camera)
-#
-#                    f.seek(int(self.exits_detailed[exit][0], 16) + rom_offset)
-#                    f.write(map_id)
-#                    f.seek(int(self.exits_detailed[exit][1], 16) + rom_offset)
-#                    f.write(xcoord)
-#                    f.seek(int(self.exits_detailed[exit][2], 16) + rom_offset)
-#                    f.write(ycoord)
-#                    if self.exits_detailed[exit][3] != "":
-#                        f.seek(int(self.exits_detailed[exit][3], 16) + rom_offset)
-#                        f.write(facedir)
-#                    f.seek(int(self.exits_detailed[exit][4], 16) + rom_offset)
-#                    f.write(camera)
+        # Overworld shuffle label assignments (or defaults)
+        for entry in self.overworld_menus:
+            new_entry = entry
+            if self.overworld_menus[entry][0] > 0:
+                new_entry = self.overworld_menus[entry][0]
+            old_label = self.overworld_menus[entry][4]
+            new_label = self.overworld_menus[new_entry][4]
+            self.asar_defines["OverworldShuffle"+old_label+"Label"] = new_label
+            self.asar_defines["OverworldShuffle"+old_label+"Text"] = self.overworld_menus[new_entry][6]
+            self.asar_defines["OverworldShuffle"+new_label+"MenuId"] = self.overworld_menus[entry][1]
+        #print("overworld shuffle done")
+        
+        # Entrance shuffle
+        for exit in self.exits:
+            new_exit = self.exits[exit][1]
+            if new_exit > 0:
+                old_exit_label = self.exits[exit][5]
+                new_exit_string_label = self.exits[new_exit][5]
+                self.asar_defines[old_exit_label] = "Default"+new_exit_string_label
+        
+        for exit in self.exits_detailed:
+            new_exit = self.exits[exit][1]
+            if new_exit:
+                map_str = self.exits[new_exit][6]
+                map_id = int.from_bytes(map_str[0:1], byteorder="little")
+                xcoord = int.from_bytes(map_str[1:3], byteorder="little")
+                ycoord = int.from_bytes(map_str[3:5], byteorder="little")
+                facedir = int.from_bytes(map_str[5:6], byteorder="little")
+                camera = int.from_bytes(map_str[6:8], byteorder="little")
+                self.asar_defines[self.exits_detailed[exit][0]] = map_id
+                self.asar_defines[self.exits_detailed[exit][1]] = xcoord
+                self.asar_defines[self.exits_detailed[exit][2]] = ycoord
+                self.asar_defines[self.exits_detailed[exit][3]] = facedir
+                self.asar_defines[self.exits_detailed[exit][4]] = camera
 
         # print "ROM successfully created"
 
-    # Print parsed list of map headers
-    def parse_maps(self, f, rom_offset=0):
-        f.seek(int("d8000", 16) + rom_offset)
-
-        header_lengths = {
-            b"\x02": 1,
-            b"\x03": 7,
-            b"\x04": 6,
-            b"\x05": 7,
-            b"\x06": 4,
-            b"\x0e": 3,
-            b"\x10": 6,
-            b"\x11": 5,
-            b"\x13": 2,
-            b"\x14": 1,
-            b"\x15": 1,
-            b"\x17": 5
-        }
-
-        done = False
-        addr = 0
-        map_dataset = {}
-        anchor_dataset = {}
-
-        while not done:
-            map_id = f.read(2)
-            print(binascii.hexlify(map_id))
-            map_headers = []
-            anchor_headers = []
-            map_done = False
-            anchor = False
-            while not map_done:
-                map_header = f.read(1)
-                if map_header == b"\x14":
-                    anchor = True
-                    anchor_id = f.read(1)
-                    map_header += anchor_id
-                    map_headers.append(map_header)
-                    print(binascii.hexlify(map_header))
-                elif map_header == b"\x00":
-                    map_done = True
-                    print(binascii.hexlify(map_header))
-                    print("")
-                else:
-                    header_len = header_lengths[map_header]
-                    map_header += f.read(header_len)
-                    map_headers.append(map_header)
-                    print(binascii.hexlify(map_header))
-                    if anchor:
-                        anchor_headers.append(map_header)
-
-            anchor_dataset[map_id] = map_headers
-            if anchor_headers:
-                anchor_dataset[anchor_id] = anchor_headers
-
-            if f.tell() >= int("daffe", 16) + rom_offset:
-                done = True
-
-        #        print map_headers
-        print(anchor_headers)
+    ## Print parsed list of map headers
+    #def parse_maps(self, f, rom_offset=0):
+    #    f.seek(int("d8000", 16) + rom_offset)
+    #
+    #    header_lengths = {
+    #        b"\x02": 1,
+    #        b"\x03": 7,
+    #        b"\x04": 6,
+    #        b"\x05": 7,
+    #        b"\x06": 4,
+    #        b"\x0e": 3,
+    #        b"\x10": 6,
+    #        b"\x11": 5,
+    #        b"\x13": 2,
+    #        b"\x14": 1,
+    #        b"\x15": 1,
+    #        b"\x17": 5
+    #    }
+    #
+    #    done = False
+    #    addr = 0
+    #    map_dataset = {}
+    #    anchor_dataset = {}
+    #
+    #    while not done:
+    #        map_id = f.read(2)
+    #        print(binascii.hexlify(map_id))
+    #        map_headers = []
+    #        anchor_headers = []
+    #        map_done = False
+    #        anchor = False
+    #        while not map_done:
+    #            map_header = f.read(1)
+    #            if map_header == b"\x14":
+    #                anchor = True
+    #                anchor_id = f.read(1)
+    #                map_header += anchor_id
+    #                map_headers.append(map_header)
+    #                print(binascii.hexlify(map_header))
+    #            elif map_header == b"\x00":
+    #                map_done = True
+    #                print(binascii.hexlify(map_header))
+    #                print("")
+    #            else:
+    #                header_len = header_lengths[map_header]
+    #                map_header += f.read(header_len)
+    #                map_headers.append(map_header)
+    #                print(binascii.hexlify(map_header))
+    #                if anchor:
+    #                    anchor_headers.append(map_header)
+    #
+    #        anchor_dataset[map_id] = map_headers
+    #        if anchor_headers:
+    #            anchor_dataset[anchor_id] = anchor_headers
+    #
+    #        if f.tell() >= int("daffe", 16) + rom_offset:
+    #            done = True
+    #
+    #    #        print map_headers
+    #    print(anchor_headers)
 
     # Pick random start location
     def random_start(self,print_log=False):
@@ -2664,7 +2589,7 @@ class World:
         destination_list = [1,6,12,14,16,18]
         random.shuffle(destination_list)
         for continent in new_continents:
-        	continent.append(destination_list.pop(0))
+            continent.append(destination_list.pop(0))
 
         # Randomly assign the rest of the locations
         destination_list += [2,3,4,5,7,8,9,10,11,13,15,17,19]
@@ -2675,7 +2600,7 @@ class World:
         new_continents[3] += destination_list[10:13]
         new_continents[4] += destination_list[-1:]
         for continent in new_continents:
-        	random.shuffle(continent)
+            random.shuffle(continent)
 
         self.overworld_menus[1][0] = new_continents[0][0]
         self.overworld_menus[2][0] = new_continents[0][1]
@@ -2720,13 +2645,7 @@ class World:
 
 
     # Shuffle enemies in ROM
-    def enemize(self, f, rom_offset=0):
-        f.seek(0)
-        rom = f.read()
-
-        # test_enemy = 13                         # TESTING!
-        # test_set = self.enemies[test_enemy][0]
-
+    def enemize(self):
         complex_enemies = [4, 15, 53, 62, 88]  # Enemies with many sprites, or are no fun
         max_complex = 5
 
@@ -2734,9 +2653,6 @@ class World:
         enemysets = []
         for set in self.enemysets:
             enemysets.append(set)
-
-        f.seek(0)
-        rom = f.read()
 
         # Shuffle enemy stats in Insane
         if self.enemizer == "Insane":
@@ -2769,9 +2685,6 @@ class World:
 
             random.shuffle(sets)
             newset = sets[0]
-            # if 10 in sets:      # TESTING!
-            #    newset = 10
-            # newset = test_set  # TESTING!
 
             # Gather enemies from old and new sets
             old_enemies = []
@@ -2783,75 +2696,49 @@ class World:
                     new_enemies.append(enemy)
 
             # Update map header to reflect new enemyset
-            if self.maps[map][3]:
-                self.map_patches.append([self.maps[map][3],self.enemysets[newset][0],self.maps[map][4]])
+            self.asar_defines["Map"+format(map,"02X")+"CardMonsters"] = "!"+self.enemysets[newset][0]
 
             # Randomize each enemy in map
-            addr_start = self.maps[map][5]
-            addr_end = self.maps[map][6]
-            for enemy in old_enemies:
-                # print self.enemies[enemy][3]
-                done = False
-                addr = int(addr_start, 16) + rom_offset
-                while not done:
-                    addr = rom.find(self.enemies[enemy][1] + self.enemies[enemy][2], addr + 1)
-                    if addr < 0 or addr > int(addr_end, 16) + rom_offset:
-                        done = True
-                    else:
-                        # Pick an enemy from new set
-                        enemytype = self.enemies[enemy][3]
-                        walkable = self.enemies[enemy][4]
-
-                        new_enemies_tmp = new_enemies[:]
-
-                        # Get X/Y for special placement exceptions
-                        f.seek(addr - 3)
-                        xcoord = binascii.hexlify(f.read(1))
-                        ycoord = binascii.hexlify(f.read(1))
-
-                        # 4-Ways cannot be on a #$XF x-coord
-                        if newset == 1 and 13 in new_enemies_tmp:
-                            if xcoord[1] == 102:
-                                new_enemies_tmp.remove(13)
-                        # Zip Flies can't be too close to map origin
-                        elif newset == 10 and 103 in new_enemies_tmp:
-                            if int(xcoord, 16) <= 4 or int(ycoord, 16) <= 4:
-                                new_enemies_tmp.remove(103)
-
-                        random.shuffle(new_enemies_tmp)
-
-                        i = 0
-                        found_enemy = False
-
-                        # if 13 in new_enemies_tmp:   # TESTING!
-                        #    new_enemy = 13
-                        #    found_enemy = True
-
-                        while not found_enemy:
-                            new_enemy = new_enemies_tmp[i]
-                            new_enemytype = self.enemies[new_enemy][3]
-                            new_walkable = self.enemies[new_enemy][4]
-                            if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies_tmp) - 1:
-                                found_enemy = True
-                                # Limit number of complex enemies per map
-                                if new_enemy in complex_enemies:
-                                    complex_ct += 1
-                                    if complex_ct >= max_complex:
-                                        for enemy_tmp in new_enemies:
-                                            if enemy_tmp in complex_enemies:
-                                                new_enemies.remove(enemy_tmp)
-                                                i -= 1
-                            i += 1
-                        f.seek(addr - 1)
-                        # f.write(b"\x00" + self.enemies[test_enemy][1] + self.enemies[test_enemy][2])  # TESTING!
-                        f.write(b"\x00" + self.enemies[new_enemy][1])
-                        if self.enemizer == "Balanced" and enemy == 102:
-                            f.write(b"\x47")
-                        elif map != 27 and self.enemizer != "Balanced":  # Moon Tribe cave enemies retain same template
-                            if self.enemizer == "Insane" and new_enemy != 102:  # Again, zombie exception
-                                f.write(insane_dictionary[new_enemy])
-                            else:
-                                f.write(self.enemies[new_enemy][2])
+            first_monster_id = self.maps[map][5]
+            last_monster_id = self.maps[map][6]
+            this_monster_id = first_monster_id
+            while this_monster_id <= last_monster_id:
+                old_enemy = self.default_enemies[this_monster_id]
+                enemytype = self.enemies[old_enemy][3]
+                walkable = self.enemies[old_enemy][4]
+                
+                random.shuffle(new_enemies)
+                i = 0
+                found_enemy = False
+                while not found_enemy:
+                    new_enemy = new_enemies[i]
+                    new_enemytype = self.enemies[new_enemy][3]
+                    new_walkable = self.enemies[new_enemy][4]
+                    if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies_tmp) - 1:
+                        found_enemy = True
+                        # Limit number of complex enemies per map
+                        if new_enemy in complex_enemies:
+                            complex_ct += 1
+                            if complex_ct >= max_complex:
+                                for enemy_tmp in new_enemies:
+                                    if enemy_tmp in complex_enemies:
+                                        new_enemies.remove(enemy_tmp)
+                                        i -= 1
+                    i += 1
+                asar_defines["Monster"+format(this_monster_id,"04X")+"Addr"] = "!"+self.enemies[new_enemy][1]
+                if map == 27:   # Moon Tribe doesn't shuffle stats
+                    new_enemy_stat_block = self.enemies[old_enemy][2]
+                elif self.enemizer == "Balanced":   # Balanced enemizer doesn't shuffle stats--
+                    new_enemy_stat_block = self.enemies[old_enemy][2]
+                    if old_enemy == 102:   # --except that we use the cyclops stat block for replaced zombies
+                        new_enemy_stat_block = 0x47
+                elif self.enemizer == "Insane" and new_enemy != 102:   # Insane uses random stat blocks for non-zombies
+                    new_enemy_stat_block = insane_dictionary[new_enemy]
+                else:   # Otherwise (Limited, Full, and zombies in Insane) the new monster uses its normal stat block
+                    new_enemy_stat_block = self.enemies[new_enemy][2]
+                asar_defines["Monster"+format(this_monster_id,"04X")+"Stats"] = new_enemy_stat_block
+                
+                this_monster_id += 1
 
     # Build world
     def __init__(self, settings: RandomizerData, statues_required=6, statues=[1,2,3,4,5,6], statue_req=StatueReq.GAME_CHOICE.value, kara=3, gem=[3,5,8,12,20,30,50], incatile=[9,5], hieroglyphs=[1,2,3,4,5,6], boss_order=[1,2,3,4,5,6,7]):
@@ -4830,280 +4717,1586 @@ class World:
         }
 
         # Database of enemy groups and spritesets
-        # FORMAT: { ID: [ROM_Loction, HeaderCode, HeaderData, Name]}
+        # FORMAT: { ID: [Header card define name, Friendly name]}
         self.enemysets = {
-            0: [b"\x03\x00\x10\x10\xEC\x59\xCD\x01\x04\x00\x60\xA0\x8C\x75\xDE\x10\xD0\x21\x00\x47\xED\x9F", "Underground Tunnel"],
-            1: [b"\x03\x00\x10\x10\xBC\x33\xC2\x01\x04\x00\x60\xA0\x0C\x77\xDE\x10\x2A\x0F\x00\xE6\x08\xD5", "Inca Ruins (Mud Monster and Larva)"],
-            2: [b"\x03\x00\x10\x10\x23\x4D\xC2\x01\x04\x00\x60\xA0\xCC\x77\xDE\x10\x36\x23\x00\x24\x45\xCC", "Inca Ruins (Statues)"],
-            3: [b"\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xCC\x7A\xDE\x10\x30\x29\x00\xBE\x2F\xCB", "Diamond Mine"],
-            4: [b"\x03\x00\x10\x10\x62\x3D\xCF\x01\x04\x00\x60\xA0\x4C\x7C\xDE\x10\x54\x1D\x00\xEF\xEE\x9E", "Sky Garden (top)"],
-            5: [b"\x03\x00\x10\x10\x62\x3D\xCF\x01\x04\x00\x60\xA0\x0C\x7D\xDE\x10\x54\x1D\x00\xEF\xEE\x9E", "Sky Garden (bottom)"],
-            6: [b"\x03\x00\x10\x10\x2D\x2E\xCC\x01\x04\x00\x60\xA0\x00\x00\xDF\x10\x16\x1C\x00\x41\x36\xD1", "Mu"],
-            7: [b"\x03\x00\x10\x10\xD1\x14\xCF\x01\x04\x00\x60\xA0\x40\x02\xDF\x10\x7F\x0F\x00\x2C\x2B\xD5", "Angel Dungeon"],
-            8: [b"\x03\x00\x10\x10\x6D\x13\xD0\x01\x04\x00\x60\xA0\x40\x05\xDF\x10\xFF\x16\x00\xF7\xF3\x99", "Great Wall"],
-            9: [b"\x03\x00\x10\x10\x00\x00\xD0\x01\x04\x00\x60\xA0\x40\x08\xDF\x10\x70\x0E\x00\x5C\x4D\xD8", "Mt. Kress"],
-            10: [b"\x03\x00\x10\x10\xEA\x15\xCE\x01\x04\x00\x70\x90\x53\x55\xDE\x10\xD5\x14\x00\x08\x73\xCC", "Ankor Wat (outside)"],
-            11: [b"\x03\x00\x10\x10\x81\x6A\xC1\x01\x04\x00\x70\x90\x13\x57\xDE\x10\x57\x10\x00\x5F\x39\xD4", "Ankor Wat (inside)"],
-            12: [b"\x03\x00\x10\x10\x0d\x18\xcb\x01\x04\x00\x60\x90\x80\x0a\xdf\x10\xfb\x13\x00\x0e\x67\xd1", "Pyramid"],
-            13: [b"\x03\x00\x10\x10\x16\x5C\xCC\x01\x04\x00\x60\xA0\xC0\x0C\xDF\x10\x30\x29\x00\xBE\x2F\xCB", "Jeweler's Mansion"]
+            0:  ["CardMonstersEdDg", "Underground Tunnel"],
+            1:  ["CardMonstersIncaSpinners", "Inca Ruins (Mud Monster and Larva)"],
+            2:  ["CardMonstersIncaStatues", "Inca Ruins (Statues)"],
+            3:  ["CardMonstersMine", "Diamond Mine"],
+            4:  ["CardMonstersSkGnTop", "Sky Garden (top)"],
+            5:  ["CardMonstersSkGnBot", "Sky Garden (bottom)"],
+            6:  ["CardMonstersMu", "Mu"],
+            7:  ["CardMonstersAngl", "Angel Dungeon"],
+            8:  ["CardMonstersGtWl", "Great Wall"],
+            9:  ["CardMonstersKres", "Mt. Kress"],
+            10: ["CardMonstersAnkrOuter", "Ankor Wat (outside)"],
+            11: ["CardMonstersAnkrInner", "Ankor Wat (inside)"],
+            12: ["CardMonstersPymd", "Pyramid"],
+            13: ["CardMonstersJwlr", "Jeweler's Mansion"]
         }
 
         # Enemy map database
         # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward[type, tier], SearchHeader,
-        #           SpritesetOffset,EventAddrLow,EventAddrHigh,RestrictedEnemysets]}
+        #           SpritesetOffset,FirstMonsterId,LastMonsterId,RestrictedEnemysets]}
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # For now, no one can have enemyset 10 (Ankor Wat outside)
             # Underground Tunnel
-            12: [0, 1, [0,0], b"\x0C\x00\x02\x05\x03", 4, "c867a", "c86ac", []],
-            13: [0, 1, [0,0], b"\x0D\x00\x02\x03\x03", 4, "c86ac", "c875c", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            14: [0, 1, [0,0], b"\x0E\x00\x02\x03\x03", 4, "c875c", "c8847", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Weird 4way issues
-            15: [0, 1, [0,0], b"\x0F\x00\x02\x03\x03", 4, "c8847", "c8935", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            18: [0, 1, [0,0], b"\x12\x00\x02\x03\x03", 4, "c8986", "c8aa9", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Spike balls
+            12: [0, 1, [0,0], b"\x0C\x00\x02\x05\x03", 4, 0x0001, 0x0003, []],
+            13: [0, 1, [0,0], b"\x0D\x00\x02\x03\x03", 4, 0x0004, 0x0012, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
+            14: [0, 1, [0,0], b"\x0E\x00\x02\x03\x03", 4, 0x0013, 0x0021, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Weird 4way issues
+            15: [0, 1, [0,0], b"\x0F\x00\x02\x03\x03", 4, 0x0022, 0x002e, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            18: [0, 1, [0,0], b"\x12\x00\x02\x03\x03", 4, 0x002f, 0x0044, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Spike balls
 
             # Inca Ruins
-            27: [1, 0, [0,0], b"\x1B\x00\x02\x05\x03", 4, "c8c33", "c8c87", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Moon Tribe cave
-            29: [1, 1, [0,0], b"\x1D\x00\x02\x0F\x03", 4, "c8cc4", "c8d85", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            32: [1, 1, [0,0], b"\x20\x00\x02\x08\x03", 4, "c8e16", "c8e75", []],  # Broken statue
-            33: [2, 1, [0,0], b"\x21\x00\x02\x08\x03", 4, "c8e75", "c8f57", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Floor switch
-            34: [2, 1, [0,0], b"\x22\x00\x02\x08\x03", 4, "c8f57", "c9029", []],  # Floor switch
-            35: [2, 1, [0,0], b"\x23\x00\x02\x0A\x03", 4, "c9029", "c90d5", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            37: [1, 1, [0,0], b"\x25\x00\x02\x08\x03", 4, "c90f3", "c91a0", [1]],  # Diamond block
-            38: [1, 1, [0,0], b"\x26\x00\x02\x08\x03", 4, "c91a0", "c9242", []],  # Broken statues
-            39: [1, 1, [0,0], b"\x27\x00\x02\x0A\x03", 4, "c9242", "c92f2", []],
-            40: [1, 1, [0,0], b"\x28\x00\x02\x08\x03", 4, "c92f2", "c935f", [1]],  # Falling blocks
+            27: [1, 0, [0,0], b"\x1B\x00\x02\x05\x03", 4, 0x0045, 0x004a, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Moon Tribe cave
+            29: [1, 1, [0,0], b"\x1D\x00\x02\x0F\x03", 4, 0x004b, 0x0059, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            32: [1, 1, [0,0], b"\x20\x00\x02\x08\x03", 4, 0x005e, 0x0065, []],  # Broken statue
+            33: [2, 1, [0,0], b"\x21\x00\x02\x08\x03", 4, 0x0066, 0x007a, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Floor switch
+            34: [2, 1, [0,0], b"\x22\x00\x02\x08\x03", 4, 0x007b, 0x008e, []],  # Floor switch
+            35: [2, 1, [0,0], b"\x23\x00\x02\x0A\x03", 4, 0x008f, 0x009d, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
+            37: [1, 1, [0,0], b"\x25\x00\x02\x08\x03", 4, 0x009e, 0x00a9, [1]],  # Diamond block
+            38: [1, 1, [0,0], b"\x26\x00\x02\x08\x03", 4, 0x00aa, 0x00b3, []],  # Broken statues
+            39: [1, 1, [0,0], b"\x27\x00\x02\x0A\x03", 4, 0x00b4, 0x00c4, []],
+            40: [1, 1, [0,0], b"\x28\x00\x02\x08\x03", 4, 0x00c5, 0x00cc, [1]],  # Falling blocks
 
             # Diamond Mine
-            61: [3, 2, [0,0], b"\x3D\x00\x02\x08\x03", 4, "c9836", "c98b7", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            62: [3, 2, [0,0], b"\x3E\x00\x02\x08\x03", 4, "c98b7", "c991a", []],
-            63: [3, 2, [0,0], b"\x3F\x00\x02\x05\x03", 4, "c991a", "c9a41", []],
-            64: [3, 2, [0,0], b"\x40\x00\x02\x08\x03", 4, "c9a41", "c9a95", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Trapped laborer (??)
-            65: [3, 2, [0,0], b"\x41\x00\x02\x00\x03", 4, "c9a95", "c9b39", [0, 2, 3, 4, 5, 11]],  # Stationary Grundit
-            69: [3, 2, [0,0], b"\x45\x00\x02\x08\x03", 4, "c9ba1", "c9bf4", []],
-            70: [3, 2, [0,0], b"\x46\x00\x02\x08\x03", 4, "c9bf4", "c9c5c", [3, 13]],
+            61: [3, 2, [0,0], b"\x3D\x00\x02\x08\x03", 4, 0x00ce, 0x00d8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            62: [3, 2, [0,0], b"\x3E\x00\x02\x08\x03", 4, 0x00d9, 0x00df, []],
+            63: [3, 2, [0,0], b"\x3F\x00\x02\x05\x03", 4, 0x00e0, 0x00f7, []],
+            64: [3, 2, [0,0], b"\x40\x00\x02\x08\x03", 4, 0x00f8, 0x00fd, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Trapped laborer (??)
+            65: [3, 2, [0,0], b"\x41\x00\x02\x00\x03", 4, 0x00fe, 0x0108, [0, 2, 3, 4, 5, 11]],  # Stationary Grundit
+            69: [3, 2, [0,0], b"\x45\x00\x02\x08\x03", 4, 0x0109, 0x010e, []],
+            70: [3, 2, [0,0], b"\x46\x00\x02\x08\x03", 4, 0x010f, 0x0117, [3, 13]],
 
             # Sky Garden
-            77: [4, 2, [0,0], b"\x4D\x00\x02\x12\x03", 4, "c9db3", "c9e92", []],
-            78: [5, 2, [0,0], b"\x4E\x00\x02\x10\x03", 4, "c9e92", "c9f53", []],
-            79: [4, 2, [0,0], b"\x4F\x00\x02\x12\x03", 4, "c9f53", "ca01a", []],
-            80: [5, 2, [0,0], b"\x50\x00\x02\x10\x03", 4, "ca01a", "ca0cb", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            81: [4, 2, [0,0], b"\x51\x00\x02\x12\x03", 4, "ca0cb", "ca192", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            82: [5, 2, [0,0], b"\x52\x00\x02\x10\x03", 4, "ca192", "ca247", [4, 5]],
-            83: [4, 2, [0,0], b"\x53\x00\x02\x12\x03", 4, "ca247", "ca335", []],
-            84: [5, 2, [0,0], b"\x54\x00\x02\x12\x03", 4, "ca335", "ca43b", [4, 5]],
+            77: [4, 2, [0,0], b"\x4D\x00\x02\x12\x03", 4, 0x0118, 0x0129, []],
+            78: [5, 2, [0,0], b"\x4E\x00\x02\x10\x03", 4, 0x012a, 0x0136, []],
+            79: [4, 2, [0,0], b"\x4F\x00\x02\x12\x03", 4, 0x0137, 0x0143, []],
+            80: [5, 2, [0,0], b"\x50\x00\x02\x10\x03", 4, 0x0144, 0x014f, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            81: [4, 2, [0,0], b"\x51\x00\x02\x12\x03", 4, 0x0150, 0x015c, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            82: [5, 2, [0,0], b"\x52\x00\x02\x10\x03", 4, 0x015d, 0x0163, [4, 5]],
+            83: [4, 2, [0,0], b"\x53\x00\x02\x12\x03", 4, 0x0164, 0x0172, []],
+            84: [5, 2, [0,0], b"\x54\x00\x02\x12\x03", 4, 0x0173, 0x0182, [4, 5]],
 
             # Mu
             #            92: [6,0,0,b"\x5C\x00\x02\x15\x03",4,[]],  # Seaside Palace
-            95: [6, 3, [0,0], b"\x5F\x00\x02\x14\x03", 4, "ca71b", "ca7ed", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            96: [6, 3, [0,0], b"\x60\x00\x02\x14\x03", 4, "ca7ed", "ca934", [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
-            97: [6, 3, [0,0], b"\x61\x00\x02\x14\x03", 4, "ca934", "caa7b", [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
-            98: [6, 3, [0,0], b"\x62\x00\x02\x14\x03", 4, "caa7b", "cab28", []],
-            100: [6, 3, [0,0], b"\x64\x00\x02\x14\x03", 4, "cab4b", "cabd4", []],
-            101: [6, 3, [0,0], b"\x65\x00\x02\x14\x03", 4, "cabd4", "cacc3", [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
+            95:  [6, 3, [0,0], b"\x5F\x00\x02\x14\x03", 4, 0x0193, 0x01a5, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
+            96:  [6, 3, [0,0], b"\x60\x00\x02\x14\x03", 4, 0x01a6, 0x01bf, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
+            97:  [6, 3, [0,0], b"\x61\x00\x02\x14\x03", 4, 0x01c0, 0x01d9, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
+            98:  [6, 3, [0,0], b"\x62\x00\x02\x14\x03", 4, 0x01da, 0x01e5, []],
+            100: [6, 3, [0,0], b"\x64\x00\x02\x14\x03", 4, 0x01e6, 0x01ed, []],
+            101: [6, 3, [0,0], b"\x65\x00\x02\x14\x03", 4, 0x01ee, 0x01fe, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
 
             # Angel Dungeon
-            109: [7, 3, [0,0], b"\x6D\x00\x02\x16\x03", 4, "caf6e", "cb04b", [7, 8, 9, 10]],  # Add 10's back in once flies are fixed
-            110: [7, 3, [0,0], b"\x6E\x00\x02\x18\x03", 4, "cb04b", "cb13e", [7, 8, 9, 10]],
-            111: [7, 3, [0,0], b"\x6F\x00\x02\x1B\x03", 4, "cb13e", "cb1ae", [7, 8, 9, 10]],
-            112: [7, 3, [0,0], b"\x70\x00\x02\x16\x03", 4, "cb1ae", "cb258", [7, 8, 9, 10]],
-            113: [7, 3, [0,0], b"\x71\x00\x02\x18\x03", 4, "cb258", "cb29e", [7, 8, 9, 10]],
-            114: [7, 3, [0,0], b"\x72\x00\x02\x18\x03", 4, "cb29e", "cb355", [7, 8, 9, 10]],
+            109: [7, 3, [0,0], b"\x6D\x00\x02\x16\x03", 4, 0x0201, 0x020f, [7, 8, 9, 10]],  # Add 10's back in once flies are fixed
+            110: [7, 3, [0,0], b"\x6E\x00\x02\x18\x03", 4, 0x0210, 0x0222, [7, 8, 9, 10]],
+            111: [7, 3, [0,0], b"\x6F\x00\x02\x1B\x03", 4, 0x0223, 0x0228, [7, 8, 9, 10]],
+            112: [7, 3, [0,0], b"\x70\x00\x02\x16\x03", 4, 0x0229, 0x022f, [7, 8, 9, 10]],
+            113: [7, 3, [0,0], b"\x71\x00\x02\x18\x03", 4, 0x0230, 0x0231, [7, 8, 9, 10]],
+            114: [7, 3, [0,0], b"\x72\x00\x02\x18\x03", 4, 0x0232, 0x0242, [7, 8, 9, 10]],
 
             # Great Wall
-            130: [8, 4, [0,0], b"\x82\x00\x02\x1D\x03", 4, "cb6c1", "cb845", [8, 9, 10]],  # Add 10's back in once flies are fixed
-            131: [8, 4, [0,0], b"\x83\x00\x02\x1D\x03", 4, "cb845", "cb966", [7, 8, 9, 10]],
-            133: [8, 4, [0,0], b"\x85\x00\x02\x1D\x03", 4, "cb97d", "cbb18", [8, 9, 10]],
-            134: [8, 4, [0,0], b"\x86\x00\x02\x1D\x03", 4, "cbb18", "cbb87", [7, 8, 9, 10]],
-            135: [8, 4, [0,0], b"\x87\x00\x02\x1D\x03", 4, "cbb87", "cbc3b", [8]],
-            136: [8, 4, [0,0], b"\x88\x00\x02\x1D\x03", 4, "cbc3b", "cbd0a", [7, 8, 9]],
+            130: [8, 4, [0,0], b"\x82\x00\x02\x1D\x03", 4, 0x0243, 0x0262, [8, 9, 10]],  # Add 10's back in once flies are fixed
+            131: [8, 4, [0,0], b"\x83\x00\x02\x1D\x03", 4, 0x0263, 0x0277, [7, 8, 9, 10]],
+            133: [8, 4, [0,0], b"\x85\x00\x02\x1D\x03", 4, 0x0278, 0x0291, [8, 9, 10]],
+            134: [8, 4, [0,0], b"\x86\x00\x02\x1D\x03", 4, 0x0292, 0x029a, [7, 8, 9, 10]],
+            135: [8, 4, [0,0], b"\x87\x00\x02\x1D\x03", 4, 0x029b, 0x02a6, [8]],
+            136: [8, 4, [0,0], b"\x88\x00\x02\x1D\x03", 4, 0x02a7, 0x02b5, [7, 8, 9]],
 
             # Mt Temple
-            160: [9, 4, [0,0], b"\xA0\x00\x02\x20\x03", 4, "cc18c", "cc21c", []],
-            161: [9, 4, [0,0], b"\xA1\x00\x02\x20\x03", 4, "cc21c", "cc335", [7, 8, 9, 10]],
-            162: [9, 4, [0,0], b"\xA2\x00\x02\x20\x03", 4, "cc335", "cc3df", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
-            163: [9, 4, [0,0], b"\xA3\x00\x02\x20\x03", 4, "cc3df", "cc4f7", []],
-            164: [9, 4, [0,0], b"\xA4\x00\x02\x20\x03", 4, "cc4f7", "cc5f8", [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13]],
-            165: [9, 4, [0,0], b"\xA5\x00\x02\x20\x03", 4, "cc5f8", "cc703", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
-            166: [9, 4, [0,0], b"\xA6\x00\x02\x20\x03", 4, "cc703", "cc7a1", []],
-            167: [9, 4, [0,0], b"\xA7\x00\x02\x20\x03", 4, "cc7a1", "cc9a3", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            168: [9, 4, [0,0], b"\xA8\x00\x02\x20\x03", 4, "cc9a3", "cca02", [7, 8, 9, 10]],
+            160: [9, 4, [0,0], b"\xA0\x00\x02\x20\x03", 4, 0x02b7, 0x02c1, []],
+            161: [9, 4, [0,0], b"\xA1\x00\x02\x20\x03", 4, 0x02c2, 0x02d9, [7, 8, 9, 10]],
+            162: [9, 4, [0,0], b"\xA2\x00\x02\x20\x03", 4, 0x02da, 0x02e7, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
+            163: [9, 4, [0,0], b"\xA3\x00\x02\x20\x03", 4, 0x02e8, 0x02fb, []],
+            164: [9, 4, [0,0], b"\xA4\x00\x02\x20\x03", 4, 0x02fc, 0x0315, [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13]],
+            165: [9, 4, [0,0], b"\xA5\x00\x02\x20\x03", 4, 0x0316, 0x032d, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
+            166: [9, 4, [0,0], b"\xA6\x00\x02\x20\x03", 4, 0x032e, 0x033c, []],
+            167: [9, 4, [0,0], b"\xA7\x00\x02\x20\x03", 4, 0x033d, 0x0363, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
+            168: [9, 4, [0,0], b"\xA8\x00\x02\x20\x03", 4, 0x0364, 0x036b, [7, 8, 9, 10]],
 
             # Ankor Wat
-            176: [10, 6, [0,0], b"\xB0\x00\x02\x2C\x03", 4, "ccb1b", "ccbd8", []],
-            177: [11, 6, [0,0], b"\xB1\x00\x02\x08\x03", 4, "ccbd8", "ccca5", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            178: [11, 6, [0,0], b"\xB2\x00\x02\x08\x03", 4, "ccca5", "ccd26", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
-            179: [11, 6, [0,0], b"\xB3\x00\x02\x08\x03", 4, "ccd26", "ccd83", []],
-            180: [11, 6, [0,0], b"\xB4\x00\x02\x08\x03", 4, "ccd83", "ccdd7", [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
-            181: [11, 6, [0,0], b"\xB5\x00\x02\x08\x03", 4, "ccdd7", "cce7b", []],
-            182: [10, 6, [0,0], b"\xB6\x00\x02\x2C\x03", 4, "cce7b", "cd005", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            183: [11, 6, [0,0], b"\xB7\x00\x02\x08\x03", 4, "cd005", "cd092", []],  # Earthquaker Golem
-            184: [11, 6, [0,0], b"\xB8\x00\x02\x08\x03", 4, "cd092", "cd0df", [0, 1, 3, 4, 5, 7, 8, 9, 11, 13]],
-            185: [11, 6, [0,0], b"\xB9\x00\x02\x08\x03", 4, "cd0df", "cd137", []],
-            186: [10, 6, [0,0], b"\xBA\x00\x02\x2C\x03", 4, "cd137", "cd197", []],
-            187: [11, 6, [0,0], b"\xBB\x00\x02\x08\x03", 4, "cd197", "cd1f4", []],
-            188: [11, 6, [0,0], b"\xBC\x00\x02\x24\x03", 4, "cd1f4", "cd29a", []],
-            189: [11, 6, [0,0], b"\xBD\x00\x02\x08\x03", 4, "cd29a", "cd339", []],
-            190: [11, 6, [0,0], b"\xBE\x00\x02\x08\x03", 4, "cd339", "cd392", []],
+            176: [10, 6, [0,0], b"\xB0\x00\x02\x2C\x03", 4, 0x036c, 0x037a, []],
+            177: [11, 6, [0,0], b"\xB1\x00\x02\x08\x03", 4, 0x037b, 0x038d, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
+            178: [11, 6, [0,0], b"\xB2\x00\x02\x08\x03", 4, 0x038e, 0x0398, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
+            179: [11, 6, [0,0], b"\xB3\x00\x02\x08\x03", 4, 0x0399, 0x039f, []],
+            180: [11, 6, [0,0], b"\xB4\x00\x02\x08\x03", 4, 0x03a0, 0x03a5, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
+            181: [11, 6, [0,0], b"\xB5\x00\x02\x08\x03", 4, 0x03a6, 0x03b0, []],
+            182: [10, 6, [0,0], b"\xB6\x00\x02\x2C\x03", 4, 0x03b1, 0x03d7, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
+            183: [11, 6, [0,0], b"\xB7\x00\x02\x08\x03", 4, 0x03d8, 0x03e3, []],  # Earthquaker Golem
+            184: [11, 6, [0,0], b"\xB8\x00\x02\x08\x03", 4, 0x03e4, 0x03e9, [0, 1, 3, 4, 5, 7, 8, 9, 11, 13]],
+            185: [11, 6, [0,0], b"\xB9\x00\x02\x08\x03", 4, 0x03ea, 0x03f1, []],
+            186: [10, 6, [0,0], b"\xBA\x00\x02\x2C\x03", 4, 0x03f2, 0x03f6, []],
+            187: [11, 6, [0,0], b"\xBB\x00\x02\x08\x03", 4, 0x03f7, 0x03fc, []],
+            188: [11, 6, [0,0], b"\xBC\x00\x02\x24\x03", 4, 0x03fd, 0x0403, []],
+            189: [11, 6, [0,0], b"\xBD\x00\x02\x08\x03", 4, 0x0404, 0x040e, []],
+            190: [11, 6, [0,0], b"\xBE\x00\x02\x08\x03", 4, 0x040f, 0x0415, []],
 
             # Pyramid
-            204: [12, 5, [0,0], b"\xCC\x00\x02\x08\x03", 4, "cd539", "cd58c", []],
-            206: [12, 5, [0,0], b"\xCE\x00\x02\x08\x03", 4, "cd5c6", "cd650", []],
-            207: [12, 5, [0,0], b"\xCF\x00\x02\x08\x03", 4, "cd650", "cd6f3", []],
-            208: [12, 5, [0,0], b"\xD0\x00\x02\x08\x03", 4, "cd6f3", "cd752", []],
-            209: [12, 5, [0,0], b"\xD1\x00\x02\x08\x03", 4, "cd752", "cd81b", []],
-            210: [12, 5, [0,0], b"\xD2\x00\x02\x08\x03", 4, "cd81b", "cd8f1", []],
-            211: [12, 5, [0,0], b"\xD3\x00\x02\x08\x03", 4, "cd8f1", "cd9a1", []],
-            212: [12, 5, [0,0], b"\xD4\x00\x02\x08\x03", 4, "cd9a1", "cda80", []],
-            213: [12, 5, [0,0], b"\xD5\x00\x02\x08\x03", 4, "cda80", "cdb4b", []],
-            214: [12, 5, [0,0], b"\xD6\x00\x02\x26\x03", 4, "cdb4b", "cdc1e", []],
-            215: [12, 5, [0,0], b"\xD7\x00\x02\x28\x03", 4, "cdc1e", "cdcfd", [0, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]],
-            216: [12, 5, [0,0], b"\xD8\x00\x02\x08\x03", 4, "cdcfd", "cde4f", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            217: [12, 5, [0,0], b"\xD9\x00\x02\x26\x03", 4, "cde4f", "cdf3c", []],
-            219: [12, 5, [0,0], b"\xDB\x00\x02\x26\x03", 4, "cdf76", "ce010", [0, 4, 5, 8, 9, 11, 12]],  #Spike elevators
+            204: [12, 5, [0,0], b"\xCC\x00\x02\x08\x03", 4, 0x0416, 0x0417, []],
+            206: [12, 5, [0,0], b"\xCE\x00\x02\x08\x03", 4, 0x0418, 0x0423, []],
+            207: [12, 5, [0,0], b"\xCF\x00\x02\x08\x03", 4, 0x0424, 0x0431, []],
+            208: [12, 5, [0,0], b"\xD0\x00\x02\x08\x03", 4, 0x0432, 0x0439, []],
+            209: [12, 5, [0,0], b"\xD1\x00\x02\x08\x03", 4, 0x043a, 0x044c, []],
+            210: [12, 5, [0,0], b"\xD2\x00\x02\x08\x03", 4, 0x044d, 0x0462, []],
+            211: [12, 5, [0,0], b"\xD3\x00\x02\x08\x03", 4, 0x0463, 0x0473, []],
+            212: [12, 5, [0,0], b"\xD4\x00\x02\x08\x03", 4, 0x0474, 0x0483, []],
+            213: [12, 5, [0,0], b"\xD5\x00\x02\x08\x03", 4, 0x0484, 0x0497, []],
+            214: [12, 5, [0,0], b"\xD6\x00\x02\x26\x03", 4, 0x0498, 0x04a8, []],
+            215: [12, 5, [0,0], b"\xD7\x00\x02\x28\x03", 4, 0x04a9, 0x04b8, [0, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]],
+            216: [12, 5, [0,0], b"\xD8\x00\x02\x08\x03", 4, 0x04b9, 0x04db, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
+            217: [12, 5, [0,0], b"\xD9\x00\x02\x26\x03", 4, 0x04dc, 0x04f2, []],
+            219: [12, 5, [0,0], b"\xDB\x00\x02\x26\x03", 4, 0x04f3, 0x04f6, [0, 4, 5, 8, 9, 11, 12]],  #Spike elevators
 
             # Jeweler's Mansion
-            233: [13, 0, [0,0], b"\xE9\x00\x02\x22\x03", 4, "ce224", "ce3a6", [0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]]
+            233: [13, 0, [0,0], b"\xE9\x00\x02\x22\x03", 4, 0x04f9, 0x051e, [0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]]
 
         }
 
         # Database of enemy types
-        # FORMAT: { ID: [Enemyset, Event addr, VanillaTemplate,
+        # FORMAT: { ID: [Enemyset ID, Define for addr, Default stat block,
         #           Type(1=stationary,2=walking,3=flying),OnWalkableTile,CanBeRandom,Name]}
         self.enemies = {
             # Underground Tunnel
-            0: [0, b"\x55\x87\x8a", b"\x05", 2, True, True, "Bat"],  # a8755
-            1: [0, b"\x6c\x82\x8a", b"\x01", 2, True, True, "Ribber"],
-            2: [0, b"\x00\x80\x8a", b"\x02", 1, False, True, "Canal Worm"],
-            3: [0, b"\xf7\x85\x8a", b"\x03", 2, True, False, "King Bat"],
-            4: [0, b"\x76\x84\x8a", b"\x10", 2, True, True, "Skull Chaser"],
-            5: [0, b"\xff\x86\x8a", b"\x04", 2, True, False, "Bat Minion 1"],
-            6: [0, b"\x9a\x86\x8a", b"\x04", 2, True, False, "Bat Minion 2"],
-            7: [0, b"\x69\x86\x8a", b"\x04", 2, True, False, "Bat Minion 3"],
-            8: [0, b"\xcb\x86\x8a", b"\x04", 2, True, False, "Bat Minion 4"],
+            0: [0, "EnemizerBatAddr", 0x05, 2, True, True, "Bat"],  # a8755
+            1: [0, "EnemizerRibberAddr", 0x01, 2, True, True, "Ribber"],
+            2: [0, "EnemizerCanalWormAddr", 0x02, 1, False, True, "Canal Worm"],
+            3: [0, "EnemizerKingBatAddr", 0x03, 2, True, False, "King Bat"],
+            4: [0, "EnemizerSkullChaserAddr", 0x10, 2, True, True, "Skull Chaser"],
+            5: [0, "EnemizerBatMinion1Addr", 0x04, 2, True, False, "Bat Minion 1"],
+            6: [0, "EnemizerBatMinion2Addr", 0x04, 2, True, False, "Bat Minion 2"],
+            7: [0, "EnemizerBatMinion3Addr", 0x04, 2, True, False, "Bat Minion 3"],
+            8: [0, "EnemizerBatMinion4Addr", 0x04, 2, True, False, "Bat Minion 4"],
 
             # Inca Ruins
-            10: [1, b"\xb7\x8d\x8a", b"\x0b", 2, True, True, "Slugger"],
-            11: [1, b"\xb6\x8e\x8a", b"\x0b", 2, True, False, "Scuttlebug"],
-            12: [1, b"\x1b\x8b\x8a", b"\x0a", 2, True, True, "Mudpit"],
-            13: [1, b"\x70\x8c\x8a", b"\x0c", 1, True, True, "Four Way"],
-            14: [2, b"\xee\x97\x8a", b"\x0f", 2, True, True, "Splop"],
-            15: [2, b"\xbc\x98\x8a", b"\x0e", 3, False, True, "Whirligig"],
-            16: [2, b"\xc2\x95\x8a", b"\x0d", 2, True, False, "Stone Lord R"],  # shoots fire
-            17: [2, b"\xb3\x95\x8a", b"\x0d", 2, True, True, "Stone Lord D"],  # shoots fire
-            18: [2, b"\xb8\x95\x8a", b"\x0d", 2, True, False, "Stone Lord U"],  # shoots fire
-            19: [2, b"\xbd\x95\x8a", b"\x0d", 2, True, False, "Stone Lord L"],  # shoots fire
-            20: [2, b"\x70\x90\x8a", b"\x0d", 2, True, False, "Stone Guard R"],  # throws spears
-            21: [2, b"\x6b\x90\x8a", b"\x0d", 2, True, False, "Stone Guard L"],  # throws spears
-            22: [2, b"\x61\x90\x8a", b"\x0d", 2, True, True, "Stone Guard D"],  # throws spears
-            23: [2, b"\xc3\x99\x8a", b"\x0e", 1, False, False, "Whirligig (stationary)"],
+            10: [1, "EnemizerSluggerAddr", 0x0b, 2, True, True, "Slugger"],
+            11: [1, "EnemizerScuttlebugAddr", 0x0b, 2, True, False, "Scuttlebug"],
+            12: [1, "EnemizerMudpitAddr", 0x0a, 2, True, True, "Mudpit"],
+            13: [1, "EnemizerFourWayAddr", 0x0c, 1, True, True, "Four Way"],
+            14: [2, "EnemizerSplopAddr", 0x0f, 2, True, True, "Splop"],
+            15: [2, "EnemizerWhirligigAddr", 0x0e, 3, False, True, "Whirligig"],
+            16: [2, "EnemizerStoneLordRAddr", 0x0d, 2, True, False, "Stone Lord R"],  # shoots fire
+            17: [2, "EnemizerStoneLordDAddr", 0x0d, 2, True, True, "Stone Lord D"],  # shoots fire
+            18: [2, "EnemizerStoneLordUAddr", 0x0d, 2, True, False, "Stone Lord U"],  # shoots fire
+            19: [2, "EnemizerStoneLordLAddr", 0x0d, 2, True, False, "Stone Lord L"],  # shoots fire
+            20: [2, "EnemizerStoneGuardRAddr", 0x0d, 2, True, False, "Stone Guard R"],  # throws spears
+            21: [2, "EnemizerStoneGuardLAddr", 0x0d, 2, True, False, "Stone Guard L"],  # throws spears
+            22: [2, "EnemizerStoneGuardDAddr", 0x0d, 2, True, True, "Stone Guard D"],  # throws spears
+            23: [2, "EnemizerWhirligigStationaryAddr", 0x0e, 1, False, False, "Whirligig (stationary)"],
 
             # Diamond Mine
-            30: [3, b"\xca\xaa\x8a", b"\x18", 2, True, True, "Flayzer 1"],
-            31: [3, b"\x54\xaa\x8a", b"\x18", 2, True, False, "Flayzer 2"],
-            32: [3, b"\x8a\xaa\x8a", b"\x18", 2, True, False, "Flayzer 3"],
-            33: [3, b"\x03\xb1\x8a", b"\x19", 2, True, True, "Eye Stalker"],
-            34: [3, b"\xb3\xb0\x8a", b"\x19", 2, True, False, "Eye Stalker (stone)"],
-            35: [3, b"\xf5\xaf\x8a", b"\x1a", 1, True, True, "Grundit"],
-            #            36: [3,b"\xf5\xa4\x8a",b"\x1a","Grundit (stationary)"],  # Can't randomize this guy
+            30: [3, "EnemizerFlayzer1Addr", 0x18, 2, True, True, "Flayzer 1"],
+            31: [3, "EnemizerFlayzer2Addr", 0x18, 2, True, False, "Flayzer 2"],
+            32: [3, "EnemizerFlayzer3Addr", 0x18, 2, True, False, "Flayzer 3"],
+            33: [3, "EnemizerEyeStalker1Addr", 0x19, 2, True, True, "Eye Stalker"],
+            34: [3, "EnemizerEyeStalkerstoneAddr", 0x19, 2, True, False, "Eye Stalker (stone)"],
+            35: [3, "EnemizerGrunditAddr", 0x1a, 1, True, True, "Grundit"],
+            #            36: [3,"\xf5\xa4\x8a",0x1a,"Grundit (stationary)"],  # Can't randomize this guy
 
             # Sky Garden
-            40: [4, b"\xb0\xb4\x8a", b"\x1d", 2, True, True, "Blue Cyber"],
-            41: [4, b"\x20\xc5\x8a", b"\x1b", 2, True, True, "Dynapede 1"],
-            42: [4, b"\x33\xc5\x8a", b"\x1b", 2, True, False, "Dynapede 2"],
-            43: [5, b"\xb0\xb8\x8a", b"\x1e", 2, True, True, "Red Cyber"],
-            44: [5, b"\x16\xc8\x8a", b"\x1c", 2, True, True, "Nitropede"],
+            40: [4, "EnemizerBlueCyberAddr", 0x1d, 2, True, True, "Blue Cyber"],
+            41: [4, "EnemizerDynapede1Addr", 0x1b, 2, True, True, "Dynapede 1"],
+            42: [4, "EnemizerDynapede2Addr", 0x1b, 2, True, False, "Dynapede 2"],
+            43: [5, "EnemizerRedCyberAddr", 0x1e, 2, True, True, "Red Cyber"],
+            44: [5, "EnemizerNitropedeAddr", 0x1c, 2, True, True, "Nitropede"],
 
             # Mu
-            50: [6, b"\xcc\xe6\x8a", b"\x2b", 2, True, True, "Slipper"],
-            51: [6, b"\x5c\xe4\x8a", b"\x2a", 2, True, True, "Skuddle"],
-            52: [6, b"\x9e\xdd\x8a", b"\x28", 2, True, True, "Cyclops"],
-            53: [6, b"\x6e\xe2\x8a", b"\x29", 3, True, True, "Flasher"],
-            54: [6, b"\x07\xde\x8a", b"\x28", 2, True, False, "Cyclops (asleep)"],
-            55: [6, b"\xf4\xe6\x8a", b"\x2b", 2, True, True, "Slipper (falling)"],
+            50: [6, "EnemizerSlipperAddr", 0x2b, 2, True, True, "Slipper"],
+            51: [6, "EnemizerSkuddleAddr", 0x2a, 2, True, True, "Skuddle"],
+            52: [6, "EnemizerCyclopsAddr", 0x28, 2, True, True, "Cyclops"],
+            53: [6, "EnemizerFlasherAddr", 0x29, 3, True, True, "Flasher"],
+            54: [6, "EnemizerCyclopsAsleepAddr", 0x28, 2, True, False, "Cyclops (asleep)"],
+            55: [6, "EnemizerSlipperFallingAddr", 0x2b, 2, True, True, "Slipper (falling)"],
 
             # Angel Dungeon
-            60: [7, b"\x9f\xee\x8a", b"\x2d", 3, False, True, "Dive Bat"],
-            61: [7, b"\x51\xea\x8a", b"\x2c", 2, True, True, "Steelbones"],
-            62: [7, b"\x33\xef\x8a", b"\x2e", 1, True, True, "Draco"],  # False for now...
-            63: [7, b"\xc7\xf0\x8a", b"\x2e", 1, True, True, "Ramskull"],
+            60: [7, "EnemizerDiveBatAddr", 0x2d, 3, False, True, "Dive Bat"],
+            61: [7, "EnemizerSteelbonesAddr", 0x2c, 2, True, True, "Steelbones"],
+            62: [7, "EnemizerDracoAddr", 0x2e, 1, True, True, "Draco"],  # False for now...
+            63: [7, "EnemizerRamskullAddr", 0x2e, 1, True, True, "Ramskull"],
 
             # Great Wall
-            70: [8, b"\x55\x91\x8b", b"\x33", 2, True, True, "Archer 1"],
-            71: [8, b"\xfe\x8e\x8b", b"\x33", 2, True, False, "Archer Statue"],
-            72: [8, b"\xbe\x8d\x8b", b"\x34", 2, True, True, "Eyesore"],
-            73: [8, b"\x70\x8c\x8b", b"\x35", 3, False, True, "Fire Bug 1"],
-            74: [8, b"\x70\x8c\x8b", b"\x33", 3, False, False, "Fire Bug 2"],
-            75: [8, b"\x23\x94\x8b", b"\x32", 2, True, True, "Asp"],
-            76: [8, b"\x65\x91\x8b", b"\x33", 2, True, False, "Archer 2"],
-            77: [8, b"\x77\x91\x8b", b"\x33", 2, True, False, "Archer 3"],
-            78: [8, b"\x72\x8f\x8b", b"\x46", 2, True, False, "Archer Statue (switch) 1"],
-            79: [8, b"\x4f\x8f\x8b", b"\x33", 2, True, False, "Archer Statue (switch) 2"],
+            70: [8, "EnemizerArcher1Addr", 0x33, 2, True, True, "Archer 1"],
+            71: [8, "EnemizerArcherStatueAddr", 0x33, 2, True, False, "Archer Statue"],
+            72: [8, "EnemizerEyesoreAddr", 0x34, 2, True, True, "Eyesore"],
+            73: [8, "EnemizerFireBug1Addr", 0x35, 3, False, True, "Fire Bug 1"],
+            74: [8, "EnemizerFireBug2Addr", 0x33, 3, False, False, "Fire Bug 2"],
+            75: [8, "EnemizerAspAddr", 0x32, 2, True, True, "Asp"],
+            76: [8, "EnemizerArcher2Addr", 0x33, 2, True, False, "Archer 2"],
+            77: [8, "EnemizerArcher3Addr", 0x33, 2, True, False, "Archer 3"],
+            78: [8, "EnemizerArcherStatueSwitch1Addr", 0x46, 2, True, False, "Archer Statue (switch) 1"],
+            79: [8, "EnemizerArcherStatueSwitch2Addr", 0x33, 2, True, False, "Archer Statue (switch) 2"],
 
             # Mt. Kress
-            80: [9, b"\xac\x9b\x8b", b"\x3e", 3, True, True, "Skulker (N/S)"],
-            81: [9, b"\x4e\x9c\x8b", b"\x3e", 3, True, True, "Skulker (E/W)"],
-            82: [9, b"\x44\x9c\x8b", b"\x3e", 3, True, False, "Skulker (E/W)"],
-            83: [9, b"\xa2\x9b\x8b", b"\x3e", 3, True, False, "Skulker (E/W)"],
-            84: [9, b"\x8b\x9e\x8b", b"\x3d", 3, False, True, "Yorrick (E/W)"],
-            85: [9, b"\x53\x9f\x8b", b"\x3d", 3, False, False, "Yorrick (E/W)"],
-            86: [9, b"\x0f\x9d\x8b", b"\x3d", 3, False, True, "Yorrick (N/S)"],
-            87: [9, b"\xcd\x9d\x8b", b"\x3d", 3, False, False, "Yorrick (N/S)"],
-            88: [9, b"\x3b\x98\x8b", b"\x3f", 3, False, True, "Fire Sprite"],
-            89: [9, b"\xcf\xa0\x8b", b"\x3c", 2, True, True, "Acid Splasher"],
-            90: [9, b"\xa1\xa0\x8b", b"\x3c", 2, True, False, "Acid Splasher (stationary E)"],
-            91: [9, b"\x75\xa0\x8b", b"\x3c", 2, True, False, "Acid Splasher (stationary W)"],
-            92: [9, b"\x49\xa0\x8b", b"\x3c", 2, True, False, "Acid Splasher (stationary S)"],
-            93: [9, b"\x1d\xa0\x8b", b"\x3c", 2, True, False, "Acid Splasher (stationary N)"],
+            80: [9, "EnemizerSkulkerNSAddr", 0x3e, 3, True, True, "Skulker (N/S)"],
+            81: [9, "EnemizerSkulkerEW1Addr", 0x3e, 3, True, True, "Skulker (E/W) 1"],
+            82: [9, "EnemizerSkulkerEW2Addr", 0x3e, 3, True, False, "Skulker (E/W) 2"],
+            83: [9, "EnemizerSkulkerEW3Addr", 0x3e, 3, True, False, "Skulker (E/W) 3"],
+            84: [9, "EnemizerYorrickEW1Addr", 0x3d, 3, False, True, "Yorrick (E/W) 1"],
+            85: [9, "EnemizerYorrickEW2Addr", 0x3d, 3, False, False, "Yorrick (E/W) 2"],
+            86: [9, "EnemizerYorrickNS1Addr", 0x3d, 3, False, True, "Yorrick (N/S) 1"],
+            87: [9, "EnemizerYorrickNS2Addr", 0x3d, 3, False, False, "Yorrick (N/S) 2"],
+            88: [9, "EnemizerFireSpriteAddr", 0x3f, 3, False, True, "Fire Sprite"],
+            89: [9, "EnemizerAcidSplasherAddr", 0x3c, 2, True, True, "Acid Splasher"],
+            90: [9, "EnemizerAcidSplasherStationaryEAddr", 0x3c, 2, True, False, "Acid Splasher (stationary E)"],
+            91: [9, "EnemizerAcidSplasherStationaryWAddr", 0x3c, 2, True, False, "Acid Splasher (stationary W)"],
+            92: [9, "EnemizerAcidSplasherStationarySAddr", 0x3c, 2, True, False, "Acid Splasher (stationary S)"],
+            93: [9, "EnemizerAcidSplasherStationaryNAddr", 0x3c, 2, True, False, "Acid Splasher (stationary N)"],
 
             # Ankor Wat
-            100: [10, b"\xd7\xb1\x8b", b"\x49", 2, True, True, "Shrubber"],
-            101: [10, b"\xb4\xb1\x8b", b"\x49", 2, True, False, "Shrubber 2"],
-            102: [10, b"\x75\xb2\x8b", b"\x46", 2, True, True, "Zombie"],
-            103: [10, b"\x4f\xaf\x8b", b"\x4a", 3, True, True, "Zip Fly"],  # False for now...
-            104: [11, b"\x8d\xbd\x8b", b"\x42", 3, True, True, "Goldcap"],
-            105: [11, b"\x25\xb8\x8b", b"\x45", 2, True, True, "Gorgon"],
-            106: [11, b"\x17\xb8\x8b", b"\x45", 2, True, False, "Gorgon (jump down)"],
-            107: [11, b"\xbb\xbf\x8b", b"\x43", 2, True, False, "Frenzie"],
-            108: [11, b"\xd0\xbf\x8b", b"\x43", 2, True, True, "Frenzie 2"],
-            109: [11, b"\x66\xbb\x8b", b"\x44", 1, False, True, "Wall Walker"],
-            110: [11, b"\x66\xbb\x8b", b"\x3a", 1, False, False, "Wall Walker 2"],
-            111: [11, b"\x5c\xbb\x8b", b"\x44", 1, False, False, "Wall Walker 3"],
-            112: [11, b"\x5c\xbb\x8b", b"\x3a", 1, False, False, "Wall Walker 4"],
-            113: [11, b"\xaf\x99\x88", b"\x45", 2, True, False, "Gorgon (block)"],
+            100: [10, "EnemizerShrubberAddr", 0x49, 2, True, True, "Shrubber"],
+            101: [10, "EnemizerShrubber2Addr", 0x49, 2, True, False, "Shrubber 2"],
+            102: [10, "EnemizerZombieAddr", 0x46, 2, True, True, "Zombie"],
+            103: [10, "EnemizerZipFlyAddr", 0x4a, 3, True, True, "Zip Fly"],  # False for now...
+            104: [11, "EnemizerGoldcapAddr", 0x42, 3, True, True, "Goldcap"],
+            105: [11, "EnemizerGorgonAddr", 0x45, 2, True, True, "Gorgon"],
+            106: [11, "EnemizerGorgonDropperAddr", 0x45, 2, True, False, "Gorgon Dropper"],
+            107: [11, "EnemizerFrenzie1Addr", 0x43, 2, True, False, "Frenzie 1"],
+            108: [11, "EnemizerFrenzie2Addr", 0x43, 2, True, True, "Frenzie 2"],
+            109: [11, "EnemizerWallWalker1Addr", 0x44, 1, False, True, "Wall Walker 1"],
+            110: [11, "EnemizerWallWalker2Addr", 0x3a, 1, False, False, "Wall Walker 2"],
+            111: [11, "EnemizerWallWalker3Addr", 0x44, 1, False, False, "Wall Walker 3"],
+            112: [11, "EnemizerWallWalker4Addr", 0x3a, 1, False, False, "Wall Walker 4"],
+            113: [11, "EnemizerGorgonBlockAddr", 0x45, 2, True, False, "Gorgon (block)"],
 
             # Pyramid
-            120: [12, b"\x5f\xc6\x8b", b"\x4f", 1, True, True, "Mystic Ball (stationary)"],
-            121: [12, b"\xfc\xc5\x8b", b"\x4f", 2, True, True, "Mystic Ball"],
-            122: [12, b"\xa3\xc5\x8b", b"\x4f", 2, True, True, "Mystic Ball"],
-            123: [12, b"\x9d\xc3\x8b", b"\x4e", 2, True, True, "Tuts"],
-            124: [12, b"\x98\xc7\x8b", b"\x51", 1, True, True, "Blaster"],
-            125: [12, b"\x84\xc1\x8b", b"\x4c", 2, True, False, "Haunt (stationary)"],
-            126: [12, b"\xa7\xc1\x8b", b"\x4c", 2, True, True, "Haunt"],
+            120: [12, "EnemizerMysticBallStationaryAddr", 0x4f, 1, True, True, "Mystic Ball (stationary)"],
+            121: [12, "EnemizerMysticBall1Addr", 0x4f, 2, True, True, "Mystic Ball 1"],
+            122: [12, "EnemizerMysticBall2Addr", 0x4f, 2, True, True, "Mystic Ball 2"],
+            123: [12, "EnemizerTutsAddr", 0x4e, 2, True, True, "Tuts"],
+            124: [12, "EnemizerBlasterAddr", 0x51, 1, True, True, "Blaster"],
+            125: [12, "EnemizerHauntStationaryAddr", 0x4c, 2, True, False, "Haunt (stationary)"],
+            126: [12, "EnemizerHauntAddr", 0x4c, 2, True, True, "Haunt"],
 
             # Babel Tower
-            #            130: [14,b"\xd7\x99\x8a",b"\x5a","Castoth (boss)"],
-            #            131: [14,b"\xd5\xd0\x8a",b"\x5b","Viper (boss)"],
-            #            132: [14,b"\x50\xf1\x8a",b"\x5c","Vampire (boss)"],
-            #            133: [14,b"\x9c\xf1\x8a",b"\x5c","Vampire (boss)"],
-            #            134: [14,b"\x00\x80\x8b",b"\x5d","Sand Fanger (boss)"],
-            #            135: [14,b"\x1a\xa6\x8b",b"\x5e","Mummy Queen (boss)"],
+            #            130: [14,"\xd7\x99\x8a",0x5a,"Castoth (boss)"],
+            #            131: [14,"\xd5\xd0\x8a",0x5b,"Viper (boss)"],
+            #            132: [14,"\x50\xf1\x8a",0x5c,"Vampire (boss)"],
+            #            133: [14,"\x9c\xf1\x8a",0x5c,"Vampire (boss)"],
+            #            134: [14,"\x00\x80\x8",0x5d,"Sand Fanger (boss)"],
+            #            135: [14,"\x1a\xa6\x8",0x5e,"Mummy Queen (boss)"],
 
             # Jeweler's Mansion
-            140: [13, b"\xca\xaa\x8a", b"\x61", 2, True, True, "Flayzer"],
-            141: [13, b"\xf5\xaf\x8a", b"\x63", 1, True, True, "Grundit"],
-            142: [13, b"\xd8\xb0\x8a", b"\x62", 2, True, False, "Eye Stalker 1"],
-            143: [13, b"\x03\xb1\x8a", b"\x62", 2, True, True, "Eye Stalker 2"]
+            140: [13, "EnemizerFlayzerAddr", 0x61, 2, True, True, "Mansion Flayzer"],
+            141: [13, "EnemizerGrunditAddr", 0x63, 1, True, True, "Mansion Grundit"],
+            142: [13, "EnemizerEyeStalker2Addr", 0x62, 2, True, False, "Mansion Eye Stalker 2"],
+            143: [13, "EnemizerEyeStalker1Addr", 0x62, 2, True, True, "Mansion Eye Stalker 1"]
 
             # Bosses
-            #            24: [15,b"\x03\x9b\x8a",b"\x14","Castoth (boss)"],
-            #            45: [15,b"\x6f\xd1\x8a",b"\x27","Viper (boss)"],
-            #            55: [15,b"\xf7\xf1\x8a",b"\x2f","Vampire (boss)"],
-            #            56: [15,b"\xc8\xf3\x8a",b"\x30","Vampire (boss)"],
-            #            79: [15,b"\x5c\x81\x8b",b"\x36","Sand Fanger (boss)"],
-            #            128: [15,b"\xb6\xa6\x8b",b"\x50","Mummy Queen (boss)"],
-            #            143: [15,b"\x09\xf7\x88",b"\x5f","Solid Arm (boss)"],
-            #            140: [15,b"\xaa\xee\x8c",b"\x54","Dark Gaia"]
+            #            24: [15,"\x03\x9b\x8a",0x14,"Castoth (boss)"],
+            #            45: [15,"\x6f\xd1\x8a",0x27,"Viper (boss)"],
+            #            55: [15,"\xf7\xf1\x8a",0x2f,"Vampire (boss)"],
+            #            56: [15,"\xc8\xf3\x8a",0x30,"Vampire (boss)"],
+            #            79: [15,"\x5c\x81\x8",0x36,"Sand Fanger (boss)"],
+            #            128: [15,"\xb6\xa6\x8",0x50,"Mummy Queen (boss)"],
+            #            143: [15,"\x09\xf7\x88",0x5f,"Solid Arm (boss)"],
+            #            140: [15,"\xaa\xee\x8c",0x54,"Dark Gaia"]
 
+        }
+        
+        # Default (vanilla) enemy type for each non-boss monster ID
+        self.default_enemies = {
+            0x0001: 0,
+            0x0002: 0,
+            0x0003: 0,
+            0x0004: 2,
+            0x0005: 2,
+            0x0006: 2,
+            0x0007: 0,
+            0x0008: 0,
+            0x0009: 0,
+            0x000A: 0,
+            0x000B: 0,
+            0x000C: 0,
+            0x000D: 0,
+            0x000E: 0,
+            0x000F: 0,
+            0x0010: 0,
+            0x0011: 1,
+            0x0012: 1,
+            0x0013: 2,
+            0x0014: 2,
+            0x0015: 2,
+            0x0016: 2,
+            0x0017: 0,
+            0x0018: 0,
+            0x0019: 0,
+            0x001A: 0,
+            0x001B: 0,
+            0x001C: 0,
+            0x001D: 0,
+            0x001E: 1,
+            0x001F: 1,
+            0x0020: 1,
+            0x0021: 1,
+            0x0022: 2,
+            0x0023: 2,
+            0x0024: 0,
+            0x0025: 0,
+            0x0026: 0,
+            0x0027: 0,
+            0x0028: 1,
+            0x0029: 1,
+            0x002A: 3,
+            0x002B: 7,
+            0x002C: 6,
+            0x002D: 8,
+            0x002E: 5,
+            0x002F: 2,
+            0x0030: 2,
+            0x0031: 2,
+            0x0032: 2,
+            0x0033: 2,
+            0x0034: 2,
+            0x0035: 2,
+            0x0036: 0,
+            0x0037: 0,
+            0x0038: 0,
+            0x0039: 0,
+            0x003A: 0,
+            0x003B: 0,
+            0x003C: 0,
+            0x003D: 1,
+            0x003E: 1,
+            0x003F: 1,
+            0x0040: 1,
+            0x0041: 1,
+            0x0042: 1,
+            0x0043: 4,
+            0x0044: 4,
+            0x0045: 10,
+            0x0046: 10,
+            0x0047: 10,
+            0x0048: 10,
+            0x0049: 10,
+            0x004A: 10,
+            0x004B: 12,
+            0x004C: 12,
+            0x004D: 12,
+            0x004E: 12,
+            0x004F: 12,
+            0x0050: 13,
+            0x0051: 13,
+            0x0052: 13,
+            0x0053: 13,
+            0x0054: 13,
+            0x0055: 13,
+            0x0056: 11,
+            0x0057: 11,
+            0x0058: 11,
+            0x0059: 11,
+            0x005A: 16,
+            0x005B: 16,
+            0x005C: 19,
+            0x005D: 19,
+            0x005E: 12,
+            0x005F: 13,
+            0x0060: 13,
+            0x0061: 13,
+            0x0062: 13,
+            0x0063: 10,
+            0x0064: 10,
+            0x0065: 10,
+            0x0066: 22,
+            0x0067: 22,
+            0x0068: 22,
+            0x0069: 16,
+            0x006A: 20,
+            0x006B: 21,
+            0x006C: 17,
+            0x006D: 17,
+            0x006E: 22,
+            0x006F: 22,
+            0x0070: 14,
+            0x0071: 14,
+            0x0072: 14,
+            0x0073: 14,
+            0x0074: 14,
+            0x0075: 14,
+            0x0076: 14,
+            0x0077: 15,
+            0x0078: 15,
+            0x0079: 15,
+            0x007A: 23,
+            0x007B: 22,
+            0x007C: 22,
+            0x007D: 17,
+            0x007E: 18,
+            0x007F: 19,
+            0x0080: 16,
+            0x0081: 14,
+            0x0082: 14,
+            0x0083: 14,
+            0x0084: 14,
+            0x0085: 14,
+            0x0086: 14,
+            0x0087: 14,
+            0x0088: 14,
+            0x0089: 14,
+            0x008A: 14,
+            0x008B: 15,
+            0x008C: 15,
+            0x008D: 15,
+            0x008E: 15,
+            0x008F: 14,
+            0x0090: 14,
+            0x0091: 14,
+            0x0092: 14,
+            0x0093: 14,
+            0x0094: 14,
+            0x0095: 14,
+            0x0096: 14,
+            0x0097: 14,
+            0x0098: 14,
+            0x0099: 14,
+            0x009A: 14,
+            0x009B: 15,
+            0x009C: 15,
+            0x009D: 23,
+            0x009E: 12,
+            0x009F: 12,
+            0x00A0: 12,
+            0x00A1: 12,
+            0x00A2: 12,
+            0x00A3: 12,
+            0x00A4: 12,
+            0x00A5: 12,
+            0x00A6: 13,
+            0x00A7: 13,
+            0x00A8: 13,
+            0x00A9: 13,
+            0x00AA: 12,
+            0x00AB: 12,
+            0x00AC: 12,
+            0x00AD: 12,
+            0x00AE: 10,
+            0x00AF: 10,
+            0x00B0: 11,
+            0x00B1: 11,
+            0x00B2: 11,
+            0x00B3: 11,
+            0x00B4: 12,
+            0x00B5: 12,
+            0x00B6: 12,
+            0x00B7: 12,
+            0x00B8: 13,
+            0x00B9: 13,
+            0x00BA: 13,
+            0x00BB: 13,
+            0x00BC: 13,
+            0x00BD: 13,
+            0x00BE: 13,
+            0x00BF: 13,
+            0x00C0: 10,
+            0x00C1: 10,
+            0x00C2: 10,
+            0x00C3: 10,
+            0x00C4: 10,
+            0x00C5: 11,
+            0x00C6: 11,
+            0x00C7: 11,
+            0x00C8: 13,
+            0x00C9: 13,
+            0x00CA: 13,
+            0x00CB: 13,
+            0x00CC: 13,
+            0x00CE: 30,
+            0x00CF: 30,
+            0x00D0: 33,
+            0x00D1: 33,
+            0x00D2: 33,
+            0x00D3: 34,
+            0x00D4: 34,
+            0x00D5: 34,
+            0x00D6: 34,
+            0x00D7: 35,
+            0x00D8: 35,
+            0x00D9: 35,
+            0x00DA: 35,
+            0x00DB: 35,
+            0x00DC: 30,
+            0x00DD: 30,
+            0x00DE: 30,
+            0x00DF: 30,
+            0x00E0: 35,
+            0x00E1: 35,
+            0x00E2: 35,
+            0x00E3: 35,
+            0x00E4: 35,
+            0x00E5: 35,
+            0x00E6: 35,
+            0x00E7: 35,
+            0x00E8: 35,
+            0x00E9: 33,
+            0x00EA: 33,
+            0x00EB: 33,
+            0x00EC: 33,
+            0x00ED: 33,
+            0x00EE: 33,
+            0x00EF: 33,
+            0x00F0: 30,
+            0x00F1: 30,
+            0x00F2: 30,
+            0x00F3: 30,
+            0x00F4: 30,
+            0x00F5: 30,
+            0x00F6: 32,
+            0x00F7: 32,
+            0x00F8: 30,
+            0x00F9: 30,
+            0x00FA: 30,
+            0x00FB: 33,
+            0x00FC: 35,
+            0x00FD: 35,
+            0x00FE: 35,
+            0x00FF: 35,
+            0x0100: 35,
+            0x0101: 35,
+            0x0103: 33,
+            0x0104: 33,
+            0x0105: 33,
+            0x0106: 30,
+            0x0107: 30,
+            0x0108: 30,
+            0x0109: 35,
+            0x010A: 35,
+            0x010B: 35,
+            0x010C: 35,
+            0x010D: 35,
+            0x010E: 35,
+            0x010F: 33,
+            0x0110: 33,
+            0x0111: 33,
+            0x0112: 33,
+            0x0113: 30,
+            0x0114: 30,
+            0x0115: 30,
+            0x0116: 30,
+            0x0117: 31,
+            0x0118: 40,
+            0x0119: 40,
+            0x011A: 40,
+            0x011B: 40,
+            0x011C: 40,
+            0x011D: 40,
+            0x011E: 40,
+            0x011F: 42,
+            0x0120: 42,
+            0x0121: 42,
+            0x0122: 42,
+            0x0123: 42,
+            0x0124: 42,
+            0x0125: 42,
+            0x0126: 42,
+            0x0127: 42,
+            0x0128: 42,
+            0x0129: 42,
+            0x012A: 43,
+            0x012B: 43,
+            0x012C: 43,
+            0x012D: 43,
+            0x012E: 43,
+            0x012F: 43,
+            0x0130: 44,
+            0x0131: 44,
+            0x0132: 44,
+            0x0133: 44,
+            0x0134: 44,
+            0x0135: 44,
+            0x0136: 44,
+            0x0137: 40,
+            0x0138: 40,
+            0x0139: 40,
+            0x013A: 40,
+            0x013B: 40,
+            0x013C: 42,
+            0x013D: 42,
+            0x013E: 42,
+            0x013F: 41,
+            0x0140: 42,
+            0x0141: 42,
+            0x0142: 42,
+            0x0143: 42,
+            0x0144: 43,
+            0x0145: 43,
+            0x0146: 43,
+            0x0147: 43,
+            0x0148: 43,
+            0x0149: 44,
+            0x014A: 44,
+            0x014B: 44,
+            0x014C: 44,
+            0x014D: 44,
+            0x014E: 44,
+            0x014F: 44,
+            0x0150: 40,
+            0x0151: 40,
+            0x0152: 40,
+            0x0153: 40,
+            0x0154: 40,
+            0x0155: 40,
+            0x0156: 40,
+            0x0157: 42,
+            0x0158: 41,
+            0x0159: 42,
+            0x015A: 42,
+            0x015B: 42,
+            0x015C: 42,
+            0x015D: 43,
+            0x015E: 43,
+            0x015F: 43,
+            0x0160: 43,
+            0x0161: 43,
+            0x0162: 44,
+            0x0163: 44,
+            0x0164: 40,
+            0x0165: 40,
+            0x0166: 40,
+            0x0167: 40,
+            0x0168: 40,
+            0x0169: 40,
+            0x016A: 42,
+            0x016B: 42,
+            0x016C: 42,
+            0x016D: 42,
+            0x016E: 42,
+            0x016F: 42,
+            0x0170: 42,
+            0x0171: 42,
+            0x0172: 42,
+            0x0173: 43,
+            0x0174: 43,
+            0x0175: 43,
+            0x0176: 43,
+            0x0177: 44,
+            0x0178: 44,
+            0x0179: 44,
+            0x017A: 44,
+            0x017B: 44,
+            0x017C: 44,
+            0x017D: 44,
+            0x017E: 44,
+            0x017F: 44,
+            0x0180: 44,
+            0x0181: 44,
+            0x0182: 44,
+            0x0184: 51,
+            0x0185: 51,
+            0x0186: 51,
+            0x0187: 51,
+            0x0188: 51,
+            0x0189: 51,
+            0x018A: 55,
+            0x018B: 55,
+            0x018C: 55,
+            0x018D: 55,
+            0x018E: 55,
+            0x018F: 55,
+            0x0190: 55,
+            0x0191: 55,
+            0x0192: 55,
+            0x0193: 52,
+            0x0194: 54,
+            0x0195: 52,
+            0x0196: 52,
+            0x0197: 52,
+            0x0198: 52,
+            0x0199: 51,
+            0x019A: 51,
+            0x019B: 51,
+            0x019C: 51,
+            0x019D: 51,
+            0x019E: 51,
+            0x019F: 51,
+            0x01A0: 51,
+            0x01A1: 51,
+            0x01A2: 51,
+            0x01A3: 51,
+            0x01A4: 51,
+            0x01A5: 53,
+            0x01A6: 50,
+            0x01A7: 50,
+            0x01A8: 50,
+            0x01A9: 50,
+            0x01AA: 50,
+            0x01AB: 54,
+            0x01AC: 52,
+            0x01AD: 52,
+            0x01AE: 52,
+            0x01AF: 52,
+            0x01B0: 52,
+            0x01B1: 54,
+            0x01B2: 54,
+            0x01B3: 53,
+            0x01B4: 53,
+            0x01B5: 53,
+            0x01B6: 53,
+            0x01B7: 51,
+            0x01B8: 51,
+            0x01B9: 51,
+            0x01BA: 51,
+            0x01BB: 51,
+            0x01BC: 51,
+            0x01BD: 51,
+            0x01BE: 51,
+            0x01BF: 51,
+            0x01C0: 50,
+            0x01C1: 50,
+            0x01C2: 50,
+            0x01C3: 50,
+            0x01C4: 52,
+            0x01C5: 52,
+            0x01C6: 54,
+            0x01C7: 52,
+            0x01C8: 54,
+            0x01C9: 53,
+            0x01CA: 53,
+            0x01CB: 53,
+            0x01CC: 53,
+            0x01CD: 53,
+            0x01CE: 51,
+            0x01CF: 51,
+            0x01D0: 51,
+            0x01D1: 51,
+            0x01D2: 51,
+            0x01D3: 51,
+            0x01D4: 51,
+            0x01D5: 51,
+            0x01D6: 51,
+            0x01D7: 51,
+            0x01D8: 51,
+            0x01D9: 51,
+            0x01DA: 51,
+            0x01DB: 51,
+            0x01DC: 51,
+            0x01DD: 51,
+            0x01DE: 51,
+            0x01DF: 51,
+            0x01E0: 51,
+            0x01E1: 51,
+            0x01E2: 51,
+            0x01E3: 51,
+            0x01E4: 53,
+            0x01E5: 53,
+            0x01E6: 52,
+            0x01E7: 51,
+            0x01E8: 51,
+            0x01E9: 51,
+            0x01EA: 51,
+            0x01EB: 51,
+            0x01EC: 53,
+            0x01ED: 53,
+            0x01EE: 54,
+            0x01EF: 54,
+            0x01F0: 54,
+            0x01F1: 54,
+            0x01F2: 54,
+            0x01F3: 54,
+            0x01F4: 53,
+            0x01F5: 51,
+            0x01F6: 51,
+            0x01F7: 51,
+            0x01F8: 51,
+            0x01F9: 51,
+            0x01FA: 50,
+            0x01FB: 50,
+            0x01FC: 50,
+            0x01FD: 50,
+            0x01FE: 50,
+            0x0201: 61,
+            0x0202: 61,
+            0x0203: 61,
+            0x0204: 61,
+            0x0205: 61,
+            0x0206: 61,
+            0x0207: 60,
+            0x0208: 60,
+            0x0209: 60,
+            0x020A: 60,
+            0x020B: 60,
+            0x020C: 60,
+            0x020D: 60,
+            0x020E: 60,
+            0x020F: 60,
+            0x0210: 61,
+            0x0211: 61,
+            0x0212: 61,
+            0x0213: 61,
+            0x0214: 61,
+            0x0215: 61,
+            0x0216: 61,
+            0x0217: 61,
+            0x0218: 60,
+            0x0219: 60,
+            0x021A: 60,
+            0x021B: 60,
+            0x021C: 60,
+            0x021D: 60,
+            0x021E: 60,
+            0x021F: 60,
+            0x0220: 62,
+            0x0221: 62,
+            0x0222: 62,
+            0x0223: 60,
+            0x0224: 60,
+            0x0225: 60,
+            0x0226: 60,
+            0x0227: 60,
+            0x0228: 60,
+            0x0229: 61,
+            0x022A: 60,
+            0x022B: 60,
+            0x022C: 60,
+            0x022D: 62,
+            0x022E: 62,
+            0x022F: 63,
+            0x0230: 63,
+            0x0231: 63,
+            0x0232: 61,
+            0x0233: 61,
+            0x0234: 60,
+            0x0235: 60,
+            0x0236: 60,
+            0x0237: 60,
+            0x0238: 60,
+            0x0239: 60,
+            0x023A: 60,
+            0x023B: 60,
+            0x023C: 60,
+            0x023D: 63,
+            0x023E: 63,
+            0x023F: 63,
+            0x0240: 63,
+            0x0241: 63,
+            0x0242: 63,
+            0x0243: 77,
+            0x0244: 77,
+            0x0245: 77,
+            0x0246: 77,
+            0x0247: 77,
+            0x0248: 70,
+            0x0249: 70,
+            0x024A: 70,
+            0x024B: 70,
+            0x024C: 70,
+            0x024D: 76,
+            0x024E: 76,
+            0x024F: 76,
+            0x0250: 76,
+            0x0251: 76,
+            0x0252: 76,
+            0x0253: 76,
+            0x0254: 73,
+            0x0255: 73,
+            0x0256: 73,
+            0x0257: 73,
+            0x0258: 73,
+            0x0259: 73,
+            0x025A: 72,
+            0x025B: 72,
+            0x025C: 72,
+            0x025D: 72,
+            0x025E: 72,
+            0x025F: 72,
+            0x0260: 72,
+            0x0261: 72,
+            0x0262: 72,
+            0x0263: 77,
+            0x0264: 77,
+            0x0265: 70,
+            0x0266: 70,
+            0x0267: 70,
+            0x0268: 76,
+            0x0269: 76,
+            0x026A: 76,
+            0x026B: 76,
+            0x026C: 76,
+            0x026D: 71,
+            0x026E: 73,
+            0x026F: 73,
+            0x0270: 72,
+            0x0271: 72,
+            0x0272: 72,
+            0x0273: 75,
+            0x0274: 75,
+            0x0275: 75,
+            0x0276: 75,
+            0x0277: 75,
+            0x0278: 75,
+            0x0279: 75,
+            0x027A: 75,
+            0x027B: 75,
+            0x027C: 75,
+            0x027D: 75,
+            0x027E: 75,
+            0x027F: 75,
+            0x0280: 75,
+            0x0281: 75,
+            0x0282: 72,
+            0x0283: 72,
+            0x0284: 72,
+            0x0285: 72,
+            0x0286: 72,
+            0x0287: 72,
+            0x0288: 72,
+            0x0289: 72,
+            0x028A: 73,
+            0x028B: 73,
+            0x028C: 76,
+            0x028D: 76,
+            0x028E: 76,
+            0x028F: 76,
+            0x0290: 76,
+            0x0291: 76,
+            0x0292: 71,
+            0x0293: 71,
+            0x0294: 75,
+            0x0295: 75,
+            0x0296: 75,
+            0x0297: 75,
+            0x0298: 75,
+            0x0299: 75,
+            0x029A: 75,
+            0x029B: 70,
+            0x029C: 76,
+            0x029D: 76,
+            0x029E: 76,
+            0x029F: 76,
+            0x02A0: 78,
+            0x02A1: 78,
+            0x02A2: 78,
+            0x02A3: 78,
+            0x02A4: 78,
+            0x02A5: 78,
+            0x02A6: 73,
+            0x02A7: 77,
+            0x02A8: 77,
+            0x02A9: 70,
+            0x02AA: 70,
+            0x02AB: 76,
+            0x02AC: 76,
+            0x02AD: 79,
+            0x02AE: 79,
+            0x02AF: 79,
+            0x02B0: 79,
+            0x02B1: 79,
+            0x02B2: 79,
+            0x02B3: 75,
+            0x02B4: 72,
+            0x02B5: 72,
+            0x02B7: 81,
+            0x02B8: 81,
+            0x02B9: 81,
+            0x02BA: 81,
+            0x02BB: 81,
+            0x02BC: 80,
+            0x02BD: 80,
+            0x02BE: 89,
+            0x02BF: 89,
+            0x02C0: 89,
+            0x02C1: 89,
+            0x02C2: 88,
+            0x02C3: 88,
+            0x02C4: 88,
+            0x02C5: 89,
+            0x02C6: 92,
+            0x02C7: 92,
+            0x02C8: 91,
+            0x02C9: 90,
+            0x02CA: 81,
+            0x02CB: 81,
+            0x02CC: 81,
+            0x02CD: 81,
+            0x02CE: 80,
+            0x02CF: 80,
+            0x02D0: 86,
+            0x02D1: 86,
+            0x02D2: 86,
+            0x02D3: 86,
+            0x02D4: 85,
+            0x02D5: 85,
+            0x02D6: 85,
+            0x02D7: 85,
+            0x02D8: 85,
+            0x02D9: 85,
+            0x02DA: 89,
+            0x02DB: 89,
+            0x02DC: 89,
+            0x02DD: 90,
+            0x02DE: 90,
+            0x02DF: 93,
+            0x02E0: 80,
+            0x02E1: 81,
+            0x02E2: 81,
+            0x02E3: 82,
+            0x02E4: 82,
+            0x02E5: 85,
+            0x02E6: 84,
+            0x02E7: 84,
+            0x02E8: 82,
+            0x02E9: 82,
+            0x02EA: 82,
+            0x02EB: 82,
+            0x02EC: 82,
+            0x02ED: 89,
+            0x02EE: 89,
+            0x02EF: 89,
+            0x02F0: 89,
+            0x02F1: 89,
+            0x02F2: 90,
+            0x02F3: 90,
+            0x02F4: 90,
+            0x02F5: 91,
+            0x02F6: 91,
+            0x02F7: 85,
+            0x02F8: 84,
+            0x02F9: 86,
+            0x02FA: 86,
+            0x02FB: 86,
+            0x02FC: 82,
+            0x02FD: 82,
+            0x02FE: 81,
+            0x02FF: 81,
+            0x0300: 81,
+            0x0301: 81,
+            0x0302: 81,
+            0x0303: 81,
+            0x0304: 80,
+            0x0305: 80,
+            0x0306: 84,
+            0x0307: 84,
+            0x0308: 84,
+            0x0309: 84,
+            0x030A: 84,
+            0x030B: 85,
+            0x030C: 85,
+            0x030D: 85,
+            0x030E: 86,
+            0x030F: 91,
+            0x0310: 89,
+            0x0311: 89,
+            0x0312: 89,
+            0x0313: 89,
+            0x0314: 89,
+            0x0315: 89,
+            0x0316: 88,
+            0x0317: 88,
+            0x0318: 88,
+            0x0319: 86,
+            0x031A: 86,
+            0x031B: 87,
+            0x031C: 85,
+            0x031D: 84,
+            0x031E: 84,
+            0x031F: 80,
+            0x0320: 82,
+            0x0321: 82,
+            0x0322: 81,
+            0x0323: 81,
+            0x0324: 81,
+            0x0325: 81,
+            0x0326: 89,
+            0x0327: 89,
+            0x0328: 89,
+            0x0329: 92,
+            0x032A: 91,
+            0x032B: 91,
+            0x032C: 90,
+            0x032D: 90,
+            0x032E: 88,
+            0x032F: 88,
+            0x0330: 88,
+            0x0331: 88,
+            0x0332: 88,
+            0x0333: 88,
+            0x0334: 84,
+            0x0335: 84,
+            0x0336: 84,
+            0x0337: 84,
+            0x0338: 86,
+            0x0339: 81,
+            0x033A: 89,
+            0x033B: 89,
+            0x033C: 89,
+            0x033D: 88,
+            0x033E: 88,
+            0x033F: 88,
+            0x0340: 89,
+            0x0341: 89,
+            0x0342: 89,
+            0x0343: 89,
+            0x0344: 89,
+            0x0345: 89,
+            0x0346: 89,
+            0x0347: 89,
+            0x0348: 89,
+            0x0349: 86,
+            0x034A: 86,
+            0x034B: 86,
+            0x034C: 86,
+            0x034D: 86,
+            0x034E: 87,
+            0x034F: 87,
+            0x0350: 87,
+            0x0351: 87,
+            0x0352: 87,
+            0x0353: 87,
+            0x0354: 84,
+            0x0355: 84,
+            0x0356: 85,
+            0x0357: 85,
+            0x0358: 83,
+            0x0359: 83,
+            0x035A: 82,
+            0x035B: 82,
+            0x035C: 82,
+            0x035D: 82,
+            0x035E: 82,
+            0x035F: 81,
+            0x0360: 81,
+            0x0361: 81,
+            0x0362: 81,
+            0x0363: 91,
+            0x0364: 88,
+            0x0365: 88,
+            0x0366: 88,
+            0x0367: 88,
+            0x0368: 86,
+            0x0369: 86,
+            0x036A: 86,
+            0x036B: 86,
+            0x036C: 103,
+            0x036D: 103,
+            0x036E: 103,
+            0x036F: 103,
+            0x0370: 103,
+            0x0371: 100,
+            0x0372: 100,
+            0x0373: 100,
+            0x0374: 102,
+            0x0375: 102,
+            0x0376: 102,
+            0x0377: 102,
+            0x0378: 102,
+            0x0379: 102,
+            0x037A: 102,
+            0x037B: 104,
+            0x037C: 104,
+            0x037D: 104,
+            0x037E: 108,
+            0x037F: 108,
+            0x0380: 108,
+            0x0381: 107,
+            0x0382: 107,
+            0x0383: 107,
+            0x0384: 107,
+            0x0385: 107,
+            0x0386: 107,
+            0x0387: 107,
+            0x0388: 111,
+            0x0389: 109,
+            0x038A: 105,
+            0x038B: 105,
+            0x038C: 105,
+            0x038D: 105,
+            0x038E: 104,
+            0x038F: 104,
+            0x0390: 108,
+            0x0391: 107,
+            0x0392: 107,
+            0x0393: 109,
+            0x0394: 109,
+            0x0395: 109,
+            0x0396: 105,
+            0x0397: 105,
+            0x0398: 105,
+            0x0399: 104,
+            0x039A: 108,
+            0x039B: 108,
+            0x039C: 109,
+            0x039D: 109,
+            0x039E: 109,
+            0x039F: 109,
+            0x03A0: 111,
+            0x03A1: 104,
+            0x03A2: 104,
+            0x03A3: 104,
+            0x03A4: 108,
+            0x03A5: 108,
+            0x03A6: 109,
+            0x03A7: 109,
+            0x03A8: 108,
+            0x03A9: 108,
+            0x03AA: 107,
+            0x03AB: 106,
+            0x03AC: 106,
+            0x03AD: 105,
+            0x03AE: 105,
+            0x03AF: 106,
+            0x03B0: 106,
+            0x03B1: 103,
+            0x03B2: 103,
+            0x03B3: 103,
+            0x03B4: 103,
+            0x03B5: 103,
+            0x03B6: 103,
+            0x03B7: 103,
+            0x03B8: 103,
+            0x03B9: 100,
+            0x03BA: 100,
+            0x03BB: 100,
+            0x03BC: 100,
+            0x03BD: 100,
+            0x03BE: 100,
+            0x03BF: 100,
+            0x03C0: 101,
+            0x03C1: 101,
+            0x03C2: 101,
+            0x03C3: 101,
+            0x03C4: 101,
+            0x03C5: 101,
+            0x03C6: 101,
+            0x03C7: 101,
+            0x03C8: 101,
+            0x03C9: 101,
+            0x03CA: 101,
+            0x03CB: 101,
+            0x03CC: 101,
+            0x03CD: 101,
+            0x03CE: 101,
+            0x03CF: 101,
+            0x03D0: 102,
+            0x03D1: 102,
+            0x03D2: 102,
+            0x03D3: 102,
+            0x03D4: 102,
+            0x03D5: 102,
+            0x03D6: 102,
+            0x03D7: 102,
+            0x03D8: 113,
+            0x03D9: 106,
+            0x03DA: 105,
+            0x03DB: 111,
+            0x03DC: 109,
+            0x03DD: 108,
+            0x03DE: 108,
+            0x03DF: 108,
+            0x03E0: 108,
+            0x03E1: 108,
+            0x03E2: 107,
+            0x03E3: 107,
+            0x03E4: 106,
+            0x03E5: 106,
+            0x03E6: 111,
+            0x03E7: 111,
+            0x03E8: 108,
+            0x03E9: 108,
+            0x03EA: 104,
+            0x03EB: 104,
+            0x03EC: 108,
+            0x03ED: 108,
+            0x03EE: 105,
+            0x03EF: 105,
+            0x03F0: 109,
+            0x03F1: 109,
+            0x03F2: 101,
+            0x03F3: 102,
+            0x03F4: 102,
+            0x03F5: 102,
+            0x03F6: 102,
+            0x03F7: 104,
+            0x03F8: 104,
+            0x03F9: 104,
+            0x03FA: 104,
+            0x03FB: 108,
+            0x03FC: 108,
+            0x03FD: 104,
+            0x03FE: 104,
+            0x03FF: 108,
+            0x0400: 108,
+            0x0401: 108,
+            0x0402: 108,
+            0x0403: 108,
+            0x0404: 104,
+            0x0405: 104,
+            0x0406: 104,
+            0x0407: 107,
+            0x0408: 107,
+            0x0409: 107,
+            0x040A: 107,
+            0x040B: 107,
+            0x040C: 106,
+            0x040D: 105,
+            0x040E: 105,
+            0x040F: 107,
+            0x0410: 107,
+            0x0411: 107,
+            0x0412: 107,
+            0x0413: 107,
+            0x0414: 104,
+            0x0415: 105,
+            0x0416: 120,
+            0x0417: 120,
+            0x0418: 123,
+            0x0419: 122,
+            0x041A: 122,
+            0x041B: 122,
+            0x041C: 122,
+            0x041D: 122,
+            0x041E: 121,
+            0x041F: 121,
+            0x0420: 121,
+            0x0421: 121,
+            0x0422: 121,
+            0x0423: 121,
+            0x0424: 121,
+            0x0425: 121,
+            0x0426: 121,
+            0x0427: 121,
+            0x0428: 122,
+            0x0429: 122,
+            0x042A: 120,
+            0x042B: 120,
+            0x042C: 120,
+            0x042D: 120,
+            0x042E: 120,
+            0x042F: 120,
+            0x0430: 123,
+            0x0431: 123,
+            0x0432: 120,
+            0x0433: 120,
+            0x0434: 121,
+            0x0435: 121,
+            0x0436: 121,
+            0x0437: 121,
+            0x0438: 121,
+            0x0439: 123,
+            0x043A: 120,
+            0x043B: 120,
+            0x043C: 120,
+            0x043D: 120,
+            0x043E: 120,
+            0x043F: 120,
+            0x0440: 120,
+            0x0441: 120,
+            0x0442: 120,
+            0x0443: 120,
+            0x0444: 122,
+            0x0445: 122,
+            0x0446: 122,
+            0x0447: 121,
+            0x0448: 121,
+            0x0449: 121,
+            0x044A: 123,
+            0x044B: 123,
+            0x044C: 123,
+            0x044D: 125,
+            0x044E: 125,
+            0x044F: 125,
+            0x0450: 125,
+            0x0451: 125,
+            0x0452: 125,
+            0x0453: 125,
+            0x0454: 125,
+            0x0455: 125,
+            0x0456: 125,
+            0x0457: 125,
+            0x0458: 122,
+            0x0459: 122,
+            0x045A: 121,
+            0x045B: 121,
+            0x045C: 121,
+            0x045D: 121,
+            0x045E: 121,
+            0x045F: 124,
+            0x0460: 124,
+            0x0461: 124,
+            0x0462: 123,
+            0x0463: 125,
+            0x0464: 125,
+            0x0465: 125,
+            0x0466: 125,
+            0x0467: 125,
+            0x0468: 125,
+            0x0469: 125,
+            0x046A: 125,
+            0x046B: 125,
+            0x046C: 122,
+            0x046D: 122,
+            0x046E: 122,
+            0x046F: 122,
+            0x0470: 121,
+            0x0471: 124,
+            0x0472: 123,
+            0x0473: 123,
+            0x0474: 122,
+            0x0475: 122,
+            0x0476: 122,
+            0x0477: 122,
+            0x0478: 121,
+            0x0479: 121,
+            0x047A: 121,
+            0x047B: 121,
+            0x047C: 121,
+            0x047D: 121,
+            0x047E: 123,
+            0x047F: 123,
+            0x0480: 123,
+            0x0481: 124,
+            0x0482: 124,
+            0x0483: 124,
+            0x0484: 121,
+            0x0485: 122,
+            0x0486: 126,
+            0x0487: 126,
+            0x0488: 125,
+            0x0489: 125,
+            0x048A: 125,
+            0x048B: 125,
+            0x048C: 125,
+            0x048D: 125,
+            0x048E: 125,
+            0x048F: 125,
+            0x0490: 125,
+            0x0491: 125,
+            0x0492: 123,
+            0x0493: 123,
+            0x0494: 123,
+            0x0495: 123,
+            0x0496: 124,
+            0x0497: 124,
+            0x0498: 120,
+            0x0499: 120,
+            0x049A: 120,
+            0x049B: 120,
+            0x049C: 122,
+            0x049D: 121,
+            0x049E: 121,
+            0x049F: 121,
+            0x04A0: 121,
+            0x04A1: 123,
+            0x04A2: 123,
+            0x04A3: 123,
+            0x04A4: 124,
+            0x04A5: 124,
+            0x04A6: 124,
+            0x04A7: 124,
+            0x04A8: 124,
+            0x04A9: 121,
+            0x04AA: 121,
+            0x04AB: 120,
+            0x04AC: 120,
+            0x04AD: 120,
+            0x04AE: 120,
+            0x04AF: 120,
+            0x04B0: 120,
+            0x04B1: 120,
+            0x04B2: 120,
+            0x04B3: 120,
+            0x04B4: 120,
+            0x04B5: 120,
+            0x04B6: 124,
+            0x04B7: 124,
+            0x04B8: 124,
+            0x04B9: 125,
+            0x04BA: 125,
+            0x04BB: 125,
+            0x04BC: 125,
+            0x04BD: 125,
+            0x04BE: 125,
+            0x04BF: 125,
+            0x04C0: 125,
+            0x04C1: 125,
+            0x04C2: 125,
+            0x04C3: 125,
+            0x04C4: 125,
+            0x04C5: 122,
+            0x04C6: 122,
+            0x04C7: 122,
+            0x04C8: 122,
+            0x04C9: 121,
+            0x04CA: 121,
+            0x04CB: 121,
+            0x04CC: 121,
+            0x04CD: 121,
+            0x04CE: 121,
+            0x04CF: 121,
+            0x04D0: 121,
+            0x04D1: 126,
+            0x04D2: 126,
+            0x04D3: 126,
+            0x04D4: 126,
+            0x04D5: 123,
+            0x04D6: 123,
+            0x04D7: 123,
+            0x04D8: 124,
+            0x04D9: 124,
+            0x04DA: 124,
+            0x04DB: 124,
+            0x04DC: 120,
+            0x04DD: 120,
+            0x04DE: 120,
+            0x04DF: 120,
+            0x04E0: 120,
+            0x04E1: 122,
+            0x04E2: 122,
+            0x04E3: 121,
+            0x04E4: 121,
+            0x04E5: 121,
+            0x04E6: 121,
+            0x04E7: 121,
+            0x04E8: 124,
+            0x04E9: 124,
+            0x04EA: 124,
+            0x04EB: 124,
+            0x04EC: 123,
+            0x04ED: 126,
+            0x04EE: 126,
+            0x04EF: 126,
+            0x04F0: 126,
+            0x04F1: 126,
+            0x04F2: 126,
+            0x04F3: 124,
+            0x04F4: 124,
+            0x04F5: 122,
+            0x04F6: 122,
+            0x04F9: 140,
+            0x04FA: 140,
+            0x04FB: 140,
+            0x04FC: 140,
+            0x04FD: 140,
+            0x04FE: 140,
+            0x04FF: 140,
+            0x0500: 140,
+            0x0501: 140,
+            0x0502: 140,
+            0x0503: 140,
+            0x0504: 140,
+            0x0505: 143,
+            0x0506: 143,
+            0x0507: 143,
+            0x0508: 143,
+            0x0509: 143,
+            0x050A: 143,
+            0x050B: 143,
+            0x050C: 143,
+            0x050D: 143,
+            0x050E: 143,
+            0x050F: 143,
+            0x0510: 143,
+            0x0511: 143,
+            0x0512: 142,
+            0x0513: 142,
+            0x0514: 142,
+            0x0515: 142,
+            0x0516: 141,
+            0x0517: 141,
+            0x0518: 141,
+            0x0519: 141,
+            0x051A: 141,
+            0x051B: 141,
+            0x051C: 141,
+            0x051D: 141,
+            0x051E: 141
         }
 
         # Database of non-enemy sprites to disable in enemizer
@@ -5123,49 +6316,50 @@ class World:
         }
 
         # Database of overworld menus
-        # FORMAT: { ID: [ShuffleID (0=no shuffle), Menu_ID, FromRegion, ToRegion, ROM_EntranceData, ROM_TextLoc, MenuText, ContinentName, AreaName]}
+        # FORMAT: { ID: [ShuffleID (0=no shuffle), Menu_ID, FromRegion, ToRegion, AssemblyLabel, ContinentName, AreaName]}
+        # Names are 10 characters, padded with white space (underscores).
         self.overworld_menus = {
             # SW Continent "\x01"
-            1:  [0, b"\x01", 10, 20, "3b95b", "0cafd", "3b590", "SW Continent", "South Cape"],
-            2:  [0, b"\x01", 10, 30, "3b96b", "0cb26", "3b5a9", "SW Continent", "Edward's"],
-            3:  [0, b"\x01", 10, 50, "3b97b", "0cb5b", "3b5b5", "SW Continent", "Itory"],
-            4:  [0, b"\x01", 10, 60, "3b98b", "4f453", "3b5c2", "SW Continent", "Moon Tribe"],
-            5:  [0, b"\x01", 10, 63, "3b99b", "0cb74", "3b59c", "SW Continent", "Inca"],
+            1:  [0, 1, 10, 20, "Cape", "SW Continent", "South Cape"],
+            2:  [0, 1, 10, 30, "Ed",   "SW Continent", "Edward's__"],
+            3:  [0, 1, 10, 50, "Itry", "SW Continent", "Itory_____"],
+            4:  [0, 1, 10, 60, "Moon", "SW Continent", "Moon Tribe"],
+            5:  [0, 1, 10, 63, "Inca", "SW Continent", "Inca______"],
 
-            # SE Continent "\x07"
-            6:  [0, b"\x07", 11, 102, "3b9ab", "5aab7", "3b5ef", "SE Continent", "Diamond Coast"],
-            7:  [0, b"\x07", 11, 110, "3b9bb", "0cba3", "3b5e3", "SE Continent", "Freejia"],
-            8:  [0, b"\x07", 11, 133, "3b9cb", "0cbbc", "3b608", "SE Continent", "Diamond Mine"],
-            9:  [0, b"\x07", 11, 160, "3b9db", "5e31e", "3b615", "SE Continent", "Neil's"],
-            10: [0, b"\x07", 11, 162, "3b9eb", "5e812", "3b5fc", "SE Continent", "Nazca"],
+            # SE Continent "\x02"
+            6:  [0, 2, 11, 102, "DCst", "SE Continent", "D. Coast__"],
+            7:  [0, 2, 11, 110, "Frej", "SE Continent", "Freejia___"],
+            8:  [0, 2, 11, 133, "Mine", "SE Continent", "D. Mine___"],
+            9:  [0, 2, 11, 160, "Neil", "SE Continent", "Neil's____"],
+            10: [0, 2, 11, 162, "Nzca", "SE Continent", "Nazca_____"],
 
-            # NE Continent "\x0a"
-            11: [0, b"\x0a", 12, 250, "3ba1b", "0cbeb", "3b642", "NE Continent", "Angel Village"],
-            12: [0, b"\x0a", 12, 280, "3ba2b", "0cc30", "3b636", "NE Continent", "Watermia"],
-            13: [0, b"\x0a", 12, 290, "3ba3b", "0cc49", "3b64f", "NE Continent", "Great Wall"],
+            # NE Continent "\x03"
+            11: [0, 3, 12, 250, "Angl", "NE Continent", "Angel Vil."],
+            12: [0, 3, 12, 280, "Wtma", "NE Continent", "Watermia__"],
+            13: [0, 3, 12, 290, "GtWl", "NE Continent", "Great Wall"],
 
-            # N Continent "\x0f"
-            14: [0, b"\x0f", 13, 310, "3ba4b", "0cc8e", "3b660", "N Continent", "Euro"],
-            15: [0, b"\x0f", 13, 330, "3ba5b", "0cca7", "3b66c", "N Continent", "Mt. Temple"],
-            16: [0, b"\x0f", 13, 350, "3ba6b", "0ccec", "3b679", "N Continent", "Native's Village"],
-            17: [0, b"\x0f", 13, 360, "3ba7b", "0cd05", "3b685", "N Continent", "Ankor Wat"],
+            # N Continent "\x04"
+            14: [0, 4, 13, 310, "Euro", "N Continent", "Euro______"],
+            15: [0, 4, 13, 330, "Kres", "N Continent", "Mt. Temple"],
+            16: [0, 4, 13, 350, "NtVl", "N Continent", "Natives'__"],
+            17: [0, 4, 13, 360, "Ankr", "N Continent", "Ankor Wat_"],
 
-            # NW Continent Overworld "\x16"
-            18: [0, b"\x16", 14, 400, "3ba8b", "0cd24", "3b696", "NW Continent", "Dao"],
-            19: [0, b"\x16", 14, 410, "3ba9b", "0cd55", "3b6a3", "NW Continent", "Pyramid"]
+            # NW Continent Overworld "\x05"
+            18: [0, 5, 14, 400, "Dao",  "NW Continent", "Dao_______"],
+            19: [0, 5, 14, 410, "Pymd", "NW Continent", "Pyramid___"]
         }
 
 
         # Database of special map exits that don't conform to the typical "02 26" format, IDs correspond to self.exits
         # FORMAT: { ID: [MapAddr, Xaddr, Yaddr, FaceDirAddr, CameraAddr]}
         self.exits_detailed = {
-            15: ["MQPostStatueExitMap", "MQPostStatueExitX", "MQPostStatueExitY", "", "MQPostStatueExitCam"]    # Mummy Queen exit
+            15: ["MQPostStatueExitMap", "MQPostStatueExitX", "MQPostStatueExitY", "MQPostStatueExitFace", "MQPostStatueExitCam"]    # Mummy Queen exit
         }
 
 
         # Database of map exits
         # FORMAT: { ID: [CoupleID (0 if one-way), ShuffleTo/ActLike (0 if no shuffle), ShuffleFrom/BeActedLikeBy (0 if no shuffle), FromRegion, ToRegion,
-        #           ROM_Location, DestString,BossFlag, DungeonID, DungeonEntranceFlag, Name]}
+        #           AssemblyLabel, DestString, BossFlag, DungeonID, DungeonEntranceFlag, Name]}
         # FOR DUNGEON SHUFFLE: Dungeon IDs begin with 1 (Tunnel) and end with 12 (Mansion)
         self.exits = {
             # Bosses

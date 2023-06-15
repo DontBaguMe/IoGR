@@ -685,7 +685,7 @@ db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $21,$00,$00 : dl $80EAA7 : db $00
 db $00,$01,$00 : dl $80C667 : db $00
-db $16,$1B,$00 : dl $84F441 : db $00
+db $00,$00,$00 : dl EWorldMapTransitionListener-3 : db $00
 db $0F,$0B,$00 : dl $89D0F5 : db $00
 db $0C,$07,$00 : dl $89D0F5 : db $00
 db $11,$09,$00 : dl $89D0F5 : db $00
@@ -751,7 +751,7 @@ db $19,$12,$03 : dl $80d2d0 : db $00
 db $2C,$05,!DkSpIncaEndType : dl $88D6A9 : db $00
 db $FF,$CA 
 
-ActorList_Map1F:
+ActorList_Map1F:    ; Inca statue "puzzle" room. No enemizer.
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $05,$0F,!Monster005AParam : dl !Monster005AAddr : db !Monster005AStats,$00,!Monster005AItemFlag
@@ -999,7 +999,7 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $80C667 : db $00
 db $07,$06,$00 : dl $85AA6C : db $00
-db $06,$01,$00 : dl $85AA9E : db $00
+db $00,$00,$00 : dl EWorldMapTransitionListener-3 : db $00
 db $0F,$0A,$09 : dl $80f500 : db $00
 db $FF,$CA 
 
@@ -1318,7 +1318,7 @@ db $08,$11,$00 : dl $85E142 : db $00
 db $08,$12,$00 : dl $85DD3C : db $00
 db $08,$12,$00 : dl $85E018 : db $00
 db $09,$12,$00 : dl $85E295 : db $00
-db $04,$08,$00 : dl $85E305 : db $00
+db $00,$00,$00 : dl EWorldMapTransitionListener-3 : db $00
 db $05,$08,$00 : dl $85E3F3 : db $00
 db $09,$08,$00 : dl $85E4D7 : db $00
 db $0C,$0B,$00 : dl $85E53A : db $00
@@ -1671,7 +1671,7 @@ db $06,$2B,$00 : dl $8688F0 : db $00
 db $0A,$28,$00 : dl $86894C : db $00
 db $FF,$CA 
 
-ActorList_Map5C:
+ActorList_Map5C:    ; Sea Palace. No enemizer.
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $21,$41,$00 : dl $80EA96 : db $00
@@ -3934,7 +3934,9 @@ db $00,$01,$00 : dl $898620 : db $00
 db $09,$1A,$00 : dl $898515 : db $00
 db $2B,$1A,!DkSpBabelTopType : dl $88D6A9 : db $00
 db $28,$1A,$00 : dl $898000 : db $00
+if !Boss6Id == 6   ; Don't allow early access to Babel bottom if MQ2 is not the Babel boss.
 db $17,$3A,$03 : dl $899B2E : db $00
+endif
 db $FF,$CA 
 
 ActorList_MapE4:
@@ -3975,7 +3977,11 @@ db $FF,$CA
 
 ActorList_MapE8:    ; Comet.
 db $05,$0A,$00 : dl $82C38C : db $00
+if !ApocalypseGaia == 1
+db $00,$01,$00 : dl EComet-3 : db $54,$00,$00
+else
 db $00,$01,!Monster04F8Param : dl !Monster04F8Addr : db !Monster04F8Stats,$00,!Monster04F8ItemFlag
+endif
 db $FF,$CA 
 
 ActorList_MapE9:

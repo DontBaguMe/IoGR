@@ -3,9 +3,6 @@ hirom
 bank noassume
 
 
-; todo:
-; - z3, ohko, rjm, fluteless, enemizer
-
 
 incsrc "iogr_exit_ledger.asr"
 incsrc "iogr_asset_ledger.asr"
@@ -29,10 +26,125 @@ SR_RemoveHeldItem = $839FB2
 LR_ClearMonsterKilledFlags = $80b4cc
 }
 
+; Various defines for Apocalypse Gaia, which don't
+; really have to be at the top of the file.
+{
+; Set up sprite substitution lists.
+; Defaults are in the comments.
+{
+!DG_Spr_Comet_Chatter_1 = $0D
+!DG_Spr_Comet_Open = $0E
+!DG_Spr_Comet_Chatter_2 = $0F
+!DG_Spr_Rain = $16
+!DG_Spr_Core_Flame = $00
+!DG_Spr_Core_Flicker = $01
+!DG_Spr_Core_Vanish = $02
+!DG_Spr_Core_Bubbles = $0C
+!DG_Spr_Head_Bottom = $03
+!DG_Spr_Head_MouthClosed = $04
+!DG_Spr_Head_OpeningX = $17 ; first frame is only bottom of head...
+!DG_Spr_Head_MouthOpen = $05
+!DG_Spr_Head_WhileBeam = $06
+!DG_Spr_Head_TopEnergyBeam = $1A
+!DG_Spr_Head_Melting_1 = $19
+!DG_Spr_Head_Melting_Static = $07
+!DG_Spr_Head_Melted = $1E
+!DG_Spr_Head_Flickering = $18
+!DG_Spr_MouthLaserHitbox = $1F
+!DG_Spr_DeathLightning_1 = $08
+!DG_Spr_DeathLightning_2 = $09
+!DG_Spr_Energy_Small = $0A
+!DG_Spr_Energy_Medium = $0B
+!DG_Spr_Energy_Large_Anim = $14
+!DG_Spr_Energy_Large = $15
+!DG_Spr_Lightning_More = $10
+!DG_Spr_Bubble_SmallWave = $11
+!DG_Spr_Bubble_LargeWave = $12
+!DG_Spr_Bubble = $13
+!DG_Spr_Rocks_1 = $1B
+!DG_Spr_Rocks_2 = $1C
+!DG_Spr_Rocks_3 = $1D
+
+!AG_Spr_Core_P1_Idle = $00   ; $00
+!AG_Spr_Core_P2_Atk1 = !DG_Spr_Head_WhileBeam   ; $01
+!AG_Spr_Core_P2_Atk2 = !DG_Spr_Head_TopEnergyBeam   ; $02
+!AG_Spr_Core_P2_Dmg = !DG_Spr_Energy_Large_Anim ; $03
+!AG_Spr_Core_P2_Death = $19 ; $04
+!AG_Spr_Bit_P1_Idle = $04 ; $05
+!AG_Spr_Bit_P1_Atk1 = !DG_Spr_Head_WhileBeam ; $06
+!AG_Spr_Bit_P1_Atk2 = $05 ; $07
+!AG_Spr_Launcher_Idle = !DG_Spr_MouthLaserHitbox ; $08
+!AG_Spr_Launcher_Atk1 = $09 ; $09
+!AG_Spr_Launcher_Atk2 = $10 ; $0A
+!AG_Spr_Bit_P2_Idle = !DG_Spr_Core_Bubbles ; $0B
+!AG_Spr_Fire_Start = $0A ; $0C
+!AG_Spr_Fire_Wait = $01 ; $0D
+!AG_Spr_Fire_Rise = $14 ; $0E
+!AG_Spr_Fire_Rain = $16 ; $0F
+; !AG_Spr_Unused = $10 ; (unused)
+!AG_Spr_Bit_P1_Bullet = $0A ; $11
+!AG_Spr_Nuke_Fall = !DG_Spr_Rocks_3 ; $12
+!AG_Spr_Nuke_Piece = !DG_Spr_Energy_Small ; $13
+!AG_Spr_Bubble_Spawn = $09   ; $14
+!AG_Spr_FloorBeam = $14 ; $15
+!AG_Spr_Bit_P1_Atk3 = $1A ; $16
+!AG_Spr_Bubble_Hold = $13 ; $17
+!AG_Spr_Bubble_Atk = $13 ; $18
+!AG_Spr_Core_P2_Atk3 = !DG_Spr_Head_WhileBeam   ; $19
+!AG_Spr_Launcher_Atk3 = $09 ; $1A
+!AG_Spr_Bit_P1_Atk5 = $04 ; $1B
+!AG_Spr_Bit_P2_DoFire = $14 ; $1C
+; !AG_Spr_Unused = $1D ; (unused)
+!AG_Spr_FCore_Move = !DG_Spr_Head_Melting_Static ; $1E
+!AG_Spr_FCore_Dmg2 = !DG_Spr_Energy_Large_Anim ; $1F
+!AG_Spr_FCore_Dmg3 = !DG_Spr_Head_Melting_1 ; $20
+!AG_Spr_FCore_Dmg4 = !DG_Spr_Energy_Large_Anim ; $21
+!AG_Spr_Mini_Fall = !DG_Spr_Energy_Large_Anim ; $22
+!AG_Spr_Mini_Idle = $19 ; $23
+!AG_Spr_Mini_Fly = $19 ; $24
+!AG_Spr_Mini_Dmg = $1E ; $25
+!AG_Spr_Mini_Death1 = !DG_Spr_Energy_Large_Anim ; $26
+!AG_Spr_Mini_Death2 = !DG_Spr_DeathLightning_1 ; $27
+!AG_Spr_FCore_Joint = $1C ; $28
+!AG_Spr_Cannon_Dir_4 = $0A   ; $29
+!AG_Spr_Cannon_Dir_0 = !AG_Spr_Cannon_Dir_4   ; $2A
+!AG_Spr_Cannon_Dir_6 = !AG_Spr_Cannon_Dir_4   ; $2B
+!AG_Spr_Cannon_Dir_2 = !AG_Spr_Cannon_Dir_4   ; $2C
+!AG_Spr_Cannon_Dir_5 = !AG_Spr_Cannon_Dir_4   ; $2D
+!AG_Spr_Cannon_Dir_7 = !AG_Spr_Cannon_Dir_4   ; $2E
+!AG_Spr_Cannon_Dir_1 = !AG_Spr_Cannon_Dir_4   ; $2F
+!AG_Spr_Cannon_Dir_3 = !AG_Spr_Cannon_Dir_4   ; $30
+; !AG_Spr_Unused = $31 ; (unused)
+!AG_Spr_FCBullet_Dir4_1 = $0A ; $32
+!AG_Spr_FCBullet_Dir0_1 = !AG_Spr_FCBullet_Dir4_1 ; $33
+!AG_Spr_FCBullet_Dir6_1 = !AG_Spr_FCBullet_Dir4_1 ; $34
+!AG_Spr_FCBullet_Dir2_1 = !AG_Spr_FCBullet_Dir4_1 ; $35
+!AG_Spr_FCBullet_Dir5_1 = !AG_Spr_FCBullet_Dir4_1 ; $36
+!AG_Spr_FCBullet_Dir7_1 = !AG_Spr_FCBullet_Dir4_1 ; $37
+!AG_Spr_FCBullet_Dir1_1 = !AG_Spr_FCBullet_Dir4_1 ; $38
+!AG_Spr_FCBullet_Dir3_1 = !AG_Spr_FCBullet_Dir4_1 ; $39
+!AG_Spr_FCBullet_Dir4_2 = !AG_Spr_FCBullet_Dir4_1 ; $3A
+!AG_Spr_FCBullet_Dir0_2 = !AG_Spr_FCBullet_Dir4_1 ; $3B
+!AG_Spr_FCBullet_Dir6_2 = !AG_Spr_FCBullet_Dir4_1 ; $3C
+!AG_Spr_FCBullet_Dir2_2 = !AG_Spr_FCBullet_Dir4_1 ; $3D
+!AG_Spr_FCBullet_Dir5_2 = !AG_Spr_FCBullet_Dir4_1 ; $3E
+!AG_Spr_FCBullet_Dir7_2 = !AG_Spr_FCBullet_Dir4_1 ; $3F
+!AG_Spr_FCBullet_Dir1_2 = !AG_Spr_FCBullet_Dir4_1 ; $40
+!AG_Spr_FCBullet_Dir3_2 = !AG_Spr_FCBullet_Dir4_1 ; $41
+!AG_Spr_FCore_Dmg1 = !DG_Spr_Energy_Large_Anim ; $42
+}
+}
+
 
 
 ; Bank $80
 {
+
+; BRK/COP handler optimization
+org $80800f
+VectorBrk:
+jml BrkHandler
+
 
 org $808067
 if !SettingRedJewelMadness == 1
@@ -44,6 +156,412 @@ lda #$0006    ; Start with 6 HP instead of 8
 else
 lda #$0008    ; Default, vanilla
 endif
+
+
+; Optimized COP+BRK vector.
+; I developed this to reduce lag during the Apocalypse Gaia fight,
+; and it's harmless to include as part of the normal rando code.
+org $80846d
+CopHandler:
+rep #$20
+txy
+lda $04,s : sta $0c
+lda $02,s : tax : dec : sta $0a
+lda [$0a] : and #$00ff
+stx $0a
+asl
+BrkHandler:
+tax
+jmp (.Pointers,x)
+.Pointers:
+{
+dw $864e    ; COP #$00
+dw $8689    ; COP #$01
+dw $86a0    ; COP #$02
+dw $86b7    ; COP #$03
+dw $8714    ; COP #$04
+dw $8749    ; COP #$05
+dw $877e    ; COP #$06
+dw $8792    ; COP #$07
+dw $87a6    ; COP #$08
+dw $87b5    ; COP #$09
+dw $87c9    ; COP #$0A
+dw $8876    ; COP #$0B
+dw $888c    ; COP #$0C
+dw $88a2    ; COP #$0D
+dw $88c8    ; COP #$0E
+dw $88ee    ; COP #$0F
+dw $8925    ; COP #$10
+dw $895c    ; COP #$11
+dw $8975    ; COP #$12
+dw $89ac    ; COP #$13
+dw $89d3    ; COP #$14
+dw $8a22    ; COP #$15
+dw $8a4d    ; COP #$16
+dw $8a78    ; COP #$17
+dw $8aa3    ; COP #$18
+dw $87dd    ; COP #$19
+dw $8ace    ; COP #$1A
+dw $8b01    ; COP #$1B
+dw $8b38    ; COP #$1C
+dw $8b6f    ; COP #$1D
+dw $8ba6    ; COP #$1E
+dw $8bdd    ; COP #$1F
+dw $8c19    ; COP #$20
+dw $8c26    ; COP #$21
+dw $8c6f    ; COP #$22
+dw Cop_23    ; COP #$23
+dw $902b    ; COP #$24
+dw $904e    ; COP #$25
+dw $9072    ; COP #$26
+dw $90ce    ; COP #$27
+dw $90f4    ; COP #$28
+dw $90fa    ; COP #$29
+dw $9135    ; COP #$2A
+dw $915f    ; COP #$2B
+dw $9189    ; COP #$2C
+dw $91b8    ; COP #$2D
+dw $9236    ; COP #$2E
+dw $926a    ; COP #$2F
+dw $9299    ; COP #$30
+dw $92e8    ; COP #$31
+dw $9317    ; COP #$32
+dw $9328    ; COP #$33
+dw $9352    ; COP #$34
+dw $91cc    ; COP #$35
+dw $9361    ; COP #$36
+dw $9364    ; COP #$37
+dw $9381    ; COP #$38
+dw $93aa    ; COP #$39
+dw $93ce    ; COP #$3A
+dw $9400    ; COP #$3B
+dw $943c    ; COP #$3C
+dw $9443    ; COP #$3D
+dw $9485    ; COP #$3E
+dw $94ad    ; COP #$3F
+dw $94d5    ; COP #$40
+dw $9501    ; COP #$41
+dw $952f    ; COP #$42
+dw $8de6    ; COP #$43
+dw $956b    ; COP #$44
+dw $95ea    ; COP #$45
+dw $9647    ; COP #$46
+dw $964c    ; COP #$47
+dw $965e    ; COP #$48
+dw $9668    ; COP #$49
+dw $8e19    ; COP #$4A
+dw $9685    ; COP #$4B
+dw $96ca    ; COP #$4C
+dw $9703    ; COP #$4D
+dw $9774    ; COP #$4E
+dw $98b8    ; COP #$4F
+dw $9930    ; COP #$50
+dw $997b    ; COP #$51
+dw $8e36    ; COP #$52
+dw $8f0d    ; COP #$53
+dw $99bf    ; COP #$54
+dw $99da    ; COP #$55
+dw $99f5    ; COP #$56
+dw $9a67    ; COP #$57
+dw $9a82    ; COP #$58
+dw $9a92    ; COP #$59
+dw $9aa2    ; COP #$5A
+dw $9ac2    ; COP #$5B
+dw $9ad6    ; COP #$5C
+dw $9aea    ; COP #$5D
+dw $9ab2    ; COP #$5E
+dw $9b89    ; COP #$5F
+dw $9c3a    ; COP #$60
+dw $9c91    ; COP #$61
+dw $9b41    ; COP #$62
+dw $9cb4    ; COP #$63
+dw $9cfa    ; COP #$64
+dw $9d52    ; COP #$65
+dw $9d81    ; COP #$66
+dw $9da3    ; COP #$67
+dw $9dbd    ; COP #$68
+dw $9dea    ; COP #$69
+dw $9e06    ; COP #$6A
+dw $a958    ; COP #$6B
+dw $a992    ; COP #$6C
+dw $a9ae    ; COP #$6D
+dw $c200    ; COP #$6E
+dw $a720    ; COP #$6F
+dw $e62a    ; COP #$70
+dw $292a    ; COP #$71
+dw Cop_72    ; COP #$72
+dw $1e9f    ; COP #$73
+dw $7f00    ; COP #$74
+dw $06bd    ; COP #$75
+dw $0900    ; COP #$76
+dw $0400    ; COP #$77
+dw $069d    ; COP #$78
+dw $fa00    ; COP #$79
+dw $2aa5    ; COP #$7A
+dw $0283    ; COP #$7B
+dw $bb40    ; COP #$7C
+dw $2aa7    ; COP #$7D
+dw $2ae6    ; COP #$7E
+dw $ff29    ; COP #$7F
+dw $9e23    ; COP #$80
+dw $9e35    ; COP #$81
+dw $9e57    ; COP #$82
+dw $9e79    ; COP #$83
+dw $9eab    ; COP #$84
+dw $9ec8    ; COP #$85
+dw $9ef5    ; COP #$86
+dw $9f22    ; COP #$87
+dw $9f8f    ; COP #$88
+dw $9faa    ; COP #$89
+dw $9fc0    ; COP #$8A
+dw $9fde    ; COP #$8B
+dw $9ff1    ; COP #$8C
+dw $a01e    ; COP #$8D
+dw $a036    ; COP #$8E
+dw $a06b    ; COP #$8F
+dw $a081    ; COP #$90
+dw $a0a7    ; COP #$91
+dw $a0cd    ; COP #$92
+dw $a103    ; COP #$93
+dw $a119    ; COP #$94
+dw $a159    ; COP #$95
+dw $a16e    ; COP #$96
+dw $a1b5    ; COP #$97
+dw $a200    ; COP #$98
+dw $a24b    ; COP #$99
+dw $a267    ; COP #$9A
+dw $a28c    ; COP #$9B
+dw $a2a8    ; COP #$9C
+dw $a2cd    ; COP #$9D
+dw $a303    ; COP #$9E
+dw $a342    ; COP #$9F
+dw $a370    ; COP #$A0
+dw $a3a7    ; COP #$A1
+dw $a3d4    ; COP #$A2
+dw $a401    ; COP #$A3
+dw $a440    ; COP #$A4
+dw $a499    ; COP #$A5
+dw $a533    ; COP #$A6
+dw $a5de    ; COP #$A7
+dw $a6a1    ; COP #$A8
+dw $a6b1    ; COP #$A9
+dw $a6c1    ; COP #$AA
+dw $a6d7    ; COP #$AB
+dw $a6ed    ; COP #$AC
+dw $a713    ; COP #$AD
+dw $a731    ; COP #$AE
+dw $a74f    ; COP #$AF
+dw $a76d    ; COP #$B0
+dw $a799    ; COP #$B1
+dw $a7b3    ; COP #$B2
+dw $a7be    ; COP #$B3
+dw $a7c9    ; COP #$B4
+dw $a7d4    ; COP #$B5
+dw $a7df    ; COP #$B6
+dw $a7f4    ; COP #$B7
+dw $a809    ; COP #$B8
+dw $a816    ; COP #$B9
+dw $a823    ; COP #$BA
+dw $a82e    ; COP #$BB
+dw $a839    ; COP #$BC
+dw $a867    ; COP #$BD
+dw $a894    ; COP #$BE
+dw $a8fb    ; COP #$BF
+dw $a9eb    ; COP #$C0
+dw $a9fb    ; COP #$C1
+dw $aa07    ; COP #$C2
+dw $aa13    ; COP #$C3
+dw $aa30    ; COP #$C4
+dw $aa60    ; COP #$C5
+dw $aa8b    ; COP #$C6
+dw $aa9b    ; COP #$C7
+dw $aab6    ; COP #$C8
+dw $aac6    ; COP #$C9
+dw $aad8    ; COP #$CA
+dw $ab0e    ; COP #$CB
+dw $ab41    ; COP #$CC
+dw $ab51    ; COP #$CD
+dw $ab60    ; COP #$CE
+dw $ab70    ; COP #$CF
+dw $ab7f    ; COP #$D0
+dw $ab8e    ; COP #$D1
+dw $abc2    ; COP #$D2
+dw $abd7    ; COP #$D3
+dw $ac05    ; COP #$D4
+dw $ac27    ; COP #$D5
+dw $ac38    ; COP #$D6
+dw $ac5a    ; COP #$D7
+dw $ac82    ; COP #$D8
+dw $ac94    ; COP #$D9
+dw $acc1    ; COP #$DA
+dw $acd6    ; COP #$DB
+dw $acdf    ; COP #$DC
+dw $ad17    ; COP #$DD
+dw $ad57    ; COP #$DE
+dw $ad8f    ; COP #$DF
+dw $a5f7    ; COP #$E0
+dw $aa74    ; COP #$E1
+dw $aa47    ; COP #$E2
+dw $80ea    ; COP #$E3
+}
+
+
+
+; Reduce cost of RNG (cop #$23) calls
+org $808ffc
+Cop_23:
+{
+;lda $0a : sta $02,s
+phy
+.FromManaged:
+phd
+lda #$0400 : tcd
+lda #$0000 ; efficiently zero high byte for output
+sep #$30
+ldx #$0F
+clc
+-:
+  lda $10,x : adc $0f,x : sta $0f,x
+  dex : bne -
+inc $1f   ; Required to match vanilla RNG outputs
+stz $00E6
+lda $10
+rep #$30
+pld
+plx
+rti
+}
+warnpc $80902b
+
+
+
+; Experimental fix to a vanilla bug wherein cop #$0B masks the
+; wrong tiles if called by a monster of size at least 2x2
+; on the rightmost tile of a screen.
+org $80b2ed
+bcs B_80B325
+
+org $80b2f6
+J_80B2F6:
+
+org $80b316
+rep #$20
+dec $1E : beq B_80B325
+lda $1A : sta $18
+jsr S_80B32B
+lda $1C
+bra J_80B2F6
+B_80B325:
+plx
+pld
+plb
+rts
+S_80B32B:
+php
+lda $1C
+sep #$20
+  clc : adc #$10 : bcs B_80B339
+sta $1C
+plp
+rts
+B_80B339:
+xba : clc : adc $0693 : xba
+rep #$20
+sta $1C
+plp
+rts
+warnpc $80b345
+
+
+org $80bcdf
+if !ApocalypseGaia == 1
+db $04,$08
+ECometBG2ShimmerEndpoint:
+bit $0A1E : bpl +
+jsr ECometBG2ShimmerEndpointSetup
++:
+cop #$02 : dl CometHDMAResetTable : db $10
+rtl
+;CometHDMAResetTable:
+;db $70,$00,$00,\
+;   $10,$00,$00,\
+;   $01,$00,$00,\
+;   $01,$00,$00,$00
+
+; This writes a sine function with an amplitude of 1 to $2110, "BG2 vertical scroll",
+;  the effect of which is to cause the starry background to look a little less boring.
+; But we don't want the effect to cause the Comet's surface to scroll,
+;  so we write #$0000 to $7E8C30/8E30, which ends the HDMA table after about 128 scanlines. 
+; Then our friend $80bcdf writes #$0000 to $2110 so that register is zeroed by the time the CRT reaches the Comet.
+; We can accomplish the same effect much more cheaply
+;  (and also save ourselves a thinker slot) by manually adding some lines to this thinker's HDMA table to have it do its own zeroing.
+db $04,$08
+ECometBG2ShimmerA:
+lda #$0001                   ;<--Branch
+sta $7F0008,x
+cop #$5F : db $00,$88,$08
+lda #$0000
+sta $7E8C30
+sta $7E8E30
+cop #$C2
+;cop #$D0                     ;[$80BCF7] ; Refresh table if leaving inv.
+;  db $FF,$00 : dw ECometBG2ShimmerA
+bit $0A1E : bpl ECometBG2ShimmerA ; equivalent to the cop #$D0 above
+cop #$60 : db $05,$02
+cop #$61 : db $00,$8C,$7E,$10
+rtl
+
+; This causes the horizontally shaking BG2 in both phases.
+; V$80BD21
+tsb $08                      ;<--In vanilla, branch goes to here
+ECometBG2ShimmerB:
+lda #$0008
+sta $7F0008,x
+cop #$5F : db $00,$84,$08
+cop #$C2
+;cop #$D0                     ;[$80BD21] ; Refresh table if leaving inv.
+;  db $FF,$00 : dw ECometBG2ShimmerB
+bit $0A1E : bpl ECometBG2ShimmerB ; equivalent to the cop #$D0 above
+cop #$60 : db $05,$02
+cop #$61 : db $00,$84,$7E,$0F
+rtl
+
+; Thinker at $80bd42.
+; Removing this causes the BGs to shake from the start instead of just in P2, and also prevents Dark Gaia's BG "materialization" effect from happening.
+tsb $08                      ;<--In vanilla, branch goes to here
+ECometBG2ShimmerC:
+lda #$0002 : sta $7F0008,x
+cop #$5F : db $00,$80,$08
+cop #$C2
+;cop #$D0                     ;[$80BD42] ; Refresh table if leaving inv.
+;  db $FF,$00 : dw ECometBG2ShimmerC
+bit $0A1E : bpl ECometBG2ShimmerC ; equivalent to the cop #$D0 above
+;cop #$D0                     ;[$80BD69]
+;  db $01,$01 : dw .CometDead
+lda $0A00 : bit #$0002 : bne .CometDead ; eq. to cop #$D0
+ cop #$60 : db $05,$00;$02
+ cop #$61 : db $00,$84,$7E,$0D
+rtl
+.CometDead:
+lda #$0070 : sta $7F0008,x    ; Materialization magic.
+cop #$5F : db $00,$80,$04
+cop #$C2
+;cop #$D0                     ;[$80BD69] ; Refresh table if leaving inv.
+;  db $FF,$00 : dw .CometDead
+bit $0A1E : bpl .CometDead ; equivalent to the cop #$D0 above
+lda $7F0008,x
+dec a
+sta $7F0008,x
+beq .TSleep                ;[$80BD93]
+cop #$60 : db $05,$00;$02
+cop #$61 : db $00,$84,$7E,$0D
+rtl
+.TSleep:
+cop #$C1                     ;<--Branch
+rtl
+endif
+warnpc $80BD96
+
 
 
 org $80c312
@@ -73,6 +591,171 @@ org $80c66f
 db $00 : dw $3000
 ;ERedJewelPickup:    ; Not enough space here for IOGR implementation,
 rtl                  ; so this is nulled out and the new code is elsewhere.
+
+
+
+org $80CA42
+db $00,$00,$30
+EWorldMapTransitionListener:
+{
+lda $0644
+cmp #$0001 : bne +$03 : jmp .HandleMap01
+cmp #$000a : bne +$03 : jmp .HandleMap0A
+cmp #$0015 : bne +$03 : jmp .HandleMap15
+cmp #$001a : bne +$03 : jmp .HandleMap1A
+cmp #$001c : bne +$03 : jmp .HandleMap1C
+cmp #$0030 : bne +$03 : jmp .HandleMap30
+cmp #$0032 : bne +$03 : jmp .HandleMap32
+cmp #$003e : bne +$03 : jmp .HandleMap3E
+cmp #$0049 : bne +$03 : jmp .HandleMap49
+cmp #$0069 : bne +$03 : jmp .HandleMap69
+cmp #$0078 : bne +$03 : jmp .HandleMap78
+cmp #$0082 : bne +$03 : jmp .HandleMap82
+cmp #$0091 : bne +$03 : jmp .HandleMap91
+cmp #$00a0 : bne +$03 : jmp .HandleMapA0
+cmp #$00ac : bne +$03 : jmp .HandleMapAC
+cmp #$00b0 : bne +$03 : jmp .HandleMapB0
+cmp #$00c3 : bne +$03 : jmp .HandleMapC3
+cmp #$00cc : bne +$03 : jmp .HandleMapCC
+rtl
+.Done:
+lda #$0400 : sta $064A
+cop #$C1
+rtl
+.HandleMap01:
+cop #$C1
+lda $09A4 : cmp #$0010 : bcc +
+  rtl
++:
+lda #$0000 : sta $0d60
+cop #$66 : dw $00d4,$03a4 : db !OverworldShuffleCapeMenuId
+jmp .Done
+.HandleMap0A:
+lda $09A4 : cmp #$02D0 : beq +
+  rtl
++:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0104,$0334 : db !OverworldShuffleEdMenuId
+jmp .Done
+.HandleMap15:
+cop #$D0 : db $01,$01 : dw ..Flag01Set
+cop #$45 : db $2D,$2E,$2F,$30 : dw ..InArea
+..Flag01Set:
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $00C4,$02B4 : db !OverworldShuffleItryMenuId
+jmp .Done
+.HandleMap1A:
+cop #$45 : db $14,$1c,$17,$1d : dw ..InArea
+rtl
+..InArea:
+cop #$66 : dw $0090,$0260 : db !OverworldShuffleMoonMenuId
+cop #$C1
+rtl
+.HandleMap1C:
+cop #$45 : db $06,$1C,$08,$1E : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0134,$0284 : db !OverworldShuffleIncaMenuId
+jmp .Done
+.HandleMap30:
+cop #$45 : db $03,$00,$06,$01 : dw ..InArea
+rtl
+..InArea:
+cop #$66 : dw $0250,$0350 : db !OverworldShuffleDCstMenuId
+cop #$C1
+rtl
+.HandleMap32:
+cop #$45 : db $12,$3C,$16,$3E : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0254,$02D4 : db !OverworldShuffleFrejMenuId
+jmp .Done
+HandleMap3E:
+cop #$45 : db $0A,$3F,$0C,$40 : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0334,$0334 : db !OverworldShuffleMineMenuId
+jmp .Done
+.HandleMap49:
+cop #$45 : db $07,$0d,$0a,$0e : dw ..InArea
+rtl
+..InArea:
+cop #$66 : dw $0270,$0270 : db !OverworldShuffleNeilMenuId
+cop #$C1
+rtl
+.HandleMap69:
+cop #$45 : db $29,$0D,$2C,$0F : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0384,$0164 : db !OverworldShuffleAnglMenuId
+jmp .Done
+.HandleMap78:
+cop #$45 : db $27,$3D,$29,$40 : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $02D4,$01A4 : db !OverworldShuffleWtmaMenuId
+jmp .Done
+.HandleMap82:
+cop #$45 : db $00,$08,$01,$0B : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $02A4,$0124 : db !OverworldShuffleGtWlMenuId
+jmp .Done
+.HandleMap91:
+cop #$45 : db $3F,$42,$40,$48 : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $01D4,$0134 : db !OverworldShuffleEuroMenuId
+jmp .Done
+.HandleMapA0:
+cop #$45 : db $2F,$1B,$30,$1C : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0214,$00B4 : db !OverworldShuffleKresMenuId
+jmp .Done
+.HandleMapAC:
+cop #$45 : db $1F,$1B,$20,$20 : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0124,$01A4 : db !OverworldShuffleNtVlMenuId
+jmp .Done
+.HandleMapB0:
+cop #$45 : db $1D,$4F,$24,$50 : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0134,$0154 : db !OverworldShuffleAnkrMenuId
+jmp .Done
+.HandleMapC3:
+cop #$45 : db $00,$0D,$01,$11 : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0094,$0114 : db !OverworldShuffleDaoMenuId
+jmp .Done
+.HandleMapCC:
+cop #$45 : db $00,$0D,$01,$0F : dw ..InArea
+cop #$45 : db $3F,$0D,$40,$0F : dw ..InArea
+rtl
+..InArea:
+lda #$0000 : sta $0D60
+cop #$66 : dw $0074,$00B4 : db !OverworldShufflePymdMenuId
+jmp .Done
+}
+warnpc $80cd59
+
+
 
 
 org $80cd12
@@ -279,8 +962,50 @@ plx
 rtl
 
 
+; Custom COP #$73 --> "Managed RNG"
+Cop_73:
+Brk_73:
+{
+phy
+lda #$0000 ; efficiently zero high byte for output
+sep #$20
+lda $00E6 : inc a
+cmp #$10 : bcc +
+ rep #$20 : jmp Cop_23_FromManaged
++:
+sta $00E6
+tay
+lda $0410,y
+plx
+rti
+}
+
+
+ECometBG2ShimmerEndpointSetup:
+lda #$7010
+ sta.l CometHDMAResetTable-$01
+ sta.l CometHDMAResetTable+$03
+lda #$0100
+ sta.l CometHDMAResetTable+$05
+ sta.l CometHDMAResetTable+$08
+ sta.l CometHDMAResetTable+$0C
+lda $06C4
+ sta.l CometHDMAResetTable+$01
+ sta.l CometHDMAResetTable+$04
+ sta.l CometHDMAResetTable+$07
+ sta.l CometHDMAResetTable+$0A
+rts
+CometHDMAResetTable = $7E8C80
+
+
+warnpc $80FFB0
 org $80ffd1
 db $52,$41,$4E,$44,$4F    ; Append "Rando" to ROM title
+
+; COP/BRK handler optimization
+org $80ffe4
+skip 2 ;dw VectorCop
+dw VectorBrk
 
 
 } ; end bank $80
@@ -403,11 +1128,19 @@ db $28,$0F,$7F,$00
 db $10,$09,$00,$02
 db $03,$04,$00,$00
 db $02,$04,$00,$01
+if !ApocalypseGaia == 1
+db $14,$08,$7F,$00
+db $28,$08,$7F,$00
+db $0A,$09,$7F,$00
+db $01,$08,$7F,$00
+db $14,$0A,$7F,$00
+else
 db $14,$10,$7F,$00
 db $28,$0F,$7F,$00
 db $0A,$10,$7F,$00
 db $01,$0F,$7F,$00
 db $14,$12,$7F,$00
+endif
 db $06,$06,$00,$02
 db $28,$10,$7F,$00
 db $28,$10,$7F,$00
@@ -420,10 +1153,17 @@ db $10,$10,$00,$02
 db $0A,$10,$00,$02
 db $18,$10,$00,$02
 db $04,$04,$00,$00
+if !ApocalypseGaia == 1
+db $01,$07,$7F,$00
+db $0A,$09,$7F,$00
+db $14,$08,$7F,$00
+db $28,$07,$7F,$00
+else
 db $01,$0D,$7F,$00
 db $0A,$10,$7F,$00
 db $14,$0F,$7F,$00
 db $28,$0D,$7F,$00
+endif
 db $28,$11,$7F,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
@@ -906,6 +1646,45 @@ Lut_Chests_MapE9:
 db $37,$16 : dw !MansionChestItem : db $2D : db $ff
 }
 warnpc $81c455
+
+
+org $81CBA6
+if !OptionMuteMusic == 1
+Table_MusicAddresses:   ; Some callers (e.g. COP) use 1-indexed, some use 0.
+{
+dl $DF2A1D    ; City
+dl $DF2A1D    ; City (dupe)
+dl $DF2A1D    ; Village
+dl $DF2A1D    ; "Ominous Whispers"
+dl $DF2A1D    ; Castle
+dl $DF2A1D    ; Dungeon
+dl $DF2A1D    ; Inca
+dl $DF2A1D    ; Sky Garden
+dl $DF2A1D    ; Mu
+dl $DF2A1D    ; Great Wall
+dl $DF2A1D    ; Angkor Wat
+dl $DF2A1D    ; Pyramid
+dl $DF2A1D    ; City (dupe)
+dl $DF2A1D    ; Space flight chorus
+dl $DF2A1D    ; Boss music
+dl $DF2A1D    ; Comet
+dl $DF2A1D    ; Dream / Angkor Wat spirit cutscene
+dl $DF2A1D    ; World map / Main menu
+dl $DF2A1D    ; Credits, end ("Rebirth")
+dl $DF2A1D    ; Credits, title theme remix
+dl $DF2A1D    ; Raft / Lance+Lily cutscene
+dl $DF2A1D    ; Dark Space
+dl $DF2A1D    ; City (dupe)
+dl $DD57FC    ; Item fanfare
+dl $DE6C12    ; Lola's Melody
+dl $DE6B33    ; Inca Melody
+dl $DF2A1D    ; Silence
+dl $DF2A1D    ; South Cape (i.e. City with pelicans)
+dl $DF2BCB    ; Ishtar's waterfall
+dl $DE2A6E    ; Memory Melody
+}
+endif
+warnpc $81cc00
 
 
 org $81da4c
@@ -1458,6 +2237,7 @@ db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 warnpc $81e5ec
 
 
+; I don't think we use this table anymore.
 org $81fd24
 table "table_dialogue.txt",rtl
 Bg3_ItemGetText:
@@ -1650,12 +2430,47 @@ ply
 rtl
 
 
-org $81ffed
-table "table_dialogue.txt",rtl
-db "Already maxed out!"
-
 
 } ; end bank $81
+
+
+
+; Bank $82
+{
+
+
+; Reduce cost of multiplication and division.
+org $8281D1
+LR_MultiplyBytesOfA:
+{
+sta $804202
+xba
+sta $804203
+nop : nop : nop ; : nop ; reduce unneeded filler cycles
+lda $804217
+xba
+lda $804216
+rtl
+nop ; filler
+}
+LR_DivideYByA:
+{
+sty $4204
+sta $4206
+pha : pla ;nop : nop : nop : nop ; reduce unneeded filler cycles
+pha : pla ;nop : nop : nop : nop ; reduce unneeded filler cycles
+lda $4216
+xba
+lda $4214
+rtl
+nop : nop : nop : nop ; filler
+}
+warnpc $8281FE
+
+
+; Removes 5 pointless nops.
+org $82a5e8
+plp : rtl
 
 
 org $82a5f9
@@ -2763,8 +3578,12 @@ cop #$E0
 +:
 jmp $B7BD
 
+}
 
 
+
+; Bank $83
+{
 
 org $8381d6
 jmp $fdc0    ; "Black Glasses allow you to see which upgrades are available"
@@ -3254,154 +4073,110 @@ Lut_MapChoices:
 {
 .Pointers:
 {
-dw .Index00
-dw .Cape2Ed
-dw .Cape2It
-dw .Ed2Cape
-dw .It2Cape
-dw .MP2It
-dw .It2MP
-dw .Frja2Mn
-dw .Mn2Frja
-dw .Frja2X
-dw .Angl2Wtma
-dw .Wtma2X
-dw .Wtma2GtWl
-dw .GtWl2Wtma
-dw .Wtma2Euro
-dw .Euro2Wtma
-dw .Euro2Krss
-dw .Krss2Euro
-dw .NtVl2X
-dw .NtVl2AW
-dw .AW2NtVl
-dw .Angl2X
-dw .Dao2NtVl
-dw .Dao2Pymd
-dw .Pymd2Dao
-dw .NtVl2Dao
-dw .Euro2NtVl
-dw .Cape2X
+dw .Index00   ; Inaccessible.
+dw .ContinentSW
+dw .ContinentSE
+dw .ContinentNE
+dw .ContinentNN
+dw .ContinentNW
 }
 ; Continent SE.
 {
 .Index00:
-.Frja2Mn:
-.Mn2Frja:
-.Frja2X:
 .ContinentSE:
 cop #$BF : dw ..Text
 cop #$BE : db $53,$00 : dw ..Options
 cop #$C5
 ..Options:
-dw OverworldMapChoices_Frej
-dw OverworldMapChoices_Frej
-dw OverworldMapChoices_Nzca
-dw OverworldMapChoices_Neil
-dw OverworldMapChoices_DCst
-dw OverworldMapChoices_Mine
+dw OverworldMapChoices_!OverworldShuffleFrejLabel
+dw OverworldMapChoices_!OverworldShuffleFrejLabel
+dw OverworldMapChoices_!OverworldShuffleNzcaLabel
+dw OverworldMapChoices_!OverworldShuffleNeilLabel
+dw OverworldMapChoices_!OverworldShuffleDCstLabel
+dw OverworldMapChoices_!OverworldShuffleMineLabel
 ..Text:
-db $C2,$11,$D2,$00,$AC,$45,$A2,$84,$84,$89,$88,$80,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$42,$8E,$80,$A3,$A4
+db $C2,$11,$D2,$00
+db $AC,!OverworldShuffleFrejText,$AC,!OverworldShuffleDCstText
 db $CB
-db $AC,$4D,$80,$AA,$82,$80,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$4C,$88,$8D,$84
+db $AC,!OverworldShuffleNzcaText,$AC,!OverworldShuffleMineText
 db $CB
-db $AC,$D6,$37,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC
+db $AC,!OverworldShuffleNeilText
 db $CA
 }
 ; Continent NE.
 {
-.Angl2Wtma:
-.Wtma2X:
-.Wtma2GtWl:
-.GtWl2Wtma:
-.Wtma2Euro:
-.Angl2X:
 .ContinentNE:
 cop #$BF : dw ..Text
 cop #$BE : db $32,$01 : dw ..Options
 cop #$C5
 ..Options:
-dw OverworldMapChoices_Wtma
-dw OverworldMapChoices_Wtma
-dw OverworldMapChoices_GtWl
-dw OverworldMapChoices_Angl
+dw OverworldMapChoices_!OverworldShuffleWtmaLabel
+dw OverworldMapChoices_!OverworldShuffleWtmaLabel
+dw OverworldMapChoices_!OverworldShuffleGtWlLabel
+dw OverworldMapChoices_!OverworldShuffleAnglLabel
 ..Text:
-db $C2,$11,$D2,$00,$AC,$67,$80,$A4,$84,$A2,$8C,$88,$80,$AC,$AC,$AC,$AC,$D6,$01,$66,$88,$8B,$8B,$80,$86,$84
+db $C2,$11,$D2,$00
+db $AC,!OverworldShuffleWtmaText,$AC,!OverworldShuffleAnglText
 db $CB
-db $AC,$D6,$16,$67,$80,$8B,$8B
+db $AC,!OverworldShuffleGtWlText
 db $CA
 }
 ; Continent N.
 {
-.Euro2Wtma:
-.Euro2Krss:
-.Krss2Euro:
-.NtVl2X:
-.NtVl2AW:
-.AW2NtVl:
-.NtVl2Dao:
-.Euro2NtVl:
 .ContinentNN:
 cop #$BF : dw ..Text
 cop #$BE : db $42,$01 : dw ..Options
 cop #$C5
 ..Options:
-dw OverworldMapChoices_Euro
-dw OverworldMapChoices_Euro
-dw OverworldMapChoices_NtVl
-dw OverworldMapChoices_Kres
-dw OverworldMapChoices_Ankr
+dw OverworldMapChoices_!OverworldShuffleEuroLabel
+dw OverworldMapChoices_!OverworldShuffleEuroLabel
+dw OverworldMapChoices_!OverworldShuffleNtVlLabel
+dw OverworldMapChoices_!OverworldShuffleKresLabel
+dw OverworldMapChoices_!OverworldShuffleAnkrLabel
 ..Text:
-db $C2,$11,$D2,$00,$AC,$44,$A5,$A2,$8E,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$4C,$A4,$2A,$AC,$64,$84,$8C,$A0,$8B,$84
+db $C2,$11,$D2,$00
+db $AC,!OverworldShuffleEuroText,$AC,!OverworldShuffleKresText
 db $CB
-db $AC,$D7,$22,$AC,$AC,$AC,$D6,$04,$67,$80,$A4,$AC
+db $AC,!OverworldShuffleNtVlText,$AC,!OverworldShuffleAnkrText
 db $CA
 }
 ; Continent NW.
 {
-.Dao2NtVl:
-.Dao2Pymd:
-.Pymd2Dao:
 .ContinentNW:
 cop #$BF : dw ..Text
 cop #$BE : db $02,$01 : dw ..Options
 cop #$C5
 ..Options:
-dw OverworldMapChoices_Dao
-dw OverworldMapChoices_Dao
-dw OverworldMapChoices_Pymd
+dw OverworldMapChoices_!OverworldShuffleDaoLabel
+dw OverworldMapChoices_!OverworldShuffleDaoLabel
+dw OverworldMapChoices_!OverworldShufflePymdLabel
 ..Text:
-db $C2,$11,$D2,$00,$AC,$43,$80,$8E
+db $C2,$11,$D2,$00
+db $AC,!OverworldShuffleDaoText
 db $CB
-db $AC,$D6,$3F
+db $AC,!OverworldShufflePymdText
 db $CA
 }
 ; Continent SW.
 {
-.Cape2Ed:
-.Cape2It:
-.Ed2Cape:
-.It2Cape:
-.MP2It:
-.It2MP:
-.Cape2X:
 .ContinentSW:
 cop #$BF : dw ..Text
 cop #$BE : db $53,$00 : dw ..Options
 cop #$C5
 ..Options:
-dw OverworldMapChoices_Cape
-dw OverworldMapChoices_Cape
-dw OverworldMapChoices_Ed
-dw OverworldMapChoices_Moon
-dw OverworldMapChoices_Inca
-dw OverworldMapChoices_ItryS
+dw OverworldMapChoices_!OverworldShuffleCapeLabel
+dw OverworldMapChoices_!OverworldShuffleCapeLabel
+dw OverworldMapChoices_!OverworldShuffleEdLabel
+dw OverworldMapChoices_!OverworldShuffleMoonLabel
+dw OverworldMapChoices_!OverworldShuffleIncaLabel
+dw OverworldMapChoices_!OverworldShuffleItryLabel
 ..Text:
-db $C2,$11,$D2,$00,$AC,$D6,$47,$42,$80,$A0,$84,$AC,$AC,$D6,$1E
+db $C2,$11,$D2,$00
+db $AC,!OverworldShuffleCapeText,$AC,!OverworldShuffleIncaText
 db $CB
-db $AC,$44,$83,$A7,$80,$A2,$83,$0E,$A3,$AC,$AC,$AC,$AC,$48,$A4,$8E,$A2,$A9
+db $AC,!OverworldShuffleEdText,$AC,!OverworldShuffleItryText
 db $CB
-db $AC,$D6,$31,$64,$A2,$88,$81,$84,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC
+db $AC,!OverworldShuffleMoonText
 db $CA
 }
 
@@ -3503,6 +4278,131 @@ endif
 
 
 
+org $83c849
+LR_WriteSpriteIfVisible:
+; Optimization: D=0, so $00??,x -> $??,x if x is LowRAM or ROM bank $00.
+phb 
+sep #$21
+  lda $7f0008,x : pha : plb 
+rep #$20
+lda $14,x  ; sec provided by sep #$21 up there
+  sbc $18,x : sec : sbc $1a : sta $18
+lda $16,x : sec : sbc $1a,x : sec : sbc $1e : sta $1c
+lda $0e,x : sta $04         ; $04 = SpriteFlags.
+stz $02
+lda $10,x : bit #$0080 : beq +
+  bit #$0010 : bne +
+lda $7F0028,x : beq ++
+lsr : bcc ++
+  lda #$0E00 : sta $02
+++:
+lda $10,x
++:
+bpl +
+  jmp $c928
++:
+lda $7f000c,x : clc : adc #$0008 : tax 
+lda $0000,x : and #$00ff : sta $10
+.MegaLoop:
+lda $0004,x : bit $04 : bpl +     ; >$c8b9
+  xba
++:
+and #$00ff : clc : adc $1c : cmp #$00f0 : bcs .NoFlushOffScreenSprite
+  sbc #$0010 : sta $0423,y
+lda $0006,x : eor $04 : ora $02 : sta $0424,y
+lda $0002,x : bit $04 : bvc +
+  xba 
++:
+and #$00ff : clc : adc $18 : cmp #$0110 : bcs .FlushOffScreenSprite
+  sbc #$000f
+sep #$20
+  sta $0422,y
+xba : lsr : ror $00
+lda $0001,x : lsr : ror $00
+dec $0e : bne +     ; >$c909
+  lda $00 : sta ($06)
+  inc $06
+  lda #$04 : sta $0e
++:
+rep #$21
+tya : adc #$0004 : tay
+cpy #$0200 : beq .Finish     ; >$c91e
+.TryNextSprite:
+txa : adc #$0007 : tax
+dec $10 : bne .MegaLoop     ; >$c8b0
+.Finish:
+plb 
+rts 
+.FlushOffScreenSprite:
+lda #$e080 : sta $0422,y
+.NoFlushOffScreenSprite:
+clc
+bra .TryNextSprite
+warnpc $83c926
+
+
+
+org $83CA55
+LR_AnimateSprite:
+; Similar optimizations.
+phb          ;<--SR
+sep #$20
+  lda $7F0008,x : pha : plb
+rep #$21
+lda $28 : asl : adc $7F0006,x : tay
+lda $2A : asl : asl : adc $0000,y : tay
+lda $0000,y : bmi .SecAndReturn;+$79     ;[$83CAF0]
+  sta $08
+lda $0002,y : tay
+  clc : adc #$0004 : sta $7F000C,x
+lda $0002,y : bit $0E : bpl +
+  xba
++:
+sep #$20
+  sta $1A
+  xba
+  sta $1E
+rep #$20
+lda $0000,y : bit $0E : bvc +
+  xba
++:
+sep #$20
+sta $18
+stz $19
+xba
+sta $1C
+stz $1D
+bpl +
+  lda #$FF : sta $1D
++:
+xba
+bpl +
+  lda #$FF : sta $19
++:
+inc $2A
+lda $13 : lsr : bcs .ClcAndReturn    ; Flag means "no-update hitbox".
+lda $18 : sta $20    ; Do update hitbox.
+lda $1C : sta $21
+lda $1E : sta $23
+lda $1A : bit $12 : bmi +    ; Flag means "no-trim hitbox Y".
+  sbc #$09    ; Actually subtract 8, but c=0 is guaranteed.
++:
+sta $22
+.ClcAndReturn:
+rep #$21
+plb
+rtl
+.SecAndReturn:
+rep #$20
+stz $2A
+sec
+plb
+rtl
+warnpc $83CAF5
+
+
+
+
 org $83d10b
 if !SettingOrbRando == 1
 nop : nop : nop : sec    ; In key rando, already-dead monsters don't trigger map rearrangement.
@@ -3524,6 +4424,7 @@ nop : nop    ; Load Firebird assets in every map, in case Early Firebird is enab
 org $83ef97
 LR_GiveNormalItemA8OrSec:
 {
+stz $0bfe    ; Used by Z3 mode to flag whether we're capped on a stat.
 php
 sep #$20
 bit #$80 : bne .IsStatOrPickup
@@ -3537,13 +4438,16 @@ iny : cpy #$0010 : bne .CheckInvSlotEmpty
 jmp .InvFull
 
 .IsStatOrPickup:
-sec : sbc #$80 : beq .IsHpJewel   ; $80 or $87
-  dec : beq .IsStrJewel  ; $81 or $88
-  dec : beq .IsDefJewel  ; $82 or $89
+sec : sbc #$80 : beq .IsHpJewel   ; $80
+  dec : beq .IsStrJewel  ; $81
+  dec : beq .IsDefJewel  ; $82
   dec : beq .IsSmallDp   ; $83
   dec : beq .IsMediumDp  ; $84
   dec : beq .IsBigDp     ; $85
-  ;dec : beq .IsHpPickup  ; $86
+  dec : beq .IsHpPickup  ; $86
+  dec : beq .IsHpJewelItem   ; $87
+  dec : beq .IsStrJewelItem  ; $88
+  dec : beq .IsDefJewelItem  ; $89
 .IsHpPickup:
 rep #$20
 lda #$0005 : clc : adc $0B22 : sta $0B22
@@ -3567,6 +4471,14 @@ and #$00FF : clc : adc $0AD6 : cmp #$03E7 : bcc +
 sta $0AD6
 cop #$06 : db $22
 bra .ClcAndRtl
+.IsHpJewelItem:    ; In Z3 non-Expert, HP that isn't a room reward awards 2 hit points.
+if !SettingZ3 == 1 && !SettingOHKO == 0
+lda #$80 : trb $09EC
+lda $0aca : inc : inc : sta $0aca
+  sec : sbc $0ace : sta $0b22
+ldy #$0000
+bra .ClcAndRtl
+endif
 .IsHpJewel:
 lda #$80 : trb $09EC
 if !SettingOHKO == 0
@@ -3575,14 +4487,46 @@ lda $0ACA : inc : sta $0ACA
 endif
 ldy #$0000
 bra .ClcAndRtl
+.IsStrJewelItem:
 .IsStrJewel:
 lda #$80 : trb $09EC
+if !SettingZ3 == 1   ; In Z3, STR is capped at 8/4/2/1 for difficulty 0/1/2/3.
+phx
+  ldx $0b24
+  lda $0ade : cmp.l ..MaxStrByDifficulty,x
+plx
+bcs +
+  asl $0ade
+  bra ++
+..MaxStrByDifficulty:
+db 8,4,2,1
++:
+lda #$01 : sta $0bfe
+++:
+else
 inc $0ADE
+endif
 ldy #$0000
 bra .ClcAndRtl
+.IsDefJewelItem:
 .IsDefJewel:
 lda #$80 : trb $09EC
+if !SettingZ3 == 1   ; In Z3, DEF is capped at 2/2/1/0 for difficulty 0/1/2/3.
+phx
+  ldx $0b24
+  lda $0adc : cmp.l ..MaxDefByDifficulty,x
+plx
+bcs +
+  inc $0adc
+  bra ++
+..MaxDefByDifficulty:
+db 2,2,1,0
++:
+lda #$01 : sta $0bfe
+++:
+else
 inc $0ADC
+endif
 ldy #$0000
 bra .ClcAndRtl
 
@@ -3612,34 +4556,6 @@ cop #$BF : dw $9e1a
 rtl
 
 
-org $83f779
-; Z3 status upgrade routines
-if 0
-
-0C F0 
-32 F0 
-51 F0 
-E9 EF 
-ED EF 
-F1 EF 
-CA EF 
-0C F0 
-32 F0 
-51 F0 
-C0 EF 
-C5 EF 
-90 FF 
-C1 FF 
-48 38 E9 57 8D B8 0D 68 38 E9 80 60 
-E0 0E 00 D0 0F 48 A9 03 CD 24 0B F0 06 68 18 69 02 80 04 68 18 69 01 60 
-08 00 04 00 02 00 01 00 
-DA 48 AD 24 0B 0A AA 68 DF B9 F7 83 F0 04 FA 18 0A 60 
-A2 36 00 8E B8 0D FA 60 
-02 00 02 00 01 00 00 00 
-DA 48 AD 24 0B 0A AA 68 DF DB F7 83 F0 05 FA 18 69 01 60 
-A2 36 00 8E B8 0D FA 60 
-
-endif
 
 
 org $83faee
@@ -3801,54 +4717,6 @@ db "It shatters into a",$cb
 db "million pieces.",$cb
 db "Whoops."
 db $c0
-warnpc $83ff50
-
-org $83ff90
-pha
-lda $0b24 : bit #$02 : beq ++
-lda $0a1e : bit #$80 : bne +
-ora #$80 : sta $0a1e
-bra +++
-+:
-eor #$80 : sta $0a1e
-++:
-pla
-jmp $F00C
-+++:
-pla
-rts
-
-;org $83ffb1
-php
-sep #$20
-pha
-cmp #$06 : bne +
-jsl $83f0b3 : bcc ++
-lda #$01 : sta $0aaa
-stz $0aab
-lda #$06
-+:
-pla
-jmp $ef9a
-++:
-sed
-lda $0aaa : adc #$01 : sta $0aaa
-pla
-jmp $f074
-
-
-org $83ffda
-sec
-sed
-lda $0aaa : sbc #$0001 : sta $0aaa
-cld
-bne +
-  jsr $9fb2
-  rts
-+:
-lda #$0000 : sta $0ac6
-  dec : sta $0ac4
-rts
 
 TextShadowsFormUnlocked:
 table "table_dialogue.txt",rtl
@@ -3856,8 +4724,12 @@ db $d3
 db $cd : dl TextLongShadowsFormUnlocked
 db $c0
 
+}
 
 
+
+; Bank $84
+{
 
 org $848377    ; Fisherman only appears at the east side of the docks.
 cop #$D0 : db $10,$01 : dw $83aa
@@ -4232,7 +5104,7 @@ cop #$8A
 cop #$E0
 .TryLeaveItory:
 cop #$45 : db $2c,$36,$2f,$39 : dw ..DoNothing
-cop #$66 : dw $00c0,$02c0 : db $01
+cop #$66 : dw $00c0,$02c0 : db !OverworldShuffleItryMenuId
 cop #$C1
 ..DoNothing:
 rtl
@@ -4302,16 +5174,6 @@ org $84f373
 %MTryGiveItemAndFlag(!ItoryCaveItem, $2d)
 rtl
 
-org $84f441
-db $00 : dw $3000
-EMoonTribeExit:    ; re-purposed Lilly code
-cop #$45 : db $14,$1c,$17,$1d : dw .DoExit
-rtl
-.DoExit:
-cop #$66 : dw $0090,$0260 : db $01
-cop #$C1
-rtl
-
 org $84f8b7
 lda.w #!MoonTribeTimeLimit
 
@@ -4366,10 +5228,12 @@ db $8C,$80,$A4,$84,$2A
 db $C0
 }
 
+}
 
 
 
-
+; Bank $85
+{
 org $858188
 nop : nop : nop : nop    ; Don't lock out Castoth on gold ship
 
@@ -4444,18 +5308,6 @@ rtl
 
 org $85aa74
 cop #$C0 : dw TurboOnInteract
-
-org $85aa9e
-; Re-purpose Coast Kara as an overworld exit.
-{
-db $00 : dw $3000
-cop #$45 : db $03,$00,$06,$01 : dw CoastKaraDoExit
-rtl
-CoastKaraDoExit:
-cop #$66 : dw $0250,$0350 : db $07
-cop #$C1
-rtl
-}
 
 org $85ad6b
 db $d3
@@ -4709,15 +5561,6 @@ db $80,$8D,$83,$AC,$43,$80,$8E,$2A,$AC,$D6,$09,$A6,$88,$A3,$88,$A4,$AC,$8C,$84,$
 db $80,$8D,$A9,$A4,$88,$8C,$84,$4F,$C0
 }
 
-org $85e305
-db $00 : dw $3000    ; Neil's invention converted to overworld exit
-cop #$45 : db $07,$0d,$0a,$0e : dw NeilsCottageDoExit
-rtl
-NeilsCottageDoExit:
-cop #$66 : dw $0270,$0270 : db $07
-cop #$C1
-rtl
-
 
 org $85e647
 ; nazca.bin, the tile that ports you to the sky
@@ -4774,7 +5617,7 @@ db $CA
 
 org $85e80c
 ; Nazca exit to world map at edges.
-cop #$66 : dw $0310,$0290 : db $07
+cop #$66 : dw $0310,$0290 : db !OverworldShuffleNzcaMenuId
 cop #$C1
 rtl
 
@@ -4891,9 +5734,12 @@ db "Code. Let's see what",$cb
 db "Seth's up to!)",$c0
 }
 
+}
 
 
 
+; Bank $86
+{
 org $868689
 db $e0,$6b    ; Disable Lilly in SeaPal (redundant?)
 
@@ -5664,7 +6510,12 @@ rtl
 cop #$BF : dw $9167
 rtl
 
+}
 
+
+
+; Bank $87
+{
 
 org $878542   ; Part of a cop #$D0 that branches to Watermia NPCs.
 dw SethWatermiaOnInteract   ; Seth travel NPC.
@@ -5919,7 +6770,14 @@ cop #$BE : db $02,$01 : dw ..Options
 ..Options:
   dw ...ChooseNo
   dw ...ChooseNo, ...ChooseYes
-
+...ChooseYes:
+stz $0ad4
+jsl LR_ClearMonsterKilledFlags
+cop #$26 : db !StartWarpString
+cop #$C1
+rtl
+...ChooseNo:
+cop #$BF : dw ..TextDeclinedWarp
 endif
 cop #$9C : dl EEuroShopPlayerPusher : dw $2000
 cop #$82 : db $06, $01
@@ -6064,7 +6922,12 @@ db "I can help you cross.",$cb
 db "(And by Bagu I mean",$cb
 db "Morse Code.)",$c0
 
+}
 
+
+
+; Bank $88
+{
 
 org $888fc4
 ; natives.bin, "Native can guide you to Dao if you give him the roast"
@@ -6352,19 +7215,52 @@ db !HieroItemTile5
 db !HieroItemTile6
 
 org $88cd71
-db $10,$00   ; Pyramid boss doesn't disappear on death.
+; MQ and Solid Arm disappear if they're the Pyramid boss; others don't.
+if !Boss5Id == 5
+db $fc,$01
+elseif !Boss5Id == 7
+db $f6,$01
+else
+db $10,$00
+endif
 
-org $88cdcf
-db !MapMQEntranceString
+org $88cdcd
+cop #$26 : db !MapMQEntranceString
+cop #$C1
+rtl
+TextMummyQueenPortal:
+db $d3
+db "Heeeeeeeeeeeeeere's",$cb
+if !Boss5Id == 1
+db "Castoth!"
+elseif !Boss5Id == 2
+db "Viper!"
+elseif !Boss5Id == 3
+db "Vampires!"
+elseif !Boss5Id == 4
+db "Sand Fanger!"
+elseif !Boss5Id == 5
+db "Mummy Queen!"
+elseif !Boss5Id == 6
+db "Mummy Queen 2.0!"
+else
+db "Solid Arm!"
+endif
+db $cb
+db "_Quit",$cb
+db "_Jump in"
+db $ca
+warnpc $88ce10
+
 
 org $88ce30
 ; The warp after receiving MQ's statue is different, since it doesn't return to MQ's map.
-lda.w !MQPostStatueExitMap : sta $0b12
-lda.w !MQPostStatueExitX : sta $0b08
+lda.w #!MQPostStatueExitMap : sta $0b12
+lda.w #!MQPostStatueExitX : sta $0b08
   sta $0b0a
-lda.w !MQPostStatueExitY : sta $0b0c
+lda.w #!MQPostStatueExitY : sta $0b0c
   sta $0b0e
-lda.w !MQPostStatueExitCam : sta $0b10
+lda.w #!MQPostStatueExitCam : sta $0b10
 cop #$26 : db $fd : dw $0000, $0000 : db $00,$00,$11
 
 org $88cea5
@@ -6923,8 +7819,12 @@ phx
 plx
 jmp $AFF9
 
+}
 
 
+
+; Bank $89
+{
 
 org $898045
 jsr SR_BabelSpiritTransformAndRespawnEnemies
@@ -6936,7 +7836,20 @@ org $898055
 db $cd : dl TextBabelBabylonJoke
 db $cb
 db "_", $d6,$42, $cb
-db "_Go to Dao"
+db "_Go to_"
+if !Boss6Id == 1
+db "Diamond Coast"
+elseif !Boss6Id == 2
+db "Seaside Palace"
+elseif !Boss6Id == 3
+db "Mu"
+elseif !Boss6Id == 4
+db "Great Wall"
+elseif !Boss6Id == 5
+db "Pyramid"
+else
+db "Dao"
+endif
 db $ca
 
 org $8980cb
@@ -7054,6 +7967,12 @@ cop #$D0 : db $6f,$00 : dw $aa6c
 cop #$CC : db $02
 org $89be74
 db $d7,$18    ; Dialogue to say "Lilly's" instead of Strange.
+
+
+; "Reconstructed" Apocalypse Gaia code.
+org $89aae3
+incsrc "apocalypse_gaia_1.asr"
+warnpc $89ba80
 
 org $89bc37
 cop #$02 : db $e0    ; Disable Lilly's flower (redundant?)
@@ -7247,7 +8166,12 @@ jsl LR_ClearMonsterKilledFlags
 jsl LR_ForceChangeToWill
 rts
 
+}
 
+
+
+; Bank $8A
+{
 
 ; Boss monster death copies some of EBasicMonsterDeath.
 org $8aa4a6
@@ -7297,6 +8221,13 @@ org $8aa771
 cop #$D0 : db $a3,$00 : dw MineSlaveInvFullResponse
 rtl
 
+; Exploding worms' death code includes "ldy $06 : cop #$23", which is a bug
+;   because COP clobbers Y. Vanilla cop #$23 happens to give Y a value that
+;   the code can use anyway, but my cop #$23 does not.
+org $8ACBF2
+cop #$23
+ldy $06
+
 org $8ace9b
 ; Expedite transform and map change after Viper.
 jsl LR_ForceChangeToWill
@@ -7312,9 +8243,12 @@ org $8afa51
 ; "Move exits around to make Vampires required for Statue"
 db $67 : dw $0178, $01d0 : db $80,$01,$22
 
+}
 
 
 
+; Bank $8B
+{
 
 ; Make Fanger's detection areas cover the arena, in case player moves during quake
 org $8b81a0
@@ -7322,6 +8256,26 @@ db $01,$19,$3f,$3f
 org $8b81b7
 db $01,$2c,$3f,$3f
 
+
+; Work around the bug where Wat fly code hangs if they spawn with X or Y less than #$0040.
+org $8baf4f
+db $00 : dw $0000
+EAWZipFly:
+lda $14 : sta $7F100C,x
+lda $16 : sta $7F100E,x
+jsr SR_FixWatFlyHomeAndLayer
+stz $24
+
+
+; Wat golems don't fall from the ceiling in pieces in Enemizer
+if !SettingEnemizer > 0
+org $8bb825
+db $00 : dw $0000
+cop #$27 : db $0f
+cop #$C1
+jmp $b8a0
+rtl
+endif
 
 
 ; Wat scarab death copies some of EBasicMonsterDeath.
@@ -7406,7 +8360,6 @@ db $c8
 db $ca
 
 }
-
 
 
 
@@ -7613,11 +8566,875 @@ cop #$BF : dw $fe40
 cop #$E0
 }
 
+SR_FixWatFlyHomeAndLayer:
+cop #$B6 : db $30
+lda $7f100c,x : cmp #$0050 : bcs +
+  lda #$0050 : sta $7f100c,x
++:
+lda $7f100e,x : cmp #$0050 : bcs +
+  lda #$0050 : sta $7f100e,x
++:
+rts
 
+}
+
+
+
+; Bank $8C
+{
 
 org $8c8000
 incsrc "iogr_8C_actor_table.asr"
 warnpc $8CE5E5
+
+; For Apocalypse Gaia, we make various changes to the Comet and DG code.
+org $8ceb74
+if !ApocalypseGaia == 1
+; The Comet's face and Dark Gaia live on BG1, the Comet's surface and the sky on BG2.
+; This thinker hides BG1 at the start of the map, then after Will lands
+; its pointer is changed to a new spot that reveals BG1 and thus the Comet's face.
+; After the Comet dies, it restores this thinker to $8ceb76 to hide its face again;
+; then when spawning Dark Gaia it sends the thinker back to $eba1 once again
+; to create a visual effect over its body; then to $ebf7 once Dark Gaia is on-screen,
+; then to $ec35 when the latter dies.
+; So this is "BG1 Invisible":
+db $00,$08
+ECometBG:
+{
+jsl LR_ClearCache
+lda #$0016 : sta $212C
+lda #$0282 : sta $2130
+lda #$1810 : sta $2107
+;sep #$20                     ;<--Branch
+;lda #$16 : sta $212C   ; Enable BG2,BG3,OBJ on main screen.
+;stz $212D             ; Enable nothing on subscreen.
+;lda #$82 : sta $2130  ; CMath, clip colors in window, use Subscreen addition.
+;lda #$02 : sta $2131 ; Additive color math on BG2.
+;lda #$10 : sta $2107 ; BG1 tilemap is at #$10 << 9 = $2000 (standard).
+;lda #$18 : sta $2108 ; BG2 tilemap is at #$18 << 9 = $3000 (standard).
+;rep #$20
+cop #$C2 ; Set pointer here and delay 1 frame.
+;cop #$D0                     ;[$8CEB76] ; Refresh screen if leaving inv.
+;  db $FF,$00 : dw ECometBG
+bit $0A1E : bpl ECometBG
+rtl			;  these options refresh every frame.
+}
+
+; The Comet sets the above's pointer to here after Will lands.
+; This is "BG1 Translucent and Tinted like the Comet".
+.AfterLanding:
+{
+jsl LR_ClearCache
+lda #$1810 : sta $2107
+lda #$0217 : sta $212C
+lda #$1182 : sta $2130
+;sep #$20                     ;<--Branch
+;lda #$17 : sta $212C ; Flag #$01 enables BG1 on main screen.
+;inc a : sta $2108 ; BG2 tilemap at same place as above.
+;lda #$02 : sta $212D ; Only BG2 enabled on subscreen.
+;lda #$82 : sta $2130 ; Color math settings same as before.
+;lda #$10 : sta $2107 ; BG1 tilemap at same place as above.
+;inc a : sta $2131 ; Additive color math on BG1 and OBJ.
+;rep #$20
+cop #$C2
+;cop #$D0        ; [$8CEBA1] ; Refresh screen if leaving inv.
+;  db $ff,$00 : dw .AfterLanding
+bit $0A1E : bpl .AfterLanding
+rtl
+}
+
+; Vanilla doesn't use this, so I'm modding it for AG.
+.AGP1:
+{
+jsl LR_PushAndUpdateAGBody
+stz $2126 ; and $2127 too: window 1 position
+lda #$0017 : sta $212C ; enable o,BG1-3 on main; nothing on sub
+sep #$20
+inc a : sta $2108 ; BG2 tilemap addr
+asl a : sta $2125 ; enable+invert color window 1
+lda #$10 : sta $2107 ; BG1 tilemap addr
+stz $2130 ; cmath=dir,all; zeroed nowhere
+lda #$23 : sta $2131 ; cmath=add, on BG1+2+B
+rep #$20
+cop #$C2
+bit $0A1E : bpl .AGP1
+rtl
+}
+
+.AGP3:
+{
+jsl LR_PushAndUpdateCometBG
+stz $2126 ; and $2127 too: window 1 position
+sep #$20
+lda #$15 : sta $212C ; enable o,BG1,3 on main
+lda #$18 : sta $2108 ; BG1+2 are the same
+asl a : sta $2125 ; enable+invert color window 1
+lda #$10 : sta $2107 ; BG1 tilemap addr
+lda #$02 : sta $2130 ; cmath=sub,all; zeroed nowhere
+sta $212D ; enable BG2 on sub
+lda #$33 : sta $2131 ; cmath=add, on O+BG1+2+B
+rep #$20
+cop #$C2
+bit $0A1E : bpl .AGP3
+rtl
+}
+
+; This one occurs once Dark Gaia is on-screen.
+.DGOnScreen:
+{
+jsl LR_ClearCache
+stz $2126 ; and $2127 too: window 1 position
+sep #$20
+lda #$17 : sta $212C ; enable o+BG1-3 on main
+inc a : sta $2108 ; BG2 tilemap addr
+asl a : sta $2125 ; enable+invert color window 1
+stz $212D ; nothing on subscreen
+lda #$22 : sta $2130 ; cmath=addsub, inside-window-only
+lda #$03 : sta $2131 ; cmath=add, on BG1&2
+lda #$10 : sta $2107 ; BG1 tilemap addr
+lda #$57 : sta $7F0C02 ; color adder
+rep #$20
+cop #$C2
+;cop #$D0                     ;[$8CEBF7]
+;  db $FF,$00 : dw .DGOnScreen
+bit $0A1E : bpl .DGOnScreen
+rtl
+}
+
+; In final death.
+; This places a colorful tinge over all BGs including BG3.
+.DGDead:
+{
+jsl LR_ClearCache
+lda #$0017 : sta $212C ; enable obj,BG1-3 on main; nothing on sub
+lda #$3F80 : sta $2130 ; cmath=fixed,everywhere,zeroed first in window; cmath=add, all layers
+sep #$20                     
+stz $2125 ; disable windows all layers
+lda #$18 : sta $2108 ; BG2 tilemap addr
+lda #$10 : sta $2107 ; BG1 tilemap addr
+rep #$20
+cop #$C2
+;cop #$D0                     ;[$8CEC35]
+;  db $FF,$00 : dw .DGDead
+bit $0A1E : bpl .DGDead
+rtl
+}
+
+TDGMouthLaser:
+{
+lda #$0004 : sta $7F000E,x
+lda #$0000
+ sta $7F0000,x
+ sta $7F0002,x
+ sta $7F0006,x
+cop #$C1
+phd
+ lda #$0000 : tcd
+tay
+lda $7F0000,x
+lsr a
+bcc +$03
+ ldy #$0200
+sep #$20
+ phb
+ lda #$7E
+ pha
+ plb
+rep #$20
+lda $7F0002,x : inc a : inc a
+ sta $7F0002,x : sta $0E
+lda #$857A : sta $18
+lda #$00FF : sta $7C01,y
+sep #$20
+lda #$45 : sta $7C00,y
+iny : iny : iny
+.LoopBody:
+lda #$04 : sta $7C00,y
+lda $18 : dec a : sta $18 : sta $7C01,y
+lda $19 : inc a : sta $19 : sta $7C02,y
+iny : iny : iny
+dec $0E                      
+bpl .LoopBody ;(-$1C)              ;[$8CECBB] 
+rep #$20
+lda #$FF01 : sta $7C00,y
+lda #$0000 : sta $7C02,y
+plb
+pld
+lda $7F0000,x
+lsr a
+bcs +$08                     ;[$8CECFE] 
+ cop #$02 : db $00,$7C,$7E,$26 ; HDMA to window pos
+bra +$06                     ;[$8CED04] 
+ cop #$02 : db $00,$7E,$7E,$26 ; HDMA to window pos
+lda $7F0000,x : inc a : sta $7F0000,x
+lda $7F0002,x
+cmp #$0024 : bcs +$01
+ rtl
+lda #$0023 : sta $7F0002,x
+lda $7F0006,x : inc a : sta $7F0006,x
+cop #$CE : db $02
+cop #$DA : db $01
+lda #$00FF : sta $2126 ; window covers screen
+cop #$3D
+rtl
+}
+
+ECometSpawnPalette:
+cop #$37 : db $7D
+bra EDGMouthLaserPalette_DoAndDie
+
+ECometDeathPalette:
+cop #$37 : db $7F
+bra EDGMouthLaserPalette_DoAndDie
+
+EDGMouthLaserPalette:
+cop #$37 : db $69
+.DoAndDie:
+cop #$39
+cop #$E0
+
+
+endif
+warnpc $8CED4B
+
+org $8ceaba
+; The AG code changes the addresses of some of these thinkers.
+if !ApocalypseGaia == 1
+db $00 : dl ECometBG-2
+db $71 : dl TIndexedPaletteBundle-2
+db $00 : dl ECometBG2ShimmerEndpoint-2
+db $00 : dl ECometBG2ShimmerA-2
+db $00 : dl ECometBG2ShimmerB-2
+db $00 : dl ECometBG2ShimmerC-2
+db $FF
+endif
+warnpc $8CEAD3
+
+org $8ceeaa
+if !ApocalypseGaia == 1
+db $00,$00,$21
+EComet:
+lda #$0010 : tsb $12
+lda #$0081 : sta $14
+lda #$00EA : sta $16
+jsl LR_SetupPlayerForComet    ; replenish herbs if applicable; set ptr to "falling"; restore camera
+lda #$0800 : tsb $09AE
+cop #$C1
+lda $09AE
+bit #$0800 : beq +$01
+ rtl
+cop #$D0 : db $F4,$01 : dw ECometDeath
+cop #$9B : dl ECometSpawnPalette  ;[Child: $8CED37] <--Branch
+cop #$C2
+lda.w #ECometBG_AfterLanding : sta $0F00
+cop #$57 : dl ECometDeath ;db $88,$EF,$8C
+cop #$04 : db $10
+cop #$DA : db $FE
+cop #$80 : db $1F
+cop #$89
+-:
+cop #$58 : dw .OnHit        ;[$8CEF3C] 
+lda #$2300 : trb $10
+cop #$A5 : dl ECometAttack : db $00,$00,$01,$03    ;[Child: $8CF550] 
+sty $24
+lda #$0064 : sta $26
+cop #$C1
+dec $26 : bmi +$01
+ rtl
+lda #$2300 : tsb $10
+--:
+cop #$DB : dw $01DF
+bra -    ;(-$2B)              ;[$8CEF11] 
+.OnHit:
+lda #$2000 : tsb $10
+cop #$A2 : dl .HitFlicker : dw $2300    ;[Child: $8CEF6D] 
+cop #$CA : db $10                 
+{
+ldy $24                      
+beq +$09                     ;[$8CEF5A] 
+ lda $0010,y : ora #$2000 : sta $0010,y
+cop #$C2                     ;<--Branch
+ldy $24                      
+beq +$09                     ;[$8CEF69] 
+ lda $0010,y : and #$DFFF : sta $0010,y
+}
+cop #$CB                     ;<--Branch
+bra --    ;(-$37)              ;[$8CEF36] 
+
+.HitFlicker:
+cop #$CA : db $10            ;<--Child
+{
+lda #$0216 : sta $212C
+cop #$C2                     
+lda #$0217 : sta $212C
+}
+cop #$CB
+cop #$E0                     
+
+ECometDeath:
+cop #$CC : db $03          ;<--Delayed ; Death of Comet.
+lda #$2300 : tsb $10
+phx ; Clear Comet from WRAM tilemap. No visible effect until screen scroll.
+ lda $069E : tax : lda #$0100 : clc : jsl LR_MassSTZ
+plx
+ldy $24                      
+beq +   ;$09               ;[$8CEFA6] 
+ lda $0010,y : ora #$2000 : sta $0010,y
++
+cop #$9B : dl ECometDeathPalette ;[Child: $8CED3E] <--Branch
+cop #$DA : db $3B                 
+lda.w #ECometBG : sta $0F00
+cop #$3C : dl TFade012NormalToWhite ;[Child: $80B7CE] ; Palette thinker 1.
+cop #$DA : db $77                 
+lda #$AD44 : sta $7F0020,x
+lda $AD44 : and #$00FF : sta $7F0026,x
+lda #$2301 : sta $10
+lda #$1000 : tsb $12
+lda #$0080 : tsb $09EC
+cop #$C2
+lda #$0800 : tsb $09AE
+xba : trb $1010
+cop #$CA : db $80                 ; Scroll of DGBody onto screen starts here.
+{
+lda $068E : inc : inc : sta $06C2
+ldy $0056
+-:
+lda $0010,y                  ;<--Branch
+bit #$0400                   
+beq +   ;+$0A              ;[$8CF016] 
+ lda $0016,y : inc : inc : sta $0016,y
++:
+lda $0006,y                  ;<--Branch
+tay
+bne -    ;(-$18)              ;[$8CF004] 
+}
+cop #$CB                     ; End DGBody screen scroll loop.
+lda #$0008 : tsb $1010
+cop #$CC : db $01
+cop #$D0 : db $F4,$01 : dw EDarkGaia_OnDeath_PlayerRespawn
+cop #$C2
+cop #$3C : dl TFade012WhiteToNormal ;[Child: $80B7D8] ; Palette thinker 2.
+lda.w #ECometBG_AfterLanding : sta $0F00
+cop #$DA : db $63
+lda.w #ECometBG_DGOnScreen : sta $0F00
+cop #$DA : db $63                 
+lda #$0080 : trb $09EC
+cop #$32 : db $9D
+cop #$33
+cop #$A2 : dl EDGFlame_Init : db $01,$03    ;[Child: $8CF4E3] 
+tya : sta $7F0010,x
+cop #$A2 : dl EDGBubbleSpawner_Left : db $00,$22 ;[Child: $8CF3FC] 
+cop #$A2 : dl EDGBubbleSpawner_Right : db $00,$22 ;[Child: $8CF403] 
+cop #$58 : dw $0000
+lda #$0080 : sta $14
+lda #$0150 : sta $16
+lda #$2000 : trb $10
+lda #$0001 : tsb $12
+cop #$80 : db $03
+cop #$89
+EDarkGaia:
+.Main:
+cop #$57 : dl EDarkGaia_OnDeath
+.MainNoDeathPointer:
+cop #$C1                     
+lda $7F0012,x                
+bmi EDarkGaia_TryAttack   ; +$0B   ;[$8CF0A2] 
+dec a : sta $7F0012,x
+lda #$0000                   
+jmp EDarkGaia_SpawnLightning      ;[$8CF13B] 
+
+.TryAttack:
+cop #$73                     ;<--Branch
+and #$0007 : sta $0000
+cop #$D9                     ;[$8CF13B] [$8CF13B] [$8CF0C0] [$8CF0C0] 
+  dw $0000,EDarkGaia_AttackD9
+.AttackD9:
+  dw EDarkGaia_SpawnLightning,EDarkGaia_SpawnLightning
+  dw EDarkGaia_DoMouthLaser,EDarkGaia_DoMouthLaser
+  dw EDarkGaia_DoMouthLaser,EDarkGaia_DoMouthLaser
+  dw EDarkGaia_DoMouthLaser,EDarkGaia_DoMouthLaser
+
+;org $8cf0c0
+.DoMouthLaser:
+lda #$0003 : sta $7F0012,x
+lda $7F0010,x                
+tay                          
+lda.w #EDGFlame_WithMouthLaser
+ sta $0000,y
+lda #$0000 : sta $0008,y
+lda #$0200 : trb $10
+cop #$80 : db $17                 
+cop #$89                     
+..NoSpriteOrFlame:
+lda #$0200 : tsb $10
+lda #$0057 : sta $7F0C02
+cop #$3C                     ;[Child: $8CEC65] 
+  dl TDGMouthLaser
+cop #$CC : db $02                 
+cop #$A5 : dl EDGMouthLaserPalette : db $00,$00,$00,$20    ;[Child: $8CED45] 
+cop #$07 : db $20                 
+cop #$A5 : dl EDGMouthLaserHitbox : db $00,$00,$00,$22    ;[Child: $8CF266] 
+jsr .SR_IfAGThenRtl
+
+.WhileMouthLaser:
+cop #$80 : db $1A            ;<--Branch
+cop #$89                     
+cop #$D0                     ;[$8CF10B] 
+  db $02,$01 : dw EDarkGaia_WhileMouthLaser
+
+.AfterMouthLaser:
+lda #$00FF : sta $2126
+cop #$84 : db $06,$3C
+cop #$8A
+cop #$80 : db $18
+cop #$89
+lda $7F0010,x
+tay
+lda.w #EDGFlame_AfterMouthLaser  ; #$F4FF
+ sta $0000,y
+lda #$0000 : sta $0008,y
+jmp EDarkGaia_Main
+
+.SpawnLightning:
+cop #$A5 : dl EDGLightning_Left : db $00,$00,$01,$03    ;[Child: $8CF2F2] <--Branch
+cop #$A5 : dl EDGLightning_Right : db $00,$00,$01,$03    ;[Child: $8CF31F] 
+jsr .SR_IfAGThenRtl
+cop #$DB : dw $012B
+jmp EDarkGaia_Main          ;[$8CF08A] 
+
+.OnDeath:
+lda #$0030 : tsb $0A00 ;cop #$CC : db $04 ;<--Delayed
+jsl LR_SetPlayerImmuneAndFrozen
+jsl LR_StorePlayerHerbCount
+cop #$A0 : dl EDarkGaiaDeathExplosionSpawner : dw $0080,$0170,$2300 ; cop #$A5 : db $01,$F2,$8C,$00,$E0,$00,$23    ;[Child: $8CF201] 
+cop #$A0 : dl EDarkGaiaDeathLightning1 : dw $0060,$01b8,$0B12 ; cop #$A5 : db $CE,$F1,$8C,$00,$00,$00,$03    ;[Child: $8CF1CE] 
+cop #$A0 : dl EDarkGaiaDeathLightning1 : dw $00b1,$01b8,$0B12 ; cop #$A5 : db $DF,$F1,$8C,$00,$00,$00,$03    ;[Child: $8CF1DF] 
+cop #$A0 : dl EDarkGaiaDeathLightning3 : dw $00b4,$01a0,$0B12 ; cop #$A5 : db $F0,$F1,$8C,$00,$00,$00,$03    ;[Child: $8CF1F0] 
+cop #$A5 : dl EDarkGaiaDeathPebbles : dw $0000,$2B00 ; cop #$A5 : db $91,$F2,$8C,$00,$00,$00,$28    ;[Child: $8CF291] 
+cop #$80 : db $19                 
+cop #$89                     
+;cop #$80 $1E                 
+;cop #$89                     
+cop #$3C : dl TFade012NormalToWhite ;[Child: $80B7CE]
+lda.w #ECometBG_DGDead : sta $0F00
+cop #$DB : dw $0120
+..PlayerRespawn:
+lda #$0030 : tsb $0A00 ;cop #$CC : db $04 ;<--Delayed
+lda #$0080 : trb $09EC
+lda #$0150 : sta $16
+lda.w #ECometBG_AGP1 : sta $0F00
+lda #$2000 : tsb $10
+cop #$3C : dl TFade012WhiteToNormal
+cop #$DA : db $FF
+;stz $065A
+lda #$0018 : trb $0A00
+;cop #$CE : db $04 : cop #$CE : db $03
+cop #$07 : db $0C
+cop #$80 : db $1F
+; Import some instructions from EAGInit
+cop #$9C : dl EAGBackgroundColors : dw $2300
+cop #$9C : dl EAGSpriteColors : dw $2300
+cop #$A1 : dl EAGScrollOn : dw $2300
+cop #$A4 : dl EAGBitP1_InitL : db $c8,$23 : dw $0111
+cop #$A4 : dl EAGBitP1_InitR : db $38,$23 : dw $2111
+;lda #$2000 : tsb $10
+cop #$A4 : dl EAGLauncher_InitL : db $BF,$0B : dw $0301
+cop #$A4 : dl EAGLauncher_InitR : db $41,$0B : dw $0301
+cop #$07 : db $21
+lda #$0003 : sta $24
+cop #$C4 : dl EAGCoreP1
+
+.SR_IfAGThenRtl ; JSR here from DG code. Then the DG code can be called by AG.
+lda $0A00 : bit #$00E0 : bne +$01 : rts
+pla : rtl
+
+; V$8CF1CE
+;warnpc $8cf1cf : org $8cf1ce
+EDarkGaiaDeathLightning1:
+.WithDarkGaiaDeath:
+cop #$80 : db $08
+cop #$89
+lda $0A00 : bit #$0010 : bne .WithDarkGaiaDeath
+.Die:
+cop #$E0
+
+EDarkGaiaDeathLightning3:
+.WithDarkGaiaDeath:
+cop #$80 : db $09
+cop #$89
+lda $0A00 : bit #$0010 : bne .WithDarkGaiaDeath
+lda.w #.WithAGMain : sta $00
+.WithAGMain:
+lda #$2000 : trb $10
+txy : lda.w #2*$73 : brk
+pha
+ and #$000F : adc #$01B0 : sta $16
+pla
+lsr : lsr : adc #$0068 : sta $14
+lda $0036 : lsr : bcs ..Sprite09
+..Sprite08:
+cop #$80 : db $08
+cop #$89
+bra ..SleepRandom
+..Sprite09:
+cop #$80 : db $09
+cop #$89
+..SleepRandom:
+bit $09FF : bvs EDarkGaiaDeathLightning1_Die ; checks flag $06
+lda #$2300 : tsb $10
+lda.w #.WithAGMain : sta $00
+lda.w #2*$73 : brk
+lsr : sta $08
+rtl
+
+; V$8CF201
+EDarkGaiaDeathExplosionSpawner:
+stz $24
+cop #$88 : dl $8ee000
+-
+lda $24 : adc #$0003 : sta $24
+cop #$CA : db $04 ; cop #$ca : db $0C                 
+{
+cop #$A5 : dl EDarkGaiaDeathExplosion1 : db $00,$00,$02,$03 ; cop #$a5 : db $2F,$F2,$8C,$00,$00,$02,$03    ;[Child: $8CF22F] ; Explosion 1
+lda $24 : sta $08 : cop #$C2               
+cop #$A5 : dl EDarkGaiaDeathExplosion2 : db $00,$00,$02,$03 ; cop #$a5 : db $3C,$F2,$8C,$00,$00,$02,$03    ;[Child: $8CF23C] ; Explosion 2
+lda $24 : sta $08 : cop #$C2 ; cop #$DA $03                 
+}
+cop #$CB                     
+lda $24 : cmp #$0012 : bcc -
+cop #$DA : db $12
+cop #$A5 : dl EDarkGaiaDeathExplosion2 : db $00,$00,$02,$03
+cop #$E0                     
+
+; V$8CF22F
+EDarkGaiaDeathExplosion1:
+cop #$07 : db $06                 ;<--Child
+lda #$0020 : jsl LR_SetRandomPosition ;jsr $F249                    ;[$8CF249] 
+cop #$80 : db $07                 
+cop #$89                     
+cop #$E0                     
+
+; V$8CF23C
+EDarkGaiaDeathExplosion2:
+cop #$07 : db $06                     ;<--Child
+lda #$0020 : jsl LR_SetRandomPosition ;jsr $F249                    ;[$8CF249] 
+cop #$80 : db $01                 
+cop #$89                     
+cop #$E0                     
+
+; V$8CF266
+;warnpc $8cf267 : org $8cf266
+EDGMouthLaserHitbox:
+lda #$AD50 : sta $7F0020,x
+;lda $AD50 : and #$00FF : sta $7F0026,x
+lda #$0080 : sta $14
+lda #$01E0 : sta $16
+cop #$DA : db $09
+lda #$2000 : trb $10
+cop #$84 : db $1F,$0A             
+cop #$8A                     
+cop #$E0                     
+
+; V$8CF291
+EDarkGaiaDeathPebbles:
+lda #$0220                   ;<--Child
+sta $16                      
+cop #$CA : db $03
+{
+cop #$9C : dl .NormalRocks : dw $0B12 ; db $00,$0B    ;[Child: $8CF2BB] 
+cop #$DA : db $19
+cop #$9C : dl .SmallRocks : dw $0B12 ; db $00,$0B    ;[Child: $8CF2C8] 
+cop #$DA : db $19
+cop #$9C : dl .TinyRocks : dw $0B12 ; db $00,$0B    ;[Child: $8CF2D5] 
+cop #$DA : db $19
+}
+cop #$CB
+.Die:
+cop #$E0
+
+; V$8CF2BB
+.NormalRocks:
+cop #$CA : db $02
+cop #$73 : sta $14
+cop #$83 : db $1B,$00,$06
+bra .Animate ; +$1A          ;[$8CF2E2] 
+.SmallRocks:
+cop #$CA : db $02
+cop #$73 : sta $14
+cop #$83 : db $1C,$00,$06
+bra .Animate ; +$0D          ;[$8CF2E2] 
+.TinyRocks:
+cop #$CA : db $02
+cop #$73 : sta $14
+cop #$83 : db $1D,$00,$08
+.Animate:
+cop #$89
+.AnimateRestart:
+cop #$B1                     ;<--Branch
+cop #$80 : db $FF
+cop #$89
+lda $16
+cmp #$00E0
+bcs .AnimateRestart ;(-$0E)      ;[$8CF2E2] 
+;cop #$D0 : db $05,$01 : dw .Die
+;lda $0A00 : bit #$0020 : bne .Die
+lda #$0220 : sta $16
+cop #$CB
+cop #$E0
+
+; V$8CF2F2
+;org $8cf2f2
+EDGLightning:
+.Left:
+lda #$0031 : sta $14        ;<--Child
+jsr .CommonInitSR
+cop #$80 : db $09
+cop #$89
+lda #$0010 : sta $14
+lda #$0150 : sta $16
+cop #$80 : db $0A
+cop #$89
+lda #$0004 : sta $26
+bra .Chase ; was JMP for no reason... ;[$8CF353] 
+.Right:
+cop #$BB                     ;<--Child
+lda #$0082 : tsb $12
+lda #$00CF : sta $14
+jsr .CommonInitSR
+cop #$80 : db $09
+cop #$89
+lda #$00F0 : sta $14
+lda #$0150 : sta $16
+cop #$80 : db $0A
+cop #$89
+lda #$000C : sta $26
+;jmp $F353                    ;[$8CF353] 
+.Chase:
+cop #$07 : db $20
+cop #$5B : db $10,$00 ; Die on contact with player?
+lda #$00A0 : tsb $12
+lda #$AD48 : sta $7F0020,x
+;lda $AD48 : and #$00FF : sta $7F0026,x
+cop #$80 : db $0B                 
+cop #$89
+lda #$0100 : trb $10 : tsb $12    ; Cleverness overload...
+..Immediate:
+cop #$A2 : dl EChaser_Init : db $00,$20    ;[Child: $80E683] 
+lda #$800B : sta $7F000A,x
+lda #$0003 : sta $7F0014,x
+lda #$1000 : sta $0024,y
+phx : tyx
+ lda $26 : sta $7F000E,x
+plx
+lda #$0002 : tsb $10
+cop #$84 : db $0B,$05
+cop #$8A
+phx
+ ldx $06
+ lda $7F002C,x : sta $0000
+ lda $7F002E,x                
+plx                          
+ sta $7F100E,x                
+lda $0000 : sta $7F100C,x
+cop #$A9
+-:
+cop #$C1                     ;<--Branch
+cop #$8B
+lda $08 : sta $24
+stz $08
+cop #$C1
+lda $7F100C,x : sta $7F002C,x
+lda $7F100E,x : sta $7F002E,x
+dec $24
+bmi +$01                     ;[$8CF3E6] 
+ rtl                          
+bit $10 : bvc -   ;(-$28)    ;[$8CF3C5] 
+cop #$E0
+
+.CommonInitSR:
+lda #$0197 : sta $16
+cop #$9C : dl .SmallSprite : db $01,$03 ;[Child: $8CF3EF] 
+rts
+
+; V$8CF3EF
+.SmallSprite:
+cop #$80 : db $08            ;<--Child
+cop #$89                     
+cop #$E0                     
+;warnpc $8cf3f6
+
+;org $8cf3fc
+EDGBubbleSpawner:
+.Left:
+lda #$0018                   ;<--Child
+bra .Both                  ;[$8CF408] 
+.Right:
+lda #$00E8                   ;<--Child
+.Both:
+sta $14
+lda #$01D8 : sta $16
+.RandomWait:
+cop #$73                     
+lsr : lsr
+adc #$0078 : sta $08
+cop #$C2                     
+cop #$D0                     ;[$8CF4E1] 
+  db $04,$01 : dw EDGBubble_BubbleDie
+cop #$A2 : dl EDGBubble : db $00,$02    ;[Child: $8CF429] 
+bra .RandomWait ;(-$1C)              ;[$8CF40D] 
+
+; V$8CF429
+EDGBubble:
+cop #$5B : dw $0080          ;<--Child
+lda #$00A0 : tsb $12
+cop #$84 : db $11,$02
+cop #$8A
+cop #$80 : db $12
+cop #$89
+lda #$AD4C : sta $7F0020,x
+cop #$07 : db $1D
+cop #$57 : dl .OnDeath     ;[Delayed: $8CF4D9] 
+lda #$0200 : trb $10
+cop #$82 : db $13,$0A             
+cop #$89                     
+cop #$82 : db $13,$2A             
+cop #$89                     
+lda #$0000 : sta $7F0026,x
+cop #$CA : db $04
+{
+cop #$C1
+cop #$D0                     ;[$8CF4DC] 
+  db $04,$01 : dw .BubbleDieWithSprite
+cop #$73 : lsr : sbc #$003F : adc $1014
+sta $7F0018,x
+bpl +$01                     ;[$8CF49D] 
+ rtl                          
+;cmp #$0108                   ;<--Branch
+;bcc +$01                     ;[$8CF4A3] 
+;rtl                          
+cop #$73 : lsr : sbc #$003F : adc $1016
+;cmp #$0100 ; player can't be near top of screen anyway
+;bcs +$01                     ;[$8CF4B7] 
+;rtl                          
+cmp #$01D8                   ;<--Branch
+bcc +$01                     ;[$8CF4BD] 
+ rtl                          
+sta $7F001A,x                ;<--Branch
+cop #$22 : db $13,$02
+bit $10 : bvs .BubbleDie     ;[$8CF4E1] 
+cop #$84 : db $13,$01
+cop #$8A
+}
+cop #$CB
+;cop #$57 : db $00,$00,$00
+
+; V$8CF4D9
+.OnDeath:
+cop #$07 : db $1B            ;<--Delayed
+.BubbleDieWithSprite:
+cop #$80 : db $11            ;<--Branch
+cop #$89                     
+.BubbleDie:
+cop #$E0                     ;<--Branch
+
+
+; V$8CF4E3
+EDGFlame:
+.Init:
+lda #$0040 : tsb $12
+asl : sta $14
+lda #$01AA : sta $16
+cop #$A4 : dl EDGFlame_ChildFlameB : db $FC,$FC,$01,$03    ;[Child: $8CF549] 
+cop #$A4 : dl EDGFlame_ChildFlameA : db $04,$00,$01,$03    ;[Child: $8CF543] 
+
+.AfterMouthLaser:
+ldy $06                      
+lda $0010,y : and #$DFFF : sta $0010,y
+lda $0006,y
+tay                          
+lda $0010,y : and #$DFFF : sta $0010,y
+
+.Idle:
+cop #$80 : db $00
+cop #$89
+bra .Idle   ;[$8CF517] 
+
+.Die:
+cop #$80 : db $02
+cop #$89
+cop #$E0
+
+.WithMouthLaser:              ; V$8CF51E
+cop #$80 : db $01
+cop #$89
+ldy $0006,x
+lda $0010,y : ora #$2000 : sta $0010,y
+lda $0006,y
+tay
+lda $0010,y : ora #$2000 : sta $0010,y
+cop #$80 : db $02
+cop #$C1
+lda $0A00 : bit #$0020 : bne .Die
+rtl
+
+.ChildFlameA:
+;warnpc $8cf544 : org $8cf543
+cop #$8D : db $0C          ;<--Child
+cop #$DA : db $09                 
+
+.ChildFlameB:           ; V$8CF549
+cop #$80 : db $0C          ;<--Child
+cop #$89
+lda $0A00 : bit #$0020 : bne .Die
+bra .ChildFlameB ;(-$07) ;[$8CF549] 
+
+
+; V$8CF550
+ECometAttack:
+cop #$80 : db $0D                    ;<--Child
+cop #$89                     
+cop #$80 : db $0E                 
+cop #$89                     
+cop #$9C : dl ECometFireOrb : db $02,$02    ;[Child: $8CF570] 
+cop #$80 : db $0F                 
+cop #$89
+ldy $24
+lda #$0000 : sta $0024,y
+cop #$E0
+
+; V$8CF570
+ECometFireOrb:
+cop #$80 : db $14            ;<--Child
+cop #$89                     
+cop #$07 : db $1D                 
+-
+cop #$82 : db $15,$0C        ;<--Branch
+cop #$89                     
+cop #$D0                     ;[$8CF5AD] 
+  db $03,$01 : dw ECometFireDie
+lda $16                      
+bpl -   ;(-$10)              ;[$8CF578] 
+;bpl +$04                     ;[$8CF58E] 
+;eor #$FFFF                   
+;inc a                        
+cmp #$FFD0 ; #$0030                   ;<--Branch
+bcs -   ;(-$1B)              ;[$8CF578] 
+lda #$2000 : tsb $10
+cop #$CA : db $0E                 
+cop #$D0                     ;[$8CF5AD] 
+  db $03,$01 : dw ECometFireDie
+cop #$9C : dl EAGBitP2_FireObject : db $02,$02    ;[Child: $8CF5AF] 
+cop #$DA : db $0E                 
+cop #$CB                     
+ECometFireDie: ; V$F5AD
+cop #$E0                     ;<--Branch
+endif
+warnpc $8cf5ef
+
+}
+
+
+
 
 org $8d8000
 incsrc "iogr_8D_asset_table.asr"
@@ -7673,13 +9490,58 @@ db $01,$00,$00,$00,$00,$02,$0C
 
 
 
+; Bank $9A / $DA 
+; Includes fluteless Will sprite tiles
+{
+
 org $da5a37
 ; Remove a rock, preventing a Spin Dash softlock.
 incbin "Tilemap6D.bin"
 
+if !SettingFluteless == 1
+fillbyte $00
+org $9a8540
+fill $60
+org $9a8740
+fill $60
+org $9aa120
+fill $40
+org $9aa560
+fill $20
+org $9aa720
+fill $60
+org $9aa8e0
+fill $80
+org $9aab00
+fill $20
+org $9aac60
+fill $40
+org $9aae60
+fill $40
+org $9ab400
+fill $80
+org $9ab600
+fill $80
+org $9ab800
+fill $40
+org $9aba00
+fill $40
+endif
+
+}
+
+
+
+
 org $de28a5
 ; Add door to Mu Passage tilemap.
 incbin "TilemapMuPassage.bin"
+
+org $df2ce7
+if !ApocalypseGaia == 1
+; Need to make BG2 tilemap 2 high so scrolling works.
+db $02
+endif
 
 org $df3ea0
 ATlMpIncaTileRoomTile:
@@ -7701,7 +9563,7 @@ incsrc "iogr_code_overflow.asr"
 
 incsrc "iogr_dialogue_overflow.asr"
 
-
+incsrc "apocalypse_gaia_2.asr"
 
 
 

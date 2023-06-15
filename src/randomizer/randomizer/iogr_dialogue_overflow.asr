@@ -218,9 +218,9 @@ db $ca
 
 BabelWarperSpiritDialogueOptions:
 db $D3
-db $67,$87,$80,$A4,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$83,$8E,$0D,$CB
-db $AC,$46,$88,$A4,$AC,$86,$A5,$83,$CB
-db $AC,$62,$A5,$8D,$AC,$80,$A7,$80,$A9,$4F
+db "What'd you like to do?",$CB
+db $AC,"Git gud",$CB
+db $AC,"Run away!"
 db $CA
 
 
