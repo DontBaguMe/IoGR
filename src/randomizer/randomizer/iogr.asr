@@ -3,10 +3,7 @@ hirom
 bank noassume
 
 
-
-incsrc "iogr_exit_ledger.asr"
-incsrc "iogr_asset_ledger.asr"
-incsrc "iogr_monster_defaults.asr"
+function BankOf(label) = label>>16
 
 macro MTryGiveItemAndFlag(Item16,Flag)
   lda.w #<Item16>
@@ -16,6 +13,10 @@ macro MTryGiveItemAndFlag(Item16,Flag)
     db <Flag>
 endmacro
 
+incsrc "iogr_exit_ledger.asr"
+incsrc "iogr_asset_ledger.asr"
+incsrc "iogr_monster_defaults.asr"
+
 
 ; Important routine labels.
 {
@@ -24,6 +25,11 @@ LR_SecOnFlag20A = $80B489
 LR_ParseDialogueScriptAtY = $82f048
 SR_RemoveHeldItem = $839FB2
 LR_ClearMonsterKilledFlags = $80b4cc
+LR_PlaceSelfBetween04And06 = $8aa41c
+LR_OrbitAtY = $80F3C9
+LR_Orbit = $80f3d3
+TIndexedPaletteBundle = $80B522
+EChaser = $80E683
 }
 
 ; Various defines for Apocalypse Gaia, which don't
@@ -170,9 +176,9 @@ lda $02,s : tax : dec : sta $0a
 lda [$0a] : and #$00ff
 stx $0a
 asl
-BrkHandler:
+#BrkHandler:
 tax
-jmp (.Pointers,x)
+jmp.w (.Pointers,x)
 .Pointers:
 {
 dw $864e    ; COP #$00
@@ -289,8 +295,8 @@ dw $c200    ; COP #$6E
 dw $a720    ; COP #$6F
 dw $e62a    ; COP #$70
 dw $292a    ; COP #$71
-dw Cop_72    ; COP #$72
-dw $1e9f    ; COP #$73
+dw $0000    ; COP #$72
+dw Cop_73    ; COP #$73
 dw $7f00    ; COP #$74
 dw $06bd    ; COP #$75
 dw $0900    ; COP #$76
@@ -471,6 +477,23 @@ sta $1C
 plp
 rts
 warnpc $80b345
+
+
+org $80b7cc
+db $00, $08
+TFade012NormalToWhite:
+cop #$37 : db $18
+cop #$39
+cop #$3D
+rtl
+
+;org $80b7d6
+db $00, $08
+TFade012WhiteToNormal:
+cop #$37 : db $19
+cop #$39
+cop #$3D
+rtl
 
 
 org $80bcdf
@@ -674,7 +697,7 @@ rtl
 lda #$0000 : sta $0D60
 cop #$66 : dw $0254,$02D4 : db !OverworldShuffleFrejMenuId
 jmp .Done
-HandleMap3E:
+.HandleMap3E:
 cop #$45 : db $0A,$3F,$0C,$40 : dw ..InArea
 rtl
 ..InArea:
@@ -756,14 +779,33 @@ jmp .Done
 warnpc $80cd59
 
 
-
-
 org $80cd12
 db $80,$04    ; "Force single overworld map exit" (in Dao)
 
 
-org $80d7c3   ; Death text
-db !PlayerDeathText
+org $80d69d
+nop    ; There's no reason respawning with >100 DP should halve your health...
+
+org $80d796
+ERespawnMessage:
+lda #$CFF0 : tsb $065A
+stz $0AF8
+cop #$DA : db $02
+lda $0aca : beq .InfiniteDeathLoop    ; i.e. player has reduced max HP to 0 in RJM
+.NormalDeath:
+cop #$BF : dw ..Text
+-:
+lda #$CFF0 : trb $065A
+cop #$E0
+..Text:
+db $d3,!PlayerDeathText
+.InfiniteDeathLoop:
+cop #$BF : dw ..Text
+bra -
+..Text:
+db $cd : dl TextInfiniteDeathLoop
+db $ca
+warnpc $80d877
 
 
 ; Make monster death look up the correct GEM tables.
@@ -774,16 +816,15 @@ jsl $83fea1
 
 
 org $80dbf2
-if !SettingOrbRando == 1
+if !SettingOrbRando > 0
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
 
 org $80DC23 
-; For key rando, dead monster checks whether its item has been given,
+; To support orb rando, dead monster checks whether its item has been given,
 ; but doesn't set the item-given flag; EMonsterDeathDoorOrItem does that,
 ; since it can more easily verify inventory free space.
-if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -793,7 +834,10 @@ jsl LR_SecOnMonsterItemFlagA : bcs ++
 cop #$D8
 +++:
 jmp $dc54
-endif
+
+
+org $80ddf2
+EMonsterDeathDoorOpener:
 
 
 org $80e03c
@@ -2074,19 +2118,24 @@ warnpc $81e12a
 
 
 org $81e12a
-Lut_ItemDroppableFlags:
-db $9f,$ff
-if !Statue3Required == 1
-db $9f
+Lut_ItemDroppableFlags:    ; or "not-droppable" perhaps I should have written
+db %10011111 ;$9f
+db %11111111 ;$ff
+if !Statue3Required == 1 || !SettingStatuesPlayerChoice == 1
+db %10011111 ;$9f
 else
-db $97
+db %10010111;$97
 endif
-if !Statue5Required == 1
-db $ff,$ff
+if !Statue5Required == 1 || !SettingStatuesPlayerChoice == 1
+db %11111111 ;$ff
+db %11111111 ;$ff
 else
-db $3f,$b0
+db %00111111 ;$3f
+db %10110000 ;$b0
 endif
-db $01,$00,$00
+db %11000001 ;$01
+db $00
+db $00
 
 
 org $81e132
@@ -3820,16 +3869,16 @@ org $8393a5
 ; Magic Dust check.
 {
 lda $0644
-if !KaraLocation == 0
+if !KaraLocation == 1
 cmp #$0013 : bne $08
 cop #$45 : db $0b,$0b,$0d,$0d
-elseif !KaraLocation == 1
+elseif !KaraLocation == 2
 cmp #$0047 : bne $08
 cop #$45 : db $0b,$24,$0d,$26
-elseif !KaraLocation == 2
+elseif !KaraLocation == 3
 cmp #$0074 : bne $08
 cop #$45 : db $07,$08,$09,$0a
-elseif !KaraLocation == 3
+elseif !KaraLocation == 4
 cmp #$00a9 : bne $08
 cop #$45 : db $12,$06,$14,$08
 else
@@ -3893,13 +3942,13 @@ rts
 Text_LancesLetter:
 ; "Will, Kara is in"
 db $D3,$C2,$04,$D6,$5C,$D6,$26,$88,$A3,$AC,$88,$8D,$CB
-if !KaraLocation == 0   ; Edward's
+if !KaraLocation == 1   ; Edward's
 db $44,$83,$a7,$80,$a2,$83,$0e,$a3,$ac,$60,$a2,$88,$a3,$8e,$8d
-elseif !KaraLocation == 1   ; Mine
+elseif !KaraLocation == 2   ; Mine
 db $43,$88,$80,$8c,$8e,$8d,$83,$ac,$4c,$88,$8d,$84
-elseif !KaraLocation == 2   ; Angel Village
+elseif !KaraLocation == 3   ; Angel Village
 db $40,$8d,$86,$84,$8b,$ac,$66,$88,$8b,$8b,$80,$86,$84
-elseif !KaraLocation == 3   ; Kress
+elseif !KaraLocation == 4   ; Kress
 db $4c,$a4,$2a,$ac,$4a,$a2,$84,$a3,$a3
 else   ; Angkor Wat
 db $40,$8d,$8a,$8e,$a2,$ac,$67,$80,$a4
@@ -4095,12 +4144,14 @@ dw OverworldMapChoices_!OverworldShuffleNeilLabel
 dw OverworldMapChoices_!OverworldShuffleDCstLabel
 dw OverworldMapChoices_!OverworldShuffleMineLabel
 ..Text:
-db $C2,$11,$D2,$00
-db $AC,!OverworldShuffleFrejText,$AC,!OverworldShuffleDCstText
+db $C1,$02,$14   ; This + next line, instead of $C2,$11;
+db $C7,$0E,$03   ; because "Where do you go?" doesn't fit with 5 options.
+db $D2,$00
+db $AC,"!OverworldShuffleFrejText",$AC,$AC,"!OverworldShuffleDCstText"
 db $CB
-db $AC,!OverworldShuffleNzcaText,$AC,!OverworldShuffleMineText
+db $AC,"!OverworldShuffleNzcaText",$AC,$AC,"!OverworldShuffleMineText"
 db $CB
-db $AC,!OverworldShuffleNeilText
+db $AC,"!OverworldShuffleNeilText"
 db $CA
 }
 ; Continent NE.
@@ -4115,10 +4166,11 @@ dw OverworldMapChoices_!OverworldShuffleWtmaLabel
 dw OverworldMapChoices_!OverworldShuffleGtWlLabel
 dw OverworldMapChoices_!OverworldShuffleAnglLabel
 ..Text:
-db $C2,$11,$D2,$00
-db $AC,!OverworldShuffleWtmaText,$AC,!OverworldShuffleAnglText
+db $C2,$11
+db $D2,$00
+db $AC,"!OverworldShuffleWtmaText",$AC,$AC,"!OverworldShuffleAnglText"
 db $CB
-db $AC,!OverworldShuffleGtWlText
+db $AC,"!OverworldShuffleGtWlText"
 db $CA
 }
 ; Continent N.
@@ -4134,10 +4186,11 @@ dw OverworldMapChoices_!OverworldShuffleNtVlLabel
 dw OverworldMapChoices_!OverworldShuffleKresLabel
 dw OverworldMapChoices_!OverworldShuffleAnkrLabel
 ..Text:
-db $C2,$11,$D2,$00
-db $AC,!OverworldShuffleEuroText,$AC,!OverworldShuffleKresText
+db $C2,$11
+db $D2,$00
+db $AC,"!OverworldShuffleEuroText",$AC,$AC,"!OverworldShuffleKresText"
 db $CB
-db $AC,!OverworldShuffleNtVlText,$AC,!OverworldShuffleAnkrText
+db $AC,"!OverworldShuffleNtVlText",$AC,$AC,"!OverworldShuffleAnkrText"
 db $CA
 }
 ; Continent NW.
@@ -4151,10 +4204,11 @@ dw OverworldMapChoices_!OverworldShuffleDaoLabel
 dw OverworldMapChoices_!OverworldShuffleDaoLabel
 dw OverworldMapChoices_!OverworldShufflePymdLabel
 ..Text:
-db $C2,$11,$D2,$00
-db $AC,!OverworldShuffleDaoText
+db $C2,$11
+db $D2,$00
+db $AC,"!OverworldShuffleDaoText"
 db $CB
-db $AC,!OverworldShufflePymdText
+db $AC,"!OverworldShufflePymdText"
 db $CA
 }
 ; Continent SW.
@@ -4171,12 +4225,14 @@ dw OverworldMapChoices_!OverworldShuffleMoonLabel
 dw OverworldMapChoices_!OverworldShuffleIncaLabel
 dw OverworldMapChoices_!OverworldShuffleItryLabel
 ..Text:
-db $C2,$11,$D2,$00
-db $AC,!OverworldShuffleCapeText,$AC,!OverworldShuffleIncaText
+db $C1,$02,$14   ; This + next line, instead of $C2,$11;
+db $C7,$0E,$03   ; because "Where do you go?" doesn't fit with 5 options.
+db $D2,$00
+db $AC,"!OverworldShuffleCapeText",$AC,$AC,"!OverworldShuffleIncaText"
 db $CB
-db $AC,!OverworldShuffleEdText,$AC,!OverworldShuffleItryText
+db $AC,"!OverworldShuffleEdText",$AC,$AC,"!OverworldShuffleItryText"
 db $CB
-db $AC,!OverworldShuffleMoonText
+db $AC,"!OverworldShuffleMoonText"
 db $CA
 }
 
@@ -4192,9 +4248,6 @@ cop #$26 : db $01 : dw $0178,$0040 : db $03,$00,$43
 cop #$C5
 .Ed:
 cop #$26 : db $0A : dw $01F8,$02C0 : db $00,$20,$34
-cop #$C5
-.ItryN:
-cop #$26 : db $15 : dw $02D8,$02B0 : db $00,$00,$35
 cop #$C5
 .Moon:
 cop #$26 : db $1A : dw $0150,$01A0 : db $00,$00,$22
@@ -4253,7 +4306,7 @@ cop #$C5
 .Babl:
 cop #$26 : db $DE : dw $0078,$00C0 : db $00,$00,$11
 cop #$C5
-.ItryS:
+.Itry:
 cop #$26 : db $15 : dw $02D8,$0370 : db $00,$00,$45
 cop #$C5
 }
@@ -4402,11 +4455,52 @@ warnpc $83CAF5
 
 
 
-
-org $83d10b
-if !SettingOrbRando == 1
-nop : nop : nop : sec    ; In key rando, already-dead monsters don't trigger map rearrangement.
+org $83d0db
+; Extensive modifications to this routine.
+SR_FixMapAndSecIfMonDead:
+phy
+phx
+sta $0000
+lsr : lsr : lsr : tay
+lda #$0000
+sep #$20
+lda $0000 : and #$07 : tax
+if !SettingDungeonShuffle == 0    ; In dungeon shuffle, monsters always respawn upon entering a room.
+lda.l Lut_PowersOfTwo83,x : and $0A80,y : bne .MonIsDead
 endif
+clc
+rep #$20
+plx
+ply
+rts
+.MonIsDead:
+if !SettingOrbRando > 0
+rep #$20
+bra .DoneOrSkippedRearrange
+else
+lda $03,s : tay    ; High byte of A and Y both are guaranteed to be 0.
+lda [$3E],y
+rep #$20
+beq .DoneOrSkippedRearrange
+jsl LR_GetItemId8ForMonsterItemFlagA
+jsl $82a363    ; jsl LR_StageMapRearrange
+bcs .DoneOrSkippedRearrange
+ldy $3E : phy
+ldy $40 : phy
+jsl $82a220    ; jsl LR_DoMapRearrange
+ply : sty $40
+ply : sty $3E
+endif
+.DoneOrSkippedRearrange:
+sec
+plx
+ply
+rts
+warnpc $83d125
+org $83d125
+Lut_PowersOfTwo83:
+db $01,$02,$04,$08,$10,$20,$40,$80
+warnpc $83d12d
 
 
 org $83cffb
@@ -4422,131 +4516,9 @@ nop : nop    ; Load Firebird assets in every map, in case Early Firebird is enab
 
 
 org $83ef97
-LR_GiveNormalItemA8OrSec:
-{
-stz $0bfe    ; Used by Z3 mode to flag whether we're capped on a stat.
-php
-sep #$20
-bit #$80 : bne .IsStatOrPickup
-pha
-ldy #$0000
-.CheckInvSlotEmpty:
-lda $0AB4,y : bne ..NotEmpty
-jmp .GotEmptyInvSlot
-..NotEmpty:
-iny : cpy #$0010 : bne .CheckInvSlotEmpty
-jmp .InvFull
-
-.IsStatOrPickup:
-sec : sbc #$80 : beq .IsHpJewel   ; $80
-  dec : beq .IsStrJewel  ; $81
-  dec : beq .IsDefJewel  ; $82
-  dec : beq .IsSmallDp   ; $83
-  dec : beq .IsMediumDp  ; $84
-  dec : beq .IsBigDp     ; $85
-  dec : beq .IsHpPickup  ; $86
-  dec : beq .IsHpJewelItem   ; $87
-  dec : beq .IsStrJewelItem  ; $88
-  dec : beq .IsDefJewelItem  ; $89
-.IsHpPickup:
-rep #$20
-lda #$0005 : clc : adc $0B22 : sta $0B22
-phd
-  txa : tcd
-  cop #$A5 : dl $80dd03 : dw $0000, $2F00    ; EHpPickupCounter
-pld
-cop #$06 : db $22
-jmp .ClcAndRtl
-.IsSmallDp:
-lda #$01 : bra .DoAwardDp
-.IsMediumDp:
-lda #$02 : bra .DoAwardDp
-.IsBigDp:
-lda #$05
-.DoAwardDp:
-rep #$20
-and #$00FF : clc : adc $0AD6 : cmp #$03E7 : bcc +
-  lda #$03E7
-+:
-sta $0AD6
-cop #$06 : db $22
-bra .ClcAndRtl
-.IsHpJewelItem:    ; In Z3 non-Expert, HP that isn't a room reward awards 2 hit points.
-if !SettingZ3 == 1 && !SettingOHKO == 0
-lda #$80 : trb $09EC
-lda $0aca : inc : inc : sta $0aca
-  sec : sbc $0ace : sta $0b22
-ldy #$0000
-bra .ClcAndRtl
-endif
-.IsHpJewel:
-lda #$80 : trb $09EC
-if !SettingOHKO == 0
-lda $0ACA : inc : sta $0ACA
-  sec : sbc $0ACE : sta $0B22
-endif
-ldy #$0000
-bra .ClcAndRtl
-.IsStrJewelItem:
-.IsStrJewel:
-lda #$80 : trb $09EC
-if !SettingZ3 == 1   ; In Z3, STR is capped at 8/4/2/1 for difficulty 0/1/2/3.
-phx
-  ldx $0b24
-  lda $0ade : cmp.l ..MaxStrByDifficulty,x
-plx
-bcs +
-  asl $0ade
-  bra ++
-..MaxStrByDifficulty:
-db 8,4,2,1
-+:
-lda #$01 : sta $0bfe
-++:
-else
-inc $0ADE
-endif
-ldy #$0000
-bra .ClcAndRtl
-.IsDefJewelItem:
-.IsDefJewel:
-lda #$80 : trb $09EC
-if !SettingZ3 == 1   ; In Z3, DEF is capped at 2/2/1/0 for difficulty 0/1/2/3.
-phx
-  ldx $0b24
-  lda $0adc : cmp.l ..MaxDefByDifficulty,x
-plx
-bcs +
-  inc $0adc
-  bra ++
-..MaxDefByDifficulty:
-db 2,2,1,0
-+:
-lda #$01 : sta $0bfe
-++:
-else
-inc $0ADC
-endif
-ldy #$0000
-bra .ClcAndRtl
-
-.GotEmptyInvSlot:
-pla : sta $0AB4,y
-  sta $0DB8
-  stz $0DB9
-ldy #$FF1F
-.ClcAndRtl:
-plp
-clc
-rtl
-.InvFull:
-pla : sta $0DB8
-  stz $0DB9
-ldy #$FF02
-plp
-sec
-rtl
-}
+; In case I've missed any explicit "jsl $83ef97" in the code.
+LR_GiveItemAnchor:
+jml LR_GiveNormalItemA8OrSec
 warnpc $83f08d
 
 
@@ -5175,7 +5147,7 @@ org $84f373
 rtl
 
 org $84f8b7
-lda.w #!MoonTribeTimeLimit
+lda.w #$!MoonTribeTimeLimit    ; The code requires this input to be BCD, so e.g. 30 seconds = $30.
 
 org $84fadf
 ; Moon Tribe cave statue
@@ -5332,7 +5304,7 @@ cop #$26 : db $32 : dw $0360, $0170 : db $00,$00,$45
 rtl
 .TextAskChoice:
 db $cd : dl TextRoofWarpingWomanAskChoice
-db $c0
+db $ca
 warnpc $85b6c0
 
 
@@ -5427,7 +5399,7 @@ rtl
 }
 
 org $85d223
-if !KaraLocation != 1
+if !KaraLocation != 2
 db $28
 else
 db $1a
@@ -5437,7 +5409,7 @@ EMineSam:
 nop : nop : nop : nop : nop : nop
 lda #$0200 : tsb $12
 cop #$0B
-if !KaraLocation != 1
+if !KaraLocation != 2
 cop #$9C : dl $85D49E : dw $0100   ; slave chain
 cop #$C0 : dw $D299
 else
@@ -5863,7 +5835,7 @@ cop #$D6 : db $10 : dw $9750
 cop #$E0
 cop #$CD : dw $0138
 cop #$D5 : db $10
-cop #$26 : db $5a : dw $0090,$0070 : db $83,$00,$14
+cop #$26 : db !Map5EExit03
 cop #$C5
 }
 
@@ -6050,7 +6022,7 @@ org $86d153
 {
 db $8a   ; Flag
 org $86d15b
-if !KaraLocation == 2
+if !KaraLocation == 3
 cop #$B6 : db $10
 else
 cop #$B6 : db $30 ; Portrait sprite needs high priority.
@@ -6152,7 +6124,7 @@ db $C6 : dw $0002, $00f0
 db "/"
 db $C6 : dw $0002, $00f2
 db $CB
-if !SettingOrbRando == 1
+if !SettingOrbRando > 0
 db "__Orbs Collected:_"
 db $C6 : dw $0002, $00f4
 db "/"
@@ -7971,7 +7943,9 @@ db $d7,$18    ; Dialogue to say "Lilly's" instead of Strange.
 
 ; "Reconstructed" Apocalypse Gaia code.
 org $89aae3
+if !ApocalypseGaia == 1
 incsrc "apocalypse_gaia_1.asr"
+endif
 warnpc $89ba80
 
 org $89bc37
@@ -8175,12 +8149,11 @@ rts
 
 ; Boss monster death copies some of EBasicMonsterDeath.
 org $8aa4a6
-if !SettingOrbRando == 1
+if !SettingOrbRando > 0
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
 org $8aa4b8
-if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -8190,7 +8163,6 @@ jsl LR_SecOnMonsterItemFlagA : bcs ++
 cop #$D8
 +++:
 jmp $a4e0
-endif
 
 
 
@@ -8280,12 +8252,11 @@ endif
 
 ; Wat scarab death copies some of EBasicMonsterDeath.
 org $8BC14d
-if !SettingOrbRando == 1
+if !SettingOrbRando > 0
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
 org $8BC15A
-if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -8295,18 +8266,16 @@ jsl LR_SecOnMonsterItemFlagA : bcs ++
 cop #$D8
 +++:
 jmp $c182
-endif
 
 
 
 ; Pyramid orb death copies some of EBasicMonsterDeath.
 org $8BC761
-if !SettingOrbRando == 1
+if !SettingOrbRando > 0
 nop : nop    ; Don't flag self killed yet, in case player's inventory is full.
 endif
 
 org $8bc76e
-if !SettingOrbRando == 1
 lda $7F0024,x : beq ++
 jsl LR_SecOnMonsterItemFlagA : bcs ++
   cop #$A5 : dl EMonsterDeathDoorOrItem : db $00,$00 : dw $0342
@@ -8316,7 +8285,6 @@ jsl LR_SecOnMonsterItemFlagA : bcs ++
 cop #$D8
 +++:
 jmp $c796
-endif
 
 
 
@@ -8394,6 +8362,23 @@ dw TextDifficultyLevel3
 
 org $8bf8c4
 dw $fa47    ; Overworld name pointer for map $DF DS, moved from map $E0.
+
+
+
+org $8bfa74
+; Bank $8B free space.
+
+SR_FixWatFlyHomeAndLayer:
+cop #$B6 : db $30
+lda $7f100c,x : cmp #$0050 : bcs +
+  lda #$0050 : sta $7f100c,x
++:
+lda $7f100e,x : cmp #$0050 : bcs +
+  lda #$0050 : sta $7f100e,x
++:
+rts
+
+
 
 org $8bfcc0    ; Use some free space for difficulty level names
 TextDifficultyLevel0:
@@ -8473,6 +8458,7 @@ jsl $80f49a
 cop #$E0
 }
 
+warnpc $8bfe40
 org $8bfe40
 ; infdeath.bin, text for winning RJM with 0 HP
 {
@@ -8565,16 +8551,6 @@ jmp $d32f
 cop #$BF : dw $fe40
 cop #$E0
 }
-
-SR_FixWatFlyHomeAndLayer:
-cop #$B6 : db $30
-lda $7f100c,x : cmp #$0050 : bcs +
-  lda #$0050 : sta $7f100c,x
-+:
-lda $7f100e,x : cmp #$0050 : bcs +
-  lda #$0050 : sta $7f100e,x
-+:
-rts
 
 }
 
@@ -9219,7 +9195,7 @@ cop #$80 : db $0B
 cop #$89
 lda #$0100 : trb $10 : tsb $12    ; Cleverness overload...
 ..Immediate:
-cop #$A2 : dl EChaser_Init : db $00,$20    ;[Child: $80E683] 
+cop #$A2 : dl EChaser : db $00,$20    ;[Child: $80E683] 
 lda #$800B : sta $7F000A,x
 lda #$0003 : sta $7F0014,x
 lda #$1000 : sta $0024,y
@@ -9563,8 +9539,9 @@ incsrc "iogr_code_overflow.asr"
 
 incsrc "iogr_dialogue_overflow.asr"
 
+if !ApocalypseGaia == 1
 incsrc "apocalypse_gaia_2.asr"
-
+endif
 
 
 

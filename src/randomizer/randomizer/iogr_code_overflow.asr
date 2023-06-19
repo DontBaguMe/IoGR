@@ -36,6 +36,143 @@ rtl
 
 
 
+LR_GiveNormalItemA8OrSec:
+{
+stz $0bfe    ; Used by Z3 mode to flag whether we're capped on a stat.
+php
+sep #$20
+bit #$80 : bne .IsStatOrPickup
+pha
+ldy #$0000
+.CheckInvSlotEmpty:
+lda $0AB4,y : bne ..NotEmpty
+jmp .GotEmptyInvSlot
+..NotEmpty:
+iny : cpy #$0010 : bne .CheckInvSlotEmpty
+jmp .InvFull
+
+.IsStatOrPickup:
+sec : sbc #$80 : bne +
+    jmp .IsHpJewel   ; $80
++:
+  dec : bne + 
+    jmp .IsStrJewel  ; $81
++:
+  dec : bne + 
+    jmp .IsDefJewel  ; $82
++:
+  dec : beq .IsSmallDp   ; $83
+  dec : beq .IsMediumDp  ; $84
+  dec : beq .IsBigDp     ; $85
+  dec : beq .IsHpPickup  ; $86
+  dec : bne + 
+    jmp .IsHpJewelItem   ; $87
++:
+  dec : bne + 
+    jmp .IsStrJewelItem  ; $88
++:
+jmp .IsDefJewelItem  ; $89
+.IsHpPickup:
+rep #$20
+lda #$0005 : clc : adc $0B22 : sta $0B22
+phd
+  txa : tcd
+  cop #$A5 : dl $80dd03 : dw $0000, $2F00    ; EHpPickupCounter
+pld
+cop #$06 : db $22
+jmp .ClcAndRtl
+.IsSmallDp:
+lda #$01 : bra .DoAwardDp
+.IsMediumDp:
+lda #$02 : bra .DoAwardDp
+.IsBigDp:
+lda #$05
+.DoAwardDp:
+rep #$20
+and #$00FF : clc : adc $0AD6 : cmp #$03E7 : bcc +
+  lda #$03E7
++:
+sta $0AD6
+cop #$06 : db $22
+jmp .ClcAndRtl
+.IsHpJewelItem:    ; In Z3 non-Expert, HP that isn't a room reward awards 2 hit points.
+if !SettingZ3 == 1 && !SettingOHKO == 0
+lda #$80 : trb $09EC
+lda $0aca : inc : inc : sta $0aca
+  sec : sbc $0ace : sta $0b22
+ldy #$0000
+jmp .ClcAndRtl
+endif
+.IsHpJewel:
+lda #$80 : trb $09EC
+if !SettingOHKO == 0
+lda $0ACA : inc : sta $0ACA
+  sec : sbc $0ACE : sta $0B22
+endif
+ldy #$0000
+bra .ClcAndRtl
+.IsStrJewelItem:
+.IsStrJewel:
+lda #$80 : trb $09EC
+if !SettingZ3 == 1   ; In Z3, STR is capped at 8/4/2/1 for difficulty 0/1/2/3.
+phx
+  ldx $0b24
+  lda $0ade : cmp.l ..MaxStrByDifficulty,x
+plx
+bcs +
+  asl $0ade
+  bra ++
+..MaxStrByDifficulty:
+db 8,4,2,1
++:
+lda #$01 : sta $0bfe
+++:
+else
+inc $0ADE
+endif
+ldy #$0000
+bra .ClcAndRtl
+.IsDefJewelItem:
+.IsDefJewel:
+lda #$80 : trb $09EC
+if !SettingZ3 == 1   ; In Z3, DEF is capped at 2/2/1/0 for difficulty 0/1/2/3.
+phx
+  ldx $0b24
+  lda $0adc : cmp.l ..MaxDefByDifficulty,x
+plx
+bcs +
+  inc $0adc
+  bra ++
+..MaxDefByDifficulty:
+db 2,2,1,0
++:
+lda #$01 : sta $0bfe
+++:
+else
+inc $0ADC
+endif
+ldy #$0000
+bra .ClcAndRtl
+
+.GotEmptyInvSlot:
+pla : sta $0AB4,y
+  sta $0DB8
+  stz $0DB9
+ldy #$FF1F
+.ClcAndRtl:
+plp
+clc
+rtl
+.InvFull:
+pla : sta $0DB8
+  stz $0DB9
+ldy #$FF02
+plp
+sec
+rtl
+}
+
+
 LR_GiveAnyItemA16OrSec:
 pha
 and #$ff00 : cmp #$1000 : bne .ItemIsNotUnlockedDoor
@@ -865,6 +1002,12 @@ db $ca
 
 
 EMonsterDeathDoorOrItem:
+if !SettingOrbRando == 0
+lda $7f0024,x : jsl LR_SetMonsterItemFlagA
+lda $7f0024,x : jsl LR_GetItemId8ForMonsterItemFlagA : sta $7f0024,x
+  jsl $80b4e0    ; jsl LR_SetFlag10A
+cop #$C7 : dl EMonsterDeathDoorOpener
+else
 cop #$B7 : db $00
 lda #$0342 : sta $10
 lda #$6000 : trb $12
@@ -875,11 +1018,7 @@ cop #$82 : db $29, $12
 cop #$89
 cop #$B6 : db $30
 lda #$0001 : sta $0bfc    ; Slow text speed.
-phx
-  lda $7F0024,x : dec : asl : tax
-  lda.l .ItemList,x
-plx
-jsl LR_GiveAnyItemA16OrSec : bcs .AnimateAndDie
+lda $7f0024,x : jsl LR_GetItemId16ForMonsterItemFlagA : jsl LR_GiveAnyItemA16OrSec : bcs .AnimateAndDie
 .ItemGiven:
 lda $7f0024,x : jsl LR_SetMonsterItemFlagA
 cop #$D8
@@ -888,6 +1027,15 @@ stz $0bfc
 cop #$80 : db $02
 cop #$89
 cop #$E0
+endif
+
+
+LR_GetItemId16ForMonsterItemFlagA:
+phx
+  dec : asl : tax
+  lda.l .ItemList,x
+plx
+rtl
 .ItemList:
 dw !EDCageWormItem           ; db !MonsterItem01Id, !MonsterItem01Type
 dw !EDSoutheastWormItem      ; db !MonsterItem02Id, !MonsterItem02Type
@@ -932,6 +1080,10 @@ dw !PyramidEntranceOrbsItem  ; db !MonsterItem28Id, !MonsterItem28Type
 dw !MansionEastGateItem      ; db !MonsterItem29Id, !MonsterItem29Type
 dw !MansionWestGateItem      ; db !MonsterItem2AId, !MonsterItem2AType
 
+
+LR_GetItemId8ForMonsterItemFlagA:
+jsl LR_GetItemId16ForMonsterItemFlagA : and #$00ff
+rtl
 
 
 

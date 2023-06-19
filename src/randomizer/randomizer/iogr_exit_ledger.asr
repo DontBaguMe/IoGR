@@ -1,6 +1,12 @@
 arch 65816
 hirom
 
+; Dungeon Shuffle removes most mid-dungeon respawn points.
+!MaybeRemoveRespawnPoint = $ff
+if !SettingDungeonShuffle > 0
+!MaybeRemoveRespawnPoint = $7f
+endif
+
 ; We need a list of "defaults" i.e. vanilla assignments, to incsrc early.
 ; Separately, we need a list of "defines" i.e. IOGR assignments, which will be of the form:
 ; !Map01Exit01 = !DefaultMapXYExitUW
@@ -19,10 +25,17 @@ hirom
 !DefaultMapMansionEntranceString = $E9,$30,$03,$d0,$03,$80,$00,$44
 !DefaultMapMansionExitString = $c3,$40,$01,$88,$00,$00,$00,$23
 
-!DefaultMQPostStatueExitMap = #$00cd
-!DefaultMQPostStatueExitX = #$0007
-!DefaultMQPostStatueExitY = #$0009
-!DefaultMQPostStatueExitCam = #$0000   ; possibly a vanilla "bug"...
+; Artificial "return" entrances, required by boss/entrance shuffle since
+; these modes may allow returning through a normally-one-way door.
+!DefaultMapMQReturnString = $CC,$F8,$01,$20,$01,$03,$00,$44
+!DefaultMapSolidArmReturnString = $E9,$78,$03,$90,$00,$03,$00,$44
+!DefaultMapBabelTopReturnString = $C3,$10,$02,$90,$00,$83,$00,$23
+
+!DefaultMQPostStatueExitMap = $00cd
+!DefaultMQPostStatueExitX = $0007
+!DefaultMQPostStatueExitY = $0009
+!DefaultMQPostStatueExitCam = $0000   ; possibly a vanilla "bug"...
+!DefaultMapMQExitString = $cd,$70,$00,$A0,$00,$00,$00,$11
 
 !DefaultMap01Exit01 = $08,$B8,$01,$80,$00,$00,$00,$12
 !DefaultMap01Exit02 = $08,$B8,$01,$80,$00,$00,$00,$12
@@ -138,7 +151,7 @@ hirom
 !DefaultMap23Exit03 = $1D,$68,$00,$60,$03,$03,$00,$53
 
 !DefaultMap24Exit01 = $22,$E8,$01,$B0,$03,$00,$00,$44
-!DefaultMap24Exit02 = $1E,$A8,$03,$40,$00,$83,$00,$24
+!DefaultMap24Exit02 = $1E,$A8,$03,$40,$00,$83&!MaybeRemoveRespawnPoint,$00,$24
 
 !DefaultMap25Exit01 = $1D,$E8,$01,$60,$00,$03,$00,$53
 !DefaultMap25Exit02 = $1D,$E8,$00,$A0,$00,$03,$00,$53
@@ -249,10 +262,10 @@ hirom
 !DefaultMap47Exit01 = $44,$F8,$00,$60,$01,$00,$00,$22
 
 !DefaultMap4CExit01 = $55,$70,$00,$E0,$01,$00,$00,$22
-!DefaultMap4CExit02 = $4D,$10,$00,$E8,$00,$87,$00,$44
-!DefaultMap4CExit03 = $4F,$78,$00,$30,$00,$83,$00,$44
-!DefaultMap4CExit04 = $53,$E0,$03,$68,$00,$86,$00,$44
-!DefaultMap4CExit05 = $51,$78,$03,$30,$00,$83,$00,$44
+!DefaultMap4CExit02 = $4D,$10,$00,$E8,$00,$87&!MaybeRemoveRespawnPoint,$00,$44
+!DefaultMap4CExit03 = $4F,$78,$00,$30,$00,$83&!MaybeRemoveRespawnPoint,$00,$44
+!DefaultMap4CExit04 = $53,$E0,$03,$68,$00,$86&!MaybeRemoveRespawnPoint,$00,$44
+!DefaultMap4CExit05 = $51,$78,$03,$30,$00,$83&!MaybeRemoveRespawnPoint,$00,$44
 
 !DefaultMap4DExit01 = $4C,$E0,$01,$D8,$00,$06,$00,$22
 !DefaultMap4DExit02 = $4E,$E8,$00,$80,$02,$00,$00,$44
@@ -316,6 +329,7 @@ hirom
 
 !DefaultMap5EExit01 = $69,$a0,$02,$38,$00,$00,$00,$13
 !DefaultMap5EExit02 = $5F,$80,$00,$40,$00,$83,$00,$44
+!DefaultMap5EExit03 = $5a,$90,$00,$70,$00,$83&!MaybeRemoveRespawnPoint,$00,$14
 
 !DefaultMap5FExit01 = $5E,$60,$00,$B0,$00,$00,$00,$14
 !DefaultMap5FExit02 = $60,$10,$00,$90,$00,$07,$00,$44
@@ -562,7 +576,7 @@ hirom
 
 !DefaultMapB1Exit01 = $B0,$F8,$01,$90,$00,$03,$00,$54
 !DefaultMapB1Exit02 = $B2,$78,$00,$C0,$07,$00,$00,$81
-!DefaultMapB1Exit03 = $B6,$F8,$02,$D0,$03,$80,$00,$46
+!DefaultMapB1Exit03 = $B6,$F8,$02,$D0,$03,$80&!MaybeRemoveRespawnPoint,$00,$46
 !DefaultMapB1Exit04 = $B5,$78,$00,$C0,$07,$00,$00,$81
 
 !DefaultMapB2Exit01 = $B1,$78,$07,$30,$00,$03,$00,$28
@@ -585,7 +599,7 @@ hirom
 !DefaultMapB7Exit02 = $B9,$48,$00,$D0,$05,$00,$00,$61
 !DefaultMapB7Exit03 = $B9,$A8,$00,$D0,$05,$00,$00,$61
 !DefaultMapB7Exit04 = $B8,$78,$00,$D0,$05,$00,$00,$61
-!DefaultMapB7Exit05 = $BA,$F8,$01,$D0,$05,$80,$00,$64
+!DefaultMapB7Exit05 = $BA,$F8,$01,$D0,$05,$80&!MaybeRemoveRespawnPoint,$00,$64
 
 !DefaultMapB8Exit01 = $B7,$68,$05,$30,$00,$03,$00,$26
 
@@ -637,13 +651,13 @@ hirom
 
 !DefaultMapC9Exit01 = $C3,$A0,$01,$A0,$01,$03,$00,$23
 
-!DefaultMapCCExit01 = $CD,$80,$00,$C0,$00,$80,$00,$11
-!DefaultMapCCExit02 = $CE,$70,$05,$C0,$00,$80,$00,$46
-!DefaultMapCCExit03 = $D0,$70,$04,$C0,$00,$80,$00,$55
-!DefaultMapCCExit04 = $D6,$70,$00,$C0,$00,$80,$00,$55
-!DefaultMapCCExit05 = $D8,$80,$04,$C0,$00,$80,$00,$55
-!DefaultMapCCExit06 = $D4,$70,$00,$C0,$00,$80,$00,$55
-!DefaultMapCCExit07 = $D2,$70,$00,$C0,$00,$80,$00,$46
+!DefaultMapCCExit01 = $CD,$80,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$11
+!DefaultMapCCExit02 = $CE,$70,$05,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$46
+!DefaultMapCCExit03 = $D0,$70,$04,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit04 = $D6,$70,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit05 = $D8,$80,$04,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit06 = $D4,$70,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit07 = $D2,$70,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$46
 
 !DefaultMapCDExit01 = $CC,$F8,$01,$20,$01,$03,$00,$44
 

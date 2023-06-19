@@ -1,8 +1,132 @@
 arch 65816
 hirom
 
+
+DataAGP3VRAMPixels: ; $1C segments of $20 bytes each. Put at word $3400, char $140.
+db $FE,$FF,$F3,$FF,$7F,$FF,$A7,$FF,$43,$FF,$80,$FF,$80,$FF,$00,$FF
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $FF,$FF,$6F,$FF,$DF,$FF,$DB,$FF,$AF,$FF,$98,$FF,$00,$FF,$14,$FF
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $01,$FF,$30,$FF,$00,$FF,$04,$FB,$C0,$3F,$0C,$F3,$21,$DE,$50,$AF
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $41,$FF,$00,$FF,$00,$FF,$04,$FB,$C0,$3F,$06,$F9,$30,$CF,$8B,$74
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $00,$FF,$40,$BF,$10,$EF,$10,$EF,$00,$FF,$49,$B6,$86,$79,$A6,$59
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $00,$FF,$00,$FF,$4C,$B3,$80,$7F,$02,$FD,$11,$EE,$01,$FE,$AF,$50
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $E6,$19,$7F,$80,$CB,$34,$FF,$00,$DD,$22,$B7,$00,$F9,$00,$5B,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $77,$88,$D8,$27,$7F,$80,$CD,$32,$FF,$00,$EF,$00,$FF,$00,$50,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $F0,$00,$FC,$00,$89,$00,$C0,$00,$29,$00,$2A,$00,$11,$00,$11,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $EF,$00,$F7,$00,$03,$00,$B4,$00,$23,$00,$14,$00,$22,$00,$12,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $62,$00,$81,$00,$00,$00,$40,$40,$E0,$E0,$11,$11,$4B,$4B,$B5,$B5
+db $FF,$FF,$FF,$FF,$FF,$FF,$BF,$FF,$1F,$FF,$EE,$FF,$B4,$FF,$4A,$FF
+db $0B,$00,$13,$00,$01,$00,$00,$00,$03,$03,$09,$09,$5D,$5D,$6F,$6F
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FC,$FF,$F6,$FF,$A2,$FF,$90,$FF
+db $FF,$FF,$FF,$FF,$3F,$FF,$C0,$FF,$EE,$FF,$A9,$FF,$40,$FF,$00,$FF
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $9F,$9F,$FF,$FF,$FC,$FF,$EE,$FF,$E6,$FF,$BB,$FF,$34,$FF,$00,$FF
+db $60,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $00,$FF,$0C,$F3,$DD,$22,$FF,$00,$FF,$00,$FF,$00,$BF,$00,$83,$00
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $00,$FF,$06,$F9,$9D,$62,$FF,$00,$FF,$00,$FF,$00,$EE,$00,$14,$00
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $0C,$00,$96,$00,$10,$00,$00,$00,$00,$00,$C2,$C2,$AF,$AF,$74,$74
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$C2,$3D,$AF,$50,$74,$8B
+db $E8,$00,$76,$00,$88,$00,$00,$00,$00,$00,$11,$11,$3C,$3C,$4D,$4D
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$11,$EE,$3C,$C3,$4D,$B2
+db $BF,$BF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$B4,$FF,$63,$FF,$1C,$FF
+db $BF,$40,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $FE,$FE,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$7F,$FF,$28,$FF,$47,$FF
+db $FE,$01,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $00,$FF,$00,$FF,$00,$FF,$08,$F7,$B6,$49,$F1,$0E,$C7,$38,$FF,$00
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$40,$BF,$71,$8E,$CB,$34,$FD,$02
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $FF,$00,$FF,$00,$FF,$00,$EB,$00,$F3,$00,$AC,$00,$82,$00,$00,$00
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $FE,$01,$FF,$00,$FF,$00,$BD,$00,$32,$00,$48,$00,$07,$00,$00,$00
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$04,$04,$7B,$7B,$F2,$F2,$FE,$FE
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FB,$00,$84,$00,$0D,$00,$01,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$C6,$C6,$38,$38,$D6,$D6,$FE,$FE
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$39,$00,$C7,$00,$29,$00,$01,$00
+db $FF,$FF,$BF,$FF,$9F,$FF,$8C,$FF,$14,$FF,$08,$FF,$00,$FF,$00,$FF
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $FF,$FF,$FF,$FF,$EC,$FF,$C3,$FF,$48,$FF,$00,$FF,$00,$FF,$00,$FF
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+DataAGP3VRAMTilemapTop: ; $20 words to be written at $1AA0.
+dw $0DF0,$0DF1,$0DF2,$0DF3,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$4DF3,$4DF2,$4DF1,$4DF0
+DataAGP3VRAMTilemap: ; $0A segments, $04 bytes each, written $10 times each starting at $1AC0.
+dw $0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43
+dw $0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45
+dw $0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47
+dw $0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49
+dw $0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B
+dw $0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D
+dw $0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F
+dw $0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51
+dw $0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53
+dw $0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55
+dw $0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57
+; Then the Comet's base. One word written $40 times.
+dw $0DFD
+
+; Initialize player and camera.
+; Includes feature to preserve player's herbs if they die in AGP3-5.
+LR_SetupPlayerForComet:
+stz $06be : stz $06c0 : stz $06c2 : stz $06c4
+lda $0aca : sta $0ace    ; Fully restore health.
+phx
+lda #$f5ef : sta $1000
+lda #$008c : sta $1002
+stz $1008
+cop #$D0 : db $F4,$00 : dw .Return    ; Do nothing else if we're not starting in P3.
+lda $0aac : sta $0aaa   ; Restore herb stack (for herb-stacking variants).
+lda #$0000
+sep #$20
+stz $2141    ; Don't use crazy-fast music in P3.
+lda $0AAE : tax : beq .Return
+ldy #$000F
+.TryReduceHerbCounter:
+lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
+  dex : beq .Return
+..NotAnHerb:
+dey : bpl .TryReduceHerbCounter
+ldy #$000F
+.TryAddAnotherHerb:
+lda $0AB4,y : bne ..NotEmpty
+  lda #$06 : sta $0AB4,y
+  dex : beq .Return
+..NotEmpty:
+dey : bpl .TryAddAnotherHerb
+.Return:
+rep #$20
+plx
+rtl
+
+LR_StorePlayerHerbCount:
+lda $0aaa : sta $0aac   ; Save herb stack (for herb-stacking variants).
+phx
+sep #$20
+ldx #$0000
+ldy #$000F
+.TryCountAnotherHerb:
+lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
+  inx
+..NotAnHerb:
+dey : bpl .TryCountAnotherHerb
+txa : sta $0AAE
+rep #$20
+plx
+rtl
+
 ; Custom LongRoutine --> "Set Position Randomly in +/-.A"
-LR_RaeSetRandomPosition:
+LR_SetRandomPosition:
 {
 phx
 dec a : sta $4378

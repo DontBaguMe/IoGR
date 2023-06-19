@@ -376,6 +376,7 @@ hirom
 
 !Map5EExit01 ?= !DefaultMap5EExit01
 !Map5EExit02 ?= !DefaultMap5EExit02
+!Map5EExit03 ?= !DefaultMap5EExit03
 
 !Map5FExit01 ?= !DefaultMap5FExit01
 !Map5FExit02 ?= !DefaultMap5FExit02

@@ -9,13 +9,15 @@ from .models.enums.start_location import StartLocation
 from .models.enums.goal import Goal
 from .models.enums.statue_req import StatueReq
 from .models.enums.entrance_shuffle import EntranceShuffle
+from .models.enums.dungeon_shuffle import DungeonShuffle
+from .models.enums.orb_rando import OrbRando
 from .models.enums.enemizer import Enemizer
 from .models.enums.logic import Logic
 from .models.randomizer_data import RandomizerData
 
 MAX_INVENTORY = 15
 PROGRESS_ADJ = [1.5, 1.25, 1, 0.75]  # Required items are more likely to be placed in easier modes
-MAX_CYCLES = 100
+MAX_CYCLES = 500
 INACCESSIBLE = 9999
 
 
@@ -88,7 +90,7 @@ class World:
     def are_item_loc_compatible(self, item, loc):
         if self.item_pool[item][1] == self.item_locations[loc][1]:
             return True
-        if self.orb_rando == 2:
+        if self.orb_rando == "Orbsanity":
             if self.item_pool[item][1] in [1,5,6] and self.item_locations[loc][1] in [1,5,6]:
                 return True
         return False
@@ -391,8 +393,8 @@ class World:
         for loc in item_locations:
             if not self.item_locations[loc][2] and self.is_accessible(self.item_locations[loc][0]):
                 loc_type = self.item_locations[loc][1]
-                if self.orb_rando == 2 and loc_type in [5,6]:
-                    loc_type = 1    # In keysanity, keys are pooled like normal items
+                if self.orb_rando == "Orbsanity" and loc_type in [5,6]:
+                    loc_type = 1    # In orbsanity, orbs are pooled like normal items
                 to_fill[loc_type-1].append(loc)
 
         quarantine = [[],[],[],[],[],[]]
@@ -400,8 +402,8 @@ class World:
         while to_place:
             item = to_place.pop(0)
             item_type = self.item_pool[item][1]
-            if self.orb_rando == 2 and item_type in [5,6]:
-                item_type = 1    # In keysanity, keys are pooled like normal items
+            if self.orb_rando == "Orbsanity" and item_type in [5,6]:
+                item_type = 1    # In orbsanity, orbs are pooled like normal items
             filled = False
             while not filled and to_fill[item_type-1]:
                 location = to_fill[item_type-1].pop(0)
@@ -519,7 +521,7 @@ class World:
                 prog_type = self.item_pool[item][5]
                 inv_type = self.item_pool[item][4]
                 type_list = [1,2]
-                if self.orb_rando > 0:
+                if self.orb_rando != "None":
                     type_list = [1,2,5]
                 if type in [1,2,5]:
                     if prog_type == 2:
@@ -626,8 +628,9 @@ class World:
     def get_maps(self):
         maps = [[], [], [], [], [], [], []]
         for map in self.maps:
-            boss = self.maps[map][1]
-            maps[boss].append(map)
+            if self.dungeon_shuffle == "None" or not self.maps[map][8]:    # Jumbo maps don't get rewards in dungeon shuffles
+                boss = self.maps[map][1]
+                maps[boss].append(map)
 
         maps.pop(0)
         return maps
@@ -725,6 +728,7 @@ class World:
         return True
 
 
+
     # Determine an exit's direction (e.g. outside to inside)
     def is_exit_coupled(self,exit,print_log=False):
         if exit not in self.exits:
@@ -772,7 +776,10 @@ class World:
 #        return exits_remaining
 
 
-    # Link one exit to another
+    # Link one exit to another, making origin_exit act like dest_exit; that is,
+    # replace the transition data of origin_exit with the vanilla transition data of dest_exit.
+    # Check_Connections makes the transition "reflexive", such that the exit that is the
+    # reverse of dest_exit acts like the exit that is the reverse of origin_exit.
     def link_exits(self, origin_exit, dest_exit, print_log=False, check_connections=True, update_graph=True):
         if origin_exit not in self.exits:
             if print_log:
@@ -782,15 +789,15 @@ class World:
             if print_log:
                 print("ERROR: Invalid destination (link)", dest_exit)
             return False
-        if print_log and self.exits[origin_exit][1] != -1 and origin_exit > 21:
-            print("WARNING: Origin already linked", origin_exit)
-        if print_log and self.exits[dest_exit][2] != -1 and dest_exit > 21:
-            print("WARNING: Destination already linked", dest_exit)
+        if print_log and self.exits[origin_exit][1] > 0 and origin_exit > 21:
+            print("WARNING: Origin already linked:", origin_exit, self.exits[origin_exit])
+        if print_log and self.exits[dest_exit][2] > 0 and dest_exit > 21:
+            print("WARNING: Destination already linked:", dest_exit, self.exits[dest_exit])
         self.exits[origin_exit][1] = dest_exit
         self.exits[dest_exit][2] = origin_exit
         self.exit_log.append([origin_exit,dest_exit])
         if print_log:
-            print("   Linked",self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+            print("   Linked",origin_exit,self.exits[origin_exit][10],"-",dest_exit,self.exits[dest_exit][10])
         if update_graph and self.exits[origin_exit][5]:
             origin = self.exits[origin_exit][3]
             dest = self.exits[dest_exit][4]
@@ -818,20 +825,22 @@ class World:
             if print_log:
                 print("ERROR: Invalid origin (unlink)", origin_exit)
             return False
-        if dest_exit not in self.exits:
+        if dest_exit and dest_exit not in self.exits:
             if print_log:
                 print("ERROR: Invalid destination (unlink)", dest_exit)
             return False
-        if print_log and (self.exits[origin_exit][1] != dest_exit or self.exits[dest_exit][2] != origin_exit):
+        if dest_exit and print_log and (self.exits[origin_exit][1] != dest_exit or self.exits[dest_exit][2] != origin_exit):
             if print_log:
                 print("WARNING: Attempted to unlink exits that are not correctly linked:", origin_exit, dest_exit)
+        if not dest_exit:
+            dest_exit = origin_exit
         self.exits[origin_exit][1] = -1
         self.exits[dest_exit][2] = -1
         for x in self.exit_log:
             if x[0] == origin_exit:
                 self.exit_log.remove(x)
         if print_log:
-            print("   Unlinked",self.exits[origin_exit][10], "-", self.exits[dest_exit][10])
+            print("   Unlinked",origin_exit,self.exits[origin_exit][10], "-", dest_exit, self.exits[dest_exit][10])
         if update_graph and self.exits[origin_exit][5]:
             origin = self.exits[origin_exit][3]
             dest = self.exits[dest_exit][4]
@@ -846,6 +855,12 @@ class World:
         if check_connections and update_graph:
             self.update_graph(True,True,True,print_log)
         return True
+
+
+    # Make exit1 send the player to where exit2 is, and vice versa;
+    # equivalent to link_exits(exit1, self.exits[exit2][0], print_log, True)
+    def join_exits(self, exit1, exit2, print_log = False):
+        return self.link_exits(exit1, self.exits[exit2][0], print_log, True)
 
 
     def print_exit_log(self,exit_log=[]):
@@ -872,11 +887,11 @@ class World:
     def find_exit(self,origin_exits_ls=[],dest_exits_ls=[],print_log=False,check_direction=False,check_progression=False,check_ds_access=False,test=False):
         if not origin_exits_ls:
             if print_log:
-                print("ERROR: No accessible exits available")
+                print("  No more accessible exits available")
             return False
         elif not dest_exits_ls:
             if print_log:
-                print("ERROR: No destination exits available")
+                print("  No destination exits available from",origin_exits_ls)
             return False
 
         origin_exits = origin_exits_ls[:]
@@ -884,6 +899,7 @@ class World:
 
         done = False
         quarantine_o = []
+        allow_external_cluster_link = False #True if self.dungeon_shuffle == "Clustered" and random.randint(1,7) == 1 else False
         while not done and origin_exits:
             origin_exit = 0
             while not origin_exit and origin_exits:
@@ -895,7 +911,7 @@ class World:
 
             if not origin_exit:
                 if print_log:
-                    print("ERROR: No accessible exits available")
+                    print("  No more accessible exits available")
                 return False
 
             direction = self.exit_direction(origin_exit)
@@ -906,12 +922,12 @@ class World:
                 while not dest_exit and dest_exits:
                     dest_exit = dest_exits.pop(0)
                     dest = self.exits[dest_exit][4]
-                    if self.exits[dest_exit][2] != -1 or (check_progression and self.is_accessible(dest)):
+                    if self.exits[dest_exit][2] != -1 or (not self.check_dungeon(origin_exit, dest_exit) and not allow_external_cluster_link) or (check_progression and self.is_accessible(dest)):
                         dest_exit = 0
 
                 if not dest_exit:
                     if print_log:
-                        print("ERROR: No destination exits available")
+                        print("  No destination exits available from",origin_exit)
                     return False
 
                 direction_new = self.exit_direction(dest_exit)
@@ -984,7 +1000,7 @@ class World:
 
     # Build islands, i.e. mutually-accessible nodes
     def build_islands(self,print_log=False):
-        islands = []
+        islands = [[] for _ in range(13)]
         visited = []
         start_island = []
         for node in self.graph:
@@ -996,7 +1012,7 @@ class World:
                 origin_logic = []
                 dest_logic = []
                 is_start = False
-                is_island = False
+                dungeon = 9999
                 while to_visit:
                     x = to_visit.pop(0)
                     visited.append(x)
@@ -1006,9 +1022,11 @@ class World:
                     for exit in self.graph[x][14]:
                         if self.exits[exit][1] == -1:
                             origin_exits.append(exit)
+                            dungeon = min(dungeon,self.exit_dungeon(exit))
                     for exit in self.graph[x][15]:
                         if self.exits[exit][2] == -1:
                             dest_exits.append(exit)
+                            dungeon = min(dungeon,self.exit_dungeon(exit))
                     for edge in self.graph[x][12]:
                         if self.logic[edge][0] == 0:
                             origin_logic.append(edge)
@@ -1023,45 +1041,209 @@ class World:
                 if is_start:
                     start_island = island
                 else:
-                    islands.append(island)
+                    if dungeon == 9999 or self.dungeon_shuffle == "None":
+                        dungeon = 0
+                    islands[dungeon].append(island)
 
         return [start_island,islands]
+
+
+    def exit_dungeon(self,exit=-1,print_log=False):
+        if exit not in self.exits:
+            if print_log:
+                print("ERROR: Exit not in database")
+            return -1
+
+        if self.exits[exit][8] and not self.exits[exit][9]:
+            if self.dungeon_shuffle == "Chaos":
+                return 1
+            return self.exits[exit][8]
+        return 0
+
+    def check_dungeon(self,exit1=-1,exit2=-1,print_log=False):
+        if exit1 not in self.exits or exit2 not in self.exits:
+            if print_log:
+                print("ERROR: Exit not in database")
+            return -1
+
+        if self.exit_dungeon(exit1) != self.exit_dungeon(exit2):
+            return False
+
+        origin1 = self.exits[exit1][3]
+        origin2 = self.exits[exit2][3]
+        dest1 = self.exits[exit1][4]
+        dest2 = self.exits[exit2][4]
+
+        if self.graph[origin1][3][2] != self.graph[origin2][3][2] or self.graph[dest1][3][2] != self.graph[dest2][3][2]:
+            return False
+        return True
 
     # Entrance randomizer
     def shuffle_exits(self,print_log=False):
         # Map passages and internal dungeon exits to graph and list all available exits
         one_way_exits = []
+        DS = (self.dungeon_shuffle != "None")
+        ER = (self.entrance_shuffle != "None")
         for x in self.exits:
             if self.is_exit_coupled(x) and (not self.exits[x][3] or not self.exits[x][4]):    # Map missing O/D data for coupled exits
                 xprime = self.exits[x][0]
                 self.exits[x][3] = self.exits[xprime][4]
                 self.exits[x][4] = self.exits[xprime][3]
 
-            if not self.exits[x][1] and (self.exits[x][5] or self.exits[x][6]) and not self.exits[x][7] and (not self.exits[x][8] or self.exits[x][9]):
-                self.exits[x][1] = -1    # Mark exit for shuffling
-                self.exits[x][2] = -1
-                if not self.is_exit_coupled(x):
-                    one_way_exits.append(x)
-                self.graph[self.exits[x][3]][14].append(x)
-                self.graph[self.exits[x][4]][15].append(x)
+            if not self.exits[x][1] and (self.exits[x][5] or self.exits[x][6]) and not self.exits[x][7]:
+                if (DS and self.exits[x][8] not in [0,11] and not self.exits[x][9]) or (ER and (not self.exits[x][8] or self.exits[x][9])):
+                    self.exits[x][1] = -1    # Mark exit for shuffling
+                    self.exits[x][2] = -1
+                    if not self.is_exit_coupled(x):
+                        one_way_exits.append(x)
+                    self.graph[self.exits[x][3]][14].append(x)
+                    self.graph[self.exits[x][4]][15].append(x)
 
         # Preserve Mu key door link
-        self.link_exits(310,310,print_log)
+        self.link_exits(310,310,print_log,False)
+        self.link_exits(311,311,print_log,False)
 
         # Set aside Jeweler's final exit in RJH seeds
         if self.goal == "Red Jewel Hunt":
             self.link_exits(720,720,print_log)
 
-        # If in Coupled mode, map one_way exits first
+        # Special case for Slider exits in Mu and Angel Dungeon
+        if self.dungeon_shuffle != "None":
+            if random.randint(0,1):
+                self.link_exits(408,414,print_log,False)
+                self.link_exits(409,415,print_log,False)
+                self.link_exits(414,408,print_log,False)
+                self.link_exits(415,409,print_log,False)
+            else:
+                self.link_exits(408,408,print_log,False)
+                self.link_exits(409,409,print_log,False)
+                self.link_exits(414,414,print_log,False)
+                self.link_exits(415,415,print_log,False)
+
+        # Dungeon Chaos gets very special handling.
+        if self.dungeon_shuffle == "Chaos":
+        
+            # Dungeon Chaos seeds are quite long. Remove some empty corridors to mitigate that.
+            # 69 Inca U-turn room; 79 Inca statue "puzzle";
+            # 140,141,144,145 Mine elevator; 259 Angl empty water room;
+            # Wat: 375,379 hall before and road to main hall; 390 corridor before spirit
+            dc_empty_dungeon_nodes = [69, 79, 140, 141, 144, 145, 259, 375, 379, 390]
+            for nodenum in dc_empty_dungeon_nodes:
+                self.graph[nodenum] = [False, [], 0, [0,0,0,b"\x00"], 0, "Trash node", [], False, [], [], [], [], [], [], [], []]
+                self.logic[10000+nodenum] = [0,1,nodenum,False,[]]
+            # Remove from the shuffle pool all the exits we don't need.
+            dc_exits_from_empty_dungeon_nodes = [137, 118, 119, 138, 225, 236, 237, 238, 239, 240, 398, 407, 583, 584, 585, 586, 597, 598]
+            for exitnum in dc_exits_from_empty_dungeon_nodes:
+                self.link_exits(exitnum,self.exits[exitnum][0],print_log,False)
+                
+            ## Simple sequence-breaking to skip Freedan is assumed.
+            #self.logic[144][3] = False   # No Freedan for Garden cage.
+            #self.logic[177][4] = [[511,1]]   # No Freedan to traverse Mu.
+            #self.logic[175] = self.logic[177]
+            #self.logic[176] = self.logic[177]
+            
+            # Don't require Pyramid rooms too early.
+            dc_artificial_pyramid_edge = 20000
+            for edge in list(range(290,295))+list(range(296,314))+list(range(500,504)):
+                self.logic[edge][4].append([51,1])
+                self.logic[edge][4].append([24,1])
+                self.logic[edge][4].append([25,1])
+                self.logic[edge][4].append([37,1])
+                #if [63,1] not in self.logic[edge][4]:
+                #    self.logic[edge][4].append([63,1])
+            self.graph[420][1] = []
+            self.graph[421][1] = []
+            
+            # Angel Village Dracos are moved, so you can go backwards.
+            self.graph[278][1].append(261)
+            self.graph[279][1].append(263)
+            
+            if self.entrance_shuffle != "Uncoupled":
+                # The code needs a lot of help creating completable Dungeon Chaos seeds.
+                dc_exits_from_kara = [73,247,543,599]
+                dc_exits_from_dead_ends = [67,125,129,141,149,231,235,243,245,294,296,298,300,339,531,533,537,539,589,641,647,653,661,667,673]
+                dc_exits_behind_reflexive_gates = [126,234,534]
+                dc_exits_from_boring_corridors = [[61,62], [123,124], [143,144], [403,404], [405,406], [411,412], [541,542]]
+                dc_exits_from_interesting_corridors = [[63,64], [121,122], [139,140], [223,226], [227,228], [229,232], [274,281], [290,291], [524,526], [535,536], [569,570], [577,578], [581,582]]
+                dc_exits_from_t_junctions = [[65,66,68], [127,128], [133,134], [147,148,150], [241,242,244], [276,287,289], [280,301], [282,283,285], [335,336,338], [525,527,529], [573,574], [587,588,590]]
+                dc_exits_from_pyramid_junction = [636,642,648,654,662,668]
+                dc_vanilla_exits_to_pyramid_junction = [637,643,649,655,663,669]
+                dc_dungeon_entrances_to_link = [60,120,222,402,462,522,562]
+                random.shuffle(dc_exits_from_dead_ends)
+                random.shuffle(dc_dungeon_entrances_to_link)
+                random.shuffle(dc_exits_from_interesting_corridors)
+                random.shuffle(dc_exits_from_boring_corridors)
+                random.shuffle(dc_exits_from_t_junctions)
+                random.shuffle(dc_exits_from_pyramid_junction)
+                
+                # Link the Pyramid rooms as in vanilla.
+                dc_exits_within_pyramid_rooms = [638, 644, 650, 656, 658, 664, 670]
+                for exitnum in dc_exits_within_pyramid_rooms:
+                    self.link_exits(exitnum, exitnum, print_log, True)
+                # Pyramid rooms lead to dead-end items.
+                dc_pyramid_room_terminal_exits = [640,646,652,660,666,672]
+                for exitnum in dc_pyramid_room_terminal_exits:
+                    self.join_exits(dc_exits_from_dead_ends.pop(),exitnum,print_log)
+                # Dungeon entrances lead to a T junction via a "boring" corridor, then an interesting corridor branches from there.
+                for dc_next_dungeon_entrance_to_link in dc_dungeon_entrances_to_link:
+                    dc_next_exits_from_boring_corridor = dc_exits_from_boring_corridors.pop()
+                    random.shuffle(dc_next_exits_from_boring_corridor)
+                    dc_next_exits_from_t_junction = dc_exits_from_t_junctions.pop()
+                    random.shuffle(dc_next_exits_from_t_junction)
+                    dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                    random.shuffle(dc_next_exits_from_interesting_corridor)
+                    self.link_exits(dc_next_dungeon_entrance_to_link,self.exits[dc_next_exits_from_boring_corridor[0]][0],print_log,True)
+                    self.link_exits(dc_next_exits_from_boring_corridor[1],self.exits[dc_next_exits_from_t_junction[0]][0],print_log,True)
+                    self.link_exits(dc_next_exits_from_t_junction[1],self.exits[dc_next_exits_from_interesting_corridor[0]][0],print_log,True)
+
+                # The Pyramid junction is more likely to lead to Pyramid rooms.
+                for exit in dc_exits_from_pyramid_junction:
+                    if random.randint(0,9) < 4:
+                        self.link_exits(dc_vanilla_exits_to_pyramid_junction.pop(),self.exits[exit][0],print_log,True)
+                        
+                # Attach Kara rooms to interesting corridors.
+                for exit in dc_exits_from_kara:
+                    dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                    random.shuffle(dc_next_exits_from_interesting_corridor)
+                    self.link_exits(exit,self.exits[dc_next_exits_from_interesting_corridor[0]][0],print_log,True)
+                
+                # Attach a subset of the remaining dead ends to remaining identified exits.
+                for exit in dc_exits_from_dead_ends:
+                    room_type_roll = random.randint(0,10)
+                    if room_type_roll < 2 and len(dc_exits_from_boring_corridors) > 0:
+                        dc_next_exits_from_boring_corridor = dc_exits_from_boring_corridors.pop()
+                        random.shuffle(dc_next_exits_from_boring_corridor)
+                        self.link_exits(dc_next_exits_from_boring_corridor[0],self.exits[exit][0],print_log,True)
+                    elif room_type_roll < 6 and len(dc_exits_from_interesting_corridors) > 0:
+                        dc_next_exits_from_interesting_corridor = dc_exits_from_interesting_corridors.pop()
+                        random.shuffle(dc_next_exits_from_interesting_corridor)
+                        self.link_exits(dc_next_exits_from_interesting_corridor[0],self.exits[exit][0],print_log,True)
+                    elif room_type_roll < 7 and len(dc_exits_behind_reflexive_gates) > 0:
+                        self.link_exits(dc_exits_behind_reflexive_gates.pop(),self.exits[exit][0],print_log,True)
+                    else:
+                        continue
+
+                            
+            
+        # If not in Uncoupled mode, map one_way exits first
         exit_log = []
-        if self.entrance_shuffle == "Coupled":
+        if self.entrance_shuffle != "Uncoupled":
             one_way_dest = one_way_exits[:]
             random.shuffle(one_way_dest)
             while one_way_exits:
-                exit1 = one_way_exits.pop()
-                exit2 = one_way_dest.pop()
-                self.link_exits(exit1, exit2, print_log, False)
-                exit_log.append([exit1,exit2])
+                o_exit = one_way_exits.pop()
+                found_oneway = False
+                while not found_oneway:
+                    #breakpoint()
+                    d_exit = one_way_dest.pop()
+                    if self.check_dungeon(o_exit, d_exit):
+                        self.link_exits(o_exit, d_exit, print_log, False)
+                        exit_log.append([o_exit,d_exit])
+                        found_oneway = True
+                    else:
+                        one_way_dest.append(d_exit)
+                        random.shuffle(one_way_dest)
+
             if print_log:
                 print( "One-way exits mapped")
 
@@ -1072,14 +1254,11 @@ class World:
         if print_log:
             print(" Graph updated. Beginning exit shuffle...")
 
-#        for x in self.graph:
-#            print(x,self.graph[x])
-
         # Build world skeleton with islands
         self.unsolve()
         island_result = self.build_islands()
         start_island = island_result[0]
-        islands = island_result[1]
+        islands = island_result[1].pop(0)
         islands_built = []
 
         traverse_result = self.traverse()
@@ -1089,46 +1268,47 @@ class World:
             origin_exits += self.graph[node][14]
 
         if print_log:
-#            i = 0
-#            for x in islands:
-#                i += 1
-#                print("Island",i,x[1],x[2])
-#                for y in x[0]:
-#                    print("-",self.graph[y][5])
+            i = 0
+            for x in islands:
+                i += 1
+                print("Island",i,x[1],x[2])
+                for y in x[0]:
+                    print("-",self.graph[y][5])
             print(" Assembling islands...")
 
-        random.shuffle(islands)
         check_direction = True
         check_progression = True
         quarantine = []
         while islands:
+            random.shuffle(islands)
             island = islands.pop(0)
             nodes_new = island[0]
             origin_exits_new = island[1]
             dest_exits_new = island[2]
 
-#            if print_log:
-#                for y in nodes_new:
-#                    print("-",self.graph[y][5])
-
             if not dest_exits_new or not origin_exits_new or self.is_accessible(nodes_new[0]):
-                if print_log and False:
-                    print("  NOT ELIGIBLE")
+                if print_log:
+                    print_log = print_log
+                    #print("  NOT ELIGIBLE")
             else:
-                if (check_progression and not origin_exits_new) or (self.entrance_shuffle == "Coupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
+                if (check_progression and not origin_exits_new) or (self.entrance_shuffle != "Uncoupled" and (len(origin_exits_new) < 2 or len(dest_exits_new) < 2)):
                     quarantine.append(island)
-#                    if print_log:
-#                        print("  REJECTED")
+                    #if print_log:
+                    #    print("  REJECTED")
                 else:
-#                    if print_log:
-#                        print("  ATTEMPTING...")
                     random.shuffle(origin_exits)
                     random.shuffle(dest_exits_new)
 
                     result = self.find_exit(origin_exits,dest_exits_new,print_log,check_direction,True)
                     if not result:
+                        #if print_log:
+                        #    print("  Quarantined",island)
                         quarantine.append(island)
                     else:
+                        if print_log:
+                            print("NEW ISLAND:")
+                            for y in nodes_new:
+                                print(" -",self.graph[y][5])
                         traverse_result = self.traverse(island[0])
                         visited += traverse_result[0]
                         progression_result = self.get_open_exits()
@@ -1145,6 +1325,11 @@ class World:
                     check_direction = True
                     islands += quarantine
                     quarantine.clear()
+            if not islands and island_result[1]:
+                islands = island_result[1].pop(0)
+                check_direction = True
+                check_progression = True
+                quarantine = []
 
         if print_log:
             print(" Island construction complete")
@@ -1155,7 +1340,7 @@ class World:
         self.update_graph(True,True,True)
 
         island_result = self.build_islands()
-        islands = island_result[1]
+        islands = island_result[1].pop(0)
 
         islands_no_ds = []
         for island in islands:
@@ -1230,28 +1415,74 @@ class World:
         for exit in self.exits:
             if self.exits[exit][1] == -1:
                 if print_log:
-                    print("How'd we miss this one??", self.exits[exit][10])
+                    print(" Unmapped exit:",exit,self.exits[exit])
                 origin_exits.append(exit)
             if self.exits[exit][2] == -1:
                 if print_log:
-                    print("This one too??", self.exits[exit][10])
+                    print(" No exit mapped to:",exit,self.exits[exit])
                 dest_exits.append(exit)
+            if origin_exits:
+                random.shuffle(origin_exits)
+            if dest_exits:
+                random.shuffle(dest_exits)
 
         while origin_exits:
             origin_exit = origin_exits.pop(0)
             if not dest_exits:
                 if print_log:
-                    print("ERROR: Entrance rando failed")
+                    print("ERROR: Entrance rando failed: no remaining exits to map to")
                 return False
-            dest_exit = dest_exits.pop(0)
+            allow_external_cluster_link = False #True if self.dungeon_shuffle == "Clustered" and random.randint(1,7) == 1 else False
+            candidate_dest_exit_idx = 0
+            fallback_dest_exit_idx = -1
+            while candidate_dest_exit_idx < len(dest_exits) - 1:
+                candidate_dest_exit = dest_exits[candidate_dest_exit_idx]
+                # Prefer mapping to an exit other than itself in the same dungeon.
+                if self.check_dungeon(origin_exit, candidate_dest_exit) or (allow_external_cluster_link and self.exit_dungeon(origin_exit) > 0 and self.exit_dungeon(dest_exit) > 0):
+                    if candidate_dest_exit == self.exits[origin_exit][0]:
+                        fallback_dest_exit_idx = candidate_dest_exit_idx
+                    else:    # If we get here, candidate_dest_exit_idx meets both criteria, so use it.
+                        fallback_dest_exit_idx = -1
+                        break
+                candidate_dest_exit_idx += 1
+            if fallback_dest_exit_idx > -1:
+                dest_exit = dest_exits.pop(fallback_dest_exit_idx)
+            else:
+                dest_exit = dest_exits.pop(candidate_dest_exit_idx)
             self.link_exits(origin_exit,dest_exit,print_log,self.entrance_shuffle != "Uncoupled")
+            if self.entrance_shuffle != "Uncoupled" and origin_exit != self.exits[dest_exit][0]:  # Reverse direction is implicitly remapped.
+                origin_exits.remove(self.exits[dest_exit][0])
+                dest_exits.remove(self.exits[origin_exit][0])
 
         # Wrap it up
 #        self.reset_progress()
 #        self.update_graph(True,True,True)
         if print_log:
             print("Entrance rando successful!")
+            #self.print_exit_graph()
 
+        return True
+
+
+    def print_exit_graph_from_node(self, node, visited=[], known_exits=[]):
+        for exit in self.exits:
+            if self.exits[exit][1] > 0 and self.exits[exit][3] == node and exit not in known_exits:
+                known_exits.append(exit)
+                if self.entrance_shuffle != "Uncoupled":
+                    known_exits.append(self.exits[self.exits[exit][1]][0])
+                dest_node = self.exits[self.exits[exit][1]][4]
+                print("",node,self.graph[node][5],"->",exit,self.exits[exit][10],"->",dest_node,self.graph[dest_node][5])
+                if dest_node in visited:
+                    print("   Looped to",dest_node,self.graph[dest_node][5])
+                else:
+                    visited.append(dest_node)
+                    self.print_exit_graph_from_node(dest_node,visited,known_exits)
+        return True
+
+
+    def print_exit_graph(self):
+        for node in self.graph:
+            self.print_exit_graph_from_node(node,[node],[])
         return True
 
 
@@ -1737,7 +1968,7 @@ class World:
                 return False
 
         # Shuffle exits
-        if self.entrance_shuffle != "None":
+        if self.entrance_shuffle != "None" or self.dungeon_shuffle != "None":
             if not self.shuffle_exits(print_log):
                 if print_log:
                     print("ERROR: Entrance rando failed")
@@ -1895,7 +2126,7 @@ class World:
         # Fill the Mystic Statues and room-clear rewards
         self.fill_statues()
         self.map_rewards()
-        if self.orb_rando == 0:
+        if self.orb_rando == "None":
             self.assign_default_monster_orbs(print_log)
 
         # Forward fill progression items with Monte Carlo method
@@ -2043,7 +2274,7 @@ class World:
             for node in self.graph:
                 if not self.graph[node][0] and node <600:
                     if print_log:
-                        print("Can't reach ",self.graph[node][5])
+                        print("Can't reach",node,self.graph[node][5])
                     completed = False
         else:
             completed = self.graph[492][0]
@@ -2149,7 +2380,7 @@ class World:
                 overworld_links.append({"region": region_name, "continent": continent_name})
             spoiler["overworld_entrances"] = overworld_links
 
-        if self.entrance_shuffle != "None":
+        if self.entrance_shuffle != "None" or self.dungeon_shuffle != "None":
             exit_links = []
             for exit in self.exits:
                 exit_name = self.exits[exit][10]
@@ -2482,15 +2713,15 @@ class World:
             if new_exit > 0:
                 old_exit_label = self.exits[exit][5]
                 new_exit_string_label = self.exits[new_exit][5]
-                self.asar_defines[old_exit_label] = "Default"+new_exit_string_label
+                self.asar_defines[old_exit_label] = "!Default"+new_exit_string_label
         
         for exit in self.exits_detailed:
             new_exit = self.exits[exit][1]
             if new_exit:
                 map_str = self.exits[new_exit][6]
                 map_id = int.from_bytes(map_str[0:1], byteorder="little")
-                xcoord = int.from_bytes(map_str[1:3], byteorder="little")
-                ycoord = int.from_bytes(map_str[3:5], byteorder="little")
+                xcoord = int.from_bytes(map_str[1:3], byteorder="little") / 16
+                ycoord = int.from_bytes(map_str[3:5], byteorder="little") / 16
                 facedir = int.from_bytes(map_str[5:6], byteorder="little")
                 camera = int.from_bytes(map_str[6:8], byteorder="little")
                 self.asar_defines[self.exits_detailed[exit][0]] = map_id
@@ -2703,6 +2934,11 @@ class World:
             last_monster_id = self.maps[map][6]
             this_monster_id = first_monster_id
             while this_monster_id <= last_monster_id:
+                #if this_monster_id % 256 == 0:
+                #    breakpoint()
+                if this_monster_id not in self.default_enemies:
+                    this_monster_id += 1
+                    continue
                 old_enemy = self.default_enemies[this_monster_id]
                 enemytype = self.enemies[old_enemy][3]
                 walkable = self.enemies[old_enemy][4]
@@ -2714,7 +2950,7 @@ class World:
                     new_enemy = new_enemies[i]
                     new_enemytype = self.enemies[new_enemy][3]
                     new_walkable = self.enemies[new_enemy][4]
-                    if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies_tmp) - 1:
+                    if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies) - 1:
                         found_enemy = True
                         # Limit number of complex enemies per map
                         if new_enemy in complex_enemies:
@@ -2725,7 +2961,7 @@ class World:
                                         new_enemies.remove(enemy_tmp)
                                         i -= 1
                     i += 1
-                asar_defines["Monster"+format(this_monster_id,"04X")+"Addr"] = "!"+self.enemies[new_enemy][1]
+                self.asar_defines["Monster"+format(this_monster_id,"04X")+"Addr"] = "!"+self.enemies[new_enemy][1]
                 if map == 27:   # Moon Tribe doesn't shuffle stats
                     new_enemy_stat_block = self.enemies[old_enemy][2]
                 elif self.enemizer == "Balanced":   # Balanced enemizer doesn't shuffle stats--
@@ -2736,7 +2972,20 @@ class World:
                     new_enemy_stat_block = insane_dictionary[new_enemy]
                 else:   # Otherwise (Limited, Full, and zombies in Insane) the new monster uses its normal stat block
                     new_enemy_stat_block = self.enemies[new_enemy][2]
-                asar_defines["Monster"+format(this_monster_id,"04X")+"Stats"] = new_enemy_stat_block
+                self.asar_defines["Monster"+format(this_monster_id,"04X")+"Stats"] = new_enemy_stat_block
+
+                # Nearly all monsters use Param to set layer priority (o = $00/$10/$20/$30),
+                # so should not override the Param (priority) of the monster they're replacing.
+                # Wat wall skulls use Param = 0/2/4/6 to set their movement direction.
+                # Inca statues with Param > 0 are frozen until a certain flag is set.
+                # So for wall skulls we want Param = a random direction, for Inca statues we want Param = 0,
+                # and for others we want to retain the priority bits but zero out the wall skull bits.
+                if new_enemy == 108:
+                    self.asar_defines["Monster"+format(this_monster_id,"04X")+"Param"] = random.randint(0,3) * 2
+                elif new_enemy in [16,17,18,19,20,21,22]:
+                    self.asar_defines["Monster"+format(this_monster_id,"04X")+"Param"] = 0
+                else:
+                    self.asar_defines["Monster"+format(this_monster_id,"04X")+"Param"] = "!DefaultMonster"+format(this_monster_id,"04X")+"Param&$F0"
                 
                 this_monster_id += 1
 
@@ -2750,7 +2999,6 @@ class World:
         self.statues_required = statues_required
         self.statue_req = statue_req
         self.boss_order = boss_order
-        self.orb_rando = 1#settings.orb_rando
         self.dungeons_req = []
         for x in self.statues:
             self.dungeons_req.append(self.boss_order[x-1])
@@ -2776,6 +3024,22 @@ class World:
             self.entrance_shuffle = "Coupled"
         elif settings.entrance_shuffle.value == EntranceShuffle.UNCOUPLED.value:
             self.entrance_shuffle = "Uncoupled"
+        
+        if settings.orb_rando.value == OrbRando.NONE.value:
+            self.orb_rando = "None"
+        elif settings.orb_rando.value == OrbRando.BASIC.value:
+            self.orb_rando = "Basic"
+        else:
+            self.orb_rando = "Orbsanity"
+ 
+        if settings.dungeon_shuffle.value == DungeonShuffle.NONE.value:
+            self.dungeon_shuffle = "None"
+        elif settings.dungeon_shuffle.value == DungeonShuffle.BASIC.value:
+            self.dungeon_shuffle = "Basic"
+        elif settings.dungeon_shuffle.value == DungeonShuffle.CHAOS.value:
+            self.dungeon_shuffle = "Chaos"
+        elif settings.dungeon_shuffle.value == DungeonShuffle.CLUSTERED.value:
+            self.dungeon_shuffle = "Clustered"
 
         if settings.start_location.value == StartLocation.SOUTH_CAPE.value:
             self.start_mode = "South Cape"
@@ -4050,6 +4314,7 @@ class World:
             214: [0, 272, 273, False, [[513, 1]]],   # Ishtar's chest w/ puzzle complete
 
             # Great Wall
+            504: [0, 293, 291, False, [[63, 1]]],            # Map 131 backwards w/ Spin Dash
             220: [0, 294, 295, False, [[601, 1]]],           # Map 133 progression w/ glitches
             221: [0, 296, 295, False, [[63, 1]]],            # Map 133 progression w/ Spin Dash
             222: [0, 296, 295,  True, []],                   # Map 133 progression w/ Freedan
@@ -4737,125 +5002,126 @@ class World:
 
         # Enemy map database
         # FORMAT: { ID: [EnemySet, RewardBoss(0 for no reward), Reward[type, tier], SearchHeader,
-        #           SpritesetOffset,FirstMonsterId,LastMonsterId,RestrictedEnemysets]}
+        #           SpritesetOffset,FirstMonsterId,LastMonsterId,RestrictedEnemysets, IsJumbo]}
         # ROM address for room reward table is mapID + $1aade
         self.maps = {
             # For now, no one can have enemyset 10 (Ankor Wat outside)
             # Underground Tunnel
-            12: [0, 1, [0,0], b"\x0C\x00\x02\x05\x03", 4, 0x0001, 0x0003, []],
-            13: [0, 1, [0,0], b"\x0D\x00\x02\x03\x03", 4, 0x0004, 0x0012, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            14: [0, 1, [0,0], b"\x0E\x00\x02\x03\x03", 4, 0x0013, 0x0021, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Weird 4way issues
-            15: [0, 1, [0,0], b"\x0F\x00\x02\x03\x03", 4, 0x0022, 0x002e, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            18: [0, 1, [0,0], b"\x12\x00\x02\x03\x03", 4, 0x002f, 0x0044, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Spike balls
+            12: [0, 1, [0,0], b"\x0C\x00\x02\x05\x03", 4, 0x0001, 0x0003, [], False],
+            13: [0, 1, [0,0], b"\x0D\x00\x02\x03\x03", 4, 0x0004, 0x0012, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], False],
+            14: [0, 1, [0,0], b"\x0E\x00\x02\x03\x03", 4, 0x0013, 0x0021, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], False],  # Weird 4way issues
+            15: [0, 1, [0,0], b"\x0F\x00\x02\x03\x03", 4, 0x0022, 0x002e, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], False],
+            18: [0, 1, [0,0], b"\x12\x00\x02\x03\x03", 4, 0x002f, 0x0044, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], True],  # Spike balls
 
             # Inca Ruins
-            27: [1, 0, [0,0], b"\x1B\x00\x02\x05\x03", 4, 0x0045, 0x004a, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Moon Tribe cave
-            29: [1, 1, [0,0], b"\x1D\x00\x02\x0F\x03", 4, 0x004b, 0x0059, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            32: [1, 1, [0,0], b"\x20\x00\x02\x08\x03", 4, 0x005e, 0x0065, []],  # Broken statue
-            33: [2, 1, [0,0], b"\x21\x00\x02\x08\x03", 4, 0x0066, 0x007a, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],  # Floor switch
-            34: [2, 1, [0,0], b"\x22\x00\x02\x08\x03", 4, 0x007b, 0x008e, []],  # Floor switch
-            35: [2, 1, [0,0], b"\x23\x00\x02\x0A\x03", 4, 0x008f, 0x009d, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            37: [1, 1, [0,0], b"\x25\x00\x02\x08\x03", 4, 0x009e, 0x00a9, [1]],  # Diamond block
-            38: [1, 1, [0,0], b"\x26\x00\x02\x08\x03", 4, 0x00aa, 0x00b3, []],  # Broken statues
-            39: [1, 1, [0,0], b"\x27\x00\x02\x0A\x03", 4, 0x00b4, 0x00c4, []],
-            40: [1, 1, [0,0], b"\x28\x00\x02\x08\x03", 4, 0x00c5, 0x00cc, [1]],  # Falling blocks
+            27: [1, 0, [0,0], b"\x1B\x00\x02\x05\x03", 4, 0x0045, 0x004a, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], False],  # Moon Tribe cave
+            29: [1, 1, [0,0], b"\x1D\x00\x02\x0F\x03", 4, 0x004b, 0x0059, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], True],
+            32: [1, 1, [0,0], b"\x20\x00\x02\x08\x03", 4, 0x005e, 0x0065, [], False],  # Broken statue
+            33: [2, 1, [0,0], b"\x21\x00\x02\x08\x03", 4, 0x0066, 0x007a, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], True],  # Floor switch
+            34: [2, 1, [0,0], b"\x22\x00\x02\x08\x03", 4, 0x007b, 0x008e, [], True],  # Floor switch
+            35: [2, 1, [0,0], b"\x23\x00\x02\x0A\x03", 4, 0x008f, 0x009d, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], False],
+            37: [1, 1, [0,0], b"\x25\x00\x02\x08\x03", 4, 0x009e, 0x00a9, [1], False],  # Diamond block
+            38: [1, 1, [0,0], b"\x26\x00\x02\x08\x03", 4, 0x00aa, 0x00b3, [], True],  # Broken statues
+            39: [1, 1, [0,0], b"\x27\x00\x02\x0A\x03", 4, 0x00b4, 0x00c4, [], False],
+            40: [1, 1, [0,0], b"\x28\x00\x02\x08\x03", 4, 0x00c5, 0x00cc, [1], False],  # Falling blocks
 
             # Diamond Mine
-            61: [3, 2, [0,0], b"\x3D\x00\x02\x08\x03", 4, 0x00ce, 0x00d8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            62: [3, 2, [0,0], b"\x3E\x00\x02\x08\x03", 4, 0x00d9, 0x00df, []],
-            63: [3, 2, [0,0], b"\x3F\x00\x02\x05\x03", 4, 0x00e0, 0x00f7, []],
-            64: [3, 2, [0,0], b"\x40\x00\x02\x08\x03", 4, 0x00f8, 0x00fd, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],  # Trapped laborer (??)
-            65: [3, 2, [0,0], b"\x41\x00\x02\x00\x03", 4, 0x00fe, 0x0108, [0, 2, 3, 4, 5, 11]],  # Stationary Grundit
-            69: [3, 2, [0,0], b"\x45\x00\x02\x08\x03", 4, 0x0109, 0x010e, []],
-            70: [3, 2, [0,0], b"\x46\x00\x02\x08\x03", 4, 0x010f, 0x0117, [3, 13]],
+            61: [3, 2, [0,0], b"\x3D\x00\x02\x08\x03", 4, 0x00ce, 0x00d8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], False],
+            62: [3, 2, [0,0], b"\x3E\x00\x02\x08\x03", 4, 0x00d9, 0x00df, [], False],
+            63: [3, 2, [0,0], b"\x3F\x00\x02\x05\x03", 4, 0x00e0, 0x00f7, [], True],
+            64: [3, 2, [0,0], b"\x40\x00\x02\x08\x03", 4, 0x00f8, 0x00fd, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], False],  # Trapped laborer (??)
+            65: [3, 2, [0,0], b"\x41\x00\x02\x00\x03", 4, 0x00fe, 0x0108, [0, 2, 3, 4, 5, 11], False],  # Stationary Grundit
+            69: [3, 2, [0,0], b"\x45\x00\x02\x08\x03", 4, 0x0109, 0x010e, [], False],
+            70: [3, 2, [0,0], b"\x46\x00\x02\x08\x03", 4, 0x010f, 0x0117, [3, 13], False],
 
             # Sky Garden
-            77: [4, 2, [0,0], b"\x4D\x00\x02\x12\x03", 4, 0x0118, 0x0129, []],
-            78: [5, 2, [0,0], b"\x4E\x00\x02\x10\x03", 4, 0x012a, 0x0136, []],
-            79: [4, 2, [0,0], b"\x4F\x00\x02\x12\x03", 4, 0x0137, 0x0143, []],
-            80: [5, 2, [0,0], b"\x50\x00\x02\x10\x03", 4, 0x0144, 0x014f, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            81: [4, 2, [0,0], b"\x51\x00\x02\x12\x03", 4, 0x0150, 0x015c, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            82: [5, 2, [0,0], b"\x52\x00\x02\x10\x03", 4, 0x015d, 0x0163, [4, 5]],
-            83: [4, 2, [0,0], b"\x53\x00\x02\x12\x03", 4, 0x0164, 0x0172, []],
-            84: [5, 2, [0,0], b"\x54\x00\x02\x12\x03", 4, 0x0173, 0x0182, [4, 5]],
+            77: [4, 2, [0,0], b"\x4D\x00\x02\x12\x03", 4, 0x0118, 0x0129, [], True],
+            78: [5, 2, [0,0], b"\x4E\x00\x02\x10\x03", 4, 0x012a, 0x0136, [], True],
+            79: [4, 2, [0,0], b"\x4F\x00\x02\x12\x03", 4, 0x0137, 0x0143, [], True],
+            80: [5, 2, [0,0], b"\x50\x00\x02\x10\x03", 4, 0x0144, 0x014f, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], True],
+            81: [4, 2, [0,0], b"\x51\x00\x02\x12\x03", 4, 0x0150, 0x015c, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], False],
+            82: [5, 2, [0,0], b"\x52\x00\x02\x10\x03", 4, 0x015d, 0x0163, [4, 5], True],
+            83: [4, 2, [0,0], b"\x53\x00\x02\x12\x03", 4, 0x0164, 0x0172, [], True],
+            84: [5, 2, [0,0], b"\x54\x00\x02\x12\x03", 4, 0x0173, 0x0182, [4, 5], True],
 
             # Mu
             #            92: [6,0,0,b"\x5C\x00\x02\x15\x03",4,[]],  # Seaside Palace
-            95:  [6, 3, [0,0], b"\x5F\x00\x02\x14\x03", 4, 0x0193, 0x01a5, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]],
-            96:  [6, 3, [0,0], b"\x60\x00\x02\x14\x03", 4, 0x01a6, 0x01bf, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
-            97:  [6, 3, [0,0], b"\x61\x00\x02\x14\x03", 4, 0x01c0, 0x01d9, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
-            98:  [6, 3, [0,0], b"\x62\x00\x02\x14\x03", 4, 0x01da, 0x01e5, []],
-            100: [6, 3, [0,0], b"\x64\x00\x02\x14\x03", 4, 0x01e6, 0x01ed, []],
-            101: [6, 3, [0,0], b"\x65\x00\x02\x14\x03", 4, 0x01ee, 0x01fe, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13]],
+            95:  [6, 3, [0,0], b"\x5F\x00\x02\x14\x03", 4, 0x0193, 0x01a5, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], True],
+            96:  [6, 3, [0,0], b"\x60\x00\x02\x14\x03", 4, 0x01a6, 0x01bf, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13], True],
+            97:  [6, 3, [0,0], b"\x61\x00\x02\x14\x03", 4, 0x01c0, 0x01d9, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13], True],
+            98:  [6, 3, [0,0], b"\x62\x00\x02\x14\x03", 4, 0x01da, 0x01e5, [], True],
+            100: [6, 3, [0,0], b"\x64\x00\x02\x14\x03", 4, 0x01e6, 0x01ed, [], True],
+            101: [6, 3, [0,0], b"\x65\x00\x02\x14\x03", 4, 0x01ee, 0x01fe, [0, 1, 2, 3, 4, 5, 6, 10, 11, 13], False],
 
             # Angel Dungeon
-            109: [7, 3, [0,0], b"\x6D\x00\x02\x16\x03", 4, 0x0201, 0x020f, [7, 8, 9, 10]],  # Add 10's back in once flies are fixed
-            110: [7, 3, [0,0], b"\x6E\x00\x02\x18\x03", 4, 0x0210, 0x0222, [7, 8, 9, 10]],
-            111: [7, 3, [0,0], b"\x6F\x00\x02\x1B\x03", 4, 0x0223, 0x0228, [7, 8, 9, 10]],
-            112: [7, 3, [0,0], b"\x70\x00\x02\x16\x03", 4, 0x0229, 0x022f, [7, 8, 9, 10]],
-            113: [7, 3, [0,0], b"\x71\x00\x02\x18\x03", 4, 0x0230, 0x0231, [7, 8, 9, 10]],
-            114: [7, 3, [0,0], b"\x72\x00\x02\x18\x03", 4, 0x0232, 0x0242, [7, 8, 9, 10]],
+            109: [7, 3, [0,0], b"\x6D\x00\x02\x16\x03", 4, 0x0201, 0x020f, [7, 8, 9, 10], True],  # Add 10's back in once flies are fixed
+            110: [7, 3, [0,0], b"\x6E\x00\x02\x18\x03", 4, 0x0210, 0x0222, [7, 8, 9, 10], True],
+            111: [7, 3, [0,0], b"\x6F\x00\x02\x1B\x03", 4, 0x0223, 0x0228, [7, 8, 9, 10], False],
+            112: [7, 3, [0,0], b"\x70\x00\x02\x16\x03", 4, 0x0229, 0x022f, [7, 8, 9, 10], False],
+            113: [7, 3, [0,0], b"\x71\x00\x02\x18\x03", 4, 0x0230, 0x0231, [7, 8, 9, 10], False],
+            114: [7, 3, [0,0], b"\x72\x00\x02\x18\x03", 4, 0x0232, 0x0242, [7, 8, 9, 10], False],
 
             # Great Wall
-            130: [8, 4, [0,0], b"\x82\x00\x02\x1D\x03", 4, 0x0243, 0x0262, [8, 9, 10]],  # Add 10's back in once flies are fixed
-            131: [8, 4, [0,0], b"\x83\x00\x02\x1D\x03", 4, 0x0263, 0x0277, [7, 8, 9, 10]],
-            133: [8, 4, [0,0], b"\x85\x00\x02\x1D\x03", 4, 0x0278, 0x0291, [8, 9, 10]],
-            134: [8, 4, [0,0], b"\x86\x00\x02\x1D\x03", 4, 0x0292, 0x029a, [7, 8, 9, 10]],
-            135: [8, 4, [0,0], b"\x87\x00\x02\x1D\x03", 4, 0x029b, 0x02a6, [8]],
-            136: [8, 4, [0,0], b"\x88\x00\x02\x1D\x03", 4, 0x02a7, 0x02b5, [7, 8, 9]],
+            130: [8, 4, [0,0], b"\x82\x00\x02\x1D\x03", 4, 0x0243, 0x0262, [8, 9, 10], True],  # Add 10's back in once flies are fixed
+            131: [8, 4, [0,0], b"\x83\x00\x02\x1D\x03", 4, 0x0263, 0x0277, [7, 8, 9, 10], True],
+            133: [8, 4, [0,0], b"\x85\x00\x02\x1D\x03", 4, 0x0278, 0x0291, [8, 9, 10], True],
+            134: [8, 4, [0,0], b"\x86\x00\x02\x1D\x03", 4, 0x0292, 0x029a, [7, 8, 9, 10], False],
+            135: [8, 4, [0,0], b"\x87\x00\x02\x1D\x03", 4, 0x029b, 0x02a6, [8], True],
+            136: [8, 4, [0,0], b"\x88\x00\x02\x1D\x03", 4, 0x02a7, 0x02b5, [7, 8, 9], True],
 
             # Mt Temple
-            160: [9, 4, [0,0], b"\xA0\x00\x02\x20\x03", 4, 0x02b7, 0x02c1, []],
-            161: [9, 4, [0,0], b"\xA1\x00\x02\x20\x03", 4, 0x02c2, 0x02d9, [7, 8, 9, 10]],
-            162: [9, 4, [0,0], b"\xA2\x00\x02\x20\x03", 4, 0x02da, 0x02e7, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
-            163: [9, 4, [0,0], b"\xA3\x00\x02\x20\x03", 4, 0x02e8, 0x02fb, []],
-            164: [9, 4, [0,0], b"\xA4\x00\x02\x20\x03", 4, 0x02fc, 0x0315, [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13]],
-            165: [9, 4, [0,0], b"\xA5\x00\x02\x20\x03", 4, 0x0316, 0x032d, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13]],  # Drops
-            166: [9, 4, [0,0], b"\xA6\x00\x02\x20\x03", 4, 0x032e, 0x033c, []],
-            167: [9, 4, [0,0], b"\xA7\x00\x02\x20\x03", 4, 0x033d, 0x0363, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            168: [9, 4, [0,0], b"\xA8\x00\x02\x20\x03", 4, 0x0364, 0x036b, [7, 8, 9, 10]],
+            160: [9, 4, [0,0], b"\xA0\x00\x02\x20\x03", 4, 0x02b7, 0x02c1, [], False],
+            161: [9, 4, [0,0], b"\xA1\x00\x02\x20\x03", 4, 0x02c2, 0x02d9, [7, 8, 9, 10], True],
+            162: [9, 4, [0,0], b"\xA2\x00\x02\x20\x03", 4, 0x02da, 0x02e7, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13], True],  # Drops
+            163: [9, 4, [0,0], b"\xA3\x00\x02\x20\x03", 4, 0x02e8, 0x02fb, [], False],
+            164: [9, 4, [0,0], b"\xA4\x00\x02\x20\x03", 4, 0x02fc, 0x0315, [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13], True],
+            165: [9, 4, [0,0], b"\xA5\x00\x02\x20\x03", 4, 0x0316, 0x032d, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13], True],  # Drops
+            166: [9, 4, [0,0], b"\xA6\x00\x02\x20\x03", 4, 0x032e, 0x033c, [], True],
+            167: [9, 4, [0,0], b"\xA7\x00\x02\x20\x03", 4, 0x033d, 0x0363, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13], True],
+            168: [9, 4, [0,0], b"\xA8\x00\x02\x20\x03", 4, 0x0364, 0x036b, [7, 8, 9, 10], False],
 
             # Ankor Wat
-            176: [10, 6, [0,0], b"\xB0\x00\x02\x2C\x03", 4, 0x036c, 0x037a, []],
-            177: [11, 6, [0,0], b"\xB1\x00\x02\x08\x03", 4, 0x037b, 0x038d, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13]],
-            178: [11, 6, [0,0], b"\xB2\x00\x02\x08\x03", 4, 0x038e, 0x0398, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
-            179: [11, 6, [0,0], b"\xB3\x00\x02\x08\x03", 4, 0x0399, 0x039f, []],
-            180: [11, 6, [0,0], b"\xB4\x00\x02\x08\x03", 4, 0x03a0, 0x03a5, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13]],
-            181: [11, 6, [0,0], b"\xB5\x00\x02\x08\x03", 4, 0x03a6, 0x03b0, []],
-            182: [10, 6, [0,0], b"\xB6\x00\x02\x2C\x03", 4, 0x03b1, 0x03d7, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            183: [11, 6, [0,0], b"\xB7\x00\x02\x08\x03", 4, 0x03d8, 0x03e3, []],  # Earthquaker Golem
-            184: [11, 6, [0,0], b"\xB8\x00\x02\x08\x03", 4, 0x03e4, 0x03e9, [0, 1, 3, 4, 5, 7, 8, 9, 11, 13]],
-            185: [11, 6, [0,0], b"\xB9\x00\x02\x08\x03", 4, 0x03ea, 0x03f1, []],
-            186: [10, 6, [0,0], b"\xBA\x00\x02\x2C\x03", 4, 0x03f2, 0x03f6, []],
-            187: [11, 6, [0,0], b"\xBB\x00\x02\x08\x03", 4, 0x03f7, 0x03fc, []],
-            188: [11, 6, [0,0], b"\xBC\x00\x02\x24\x03", 4, 0x03fd, 0x0403, []],
-            189: [11, 6, [0,0], b"\xBD\x00\x02\x08\x03", 4, 0x0404, 0x040e, []],
-            190: [11, 6, [0,0], b"\xBE\x00\x02\x08\x03", 4, 0x040f, 0x0415, []],
+            176: [10, 6, [0,0], b"\xB0\x00\x02\x2C\x03", 4, 0x036c, 0x037a, [], True],
+            177: [11, 6, [0,0], b"\xB1\x00\x02\x08\x03", 4, 0x037b, 0x038d, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], True],
+            178: [11, 6, [0,0], b"\xB2\x00\x02\x08\x03", 4, 0x038e, 0x0398, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13], True],
+            179: [11, 6, [0,0], b"\xB3\x00\x02\x08\x03", 4, 0x0399, 0x039f, [], True],
+            180: [11, 6, [0,0], b"\xB4\x00\x02\x08\x03", 4, 0x03a0, 0x03a5, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13], False],
+            181: [11, 6, [0,0], b"\xB5\x00\x02\x08\x03", 4, 0x03a6, 0x03b0, [], True],
+            182: [10, 6, [0,0], b"\xB6\x00\x02\x2C\x03", 4, 0x03b1, 0x03d7, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13], True],
+            183: [11, 6, [0,0], b"\xB7\x00\x02\x08\x03", 4, 0x03d8, 0x03e3, [], True],  # Earthquaker Golem
+            184: [11, 6, [0,0], b"\xB8\x00\x02\x08\x03", 4, 0x03e4, 0x03e9, [0, 1, 3, 4, 5, 7, 8, 9, 11, 13], True],
+            185: [11, 6, [0,0], b"\xB9\x00\x02\x08\x03", 4, 0x03ea, 0x03f1, [], False],
+            186: [10, 6, [0,0], b"\xBA\x00\x02\x2C\x03", 4, 0x03f2, 0x03f6, [], True],
+            187: [11, 6, [0,0], b"\xBB\x00\x02\x08\x03", 4, 0x03f7, 0x03fc, [], False],
+            188: [11, 6, [0,0], b"\xBC\x00\x02\x24\x03", 4, 0x03fd, 0x0403, [], True],
+            189: [11, 6, [0,0], b"\xBD\x00\x02\x08\x03", 4, 0x0404, 0x040e, [], True],
+            190: [11, 6, [0,0], b"\xBE\x00\x02\x08\x03", 4, 0x040f, 0x0415, [], False],
 
             # Pyramid
-            204: [12, 5, [0,0], b"\xCC\x00\x02\x08\x03", 4, 0x0416, 0x0417, []],
-            206: [12, 5, [0,0], b"\xCE\x00\x02\x08\x03", 4, 0x0418, 0x0423, []],
-            207: [12, 5, [0,0], b"\xCF\x00\x02\x08\x03", 4, 0x0424, 0x0431, []],
-            208: [12, 5, [0,0], b"\xD0\x00\x02\x08\x03", 4, 0x0432, 0x0439, []],
-            209: [12, 5, [0,0], b"\xD1\x00\x02\x08\x03", 4, 0x043a, 0x044c, []],
-            210: [12, 5, [0,0], b"\xD2\x00\x02\x08\x03", 4, 0x044d, 0x0462, []],
-            211: [12, 5, [0,0], b"\xD3\x00\x02\x08\x03", 4, 0x0463, 0x0473, []],
-            212: [12, 5, [0,0], b"\xD4\x00\x02\x08\x03", 4, 0x0474, 0x0483, []],
-            213: [12, 5, [0,0], b"\xD5\x00\x02\x08\x03", 4, 0x0484, 0x0497, []],
-            214: [12, 5, [0,0], b"\xD6\x00\x02\x26\x03", 4, 0x0498, 0x04a8, []],
-            215: [12, 5, [0,0], b"\xD7\x00\x02\x28\x03", 4, 0x04a9, 0x04b8, [0, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]],
-            216: [12, 5, [0,0], b"\xD8\x00\x02\x08\x03", 4, 0x04b9, 0x04db, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]],
-            217: [12, 5, [0,0], b"\xD9\x00\x02\x26\x03", 4, 0x04dc, 0x04f2, []],
-            219: [12, 5, [0,0], b"\xDB\x00\x02\x26\x03", 4, 0x04f3, 0x04f6, [0, 4, 5, 8, 9, 11, 12]],  #Spike elevators
+            204: [12, 5, [0,0], b"\xCC\x00\x02\x08\x03", 4, 0x0416, 0x0417, [], False],
+            206: [12, 5, [0,0], b"\xCE\x00\x02\x08\x03", 4, 0x0418, 0x0423, [], True],
+            207: [12, 5, [0,0], b"\xCF\x00\x02\x08\x03", 4, 0x0424, 0x0431, [], True],
+            208: [12, 5, [0,0], b"\xD0\x00\x02\x08\x03", 4, 0x0432, 0x0439, [], False],
+            209: [12, 5, [0,0], b"\xD1\x00\x02\x08\x03", 4, 0x043a, 0x044c, [], True],
+            210: [12, 5, [0,0], b"\xD2\x00\x02\x08\x03", 4, 0x044d, 0x0462, [], True],
+            211: [12, 5, [0,0], b"\xD3\x00\x02\x08\x03", 4, 0x0463, 0x0473, [], True],
+            212: [12, 5, [0,0], b"\xD4\x00\x02\x08\x03", 4, 0x0474, 0x0483, [], True],
+            213: [12, 5, [0,0], b"\xD5\x00\x02\x08\x03", 4, 0x0484, 0x0497, [], True],
+            214: [12, 5, [0,0], b"\xD6\x00\x02\x26\x03", 4, 0x0498, 0x04a8, [], True],
+            215: [12, 5, [0,0], b"\xD7\x00\x02\x28\x03", 4, 0x04a9, 0x04b8, [0, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13], False],
+            216: [12, 5, [0,0], b"\xD8\x00\x02\x08\x03", 4, 0x04b9, 0x04db, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13], True],
+            217: [12, 5, [0,0], b"\xD9\x00\x02\x26\x03", 4, 0x04dc, 0x04f2, [], True],
+            219: [12, 5, [0,0], b"\xDB\x00\x02\x26\x03", 4, 0x04f3, 0x04f6, [0, 4, 5, 8, 9, 11, 12], False],  #Spike elevators
 
             # Jeweler's Mansion
-            233: [13, 0, [0,0], b"\xE9\x00\x02\x22\x03", 4, 0x04f9, 0x051e, [0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]]
+            233: [13, 0, [0,0], b"\xE9\x00\x02\x22\x03", 4, 0x04f9, 0x051e, [0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13], True]
 
         }
 
         # Database of enemy types
         # FORMAT: { ID: [Enemyset ID, Define for addr, Default stat block,
-        #           Type(1=stationary,2=walking,3=flying),OnWalkableTile,CanBeRandom,Name]}
+        #           Type(1=stationary,2=walking,3=flying),OnWalkableTile,CanBeRandom,
+        #           Name]}
         self.enemies = {
             # Underground Tunnel
             0: [0, "EnemizerBatAddr", 0x05, 2, True, True, "Bat"],  # a8755
@@ -4952,10 +5218,10 @@ class World:
             106: [11, "EnemizerGorgonDropperAddr", 0x45, 2, True, False, "Gorgon Dropper"],
             107: [11, "EnemizerFrenzie1Addr", 0x43, 2, True, False, "Frenzie 1"],
             108: [11, "EnemizerFrenzie2Addr", 0x43, 2, True, True, "Frenzie 2"],
-            109: [11, "EnemizerWallWalker1Addr", 0x44, 1, False, True, "Wall Walker 1"],
-            110: [11, "EnemizerWallWalker2Addr", 0x3a, 1, False, False, "Wall Walker 2"],
-            111: [11, "EnemizerWallWalker3Addr", 0x44, 1, False, False, "Wall Walker 3"],
-            112: [11, "EnemizerWallWalker4Addr", 0x3a, 1, False, False, "Wall Walker 4"],
+            109: [11, "EnemizerWatScarab1Addr", 0x44, 1, False, True, "Wall Walker 1"],
+            110: [11, "EnemizerWatScarab2Addr", 0x3a, 1, False, False, "Wall Walker 2"],
+            111: [11, "EnemizerWatScarab3Addr", 0x44, 1, False, False, "Wall Walker 3"],
+            112: [11, "EnemizerWatScarab4Addr", 0x3a, 1, False, False, "Wall Walker 4"],
             113: [11, "EnemizerGorgonBlockAddr", 0x45, 2, True, False, "Gorgon (block)"],
 
             # Pyramid
@@ -6380,15 +6646,15 @@ class World:
             12: [ 0, 0, 0, 303, 290, "Map8AExit02", b"\x82\x10\x00\x90\x00\x87\x00\x18", True, 7, False, "Sand Fanger exit"],
             
             13: [14, 0, 0, 414, 448, "MapMQEntranceString", b"\xDD\xF8\x00\xB0\x01\x00\x00\x22", True, 10, False, "Mummy Queen entrance (in)"],
-            14: [13, 0, 0,   0,   0,      "", b"\xCC\xF8\x01\x20\x01\x03\x00\x44", True, 10, False, "Mummy Queen entrance (out)"],  # fake
-            15: [ 0, 0, 0, 448, 415,      "", b"\xCD\x70\x00\x90\x00\x83\x00\x11", True, 10, False, "Mummy Queen exit"],     # This one's dumb, see exits_detailed
+            14: [13, 0, 0,   0,   0, "MapMQReturnString", b"\xCC\xF8\x01\x20\x01\x03\x00\x44", True, 10, False, "Mummy Queen entrance (out)"],  # Artificial
+            15: [ 0, 0, 0, 448, 415, "MapMQExitString", b"\xCD\x70\x00\xA0\x00\x83\x00\x11", True, 10, False, "Mummy Queen exit"],     # Artificial; details in exits_detailed
 
             16: [17, 0, 0, 470, 471, "MapE2Exit02", b"\xE3\xD8\x00\x90\x03\x83\x30\x44", True, 11, False, "Babel entrance (in)"],
             17: [16, 0, 0,   0,   0, "MapE3Exit01", b"\xE2\xD0\x00\xE0\x00\x03\x00\x84", True, 11, False, "Babel entrance (out)"],
             18: [ 0, 0, 0, 472, 400, "MapBabelWarpString", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, 11, False, "Dao passage (Babel)"],
             19: [20, 0, 0, 481, 482, "MapE9Exit01", b"\xEA\x78\x00\xC0\x00\x00\x00\x11", True, 12, False, "Solid Arm entrance (in)"],
-            20: [19, 0, 0,   0,   0,      "", b"\xE9\x78\x03\x90\x00\x03\x00\x44", True, 12, False, "Solid Arm entrance (out)"],  # fake
-            21: [ 0, 0, 0, 472, 400,      "", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, 12, False, "Dao passage (Solid Arm)"],  # fake
+            20: [19, 0, 0,   0,   0, "MapSolidArmReturnString", b"\xE9\x78\x03\x90\x00\x03\x00\x44", True, 12, False, "Solid Arm entrance (out)"],  # Artificial
+            21: [ 0, 0, 0, 472, 400, "MapBabelTopReturnString", b"\xC3\x10\x02\x90\x00\x83\x00\x23", True, 12, False, "Dao passage (Solid Arm)"],  # Artificial
 #            21: [ 0, 0, 0, 482, 472,      "", b"\xE3\x80\x02\xB0\x01\x80\x10\x23", True, True, False, "Babel passage (Solid Arm)", []],  # This one stays, @98115
 
             # Passage Menus
@@ -6621,8 +6887,8 @@ class World:
             308: [307, 0, 0,   0,   0, "Map54Exit03", b"", False,  4, False, "Sky Garden: Map 84 to Map 83 (W)"],
             
             # Seaside Palace
-            310: [311, 0, 0, 211, 201, "", b"", False, 0, False, "Seaside entrance"],  # ALWAYS LINKED (69759)
-            311: [310, 0, 0,   0,   0, "", b"", False, 0, False, "Seaside exit"],      # ALWAYS LINKED (1906a)
+            310: [311, 0, 0, 211, 201, "Map5EExit03", b"", False, 0, False, "Seaside entrance"],  # ALWAYS LINKED (69759)
+            311: [310, 0, 0,   0,   0, "Map5AExit05", b"", False, 0, False, "Seaside exit"],      # ALWAYS LINKED (1906a)
             312: [313, 0, 0, 200, 202, "Map5AExit02", b"", False, 0, False, "Seaside: Area 1 NE Room (in)"],
             313: [312, 0, 0,   0,   0, "Map5BExit01", b"", False, 0, False, "Seaside: Area 1 NE Room (out)"],
             314: [315, 0, 0, 200, 203, "Map5AExit03", b"", False, 0, False, "Seaside: Area 1 NW Room (in)"],

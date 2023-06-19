@@ -27,6 +27,15 @@ hirom
 !CardMusicCityVariant = $11,$1C,$00,$9C,$F3,$95
 !CardMusicSilence = $11,$1b,$00,$1d,$2a,$df
 
+if !SettingDungeonShuffle == 2    ; Dungeon Chaos QOL to prevent chaotic music shifts.
+!CardMusicInca = !CardMusicMinorDungeon
+!CardMusicSkGn = !CardMusicMinorDungeon
+!CardMusicMu = !CardMusicMinorDungeon
+!CardMusicGtWl = !CardMusicMinorDungeon
+!CardMusicAnkr = !CardMusicMinorDungeon
+!CardMusicPymd = !CardMusicMinorDungeon
+endif
+
 if !OptionMuteMusic == 1
 !CardMusicCape = !CardMusicSilence
 !CardMusicCastle = !CardMusicSilence

@@ -14,6 +14,8 @@ from randomizer.models.enums.statue_req import StatueReq
 from randomizer.models.enums.logic import Logic
 from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
+from randomizer.models.enums.dungeon_shuffle import DungeonShuffle
+from randomizer.models.enums.orb_rando import OrbRando
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
@@ -120,6 +122,26 @@ def generate_ROM():
             return EntranceShuffle.COUPLED
         if g == "Uncoupled":
             return EntranceShuffle.UNCOUPLED
+ 
+    def get_dungeon_shuffle():
+        g = dungeon_shuffle.get()
+        if g == "None":
+            return DungeonShuffle.NONE
+        if g == "Basic":
+            return DungeonShuffle.BASIC
+        if g == "Chaos":
+            return DungeonShuffle.CHAOS
+        if g == "Clustered":
+            return DungeonShuffle.CLUSTERED
+
+    def get_orb_rando():
+        g = orb_rando.get()
+        if g == "None":
+            return OrbRando.NONE
+        if g == "Basic":
+            return OrbRando.BASIC
+        if g == "Orbsanity":
+            return OrbRando.ORBSANITY
 
     def get_start_location():
         g = start.get()
@@ -155,7 +177,8 @@ def generate_ROM():
         seed_int = int(seed_str)
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite())
+            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(),
+            get_dungeon_shuffle(), get_orb_rando())
 
         rom_filename = generate_filename(settings, "sfc")
         spoiler_filename = generate_filename(settings, "json")
@@ -347,6 +370,8 @@ tkinter.Label(mainframe, text="Generate graph").grid(row=18, column=0, sticky=tk
 tkinter.Label(mainframe, text="Race seed").grid(row=19, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Fluteless").grid(row=20, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Sprite").grid(row=21, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=22, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Orb Rando").grid(row=23, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
@@ -396,6 +421,14 @@ overworld_shuffle.set(0)
 entrance_shuffle = tkinter.StringVar(root)
 entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
 entrance_shuffle.set("None")
+
+dungeon_shuffle = tkinter.StringVar(root)
+dungeon_shuffle_choices = ["None", "Basic", "Chaos"]
+dungeon_shuffle.set("None")
+
+orb_rando = tkinter.StringVar(root)
+orb_rando_choices = ["None", "Basic", "Orbsanity"]
+orb_rando.set("None")
 
 graph_viz_toggle = tkinter.IntVar(root)
 graph_viz_toggle.set(0)
@@ -450,6 +483,8 @@ graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_to
 race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
 fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=20, column=1)
 sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=21, column=1)
+dungeon_shuffle_menu = tkinter.OptionMenu(mainframe, dungeon_shuffle, *dungeon_shuffle_choices).grid(row=22, column=1)
+orb_rando_menu = tkinter.OptionMenu(mainframe, orb_rando, *orb_rando_choices).grid(row=23, column=1)
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)

@@ -5,6 +5,8 @@ from .enums.goal import Goal
 from .enums.statue_req import StatueReq
 from .enums.logic import Logic
 from .enums.entrance_shuffle import EntranceShuffle
+from .enums.dungeon_shuffle import DungeonShuffle
+from .enums.orb_rando import OrbRando
 from .enums.enemizer import Enemizer
 from .enums.start_location import StartLocation
 from .enums.sprites import Sprite
@@ -19,7 +21,8 @@ class RandomizerData:
                  red_jewel_madness: bool = False, allow_glitches: bool = False, boss_shuffle: bool = False,
                  open_mode: bool = False, z3: bool = False, overworld_shuffle: bool = False,
                  entrance_shuffle: EntranceShuffle = EntranceShuffle.NONE, race_mode: bool = False, fluteless: bool = False,
-                 sprite: Sprite = Sprite.WILL, dungeon_shuffle: bool = False):
+                 sprite: Sprite = Sprite.WILL, dungeon_shuffle: DungeonShuffle = DungeonShuffle.NONE,
+                 orb_rando: OrbRando = OrbRando.NONE):
         self.seed = seed
         self.difficulty = difficulty
 #        self.level = level
@@ -36,6 +39,7 @@ class RandomizerData:
         self.boss_shuffle = boss_shuffle
         self.overworld_shuffle = overworld_shuffle
         self.dungeon_shuffle = dungeon_shuffle
+        self.orb_rando = orb_rando
         self.open_mode = open_mode
         self.z3 = z3
         self.overworld_shuffle = overworld_shuffle

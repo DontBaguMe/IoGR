@@ -2,7 +2,10 @@ arch 65816
 hirom
 fillbyte $FF
 
-
+!DungeonShuffleDracoOffset = 0
+if !SettingDungeonShuffle > 0
+!DungeonShuffleDracoOffset = 2
+endif
 
 ActorList:
 .Pointers:
@@ -628,7 +631,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $07,$08,$00 : dl $89BF90 : db $00
 db $0D,$18,$05 : dl $80f500 : db $00
-if !KaraLocation == 0
+if !KaraLocation == 1
 db $0b,$0b,$00 : dl $86d14e : db $00
 endif
 db $FF,$CA 
@@ -1300,7 +1303,7 @@ db $FF,$CA
 ActorList_Map47:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
-if !KaraLocation == 1
+if !KaraLocation == 2
 db $0b,$24,$00 : dl $86d14e : db $00
 else
 db $0B,$25,$00 : dl $85D08E : db $00 
@@ -2090,9 +2093,9 @@ db $0E,$25,!Monster021CParam : dl !Monster021CAddr : db !Monster021CStats,$1C,!M
 db $16,$25,!Monster021DParam : dl !Monster021DAddr : db !Monster021DStats,$1D,!Monster021DItemFlag
 db $30,$24,!Monster021EParam : dl !Monster021EAddr : db !Monster021EStats,$1E,!Monster021EItemFlag
 db $35,$23,!Monster021FParam : dl !Monster021FAddr : db !Monster021FStats,$1F,!Monster021FItemFlag
-db $28,$09,!Monster0220Param : dl !Monster0220Addr : db !Monster0220Stats,$20,!Monster0220ItemFlag
-db $37,$08,!Monster0221Param : dl !Monster0221Addr : db !Monster0221Stats,$21,!Monster0221ItemFlag
-db $39,$29,!Monster0222Param : dl !Monster0222Addr : db !Monster0222Stats,$22,!Monster0222ItemFlag
+db $28,$09+!DungeonShuffleDracoOffset,!Monster0220Param : dl !Monster0220Addr : db !Monster0220Stats,$20,!Monster0220ItemFlag
+db $37,$08+!DungeonShuffleDracoOffset,!Monster0221Param : dl !Monster0221Addr : db !Monster0221Stats,$21,!Monster0221ItemFlag
+db $39,$29+!DungeonShuffleDracoOffset,!Monster0222Param : dl !Monster0222Addr : db !Monster0222Stats,$22,!Monster0222ItemFlag
 db $FF,$CA 
 
 ActorList_Map6F:
@@ -2134,8 +2137,8 @@ db $1B,$19,!Monster0229Param : dl !Monster0229Addr : db !Monster0229Stats,$30,!M
 db $1F,$12,!Monster022AParam : dl !Monster022AAddr : db !Monster022AStats,$31,!Monster022AItemFlag
 db $17,$13,!Monster022BParam : dl !Monster022BAddr : db !Monster022BStats,$32,!Monster022BItemFlag
 db $12,$14,!Monster022CParam : dl !Monster022CAddr : db !Monster022CStats,$33,!Monster022CItemFlag
-db $27,$18,!Monster022DParam : dl !Monster022DAddr : db !Monster022DStats,$34,!Monster022DItemFlag
-db $2A,$18,!Monster022EParam : dl !Monster022EAddr : db !Monster022EStats,$35,!Monster022EItemFlag
+db $27,$18+!DungeonShuffleDracoOffset,!Monster022DParam : dl !Monster022DAddr : db !Monster022DStats,$34,!Monster022DItemFlag
+db $2A,$18+!DungeonShuffleDracoOffset,!Monster022EParam : dl !Monster022EAddr : db !Monster022EStats,$35,!Monster022EItemFlag
 db $12,$1C,!Monster022FParam : dl !Monster022FAddr : db !Monster022FStats,$36,!Monster022FItemFlag
 db $26,$18,$09 : dl $80d16a : db $00
 db $0A,$2E,$09 : dl $80D1B5 : db $00
@@ -2191,7 +2194,7 @@ db $FF,$CA
 ActorList_Map74:
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
-if !KaraLocation == 2
+if !KaraLocation == 3
 db $07,$08,$00 : dl $86D14E : db $00 
 endif
 db $25,$0B,$00 : dl $86ce82 : db $00
@@ -3063,7 +3066,7 @@ ActorList_MapA9:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $DF,$DF,$00 : dl $80E94D : db $00
-if !KaraLocation == 3
+if !KaraLocation == 4
 db $12,$06,$00 : dl $86d14e : db $00
 endif
 db $FF,$CA 
@@ -3409,7 +3412,7 @@ ActorList_MapBF:
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $0F,$0B,$00 : dl $889AA3 : db $00
-if !KaraLocation == 4
+if !KaraLocation == 5
 db $1a,$10,$00 : dl $86d14e : db $00
 endif
 db $FF,$CA 

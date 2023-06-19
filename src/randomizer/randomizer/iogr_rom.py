@@ -12,15 +12,17 @@ from .models.enums.goal import Goal
 from .models.enums.statue_req import StatueReq
 from .models.enums.logic import Logic
 from .models.enums.entrance_shuffle import EntranceShuffle
+from .models.enums.dungeon_shuffle import DungeonShuffle
+from .models.enums.orb_rando import OrbRando
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
 from . import asar
 import os   # Required to add asar.dll
 
-VERSION = "4.4.9"
+VERSION = "4.7.0"
 
-MAX_RANDO_RETRIES = 9
+MAX_RANDO_RETRIES = 100
 PRINT_LOG = True
 
 KARA_EDWARDS = 1
@@ -98,6 +100,23 @@ def generate_filename(settings: RandomizerData, extension: str):
             return "_ER(x)"
         if entrance_shuffle.value == EntranceShuffle.NONE.value:
             return ""
+ 
+    def getDungeonShuffle(dungeon_shuffle):
+        if dungeon_shuffle.value == DungeonShuffle.BASIC.value:
+            return "_dsb"
+        if dungeon_shuffle.value == DungeonShuffle.CHAOS.value:
+            return "_dsx"
+        if dungeon_shuffle.value == DungeonShuffle.NONE.value:
+            return ""
+        if dungeon_shuffle.value == DungeonShuffle.CLUSTERED.value:
+            return "_dsc"
+    
+    def getOrbRando(orb_rando):
+        if orb_rando.value == OrbRando.BASIC.value:
+            return "_ob"
+        if orb_rando.value == OrbRando.ORBSANITY.value:
+            return "_ox"
+        return ""
 
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
@@ -139,6 +158,8 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.firebird, "f")
     filename += getSwitch(settings.ohko, "ohko")
     filename += getSwitch(settings.z3, "z3")
+    filename += getDungeonShuffle(settings.dungeon_shuffle)
+    filename += getOrbRando(settings.orb_rando)
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.fluteless, "fl")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
@@ -195,13 +216,13 @@ class Randomizer:
         hash = h.digest()
 
         hash_dict = [ "/", ".", "[", "]", "*", ",", "+", "-", 
-            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", 
+                      "2", "3", "4", "5", "6", "7", "8", "9", ":", 
             "(", ")", "?", "A", "B", "C", "D", "E", "F", "G", 
-            "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", 
+            "H", "I", "J", "K", "L", "M", "N",      "P", "Q", "R", 
             "S", "T", "U", "V", "W", "X", "Y", "Z", "'", "<", ">", 
             "#", "a", "b", "c", "d", "e", "f", "g", "h", "i", 
-            "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", 
-            "u", "v", "w", "x", "y", "z", "{", "}", "|", "=", ";" ]
+            "j", "k",      "m", "n", "o", "p", "q", "r", "s", "t", 
+            "u", "v", "w", "x", "y", "z", "{", "}",      "=", ";" ]
 
         hash_len = len(hash_dict)
 
@@ -663,15 +684,6 @@ class Randomizer:
             i += 1
             if i < len(death_str):
                 asar_defines["PlayerDeathText"] += ","
-
-        ## Standardize text, check for infinite death loop
-        #patch.seek(int("d7a2", 16) + rom_offset)
-        #patch.write(b"\xAD\xCA\x0A\xF0\x06\x02\xBF\xC2\xD7\x80\x0D\x02\xBF\xF0\xFD\x80\x07")
-        #
-        #f_pi = open(BIN_PATH + "00fdf0_pi.bin", "rb")
-        #patch.seek(int("fdf0", 16) + rom_offset)
-        #patch.write(f_pi.read())
-        #f_pi.close()
 
         ##########################################################################
         #                   Randomize item and ability placement
@@ -1192,8 +1204,6 @@ class Randomizer:
         ##########################################################################
         romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
         
-        # temp for testing
-        asar_defines["SettingOrbRando"] = 1
         asar_defines["SettingEarlyFirebird"] = 1 if settings.firebird else 0
         asar_defines["SettingRedJewelHunt"] = 1 if settings.goal.value is Goal.RED_JEWEL_HUNT.value else 0
         asar_defines["SettingRedJewelMadness"] = 1 if settings.red_jewel_madness else 0
@@ -1202,18 +1212,22 @@ class Randomizer:
         asar_defines["SettingZ3"] = 1 if settings.z3 else 0
         asar_defines["SettingFluteless"] = 1 if settings.fluteless else 0
         asar_defines["SettingEnemizer"] = settings.enemizer.value
-        asar_defines["SettingEntranceShuffle"] = 0
+        asar_defines["SettingEntranceShuffle"] = settings.entrance_shuffle.value
+        asar_defines["SettingDungeonShuffle"] = settings.dungeon_shuffle.value
+        asar_defines["SettingOrbRando"] = settings.orb_rando.value
+        
+        asar_defines["OptionMuteMusic"] = 0
         
         for d in asar_defines:
             asar_defines[d] = str(asar_defines[d])   # The library requires defines to be string type.
         asar.init("asar.dll")
         asar_patch_result = asar.patch(os.getcwd()+"/src/randomizer/randomizer/iogr.asr", romdata, [], True, asar_defines)
-        #breakpoint()
         
         if asar_patch_result[0]:
             return asar_patch_result
         else:
             asar_error_list = asar.geterrors()
+            #breakpoint()
             return [False, asar_error_list]
 
     def generate_spoiler(self) -> str:

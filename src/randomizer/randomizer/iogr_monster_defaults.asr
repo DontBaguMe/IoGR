@@ -11986,10 +11986,10 @@ hirom
 !EnemizerGorgonDropperAddr = $8bb817
 !EnemizerFrenzie1Addr = $8bbfbb
 !EnemizerFrenzie2Addr = $8bbfd0
-!EnemizerWallWalker1Addr = $8bbb66
-!EnemizerWallWalker2Addr = $8bbb66
-!EnemizerWallWalker3Addr = $8bbb5c
-!EnemizerWallWalker4Addr = $8bbb5c
+!EnemizerWatScarab1Addr = $8bbb66
+!EnemizerWatScarab2Addr = $8bbb66
+!EnemizerWatScarab3Addr = $8bbb5c
+!EnemizerWatScarab4Addr = $8bbb5c
 !EnemizerGorgonBlockAddr = $8899af
 
 !EnemizerMysticBallStationaryAddr = $8bc65f
