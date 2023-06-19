@@ -444,7 +444,7 @@ enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
 enemizer.set("None")
 
 sprite = tkinter.StringVar(root)
-sprite_choices = ["Will", "Bagu", "Invisible"]#, "Freet", "Solar", "Sye"]
+sprite_choices = ["Will"]#, "Bagu", "Invisible"]#, "Freet", "Solar", "Sye"]
 sprite.set("Will")
 
 statues = tkinter.StringVar(root)
