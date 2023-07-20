@@ -386,7 +386,7 @@ db "DEF",$ca
 .StrItem:
 db "STR",$ca
 .LightJewel:
-db "a Light Upgrade",$ca
+db "a Dash Upgrade",$ca
 .DarkJewel:
 db "a Friar Upgrade",$ca
 .RamaStatue:

@@ -3259,8 +3259,8 @@ class World:
             #737: [1, 5, 0x6d, "Ankor Wat Pit Exit", False, 1], # Probably shouldn't randomize this...
             738: [1, 5, 0x6f, "Wat Dark Space Corridor", False, 1],
             739: [1, 5, 0x73, "Pyramid Foyer Dark Space", False, 1],
-            740: [1, 5, 0x9a, "Mansion First Gate", False, 1],
-            741: [1, 5, 0x9b, "Mansion Second Gate", False, 1]
+            740: [1, 5, 0x9a, "Mansion First Barrier", False, 1],
+            741: [1, 5, 0x9b, "Mansion Second Barrier", False, 1]
         }
 
         # Define Item/Ability/Statue locations
