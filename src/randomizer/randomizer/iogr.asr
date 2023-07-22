@@ -5357,6 +5357,15 @@ db " Yes, I'm a bad person",$cb
 db " Snitches get stitches yo",$ca
 warnpc $85ba0c
 
+; "Update NPC dialogue to Neomatamune's quote (congrats tourney winner 2023)"
+org $85bdbe
+db $d3
+db "French don't say Sacre",$cb
+db "Bleu!"
+db $c0
+warnpc $85bdea
+
+
 org $85bfdb
 dw $bfde    ; Slave text target
 
