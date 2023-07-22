@@ -8394,9 +8394,9 @@ db "Expert______",$ca
 org $8bfd00
 ; switches.bin, game initialization
 {
-lda.w #(!HieroOrder2+(!HieroOrder1<<8)) : sta $0a58
-lda.w #(!HieroOrder4+(!HieroOrder3<<8)) : sta $0a5a
-lda.w #(!HieroOrder6+(!HieroOrder5<<8)) : sta $0a5c
+lda.w #(!HieroOrder1+(!HieroOrder2<<8)) : sta $0a58
+lda.w #(!HieroOrder3+(!HieroOrder4<<8)) : sta $0a5a
+lda.w #(!HieroOrder5+(!HieroOrder6<<8)) : sta $0a5c
 lda.w #!AutotrackerLogicAndKaraVal : sta $0a5e
 cop #$CD : dw (!Statue1Required*$02f8)    ; Flag for autotracker.
 cop #$CD : dw (!Statue2Required*$02f9)    ; Flag for autotracker.

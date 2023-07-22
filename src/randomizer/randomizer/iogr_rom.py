@@ -523,13 +523,14 @@ class Randomizer:
         asar_defines["KaraLocation"] = kara_location
 
         # Set Kara's location and logic mode in RAM switches (for autotracker)
-        if settings.logic.value == Logic.COMPLETABLE.value:
-            logic_int = 0x10 + kara_location
-        elif settings.logic.value == Logic.BEATABLE.value:
-            logic_int = 0x20 + kara_location
-        else:
-            logic_int = 0x40 + kara_location
-        asar_defines["AutotrackerLogicAndKaraVal"] = logic_int
+        ## (hmm, I don't think tracker supports this yet? --rae)
+        #if settings.logic.value == Logic.COMPLETABLE.value:
+        #    logic_int = 0x10 + kara_location
+        #elif settings.logic.value == Logic.BEATABLE.value:
+        #    logic_int = 0x20 + kara_location
+        #else:
+        #    logic_int = 0x40 + kara_location
+        asar_defines["AutotrackerLogicAndKaraVal"] = kara_location#logic_int
 
         ##########################################################################
         #                          Have fun with death text
