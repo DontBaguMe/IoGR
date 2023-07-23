@@ -7973,6 +7973,81 @@ org $89c037
 jsl LR_ForceChangeToWill   ; At Edward's dungeon exit.
 cop #$E0
 
+if !SettingEnemizer >= 2
+org $89C2D0
+; unused
+
+warnpc $89c2db
+org $89c2db
+EMPFallingBlockWall:
+lda #$0000 : sta $7F0010,x
+bra +
+EMPFallingBlockFloor:
+lda #$0001 : sta $7F0010,x
++:
+cop #$88 : dl $8ee000
+cop #$BC : db $08, $00
+cop #$9C : dl EMPFallingBlockShadow : dw $0301
+dec $17    ; witchcraft (eq. lda $16 : sec : sbc #$0100 : sta $16, provided $16 >= #$0100)
+lda #$2000 : trb $10
+cop #$B2
+cop #$86 : db $1b, $02, $0F
+cop #$8A
+cop #$08 : db $15, $15
+cop #$B4
+lda #$0100 : trb $10
+cop #$82 : db $1b, $35
+cop #$89
+lda #$0100 : tsb $10
+cop #$B3
+lda $7F0010,x : bne +   ; Is 1 if new floor, 0 if new wall.
+cop #$0B
+bra ++
++:
+cop #$11
+++:
+cop #$C1
+rtl
+EMPFallingBlockShadow:
+cop #$84 : db $31, $03
+cop #$8A
+cop #$E0
+
+warnpc $89c33b
+org $89c33b
+db $1b : dw $2300
+EMPFallingBlockInDiamondBlockRoom:
+cop #$88 : dl $8ee000
+cop #$8D : db $1b
+cop #$BC : db $08, $00
+cop #$D0 : db $2F, $01 : dw .DoneFalling
+cop #$D2 : db $2F, $01
+lda #$CFF0 : tsb $065A
+cop #$DA : db $3B
+cop #$08 : db $15, $15
+cop #$9C : dl $80cf8e : dw $2000    ; i.e. ESimpleScreenShake
+cop #$DA : db $B3
+cop #$23 : sta $08
+cop #$C2
+dec $17    ; witchcraft (eq. lda $16 : sec : sbc #$0100 : sta $16, provided $16 >= #$0100)
+lda #$2000 : trb $10
+cop #$B2
+cop #$86 : db $1b, $02, $0F
+cop #$8A
+cop #$08 : db $15, $15
+cop #$B4
+cop #$82 : db $1b, $35
+cop #$89
+.DoneFalling:
+lda #$2000 : trb $10
+cop #$B3
+cop #$11
+lda #$CFF0 : trb $065A
+cop #$C1
+rtl
+warnpc $89c39f
+endif
+
 org $89c5bb
 ; Singing Statue
 %MTryGiveItemAndFlag(!IncaCliffItem, $32)

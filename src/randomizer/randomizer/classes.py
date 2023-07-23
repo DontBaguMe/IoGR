@@ -2314,7 +2314,10 @@ class World:
             if location not in self.free_locations and location in self.location_text:
                 if item in self.required_items or item in self.good_items or location in self.trolly_locations:
                     spoiler_str = self.area_short_name[location] + " has ]"   # ']' is a newline
-                    spoiler_str += self.item_pool[item][3]
+                    if len(self.item_pool[item][3]) >= 26:
+                        spoiler_str += self.item_pool[item][3].replace(' ','_',2).replace(' ',']',1)
+                    else:
+                        spoiler_str += self.item_pool[item][3]
                     # No in-game spoilers in Expert mode
                     if self.difficulty >= 3:
                         spoiler_str = "nice try dodongo!"
@@ -2875,6 +2878,13 @@ class World:
         return True
 
 
+    # Check whether this monster ID is compatible with this enemy type.
+    def can_monster_be_type(self, monster_id, enemy_type):
+        if monster_id in self.enemizer_restricted_enemies:
+            if enemy_type in self.enemizer_restricted_enemies[monster_id]:
+                return False
+        return True
+
     # Shuffle enemies in ROM
     def enemize(self):
         complex_enemies = [4, 15, 53, 62, 88]  # Enemies with many sprites, or are no fun
@@ -2950,16 +2960,11 @@ class World:
                     new_enemy = new_enemies[i]
                     new_enemytype = self.enemies[new_enemy][3]
                     new_walkable = self.enemies[new_enemy][4]
-                    if walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies) - 1:
+                    if (this_monster_id in self.enemizer_restricted_enemies and self.can_monster_be_type(this_monster_id,new_enemy)) or ((this_monster_id not in self.enemizer_restricted_enemies) and (complex_ct < max_complex or new_enemy not in complex_enemies) and (walkable or new_enemytype == 3 or walkable == new_walkable or i == len(new_enemies) - 1)):
                         found_enemy = True
                         # Limit number of complex enemies per map
                         if new_enemy in complex_enemies:
                             complex_ct += 1
-                            if complex_ct >= max_complex:
-                                for enemy_tmp in new_enemies:
-                                    if enemy_tmp in complex_enemies:
-                                        new_enemies.remove(enemy_tmp)
-                                        i -= 1
                     i += 1
                 self.asar_defines["Monster"+format(this_monster_id,"04X")+"Addr"] = "!"+self.enemies[new_enemy][1]
                 if map == 27:   # Moon Tribe doesn't shuffle stats
@@ -3219,48 +3224,48 @@ class World:
             602: [0, 4, "", "Early Firebird", False, 1],
             
             # Orbs that open doors
-            700: [1, 5, 0x01, "U.Tunnel Skeleton Cage", False, 3],
-            701: [1, 5, 0x02, "U.Tunnel First Door", False, 1],
-            702: [1, 5, 0x03, "U.Tunnel Second Door", False, 1],
-            703: [1, 5, 0x05, "U.Tunnel Bat Door", False, 1],
-            704: [1, 5, 0x16, "U.Tunnel Dark Space", False, 1],
-            705: [1, 5, 0x17, "U.Tunnel Skeleton Door 1", False, 1],
-            706: [1, 5, 0x18, "U.Tunnel Skeleton Door 2", False, 1],
-            707: [1, 5, 0x0d, "Inca West Ladder", False, 3],
-            708: [1, 5, 0x0e, "Inca Entrance Ladder", False, 3],
-            709: [1, 5, 0x0f, "Inca Final Ladder", False, 3],
-            710: [1, 5, 0x0c, "Inca N/S Ramp Room Ramp", False, 1],
-            711: [1, 5, 0x0b, "Inca E/W Ramp Room Ramp", False, 1],
-            712: [1, 5, 0x0a, "Inca Diamond Block Stair", False, 3],
-            713: [1, 5, 0x10, "Inca Singing Statue Stair", False, 3],
-            714: [1, 5, 0x34, "Mine Tunnel Middle Fence", False, 1],
-            715: [1, 5, 0x35, "Mine Tunnel South Fence", False, 1],
-            716: [1, 5, 0x36, "Mine Tunnel North Fence", False, 1],
-            717: [1, 5, 0x22, "Mine Big Room Cage", False, 3],
-            718: [1, 5, 0x32, "Mine Appearing Dark Space", False, 1],
-            719: [1, 5, 0x23, "Mine Friar Fence", False, 1],
-            720: [1, 5, 0x37, "Garden SE Top Gate", False, 1],
-            721: [1, 5, 0x30, "Garden SE Darkside Chest", False, 1],
-            722: [1, 5, 0x24, "Garden SW Top Robot Gate", False, 1],
-            723: [1, 5, 0x2b, "Garden SW Top Robot Ramp", False, 3],
-            724: [1, 5, 0x2c, "Garden SW Top Worm Gate", False, 3],
-            725: [1, 5, 0x31, "Garden SW Darkside Cage", False, 3],
-            726: [1, 5, 0x3d, "Mu Entrance Gate", False, 1],
-            727: [1, 5, 0x3e, "Mu NE First Rock", False, 1],
-            728: [1, 5, 0x3f, "Mu NE Second Rock", False, 1],
-            729: [1, 5, 0x42, "Mu West Slime Cages", False, 3],
-            730: [1, 5, 0x41, "Mu SE East-facing Head", False, 3],
-            731: [1, 5, 0x40, "Mu SE South-facing Head", False, 3],
-            732: [1, 5, 0x53, "Great Wall Friar Gate", False, 1],
-            #733: [1, 5, 0x6a, "Fanger Blocked Exit", False, 1], # Probably shouldn't randomize this...
-            734: [1, 5, 0x68, "Kress West Room Shortcut", False, 3],
-            735: [1, 5, 0x6c, "Wat Entrance Stair", False, 1],
-            736: [1, 5, 0x6b, "Wat East Slider Hole", False, 1],
-            #737: [1, 5, 0x6d, "Ankor Wat Pit Exit", False, 1], # Probably shouldn't randomize this...
-            738: [1, 5, 0x6f, "Wat Dark Space Corridor", False, 1],
-            739: [1, 5, 0x73, "Pyramid Foyer Dark Space", False, 1],
-            740: [1, 5, 0x9a, "Mansion First Barrier", False, 1],
-            741: [1, 5, 0x9b, "Mansion Second Barrier", False, 1]
+            700: [1, 5, 0x01, "Open Underground Tunnel Skeleton Cage", False, 3],
+            701: [1, 5, 0x02, "Open Underground Tunnel First Worm Door", False, 1],
+            702: [1, 5, 0x03, "Open Underground Tunnel Second Worm Door", False, 1],
+            703: [1, 5, 0x05, "Open Underground Tunnel West Room Bat Door", False, 1],
+            704: [1, 5, 0x16, "Open Underground Tunnel Hidden Dark Space", False, 1],
+            705: [1, 5, 0x17, "Open Underground Tunnel Red Skeleton Barrier 1", False, 1],
+            706: [1, 5, 0x18, "Open Underground Tunnel Red Skeleton Barrier 2", False, 1],
+            707: [1, 5, 0x0d, "Open Incan Ruins West Ladder", False, 3],
+            708: [1, 5, 0x0e, "Open Incan Ruins Entrance Ladder", False, 3],
+            709: [1, 5, 0x0f, "Open Incan Ruins Final Ladder", False, 3],
+            710: [1, 5, 0x0c, "Open Incan Ruins Water Room Ramp", False, 1],
+            711: [1, 5, 0x0b, "Open Incan Ruins East-West Freedan Ramp", False, 1],
+            712: [1, 5, 0x0a, "Open Incan Ruins Diamond Block Stairs", False, 3],
+            713: [1, 5, 0x10, "Open Incan Ruins Singing Statue Stairs", False, 3],
+            714: [1, 5, 0x34, "Open Diamond Mine Tunnel Middle Fence", False, 1],
+            715: [1, 5, 0x35, "Open Diamond Mine Tunnel South Fence", False, 1],
+            716: [1, 5, 0x36, "Open Diamond Mine Tunnel North Fence", False, 1],
+            717: [1, 5, 0x22, "Open Diamond Mine Big Room Monster Cage", False, 3],
+            718: [1, 5, 0x32, "Open Diamond Mine Hidden Dark Space", False, 1],
+            719: [1, 5, 0x23, "Open Diamond Mine Ramp Room Worm Fence", False, 1],
+            720: [1, 5, 0x37, "Open Sky Garden SE Topside Friar Barrier", False, 1],
+            721: [1, 5, 0x30, "Open Sky Garden SE Darkside Chest Barrier", False, 1],
+            722: [1, 5, 0x24, "Open Sky Garden SW Topside Cyber Barrier", False, 1],
+            723: [1, 5, 0x2b, "Open Sky Garden SW Topside Cyber Ledge", False, 3],
+            724: [1, 5, 0x2c, "Open Sky Garden SW Topside Worm Barrier", False, 3],
+            725: [1, 5, 0x31, "Open Sky Garden SW Darkside Fire Cages", False, 3],
+            726: [1, 5, 0x3d, "Open Mu Entrance Room Barrier", False, 1],
+            727: [1, 5, 0x3e, "Open Mu Northeast Room Rock 1", False, 1],
+            728: [1, 5, 0x3f, "Open Mu Northeast Room Rock 2", False, 1],
+            729: [1, 5, 0x42, "Open Mu West Room Slime Cages", False, 3],
+            730: [1, 5, 0x41, "Open Mu East-Facing Stone Head", False, 3],
+            731: [1, 5, 0x40, "Open Mu South-Facing Stone Head", False, 3],
+            732: [1, 5, 0x53, "Open Great Wall Archer Friar Barrier", False, 1],
+            #733: [1, 5, 0x6a, "Open Great Wall Fanger Arena Exit", False, 1], # Probably shouldn't randomize this...
+            734: [1, 5, 0x68, "Open Mt. Temple West Chest Shortcut", False, 3],
+            735: [1, 5, 0x6c, "Open Ankor Wat Entrance Stairs", False, 1],
+            736: [1, 5, 0x6b, "Open Ankor Wat Outer East Slider Hole", False, 1],
+            #737: [1, 5, 0x6d, "Open Ankor Wat Pit Exit", False, 1], # Probably shouldn't randomize this...
+            738: [1, 5, 0x6f, "Open Ankor Wat Dark Space Corridor", False, 1],
+            739: [1, 5, 0x73, "Open Pyramid Foyer Upper Dark Space", False, 1],
+            740: [1, 5, 0x9a, "Open Jeweler's Mansion First Barrier", False, 1],
+            741: [1, 5, 0x9b, "Open Jeweler's Mansion Second Barrier", False, 1]
         }
 
         # Define Item/Ability/Statue locations
@@ -4866,6 +4871,7 @@ class World:
         }
 
         # Define long item text for in-game format
+        # I think this is only used for spoilers now
         self.item_text_long = {
             0:  b"\xd3\xd6\x1d\x8d\x8e\xa4\x87\x88\x8d\x86\x4f\xac\xac\xac\xac\xac\xac\xac\xac",
             1:  b"\xd3\xd6\x1d\x80\xac\x62\x84\x83\xac\x49\x84\xa7\x84\x8b\x4f\xac\xac\xac\xac",
@@ -5020,10 +5026,10 @@ class World:
             33: [2, 1, [0,0], b"\x21\x00\x02\x08\x03", 4, 0x0066, 0x007a, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], True],  # Floor switch
             34: [2, 1, [0,0], b"\x22\x00\x02\x08\x03", 4, 0x007b, 0x008e, [], True],  # Floor switch
             35: [2, 1, [0,0], b"\x23\x00\x02\x0A\x03", 4, 0x008f, 0x009d, [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13], False],
-            37: [1, 1, [0,0], b"\x25\x00\x02\x08\x03", 4, 0x009e, 0x00a9, [1], False],  # Diamond block
+            37: [1, 1, [0,0], b"\x25\x00\x02\x08\x03", 4, 0x009e, 0x00a9, [], False],  # Diamond block
             38: [1, 1, [0,0], b"\x26\x00\x02\x08\x03", 4, 0x00aa, 0x00b3, [], True],  # Broken statues
             39: [1, 1, [0,0], b"\x27\x00\x02\x0A\x03", 4, 0x00b4, 0x00c4, [], False],
-            40: [1, 1, [0,0], b"\x28\x00\x02\x08\x03", 4, 0x00c5, 0x00cc, [1], False],  # Falling blocks
+            40: [1, 1, [0,0], b"\x28\x00\x02\x08\x03", 4, 0x00c5, 0x00cc, [], False],  # Falling blocks
 
             # Diamond Mine
             61: [3, 2, [0,0], b"\x3D\x00\x02\x08\x03", 4, 0x00ce, 0x00d8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13], False],
@@ -5213,11 +5219,11 @@ class World:
             101: [10, "EnemizerShrubber2Addr", 0x49, 2, True, False, "Shrubber 2"],
             102: [10, "EnemizerZombieAddr", 0x46, 2, True, True, "Zombie"],
             103: [10, "EnemizerZipFlyAddr", 0x4a, 3, True, True, "Zip Fly"],  # False for now...
-            104: [11, "EnemizerGoldcapAddr", 0x42, 3, True, True, "Goldcap"],
+            104: [11, "EnemizerGoldcapAddr", 0x42, 3, True, True, "Goldcap"],    # i.e. flying skull
             105: [11, "EnemizerGorgonAddr", 0x45, 2, True, True, "Gorgon"],
             106: [11, "EnemizerGorgonDropperAddr", 0x45, 2, True, False, "Gorgon Dropper"],
-            107: [11, "EnemizerFrenzie1Addr", 0x43, 2, True, False, "Frenzie 1"],
-            108: [11, "EnemizerFrenzie2Addr", 0x43, 2, True, True, "Frenzie 2"],
+            107: [11, "EnemizerFrenzie1Addr", 0x43, 2, True, False, "Frenzie 1"],   # i.e. wall skull stationary
+            108: [11, "EnemizerFrenzie2Addr", 0x43, 2, True, True, "Frenzie 2"],    # i.e. wall skull moving
             109: [11, "EnemizerWatScarab1Addr", 0x44, 1, False, True, "Wall Walker 1"],
             110: [11, "EnemizerWatScarab2Addr", 0x3a, 1, False, False, "Wall Walker 2"],
             111: [11, "EnemizerWatScarab3Addr", 0x44, 1, False, False, "Wall Walker 3"],
@@ -5228,10 +5234,10 @@ class World:
             120: [12, "EnemizerMysticBallStationaryAddr", 0x4f, 1, True, True, "Mystic Ball (stationary)"],
             121: [12, "EnemizerMysticBall1Addr", 0x4f, 2, True, True, "Mystic Ball 1"],
             122: [12, "EnemizerMysticBall2Addr", 0x4f, 2, True, True, "Mystic Ball 2"],
-            123: [12, "EnemizerTutsAddr", 0x4e, 2, True, True, "Tuts"],
-            124: [12, "EnemizerBlasterAddr", 0x51, 1, True, True, "Blaster"],
-            125: [12, "EnemizerHauntStationaryAddr", 0x4c, 2, True, False, "Haunt (stationary)"],
-            126: [12, "EnemizerHauntAddr", 0x4c, 2, True, True, "Haunt"],
+            123: [12, "EnemizerTutsAddr", 0x4e, 2, True, True, "Tuts"],   # i.e. spearman
+            124: [12, "EnemizerBlasterAddr", 0x51, 1, True, True, "Blaster"],   # i.e. bird head
+            125: [12, "EnemizerHauntStationaryAddr", 0x4c, 2, True, False, "Haunt (stationary)"],   # i.e. wall mummy
+            126: [12, "EnemizerHauntAddr", 0x4c, 2, True, True, "Haunt"],   # i.e. loose mummy
 
             # Babel Tower
             #            130: [14,"\xd7\x99\x8a",0x5a,"Castoth (boss)"],
@@ -5517,6 +5523,7 @@ class World:
             0x00FF: 35,
             0x0100: 35,
             0x0101: 35,
+            #0x0102: xx,    # Friar worm fence worm; always a special stationary worm actor
             0x0103: 33,
             0x0104: 33,
             0x0105: 33,
@@ -6563,6 +6570,53 @@ class World:
             0x051C: 141,
             0x051D: 141,
             0x051E: 141
+        }
+        
+        # If populated, list of disallowed enemy type at each monster ID.
+        # Prevents monsters who hold orbs from being enemized to something unreachable.
+        self.enemizer_restricted_enemies = {
+            0x0004: [53,60,73,80,81,102,103,104],  # U.Tunnel Skeleton Cage
+            0x0006: [53,60,73,80,81,102,103,104],  # U.Tunnel First Door
+            0x0016: [53,60,73,80,81,102,103,104],  # U.Tunnel Second Door
+            0x002A: [53,60,73,80,81,102,103,104],  # U.Tunnel Bat Door
+            0x0034: [53,60,73,80,81,102,103,104],  # U.Tunnel Dark Space
+            0x0043: [53,60,73,80,81,102,103,104],  # U.Tunnel Skeleton Door 1
+            0x0044: [53,60,73,80,81,102,103,104],  # U.Tunnel Skeleton Door 2
+            0x0051: [53,60,73,80,81,102,103,104],  # Inca West Ladder
+            0x0052: [53,60,73,80,81,102,103,104],  # Inca Entrance Ladder
+            0x0055: [53,60,73,80,81,102,103,104],  # Inca Final Ladder
+            0x007A: [53,60,73,80,81,102,103,104],  # Inca N/S Ramp Room Ramp
+            0x009D: [53,60,73,80,81,102,103,104],  # Inca E/W Ramp Room Ramp
+            0x00BF: [53,60,73,80,81,102,103,104],  # Inca Diamond Block Stair
+            0x00CA: [53,60,73,80,81,102,103,104],  # Inca Singing Statue Stair
+            0x00CF: [53,60,73,80,81,102,103,104],  # Mine Tunnel Middle Fence
+            0x00D2: [53,60,73,80,81,102,103,104],  # Mine Tunnel South Fence
+            0x00D3: [53,60,73,80,81,102,103,104],  # Mine Tunnel North Fence
+            0x00E0: [53,60,73,80,81,102,103,104],  # Mine Big Room Cage
+            0x00FD: [53,60,73,80,81,102,103,104],  # Mine Appearing Dark Space
+            #0x0102: [],   # Friar worm fence worm is never randomized
+            0x013B: [2,14,17,22,33,35,41,43,52,53,55,60,62,73,80,81,102,103,104,123,141,143],  # Garden SE Top Gate
+            0x0148: [53,60,73,80,81,102,103,104],  # Garden SE Darkside Chest
+            0x0150: [53,60,73,80,81,102,103,104],  # Garden SW Top Robot Gate
+            0x0153: [53,60,73,80,81,102,103,104],  # Garden SW Top Robot Ramp
+            0x015C: [53,60,73,80,81,102,103,104],  # Garden SW Top Worm Gate
+            0x0161: [53,60,73,80,81,102,103,104],  # Garden SW Darkside Cage
+            0x0194: [53,60,73,80,81,102,103,104],  # Mu Entrance Gate
+            0x01A7: [2,14,17,22,33,35,41,43,52,53,55,60,62,73,80,81,102,103,104,123,141,143],  # Mu NE First Rock
+            0x01A9: [2,14,17,22,33,35,41,43,52,53,55,60,62,73,80,81,102,103,104,123,141,143],  # Mu NE Second Rock
+            0x01DE: [53,60,73,80,81,102,103,104],  # Mu West Slime Cages
+            0x01EE: [53,60,73,80,81,102,103,104],  # Mu SE East-facing Head
+            0x01FC: [53,60,73,80,81,102,103,104],  # Mu SE South-facing Head
+            0x029B: [2,14,17,22,33,35,41,43,52,53,55,60,62,73,80,81,102,103,104,123,141,143],  # Great Wall Friar Gate
+            #0x02B6: [],   # Fanger is never randomized
+            0x030A: [53,60,73,80,81,102,103,104],  # Kress West Room Shortcut
+            0x0388: [53,60,73,80,81,102,103,104],  # Wat Entrance Stair
+            0x0395: [53,60,73,80,81,102,103,104],  # Wat East Slider Hole
+            0x03A0: [53,60,73,80,81,102,103,104],  # Ankor Wat Pit Exit
+            0x03E9: [2,14,17,22,33,35,41,43,52,53,55,60,62,73,80,81,102,103,104,123,141,143],  # Wat Dark Space Corridor
+            0x0417: [53,60,73,80,81,102,103,104],  # Pyramid Foyer Dark Space
+            0x04FA: [53,60,73,80,81,102,103,104],  # Mansion First Barrier
+            0x0505: [53,60,73,80,81,102,103,104]   # Mansion Second Barrier
         }
 
         # Database of non-enemy sprites to disable in enemizer

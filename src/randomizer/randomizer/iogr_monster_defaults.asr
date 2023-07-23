@@ -11981,11 +11981,11 @@ hirom
 !EnemizerShrubber2Addr = $8bb1b4
 !EnemizerZombieAddr = $8bb275
 !EnemizerZipFlyAddr = $8baf4f
-!EnemizerGoldcapAddr = $8bbd8d
+!EnemizerGoldcapAddr = $8bbd8d    ; i.e. flying skull
 !EnemizerGorgonAddr = $8bb825
 !EnemizerGorgonDropperAddr = $8bb817
-!EnemizerFrenzie1Addr = $8bbfbb
-!EnemizerFrenzie2Addr = $8bbfd0
+!EnemizerFrenzie1Addr = $8bbfbb    ; i.e. wall skull stationary
+!EnemizerFrenzie2Addr = $8bbfd0    ; i.e. wall skull moving
 !EnemizerWatScarab1Addr = $8bbb66
 !EnemizerWatScarab2Addr = $8bbb66
 !EnemizerWatScarab3Addr = $8bbb5c

@@ -955,7 +955,9 @@ db $04,$24,!Monster00CAParam : dl !Monster00CAAddr : db !Monster00CAStats,$84,!M
 db $12,$12,!Monster00CBParam : dl !Monster00CBAddr : db !Monster00CBStats,$85,!Monster00CBItemFlag
 db $0E,$18,!Monster00CCParam : dl !Monster00CCAddr : db !Monster00CCStats,$86,!Monster00CCItemFlag
 db $00,$01,$00 : dl $89C6A9 : db $00
+if !SettingEnemizer == 0
 db $1B,$13,$00 : dl $89C89D : db $00
+endif
 db $FF,$CA 
 
 ActorList_Map29:    ; Castoth.
