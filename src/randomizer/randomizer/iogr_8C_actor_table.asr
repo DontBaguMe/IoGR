@@ -6,6 +6,10 @@ fillbyte $FF
 if !SettingDungeonShuffle > 0
 !DungeonShuffleDracoOffset = 2
 endif
+!FlutelessEnemizerEdDgWaterSpawnOffset = 0
+if !SettingEnemizer >= 2 && !SettingFluteless > 0
+!FlutelessEnemizerEdDgWaterSpawnOffset = 2
+endif
 
 ActorList:
 .Pointers:
@@ -481,9 +485,9 @@ ActorList_Map0D:
 db $0A,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $12,$22,!Monster0004Param : dl !Monster0004Addr : db !Monster0004Stats,$04,!Monster0004ItemFlag
+db $12+!FlutelessEnemizerEdDgWaterSpawnOffset,$22,!Monster0004Param : dl !Monster0004Addr : db !Monster0004Stats,$04,!Monster0004ItemFlag
 db $15,$2D,!Monster0005Param : dl !Monster0005Addr : db !Monster0005Stats,$05,!Monster0005ItemFlag
-db $0C,$3D,!Monster0006Param : dl !Monster0006Addr : db !Monster0006Stats,$06,!Monster0006ItemFlag
+db $0C-!FlutelessEnemizerEdDgWaterSpawnOffset,$3D,!Monster0006Param : dl !Monster0006Addr : db !Monster0006Stats,$06,!Monster0006ItemFlag
 db $09,$0B,!Monster0007Param : dl !Monster0007Addr : db !Monster0007Stats,$07,!Monster0007ItemFlag
 db $03,$1B,!Monster0008Param : dl !Monster0008Addr : db !Monster0008Stats,$08,!Monster0008ItemFlag
 db $01,$22,!Monster0009Param : dl !Monster0009Addr : db !Monster0009Stats,$09,!Monster0009ItemFlag
@@ -505,7 +509,7 @@ db $11,$11,$00 : dl $80EA96 : db $00
 db $2B,$10,!Monster0013Param : dl !Monster0013Addr : db !Monster0013Stats,$13,!Monster0013ItemFlag
 db $1F,$1B,!Monster0014Param : dl !Monster0014Addr : db !Monster0014Stats,$14,!Monster0014ItemFlag
 db $11,$15,!Monster0015Param : dl !Monster0015Addr : db !Monster0015Stats,$15,!Monster0015ItemFlag
-db $08,$0B,!Monster0016Param : dl !Monster0016Addr : db !Monster0016Stats,$16,!Monster0016ItemFlag
+db $08-!FlutelessEnemizerEdDgWaterSpawnOffset,$0B,!Monster0016Param : dl !Monster0016Addr : db !Monster0016Stats,$16,!Monster0016ItemFlag
 db $37,$04,!Monster0017Param : dl !Monster0017Addr : db !Monster0017Stats,$17,!Monster0017ItemFlag
 db $3D,$07,!Monster0018Param : dl !Monster0018Addr : db !Monster0018Stats,$18,!Monster0018ItemFlag
 db $34,$1E,!Monster0019Param : dl !Monster0019Addr : db !Monster0019Stats,$19,!Monster0019ItemFlag
@@ -595,7 +599,7 @@ db $21,$5A,!Monster0030Param : dl !Monster0030Addr : db !Monster0030Stats,$31,!M
 db $0F,$4D,!Monster0031Param : dl !Monster0031Addr : db !Monster0031Stats,$32,!Monster0031ItemFlag
 db $0F,$4B,!Monster0032Param : dl !Monster0032Addr : db !Monster0032Stats,$33,!Monster0032ItemFlag
 db $05,$4D,!Monster0033Param : dl !Monster0033Addr : db !Monster0033Stats,$34,!Monster0033ItemFlag
-db $05,$4B,!Monster0034Param : dl !Monster0034Addr : db !Monster0034Stats,$35,!Monster0034ItemFlag
+db $05+!FlutelessEnemizerEdDgWaterSpawnOffset,$4B,!Monster0034Param : dl !Monster0034Addr : db !Monster0034Stats,$35,!Monster0034ItemFlag
 db $0A,$18,!Monster0035Param : dl !Monster0035Addr : db !Monster0035Stats,$36,!Monster0035ItemFlag
 db $1B,$56,!Monster0036Param : dl !Monster0036Addr : db !Monster0036Stats,$37,!Monster0036ItemFlag
 db $0B,$56,!Monster0037Param : dl !Monster0037Addr : db !Monster0037Stats,$38,!Monster0037ItemFlag

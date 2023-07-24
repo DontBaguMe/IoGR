@@ -6586,7 +6586,7 @@ class World:
             0x0052: [53,60,73,80,81,102,103,104],  # Inca Entrance Ladder
             0x0055: [53,60,73,80,81,102,103,104],  # Inca Final Ladder
             0x007A: [53,60,73,80,81,102,103,104],  # Inca N/S Ramp Room Ramp
-            0x009D: [53,60,73,80,81,102,103,104],  # Inca E/W Ramp Room Ramp
+            0x009D: [14,33,52,53,60,73,80,81,102,103,104,143],  # Inca E/W Ramp Room Ramp
             0x00BF: [53,60,73,80,81,102,103,104],  # Inca Diamond Block Stair
             0x00CA: [53,60,73,80,81,102,103,104],  # Inca Singing Statue Stair
             0x00CF: [53,60,73,80,81,102,103,104],  # Mine Tunnel Middle Fence

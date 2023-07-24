@@ -8231,6 +8231,12 @@ rts
 ; Bank $8A
 {
 
+org $8a8b1e
+EMPMudGolem:
+if !SettingEnemizer >= 2
+jmp EMPMudGolem_SetUpEnemizerPalette
+endif
+
 ; Boss monster death copies some of EBasicMonsterDeath.
 org $8aa4a6
 if !SettingOrbRando > 0
@@ -8298,6 +8304,20 @@ rtl
 org $8afa51
 ; "Move exits around to make Vampires required for Statue"
 db $67 : dw $0178, $01d0 : db $80,$01,$22
+
+
+org $8afd87
+; Bank $8A free space begins here.
+
+EMPMudGolem_SetUpEnemizerPalette:
+cop #$D0 : db $0f,$01 : dw .PaletteSetupDone
+cop #$CC : db $0f
+cop #$3B : db $13 : dl $80B522
+.PaletteSetupDone:
+cop #$C2
+cop #$CE : db $0f
+cop #$27 : db $10
+jmp $8b21
 
 }
 
@@ -8646,6 +8666,14 @@ cop #$E0
 org $8c8000
 incsrc "iogr_8C_actor_table.asr"
 warnpc $8CE5E5
+
+org $8ce869
+if !SettingEnemizer >= 2
+;db $13 : dl $80B520   ; In enemizer, don't spawn Inca mud golem palette bundle
+db $00 : dl $80BF89
+db $FF 
+endif
+
 
 ; For Apocalypse Gaia, we make various changes to the Comet and DG code.
 org $8ceb74
