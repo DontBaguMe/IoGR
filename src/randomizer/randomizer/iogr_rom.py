@@ -14,6 +14,7 @@ from .models.enums.logic import Logic
 from .models.enums.entrance_shuffle import EntranceShuffle
 from .models.enums.dungeon_shuffle import DungeonShuffle
 from .models.enums.orb_rando import OrbRando
+from .models.enums.darkrooms import DarkRooms
 from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
@@ -40,9 +41,6 @@ GEMS_Z3_EASY = 24
 GEMS_Z3_NORMAL = 28
 GEMS_Z3_HARD = 31
 GEMS_Z3_EXTREME = 34
-
-FORCE_CHANGE = b"\x22\x30\xfd\x88"
-CLEAR_ENEMIES = b"\x22\x9B\xFF\x81"
 
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
@@ -117,6 +115,21 @@ def generate_filename(settings: RandomizerData, extension: str):
         if orb_rando.value == OrbRando.ORBSANITY.value:
             return "_ox"
         return ""
+    
+    def getDarkRooms(darkrooms):
+        if abs(darkrooms.value) == DarkRooms.NONE.value:
+            return ""
+        if abs(darkrooms.value) == DarkRooms.FEW.value:
+            affix = "_drf"
+        if abs(darkrooms.value) == DarkRooms.SOME.value:
+            affix = "_drs"
+        if abs(darkrooms.value) == DarkRooms.MANY.value:
+            affix = "_drm"
+        if abs(darkrooms.value) == DarkRooms.ALL.value:
+            affix = "_dra"
+        if darkrooms.value < 0:
+            affix += "c"
+        return affix
 
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
@@ -160,6 +173,7 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getSwitch(settings.z3, "z3")
     filename += getDungeonShuffle(settings.dungeon_shuffle)
     filename += getOrbRando(settings.orb_rando)
+    filename += getDarkRooms(settings.darkrooms)
     filename += getSwitch(settings.allow_glitches, "g")
     filename += getSwitch(settings.fluteless, "fl")
     filename += getSwitch(settings.red_jewel_madness, "rjm")
@@ -192,7 +206,7 @@ class Randomizer:
         self.logger = logging.getLogger("IOGR")
 
     def generate_rom(self, filename: str, settings: RandomizerData):
-        asar_defines = { "DummyRandomizerDefine": "DummyRandomizerDefine" }
+        self.asar_defines = { "DummyRandomizerDefine": "DummyRandomizerDefine" }
 
         random.seed(settings.seed)
         if settings.race_mode:
@@ -233,18 +247,17 @@ class Randomizer:
             hash_final += hash_dict[key]
             i += 1
 
-        asar_defines["RandoTitleScreenHashString"] = hash_final
+        self.asar_defines["RandoTitleScreenHashString"] = hash_final
         
         ##########################################################################
         #                   Adjust Moon Tribe timer for enemizer
         ##########################################################################
-        #
         timer = 20
         if settings.enemizer.value != Enemizer.NONE.value:
             timer += 5
             if settings.enemizer.value != Enemizer.LIMITED.value:
                 timer += 5
-        asar_defines["MoonTribeTimeLimit"] = timer
+        self.asar_defines["MoonTribeTimeLimit"] = timer
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -270,18 +283,18 @@ class Randomizer:
         incamap_compressed = qt_compress(incamap_data)
         
         # The tilemap define is awkward because it has to be a text representation, not raw bytes.
-        asar_defines["IncaTileRoomCompTilemap"] = ""
+        self.asar_defines["IncaTileRoomCompTilemap"] = ""
         i = 0
         while i < len(incamap_compressed):
-            asar_defines["IncaTileRoomCompTilemap"] += "$"+format(incamap_compressed[i],"02X")
+            self.asar_defines["IncaTileRoomCompTilemap"] += "$"+format(incamap_compressed[i],"02X")
             i += 1
             if i < len(incamap_compressed):
-                asar_defines["IncaTileRoomCompTilemap"] += ","
+                self.asar_defines["IncaTileRoomCompTilemap"] += ","
         # The other defines are normal.
-        asar_defines["IncaTileWest"] = inca_tile_west
-        asar_defines["IncaTileNorth"] = inca_tile_north
-        asar_defines["IncaTileEast"] = inca_tile_east
-        asar_defines["IncaTileSouth"] = inca_tile_south
+        self.asar_defines["IncaTileWest"] = inca_tile_west
+        self.asar_defines["IncaTileNorth"] = inca_tile_north
+        self.asar_defines["IncaTileEast"] = inca_tile_east
+        self.asar_defines["IncaTileSouth"] = inca_tile_south
 
         ##########################################################################
         #                       Randomize heiroglyph order
@@ -299,17 +312,15 @@ class Randomizer:
         this_pos = 1
         while this_pos < 7:
             this_hiero = hieroglyph_order[this_pos-1]
-            asar_defines["HieroOrder"+str(this_pos)] = this_hiero
-            asar_defines["HieroSpritePointer"+str(this_pos)] = hieroglyph_info[this_hiero][1]
-            asar_defines["HieroItemTile"+str(this_pos)] = hieroglyph_info[this_hiero][2]
-            asar_defines["HieroJournalText"+str(this_pos)] = hieroglyph_info[this_hiero][0]
+            self.asar_defines["HieroOrder"+str(this_pos)] = this_hiero
+            self.asar_defines["HieroSpritePointer"+str(this_pos)] = hieroglyph_info[this_hiero][1]
+            self.asar_defines["HieroItemTile"+str(this_pos)] = hieroglyph_info[this_hiero][2]
+            self.asar_defines["HieroJournalText"+str(this_pos)] = hieroglyph_info[this_hiero][0]
             this_pos += 1
 
         ##########################################################################
         #                          Randomize Snake Game
         ##########################################################################
-        # Randomize snake game duration/goal
-        #breakpoint()
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
         if settings.fluteless:
             snakes_per_sec = [i/4.0 for i in snakes_per_sec]
@@ -329,22 +340,21 @@ class Randomizer:
         snake_target_str.append(format(int(snake_target[3] / 10), "x") + format(snake_target[3] % 10, "x"))
 
         # Update snake game logic and text with new values
-        asar_defines["SnakeGameTimeLimitSeconds"] = snake_timer
-        asar_defines["SnakeGameTargetEasy"] = int(snake_timer * snakes_per_sec[0] * snake_adj)
-        asar_defines["SnakeGameTargetIntermediate"] = int(snake_timer * snakes_per_sec[1] * snake_adj)
-        asar_defines["SnakeGameTargetAdvanced"] = int(snake_timer * snakes_per_sec[2] * snake_adj)
-        asar_defines["SnakeGameTargetExpert"] = int(snake_timer * snakes_per_sec[3] * snake_adj)
+        self.asar_defines["SnakeGameTimeLimitSeconds"] = snake_timer
+        self.asar_defines["SnakeGameTargetEasy"] = int(snake_timer * snakes_per_sec[0] * snake_adj)
+        self.asar_defines["SnakeGameTargetIntermediate"] = int(snake_timer * snakes_per_sec[1] * snake_adj)
+        self.asar_defines["SnakeGameTargetAdvanced"] = int(snake_timer * snakes_per_sec[2] * snake_adj)
+        self.asar_defines["SnakeGameTargetExpert"] = int(snake_timer * snakes_per_sec[3] * snake_adj)
         # The initial space forces the define to resolve as text instead of a number.
-        asar_defines["SnakeGameTimeLimitSecondsString"] = "_" + str(snake_timer)
-        asar_defines["SnakeGameTargetEasyString"] = "_" + str(int(snake_timer * snakes_per_sec[0] * snake_adj))
-        asar_defines["SnakeGameTargetIntermediateString"] = "_" + str(int(snake_timer * snakes_per_sec[1] * snake_adj))
-        asar_defines["SnakeGameTargetAdvancedString"] = "_" + str(int(snake_timer * snakes_per_sec[2] * snake_adj))
-        asar_defines["SnakeGameTargetExpertString"] = "_" + str(int(snake_timer * snakes_per_sec[3] * snake_adj))
+        self.asar_defines["SnakeGameTimeLimitSecondsString"] = "_" + str(snake_timer)
+        self.asar_defines["SnakeGameTargetEasyString"] = "_" + str(int(snake_timer * snakes_per_sec[0] * snake_adj))
+        self.asar_defines["SnakeGameTargetIntermediateString"] = "_" + str(int(snake_timer * snakes_per_sec[1] * snake_adj))
+        self.asar_defines["SnakeGameTargetAdvancedString"] = "_" + str(int(snake_timer * snakes_per_sec[2] * snake_adj))
+        self.asar_defines["SnakeGameTargetExpertString"] = "_" + str(int(snake_timer * snakes_per_sec[3] * snake_adj))
 
         ##########################################################################
         #                    Randomize Jeweler Reward amounts
         ##########################################################################
-        # Randomize jeweler reward values
         gem = []
         if settings.z3:
             gem.append(random.randint(1, 2))
@@ -385,7 +395,7 @@ class Randomizer:
 
         i = 1
         while i <= 7:
-            asar_defines["Jeweler"+str(i)+"Cost"] = gem[i-1]
+            self.asar_defines["Jeweler"+str(i)+"Cost"] = gem[i-1]
             i += 1
 
         ##########################################################################
@@ -396,40 +406,40 @@ class Randomizer:
         statues = []
         statues_hex = []
         
-        asar_defines["StatuesRequiredCount"] = statues_required
+        self.asar_defines["StatuesRequiredCount"] = statues_required
         for i in statueOrder:
-            asar_defines["Statue"+str(i)+"Required"] = 0
+            self.asar_defines["Statue"+str(i)+"Required"] = 0
 
         if statue_req == StatueReq.PLAYER_CHOICE.value:
-            asar_defines["SettingStatuesPlayerChoice"] = 1
+            self.asar_defines["SettingStatuesPlayerChoice"] = 1
         else:
-            asar_defines["SettingStatuesPlayerChoice"] = 0
+            self.asar_defines["SettingStatuesPlayerChoice"] = 0
             i = 0
             while i < statues_required:
                 if statueOrder[i] == 1:
                     statues.append(1)
                     statues_hex.append(b"\x21")
-                    asar_defines["Statue1Required"] = 1
+                    self.asar_defines["Statue1Required"] = 1
                 if statueOrder[i] == 2:
                     statues.append(2)
                     statues_hex.append(b"\x22")
-                    asar_defines["Statue2Required"] = 1
+                    self.asar_defines["Statue2Required"] = 1
                 if statueOrder[i] == 3:
                     statues.append(3)
                     statues_hex.append(b"\x23")
-                    asar_defines["Statue3Required"] = 1
+                    self.asar_defines["Statue3Required"] = 1
                 if statueOrder[i] == 4:
                     statues.append(4)
                     statues_hex.append(b"\x24")
-                    asar_defines["Statue4Required"] = 1
+                    self.asar_defines["Statue4Required"] = 1
                 if statueOrder[i] == 5:
                     statues.append(5)
                     statues_hex.append(b"\x25")
-                    asar_defines["Statue5Required"] = 1
+                    self.asar_defines["Statue5Required"] = 1
                 if statueOrder[i] == 6:
                     statues.append(6)
                     statues_hex.append(b"\x26")
-                    asar_defines["Statue6Required"] = 1
+                    self.asar_defines["Statue6Required"] = 1
                 i += 1
 
         # Teacher at start spoils required Mystic Statues
@@ -463,13 +473,13 @@ class Randomizer:
 
                     statues_hex.pop(0)
 
-        asar_defines["TextTeacherStatuesString"] = ""
+        self.asar_defines["TextTeacherStatuesString"] = ""
         i = 0
         while i < len(statue_str):
-            asar_defines["TextTeacherStatuesString"] += "$" + format(statue_str[i],"02x")
+            self.asar_defines["TextTeacherStatuesString"] += "$" + format(statue_str[i],"02x")
             i += 1
             if i < len(statue_str):
-                asar_defines["TextTeacherStatuesString"] += ","
+                self.asar_defines["TextTeacherStatuesString"] += ","
 
         ##########################################################################
         #                           Determine Boss Order
@@ -505,13 +515,13 @@ class Randomizer:
                 while i < 6:
                     boss = boss_order[i]
                     this_dungeon_card = "Map"+boss_music_card_labels[i]+"CardMusic"
-                    replacement_card = "DefaultMap"+boss_music_card_labels[boss]+"CardMusic"
-                    asar_defines[this_dungeon_card] = "!"+replacement_card
+                    replacement_card = "DefaultMap"+boss_music_card_labels[boss-1]+"CardMusic"
+                    self.asar_defines[this_dungeon_card] = "!"+replacement_card
                     i += 1
         # Set up assembly defines for boss order
         i = 1
         while i < 8:
-            asar_defines["Boss"+str(i)+"Id"] = boss_order[i-1]
+            self.asar_defines["Boss"+str(i)+"Id"] = boss_order[i-1]
             i += 1
 
         ##########################################################################
@@ -520,7 +530,7 @@ class Randomizer:
         ##########################################################################
         # Determine random location ID
         kara_location = random.randint(1, 5)
-        asar_defines["KaraLocation"] = kara_location
+        self.asar_defines["KaraLocation"] = kara_location
 
         # Set Kara's location and logic mode in RAM switches (for autotracker)
         ## (hmm, I don't think tracker supports this yet? --rae)
@@ -530,7 +540,7 @@ class Randomizer:
         #    logic_int = 0x20 + kara_location
         #else:
         #    logic_int = 0x40 + kara_location
-        asar_defines["AutotrackerLogicAndKaraVal"] = kara_location#logic_int
+        self.asar_defines["AutotrackerLogicAndKaraVal"] = kara_location#logic_int
 
         ##########################################################################
         #                          Have fun with death text
@@ -678,13 +688,13 @@ class Randomizer:
 
         # Will death text
         death_str = death_list[random.randint(0, len(death_list) - 1)]
-        asar_defines["PlayerDeathText"] = ""
+        self.asar_defines["PlayerDeathText"] = ""
         i = 0
         while i < len(death_str):
-            asar_defines["PlayerDeathText"] += "$" + format(death_str[i],"02x")
+            self.asar_defines["PlayerDeathText"] += "$" + format(death_str[i],"02x")
             i += 1
             if i < len(death_str):
-                asar_defines["PlayerDeathText"] += ","
+                self.asar_defines["PlayerDeathText"] += ","
 
         ##########################################################################
         #                   Randomize item and ability placement
@@ -701,24 +711,25 @@ class Randomizer:
             self.w = World(settings, statues_required, statues, statue_req, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj,PRINT_LOG)
             seed_adj += 1
+        #breakpoint()
         self.w.generate_spoiler(VERSION)
         self.w.populate_asar_defines()
         for wdef in self.w.asar_defines:
-            asar_defines[wdef] = self.w.asar_defines[wdef]
+            self.asar_defines[wdef] = self.w.asar_defines[wdef]
 
         ##########################################################################
         #             Handle Jeweler inventory strings and tracker RAM
         ##########################################################################
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-            asar_defines["Jeweler7RowText"] = "Beat the game"
+            self.asar_defines["Jeweler7RowText"] = "Beat the game"
         else:
-            asar_defines["Jeweler7RowText"] = "My Secrets"
+            self.asar_defines["Jeweler7RowText"] = "My Secrets"
         for i in [1,2,3,4,5,6,7]:
-            while len(asar_defines["Jeweler"+str(i)+"RowText"]) < 14:
-                asar_defines["Jeweler"+str(i)+"RowText"] += "_"
+            while len(self.asar_defines["Jeweler"+str(i)+"RowText"]) < 14:
+                self.asar_defines["Jeweler"+str(i)+"RowText"] += "_"
             if gem[i-1] < 10:
-                asar_defines["Jeweler"+str(i)+"RowText"] += "_"
-            asar_defines["Jeweler"+str(i)+"RowText"] += str(gem[i-1])
+                self.asar_defines["Jeweler"+str(i)+"RowText"] += "_"
+            self.asar_defines["Jeweler"+str(i)+"RowText"] += str(gem[i-1])
 
         ##########################################################################
         #                        Randomize Ishtar puzzle
@@ -740,7 +751,7 @@ class Randomizer:
         same_chest = (self.w.item_locations[80][3] == self.w.item_locations[81][3])
         
         # This is required, and should be 0 if no room's difference is Will's hair
-        asar_defines["IshtarRoomWithHairDifference"] = 0
+        self.asar_defines["IshtarRoomWithHairDifference"] = 0
 
         # Loop through the four rooms, determine and apply map changes
         for room in range(4):
@@ -765,13 +776,13 @@ class Randomizer:
                 else:
                     change_id = idx_diff[room]
                     done = True
-                if change_id == 0 and asar_defines["IshtarRoomWithHairDifference"] > 0:
+                if change_id == 0 and self.asar_defines["IshtarRoomWithHairDifference"] > 0:
                     change_id = 1    # Only one room can have hair as the difference
 
                 # Set change for Room 1
                 if room == 0:
                     if change_id == 0:  # Will's hair
-                        asar_defines["IshtarRoomWithHairDifference"] = 1
+                        self.asar_defines["IshtarRoomWithHairDifference"] = 1
                         coords[room] = [0x01a0, 0x01c0, 0x00b0, 0x00d0]
 
                     elif change_id == 1:  # Change right vase to light (vanilla)
@@ -892,7 +903,7 @@ class Randomizer:
                 # Set change for Room 2
                 elif room == 1:
                     if change_id == 0:  # Will's hair
-                        asar_defines["IshtarRoomWithHairDifference"] = 2
+                        self.asar_defines["IshtarRoomWithHairDifference"] = 2
                         coords[room] = [0x0390, 0x03b0, 0x00a0, 0x00c0]
 
                     elif change_id == 1:  # Change left vase to light
@@ -986,7 +997,7 @@ class Randomizer:
                         done = True
                     
                     elif (not done or same_chest) and change_id == 0:  # Will's hair
-                        asar_defines["IshtarRoomWithHairDifference"] = 3
+                        self.asar_defines["IshtarRoomWithHairDifference"] = 3
                         coords[room] = [0x0590, 0x05b0, 0x00a0, 0x00c0]
 
                     elif (not done or same_chest) and change_id == 1:  # Remove rock
@@ -1033,7 +1044,7 @@ class Randomizer:
                 # Set change for Room 4
                 elif room == 3:
                     if change_id == 0:  # Will's hair (vanilla)
-                        asar_defines["IshtarRoomWithHairDifference"] = 4
+                        self.asar_defines["IshtarRoomWithHairDifference"] = 4
                         coords[room] = [0x0790, 0x07b0, 0x00a0, 0x00c0]
 
                     if change_id == 1:  # Remove rock
@@ -1135,31 +1146,30 @@ class Randomizer:
 
         # Update cursor check ranges
         for i in range(4):
-            asar_defines["IshtarRoom"+str(i+1)+"TargetWest"] = coords[i][0]
-            asar_defines["IshtarRoom"+str(i+1)+"TargetEast"] = coords[i][1]
-            asar_defines["IshtarRoom"+str(i+1)+"TargetNorth"] = coords[i][2]
-            asar_defines["IshtarRoom"+str(i+1)+"TargetSouth"] = coords[i][3]
+            self.asar_defines["IshtarRoom"+str(i+1)+"TargetWest"] = coords[i][0]
+            self.asar_defines["IshtarRoom"+str(i+1)+"TargetEast"] = coords[i][1]
+            self.asar_defines["IshtarRoom"+str(i+1)+"TargetNorth"] = coords[i][2]
+            self.asar_defines["IshtarRoom"+str(i+1)+"TargetSouth"] = coords[i][3]
 
         # Compress map data and write. A bit awkward because output needs to be a string.
         f_ishtarmap.seek(0)
         ishtarmapcomp = qt_compress(f_ishtarmap.read())
         f_ishtarmap.close()
-        asar_defines["IshtarRoomCompTilemap"] = ""
+        self.asar_defines["IshtarRoomCompTilemap"] = ""
         i = 0
         while i < len(ishtarmapcomp):
-            asar_defines["IshtarRoomCompTilemap"] += "$" + format(ishtarmapcomp[i],"02x")
+            self.asar_defines["IshtarRoomCompTilemap"] += "$" + format(ishtarmapcomp[i],"02x")
             i += 1
             if i < len(ishtarmapcomp):
-                asar_defines["IshtarRoomCompTilemap"] += ","
+                self.asar_defines["IshtarRoomCompTilemap"] += ","
 
         ##########################################################################
         #                                   Plugins
         ##########################################################################
-        # Apocalypse Gaia
         if self.w.goal == "Apocalypse Gaia":
-            asar_defines["ApocalypseGaia"] = 1
+            self.asar_defines["ApocalypseGaia"] = 1
         else:
-            asar_defines["ApocalypseGaia"] = 0
+            self.asar_defines["ApocalypseGaia"] = 0
 
         ##########################################################################
         #                          Have fun with final text
@@ -1198,31 +1208,31 @@ class Randomizer:
 
         # Assign final text box
         rand_idx = random.randint(0, len(superhero_list) - 1)
-        asar_defines["TextShadowSuperhero"] = superhero_list[rand_idx]
+        self.asar_defines["TextShadowSuperhero"] = superhero_list[rand_idx]
 
         ##########################################################################
         #            Pass all defines to assembler and return patch
         ##########################################################################
         romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
         
-        asar_defines["SettingEarlyFirebird"] = 1 if settings.firebird else 0
-        asar_defines["SettingRedJewelHunt"] = 1 if settings.goal.value is Goal.RED_JEWEL_HUNT.value else 0
-        asar_defines["SettingRedJewelMadness"] = 1 if settings.red_jewel_madness else 0
-        asar_defines["SettingOpenMode"] = 1 if settings.open_mode else 0
-        asar_defines["SettingOHKO"] = 1 if settings.ohko else 0
-        asar_defines["SettingZ3"] = 1 if settings.z3 else 0
-        asar_defines["SettingFluteless"] = 1 if settings.fluteless else 0
-        asar_defines["SettingEnemizer"] = settings.enemizer.value
-        asar_defines["SettingEntranceShuffle"] = settings.entrance_shuffle.value
-        asar_defines["SettingDungeonShuffle"] = settings.dungeon_shuffle.value
-        asar_defines["SettingOrbRando"] = settings.orb_rando.value
+        self.asar_defines["SettingEarlyFirebird"] = 1 if settings.firebird else 0
+        self.asar_defines["SettingRedJewelHunt"] = 1 if settings.goal.value is Goal.RED_JEWEL_HUNT.value else 0
+        self.asar_defines["SettingRedJewelMadness"] = 1 if settings.red_jewel_madness else 0
+        self.asar_defines["SettingOpenMode"] = 1 if settings.open_mode else 0
+        self.asar_defines["SettingOHKO"] = 1 if settings.ohko else 0
+        self.asar_defines["SettingZ3"] = 1 if settings.z3 else 0
+        self.asar_defines["SettingFluteless"] = 1 if settings.fluteless else 0
+        self.asar_defines["SettingEnemizer"] = settings.enemizer.value
+        self.asar_defines["SettingEntranceShuffle"] = settings.entrance_shuffle.value
+        self.asar_defines["SettingDungeonShuffle"] = settings.dungeon_shuffle.value
+        self.asar_defines["SettingOrbRando"] = settings.orb_rando.value
         
-        asar_defines["OptionMuteMusic"] = 0
+        self.asar_defines["OptionMuteMusic"] = 0
         
-        for d in asar_defines:
-            asar_defines[d] = str(asar_defines[d])   # The library requires defines to be string type.
+        for d in self.asar_defines:
+            self.asar_defines[d] = str(self.asar_defines[d])   # The library requires defines to be string type.
         asar.init("asar.dll")
-        asar_patch_result = asar.patch(os.getcwd()+"/src/randomizer/randomizer/iogr.asr", romdata, [], True, asar_defines)
+        asar_patch_result = asar.patch(os.getcwd()+"/src/randomizer/randomizer/iogr.asr", romdata, [], True, self.asar_defines)
         
         if asar_patch_result[0]:
             return asar_patch_result
@@ -1233,6 +1243,13 @@ class Randomizer:
 
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)
+
+    def generate_asm_dump(self) -> str:
+        defines_sorted = dict(sorted(self.asar_defines.items()))
+        defdump = ""
+        for d in defines_sorted:
+            defdump += "!" + d + " = " + defines_sorted[d] + "\n"
+        return defdump
 
     def generate_graph_visualization(self) -> graphviz.Digraph:
         self.w.complete_graph_visualization()

@@ -18,18 +18,23 @@ incsrc "iogr_asset_ledger.asr"
 incsrc "iogr_monster_defaults.asr"
 
 
-; Important routine labels.
+; Routine labels.
 {
 LR_SetFlag20A = $80b481
-LR_SecOnFlag20A = $80B489
-LR_ParseDialogueScriptAtY = $82f048
-SR_RemoveHeldItem = $839FB2
+LR_SecOnFlag20A = $80b489
+LR_SecOnFlagA = $80b4b7
 LR_ClearMonsterKilledFlags = $80b4cc
-LR_PlaceSelfBetween04And06 = $8aa41c
-LR_OrbitAtY = $80F3C9
-LR_Orbit = $80f3d3
 TIndexedPaletteBundle = $80B522
 EChaser = $80E683
+LR_OrbitAtY = $80F3C9
+LR_Orbit = $80f3d3
+EPlayer_DoFriar = $82bb3b
+EPlayer_DoAuraBarrier = $82b97f
+EPlayer_DoPsychoDash = $82bea0
+EPlayer_DoSpinDash = $82c0a9
+LR_ParseDialogueScriptAtY = $82f048
+SR_RemoveHeldItem = $839FB2
+LR_PlaceSelfBetween04And06 = $8aa41c
 }
 
 ; Various defines for Apocalypse Gaia, which don't
@@ -412,7 +417,6 @@ dw $80ea    ; COP #$E3
 }
 
 
-
 ; Reduce cost of RNG (cop #$23) calls
 org $808ffc
 Cop_23:
@@ -440,16 +444,12 @@ rti
 warnpc $80902b
 
 
-
-; Experimental fix to a vanilla bug wherein cop #$0B masks the
-; wrong tiles if called by a monster of size at least 2x2
-; on the rightmost tile of a screen.
+; Fixes a vanilla bug wherein cop #$0B masks the wrong tiles if called 
+; by a monster of size at least 2x2 on the rightmost tile of a screen.
 org $80b2ed
 bcs B_80B325
-
 org $80b2f6
 J_80B2F6:
-
 org $80b316
 rep #$20
 dec $1E : beq B_80B325
@@ -498,89 +498,63 @@ rtl
 
 org $80bcdf
 if !ApocalypseGaia == 1
+
+; `cop #$D0 : db $ff,$00 : dw Addr` jumps to Addr during the pre-render frame that runs
+; when exiting the inventory. After cop #$C1/#$C2, `bit $0a1e : bpl Addr` is equivalent.
+; This is used to refresh HDMA tables clobbered by the inventory screen.
+
 db $04,$08
 ECometBG2ShimmerEndpoint:
 bit $0A1E : bpl +
-jsr ECometBG2ShimmerEndpointSetup
+  jsr ECometBG2ShimmerEndpointSetup
 +:
 cop #$02 : dl CometHDMAResetTable : db $10
 rtl
-;CometHDMAResetTable:
-;db $70,$00,$00,\
-;   $10,$00,$00,\
-;   $01,$00,$00,\
-;   $01,$00,$00,$00
 
-; This writes a sine function with an amplitude of 1 to $2110, "BG2 vertical scroll",
-;  the effect of which is to cause the starry background to look a little less boring.
-; But we don't want the effect to cause the Comet's surface to scroll,
-;  so we write #$0000 to $7E8C30/8E30, which ends the HDMA table after about 128 scanlines. 
-; Then our friend $80bcdf writes #$0000 to $2110 so that register is zeroed by the time the CRT reaches the Comet.
-; We can accomplish the same effect much more cheaply
-;  (and also save ourselves a thinker slot) by manually adding some lines to this thinker's HDMA table to have it do its own zeroing.
 db $04,$08
 ECometBG2ShimmerA:
-lda #$0001                   ;<--Branch
-sta $7F0008,x
+lda #$0001 : sta $7F0008,x
 cop #$5F : db $00,$88,$08
-lda #$0000
-sta $7E8C30
-sta $7E8E30
+lda #$0000 : sta $7E8C30
+  sta $7E8E30
 cop #$C2
-;cop #$D0                     ;[$80BCF7] ; Refresh table if leaving inv.
-;  db $FF,$00 : dw ECometBG2ShimmerA
-bit $0A1E : bpl ECometBG2ShimmerA ; equivalent to the cop #$D0 above
+bit $0A1E : bpl ECometBG2ShimmerA
 cop #$60 : db $05,$02
 cop #$61 : db $00,$8C,$7E,$10
 rtl
 
-; This causes the horizontally shaking BG2 in both phases.
-; V$80BD21
-tsb $08                      ;<--In vanilla, branch goes to here
+db $04,$08
 ECometBG2ShimmerB:
-lda #$0008
-sta $7F0008,x
+lda #$0008 : sta $7F0008,x
 cop #$5F : db $00,$84,$08
 cop #$C2
-;cop #$D0                     ;[$80BD21] ; Refresh table if leaving inv.
-;  db $FF,$00 : dw ECometBG2ShimmerB
-bit $0A1E : bpl ECometBG2ShimmerB ; equivalent to the cop #$D0 above
+bit $0A1E : bpl ECometBG2ShimmerB
 cop #$60 : db $05,$02
 cop #$61 : db $00,$84,$7E,$0F
 rtl
 
-; Thinker at $80bd42.
-; Removing this causes the BGs to shake from the start instead of just in P2, and also prevents Dark Gaia's BG "materialization" effect from happening.
-tsb $08                      ;<--In vanilla, branch goes to here
+db $04,$08
 ECometBG2ShimmerC:
 lda #$0002 : sta $7F0008,x
 cop #$5F : db $00,$80,$08
 cop #$C2
-;cop #$D0                     ;[$80BD42] ; Refresh table if leaving inv.
-;  db $FF,$00 : dw ECometBG2ShimmerC
-bit $0A1E : bpl ECometBG2ShimmerC ; equivalent to the cop #$D0 above
-;cop #$D0                     ;[$80BD69]
-;  db $01,$01 : dw .CometDead
-lda $0A00 : bit #$0002 : bne .CometDead ; eq. to cop #$D0
- cop #$60 : db $05,$00;$02
- cop #$61 : db $00,$84,$7E,$0D
-rtl
+bit $0A1E : bpl ECometBG2ShimmerC
+lda $0A00 : bit #$0002 : bne .CometDead ; cheap alternative to cop #$D0 : db $01,$01 : dw .CometDead
+  cop #$60 : db $05,$00
+  cop #$61 : db $00,$84,$7E,$0D
+  rtl
 .CometDead:
 lda #$0070 : sta $7F0008,x    ; Materialization magic.
 cop #$5F : db $00,$80,$04
 cop #$C2
-;cop #$D0                     ;[$80BD69] ; Refresh table if leaving inv.
-;  db $FF,$00 : dw .CometDead
-bit $0A1E : bpl .CometDead ; equivalent to the cop #$D0 above
-lda $7F0008,x
-dec a
-sta $7F0008,x
-beq .TSleep                ;[$80BD93]
-cop #$60 : db $05,$00;$02
+bit $0A1E : bpl .CometDead
+lda $7F0008,x : dec : sta $7F0008,x
+  beq .TSleep
+cop #$60 : db $05,$00
 cop #$61 : db $00,$84,$7E,$0D
 rtl
 .TSleep:
-cop #$C1                     ;<--Branch
+cop #$C1
 rtl
 endif
 warnpc $80BD96
@@ -779,10 +753,6 @@ jmp .Done
 warnpc $80cd59
 
 
-org $80cd12
-db $80,$04    ; "Force single overworld map exit" (in Dao)
-
-
 org $80d69d
 nop    ; There's no reason respawning with >100 DP should halve your health...
 
@@ -810,9 +780,9 @@ warnpc $80d877
 
 ; Make monster death look up the correct GEM tables.
 org $80dadd
-jsl $83fea1
+jsl LR_GetMonsterGemAtStatAddrY
 org $80dc07
-jsl $83fea1
+jsl LR_GetMonsterGemAtStatAddrY
 
 
 org $80dbf2
@@ -848,14 +818,12 @@ lda $0aca
 endif
 
 
-; For Early Firebird, we spawn the Firebird palette manager via the camera actor.
+; Set up Early Firebird and other IOGR map-level code.
 org $80eaed
 db $00 : dw $2c00
 ECameraEtc:
-if !SettingEarlyFirebird == 1
-jsl LR_SpawnFirebirdPaletteManager
+jsl LR_SetupIogrMap
 nop
-endif
 
 
 org $80f49a
@@ -1013,9 +981,9 @@ Brk_73:
 phy
 lda #$0000 ; efficiently zero high byte for output
 sep #$20
-lda $00E6 : inc a
-cmp #$10 : bcc +
- rep #$20 : jmp Cop_23_FromManaged
+lda $00E6 : inc : cmp #$10 : bcc +
+  rep #$20
+  jmp Cop_23_FromManaged
 +:
 sta $00E6
 tay
@@ -1024,20 +992,19 @@ plx
 rti
 }
 
-
 ECometBG2ShimmerEndpointSetup:
 lda #$7010
- sta.l CometHDMAResetTable-$01
- sta.l CometHDMAResetTable+$03
+  sta.l CometHDMAResetTable-$01
+  sta.l CometHDMAResetTable+$03
 lda #$0100
- sta.l CometHDMAResetTable+$05
- sta.l CometHDMAResetTable+$08
- sta.l CometHDMAResetTable+$0C
+  sta.l CometHDMAResetTable+$05
+  sta.l CometHDMAResetTable+$08
+  sta.l CometHDMAResetTable+$0C
 lda $06C4
- sta.l CometHDMAResetTable+$01
- sta.l CometHDMAResetTable+$04
- sta.l CometHDMAResetTable+$07
- sta.l CometHDMAResetTable+$0A
+  sta.l CometHDMAResetTable+$01
+  sta.l CometHDMAResetTable+$04
+  sta.l CometHDMAResetTable+$07
+  sta.l CometHDMAResetTable+$0A
 rts
 CometHDMAResetTable = $7E8C80
 
@@ -2137,7 +2104,7 @@ db %11000001 ;$01
 db $00
 db $00
 
-
+warnpc $81e132
 org $81e132
 table "table_invtext.txt",rtl
 Text_ItemDescriptions:
@@ -2285,6 +2252,12 @@ db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 }
 warnpc $81e5ec
 
+org $81ead1
+Bg3_RadarForce:
+db $01 : dw $01C6
+db $04 : dl Bg3_IogrForceText : dw $0bfa
+db $00
+warnpc $81eadc
 
 ; I don't think we use this table anymore.
 org $81fd24
@@ -2449,35 +2422,40 @@ db $4C,$A9,$A3,$A4,$88,$82,$AC,$D6,$48,$CA
 
 warnpc $81ff02
 
-
-org $81ff70
-; "Change start menu FORCE text"
-db $01,$c6,$01,$03,$14,$2d
+org $81ff6c
+; Bank $81 freespace begins here.
+Bg3_IogrForceText:
+.Pointers:
+{
+dw .Force
+dw .PlusHp
+dw .PlusStr
+dw .PlusDef
+}
+{
+.Force:
+db $03 : db $14
+db $46,$4F,$52,$43,$45
+db $00
+.PlusHp:
+db $03 : db $14
+db $2d
 if !SettingZ3 == 1
 db $31
 else
 db $33
 endif
-db $48,$50,$00
-org $81ff80
-db $01,$c6,$01,$03,$14,$2d,$31,$53,$54,$52,$00
-org $81ff90
-db $01,$c6,$01,$03,$14,$2d,$31,$44,$45,$46,$00
-
-
-org $81ff9b
-; "Write code for clearing enemy tally data"
-phy
-pha
-ldy #$0000
-lda #$0000
--:
-sta $0A80,y
-iny : iny : cpy #$0020 : bne -
-pla
-ply
-rtl
-
+db $48,$50
+db $00
+.PlusStr:
+db $03 : db $14
+db $2d,$31,$53,$54,$52
+db $00
+.PlusDef:
+db $03 : db $14
+db $2d,$31,$44,$45,$46
+db $00
+}
 
 
 } ; end bank $81
@@ -2528,7 +2506,7 @@ skip 3   ; lda $0000,x
 skip 3   ; bit #$0080
 skip 2   ; bne B_82A65B
 phx
-lda $0004,x : and #$007f : jsl $80B489 : bcc UpdateTilemapChestsCheckNext
+lda $0004,x : and #$007f : jsl LR_SecOnFlag20A : bcc UpdateTilemapChestsCheckNext
 org $82a652
 UpdateTilemapChestsCheckNext:
 rep #$21
@@ -2596,23 +2574,182 @@ rts
 warnpc $82a7b8
 
 
+org $82b7b3
+EPlayerChargeListenerSpawner:
+jsr SR_SecIfCombatEnabledOrSnakeGame : bcs EPlayerChargeListener
+  cop #$E0
+  nop : nop : nop   ; dunno whether this padding is needed anymore
+EPlayerChargeListener:
+{
+lda #$0001 : trb $09AE
+cop #$C1
+lda $09AE : bit #$2A00 : beq +
+  rtl
++:
+lda $0AD4 : cmp #$0002 : bcc +
+  rtl
++:
+cop #$40 : dw $8001, .OkayCharge
+  rtl
+.OkayCharge:
+lda #$0001 : tsb $09AE
+lda #$8000 : tsb $0658
+lda $0AD4 : beq .WillCharge
+  jmp .FreedanCharge
+.WillCharge:
+{
+lda $0AA2 : bit #$0005 : bne +
+  rtl
++:
+cop #$CA : db $28
+  cop #$41 : dw $8001, EPlayerChargeListener    ; Check button held.
+cop #$CB
+jsr .SR_SetPosAtPlayer
+cop #$A5 : dl $82c308 : dw $0000, $2C00    ; i.e. EWillChargePalette
+sty $22
+lda #$0078 : sta $24
+cop #$C1
+jsr .SR_QuitChargeIfForbidden
+cop #$41 : dw $8001, .QuitCharge
+dec $24 : bmi ..Ready
+  rtl
+..Ready:
+lda $0AA2 : bit #$0004 : bne ..CanSpinDash
+cop #$C1
+jsr .SR_QuitChargeIfForbidden
+cop #$41 : dw $8001, ..TryPsychoDash
+rtl
+..CanSpinDash:
+cop #$C1
+jsr .SR_QuitChargeIfForbidden
+cop #$41 : dw $8001, ..TryPsychoDash
+jsr .SR_ClcIfStationary : bcc +
+  rtl
++:
+cop #$40 : dw $0030, ..TrySpinDash
+rtl
+..TryPsychoDash:
+jsr .SR_QuitPsychoDashIfForbidden
+lda.w #EPlayer_DoPsychoDash : jsr .SR_SetPlayerPointerToA   ; i.e. lda #$bea0
+jmp .QuitCharge
+..TrySpinDash:
+jsr .SR_QuitAbilityIfForbidden
+lda.w #EPlayer_DoSpinDash : jsr .SR_SetPlayerPointerToA   ; i.e. lda #$c0a9 : jsr $b926
+jmp .QuitCharge
+} ; EPlayerChargeListener_WillCharge
 
-org $82b858
-jmp BR_CheckPsychoDash
+.FreedanCharge:
+{
+lda $0AA2 : bit #$0030 : bne +
+  rtl
++:
+cop #$CA : db $28
+  cop #$41 : dw $8001, EPlayerChargeListener
+cop #$CB
+jsr .SR_SetPosAtPlayer
+cop #$A5 : dl $82c315 : dw $0000, $2C00    ; i.e. EFreedanChargePalette
+sty $22
+lda #$0064 : sta $24
+cop #$C1
+jsr .SR_QuitChargeIfForbidden    ; $b946
+cop #$41 : dw $8001, .QuitCharge
+cop #$40 : dw $40B0, .QuitCharge
+dec $24 : bmi ..Ready
+  rtl
+..Ready:
+lda $0AA2 : bit #$0020 : bne ..CanAuraBarrier
+cop #$C1
+jsr .SR_QuitChargeIfForbidden
+cop #$41 : dw $8001, ..TryFriar
+rtl
+..CanAuraBarrier:
+cop #$C1
+jsr .SR_QuitChargeIfForbidden
+cop #$41 : dw $8001, ..TryFriar
+cop #$40 : dw $0F00, ...NotStationary
+cop #$40 : dw $0030, ..TryAuraBarrier
+...NotStationary:
+rtl
+..TryFriar:
+lda #$0001 : sta $00EA
+jsr .SR_QuitFriarIfForbidden
+lda.w #EPlayer_DoFriar : jsr .SR_SetPlayerPointerToA    ; i.e. lda #$bb3b
+bra .QuitCharge
+..TryAuraBarrier:
+lda $09B2 : ora $09B4 : beq ...OkayNotRunning
+  rtl
+...OkayNotRunning:
+lda #$0002 : sta $00EA
+jsr .SR_QuitAbilityIfForbidden
+lda.w #EPlayer_DoAuraBarrier : jsr .SR_SetPlayerPointerToA   ; i.e. lda #$b97f
+bra .QuitCharge
+}
 
-org $82b871
-db $30   ; Prevent Earthquaker and AB from implicitly allowing Friar
+.QuitCharge:
+{
+phx
+phd
+lda $22 : beq ..KilledPalette
+  tcd : tax
+  cop #$A7    ; "Die" while impersonating palette setter.
+..KilledPalette:
+pld
+plx
+lda $0AD4 : bne ..RestorePaletteFreedan
+..RestorePaletteWill:
+cop #$37 : db $0B
+cop #$39
+cop #$C4 : dl EPlayerChargeListener
+..RestorePaletteFreedan:
+cop #$37 : db $0C
+cop #$39
+cop #$C4 : dl EPlayerChargeListener
+}
 
-org $82b8df
-jmp BR_CheckDarkFriar
+.SR_SetPlayerPointerToA:
+ldy $09AA : sta $0000,y
+lda #$0000 : sta $0008,y
+rts
 
+.SR_QuitAbilityIfForbidden:
+lda $09AE : bit #$3A00 : bne .SR_QuitCharge
+cop #$48 : cmp #$0004 : bcs .SR_QuitCharge
+rts
+
+.SR_QuitCharge:
+pla : bra EPlayerChargeListener_QuitCharge
+
+.SR_QuitChargeIfForbidden:
+lda $09AE : bit #$2B00 : bne .SR_QuitCharge
+rts
+
+.SR_SetPosAtPlayer:
+ldy $09AA
+lda $0014,y : sta $14
+lda $0016,y : sta $16
+rts
+
+.SR_ClcIfStationary:
+lda $09AE : bit #$8000 : beq ..NoActiveSpecialAnimation
+..SecAndReturn:
+  sec
+  rts
+..NoActiveSpecialAnimation:
+ldy $09AA
+lda $0028,y : bmi ..SecAndReturn
+  cmp #$0004 : bcc ..ClcAndReturn
+  sec : sbc #$0010 : cmp #$0004 : bcs ..SecAndReturn
+..ClcAndReturn:
+clc
+rts
+warnpc $82b97f
+}
 
 
 org $82ca63
 if !SettingFluteless == 1
 jsr SR_AllowBlockIfNotWill    ; Instead of lda #$0100.
 endif
-
 
 
 ; Early Firebird checks.
@@ -2683,6 +2820,7 @@ org $82f130
 ; enemystats.bin, the new way of doing stat blocks
 if !SettingZ3 == 0
 {
+Lut_VitalsDifficulty0:
 db $00,$00,$00,$00
 db $04,$01,$00,$02
 db $03,$01,$00,$01
@@ -2793,8 +2931,7 @@ db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
-db $FF,$FF,$FF,$FF
-db $FF,$FF,$FF,$FF
+Lut_VitalsDifficulty1:
 db $00,$00,$00,$00
 db $06,$01,$00,$02
 db $05,$01,$00,$01
@@ -2905,8 +3042,7 @@ db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
-db $FF,$FF,$FF,$FF
-db $FF,$FF,$FF,$FF
+Lut_VitalsDifficulty2:
 db $00,$00,$00,$00
 db $06,$02,$00,$02
 db $05,$02,$00,$01
@@ -3017,8 +3153,7 @@ db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
-db $FF,$FF,$FF,$FF
-db $FF,$FF,$FF,$FF
+Lut_VitalsDifficulty3:
 db $00,$00,$00,$00
 db $06,$04,$00,$02
 db $05,$03,$00,$01
@@ -3132,6 +3267,7 @@ db $00,$00,$00,$00
 }
 else
 {
+Lut_VitalsDifficulty0:
 db $00,$00,$00,$00
 db $02,$01,$00,$02
 db $02,$01,$00,$01
@@ -3242,8 +3378,7 @@ db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
-db $FF,$FF,$FF,$FF
-db $FF,$FF,$FF,$FF
+Lut_VitalsDifficulty1:
 db $00,$00,$00,$00
 db $02,$01,$00,$02
 db $02,$01,$00,$01
@@ -3354,8 +3489,7 @@ db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
-db $FF,$FF,$FF,$FF
-db $FF,$FF,$FF,$FF
+Lut_VitalsDifficulty2:
 db $00,$00,$00,$00
 db $02,$01,$00,$02
 db $02,$01,$00,$01
@@ -3466,8 +3600,7 @@ db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
 db $00,$00,$00,$00
-db $FF,$FF,$FF,$FF
-db $FF,$FF,$FF,$FF
+Lut_VitalsDifficulty3:
 db $00,$00,$00,$00
 db $02,$01,$00,$02
 db $02,$01,$00,$01
@@ -3584,48 +3717,34 @@ endif
 
 
 
-; More "Early Firebird"
 org $82f828
-LR_SpawnFirebirdPaletteManager:
-cop #$3B : db $71 : dl TFirebirdPaletteManager
-lda #$1000 : tsb $12
-rtl
--:
-cop #$C1
-TFirebirdPaletteManager:
-lda $0AD4 : cmp #$0002 : beq +
-  rtl
+EPlayerChargeListener_SR_QuitPsychoDashIfForbidden:
+lda $0AA2 : bit #$0001 : bne +
+  jmp EPlayerChargeListener_SR_QuitCharge
 +:
-cop #$36
-cop #$39
-bra -
+jmp EPlayerChargeListener_SR_QuitAbilityIfForbidden
+EPlayerChargeListener_SR_QuitFriarIfForbidden:
+lda $0aa2 : bit #$0010 : bne +
+  jmp EPlayerChargeListener_SR_QuitCharge
++:
+jmp EPlayerChargeListener_SR_QuitAbilityIfForbidden
 
-BR_CheckPsychoDash:
-lda $0AA2 : bit #$0001 : beq +
-lda #$BEA0 : jsr $B926
-+:
-jmp $B901
-BR_CheckDarkFriar:
-lda $0aa2 : bit #$0010 : beq +
-lda #$bb3b : jsr $b926
-+:
-jmp $b901
-
-SR_AllowBlockIfNotWill:   ; assumed to be $82f845
+SR_AllowBlockIfNotWill:
 lda $0ad4 : beq +
-lda #$0100
+  lda #$0100
 +:
 rts
 SR_DisableAttackDamage:
 lda #$0400 : tsb $10
 lda #$0200 : trb $10
 rts
-SR_AllowChargeIfInSnakeGame:
+SR_SecIfCombatEnabledOrSnakeGame:
+sec
 lda $0644 : cmp #$00C6 : beq +
 lda $09AE : bit #$0008 : beq +
-cop #$E0
+  clc
 +:
-jmp $B7BD
+rts
 
 }
 
@@ -3634,14 +3753,15 @@ jmp $B7BD
 ; Bank $83
 {
 
-org $8381d6
-jmp $fdc0    ; "Black Glasses allow you to see which upgrades are available"
-
+org $8381cd
+lda $81aade,x : jsr SR_SetupRadarForceTextOrSec : bcs B_838248
+org $838248
+B_838248:
 
 org $838294
-lda $81adac,x   ; radar screen chest counter, update for new chest table
+lda $81adac,x   ; radar screen chest counter, updated for chest table with 2-byte items
 rep #$20
-and #$007f : jsl $80b489
+and #$007f : jsl LR_SecOnFlag20A
 sep #$20 : bcs +
 org $8382f9
 inc $0002
@@ -3652,15 +3772,14 @@ inx : inx : inx : inx : inx : jmp $828e
 org $83848d
 dw SR_UseItemCrystalRing    ; Item $27
 dw SR_UseItemApple    ; Item $28
-dw SR_UseItemHpUpgrade    ; Item $29 
-dw $f792    ; Item $2a 
-dw $f7cd    ; Item $2b 
-dw SR_UseItemPsychoDashUpgrade    ; Item $2c 
-dw SR_UseItemFriarUpgrade    ; Item $2d 
+skip 2    ; Item $29, artificial for HP upgrade
+skip 2    ; Item $2a, artificial for STR upgrade
+skip 2    ; Item $2b, artificial for DEF upgrade
+skip 2    ; Item $2c, artificial for Psycho Dash upgrade
+skip 2    ; Item $2d, artificial for Friar upgrade
 dw SR_UseItemTwoJewels    ; Item $2e 
 dw SR_UseItemThreeJewels    ; Item $2f 
 dw $ffa0    ; Item $30 
-
 
 
 org $8384d5
@@ -3694,36 +3813,6 @@ db $13    ; Allow Prison Key use from south of door.
 org $8385dc
 cop #$D5 : db $02   ; No need to check whether the key is being re-used. Just remove it here.
 nop : nop : nop
-
-
-org $83881d
-; Unused Inca Melody block, used now for upgrade items
-{
-SR_UseItemStrUpgrade:
-cop #$BF : dw .Text
-inc $0ade
-jsr $9fb2    ; jsr SR_RemoveHeldItem
-rts
-.Text:
-; "Your STR increased!"
-db $D3,$D6,$68,$63,$64,$62,$AC,$88,$8D,$82,$A2,$84,$80,$A3,$84,$83,$4F,$C0
-
-SR_UseItemPsychoDashUpgrade:
-cop #$BF : dw .Text
-inc $0b16
-jmp $f07d
-.Text:
-; "Psycho Dash has been improved!"
-db $D6,$3C,$43,$80,$A3,$87,$AC,$87,$80,$A3,$AC,$D6,$70,$CB,$88,$8C,$A0,$A2,$8E,$A6,$84,$83,$4F,$AC,$C0
-
-SR_UseItemFriarUpgrade:
-cop #$BF : dw .Text
-inc $0b1c
-jmp $f07d
-.Text:
-; "Dark Friar has been improved!"
-db $D3,$D6,$0C,$45,$A2,$88,$80,$A2,$AC,$87,$80,$A3,$AC,$D6,$70,$CB,$88,$8C,$A0,$A2,$8E,$A6,$84,$83,$4F,$AC,$C0
-}
 
 
 org $83888a
@@ -3773,9 +3862,9 @@ jsl $82a10a : bcc +
   rts
 +:
 lda $0644 : cmp #$0015 : bne .NothingHappened
-.InItory:    ; org $838bd6
+.InItory:
 cop #$D0 : db $40, $01 : dw .NothingHappened
-.DoPlaySong:    ; org $838bef
+.DoPlaySong:
 lda #$0080 : tsb $09EC
 cop #$BF : dw Text_LayDownDatFunkCat
 phx
@@ -3816,7 +3905,7 @@ db $D3,$4B,$80,$A9,$AC,$83,$8E,$A7,$8D,$AC,$83,$80,$A4,$AC,$85,$A5,$8D,$8A,$2B,$
 }
 
 org $838f17
-; item0d.bin, memory melody
+; Memory melody. Haven't cleaned this up with labels yet.
 {
 lda $0ad4 : beq +
   cop #$BF : dw $8f82
@@ -3865,6 +3954,33 @@ rts   ; End Mu key use before excessive text.
 org $8391d7
 db $c0    ; Shorten Mu door text.
 
+org $839299
+SR_UseItemHopeStatue:   ; Use 2-byte flags for statue placement, to separate placement from water level
+cop #$BF : dw .TextRaisedStatue
+lda $0644 : cmp #$0063 : bne .NothingHappened
+cop #$45 : db $06, $06, $0A, $08 : dw .InLeftRoom
+cop #$45 : db $16, $06, $1A, $08 : dw .InRightRoom
+bra .NothingHappened
+.InRightRoom:
+cop #$D1 : dw $02b1 : db $01 : dw .NothingHappened
+jsr SR_RemoveHeldItem
+cop #$BF : dw $930B
+cop #$CD : dw $02b1
+rts
+.InLeftRoom:
+cop #$D1 : dw $02b0 : db $01 : dw .NothingHappened
+jsr SR_RemoveHeldItem
+cop #$BF : dw $930B
+cop #$CD : dw $02b0
+rts
+.NothingHappened:
+cop #$BF : dw $92FB
+rts
+.TextRaisedStatue:
+db $cd : dl TextRaisedStatueOfHope
+db $ca
+warnpc $8392FB
+
 org $8393a5
 ; Magic Dust check.
 {
@@ -3893,6 +4009,7 @@ db $8a
 
 org $839427
 SR_UseItemBlueJournal:
+{
 cop #$BF : dw .TextIntro
 cop #$BE : db $03,$01 : dw .UseOptions
 .UseOptions:
@@ -3929,8 +4046,7 @@ db $c0
 .TextOption3:
 db $cd : dl TextBlueJournalOption3
 db $c0
-
-
+}
 
 org $83950c
 ; Lance's letter
@@ -4008,10 +4124,15 @@ org $839CDC    ; In SR_UseItemAura, this is the not-Shadow branch.
 cop #$BF : dw TextShadowsFormUnlocked
 cop #$CC : db $b4
 rts
+TextShadowsFormUnlocked:
+table "table_dialogue.txt",rtl
+db $d3
+db $cd : dl TextLongShadowsFormUnlocked
+db $c0
 
-
+warnpc $839d09
 org $839d09
-; item25.bin, nominally Lola's letter but also includes 2+3 RJ items
+; End of Lola's Letter use code.
 {
 cop #$CC : db $11
 cop #$D5 : db $25
@@ -4023,6 +4144,7 @@ db $8B,$84,$80,$A2,$8D,$AC,$4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$2A,$AC,$41,$
 db $8A,$8D,$8E,$A7,$A3,$AC,$88,$A4,$2B,$AC,$D6,$20,$84,$8D,$82,$8B,$8E,$A3,$84,$83,$CB
 db $87,$88,$A3,$AC,$84,$A8,$A0,$8B,$80,$8D,$80,$A4,$88,$8E,$8D,$2A,$AC,$6D,$4B,$8E,$8B,$80,$CF
 db $C3,$00,$69,$8E,$A5,$AC,$8D,$8E,$A7,$AC,$D6,$A4,$4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$4F,$C0
+}
 
 SR_UseItemTwoJewels:
 jsr SR_RemoveHeldItem
@@ -4057,18 +4179,10 @@ rts
 .Text:
 db $cd : dl TextUsedThreeRedJewels
 db $C0
-}
 
-
-org $839e9a
-; Father's Journal hiero text.
-dw !HieroJournalText1,!HieroJournalText2,!HieroJournalText3
-dw !HieroJournalText4,!HieroJournalText5,!HieroJournalText6
-
-org $839ea8
-db $cd : dl TextFathersJournalSubstitute
+org $839e1a
+db $cd : dl TextUseFathersJournal
 db $c0
-
 
 org $839f30
 SR_UseItemCrystalRing:
@@ -4083,8 +4197,6 @@ db "Bling bling."
 db $c0
 
 org $839f5d
-; item28.bin, nominally the apple but also includes upgrade items
-{
 SR_UseItemApple:
 cop #$BF : dw .Text
 rts
@@ -4092,32 +4204,8 @@ rts
 ; "Great an apple."
 db $D3,$D6,$16,$80,$8D,$AC,$80,$A0,$A0,$8B,$84,$2A,$C0
 
-SR_UseItemHpUpgrade:
-cop #$BF : dw .Text
-inc $0aca
-jsr $fe70 : sta $0b22
-jsr $9fb2    ; jsr SR_RemoveHeldItem
-rts
-.Text:
-; "Your HP increased!"
-db $D3,$D6,$68,$47,$60,$AC,$88,$8D,$82,$A2,$84,$80,$A3,$84,$83,$4F,$C0
-
-SR_UseItemDefUpgrade:
-cop #$BF : dw .Text
-inc $0adc
-jsr $9fb2    ; jsr SR_RemoveHeldItem
-rts
-.Text:
-; "Your DEF increased!"
-db $D3,$D6,$68,$43,$44,$45,$AC,$88,$8D,$82,$A2,$84,$80,$A3,$84,$83,$4F,$C0
-}
-
-
-
-
 
 org $83b401
-;mapchoices.bin
 Lut_MapChoices:
 {
 .Pointers:
@@ -4312,15 +4400,15 @@ cop #$C5
 }
 
 
-; Changes to make monster stats lookup the correct new tables.
+; Changes to make monster stats look up the new tables.
 org $83be52
-db $82
+db $82   ; i.e. #BankOf(Lut_VitalsDifficulty0)
 org $83bfba
-jsr $fe80
+jsr SR_GetMonsterHpAtStatAddrY
 org $83bfc3
-jsr $fe96
+jsr SR_GetMonsterDefAtStatAddrY
 org $83c45d
-jsr $fe8b
+jsr SR_GetMonsterStrAtStatAddrY
 
 
 
@@ -4333,6 +4421,7 @@ endif
 
 org $83c849
 LR_WriteSpriteIfVisible:
+{
 ; Optimization: D=0, so $00??,x -> $??,x if x is LowRAM or ROM bank $00.
 phb 
 sep #$21
@@ -4391,12 +4480,12 @@ lda #$e080 : sta $0422,y
 .NoFlushOffScreenSprite:
 clc
 bra .TryNextSprite
+}
 warnpc $83c926
-
-
 
 org $83CA55
 LR_AnimateSprite:
+{
 ; Similar optimizations.
 phb          ;<--SR
 sep #$20
@@ -4451,13 +4540,13 @@ stz $2A
 sec
 plb
 rtl
+}
 warnpc $83CAF5
-
-
 
 org $83d0db
 ; Extensive modifications to this routine.
 SR_FixMapAndSecIfMonDead:
+{
 phy
 phx
 sta $0000
@@ -4500,15 +4589,16 @@ warnpc $83d125
 org $83d125
 Lut_PowersOfTwo83:
 db $01,$02,$04,$08,$10,$20,$40,$80
+}
 warnpc $83d12d
 
 
 org $83cffb
-jsr $fed0    ; Another monster stat lookup.
+jsr SR_MapVitalOffsetByDifficulty    ; Another monster stat lookup.
 
 
 org $83d003
-jsr $fe80    ; jsr to lookup for new stat blocks
+jsr SR_GetMonsterHpAtStatAddrY    ; jsr to lookup for new stat blocks
 
 
 org $83e03a
@@ -4522,15 +4612,8 @@ jml LR_GiveNormalItemA8OrSec
 warnpc $83f08d
 
 
-org $83f208
-; Pyramid Guy hook to show journal text
-cop #$BF : dw $9e1a
-rtl
-
-
-
-
-org $83faee
+; Bank $83 free space begins here.
+org $83f201
 SR_HalveAPerDef:
 phx
 ldx $0ADC
@@ -4544,52 +4627,18 @@ plx
 cmp #$0000  
 rts
 
+SR_SetupRadarForceTextOrSec:
+and #$00ff : beq .SecAndReturn
+  sta $0bfa
+cop #$D0 : db $f5,$01 : dw .ClcAndReturn
+stz $0bfa
+.ClcAndReturn:
+clc
+rts
+.SecAndReturn:
+sec
+rts
 
-org $83fdc0
-; startmenu.bin
-{
-pha
-cop #$D0 : db $F5,$01 : dw $fdd4
-cop #$D0 : db $F5,$01 : dw $fdd4   ; repetition is a bug
-pla
-lda #$2EE1
-jmp $81d9
-; org $83ffd4, show room reward type
-phb
-lda #$7f00 : pha : plb : plb
-lda #$2ee1 : sta $0406
-inc : sta $0408
-inc : sta $0446
-lda #$6ee0 : sta $040c
-inc : sta $040a
-inc : sta $044c
-lda #$aee1 : sta $04c6
-inc : sta $04c8
-inc : sta $0486
-lda #$eee1 : sta $04cc
-inc : sta $04ca
-inc : sta $048c
-lda #$32e8 : sta $0448
-inc : sta $044a
-inc : sta $0488
-inc : sta $048a
-plb
-pla
-ldx #$0000
-dec : beq ++
-dec : beq +
-cop #$BD : dl $81ff90
-bra +++
-+:
-cop #$BD : dl $81ff80
-bra +++
-++:
-cop #$BD : dl $81ff70
-+++:
-jmp $8248
-}
-
-org $83fe50
 SR_GetHerbHealAmount:
 lda $0B24 : beq +++
   dec : beq ++
@@ -4618,83 +4667,64 @@ bra ++++
 lda #$0028 ;: bra ++++
 ++++:
 rts
-warnpc $83fe6e
 
-org $83fe80
-; Routines to look up stats in new, non-Intermediate tables.
-; HP
-jsr $fead
+; Maps a relative address in the base vitals table (i.e. the x in $81abf0,x) to the
+; corresponding absolute address in the difficulty-specific vitals table (i.e. the x in $820000,x).
+SR_MapVitalOffsetByDifficulty:
+pha
+lda $0B24 : beq +++
+  dec : beq ++
+    dec : beq +
+      pla : adc.w #Lut_VitalsDifficulty3
+      bra ++++
++:
+    pla : adc.w #Lut_VitalsDifficulty2
+    bra ++++
+++:
+  pla : adc.w #Lut_VitalsDifficulty1
+  bra ++++
++++:
+pla : adc.w #Lut_VitalsDifficulty0
+++++:
+rts
+
+; Maps an absolute address in the base vitals table (i.e. the x in $810000,x) to the difficulty-specific table. 
+; Addresses in the difficulty-specific tables, as well as $0000, are unmodified.
+SR_MapVitalAbsoluteByDifficulty:
+cpy #$B000 : bcs +
+  tya : beq +
+    sec : sbc #$ABF0 : clc : jsr SR_MapVitalOffsetByDifficulty : tay
++:
+rts
+
+SR_GetMonsterHpAtStatAddrY:
+jsr SR_MapVitalAbsoluteByDifficulty
 phx
 tyx
 lda $820000,x
 plx
 rts
-; STR
-jsr $fead
+SR_GetMonsterStrAtStatAddrY:
+jsr SR_MapVitalAbsoluteByDifficulty
 phx
 tyx
 lda $820001,x
 plx
 rts
-; DEF
-jsr $fead
+SR_GetMonsterDefAtStatAddrY:
+jsr SR_MapVitalAbsoluteByDifficulty
 phx
 tyx
 lda $820002,x
 plx
 rts
-; GEM, the only one referenced from another bank, has to be a LR instead of an SR.
-tay
-jsr $FEAD
+LR_GetMonsterGemAtStatAddrY:   ; LR because this is called from two banks.
+tay : jsr SR_MapVitalAbsoluteByDifficulty
 phx
 tyx
 lda $820003,x
 plx
 rtl
-; This is $fead and converts, if applicable, a hardcoded stat block address to the new format.
-cpy #$B000 : bcs +
-  tya : beq +
-    sec : sbc #$ABF0 : clc : jsr $FED0 : tay
-+:
-rts
-
-org $83fed0
-pha
-lda $0B24 : beq +++
-  dec : beq ++
-    dec : beq +
-      pla : adc #$F670
-      bra ++++
-+:
-    pla : adc #$F4B0
-    bra ++++
-++:
-  pla : adc #$F2F0
-  bra ++++
-+++:
-pla : adc #$F130
-++++:
-rts
-
-
-
-
-
-table "table_dialogue.txt",rtl
-org $83ff00
-Text_UseJewelOHKO:
-db $d3
-db "Will drops the HP Jewel.",$cb
-db "It shatters into a",$cb
-db "million pieces.",$cb
-db "Whoops."
-db $c0
-
-TextShadowsFormUnlocked:
-table "table_dialogue.txt",rtl
-db $d3
-db $cd : dl TextLongShadowsFormUnlocked
-db $c0
 
 }
 
@@ -4703,7 +4733,7 @@ db $c0
 ; Bank $84
 {
 
-org $848377    ; Fisherman only appears at the east side of the docks.
+org $848377    ; Cape fisherman appears at the east side of the docks.
 cop #$D0 : db $10,$01 : dw $83aa
 nop
 
@@ -4729,24 +4759,8 @@ cop #$CC : db $38
 rtl
 .Text:
 db $d3
-;if !StatuesRequiredCount == 0
-;db "No statues required!"
-;elseif !StatuesRequiredCount == 1
-;db "You need Statue "
-;else
-;db "You need Statues ",$cb
-;endif
 db !TextTeacherStatuesString
 db $c0
-
-
-; No friend actors in school (redundant?)
-org $848d25
-db $e0,$6b
-org $848d72
-db $e0,$6b
-org $848d99
-db $e0,$6b
 
 
 org $84922f
@@ -4772,68 +4786,48 @@ cop #$BF : dw $9d94
 rtl
 }
 
-org $84afb6
-db $e0,$6b   ; Disable playing cards (redundant?)
-
-org $84b067
-db $10,$00   ; Disable Cape cave friend 1
-
-org $84b06c
-db $e0,$6b   ; Disable cave Lance (redundant?)
-
-org $84b459
-db $e0,$6b   ; Disable cave Seth (redundant?)
-
-org $84b465
-db $10,$00   ; Disable Cape cave friend 2
-
-org $84b8b4
-cop #$D0 : db $10,$01 : dw $b962   ; Change Erik's code path in Cape
-org $84b968
-cop #$C0 : dw $b9a5    ; Change Erik's interaction in Cape
-
-org $84b9a5
-; seaside.bin, Erik's dialogue in Seaside Cave
-{
-ErikOnInteract:
-cop #$D0 : db $12,$01 : dw ErikAskWhere
-cop #$D0 : db $11,$01 : dw ErikSetTravelFlag
-cop #$BF : dw TextErikNoTravel
+org $84b8b1
+db $0a : dw $1000
+EErikInCapeCave:
+cop #$25 : db $08,$09
+cop #$C0 : dw .OnInteract
+cop #$C1
 rtl
-ErikSetTravelFlag:
+.OnInteract:
+cop #$D0 : db $12,$01 : dw .AskWhere
+cop #$D0 : db $11,$01 : dw .SetTravelFlag
+cop #$BF : dw .TextNoTravel
+rtl
+.SetTravelFlag:
 cop #$CC : db $12
-cop #$BF : dw TextErikFirstTravel
-ErikAskWhere:
-cop #$BF : dw TextErikWhereTravel
-cop #$BE : db $42,$01 : dw ErikTravelOptions
-ErikTravelOptions:
-dw ErikCancel
-dw ErikCancel,        ErikToWatermia
-dw ErikToDiamondCoast,ErikToSouthCape
-dw ErikToSouthCape    ; unused, does not appear due to 4x2 restriction
-ErikCancel:
-cop #$BF : dw TextErikCancel
+cop #$BF : dw .TextFirstTravel
+.AskWhere:
+cop #$BF : dw .TextWhereTravel
+cop #$BE : db $42,$01 : dw .TravelOptions
+.TravelOptions:
+dw ..ChooseCancel
+dw ..ChooseCancel,        ..ChooseToWatermia
+dw ..ChooseToDiamondCoast,..ChooseToSouthCape
+..ChooseCancel:
+cop #$BF : dw .TextCancel
 rtl
-ErikToWatermia:
+..ChooseToWatermia:
 cop #$26 : db $78 : dw $0278,$0390 : db $00,$00,$45
 cop #$C5
-ErikToSeaPalace:
-cop #$26 : db $5a : dw $0090,$0070 : db $83,$00,$14
-cop #$C5
-ErikToDiamondCoast:
+..ChooseToDiamondCoast:
 cop #$26 : db $30 : dw $0048,$0110 : db $03,$00,$21
 cop #$C5
-ErikToSouthCape:
+..ChooseToSouthCape:
 cop #$26 : db $02 : dw $0070,$0080 : db $03,$00,$11
 cop #$C5
-TextErikNoTravel:
+.TextNoTravel:
 db $C2,$0A,$C2,$03,$44,$A2,$88,$8A,$2F,$AC,$48,$AC,$82,$80,$8D,$AC,$D6,$9B,$63,$84,$A4,$87,$AC
 db $CB
 db $D6,$8E,$D6,$D6,$82,$80,$A6,$84,$2B,$AC,$81,$A5,$A4,$AC,$48,$AC
 db $CB
 db $D6,$82,$D6,$A4,$4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$2A
 db $C0
-TextErikFirstTravel:
+.TextFirstTravel:
 db $C2,$0A,$C2,$03,$44,$A2,$88,$8A,$2F,$AC,$4E,$87,$AC,$86,$A2,$84,$80,$A4,$2B,$AC,$A9,$8E,$A5,$AC,$D6,$A4
 db $CB
 db $4C,$8E,$A2,$A3,$84,$AC,$42,$8E,$83,$84,$0D,$AC,$D6,$2B,$A3,$84,$84,$AC
@@ -4842,42 +4836,22 @@ db $D6,$F7,$63,$84,$A4,$87,$AC,$88,$A3,$AC,$A3,$80,$A9,$88,$8D,$86,$4F,$AC,$CF,$
 db $CB
 db $A9,$8E,$A5,$AC,$80,$82,$A2,$8E,$A3,$A3,$AC,$A4,$87,$84,$AC,$A3,$84,$80,$2A,$2A,$2A,$AC
 db $C0
-TextErikWhereTravel:
+.TextWhereTravel:
 db $D3,$C2,$05,$D5,$00,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D
 db $CB
 db $AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$82,$8E,$80,$A3,$A4
 db $CB
 db $AC,$67,$80,$A4,$84,$A2,$8C,$88,$80,$AC,$AC,$AC,$AC,$D6,$47,$42,$80,$A0,$84
 db $CA
-TextErikUnusedJunk:
-db $8E,$A7,$84,$A2,$AC
-db $CB
-db $AC,$63,$84,$80,$AC,$D7,$93,$AC,$AC,$AC
-db $CA
-TextErikCancel:
+.TextCancel:
 db $CE,$C2,$05,$D5,$00,$63,$84,$A4,$87,$2F,$AC,$D6,$63,$A4,$87,$80,$8D,$8A,$A3,$AC,$85,$8E,$A2
 db $CB
 db $8D,$8E,$A4,$88,$82,$88,$8D,$86,$AC,$8C,$84,$2A,$2A,$2A,$AC,$AC,$AC
 db $C0
-}
 
-org $84bca9
-db $10   ; Will's house flag 1
 
-org $84bccc
-db $10   ; Will's house flag 2
-
-org $84bcda
-db $10   ; Lance's house flag
-
-org $84bce8
-db $10   ; Erik's house flag
-
-org $84bcf6
-db $10   ; Seaside cave flag another one
-
-org $84be3d
-db $10   ; Seaside cave flag
+org $84be3b
+jmp $be57   ; Seaside Cave exit listener, skip the plot/dialogue
 
 org $84be6a
 db !Map02Exit01
@@ -4936,9 +4910,6 @@ db $d3
 db "!SpoilerTextCastleGuard"
 db $c0
 
-org $84cb5e
-db $e0,$6b    ; Disable Castle Kara (redundant?)
-
 org $84d0da
 ; Castle basement barrel
 {
@@ -4956,7 +4927,7 @@ rtl
 org $84d1a0
 ; castleguard.bin, the jailer's dialogue
 {
-cop #$C0 : dw $d1ce
+cop #$C0 : dw CastleBasementGuardOnInteract
 cop #$BC : db $00,$08
 ---:
 cop #$0B
@@ -4970,9 +4941,11 @@ lda #$0008 : sta $09b2
 cop #$DA : db $1d
 cop #$CE : db $01
 bra ---
-cop #$BF : dw $d1d6
+CastleBasementGuardOnInteract:
+cop #$BF : dw TextCastleBasementGuard
 cop #$CC : db $01
 rtl
+TextCastleBasementGuard:
 db $C2,$0B,$64,$87,$88,$A3,$AC,$88,$A3,$AC,$A4,$87,$84,$AC,$A0,$A2,$88,$A3,$8E,$8D,$2A
 db $CB
 db $48,$8D,$8D,$8E,$82,$84,$8D,$A4,$A3,$AC,$D6,$78,$84,$8D,$A4,$84,$A2,$2A
@@ -5003,12 +4976,6 @@ cop #$E0
 
 org $84dc5e
 db $d3,$60,$8b,$84,$80,$a3,$84,$2a,$2a,$2a,$ac,$d7,$ad,$cb,$63,$8c,$80,$a3,$87,$4c,$80,$8d,$88,$80,$82,$ac,$48,$0e,$8c,$ac,$d6,$fd,$cb,$85,$8e,$a2,$ac,$87,$88,$8c,$2a,$2a,$2a,$c0
-
-org $84e06e
-db $e0,$6b    ; Disable Itory Kara (redundant?)
-
-org $84e1b7
-db $e0,$6b    ; Disable Lilly's-house Kara (redundant?)
 
 org $84e2a3
 ; itory.bin, modified itory entrance handler
@@ -5082,30 +5049,35 @@ cop #$C1
 rtl
 }
 
-org $84e5a6
-db $6f    ; Lilly change 1
-org $84e5ac
-dw $e5ff  ; Lilly changes 2
-cop #$0B
-rtl
 
-org $84e5ff
-; lilly.bin, Lilly NPC
-{
-cop #$D6 : db $17 : dw $e60c
-cop #$BF : dw $e617
+
+org $84e5a1
+db $1c : dw $1000
+ELillyInItory:
+cop #$D0 : db $6f,$01 : dw .Die
+cop #$0B
+cop #$C0 : dw .OnInteract
 rtl
+.OnInteract:
+cop #$D6 : db $17 : dw .TakeNecklace
+cop #$BF : dw .TextNoNecklace
+rtl
+.TakeNecklace:
 cop #$CC : db $37
 cop #$CC : db $6f
 cop #$D5 : db $17
-cop #$BF : dw $e653
-rtl
+cop #$BF : dw .TextTakeNecklace
+.Die:
+cop #$0C
+cop #$E0
+.TextNoNecklace:
 db $C2,$0B,$C2,$02,$D6,$2A,$48,$AC,$D7,$7A,$A4,$87,$84,$AC,$8D,$84,$82,$8A,$8B,$80,$82,$84
 db $CB
 db $4B,$80,$8D,$82,$84,$AC,$86,$80,$A6,$84,$AC,$8C,$84,$4F,$AC,$48,$AC,$D6,$91
 db $CB
 db $A3,$8E,$AC,$80,$A7,$85,$A5,$8B,$2A,$2A,$2A,$AC,$AC,$AC,$AC,$AC
 db $C0
+.TextTakeNecklace:
 db $C2,$0B,$C2,$02,$D6,$2A,$4E,$87,$2B,$AC,$A9,$8E,$A5,$AC,$D6,$8F,$8C,$A9
 db $CB
 db $8D,$84,$82,$8A,$8B,$80,$82,$84,$4F,$AC,$D6,$58,$A9,$8E,$A5,$AC,$A3,$8E
@@ -5114,19 +5086,20 @@ db $8C,$A5,$82,$87,$4F,$AC,$AC,$CF,$CE,$C2,$02,$4B,$84,$A4,$AC,$8C,$84,$AC,$89,$
 db $CB
 db $8E,$85,$AC,$87,$84,$8B,$A0,$AC,$83,$8E,$A7,$8D,$AC,$A4,$87,$84,$AC,$A2,$8E,$80,$83,$4F
 db $C0
-db $CE,$C2,$02,$4B,$84,$A4,$AC,$8C,$84,$AC,$A0,$80,$82,$8A,$AC,$8C,$A9,$AC,$A4,$87,$88,$8D,$86,$A3,$2B
-db $CB
-db $D6,$1F,$85,$8B,$A9,$AC,$D6,$A1,$D6,$FE,$A0,$8E,$82,$8A,$84,$A4
-db $CB
-db $D6,$F6,$D6,$FF,$8D,$8E,$A4,$AC,$D6,$AB,$2F,$6F
-db $C0
-}
+; unused extra text
+;db $CE,$C2,$02,$4B,$84,$A4,$AC,$8C,$84,$AC,$A0,$80,$82,$8A,$AC,$8C,$A9,$AC,$A4,$87,$88,$8D,$86,$A3,$2B
+;db $CB
+;db $D6,$1F,$85,$8B,$A9,$AC,$D6,$A1,$D6,$FE,$A0,$8E,$82,$8A,$84,$A4
+;db $CB
+;db $D6,$F6,$D6,$FF,$8D,$8E,$A4,$AC,$D6,$AB,$2F,$6F
+;db $C0
+
 
 org $84e933
 db $10   ; Itory elder is always visible
 
 org $84e97a
-cop #$BF : dw $e9ff    ; Itory elder just talks upon interaction
+cop #$BF : dw TextSpoilerItoryElder    ; Itory elder just talks upon interaction
 rtl
 
 org $84e9ff
@@ -5134,12 +5107,6 @@ TextSpoilerItoryElder:
 db $d3
 db "!SpoilerTextItoryElder"
 db $c0
-
-org $84ef78
-db $e0,$6b    ; Disable Itory Bill (redundant?)
-
-org $84f0a7
-db $e0,$6b    ; Disable Itory Lola (redundant?)
 
 org $84f373
 ; Itory cave statue
@@ -5158,42 +5125,46 @@ org $84fb50
 ; tutorial.bin, NPC who gives tutorial book
 {
 TutorialNpcOnInteract:
-cop #$BF : dw $fb80
-cop #$BE : db $02,$01 : dw $fb5a
-dw $fb60
-dw $fb60
-dw $fb65
-cop #$BF : dw $fba0
+cop #$BF : dw .TextChat
+cop #$BE : db $02,$01 : dw .ChatOptions
+.ChatOptions:
+  dw ..ChooseNo
+  dw ..ChooseNo, ..ChooseYes
+..ChooseNo:
+cop #$BF : dw .TextChoseNo
 rtl
-cop #$D6 : db $15 : dw $fb79
-cop #$D4 : db $15 : dw $fb74
-cop #$BF : dw $fbf0
+..ChooseYes:
+cop #$D6 : db $15 : dw ..AlreadyHaveBook
+cop #$D4 : db $15 : dw ..YourInvFull
+cop #$BF : dw .TextGetBook
 rtl
-cop #$BF : dw $fc10
+..YourInvFull:
+cop #$BF : dw .TextYourInvFull
 rtl
-cop #$BF : dw $fbd0
+..AlreadyHaveBook:
+cop #$BF : dw .TextAlreadyHaveBook
 rtl
-db $ff,$ff   ; padding
+.TextChat:
 db $D3,$67,$80,$8D,$A4,$AC,$80,$AC,$A4,$A5,$A4,$8E,$A2,$88,$80,$8B,$0D
 db $CB
 db $AC,$4D,$8E
 db $CB
 db $AC,$69,$84,$A3
 db $CA
-db $FF,$FF,$FF,$FF,$FF   ; padding
+.TextChoseNo:
 db $CE,$D6,$69,$A2,$88,$86,$87,$A4,$AB,$AC,$A2,$84,$80,$83,$88,$8D,$86,$0E,$A3,$AC
 db $CB
 db $85,$8E,$A2,$AC,$8D,$84,$A2,$83,$A3,$2A
 db $C0
-db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF   ; padding
+.TextAlreadyHaveBook:
 db $CE,$69,$8E,$A5,$AC,$80,$8B,$A2,$84,$80,$83,$A9,$AC,$D6,$98,$8E,$8D,$84,$4F,$AC
 db $CB
 db $46,$A2,$84,$84,$83,$A9,$2A,$2A,$2A
 db $C0
-db $FF   ; padding
+.TextGetBook:
 db $CE,$69,$8E,$A5,$AC,$86,$8E,$A4,$AC,$A4,$87,$84,$AC,$41,$8B,$A5,$84,$AC,$49,$8E,$A5,$A2,$8D,$80,$8B,$4F
 db $C0
-db $FF,$FF,$FF,$FF,$FF   ; padding
+.TextYourInvFull:
 db $CE,$D6,$68,$88,$8D,$A6,$84,$8D,$A4,$8E,$A2,$A9,$0E,$A3,$AC,$85,$A5,$8B,$8B,$AB,$AC
 db $CB
 db $8C,$80,$A4,$84,$2A
@@ -5253,7 +5224,7 @@ org $8586a3   ; Map transition upon sleeping in Inca ship
 cop #$26 : db $30 : dw $0048,$0020 : db $03,$00,$21
 
 org $858a04
-dw $0010 ; Gold Ship queen flag
+db $10,$00 ; Gold Ship queen flag
 
 org $858a1f
 db $10   ; Gold Ship queen flag
@@ -5374,16 +5345,6 @@ org $85c331
 db $42,$a2,$80,$a0,$2b,$ac,$48,$ac,$d6,$ae,$a4,$87,$84,$ac,$d7,$58,$cb,$a5
 db $8d,$8b,$8e,$82,$8a,$84,$83,$ac,$80,$86,$80,$88,$8d,$2a,$2a,$2a,$c0
 
-; Disable Freejia hotel friends (redundant?)
-org $85c45a
-db $e0,$6b
-org $85c5b7
-db $e0,$6b
-org $85c782
-db $e0,$6b
-org $85cb34
-db $e0,$6b
-
 org $85cf31
 EFreejiaBin2_OnInteract:
 cop #$D0 : db $53,$01 : dw .GotItemAlready
@@ -5448,11 +5409,31 @@ lda $0e : sta $24
 lda #$2000 : sta $0e
 cop #$E0    ; Possibly unsafe?
 
+org $85d736
+db $00 : dw $1000
+EMineBreakableWallOverSlave:
+{
+cop #$D0 : db $d9,$01 : dw .DoDisappear
+cop #$9C : dl EMineBreakableWallSlave : dw $1000
+;...
 org $85d796
-cop #$CC : db $05   ; Use temp flag to trigger caved-in miner.
-
-org $85d7cb
-{  ; Caved-in slave miner.
+; Caved-in wall broken, drawing the open-wall tiles
+cop #$CC : db $05   ; Use temp flag instead of item flag to trigger item event.
+.DoDisappear:
+cop #$4B : db $08,$11,$d5
+cop #$4B : db $09,$11,$d4
+cop #$4B : db $08,$12,$ec
+cop #$4B : db $09,$12,$dc
+cop #$0F : db $08,$12     ; More solid tiles added, and made solid earlier, to fix a bug where
+cop #$4B : db $08,$13,$f4 ; Will can slide through a newly-drawn tile while other tiles are
+cop #$0F : db $09,$12     ; waiting to be drawn.
+cop #$4B : db $09,$13,$e4
+cop #$0F : db $08,$13
+cop #$4B : db $08,$14,$02 
+cop #$0F : db $09,$13
+cop #$4B : db $09,$14,$02
+cop #$E0
+EMineBreakableWallSlave:
 cop #$BC : db $08,$00
 lda #$2000 : tsb $10
 cop #$80 : db $0c
@@ -5464,8 +5445,8 @@ cop #$DA : db $77
 cop #$CE : db $00
 EMineWallSlave_TryGiveItem:
 %MTryGiveItemAndFlag(!MineWallSlaveItem, $d9)
-cop #$D0 : db $d9,$00 : dw EMineWallSlave_InvWasFull
 lda #$EFF0 : trb $065A
+cop #$D0 : db $d9,$00 : dw EMineWallSlave_InvWasFull
 lda #$0080 : tsb $09EC
 cop #$86 : db $0D, $08, $01
 cop #$8A
@@ -5477,7 +5458,7 @@ cop #$C0 : dw EMineWallSlave_TryGiveItem
 cop #$C1
 rtl
 }
-
+warnpc $85d89a
 org $85d89a
 ; neilscottage.bin, Neil in his cottage
 {
@@ -5544,12 +5525,12 @@ db $80,$8D,$A9,$A4,$88,$8C,$84,$4F,$C0
 
 
 org $85e647
-; nazca.bin, the tile that ports you to the sky
+; Nazca teleporter + world map exit listener
 {
 db $00 : dw $3000
-cop #$9C : dl $85e7d0 : dw $2000
-cop #$D2 : db $10,$01
-cop #$C0 : dw $e6ad
+ENazcaTeleporterTile:
+cop #$9C : dl $85e7d0 : dw $2000    ; World map exit listener 
+cop #$C0 : dw .OnInteract
 cop #$D2 : db $0f,$01
 lda #$eff0 : tsb $065a
 lda #$00e0 : sta $7f0010,x
@@ -5561,39 +5542,39 @@ lda $7f0010,x
   inc : sta $7f0010,x
 cop #$DA : db $01
 cop #$CB
-cop #$C1
-cop #$C1
-cop #$C1
-cop #$C1
-cop #$C1
-cop #$9C : dl $85e7a6 : dw $0300
+cop #$9C : dl $85e7a6 : dw $0300    ; Vanishes Will's sprite 
 cop #$DA : db $3b
-cop #$C1
-cop #$C1
 lda #$0404 : sta $064a
 cop #$26 : db !MapGardenEntranceString ; $4c : dw $0168,$0040 : db $83,$00,$22
 cop #$C1
 rtl
-
-cop #$BF : dw $e71d
-cop #$BE : db $02,$01 : dw $e6b7
-  dw $e6bd
-  dw $e6a0,$e6bd
-cop #$BF : dw $e6c2
+.OnInteract:
+cop #$BF : dw .TextOfferWarp
+cop #$BE : db $02,$01 : dw ..Options
+..Options:
+  dw ..ChooseNo
+  dw ..ChooseYes,..ChooseNo
+..ChooseNo:
+cop #$BF : dw .TextRefusedWarp
 rtl
-
-db $CE,$D6,$63,$8E,$8A,$80,$A9,$2A
-db $C0
-db $A4,$88,$8B,$84,$AC,$81,$A5,$A2,$88,$84,$83
-db $CB
-db $88,$8D,$AC,$A4,$87,$84,$AC,$A3,$80,$8D,$83,$2A,$2A,$2A,$CF,$D6,$61,$67,$88,$8B,$8B,$0E,$A3,$AC,$45,$8B,$A5,$A4,$84,$AC,$CB,$A4,$8E,$A5,$82,$87,$84,$83,$AC,$88,$A4,$2B,$AC,$D6,$D9,$CB,$A7,$80,$A3,$AC,$80,$AC,$A2,$A5,$8C,$81,$8B,$88,$8D,$86,$AC,$A3,$8E,$A5,$8D,$83,$4F,$C3,$00
-db $C0
-db $D3,$67,$80,$A2,$A0,$AC,$A4,$8E,$AC,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$0D
-db $CB
-db $AC,$69,$84,$A3
-db $CB
-db $AC,$4D,$8E
-db $CA
+..ChooseYes:
+cop #$CC : db $0f
+cop #$BF : dw .TextAcceptedWarp
+rtl
+table "table_dialogue.txt",rtl
+.TextOfferWarp:
+db $d3
+db "Warp to Sky Garden?",$cb
+db "_Yes",$cb
+db "_No"
+db $ca
+.TextRefusedWarp:
+db $ce
+db "Well, okay."
+db $c0
+.TextAcceptedWarp:
+db $ce
+db $ca
 }
 
 org $85e80c
@@ -5602,30 +5583,15 @@ cop #$66 : dw $0310,$0290 : db !OverworldShuffleNzcaMenuId
 cop #$C1
 rtl
 
-; Disable Nazca friends (redundant?)
-org $85e845
-db $e0,$6b
-org $85ec8f
-db $e0,$6b
-org $85eea5
-db $e0,$6b
-org $85efed
-db $e0,$6b
-org $85f1fd
-db $e0,$6b
-
-
-
-
-
-
-; "Put a Moon Tribe where the warp point is"
-org $85f2f1
-db $10
-bra $0b
-org $85f30c
-cop #$C0 : dw $e6ad
-bra $f5
+; Animate a Moon Tribe sprite to show the warp point 
+org $85f2ef
+db $32 : dw $1000
+EMoonTribeIdle:
+lda #$0200 : tsb $12
+-:
+cop #$80 : db $32
+cop #$89
+bra -
 
 org $85f356
 ; Sky Garden spirits and exit portal.
@@ -5701,7 +5667,7 @@ cop #$D0 : db $12,$01 : dw .OfferTravel
 cop #$CC : db $12
 cop #$BF : dw .TextFirstTravel
 .OfferTravel:
-jml ErikAskWhere
+jml EErikInCapeCave_AskWhere
 .TextNoTravel:
 db $d3
 db "Woof woof!",$cb
@@ -5721,10 +5687,6 @@ db "Seth's up to!)",$c0
 
 ; Bank $86
 {
-org $868689
-db $e0,$6b    ; Disable Lilly in SeaPal (redundant?)
-
-
 org $8686fa
 db $10   ; Lilly at Seaside Palace flag
 
@@ -5864,9 +5826,11 @@ EMuHopeRoomFlame = $869c14
 EMuHopeRoomWizard = $869BDA
 
 cop #$45 : db $10, $00, $20, $10 : dw EMuHopeRoomListenerRight
-cop #$D0 : db $7B, $01 : dw .StatueAlreadyPlaced
-cop #$D2 : db $7B, $01
+EMuHopeRoomListenerLeft:
+cop #$D1 : dw $02b0 : db $01 : dw .StatueAlreadyPlaced
+cop #$D3 : dw $02b0 : db $01
 cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0080, $0058, $1000
+jsl LR_LowerMuWaterOneStep
 lda #$CFF0 : tsb $065A
 cop #$DA : db $0F
 cop #$04 : db $1B
@@ -5903,19 +5867,20 @@ cop #$DA : db $10
 stz $0688
 lda #$CFF0 : trb $065A
 cop #$E0
-.StatueAlreadyPlaced:    ; org $869aae
+.StatueAlreadyPlaced:
 cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0080, $0058, $1000
 cop #$E0
 
-EMuHopeRoomStatueSprite:    ; org $869abb
+EMuHopeRoomStatueSprite:
 cop #$80 : db $30
 cop #$89
 rtl
 
-EMuHopeRoomListenerRight:    ; org $869ac1
-cop #$D0 : db $7E, $01 : dw .StatueAlreadyPlaced
-cop #$D2 : db $7E, $01
+EMuHopeRoomListenerRight:
+cop #$D1 : dw $02b1 : db $01 : dw .StatueAlreadyPlaced
+cop #$D3 : dw $02b1 : db $01
 cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0180, $0058, $1000
+jsl LR_LowerMuWaterOneStep
 lda #$CFF0 : tsb $065A
 cop #$DA : db $0F
 cop #$04 : db $1B
@@ -5952,12 +5917,14 @@ cop #$DA : db $10
 stz $0688
 lda #$CFF0 : trb $065A
 cop #$E0
-.StatueAlreadyPlaced:    ; org $869b9d
+.StatueAlreadyPlaced:
 cop #$A0 : dl EMuHopeRoomStatueSprite : dw $0180, $0058, $1000
 cop #$E0
 
 TextMuHopeRoomWizard:
 db $d3 : db "Hey." : db $c0    ; Hope Room text
+
+warnpc $869BDA
 }
 
 org $869c60
@@ -6300,7 +6267,10 @@ db $8d
 db $ff
 db $ff
 .Pymd:
-db $bd,$c2,$c3,$c4,$c5,$c6,$c7
+db $bd,$c2,$c3,$c4,$c5
+if !SettingDungeonShuffle == 0
+db $c6,$c7
+endif
 db $ff
 db $29,$2a,$2b,$2c,$8e
 db $ff
@@ -6839,14 +6809,6 @@ db $d3
 db "!SpoilerTextEuroOldMan"
 db $c0
 
-; Disable friends in Euro (redundant?)
-org $87d989
-db $e0,$6b
-org $87daa1
-db $e0,$6b
-org $87db29
-db $e0,$6b
-
 org $87df43
 cop #$D5 : db $28
 %MTryGiveItemAndFlag(!EuroAnnItem, $e5)
@@ -6889,7 +6851,7 @@ cop #$D0 : db $12,$01 : dw .OfferTravel
 cop #$CC : db $12
 cop #$BF : dw .TextFirstTravel
 .OfferTravel:
-jml ErikAskWhere
+jml EErikInCapeCave_AskWhere
 .TextNoTravel:
 db $d3
 db "Only town folk may cross",$cb
@@ -7043,12 +7005,6 @@ rtl
 .Die:
 cop #$E0
 
-; Disable Dao friends (redundant?)
-org $88a4af
-db $e0,$6b
-org $88a56b
-db $e0,$6b
-
 org $88a5b3
 db $14,$00   ; Neil Dao flag
 
@@ -7126,35 +7082,37 @@ org $88b1ae   ; Inventory freespace check is handled by NPC's code earlier.
 cop #$BF : dw DaoOfferTravelToNatives_TextPostGiveItem
 rtl
 
-; Disable Pymd Kara and Jackal (redundant?)
-org $88b7a1
-db $e0,$6b
-org $88b822
-db $e0,$6b
-
-org $88c205
-cop #$C0 : dw PyramidGuyOnInteract ;$c20e
+org $88c1fd
+db $1f : dw $1000
+EPyramidGuy:
+lda #$0200 : tsb $12
+cop #$C0 : dw .OnInteract
 cop #$0B
 cop #$C1
 rtl
-PyramidGuyOnInteract:
-cop #$D0 : db $ef, $01 : dw PyramidGuyAlreadyGivenBook ;$c21e
-cop #$D6 : db $26 : dw PyramidGuyGiveBook ;$c222
-cop #$BF : dw PyramidGuyTextOfferTakeBook
+.OnInteract:
+cop #$D0 : db $ef, $01 : dw .AlreadyGivenBook
+cop #$D6 : db $26 : dw .GiveBook
+cop #$BF : dw .TextOfferTakeBook
 rtl
-PyramidGuyAlreadyGivenBook:
-jml $83f208
-PyramidGuyGiveBook:
+.AlreadyGivenBook:
+cop #$BF : dw .TextReadGivenBook
+rtl
+.GiveBook:
 cop #$CC : db $ef
 cop #$D5 : db $26
-cop #$BF : dw PyramidGuyTextDoTakeBook
+cop #$BF : dw .TextDoTakeBook
 rtl
-PyramidGuyTextOfferTakeBook:
+.TextOfferTakeBook:
 db $cd : dl TextPyramidGuyOfferTakeBook
 db $c0
-PyramidGuyTextDoTakeBook:
+.TextDoTakeBook:
 db $cd : dl TextPyramidGuyDoTakeBook
 db $c0
+.TextReadGivenBook:
+db $cd : dl TextUseFathersJournal
+db $c0
+warnpc $88c2da
 
 
 ; "Speed up Room 3 elevator"
@@ -7836,9 +7794,6 @@ db $ca
 org $8980cb
 jmp DaoSpiritLogicOverride
 
-org $898519
-db $e0,$6b    ; Disable one Babel Kara (redundant?)
-
 org $89884c
 db $01,$00   ; "Shorten Olman text boxes"
 
@@ -7937,9 +7892,6 @@ cop #$26 : db $de : dw $0078, $00c0 : db $00,$00,$11
 cop #$C5
 rtl
 
-org $899e90
-db $e0,$6b    ; Disable other Babel Kara (redundant?)
-
 
 ; Lilly button is available if Lilly is with you due to Necklace.
 org $89aa40
@@ -7957,10 +7909,6 @@ incsrc "apocalypse_gaia_1.asr"
 endif
 warnpc $89ba80
 
-org $89bc37
-cop #$02 : db $e0    ; Disable Lilly's flower (redundant?)
-rtl
-
 org $89bf7d
 ; Allow Edward's to spawn a DS containing an ability.
 cop #$A0 : dl $88d6ac : dw $00a8,$04c0 : dw $0b00
@@ -7975,8 +7923,7 @@ cop #$E0
 
 if !SettingEnemizer >= 2
 org $89C2D0
-; unused
-
+; this section currently unused
 warnpc $89c2db
 org $89c2db
 EMPFallingBlockWall:
@@ -8115,9 +8062,6 @@ cop #$C5
 db $C1,$03,$06,$C7,$0D,$04,$C2,$02,$48,$AC,$89,$A5,$A3,$A4,$AC,$8C,$84,$A4,$AC,$80,$AC,$82,$80,$A0,$A4,$80,$88,$8D,$CB,$8E,$85,$85,$84,$A2,$88,$8D,$86,$AC,$A0,$80,$A3,$A3,$80,$86,$84,$AC,$80,$82,$A2,$8E,$A3,$A3,$CB,$A4,$87,$84,$AC,$A3,$84,$80,$2A,$AC,$48,$8D,$A4,$84,$A2,$84,$A3,$A4,$84,$83,$0D,$CB,$C3,$00,$AC,$4D,$8E,$CC,$14,$69,$84,$A3,$AC,$AC,$CA,$C1,$03,$06,$C7,$0D,$04,$C2,$02,$4B,$84,$A4,$AC,$8C,$84,$AC,$D6,$A4,$88,$85,$AC,$A9,$8E,$A5,$AC,$D7,$52,$CB,$D6,$FE,$8C,$88,$8D,$83,$2A,$AC,$AC,$AC,$C0,$C1,$03,$06,$C7,$0D,$04,$C2,$02,$D6,$63,$48,$AC,$D6,$DA,$87,$84,$0E,$A3,$AC,$80,$A3,$8A,$88,$8D,$86,$CB,$85,$8E,$A2,$AC,$86,$8E,$8B,$83,$2A,$2A,$2A,$AC,$AC,$AC,$AC,$C0,$C1,$03,$06,$C7,$0D,$04,$C2,$02,$67,$87,$84,$A2,$84,$0E,$83,$AC,$A9,$8E,$A5,$AC,$D6,$A5,$A4,$8E,$AC,$86,$8E,$0D,$CB,$C3,$00,$AC,$D6,$42,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$D6,$0E,$42,$8E,$80,$A3,$A4,$CB,$AC,$67,$80,$A4,$84,$A2,$8C,$88,$80,$AC,$AC,$AC,$AC,$63,$84,$80,$AC,$60,$80,$8B,$80,$82,$84,$CA
 
 }
-
-org $89cea7
-db $e0,$6b    ; Disable Inca Kara (redundant?)
 
 org $89cfaa
 jsl LR_ForceChangeToWill   ; After Castoth.
@@ -9643,8 +9587,15 @@ db 8,2
 db !IshtarRoomCompTilemap
 
 
+org $c00000
+ATlMpMuSWWaterHighSub:
+db 2,4
+incbin "ATlMpMuSWWaterHighSub_Tilemap1_comp.bin"
+ATlMpMuSEWaterHighSub:
+db 4,4
+incbin "ATlMpMuSEWaterHighSub_Tilemap1_comp.bin"
 
-
+warnpc $c08000
 org $a08000
 
 incsrc "iogr_code_overflow.asr"

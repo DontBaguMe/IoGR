@@ -339,13 +339,14 @@ db $0D,$15,$00 : dl $84922C : db $00
 db $0E,$06,!DkSpSouthCapeType : dl $88D6A9 : db $00
 db $00,$01,$00 : dl $80CA42 : db $00
 db $08,$0C,$03 : dl $80f500 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$D6,$47,$42,$80,$A0,$84,$CA 
 
 ActorList_Map02:
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
-db $08,$12,$00 : dl $84B8B1 : db $00
-db $00,$01,$00 : dl $84BE38 : db $00
+db $08,$12,$00 : dl $84B8B1 : db $00    ; Erik in Seaside Cave
+db $00,$01,$00 : dl $84BE38 : db $00    ; Seaside Cave exit manager
 db $FF,$D7,$32,$42,$80,$A6,$84,$CA 
 
 ActorList_Map03:
@@ -363,6 +364,7 @@ db $11,$11,$00 : dl $80EA96 : db $00
 db $05,$19,$00 : dl $848F7A : db $00
 db $19,$18,$00 : dl $848FDE : db $00
 db $18,$09,$00 : dl $849052 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$44,$A2,$88,$8A,$0E,$A3,$AC,$47,$8E,$A5,$A3,$84,$AC,$CA 
 
 ActorList_Map05:
@@ -399,9 +401,10 @@ db $05,$0B,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $08,$08,$00 : dl $848A8C : db $00
-db $07,$0B,$00 : dl $848D21 : db $00
-db $0B,$0B,$00 : dl $848D6E : db $00
-db $09,$0B,$00 : dl $848D95 : db $00
+;db $07,$0B,$00 : dl $848D21 : db $00    ; School friends
+;db $0B,$0B,$00 : dl $848D6E : db $00    ; School friends
+;db $09,$0B,$00 : dl $848D95 : db $00    ; School friends
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$63,$82,$87,$8E,$8E,$8B,$CA 
 
 ActorList_Map09:
@@ -428,7 +431,7 @@ db $3A,$1C,$00 : dl $84C7FC : db $00
 db $35,$09,$00 : dl $84C8B0 : db $00
 db $10,$0C,$00 : dl $84C947 : db $00
 db $34,$09,$00 : dl $84C8E6 : db $00
-db $07,$0A,$00 : dl $84CB5A : db $00
+;db $07,$0A,$00 : dl $84CB5A : db $00    ; Kara
 db $10,$3C,$00 : dl $84D19D : db $00    ; Basement guard, moved west for IOGR.
 db $1C,$16,$00 : dl $84C56A : db $00
 db $28,$3B,$00 : dl $84D0D3 : db $00
@@ -454,6 +457,7 @@ db $3D,$15,$00 : dl $84BFBA : db $00
 db $3C,$14,$00 : dl $84BFBA : db $00
 db $3D,$06,$00 : dl $84BFBA : db $00
 db $3C,$05,$00 : dl $84BFBA : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$44,$83,$A7,$80,$A2,$83,$0E,$A3,$AC,$42,$80,$A3,$A4,$8B,$84,$AC,$CA 
 
 ActorList_Map0B:
@@ -470,6 +474,7 @@ db $10,$11,$00 : dl $84DB12 : db $00
 db $12,$07,$00 : dl $84DB4A : db $00
 db $0B,$0D,$00 : dl $84DB4A : db $00
 db $0C,$08,$00 : dl $84DBD9 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$44,$83,$A7,$80,$A2,$83,$0E,$A3,$AC,$D7,$26,$CA 
 
 ActorList_Map0C:
@@ -583,7 +588,7 @@ ActorList_Map11:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $04,$05,$00 : dl $89BC34 : db $00
+;db $04,$05,$00 : dl $89BC34 : db $00    ; Wall flower
 db $03,$07,$00 : dl $89BC8B : db $00
 db $1C,$07,$00 : dl $89BCD1 : db $00
 db $1C,$07,$00 : dl $89BDB5 : db $00
@@ -650,15 +655,16 @@ db $43,$0E,$00 : dl $84DEB3 : db $00
 db $44,$0E,$00 : dl $84DF0C : db $00
 db $3D,$2B,$00 : dl $84E022 : db $00
 db $2E,$36,$00 : dl $84E2A3 : db $00
-db $2D,$36,$00 : dl $84E06A : db $00
+;db $2D,$36,$00 : dl $84E06A : db $00    ; Kara
 db $0A,$18,$00 : dl $84E929 : db $00
-db $46,$27,$00 : dl $84F0A3 : db $00
-db $47,$27,$00 : dl $84EF74 : db $00
+;db $46,$27,$00 : dl $84F0A3 : db $00    ; Lola
+;db $47,$27,$00 : dl $84EF74 : db $00    ; Bill
 db $43,$08,!DkSpItoryType : dl $88D6A9 : db $00
 db $00,$01,$00 : dl $80CA42 : db $00
 db $30,$19,$01 : dl $80d2d0 : db $00
 db $0F,$25,$01 : dl $80d348 : db $00
 db $25,$28,$07 : dl $80f500 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$48,$A4,$8E,$A2,$A9,$AC,$66,$88,$8B,$8B,$80,$86,$84,$CA 
 
 ActorList_Map16:
@@ -671,6 +677,7 @@ ActorList_Map17:
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $08,$0B,$00 : dl $84E5A1 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$D7,$18,$47,$8E,$A5,$A3,$84,$CA 
 
 ActorList_Map18:
@@ -685,6 +692,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $07,$29,$00 : dl $84F359 : db $00
 db $09,$07,$00 : dl $84F3CD : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map1A:
@@ -718,6 +726,7 @@ db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $21,$00,$00 : dl $80EAA7 : db $00
 db $00,$01,$00 : dl $80CA42 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$44,$8D,$A4,$A2,$80,$8D,$82,$84,$AC,$A4,$8E,$AC,$62,$A5,$88,$8D,$A3,$CA 
 
 ActorList_Map1D:
@@ -1010,6 +1019,7 @@ db $00,$01,$00 : dl $80C667 : db $00
 db $07,$06,$00 : dl $85AA6C : db $00
 db $00,$00,$00 : dl EWorldMapTransitionListener-3 : db $00
 db $0F,$0A,$09 : dl $80f500 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map31:
@@ -1061,6 +1071,7 @@ db $23,$07,$00 : dl $85BD7B : db $00
 db $0C,$0F,$00 : dl $85BE0E : db $00
 db $3D,$09,$00 : dl $85BE55 : db $00
 db $1C,$1C,$01 : dl $88cea0 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$D6,$08,$8E,$85,$AC,$45,$A2,$84,$84,$89,$88,$80,$AC,$CA 
 
 ActorList_Map33:
@@ -1084,6 +1095,7 @@ db $11,$11,$00 : dl $80EA96 : db $00
 db $06,$09,$00 : dl $85C375 : db $00
 db $08,$09,$00 : dl $85C3A5 : db $00
 db $09,$09,$00 : dl $85C3F8 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$4B,$80,$81,$8E,$A2,$AC,$42,$80,$8C,$A0,$CA 
 
 ActorList_Map36:
@@ -1098,6 +1110,7 @@ db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $03,$1B,$00 : dl $85BCFF : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map38:
@@ -1113,11 +1126,12 @@ ActorList_Map39:
 db $04,$1D,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $05,$1D,$00 : dl $85C456 : db $00
-db $07,$16,$00 : dl $85C5B3 : db $00
-db $16,$19,$00 : dl $85C77E : db $00
-db $18,$1A,$00 : dl $85CB30 : db $00
+;db $05,$1D,$00 : dl $85C456 : db $00    ; Hotel friends
+;db $07,$16,$00 : dl $85C5B3 : db $00    ; Hotel friends
+;db $16,$19,$00 : dl $85C77E : db $00    ; Hotel friends
+;db $18,$1A,$00 : dl $85CB30 : db $00    ; Hotel friends
 db $27,$08,$0B : dl $80f500 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map3A:
@@ -1126,6 +1140,7 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $0E,$0C,$00 : dl $85C30E : db $00
 db $08,$0A,$00 : dl $85BC56 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map3B:
@@ -1331,19 +1346,21 @@ db $00,$00,$00 : dl EWorldMapTransitionListener-3 : db $00
 db $05,$08,$00 : dl $85E3F3 : db $00
 db $09,$08,$00 : dl $85E4D7 : db $00
 db $0C,$0B,$00 : dl $85E53A : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$D6,$37,$42,$8E,$A4,$A4,$80,$86,$84,$AC,$CA 
 
 ActorList_Map4B:
 db $12,$09,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $12,$06,$00 : dl $85E841 : db $00
-db $10,$09,$00 : dl $85EFE9 : db $00
-db $11,$09,$00 : dl $85EEA1 : db $00
-db $13,$09,$00 : dl $85EC8B : db $00
-db $14,$09,$00 : dl $85F1F9 : db $00
+;db $12,$06,$00 : dl $85E841 : db $00    ; Nazca friends
+;db $10,$09,$00 : dl $85EFE9 : db $00    ; Nazca friends
+;db $11,$09,$00 : dl $85EEA1 : db $00    ; Nazca friends
+;db $13,$09,$00 : dl $85EC8B : db $00    ; Nazca friends
+;db $14,$09,$00 : dl $85F1F9 : db $00    ; Nazca friends
 db $1d,$2C,$00 : dl $85F2EF : db $00
 db $1D,$2C,$00 : dl $85E647 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$4D,$80,$AA,$82,$80,$AC,$60,$8B,$80,$88,$8D,$AC,$CA 
 
 ActorList_Map4C:
@@ -1667,6 +1684,7 @@ db $2E,$1A,$19 : dl $868A59 : db $00
 db $2F,$19,$3B : dl $868A59 : db $00
 db $00,$01,$00 : dl $869535 : db $00
 db $00,$01,$00 : dl $868496 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map5B:
@@ -1675,7 +1693,7 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $21,$51,$00 : dl $80EA96 : db $00
 db $09,$0A,$00 : dl $86861E : db $00
 db $06,$19,$00 : dl $868876 : db $00
-db $04,$3A,$00 : dl $868685 : db $00
+;db $04,$3A,$00 : dl $868685 : db $00    ; Lilly in SeaPal side room
 db $06,$2B,$00 : dl $8688F0 : db $00
 db $0A,$28,$00 : dl $86894C : db $00
 db $FF,$CA 
@@ -1707,6 +1725,7 @@ db $2A,$3C,!Monster018FParam : dl !Monster018FAddr : db !Monster018FStats,$00,!M
 db $2B,$3A,!Monster0190Param : dl !Monster0190Addr : db !Monster0190Stats,$00,!Monster0190ItemFlag
 db $30,$3A,!Monster0191Param : dl !Monster0191Addr : db !Monster0191Stats,$00,!Monster0191ItemFlag
 db $32,$3C,!Monster0192Param : dl !Monster0192Addr : db !Monster0192Stats,$00,!Monster0192ItemFlag
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map5D:
@@ -1720,6 +1739,7 @@ ActorList_Map5E:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $00,$01,$00 : dl $869736 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map5F:
@@ -1747,6 +1767,7 @@ db $1A,$2D,!Monster01A3Param : dl !Monster01A3Addr : db !Monster01A3Stats,$10,!M
 db $21,$1B,!Monster01A4Param : dl !Monster01A4Addr : db !Monster01A4Stats,$11,!Monster01A4ItemFlag
 db $14,$2E,!Monster01A5Param : dl !Monster01A5Addr : db !Monster01A5Stats,$12,!Monster01A5ItemFlag
 db $33,$3E,$09 : dl $80D1B5 : db $00
+db $00,$00,$00 : dl EMuDSCEntranceReturnListener-3 : db $00
 db $FF,$4C,$A5,$CA 
 
 ActorList_Map60:
@@ -1791,6 +1812,7 @@ db $1E,$26,$30 : dl $869ce9 : db $00
 db $2B,$34,$30 : dl $8ae943 : db $00
 endif
 db $07,$23,!DkSpMuTransformType : dl $88D6A9 : db $00
+db $00,$00,$00 : dl EMuDSCEntranceReturnListener-3 : db $00
 db $FF,$CA 
 
 ActorList_Map61:
@@ -1835,6 +1857,7 @@ db $1D,$0C,$30 : dl $869ce9 : db $00
 endif
 db $00,$01,$00 : dl $8697A6 : db $00
 db $00,$01,$00 : dl $868496 : db $00
+db $00,$00,$00 : dl EMuDSCEntranceReturnListener-3 : db $00
 db $FF,$CA 
 
 ActorList_Map62:
@@ -1861,6 +1884,7 @@ endif
 db $20,$1C,$11 : dl $80D119 : db $00
 db $28,$1C,$11 : dl $80D0D1 : db $00
 db $33,$05,$0B : dl $80d16a : db $00
+db $00,$00,$00 : dl EMuDSCEntranceReturnListener-3 : db $00
 db $FF,$CA 
 
 ActorList_Map63:
@@ -1889,6 +1913,7 @@ db $09,$2E,$30 : dl $8ae943 : db $00
 db $1A,$27,$00 : dl $869D1F : db $00
 db $1B,$27,$00 : dl $869D1F : db $00
 endif
+db $00,$00,$00 : dl EMuDSCEntranceReturnListener-3 : db $00
 db $FF,$CA 
 
 ActorList_Map65:
@@ -1923,6 +1948,7 @@ db $34,$3D,$30 : dl $869ce9 : db $00
 db $2D,$3D,$30 : dl $869ce9 : db $00
 db $2C,$3D,$30 : dl $869ce9 : db $00
 endif
+db $00,$00,$00 : dl EMuDSCEntranceReturnListener-3 : db $00
 db $FF,$CA 
 
 ActorList_Map66:
@@ -1973,6 +1999,7 @@ db $2B,$0D,$00 : dl $86C46A : db $00
 db $28,$07,$01 : dl $86BA09 : db $00
 db $06,$08,$03 : dl $86BA09 : db $00
 db $00,$01,$00 : dl $80CA42 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map6A:
@@ -2007,6 +2034,7 @@ db $1A,$05,$00 : dl $86D55B : db $00
 db $2E,$14,$00 : dl $86D55B : db $00
 db $0A,$15,$00 : dl $86D55B : db $00
 db $3A,$28,$00 : dl $86D745 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$40,$8D,$86,$84,$8B,$AC,$66,$88,$8B,$8B,$80,$86,$84,$CA 
 
 ActorList_Map6C:
@@ -2036,6 +2064,7 @@ db $2E,$05,$00 : dl $86D134 : db $00
 db $35,$06,$00 : dl $86D141 : db $00
 db $23,$09,$0D : dl $80f500 : db $00
 db $19,$0A,!DkSpAngelVillageType : dl $88D6A9 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map6D:
@@ -2195,6 +2224,7 @@ db $08,$1E,$09 : dl $80D1B5 : db $00
 db $00,$01,$00 : dl $86D62F : db $00
 db $2C,$17,$00 : dl $86D59E : db $00
 db $00,$01,$00 : dl $86D6F4 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map74:
@@ -2274,6 +2304,7 @@ db $30,$28,$00 : dl $879B67 : db $00
 db $0F,$16,$00 : dl $879B67 : db $00
 db $35,$0B,$00 : dl $879BF5 : db $00
 db $12,$38,$11 : dl $80f500 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$67,$80,$A4,$84,$A2,$8C,$88,$80,$CA 
 
 ActorList_Map79:
@@ -2676,6 +2707,7 @@ db $31,$23,$00 : dl $80C5F3 : db $00
 db $29,$23,$00 : dl $80C5F3 : db $00
 db $23,$23,$00 : dl $80C5F3 : db $00
 db $27,$32,$15 : dl $80f500 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$D6,$08,$8E,$85,$AC,$44,$A5,$A2,$8E,$CA 
 
 ActorList_Map92:
@@ -2709,15 +2741,16 @@ db $0B,$0A,$00 : dl $87DF04 : db $00
 db $2B,$0B,$00 : dl $87E1BA : db $00
 db $29,$0C,$00 : dl $87E2D7 : db $00
 db $2A,$0B,$00 : dl $87E37A : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$D6,$44,$4C,$80,$8D,$A3,$88,$8E,$8D,$CA 
 
 ActorList_Map96:
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $05,$0B,$00 : dl $87D985 : db $00
-db $08,$09,$00 : dl $87DA9D : db $00
-db $0A,$0D,$00 : dl $87DB25 : db $00
+;db $05,$0B,$00 : dl $87D985 : db $00    ; Rolek friends 
+;db $08,$09,$00 : dl $87DA9D : db $00    ; Rolek friends 
+;db $0A,$0D,$00 : dl $87DB25 : db $00    ; Rolek friends 
 db $FF,$46,$A5,$84,$A3,$A4,$AC,$62,$8E,$8E,$8C,$CA 
 
 ActorList_Map97:
@@ -2728,6 +2761,7 @@ db $19,$0C,$00 : dl $87CB95 : db $00
 db $08,$0D,$00 : dl $87CC39 : db $00
 db $0D,$08,$00 : dl $87CCF3 : db $00
 db $10,$08,$00 : dl $87CDDA : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_Map98:
@@ -3099,6 +3133,7 @@ db $0C,$14,$00 : dl $888F88 : db $00    ; Slightly different actor, to make room
 db $06,$0F,$00 : dl $889200 : db $00
 db $08,$0F,$00 : dl $889248 : db $00
 db $0A,$0F,$00 : dl $88925C : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_MapAD:
@@ -3282,7 +3317,7 @@ db $29,$1B,!Monster03D5Param : dl !Monster03D5Addr : db !Monster03D5Stats,$94,!M
 db $2F,$15,!Monster03D6Param : dl !Monster03D6Addr : db !Monster03D6Stats,$95,!Monster03D6ItemFlag
 db $4E,$12,!Monster03D7Param : dl !Monster03D7Addr : db !Monster03D7Stats,$96,!Monster03D7ItemFlag
 if !SettingEnemizer < 2
-db $53,$28,$00 : dl $889FFC : db $00
+db $53,$28,$00 : dl $889FFC : db $00    ; Interactable ground skeleton
 endif
 db $FF,$46,$80,$A2,$83,$84,$8D,$CA 
 
@@ -3339,7 +3374,7 @@ db $0F,$43,!Monster03F4Param : dl !Monster03F4Addr : db !Monster03F4Stats,$C2,!M
 db $29,$3D,!Monster03F5Param : dl !Monster03F5Addr : db !Monster03F5Stats,$C3,!Monster03F5ItemFlag
 db $2F,$43,!Monster03F6Param : dl !Monster03F6Addr : db !Monster03F6Stats,$C4,!Monster03F6ItemFlag
 if !SettingEnemizer < 2
-db $03,$42,$00 : dl $88A25E : db $00
+db $03,$42,$00 : dl $88A25E : db $00    ; Interactable skeleton
 endif
 db $FF,$62,$8E,$80,$83,$AC,$A4,$8E,$AC,$D7,$1B,$47,$80,$8B,$8B,$CA 
 
@@ -3361,7 +3396,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $00,$01,$00 : dl $889A1C : db $00
 if !SettingEnemizer < 2
-db $1D,$0B,$00 : dl $889F2C : db $00
+db $1D,$0B,$00 : dl $889F2C : db $00    ; Floating crystals
 db $0F,$1D,$00 : dl $889F2C : db $00
 db $06,$24,$00 : dl $889F2C : db $00
 db $27,$15,$00 : dl $889F2C : db $00
@@ -3449,14 +3484,15 @@ db $18,$1B,$30 : dl $88B2ED : db $00
 db $07,$1B,$30 : dl $88B334 : db $00
 db $21,$08,$00 : dl $8980C3 : db $00
 db $28,$05,$1B : dl $80f500 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$D7,$08,$66,$88,$8B,$8B,$80,$86,$84,$AC,$43,$80,$8E,$CA 
 
 ActorList_MapC4:
 db $07,$0B,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $07,$09,$00 : dl $88A4AB : db $00
-db $08,$09,$00 : dl $88A567 : db $00
+;db $07,$09,$00 : dl $88A4AB : db $00    ; Dao friends 
+;db $08,$09,$00 : dl $88A567 : db $00    ; Dao friends 
 db $FF,$CA 
 
 ActorList_MapC5:
@@ -3517,8 +3553,8 @@ ActorList_MapCD:
 db $05,$0A,$32 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $02,$0B,$00 : dl $88B74D : db $00
-db $0D,$0B,$00 : dl $88B79D : db $00
-db $07,$0E,$00 : dl $88B81E : db $00
+;db $0D,$0B,$00 : dl $88B79D : db $00    ; Kara and Jackal
+;db $07,$0E,$00 : dl $88B81E : db $00    ; Kara and Jackal
 db $07,$0E,$00 : dl $88BD30 : db $00
 db $04,$0A,$00 : dl $88C1FD : db $00
 db $00,$01,$00 : dl $88CB9A : db $00
@@ -3889,6 +3925,7 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $17,$0B,$00 : dl $898808 : db $00
 db $00,$01,$00 : dl $898620 : db $00
 db $00,$01,$00 : dl $8998B3 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_MapDF:
@@ -3896,7 +3933,7 @@ db $07,$0E,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $898620 : db $00
-db $00,$01,$00 : dl $899E8C : db $00
+;db $00,$01,$00 : dl $899E8C : db $00    ; Kara
 db $00,$01,$00 : dl $899972 : db $00
 db $00,$01,$00 : dl $8998B3 : db $00
 db $4B,$0A,$01 : dl $899B2E : db $00
@@ -3904,6 +3941,7 @@ db $2B,$0A,$05 : dl $899B2E : db $00
 db $28,$0A,$07 : dl $899B2E : db $00
 db $3F,$1A,$1F : dl $80f500 : db $00
 db $79,$1A,!DkSpBabelBotType : dl $88D6A9 : db $00    ; Moved here from $E0 for IOGR.
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_MapE0:
@@ -3916,6 +3954,7 @@ db $00,$01,$00 : dl $898778 : db $00
 db $00,$01,$00 : dl $8987A8 : db $00
 db $00,$01,$00 : dl $898620 : db $00
 db $27,$1A,$03 : dl $899B2E : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_MapE1:
@@ -3925,6 +3964,7 @@ db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $898620 : db $00
 db $00,$01,$00 : dl $899586 : db $00
 db $15,$6E,$00 : dl $899634 : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_MapE2:
@@ -3932,6 +3972,7 @@ db $07,$0E,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $18,$70,$00 : dl $8997CC : db $00
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_MapE3:
@@ -3940,12 +3981,13 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $8987D8 : db $00
 db $00,$01,$00 : dl $898620 : db $00
-db $09,$1A,$00 : dl $898515 : db $00
+;db $09,$1A,$00 : dl $898515 : db $00    ; Kara
 db $2B,$1A,!DkSpBabelTopType : dl $88D6A9 : db $00
 db $28,$1A,$00 : dl $898000 : db $00
 if !Boss6Id == 6   ; Don't allow early access to Babel bottom if MQ2 is not the Babel boss.
 db $17,$3A,$03 : dl $899B2E : db $00
 endif
+db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$CA 
 
 ActorList_MapE4:
@@ -4158,10 +4200,10 @@ db $02,$08,$05 : dl $80CF29 : db $00
 db $0C,$03,$27 : dl $80CF29 : db $00
 db $0D,$05,$09 : dl $80CF29 : db $00
 db $0C,$08,$0B : dl $80CF29 : db $00
-db $FF,$CA0526
+db $FF,$CA
 
 }
-
+warnpc $8ce5e5
 
 
 

@@ -1,7 +1,14 @@
 arch 65816
 hirom
 
-
+; Reserved RAM:
+; $0bfa = used on radar screen to choose "FORCE" text
+; $0bfc = used during item pickup to write text slowly (for chests)
+; $0bfe = used during item pickup to flag a stat as maxed out
+; Reserved flags:
+; $022f - $0247 : Monster item flags $01 - $18
+; $0290 - $02af : Monster item flags $19 - $2A, and 13 extras
+; $02b0 - $02b1 : Statue placed in the Left/Right Hope Room
 
 
 LR_SecOnAnyFlagA:
@@ -15,7 +22,7 @@ jsl $80b4c8    ; i.e. 3+LR_ClearFlagA
 rtl
 
 ; Flags $022f - $0247 (chest block) and $0290 - $02bf (RJ block) are free in IOGR.
-; Monster item flags are mapped onto those.
+; Monster item flags are mapped to a subset of those.
 SR_MapMonsterItemFlagA:
 dec : clc : adc #$022f : cmp #$0248 : bcc +
   clc : adc #$0048
@@ -172,8 +179,8 @@ sec
 rtl
 }
 
-
 LR_GiveAnyItemA16OrSec:
+{
 pha
 and #$ff00 : cmp #$1000 : bne .ItemIsNotUnlockedDoor
   jmp .GiveUnlockedDoor
@@ -277,6 +284,7 @@ db $d5,$00
 db "Opened a door!",$cb
 db $c5 : dw TextDoorNames, $0db8
 db $ca
+}
 
 TextItemGetNames:
 .Pointers:
@@ -1000,7 +1008,6 @@ db $ca
 db "But you're maxed out!"
 db $ca
 
-
 EMonsterDeathDoorOrItem:
 if !SettingOrbRando == 0
 lda $7f0024,x : jsl LR_SetMonsterItemFlagA
@@ -1080,12 +1087,9 @@ dw !PyramidEntranceOrbsItem  ; db !MonsterItem28Id, !MonsterItem28Type
 dw !MansionEastGateItem      ; db !MonsterItem29Id, !MonsterItem29Type
 dw !MansionWestGateItem      ; db !MonsterItem2AId, !MonsterItem2AType
 
-
 LR_GetItemId8ForMonsterItemFlagA:
 jsl LR_GetItemId16ForMonsterItemFlagA : and #$00ff
 rtl
-
-
 
 LR_DecHP:
 lda $0aca : beq +
@@ -1104,6 +1108,324 @@ rtl
 
 
 
+
+
+; The first half of this code works around start-of-map camera behavior.
+; Camera is clamped after 2 actor frames, then actors are
+; frozen for fade-in (LR_InitMemForNewMap calls LR_ActActors twice). Spotlight
+; needs to idle for 1 frame, then correct its position if the camera needs 
+; to be clamped. 
+db $00 : dw $3000
+EDarkRoomSpotlightManager:
+{
+cop #$C2
+lda $068a : clc : adc #$0100 : cmp $06da : bcs .WithClampRight
+lda $068a : cmp $06d6 : bcs .NoClampLR
+.WithClampLeft:
+lda $068a : sec : sbc $06d6
+  clc : adc $09a2
+  sec : sbc $068a
+  clc : adc #$0008
+  sta $00f6
+bra +
+.NoClampLR:
+lda $09a2 : sec : sbc $068a : clc : adc #$0008 : sta $00f6
+bra +
+.WithClampRight:
+lda $09a2 : clc : adc #$0100 : sec : sbc $06da : clc : adc #$0008 : sta $00f6
++:
+lda $068e : clc : adc #$0100 : cmp $06dc : bcs .WithClampDown
+.NoClampDown:
+lda $09a4 : sec : sbc $068e : sta $00fa
+bra +
+.WithClampDown:
+lda $09a4 : clc : adc #$0100 : sec : sbc $06dc : sta $00fa
++:
+lda #$0040 : sta $00fe
+sep #$20
+lda #$33 : sta $2123
+lda #$03 : sta $2125
+lda #$17 : sta $212e
+lda #$13 : sta $212f
+lda #$82 : sta $2130
+lda #$83 : sta $2131
+lda #$87 : sta $7f0c00
+lda #$47 : sta $7f0c01
+lda #$27 : sta $7f0c02
+rep #$20
+cop #$C2    ; Regular frame-by-frame behavior begins here.
+lda $1010 : bit #$2000 : beq +
+  rtl   ; First attempt to fix the spot while climbing stairs, by freezing it on-screen.
++:
+lda $09a2 : sec : sbc $068a : clc : adc #$0008 : sta $00f6
+lda $09a4 : sec : sbc $068e : sta $00fa
+lda #$0040 : sta $00fe
+sep #$20
+lda #$33 : sta $2123
+lda #$03 : sta $2125
+lda #$17 : sta $212e
+lda #$13 : sta $212f
+lda #$82 : sta $2130
+lda #$83 : sta $2131
+lda #$87 : sta $7f0c00
+lda #$47 : sta $7f0c01
+lda #$27 : sta $7f0c02
+rep #$20
+rtl
+}
+
+
+
+LR_SetupIogrMap:
+cop #$3B : db $71 : dl TFirebirdPaletteManager
+;; Experimental dark rooms
+;cop #$3C : dl $85FB34    ; HDMA spotlight thinker
+;phx
+;  tyx
+;  lda #$0804 : sta $7f000e,x
+;plx
+;cop #$9C : dl EDarkRoomSpotlightManager : dw $3000
+;; End experimental dark rooms
+lda #$1000 : tsb $12
+rtl
+
+db $00 : dw $2000
+EMonsterRespawner:
+jsl LR_ClearMonsterKilledFlags
+cop #$E0
+
+-:
+cop #$C1
+TFirebirdPaletteManager:
+lda $0AD4 : cmp #$0002 : beq +
+  rtl
++:
+cop #$36
+cop #$39
+bra -
+
+
+db $00 : dw $2000
+EMuDSCEntranceReturnListener:
+{
+cop #$D0 : db $7e,$01 : dw .Die   ; No water
+stz $24
+jsr .SR_StoreJmpAddrOrSec : bcs .Die
+lda #$2200 : tsb $1010   ; invisible and invulnerable
+lda #$fff0 : tsb $065a
+cop #$DA : db $20
+cop #$BF : dw .TextMustTurnBack
+lda.w #.Die : sta $00
+lda $24 : dec : pha : rts
+.Die:
+cop #$E0
+.TextMustTurnBack:
+table "table_dialogue.txt",rtl
+db $d3
+db "This path is flooded.",$cb
+db "You'll have to turn",$cb
+db "back."
+db $c0
+;stz $24
+;lda #$007b : jsl LR_SecOnFlagA : bcc +
+;  lda #$0001 : sta $24   ; So now $24 = 0 means "high water", = 1 means "mid water"
+;+:
+;lda $0644 : sec : sbc #$005f : beq .MapNW
+;  dec : beq .MapNE
+;  dec : beq .MapEE
+;  dec : beq .MapWW
+;  dec
+;  dec : beq .MapSW
+;  dec : beq .MapSE
+;.Die:
+;cop #$E0
+;.MapNW:
+;lda $24 : bne ..MidWater
+;..HighWater:
+;cop #$45 : db 47,2, 52,7 : dw .ReturnNWExitN
+;..MidWater:
+;cop #$45 : db 17,56, 27,64 : dw .ReturnNWExitS
+;bra .Die
+;.MapNE:
+;lda $24 : bne ..MidWater
+;..HighWater:
+;cop #$45 : db 10,55, 17,64 : dw .ReturnNEExitS2
+;..MidWater:
+;cop #$45 : db 3,55, 10,64 : dw .ReturnNEExitS1
+;bra .Die
+;.MapEE:
+;lda $24 : bne ..MidWater
+;..HighWater:
+;cop #$45 : db 10,0, 17,6 : dw .ReturnEEExitN2
+;cop #$45 : db 0,39, 8,48 : dw .ReturnEEExitW2
+;..MidWater:
+;cop #$45 : db 4,0, 10,7 : dw .ReturnEEExitN1
+;cop #$45 : db 0,29, 8,39 : dw .ReturnEEExitW1
+;bra .Die
+;.MapWW:
+;lda $24 : bne ..MidWater
+;..HighWater:
+;cop #$45 : db 1,53, 11,63 : dw .ReturnWWExitS1
+;cop #$45 : db 22,53, 29,63 : dw .ReturnWWExitS3
+;cop #$45 : db 58,38, 65,48 : dw .ReturnWWExitE2
+;..MidWater:
+;cop #$45 : db 18,0, 24,8 : dw .ReturnWWExitN
+;cop #$45 : db 56,29, 65,39 : dw .ReturnWWExitE1
+;cop #$45 : db 11,54, 22,64 : dw .ReturnWWExitS2
+;bra .Die
+;.MapSW:
+;lda $24 : bne ..MidWater
+;..HighWater:
+;cop #$45 : db 2,0, 10,8 : dw .ReturnSWExitN1
+;cop #$45 : db 21,0, 29,9 : dw .ReturnSWExitN3
+;cop #$45 : db 26,37, 33,46 : dw .ReturnSWExitE1
+;cop #$45 : db 25,56, 34,63 : dw .ReturnSWExitE3
+;..MidWater:
+;cop #$45 : db 11,0, 21,8 : dw .ReturnSWExitN2
+;cop #$45 : db 25,47, 33,56 : dw .ReturnSWExitE2
+;bra .Die
+;.MapSE:
+;lda $24 : bne ..MidWater
+;..HighWater:
+;cop #$45 : db 0,37, 8,46 : dw .ReturnSEExitW1
+;cop #$45 : db 0,56, 11,63 : dw .ReturnSEExitW3
+;..MidWater:
+;cop #$45 : db 0,46, 8,56 : dw .ReturnSEExitW2
+;cop #$45 : db 8,36, 16,46 : dw .ReturnSEExitC
+;bra .Die
+.TableHighWater: ; Structure: db Map,XLeft,YTop,XRight,YBot : dw JmpAddr
+db $5f, 47,2, 52,7 : dw .ReturnNWExitN
+db $60, 10,55, 17,64 : dw .ReturnNEExitS2
+db $61, 10,0, 17,6 : dw .ReturnEEExitN2
+db $61, 0,39, 8,48 : dw .ReturnEEExitW2
+db $62, 1,53, 11,63 : dw .ReturnWWExitS1
+db $62, 22,53, 29,63 : dw .ReturnWWExitS3
+db $62, 58,38, 65,48 : dw .ReturnWWExitE2
+db $64, 2,0, 10,8 : dw .ReturnSWExitN1
+db $64, 21,0, 29,9 : dw .ReturnSWExitN3
+db $64, 26,37, 33,46 : dw .ReturnSWExitE1
+db $64, 25,56, 34,63 : dw .ReturnSWExitE3
+db $65, 0,37, 8,46 : dw .ReturnSEExitW1
+db $65, 0,56, 11,63 : dw .ReturnSEExitW3
+.TableMidWater:
+db $5f, 17,56, 27,64 : dw .ReturnNWExitS
+db $60, 3,55, 10,64 : dw .ReturnNEExitS1
+db $61, 4,0, 10,7 : dw .ReturnEEExitN1
+db $61, 0,29, 8,39 : dw .ReturnEEExitW1
+db $62, 18,0, 24,8 : dw .ReturnWWExitN
+db $62, 56,29, 65,39 : dw .ReturnWWExitE1
+db $62, 11,54, 22,64 : dw .ReturnWWExitS2
+db $64, 11,0, 21,8 : dw .ReturnSWExitN2
+db $64, 25,47, 33,56 : dw .ReturnSWExitE2
+db $65, 0,46, 8,56 : dw .ReturnSEExitW2
+db $65, 8,36, 16,46 : dw .ReturnSEExitC
+dw $ffff
+.SR_StoreJmpAddrOrSec:
+phx
+ldx #$0000
+lda #$007b : jsl LR_SecOnFlagA : bcs ..CheckIfInArea
+  ldx.w #.TableMidWater-.TableHighWater   ; If the flag is set, start .X in the MidWater table.
+..CheckIfInArea:
+lda.l .TableHighWater,x : cmp #$ffff : beq ..NotInAnyArea
+  and #$00ff : cmp $0644 : bne ..CheckNext   ; Wrong map.
+lda.l 1+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1014 : bcs ..CheckNext
+lda.l 2+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1016 : bcs ..CheckNext
+lda.l 3+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1014 : bcc ..CheckNext
+lda.l 4+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1016 : bcc ..CheckNext
+..IsInThisArea:
+lda.l 5+.TableHighWater,x : sta $24
+plx
+clc
+rts
+..CheckNext:
+inx : inx : inx : inx : inx : inx : inx
+bra ..CheckIfInArea
+..NotInAnyArea:
+plx
+sec
+rts
+.ReturnNWExitN:
+cop #$26 : db !Map5FExit05
+rtl
+.ReturnNWExitS:
+cop #$26 : db !Map5FExit03
+rtl
+.ReturnNEExitS1:
+cop #$26 : db !Map60Exit04
+rtl
+.ReturnNEExitS2:
+cop #$26 : db !Map60Exit03
+rtl
+.ReturnEEExitN1:
+cop #$26 : db !Map61Exit03
+rtl
+.ReturnEEExitN2:
+cop #$26 : db !Map61Exit02
+rtl
+.ReturnEEExitW1:
+cop #$26 : db !Map61Exit06
+rtl
+.ReturnEEExitW2:
+cop #$26 : db !Map61Exit05
+rtl
+.ReturnWWExitN:
+cop #$26 : db !Map62Exit01
+rtl
+.ReturnWWExitS1:
+cop #$26 : db !Map62Exit08
+rtl
+.ReturnWWExitS2:
+cop #$26 : db !Map62Exit07
+rtl
+.ReturnWWExitS3:
+cop #$26 : db !Map62Exit06
+rtl
+.ReturnWWExitE1:
+cop #$26 : db !Map62Exit04
+rtl
+.ReturnWWExitE2:
+cop #$26 : db !Map62Exit03
+rtl
+.ReturnSWExitN1:
+cop #$26 : db !Map64Exit03
+rtl
+.ReturnSWExitN2:
+cop #$26 : db !Map64Exit02
+rtl
+.ReturnSWExitN3:
+cop #$26 : db !Map64Exit01
+rtl
+.ReturnSWExitE1:
+cop #$26 : db !Map64Exit04
+rtl
+.ReturnSWExitE2:
+cop #$26 : db !Map64Exit05
+rtl
+.ReturnSWExitE3:
+cop #$26 : db !Map64Exit06
+rtl
+.ReturnSEExitW1:
+cop #$26 : db !Map65Exit01
+rtl
+.ReturnSEExitW2:
+cop #$26 : db !Map65Exit02
+rtl
+.ReturnSEExitW3:
+cop #$26 : db !Map65Exit03
+rtl
+.ReturnSEExitC:
+cop #$26 : db !Map65Exit04
+rtl
+}
+
+LR_LowerMuWaterOneStep:
+cop #$D0 : db $7b,$01 : dw .ToNoWater
+.ToMidWater:
+cop #$CC : db $7b
+rtl
+.ToNoWater:
+cop #$CC : db $7e
+rtl
 
 
 

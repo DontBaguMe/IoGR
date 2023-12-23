@@ -53,7 +53,26 @@ db $ce
 db $CE,$47,$84,$AC,$A3,$A4,$8E,$A0,$A0,$84,$83,$AC,$84,$80,$A4,$88,$8D,$86,$AC,$CB,$A4,$87,$84,$AC,$87,$84,$A2,$81,$2A,$AC,$C0
 db $ca
 
-TextFathersJournalSubstitute:
+TextRaisedStatueOfHope:
+db $D3
+db $47,$84,$AC,$A2,$80,$88,$A3,$84,$A3,$AC,$A4,$87,$84,$AC,$CB
+db $D6,$48,$8E,$85,$AC,$47,$8E,$A0,$84,$2A,$AC,$CF,$CA
+
+TextUseFathersJournal:
+db $d3
+db "I've deciphered the",$cb
+db "hieroglyphs. No one",$cb
+db "has ever done",$cb
+db "it before."
+db $cf
+db "It says there's a key to",$cb
+db "solving the riddle of",$cb
+db "human history in",$cb
+db "the Pyramid."
+db $cf
+db $d8
+dw !HieroJournalText1,!HieroJournalText2,!HieroJournalText3,!HieroJournalText4,!HieroJournalText5,!HieroJournalText6
+db $00,$cb
 db "It reads: ",$2d,"He who is",$cb
 db "valiant and pure of",$cb
 db "spirit..."
@@ -64,8 +83,6 @@ db "Aauugghh",$2e
 db $cf
 db "Here a page is missing."
 db $ca
-
-
 
 TextBlueJournalIntro:
 db $D3,$CE,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$67,$84,$8B,$82,$8E,$8C,$84,$AC,$A4,$8E,$CB,$CB,$AC,$AC,$41,$80,$86,$A5,$0E,$A3,$AC,$63,$A5,$A0,$84,$A2,$6D,$47,$84,$8B,$A0,$85,$A5,$8B,$CB,$AC,$AC,$48,$8D,$6D,$46,$80,$8C,$84,$AC,$64,$A5,$A4,$8E,$A2,$88,$80,$8B,$4F,$6E,$64,$4C,$6F

@@ -16,6 +16,7 @@ from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
 from randomizer.models.enums.dungeon_shuffle import DungeonShuffle
 from randomizer.models.enums.orb_rando import OrbRando
+from randomizer.models.enums.darkrooms import DarkRooms
 from randomizer.models.enums.start_location import StartLocation
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
@@ -142,6 +143,26 @@ def generate_ROM():
             return OrbRando.BASIC
         if g == "Orbsanity":
             return OrbRando.ORBSANITY
+    
+    def get_darkrooms():
+        l = darkrooms_level.get()
+        c = darkrooms_cursed.get()
+        if l == "None":
+            return DarkRooms.NONE
+        if l == "All":
+            return DarkRooms.ALL
+        if l == "Few":
+            if c:
+                return DarkRooms.FEWCURSED
+            return DarkRooms.FEW
+        if l == "Some":
+            if c:
+                return DarkRooms.SOMECURSED
+            return DarkRooms.SOME
+        if l == "Many":
+            if c:
+                return DarkRooms.MANYCURSED
+            return DarkRooms.MANY
 
     def get_start_location():
         g = start.get()
@@ -178,15 +199,18 @@ def generate_ROM():
         settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
             firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
             overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(),
-            get_dungeon_shuffle(), get_orb_rando())
+            get_dungeon_shuffle(), get_orb_rando(), get_darkrooms())
 
         rom_filename = generate_filename(settings, "sfc")
+        asm_filename = generate_filename(settings, "asr")
         spoiler_filename = generate_filename(settings, "json")
         graph_viz_filename = generate_filename(settings, "png")
 
         randomizer = Randomizer(rompath)
 
         patch = randomizer.generate_rom(rom_filename, settings)
+        asm_dump = randomizer.generate_asm_dump()
+        write_asm_dump(asm_dump, asm_filename, rompath)
 
         if not patch[0]:
             tkinter.messagebox.showerror("Error", "Assembling failed. The first error was:" + str(patch[1][0]) )
@@ -210,6 +234,12 @@ def generate_ROM():
 def write_spoiler(spoiler, filename, rom_path):
     f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w+")
     f.write(spoiler)
+    f.close()
+
+
+def write_asm_dump(asm_dump, filename, rom_path):
+    f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w+")
+    f.write(asm_dump)
     f.close()
 
 
@@ -372,6 +402,7 @@ tkinter.Label(mainframe, text="Fluteless").grid(row=20, column=0, sticky=tkinter
 tkinter.Label(mainframe, text="Sprite").grid(row=21, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=22, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Orb Rando").grid(row=23, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Dark Rooms").grid(row=24, column=0, sticky=tkinter.W)
 #tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
@@ -430,6 +461,12 @@ orb_rando = tkinter.StringVar(root)
 orb_rando_choices = ["None", "Basic", "Orbsanity"]
 orb_rando.set("None")
 
+darkrooms_level = tkinter.StringVar(root)
+darkrooms_level_choices = ["None", "Few", "Some", "Many", "All"]
+darkrooms_level.set("None")
+darkrooms_cursed = tkinter.IntVar(root)
+darkrooms_cursed.set(0)
+
 graph_viz_toggle = tkinter.IntVar(root)
 graph_viz_toggle.set(0)
 
@@ -485,6 +522,14 @@ fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=
 sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=21, column=1)
 dungeon_shuffle_menu = tkinter.OptionMenu(mainframe, dungeon_shuffle, *dungeon_shuffle_choices).grid(row=22, column=1)
 orb_rando_menu = tkinter.OptionMenu(mainframe, orb_rando, *orb_rando_choices).grid(row=23, column=1)
+darkrooms_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
+darkrooms_frame.grid(row=24, column=1)
+darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *darkrooms_level_choices)
+darkrooms_level_menu.pack(fill='x')
+darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed: ")
+darkrooms_label.pack(fill='x')
+darkrooms_cursed_checkbox = tkinter.Checkbutton(darkrooms_frame, variable=darkrooms_cursed, onvalue=1, offvalue=0)
+darkrooms_cursed_checkbox.pack(fill='x')
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)

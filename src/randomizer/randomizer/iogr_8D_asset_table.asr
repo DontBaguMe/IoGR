@@ -521,7 +521,7 @@ db $00
 db $1D : db $00
 db $02 : db $0F
 db !Map1DCardMonsters
-db !Map1DCardMusic
+db !MapIncaCardMusic
 db $03,$00,$20,$00,$BC,$A9,$99,$00
 db $04,$00,$70,$10,$D3,$35,$DE
 db $05,$00,$20,$00,$01,$59,$60,$D9
@@ -1238,6 +1238,9 @@ db $05,$00,$20,$00,$01,$B9,$2A,$D7
 db $06,$01,$A0,$30,$DD
 db $05,$00,$20,$00,$02,$2D,$4D,$D7
 db $13 : db $7E,$17
+db $13 : db $7B,$1D   ; This and the next 2 lines add a "high water" version of the room.
+db $06 : db $02 : dl ATlMpMuSWWaterHighSub
+db $15 : db $18
 db $14 : db $1D
 db $06,$02,$3A,$01,$DE
 db $00
@@ -1252,6 +1255,9 @@ db $05,$00,$20,$00,$01,$B9,$2A,$D7
 db $06,$01,$60,$50,$DA
 db $05,$00,$20,$00,$02,$2D,$4D,$D7
 db $13 : db $7E,$17
+db $13 : db $7B,$1E   ; This and the next 2 lines add a "high water" version of the room.
+db $06 : db $02 : dl ATlMpMuSEWaterHighSub
+db $15 : db $18
 db $14 : db $1E
 db $06,$02,$82,$1A,$DD
 db $00
