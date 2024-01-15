@@ -16,135 +16,7 @@ endmacro
 incsrc "iogr_exit_ledger.asr"
 incsrc "iogr_asset_ledger.asr"
 incsrc "iogr_monster_defaults.asr"
-
-
-; Routine labels.
-{
-LR_SetFlag20A = $80b481
-LR_SecOnFlag20A = $80b489
-LR_SecOnFlagA = $80b4b7
-LR_ClearMonsterKilledFlags = $80b4cc
-TIndexedPaletteBundle = $80B522
-EChaser = $80E683
-LR_OrbitAtY = $80F3C9
-LR_Orbit = $80f3d3
-EPlayer_DoFriar = $82bb3b
-EPlayer_DoAuraBarrier = $82b97f
-EPlayer_DoPsychoDash = $82bea0
-EPlayer_DoSpinDash = $82c0a9
-LR_ParseDialogueScriptAtY = $82f048
-SR_RemoveHeldItem = $839FB2
-LR_PlaceSelfBetween04And06 = $8aa41c
-}
-
-; Various defines for Apocalypse Gaia, which don't
-; really have to be at the top of the file.
-{
-; Set up sprite substitution lists.
-; Defaults are in the comments.
-{
-!DG_Spr_Comet_Chatter_1 = $0D
-!DG_Spr_Comet_Open = $0E
-!DG_Spr_Comet_Chatter_2 = $0F
-!DG_Spr_Rain = $16
-!DG_Spr_Core_Flame = $00
-!DG_Spr_Core_Flicker = $01
-!DG_Spr_Core_Vanish = $02
-!DG_Spr_Core_Bubbles = $0C
-!DG_Spr_Head_Bottom = $03
-!DG_Spr_Head_MouthClosed = $04
-!DG_Spr_Head_OpeningX = $17 ; first frame is only bottom of head...
-!DG_Spr_Head_MouthOpen = $05
-!DG_Spr_Head_WhileBeam = $06
-!DG_Spr_Head_TopEnergyBeam = $1A
-!DG_Spr_Head_Melting_1 = $19
-!DG_Spr_Head_Melting_Static = $07
-!DG_Spr_Head_Melted = $1E
-!DG_Spr_Head_Flickering = $18
-!DG_Spr_MouthLaserHitbox = $1F
-!DG_Spr_DeathLightning_1 = $08
-!DG_Spr_DeathLightning_2 = $09
-!DG_Spr_Energy_Small = $0A
-!DG_Spr_Energy_Medium = $0B
-!DG_Spr_Energy_Large_Anim = $14
-!DG_Spr_Energy_Large = $15
-!DG_Spr_Lightning_More = $10
-!DG_Spr_Bubble_SmallWave = $11
-!DG_Spr_Bubble_LargeWave = $12
-!DG_Spr_Bubble = $13
-!DG_Spr_Rocks_1 = $1B
-!DG_Spr_Rocks_2 = $1C
-!DG_Spr_Rocks_3 = $1D
-
-!AG_Spr_Core_P1_Idle = $00   ; $00
-!AG_Spr_Core_P2_Atk1 = !DG_Spr_Head_WhileBeam   ; $01
-!AG_Spr_Core_P2_Atk2 = !DG_Spr_Head_TopEnergyBeam   ; $02
-!AG_Spr_Core_P2_Dmg = !DG_Spr_Energy_Large_Anim ; $03
-!AG_Spr_Core_P2_Death = $19 ; $04
-!AG_Spr_Bit_P1_Idle = $04 ; $05
-!AG_Spr_Bit_P1_Atk1 = !DG_Spr_Head_WhileBeam ; $06
-!AG_Spr_Bit_P1_Atk2 = $05 ; $07
-!AG_Spr_Launcher_Idle = !DG_Spr_MouthLaserHitbox ; $08
-!AG_Spr_Launcher_Atk1 = $09 ; $09
-!AG_Spr_Launcher_Atk2 = $10 ; $0A
-!AG_Spr_Bit_P2_Idle = !DG_Spr_Core_Bubbles ; $0B
-!AG_Spr_Fire_Start = $0A ; $0C
-!AG_Spr_Fire_Wait = $01 ; $0D
-!AG_Spr_Fire_Rise = $14 ; $0E
-!AG_Spr_Fire_Rain = $16 ; $0F
-; !AG_Spr_Unused = $10 ; (unused)
-!AG_Spr_Bit_P1_Bullet = $0A ; $11
-!AG_Spr_Nuke_Fall = !DG_Spr_Rocks_3 ; $12
-!AG_Spr_Nuke_Piece = !DG_Spr_Energy_Small ; $13
-!AG_Spr_Bubble_Spawn = $09   ; $14
-!AG_Spr_FloorBeam = $14 ; $15
-!AG_Spr_Bit_P1_Atk3 = $1A ; $16
-!AG_Spr_Bubble_Hold = $13 ; $17
-!AG_Spr_Bubble_Atk = $13 ; $18
-!AG_Spr_Core_P2_Atk3 = !DG_Spr_Head_WhileBeam   ; $19
-!AG_Spr_Launcher_Atk3 = $09 ; $1A
-!AG_Spr_Bit_P1_Atk5 = $04 ; $1B
-!AG_Spr_Bit_P2_DoFire = $14 ; $1C
-; !AG_Spr_Unused = $1D ; (unused)
-!AG_Spr_FCore_Move = !DG_Spr_Head_Melting_Static ; $1E
-!AG_Spr_FCore_Dmg2 = !DG_Spr_Energy_Large_Anim ; $1F
-!AG_Spr_FCore_Dmg3 = !DG_Spr_Head_Melting_1 ; $20
-!AG_Spr_FCore_Dmg4 = !DG_Spr_Energy_Large_Anim ; $21
-!AG_Spr_Mini_Fall = !DG_Spr_Energy_Large_Anim ; $22
-!AG_Spr_Mini_Idle = $19 ; $23
-!AG_Spr_Mini_Fly = $19 ; $24
-!AG_Spr_Mini_Dmg = $1E ; $25
-!AG_Spr_Mini_Death1 = !DG_Spr_Energy_Large_Anim ; $26
-!AG_Spr_Mini_Death2 = !DG_Spr_DeathLightning_1 ; $27
-!AG_Spr_FCore_Joint = $1C ; $28
-!AG_Spr_Cannon_Dir_4 = $0A   ; $29
-!AG_Spr_Cannon_Dir_0 = !AG_Spr_Cannon_Dir_4   ; $2A
-!AG_Spr_Cannon_Dir_6 = !AG_Spr_Cannon_Dir_4   ; $2B
-!AG_Spr_Cannon_Dir_2 = !AG_Spr_Cannon_Dir_4   ; $2C
-!AG_Spr_Cannon_Dir_5 = !AG_Spr_Cannon_Dir_4   ; $2D
-!AG_Spr_Cannon_Dir_7 = !AG_Spr_Cannon_Dir_4   ; $2E
-!AG_Spr_Cannon_Dir_1 = !AG_Spr_Cannon_Dir_4   ; $2F
-!AG_Spr_Cannon_Dir_3 = !AG_Spr_Cannon_Dir_4   ; $30
-; !AG_Spr_Unused = $31 ; (unused)
-!AG_Spr_FCBullet_Dir4_1 = $0A ; $32
-!AG_Spr_FCBullet_Dir0_1 = !AG_Spr_FCBullet_Dir4_1 ; $33
-!AG_Spr_FCBullet_Dir6_1 = !AG_Spr_FCBullet_Dir4_1 ; $34
-!AG_Spr_FCBullet_Dir2_1 = !AG_Spr_FCBullet_Dir4_1 ; $35
-!AG_Spr_FCBullet_Dir5_1 = !AG_Spr_FCBullet_Dir4_1 ; $36
-!AG_Spr_FCBullet_Dir7_1 = !AG_Spr_FCBullet_Dir4_1 ; $37
-!AG_Spr_FCBullet_Dir1_1 = !AG_Spr_FCBullet_Dir4_1 ; $38
-!AG_Spr_FCBullet_Dir3_1 = !AG_Spr_FCBullet_Dir4_1 ; $39
-!AG_Spr_FCBullet_Dir4_2 = !AG_Spr_FCBullet_Dir4_1 ; $3A
-!AG_Spr_FCBullet_Dir0_2 = !AG_Spr_FCBullet_Dir4_1 ; $3B
-!AG_Spr_FCBullet_Dir6_2 = !AG_Spr_FCBullet_Dir4_1 ; $3C
-!AG_Spr_FCBullet_Dir2_2 = !AG_Spr_FCBullet_Dir4_1 ; $3D
-!AG_Spr_FCBullet_Dir5_2 = !AG_Spr_FCBullet_Dir4_1 ; $3E
-!AG_Spr_FCBullet_Dir7_2 = !AG_Spr_FCBullet_Dir4_1 ; $3F
-!AG_Spr_FCBullet_Dir1_2 = !AG_Spr_FCBullet_Dir4_1 ; $40
-!AG_Spr_FCBullet_Dir3_2 = !AG_Spr_FCBullet_Dir4_1 ; $41
-!AG_Spr_FCore_Dmg1 = !DG_Spr_Energy_Large_Anim ; $42
-}
-}
+incsrc "iogr_misc_defines.asr"
 
 
 
@@ -159,7 +31,7 @@ jml BrkHandler
 
 org $808067
 if !SettingRedJewelMadness == 1
-lda #$0028
+lda #$0028    ; RJM max health overrides OHKO max health
 elseif !SettingOHKO == 1
 lda #$0001
 elseif !SettingZ3 == 1
@@ -479,6 +351,13 @@ rts
 warnpc $80b345
 
 
+org $80b520
+db $00,$08
+TIndexedPaletteBundle:
+cop #$C7 : dl TIndexedPaletteBundleRepl
+nop
+
+
 org $80b7cc
 db $00, $08
 TFade012NormalToWhite:
@@ -494,6 +373,22 @@ cop #$37 : db $19
 cop #$39
 cop #$3D
 rtl
+
+org $80b88b
+; BG parallax thinker requires too many HDMA channels to coexist with darkrooms
+db $04,$08
+jsr SR_DieIfCmathInDarkRoomElseClearBgScrollCounters
+
+org $80be18
+; Wavy BG thinker conflicts with darkrooms
+db $04,$08
+TWavyBgWriter:
+jsl LR_SecIfThisMapIsDark : bcc +
+  cop #$3D
+  rtl
++:
+jmp TWavyBgWriterRepl
+warnpc $80be39
 
 
 org $80bcdf
@@ -753,6 +648,24 @@ jmp .Done
 warnpc $80cd59
 
 
+org $80ce46
+; Change the statue-get cutscene to exit via cop #$26 rather than using coordinates stored by the boss.
+; Simplifies boss shuffle, which otherwise needs special handling for the warp from MQ.
+EStatueGetCutsceneStatue_DoWarp:
+lda #$0303 : sta $064A
+lda #$0002 : sta $0648
+lda $28 : sec : sbc #$003a : sta $0000
+cop #$D9 : dw $0000, .WarpToOptions
+.WarpToOptions:
+  dw EStatueGetCutsceneStatue_ToShip
+  dw EStatueGetCutsceneStatue_ToSeaPalace
+  dw EStatueGetCutsceneStatue_ToRama
+  dw EStatueGetCutsceneStatue_ToFanger
+  dw EStatueGetCutsceneStatue_ToPyramid
+  dw EStatueGetCutsceneStatue_ToBabel
+warnpc $80ce7b
+
+
 org $80d69d
 nop    ; There's no reason respawning with >100 DP should halve your health...
 
@@ -818,16 +731,41 @@ lda $0aca
 endif
 
 
-; Set up Early Firebird and other IOGR map-level code.
+; Set up Early Firebird and run other IOGR map-level code.
 org $80eaed
 db $00 : dw $2c00
 ECameraEtc:
 jsl LR_SetupIogrMap
-nop
+cop #$C1
+jsr SR_RunIogrMapCode
+jsr SR_SecIfCameraFrozen : bcc +
+  rtl
+  nop
++:   ; this is $80eb00
 
 
-org $80f49a
-; roominit.bin, difficulty-specific room initialization
+
+org $80f48f
+; bank $80 free space begins here
+SR_RunIogrMapCode:
+lda #$09c4 : jsl LR_SecOnAnyFlagA : bcc .PostDsWarpCheck
+  cop #$CF : dw $09c4
+  cop #$9C : dl EDarkSpaceWarper : dw $2000
+  lda $0bf6 : sta $0026,y
+.PostDsWarpCheck:
+rts
+
+
+SR_SecIfCameraFrozen:
+lda $06EE : bit #$0200 : beq +
+  sec
+  rts
++:
+clc
+rts
+
+
+LR_MarkRoomRewardsObtainedByDifficulty:
 {
 lda $0b24 : beq +++
   dec : beq ++
@@ -857,7 +795,6 @@ rtl
 }
 
 
-org $80f500
 ; custom actor for RJ pickup spots
 db $00 : dw $3000
 ERedJewelSpot:
@@ -1007,6 +944,94 @@ lda $06C4
   sta.l CometHDMAResetTable+$0A
 rts
 CometHDMAResetTable = $7E8C80
+
+EStatueGetCutsceneStatue_ToShip:
+stz $0ad4
+cop #$26 : db $2e : dw $0250, $01a0 : db $03,$10,$23
+cop #$C1
+rtl
+EStatueGetCutsceneStatue_ToSeaPalace:
+stz $0ad4
+cop #$26 : db !MapViperExitString    ; May as well skip loading and immediately unloading Viper's map.
+cop #$C1
+rtl
+EStatueGetCutsceneStatue_ToRama:
+stz $0ad4
+cop #$26 : db $66 : dw $00f0, $0070 : db $03,$00,$22
+cop #$C1
+rtl
+EStatueGetCutsceneStatue_ToFanger:
+stz $0ad4
+cop #$26 : db $8a : dw $0160, $02c0 : db $03,$00,$33
+cop #$C1
+rtl
+EStatueGetCutsceneStatue_ToPyramid:
+stz $0ad4
+cop #$26 : db !MapMQExitString
+cop #$C1
+rtl
+EStatueGetCutsceneStatue_ToBabel:
+stz $0ad4
+cop #$26 : db $de : dw $0170, $00b0 : db $03,$01,$12
+cop #$C1
+rtl
+
+; The DMA thinker ($80b88b) can't be allowed to write cmath registers if the room is dark.
+SR_DieIfCmathInDarkRoomElseClearBgScrollCounters:
+jsl LR_SecIfThisMapIsDark : bcc .MapOkay
+phx
+  lda $7f0002,x : asl : tax
+  lda $cc00,x : tax
+  lda $0003,x : and #$003f : cmp #$0030 : beq .ThinkerDie
+    cmp #$0031 : beq .ThinkerDie
+    cmp #$0032 : beq .ThinkerDie
+plx
+bra .MapOkay
+.ThinkerDie:
+plx
+cop #$3D
+pla
+rtl
+.MapOkay:
+jsr $b8c3   ; i.e. jsr SR_ClearBgScrollCounters
+rts
+
+db $00,$08
+TIndexedPaletteBundleRepl:
+jsl LR_SecIfThisMapIsDark : bcc .BundleOkay
+lda $7f0002,x    ; Palette bundles that write color math aren't compatible with darkrooms
+  cmp #$001b : beq .BundleNotOkay
+  cmp #$001c : beq .BundleNotOkay
+  cmp #$0028 : beq .BundleNotOkay
+  cmp #$002f : beq .BundleNotOkay
+  cmp #$0038 : beq .BundleNotOkay
+  cmp #$0040 : beq .BundleNotOkay
+  cmp #$0061 : beq .BundleNotOkay
+  cmp #$0066 : beq .BundleNotOkay
+  cmp #$0067 : beq .BundleNotOkay
+  cmp #$0069 : beq .BundleNotOkay
+  cmp #$006a : beq .BundleNotOkay
+  cmp #$0070 : beq .BundleNotOkay
+.BundleOkay:
+cop #$C1
+-:
+cop #$36
+cop #$39
+bra -
+.BundleNotOkay:
+cop #$3D
+rtl
+
+TWavyBgWriterRepl:
+-:
+lda #$0008 : sta $7f0008,x
+cop #$5F : dw $8800 : db $40
+cop #$C2
+cop #$D0 : db $ff,$00 : dw -
+cop #$60 : db $01,$02
+cop #$61 : dl $7e8800 : db $0d
+rtl
+
 
 
 warnpc $80FFB0
@@ -2252,6 +2277,17 @@ db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 }
 warnpc $81e5ec
 
+org $81EA70
+db $03 : db $00 
+db $01 : dw $0596 
+db "Your condition."
+db $0d 
+db "Press Attack to"
+db $0d 
+db "warp to Dark Space."
+db $00 
+warnpc $81eab4
+
 org $81ead1
 Bg3_RadarForce:
 db $01 : dw $01C6
@@ -2794,7 +2830,60 @@ lda $0ade    ; Instead of lda #$0001, doubles jump-slash damage
 endif
 
 
-org $82f0c0
+org $82e719
+EInvScreenManager_CondMenu:
+lda $18,s : and #$00ff : cmp #$00e6 : bne +   ; You're already inside a DS
+  cop #$06 : db $12
+  jmp $e40c   ; Return to main menu loop
++:
+lda #$0000 : sta $0AE6
+cop #$BD : dl $81E90B   ; Clear the upper-right box
+cop #$BD : dl $81EA39   ; "Dark Power" in the upper-right box
+sty $20
+stz $22
+-:
+cop #$BD : dl $81E912   ; Clear the lower-right box
+cop #$BD : dl TextInvOfferDsWarp   ; Ask whether to warp to DS
+stz $28
+cop #$C2
+jsr $EBC6 : bcs +       ; Routine handles flickering the arrow, and "No"/"Yes" selection
+  rtl
++:
+lda $28 : beq .DeclineWarp
+.AcceptWarp:
+cop #$06 : db $11
+cop #$CD : dw $09c4
+jmp $e40c
+.DeclineWarp:
+cop #$CF : dw $09c4
+jmp $e40c
+warnpc $82e7a3
+
+org $82e816
+EInvScreenManager_HoverCondLine:
+jsr $EB45
+jsr $EB0B
+cop #$BD : dl $81E912   ; Clear the lower-right box
+cop #$BD : dl $81E870   ; Draw the upper-left box
+jsr SR_DrawInvScreenTextForDsWarpState
+nop : nop
+; The rest of this code goes as usual.
+
+
+
+org $82f08c
+; Beginning of bank $82 free space.
+
+SR_DrawInvScreenTextForDsWarpState:
+cop #$D1 : dw $09c4 : db $01 : dw .YesWarp
+.NoWarp:
+cop #$BD : dl $81EA70    ; Say you can warp
+rts
+.YesWarp:
+cop #$BD : dl TextInvCondMenuYouWillWarp
+rts
+
+
 SR_SecIfFirebirdAllowed:
 {
 lda $0644 : cmp #$00e8 : beq .OkayFirebird
@@ -2816,8 +2905,6 @@ rts
 }
 
 
-org $82f130
-; enemystats.bin, the new way of doing stat blocks
 if !SettingZ3 == 0
 {
 Lut_VitalsDifficulty0:
@@ -3715,9 +3802,6 @@ db $00,$00,$00,$00
 endif
 
 
-
-
-org $82f828
 EPlayerChargeListener_SR_QuitPsychoDashIfForbidden:
 lda $0AA2 : bit #$0001 : bne +
   jmp EPlayerChargeListener_SR_QuitCharge
@@ -3739,11 +3823,13 @@ lda #$0400 : tsb $10
 lda #$0200 : trb $10
 rts
 SR_SecIfCombatEnabledOrSnakeGame:
+lda $0644 : cmp #$00C6 : beq .SecAndReturn
+lda $09AE : bit #$0008 : beq .SecAndReturn
+.ClcAndReturn:
+clc
+rts
+.SecAndReturn:
 sec
-lda $0644 : cmp #$00C6 : beq +
-lda $09AE : bit #$0008 : beq +
-  clc
-+:
 rts
 
 }
@@ -5410,7 +5496,7 @@ lda #$2000 : sta $0e
 cop #$E0    ; Possibly unsafe?
 
 org $85d736
-db $00 : dw $1000
+db $00 : dw $0100
 EMineBreakableWallOverSlave:
 {
 cop #$D0 : db $d9,$01 : dw .DoDisappear
@@ -5585,7 +5671,7 @@ rtl
 
 ; Animate a Moon Tribe sprite to show the warp point 
 org $85f2ef
-db $32 : dw $1000
+db $32 : dw $0300
 EMoonTribeIdle:
 lda #$0200 : tsb $12
 -:
@@ -5653,7 +5739,31 @@ rtl
 }
 
 
+if !SettingDarkRoomsLevel != 0
+; Move the memory block used by the spotlight, so it doesn't interfere with other effects
+org $85fb4d
+dl $7ef000
+org $85fb54
+dl $7ef100
+org $85fe64
+lda #$f600 : sta $0000
+lda #$f000 : sta $0002
+lda #$00ff : sta $7ef200
+lda #$f200 : sta $04
+clc
+rts
+;org $85fe7e
+lda #$fa00 : sta $0000
+lda #$f100 : sta $0002
+lda #$00ff : sta $7ef200
+lda #$f200 : sta $04
+clc
+rts
+endif
+
+
 org $85fed2
+; Bank $85 free space begins here
 TurboOnInteract:
 {
 cop #$CC : db $01
@@ -5982,7 +6092,7 @@ db $C0
 org $86bff7
 ; Clear monster killed flags and force change to Will in Angel's exterior.
 db $00 : dw $3000
-jsl $80b4cc    ; i.e. jsl LR_ClearMonsterKilledFlags
+jsl LR_ClearMonsterKilledFlags
 jsl LR_ForceChangeToWill
 cop #$E0
 
@@ -6268,7 +6378,7 @@ db $ff
 db $ff
 .Pymd:
 db $bd,$c2,$c3,$c4,$c5
-if !SettingDungeonShuffle == 0
+if !SettingDungeonShuffle < 2
 db $c6,$c7
 endif
 db $ff
@@ -6724,7 +6834,7 @@ cop #$BE : db $02,$01 : dw ..Options
 ...ChooseYes:
 stz $0ad4
 jsl LR_ClearMonsterKilledFlags
-cop #$26 : db !StartWarpString
+jsl LR_WarpToStart
 cop #$C1
 rtl
 ...ChooseNo:
@@ -6941,9 +7051,8 @@ cop #$BF : dw $9a68
 lda #$cff0 : trb $065a
 cop #$D0 : db $f5,$01 : dw $9a5d
 cop #$DA : db $13
-cop #$3C
--:    ; oops
-dl $80b7ce
+cop #$3C : dl $80b7ce
+-:
 cop #$DA : db $b3
 cop #$C1
 cop #$D0 : db $f5,$01 : dw $9a55
@@ -7082,6 +7191,56 @@ org $88b1ae   ; Inventory freespace check is handled by NPC's code earlier.
 cop #$BF : dw DaoOfferTravelToNatives_TextPostGiveItem
 rtl
 
+
+org $88B6A2
+if !SettingDungeonShuffle == 2
+db $1c : dw $1001
+EPymdPortalToFoyer:
+lda #$0200 : tsb $12
+cop #$C0 : dw .OnInteract
+cop #$C1
+rtl
+.OnInteract:
+cop #$D0 : db $d1,$01 : dw .DoOfferWarp   ; Hieroglyph puzzle solved
+cop #$D0 : db $b4,$01 : dw .DoOfferWarp   ; Has/Used Aura
+cop #$BF : dw .TextDenyWarp
+rtl
+.DoOfferWarp:
+cop #$BF : dw .TextOfferWarp
+cop #$BE : db $02,$02 : dw ..Options
+..Options:
+  dw ..ChooseNo
+  dw ..ChooseNo, ..ChooseYes
+..ChooseNo:
+cop #$BF : dw .TextClear
+rtl
+..ChooseYes:
+cop #$BF : dw .TextClear
+lda $1010 : ora #$2000 : sta $1010
+cop #$9C : dl .EVanishingPlayerSprite : dw $1800
+lda #$0303 : sta $0648
+lda #$0303 : sta $064a
+cop #$26 : db $CC : dw $01f8, $0130 : db $03,$00,$44
+rtl
+.TextDenyWarp:
+db $cd : dl TextPyramidWarpNotUnlocked
+db $c0
+.TextOfferWarp:
+db $cd : dl TextPyramidOfferWarp
+db $ca
+.TextClear:
+db $C8,$CA
+.EVanishingPlayerSprite:
+lda $1014 : sta $14
+lda $1016 : sta $16
+cop #$88 : dl $8ee000
+cop #$80 : db $1c
+cop #$89
+cop #$E0
+endif
+warnpc $88b74d
+
+
 org $88c1fd
 db $1f : dw $1000
 EPyramidGuy:
@@ -7191,16 +7350,6 @@ db "_Jump in"
 db $ca
 warnpc $88ce10
 
-
-org $88ce30
-; The warp after receiving MQ's statue is different, since it doesn't return to MQ's map.
-lda.w #!MQPostStatueExitMap : sta $0b12
-lda.w #!MQPostStatueExitX : sta $0b08
-  sta $0b0a
-lda.w #!MQPostStatueExitY : sta $0b0c
-  sta $0b0e
-lda.w #!MQPostStatueExitCam : sta $0b10
-cop #$26 : db $fd : dw $0000, $0000 : db $00,$00,$11
 
 org $88cea5
 db $10,$00   ; Jeweler doesn't disappear when defeated.
@@ -7424,6 +7573,22 @@ warnpc $88d6a9
 }
 
 
+org $88d7a8
+; Small space optimizations to fit in a call to LR_SetThisDsVisitedAndActive.
+db $00 : dw $2300
+EGaia:
+cop #$9C : dl $88f687 : dw $2800    ; = EDarkSpaceBgSparkleFactory
+cop #$A0 : dl $89A090 : dw $0080, $0040, $1800    ; = EDarkSpaceGaiaEyes
+cop #$A0 : dl $89A096 : dw $0080, $0058, $1800    ; = EDarkSpaceGaiaMouth
+jsl LR_SetThisDsVisitedAndActive
+lda $0AAC : and #$0003 : sta $0AB2
+stz $0AAC
+sta $0000
+cop #$D9 : dw $0000, .DarkSpaceTypeBranch
+.DarkSpaceTypeBranch:    ; Handlers for DS types 0, 1, 2, and 3
+  dw $d856, $d87c, $d9cc, $da7d
+warnpc $88d7ea
+
 org $88daf0
 ; Skip a lot of Gaia chatter.
 {
@@ -7435,7 +7600,7 @@ ldy $06
 lda #$FFFF : sta $0024,y
 lda $0ace : cmp $0aca : beq +
 EGaia_TryChat_DoHeal:
-  cop #$BF : dw $de4d
+  cop #$BF : dw EGaia_TextGiveHealing
   lda #$FFF0 : tsb $065a
   lda #$0028 : sta $0b22
   cop #$C1
@@ -7516,10 +7681,11 @@ cop #$BE : db $02,$01 : dw .Options
 .Options:
   dw .SayNo, .SayNo, .SayYes
 .SayYes:
-stz $0ad4
-jsl LR_ClearMonsterKilledFlags
-cop #$26 : db !StartWarpString
-cop #$C5
+;stz $0ad4
+;jsl LR_ClearMonsterKilledFlags
+;cop #$26 : db !StartWarpString
+;cop #$C5
+jml EGaia_DsWarpMainMenu
 .SayNo:
 EGaia_ThenGo:
 cop #$BF : dw EGaia_TextThenGo
@@ -7538,16 +7704,21 @@ db $A3,$8E,$AC,$85,$80,$A2,$0D,$CB,$AC,$62,$84,$82,$8E,$A2,$83,$CB,$AC,$D6,$0D,$
 EGaia_TextFinishedRecordingOfferWarp:
 db $CE,$45,$88,$8D,$88,$A3,$87,$84,$83,$AC,$A2,$84,$82,$8E,$A2,$83,$88,$8D,$86,$2A,$2A,$2A,$CF
 db $CE
-db $62,$84,$A4,$A5,$A2,$8D,$AC,$A4,$8E,$AC    ; "Return to "
-db "!StartLocationName"
-db $0D,$CB    ; "?"
+db "Warp to a Dark Space?",$cb
+;db $62,$84,$A4,$A5,$A2,$8D,$AC,$A4,$8E,$AC    ; "Return to "
+;db "!StartLocationName"
+;db $0D,$CB    ; "?"
 db $AC,$4D,$8E,$CB
 db $AC,$69,$84,$A3
 db $CA
 EGaia_TextThenGo:
 db $CE,$64,$87,$84,$8D,$AC,$86,$8E,$2A,$C0
+EGaia_TextGiveHealing:
+db $D3,$CE,$48,$A4,$AC,$D6,$AA,$D6,$A5,$A9,$8E,$A5,$0E,$A2,$84,$CB,$87,$A5,$A2,$A4,$2A,$AC,$42,$8B,$8E,$A3,$84,$AC,$D6,$FE,$84,$A9,$84,$A3,$2A,$CF,$CA
+
 
 }
+warnpc $88de72
 
 org $88eb15
 ; "Cut out ability explanation text"
@@ -7576,6 +7747,14 @@ db $c0   ; "Shorten ability acquisition text"
 org $88f0a1
 db $10   ; Meet Freedan
 
+; Mansion: don't tamper with BG registers if room is dark
+if !IsMapEADark == 1 || !SettingDarkRoomsLevel == 4
+org $88f9f6
+nop : nop : nop
+org $88f9fb
+nop : nop : nop
+endif
+
 org $88fa25
 jmp SolidArmDeathOverride
 
@@ -7602,11 +7781,20 @@ db "you weren't my friend,",$cb
 db "I just don't think",$cb
 db "I could bear it.",$c0
 
+; Mansion: don't tamper with BG registers if room is dark
+if !IsMapE9Dark == 1 || !SettingDarkRoomsLevel == 4
+org $88fc77
+nop : nop : nop
+org $88fca0
+nop : nop : nop
+endif
+
 org $88fcb2
 ; Exit to Dao from Mansion
 cop #$26 : db !MapMansionExitString ; $c3 : dw $0140,$0088 : db $00,$00,$23
 
 org $88fd16
+; Bank $88 free space begins here.
 ; Force change back to Will.
 {
 LR_ForceChangeToWill:
@@ -7667,59 +7855,6 @@ dec $26
 rts
 
 
-;org $88fd80
-;; jeweler2.bin
-;{
-;cop #$D6 : db $2e : dw $fd92
-;cop #$D6 : db $2f : dw $fd9a
-;cop #$D6 : db $01 : dw $cf68
-;jmp $cf63
-;
-;cop #$D5 : db $2e
-;lda #$0002 : bra +
-;cop #$D5 : db $2f
-;lda #$0003
-;+:
-;if !ModeFlagRjm == 0
-;{
-;sed
-;clc : adc $0ab0 : sta $0ab0
-;cld
-;cop #$D6 : db $2f : dw $fd9a
-;cop #$D6 : db $01 : dw $cf68
-;jmp $cf9f
-;
-;; filler
-;db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-;
-;}
-;else   ; RJM handler
-;{
-;pha
-;pha
-;-:
-;jsl $83fdb2
-;jsl $83fda0
-;pla : dec : beq +
-;  pha : bra -
-;+:
-;-:
-;jsl $83fda9
-;pla : dec : beq +
-;  pha : bra -
-;+:
-;cop #$D6 : db $2f : dw $fd9a
-;cop #$D6 : db $01 : dw $cf68
-;jmp $cf9f
-;
-;cop #$D5 : db $01
-;jsl $83fda0
-;jsl $83fda9
-;jmp $cf9a
-;}
-;endif
-;}
-
 org $88feb0
 TextSnakeGameSnakesInSecondsGo:
 db "_snakes in","!SnakeGameTimeLimitSecondsString",$cb,"seconds. Go!"
@@ -7769,22 +7904,22 @@ org $898045
 jsr SR_BabelSpiritTransformAndRespawnEnemies
 
 org $89804a
-db !MapBabelWarpString
+db !MapBabelDaoWarpString
 
 org $898055
 db $cd : dl TextBabelBabylonJoke
 db $cb
-db "_", $d6,$42, $cb
+db "_", $d6,$42, $cb    ; "Quit"
 db "_Go to_"
-if !Boss6Id == 1
+if !Boss1Id == 6
 db "Diamond Coast"
-elseif !Boss6Id == 2
+elseif !Boss2Id == 6
 db "Seaside Palace"
-elseif !Boss6Id == 3
+elseif !Boss3Id == 6
 db "Mu"
-elseif !Boss6Id == 4
+elseif !Boss4Id == 6
 db "Great Wall"
-elseif !Boss6Id == 5
+elseif !Boss5Id == 6
 db "Pyramid"
 else
 db "Dao"
@@ -8388,11 +8523,7 @@ db $03    ; 3 difficulty levels available
 
 ; Entr'acte: upon starting a new game, set IOGR flags.
 org $8be515
-if !StartAtWarpLocation == 1
-cop #$26 : db !StartWarpString
-else
-cop #$26 : db $08 : dw $0050, $00a0 : db $80, $00, $12
-endif
+jsl LR_WarpToStart
 jmp $fd00
 
 ; Back to difficulty settings.
@@ -8486,8 +8617,8 @@ cop #$CC : db $a1
 endif
 lda.w #%0000000001001111 : tsb $0a16   ; Flags $b0/1/2/3/6
 lda.w #%1110000001001101 : tsb $0a1a   ; Flags $d0/2/3/6/d/e/f
-if !StartLocationId == 19    ; Lilly's door and DS are open if starting at back of Edward's
-cop #$CD : dw $0113
+if !StartLocationId == 19    ; [Lilly's door? and] DS are open if starting at back of Edward's
+;cop #$CD : dw $0113
 cop #$CD : dw $0116
 elseif !StartLocationId == 46   ; Mine hidden DS is open if starting there
 cop #$CD : dw $0132
@@ -8502,7 +8633,7 @@ endif
 cop #$CE : db $F4   ; For Apocalypse Gaia.
 stz $0bfc   ; Default to fast item-get text speed.
 lda #$2800 : trb $09ae
-jsl $80f49a
+jsl LR_MarkRoomRewardsObtainedByDifficulty
 cop #$E0
 }
 
@@ -8617,6 +8748,19 @@ if !SettingEnemizer >= 2
 db $00 : dl $80BF89
 db $FF 
 endif
+
+org $8ceaba
+; The AG code changes the addresses of some of these thinkers.
+if !ApocalypseGaia == 1
+db $00 : dl ECometBG-2
+db $71 : dl TIndexedPaletteBundle-2
+db $00 : dl ECometBG2ShimmerEndpoint-2
+db $00 : dl ECometBG2ShimmerA-2
+db $00 : dl ECometBG2ShimmerB-2
+db $00 : dl ECometBG2ShimmerC-2
+db $FF
+endif
+warnpc $8CEAD3
 
 
 ; For Apocalypse Gaia, we make various changes to the Comet and DG code.
@@ -8828,19 +8972,6 @@ cop #$E0
 
 endif
 warnpc $8CED4B
-
-org $8ceaba
-; The AG code changes the addresses of some of these thinkers.
-if !ApocalypseGaia == 1
-db $00 : dl ECometBG-2
-db $71 : dl TIndexedPaletteBundle-2
-db $00 : dl ECometBG2ShimmerEndpoint-2
-db $00 : dl ECometBG2ShimmerA-2
-db $00 : dl ECometBG2ShimmerB-2
-db $00 : dl ECometBG2ShimmerC-2
-db $FF
-endif
-warnpc $8CEAD3
 
 org $8ceeaa
 if !ApocalypseGaia == 1
@@ -9523,13 +9654,12 @@ db $01,$00,$00,$00,$00,$02,$0C
 
 
 ; Bank $9A / $DA 
-; Includes fluteless Will sprite tiles
 {
-
 org $da5a37
 ; Remove a rock, preventing a Spin Dash softlock.
 incbin "Tilemap6D.bin"
 
+; Fluteless Will sprite tiles
 if !SettingFluteless == 1
 fillbyte $00
 org $9a8540
@@ -9563,6 +9693,15 @@ endif
 }
 
 
+org $a08000
+
+incsrc "iogr_code_overflow.asr"
+
+incsrc "iogr_dialogue_overflow.asr"
+
+if !ApocalypseGaia == 1
+incsrc "apocalypse_gaia_2.asr"
+endif
 
 
 org $de28a5
@@ -9587,7 +9726,7 @@ db 8,2
 db !IshtarRoomCompTilemap
 
 
-org $c00000
+org $e00000
 ATlMpMuSWWaterHighSub:
 db 2,4
 incbin "ATlMpMuSWWaterHighSub_Tilemap1_comp.bin"
@@ -9595,16 +9734,7 @@ ATlMpMuSEWaterHighSub:
 db 4,4
 incbin "ATlMpMuSEWaterHighSub_Tilemap1_comp.bin"
 
-warnpc $c08000
-org $a08000
-
-incsrc "iogr_code_overflow.asr"
-
-incsrc "iogr_dialogue_overflow.asr"
-
-if !ApocalypseGaia == 1
-incsrc "apocalypse_gaia_2.asr"
-endif
+warnpc $e08000
 
 
 

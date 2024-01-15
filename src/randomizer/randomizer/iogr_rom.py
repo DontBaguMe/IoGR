@@ -19,12 +19,11 @@ from .models.enums.enemizer import Enemizer
 from .models.enums.start_location import StartLocation
 
 from . import asar
-import os   # Required to add asar.dll
 
 VERSION = "4.7.0"
 
 MAX_RANDO_RETRIES = 100
-PRINT_LOG = True
+PRINT_LOG = -1
 
 KARA_EDWARDS = 1
 KARA_MINE = 2
@@ -706,7 +705,7 @@ class Randomizer:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
             elif seed_adj > 0:
-                if PRINT_LOG:
+                if PRINT_LOG > -1:
                     print("Trying again... attempt", seed_adj+1)
             self.w = World(settings, statues_required, statues, statue_req, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj,PRINT_LOG)
@@ -767,7 +766,7 @@ class Randomizer:
                     changes[room].remove(0)
                 other_changes[room] = changes[room][:settings.difficulty.value]
 
-            if PRINT_LOG:
+            if PRINT_LOG > -1:
                 print("Ishtar room",room+1,":",idx_diff[room],other_changes[room])
             done = False
             while not done:
@@ -1226,6 +1225,7 @@ class Randomizer:
         self.asar_defines["SettingEntranceShuffle"] = settings.entrance_shuffle.value
         self.asar_defines["SettingDungeonShuffle"] = settings.dungeon_shuffle.value
         self.asar_defines["SettingOrbRando"] = settings.orb_rando.value
+        self.asar_defines["SettingDarkRoomsLevel"] = abs(settings.darkrooms.value)
         
         self.asar_defines["OptionMuteMusic"] = 0
         

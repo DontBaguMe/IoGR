@@ -1,5 +1,22 @@
 arch 65816
 hirom
+table "table_dialogue.txt",rtl
+
+TextPyramidWarpNotUnlocked:
+db $d3
+db "For some reason, you",$cb
+db "can't quite see the",$cb
+db "door to the Pyramid",$cb
+db "in the portal light..."
+db $cf
+db "(You need to find the",$cb
+db "Aura or solve the",$cb
+db "hieroglyph puzzle to",$cb
+db "use these portals.)"
+db $ca
+
+TextPyramidOfferWarp:
+db $C2,$0B,$64,$87,$84,$AC,$D7,$58,$A4,$8E,$AC,$A4,$87,$84,$AC,$60,$A9,$A2,$80,$8C,$88,$83,$CB,$80,$A0,$A0,$84,$80,$A2,$A3,$AC,$88,$8D,$AC,$A4,$87,$84,$AC,$8B,$88,$86,$87,$A4,$2A,$2A,$2A,$CB,$AC,$61,$A5,$88,$A4,$CB,$AC,$49,$A5,$8C,$A0,$AC,$88,$8D,$CA
 
 
 TextLongShadowsFormUnlocked:
@@ -50,7 +67,7 @@ endif
 
 TextDeclinedHerbOverflow:
 db $ce
-db $CE,$47,$84,$AC,$A3,$A4,$8E,$A0,$A0,$84,$83,$AC,$84,$80,$A4,$88,$8D,$86,$AC,$CB,$A4,$87,$84,$AC,$87,$84,$A2,$81,$2A,$AC,$C0
+db $CE,$47,$84,$AC,$A3,$A4,$8E,$A0,$A0,$84,$83,$AC,$84,$80,$A4,$88,$8D,$86,$AC,$CB,$A4,$87,$84,$AC,$87,$84,$A2,$81,$2A,$AC
 db $ca
 
 TextRaisedStatueOfHope:
@@ -292,12 +309,36 @@ db $ca
 
 
 
-
-
-
 TextCreditsPlaytesterListOverflow:
 db $D3,$D2,$00,$D5,$00,$42,$8E,$8D,$A4,$A2,$88,$81,$A5,$A4,$8E,$A2,$A3,$AC,$80,$8D,$83,$AC,$64,$84,$A3,$A4,$84,$A2,$A3,$2F,$CB,$6D,$40,$8B,$82,$87,$84,$8C,$88,$82,$AC,$6D,$40,$A4,$8B,$80,$A3,$CB,$6D,$42,$87,$80,$8E,$AA,$49,$8E,$84,$AC,$6D,$41,$4E,$67,$48,$44,$A4,$87,$84,$47,$44,$62,$4E,$CB,$6D,$47,$88,$A2,$8E,$A3,$8E,$85,$64,$AC,$6D,$41,$A5,$81,$81,$80,$63,$67,$80,$8B,$A4,$84,$A2,$C9,$B4,$CE,$6D,$40,$A5,$A3,$A4,$88,$8D,$22,$21,$23,$20,$20,$AC,$6D,$43,$84,$A2,$64,$8E,$8B,$8B,$84,$48,$86,$84,$8B,$CB,$6D,$83,$89,$A4,$88,$85,$80,$87,$84,$80,$A2,$A4,$AC,$6D,$43,$8E,$8E,$83,$63,$45,$CB,$6D,$63,$8C,$80,$A3,$87,$4C,$80,$8D,$88,$80,$82,$AC,$6D,$44,$A0,$A0,$A9,$23,$27,$CB,$6D,$64,$A9,$8C,$84,$8A,$84,$84,$A0,$84,$A2,$AC,$AC,$6D,$4B,$80,$A3,$A3,$88,$82,$C9,$B4,$CE,$6D,$41,$8E,$8D,$AA,$80,$88,$41,$88,$84,$A2,$AC,$6D,$46,$8B,$88,$88,$A4,$82,$87,$67,$88,$88,$A4,$82,$87,$CB,$6D,$4A,$84,$A9,$A0,$80,$8B,$80,$83,$88,$8D,$AC,$6D,$4B,$84,$47,$A5,$8B,$8A,$CB,$6D,$61,$A5,$84,$84,$8D,$40,$8D,$8D,$84,$41,$AC,$6D,$4C,$88,$8A,$80,$8D,$CB,$6D,$A3,$A4,$84,$A6,$84,$87,$80,$82,$8A,$A3,$AC,$6D,$4D,$84,$8C,$8E,$C9,$B4,$CE,$6D,$42,$A2,$80,$AA,$A9,$87,$80,$AA,$84,$AC,$6D,$60,$8B,$80,$8D,$CB,$6D,$4D,$69,$62,$80,$8C,$81,$8B,$84,$A2,$AC,$6D,$60,$8E,$AA,$AA,$A5,$8C,$63,$84,$8D,$A0,$80,$88,$CB,$6D,$A7,$88,$8B,$83,$85,$80,$8D,$86,$21,$AC,$6D,$A2,$8E,$84,$A9,$80,$CB,$6D,$6A,$84,$8A,$84,$63,$A4,$80,$A2,$A2,$AC,$6D,$63,$8A,$88,$A0,$A3,$A9,$C9,$B4,$CE,$6D,$4C,$A2,$45,$A2,$84,$84,$A4,$AC,$6D,$A3,$8E,$8B,$80,$A2,$82,$84,$8B,$8B,$20,$20,$27,$CB,$6D,$63,$82,$87,$84,$A2,$88,$A3,$AC,$6D,$63,$4E,$25,$6A,$CB,$6D,$63,$43,$88,$84,$AA,$80,$8B,$AC,$6D,$63,$A9,$84,$29,$29,$20,$C9,$B4,$CE,$6D,$63,$8A,$80,$A2,$A3,$8D,$88,$8A,$AC,$6D,$66,$84,$84,$A4,$8E,$A2,$A0,$CB,$6D,$66,$84,$A2,$80,$8B,$8B,$88,$A8,$AC,$6D,$66,$8E,$8B,$8E,$A2,$CB,$6D,$66,$8E,$A2,$80,$8D,$A4,$87,$84,$AC,$6D,$A7,$8E,$A2,$8C,$A3,$8E,$85,$82,$80,$8D,$C9,$B4,$CE,$6D,$64,$A3,$A5,$A2,$80,$8D,$80,$AC,$6D,$A8,$48,$82,$84,$81,$8B,$A5,$84,$CB,$6D,$67,$88,$8B,$83,$83,$88,$8D,$AC,$6D,$6A,$8E,$82,$8A,$84,$A2,$63,$A4,$A5,$CB,$6D,$68,$A9,$A2,$82,$8E,$A2,$83,$AC,$6D,$6A,$24,$A4,$20,$A8,$C9,$B4,$CE,$CB,$AC,$AC,$D6,$58,$A9,$8E,$A5,$AC,$80,$8B,$8B,$AC,$A3,$8E,$AC,$8C,$A5,$82,$87,$4F,$CB,$AC,$AC,$AC,$AC,$AC,$D6,$4E,$A7,$80,$A3,$AC,$A3,$8E,$AC,$85,$A5,$8D,$4F,$C9,$F0,$C8,$CA
 
+
+
+table "table_invtext.txt",rtl
+TextInvCondMenuYouWillWarp:
+db $03 : db $00 
+db $01 : dw $0596 
+db "Your condition."
+db $0d 
+db "You'll warp to Dark"
+db $0d 
+db "Space when you"
+db $0d
+db "exit this screen."
+db $00 
+
+TextInvOfferDsWarp:
+db $03 : db $00 
+db $01 : dw $0596 
+db "Really warp to"
+db $0d 
+db "Dark Space?"
+db $0d 
+db $40,$40 : db "No"
+db $0d 
+db $40,$40 : db "Yes"
+db $00
+table "table_dialogue.txt",rtl
 
 
 

@@ -261,46 +261,6 @@ def write_patch(patch, rom_path, filename, settings):
     randomized.write(patch[1])
 
     original.close()
-    #data = json.loads(patch)
-    #data.sort(key=sort_patch)
-    #
-    #for k in data:
-    #    address = int(k['address'])
-    #    value = bytes(k['data'])
-    #
-    #    randomized.seek(address)
-    #    randomized.write(value)
-    #
-    ## Custom sprites
-    #if settings.sprite != Sprite.WILL:
-    #    sprite_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"randomizer","randomizer","bin","plugins","sprites",settings.sprite.value,"")
-    #    for binfile in os.listdir(sprite_dir):
-    #        if binfile.endswith(".bin"):
-    #            f = open(os.path.join(sprite_dir,binfile), "rb")
-    #            randomized.seek(int(binfile.partition(".")[0], 16))
-    #            randomized.write(f.read())
-    #            f.close
-    #
-    ## Fluteless sprite work
-    #if settings.fluteless:
-    #    flute_addrs = [
-    #        [0x1a8540,0x60],
-    #        [0x1a8740,0x60],
-    #        [0x1aa120,0x40],
-    #        [0x1aa560,0x20],
-    #        [0x1aa720,0x60],
-    #        [0x1aa8e0,0x80],
-    #        [0x1aab00,0x20],
-    #        [0x1aac60,0x40],
-    #        [0x1aae60,0x40],
-    #        [0x1ab400,0x80],
-    #        [0x1ab600,0x80],
-    #        [0x1ab800,0x40],
-    #        [0x1aba00,0x40]
-    #    ]
-    #    for [addr,l] in flute_addrs:
-    #        randomized.seek(addr)
-    #        randomized.write(b"\x00"*l)
 
     randomized.close()
 
@@ -363,6 +323,13 @@ def entrance_shuffle_help():
              "COUPLED:", " - Doors and exits act normally, i.e. if you backtrack through an exit you'll return to where you entered", "",
              "UNCOUPLED:", " - Doors and exits send you to different places, depending on which direction you go through them"]
     tkinter.messagebox.showinfo("Start Location", "\n".join(lines))
+    
+def dr_maybe_set_cursed(drlevel):
+    if darkrooms_level.get() == "All":
+        darkrooms_cursed_checkbox.config(state='disabled')
+        darkrooms_cursed.set(1)
+    else:
+        darkrooms_cursed_checkbox.config(state='normal')
 
 
 root = tkinter.Tk()
@@ -508,8 +475,10 @@ start_menu = tkinter.OptionMenu(mainframe, start, *start_choices).grid(row=6, co
 ohko_checkbox = tkinter.Checkbutton(mainframe, variable=ohko, onvalue=1, offvalue=0).grid(row=7, column=1)
 rjm_checkbox = tkinter.Checkbutton(mainframe, variable=red_jewel_madness, onvalue=1, offvalue=0).grid(row=8, column=1)
 enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(row=9, column=1)
-statues_menu = tkinter.OptionMenu(mainframe, statues, *statue_choices).grid(row=10, column=1)
-statue_req_menu = tkinter.OptionMenu(mainframe, statue_req, *statue_req_choices).grid(row=11, column=1)
+statues_frame = tkinter.Frame(mainframe)
+statues_frame.grid(row=10, column=1)
+statues_menu = tkinter.OptionMenu(statues_frame, statues, *statue_choices).pack(side='left')
+statue_req_menu = tkinter.OptionMenu(statues_frame, statue_req, *statue_req_choices).pack(side='left')
 glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=12, column=1)
 boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=13, column=1)
 open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
@@ -524,12 +493,12 @@ dungeon_shuffle_menu = tkinter.OptionMenu(mainframe, dungeon_shuffle, *dungeon_s
 orb_rando_menu = tkinter.OptionMenu(mainframe, orb_rando, *orb_rando_choices).grid(row=23, column=1)
 darkrooms_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
 darkrooms_frame.grid(row=24, column=1)
-darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *darkrooms_level_choices)
-darkrooms_level_menu.pack(fill='x')
-darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed: ")
-darkrooms_label.pack(fill='x')
+darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *darkrooms_level_choices, command=dr_maybe_set_cursed)
+darkrooms_level_menu.pack(side='left')
+darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed:")
+darkrooms_label.pack(side='left')
 darkrooms_cursed_checkbox = tkinter.Checkbutton(darkrooms_frame, variable=darkrooms_cursed, onvalue=1, offvalue=0)
-darkrooms_cursed_checkbox.pack(fill='x')
+darkrooms_cursed_checkbox.pack(side='left')
 #level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
