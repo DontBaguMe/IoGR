@@ -62,17 +62,6 @@ def generate_ROM():
         if d == "Extreme":
             return Difficulty.EXTREME
 
-#    def get_level():
-#        l = level.get()
-#        if l == "Beginner":
-#            return Level.BEGINNER
-#        if l == "Intermediate":
-#            return Level.INTERMEDIATE
-#        if l == "Advanced":
-#            return Level.ADVANCED
-#        if l == "Expert":
-#            return Level.EXPERT
-
     def get_goal():
         g = goal.get()
         if g == "Dark Gaia":
@@ -209,8 +198,6 @@ def generate_ROM():
         randomizer = Randomizer(rompath)
 
         patch = randomizer.generate_rom(rom_filename, settings)
-        asm_dump = randomizer.generate_asm_dump()
-        write_asm_dump(asm_dump, asm_filename, rompath)
 
         if not patch[0]:
             tkinter.messagebox.showerror("Error", "Assembling failed. The first error was:" + str(patch[1][0]) )
@@ -219,9 +206,11 @@ def generate_ROM():
             if not race_mode_toggle.get():
                 spoiler = randomizer.generate_spoiler()
                 write_spoiler(spoiler, spoiler_filename, rompath)
-            if graph_viz_toggle.get():
-                graph_viz = randomizer.generate_graph_visualization()
-                write_graph_viz(graph_viz, graph_viz_filename, rompath)
+                asm_dump = randomizer.generate_asm_dump()
+                write_asm_dump(asm_dump, asm_filename, rompath)
+                if graph_viz_toggle.get():
+                    graph_viz = randomizer.generate_graph_visualization()
+                    write_graph_viz(graph_viz, graph_viz_filename, rompath)
             tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
         tkinter.messagebox.showerror("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
@@ -266,11 +255,9 @@ def write_patch(patch, rom_path, filename, settings):
 
 
 def diff_help():
-    lines = ["Difficulty affects enemy strength as well as stat upgrades available to the player (HP/STR/DEF):", "",
-             "EASY:", " - Enemies have 50% STR/DEF and 67% HP compared to Normal", " - Herbs restore HP to full", " - Player upgrades available: 10/7/7 (4 upgrades per boss)", "",
-             "NORMAL:", " - Enemy stats roughly mirror a vanilla playthrough", " - Herbs restore 8 HP", " - Player upgrades available: 10/4/4 (3 upgrades per boss)", "",
-             "HARD:", " - Enemies have roughly 2x STR/DEF compared to Normal", " - Herbs restore 4 HP", " - Player upgrades available: 8/2/2 (2 upgrades per boss)", "",
-             "EXTREME:", " - Enemies have roughly 2x STR/DEF compared to Normal", " - Herbs restore 2 HP, item hints are removed", " - Player upgrades available: 6/0/0 (1 upgrade per boss)"]
+    lines = ["Increased difficulty generally places required items deeper in dungeons, so more of the game has to be completed.",
+             "",
+             "Extreme difficulty additionally removes in-game spoilers, and may require difficult tasks like defeating Solid Arm."]
     tkinter.messagebox.showinfo("Difficulties", "\n".join(lines))
 
 
@@ -285,20 +272,21 @@ def goal_help():
 
 def logic_help():
     lines = ["Logic determines how items and abilities are placed:", "",
-             "COMPLETABLE:", " - All locations are accessible", " - Freedan abilities will only show up in dungeons", "",
+             "COMPLETABLE:", " - All items and locations are accessible", " - Freedan abilities will only show up in dungeons", "",
              "BEATABLE:", " - Some non-essential items may be inaccessible", " - Freedan abilities will only show up in dungeons", "",
              "CHAOS:", " - Some non-essential items may be inaccessible", " - Freedan abilities may show up in towns"]
     tkinter.messagebox.showinfo("Logic Modes", "\n".join(lines))
 
 
-def firebird_help():
-    lines = ["Checking this box grants early access to the Firebird attack, when:", " - The Crystal Ring is equipped,", " - Kara is saved from her painting, and",
-             " - Player is in Shadow's form."]
-    tkinter.messagebox.showinfo("Firebird", "\n".join(lines))
-
-
 def variant_help():
-    lines = ["The following variants are currently available:", "", "OHKO:", " - Player starts with 1 HP", " - All HP upgrades are removed or negated"]
+    lines = ["OHKO: You always have 1 HP and perish in one hit.","",
+             "Red Jewel Madness: Start with 40 HP. Each Red Jewel given to the Jeweler reduces HP by 1.","",
+             "Fluteless: Will has no primary weapon, and can only do damage via abilities or as Freedan/Shadow.","",
+             "Z3 Mode: HP and damage values are adjusted to make combat faster and more dangerous. STR and DEF upgrades double/halve damage.","",
+             "Glitches: To beat the game, you may be required to take advantage of bugs or other unintended mechanics.","",
+             "Early Firebird: As Shadow, you gain the Firebird attack after using the Crystal Ring and rescuing Kara.","",
+             "Open Mode: Intercontinental travel via Lola's Letter, the Teapot, the Memory Melody, the Will, and the Large Roast is accessible from the start of the game.","",
+             "Race Seed: A spoiler log is not generated, and the chosen seed is transformed to a new secret seed. Useful for racing if exchanging files isn't possible.",""]
     tkinter.messagebox.showinfo("Variants", "\n".join(lines))
 
 
@@ -319,10 +307,30 @@ def start_help():
     tkinter.messagebox.showinfo("Start Location", "\n".join(lines))
 
 def entrance_shuffle_help():
-    lines = ["This setting shuffles where doors and other exits take you.", "",
-             "COUPLED:", " - Doors and exits act normally, i.e. if you backtrack through an exit you'll return to where you entered", "",
-             "UNCOUPLED:", " - Doors and exits send you to different places, depending on which direction you go through them"]
-    tkinter.messagebox.showinfo("Start Location", "\n".join(lines))
+    lines = ["Overworld Shuffle randomizes which overworld maps are on each continent for overworld travel.",
+             "",
+             "Entrance Shuffle randomizes doors and other transitions outside of dungeons.",
+             " - Coupled: Doors and exits are reversible, i.e. if you backtrack through an exit you'll return to where you entered.",
+             " - Uncoupled: Backtracking generally will not return you to the room you came from.",
+             "",
+             "Dungeon Shuffle randomizes transitions within dungeons. Transitions are reversible unless non-dungeon Entrance Shuffle is enabled and set as Uncoupled.",
+             " - Basic: Dungeon rooms only connect to other rooms from the same dungeon.",
+             " - Chaos: All dungeon rooms are shuffled and connected randomly."]
+    tkinter.messagebox.showinfo("Room and Map Shuffles", "\n".join(lines))
+    
+def orb_rando_help():
+    lines = ["Randomizes the orbs that open doors and barriers, that are produced when some monsters are destroyed.",
+             " - Basic: Orb-generating monsters open a random door instead of their intended one.",
+             " - Orbsanity: Orbs are shuffled with all other items. Orb-generating monsters grant a random item when they're destroyed."]
+    tkinter.messagebox.showinfo("Orb Rando", "\n".join(lines))
+    
+def darkrooms_help():
+    lines = ["Random dungeon rooms are made dark, generally in clusters on side branches or near the dungeon end.",
+             "",
+             "The Dark Glasses and the Crystal Ring let you see in darkness. The game won't require you to enter a dark room without both of these items, unless you choose Cursed Darkness.",
+             "",
+             "If Cursed, you may have to traverse dark rooms without a light source. Darkness may spread out of side branches into central dungeon rooms."]
+    tkinter.messagebox.showinfo("Dark Rooms", "\n".join(lines))
     
 def dr_maybe_set_cursed(drlevel):
     if darkrooms_level.get() == "All":
@@ -330,6 +338,18 @@ def dr_maybe_set_cursed(drlevel):
         darkrooms_cursed.set(1)
     else:
         darkrooms_cursed_checkbox.config(state='normal')
+
+def checkbox_clear_rjm():
+    red_jewel_madness.set(0)
+def checkbox_clear_ohko():
+    ohko.set(0)
+
+def goal_maybe_change_statues(goalchoice):
+    if goal.get() == "Red Jewel Hunt":
+        statues.set("0")
+def statues_maybe_change_goal(statuechoice):
+    if statues.get() != "0" and goal.get() == "Red Jewel Hunt":
+        goal.set("Dark Gaia")
 
 
 root = tkinter.Tk()
@@ -346,39 +366,25 @@ mainframe.columnconfigure(0, weight=1)
 mainframe.rowconfigure(0, weight=1)
 mainframe.pack(pady=20, padx=20)
 
-tkinter.Label(mainframe, text="ROM File").grid(row=0, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Base ROM File").grid(row=0, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Seed").grid(row=1, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Difficulty").grid(row=2, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Goal").grid(row=3, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Logic").grid(row=4, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Early Firebird").grid(row=5, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Logic").grid(row=3, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Goal").grid(row=4, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Statues").grid(row=5, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Start Location").grid(row=6, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="One Hit KO").grid(row=7, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Red Jewel Madness").grid(row=8, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Enemizer (beta)").grid(row=9, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Statues").grid(row=10, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Allow Glitches").grid(row=12, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Boss Shuffle").grid(row=13, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Open Mode").grid(row=14, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Z3 Mode").grid(row=15, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Gameplay Variants").grid(row=7, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Enemizer").grid(row=9, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=16, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=17, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Generate graph").grid(row=18, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Race seed").grid(row=19, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Fluteless").grid(row=20, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Sprite").grid(row=21, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=22, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Orb Rando").grid(row=23, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Dark Rooms").grid(row=24, column=0, sticky=tkinter.W)
-#tkinter.Label(mainframe, text="Player Level").grid(row=15, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=18, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Orb Rando").grid(row=20, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Dark Rooms").grid(row=22, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Generate graph").grid(row=24, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
 difficulty.set("Normal")
-
-#level = tkinter.StringVar(root)
-#level_choices = ["Beginner", "Intermediate", "Advanced", "Expert"]
-#level.set("Intermediate")
 
 goal = tkinter.StringVar(root)
 goal_choices = ["Dark Gaia", "Apocalypse Gaia", "Random Gaia", "Red Jewel Hunt"]
@@ -463,55 +469,77 @@ ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)
 ROM.insert(0,load_ROM())
 
-seed = tkinter.Entry(mainframe)
-seed.grid(row=1, column=1)
+seed_frame = tkinter.Frame(mainframe, borderwidth=1)
+seed_frame.grid(row=1, column=1)
+seed_frame.columnconfigure(0, weight=1)
+seed_frame.rowconfigure(0, weight=1)
+seed = tkinter.Entry(seed_frame)
+seed.pack(side='left')
 seed.insert(10, random.randint(0, 999999))
 
 diff_menu = tkinter.OptionMenu(mainframe, difficulty, *diff_choices).grid(row=2, column=1)
-goal_menu = tkinter.OptionMenu(mainframe, goal, *goal_choices).grid(row=3, column=1)
-logic_menu = tkinter.OptionMenu(mainframe, logic, *logic_choices).grid(row=4, column=1)
-firebird_checkbox = tkinter.Checkbutton(mainframe, variable=firebird, onvalue=1, offvalue=0).grid(row=5, column=1)
-start_menu = tkinter.OptionMenu(mainframe, start, *start_choices).grid(row=6, column=1)
-ohko_checkbox = tkinter.Checkbutton(mainframe, variable=ohko, onvalue=1, offvalue=0).grid(row=7, column=1)
-rjm_checkbox = tkinter.Checkbutton(mainframe, variable=red_jewel_madness, onvalue=1, offvalue=0).grid(row=8, column=1)
-enemizer_menu = tkinter.OptionMenu(mainframe, enemizer, *enemizer_choices).grid(row=9, column=1)
+logic_menu = tkinter.OptionMenu(mainframe, logic, *logic_choices).grid(row=3, column=1)
+goal_menu = tkinter.OptionMenu(mainframe, goal, *goal_choices, command=goal_maybe_change_statues).grid(row=4, column=1)
 statues_frame = tkinter.Frame(mainframe)
-statues_frame.grid(row=10, column=1)
-statues_menu = tkinter.OptionMenu(statues_frame, statues, *statue_choices).pack(side='left')
+statues_frame.grid(row=5, column=1)
+statues_menu = tkinter.OptionMenu(statues_frame, statues, *statue_choices, command=statues_maybe_change_goal).pack(side='left')
 statue_req_menu = tkinter.OptionMenu(statues_frame, statue_req, *statue_req_choices).pack(side='left')
-glitches_checkbox = tkinter.Checkbutton(mainframe, variable=glitches, onvalue=1, offvalue=0).grid(row=12, column=1)
-boss_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=boss_shuffle, onvalue=1, offvalue=0).grid(row=13, column=1)
-open_mode_checkbox = tkinter.Checkbutton(mainframe, variable=open_mode, onvalue=1, offvalue=0).grid(row=14, column=1)
-z3_mode_checkbox = tkinter.Checkbutton(mainframe, variable=z3_mode, onvalue=1, offvalue=0).grid(row=15, column=1)
+start_menu = tkinter.OptionMenu(mainframe, start, *start_choices).grid(row=6, column=1)
+
+variants_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
+variants_frame.grid(row=7, column=1)
+variants_frame.columnconfigure(0, weight=1)
+variants_frame.rowconfigure(0, weight=1)
+ohko_label = tkinter.Label(variants_frame, text="OHKO:").grid(row=0, column=0, sticky=tkinter.E)
+ohko_checkbox = tkinter.Checkbutton(variants_frame, variable=ohko, onvalue=1, offvalue=0, command=checkbox_clear_rjm).grid(row=0, column=1)
+#variants_col_split_label = tkinter.Label(variants_frame, text=" ").grid(row=0, column=2)
+rjm_label = tkinter.Label(variants_frame, text="Red Jewel Madness:").grid(row=0, column=3, sticky=tkinter.E)
+rjm_checkbox = tkinter.Checkbutton(variants_frame, variable=red_jewel_madness, onvalue=1, offvalue=0, command=checkbox_clear_ohko).grid(row=0, column=4)
+fluteless_label = tkinter.Label(variants_frame, text="Fluteless:").grid(row=1, column=0, sticky=tkinter.E)
+fluteless_checkbox = tkinter.Checkbutton(variants_frame, variable=fluteless, onvalue=1, offvalue=0).grid(row=1, column=1)
+z3_mode_label = tkinter.Label(variants_frame, text="Z3 Mode:").grid(row=1, column=3, sticky=tkinter.E)
+z3_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=z3_mode, onvalue=1, offvalue=0).grid(row=1, column=4)
+glitches_label = tkinter.Label(variants_frame, text="Glitches:").grid(row=2, column=0, sticky=tkinter.E)
+glitches_checkbox = tkinter.Checkbutton(variants_frame, variable=glitches, onvalue=1, offvalue=0).grid(row=2, column=1)
+firebird_label = tkinter.Label(variants_frame, text="Early Firebird:").grid(row=2, column=3, sticky=tkinter.E)
+firebird_checkbox = tkinter.Checkbutton(variants_frame, variable=firebird, onvalue=1, offvalue=0).grid(row=2, column=4)
+open_mode_label = tkinter.Label(variants_frame, text="Open:").grid(row=3, column=0, sticky=tkinter.E)
+open_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=open_mode, onvalue=1, offvalue=0).grid(row=3, column=1)
+race_mode_label = tkinter.Label(variants_frame, text="Race Seed:").grid(row=3, column=3, sticky=tkinter.E)
+race_mode_toggle_checkbox = tkinter.Checkbutton(variants_frame, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=3, column=4)
+
+enemy_rando_frame = tkinter.Frame(mainframe, borderwidth=1)
+enemy_rando_frame.grid(row=9, column=1)
+enemy_rando_frame.columnconfigure(0, weight=1)
+enemy_rando_frame.rowconfigure(0, weight=1)
+enemizer_menu = tkinter.OptionMenu(enemy_rando_frame, enemizer, *enemizer_choices).pack(side='left')
+boss_shuffle_label = tkinter.Label(enemy_rando_frame, text="Boss shuffle:").pack(side='left')
+boss_shuffle_checkbox = tkinter.Checkbutton(enemy_rando_frame, variable=boss_shuffle, onvalue=1, offvalue=0).pack(side='left')
+
 overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=16, column=1)
 entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=17, column=1)
-graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=18, column=1)
-race_mode_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=19, column=1)
-fluteless_checkbox = tkinter.Checkbutton(mainframe, variable=fluteless, onvalue=1, offvalue=0).grid(row=20, column=1)
-sprite_menu = tkinter.OptionMenu(mainframe, sprite, *sprite_choices).grid(row=21, column=1)
-dungeon_shuffle_menu = tkinter.OptionMenu(mainframe, dungeon_shuffle, *dungeon_shuffle_choices).grid(row=22, column=1)
-orb_rando_menu = tkinter.OptionMenu(mainframe, orb_rando, *orb_rando_choices).grid(row=23, column=1)
-darkrooms_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
-darkrooms_frame.grid(row=24, column=1)
-darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *darkrooms_level_choices, command=dr_maybe_set_cursed)
-darkrooms_level_menu.pack(side='left')
-darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed:")
-darkrooms_label.pack(side='left')
+dungeon_shuffle_menu = tkinter.OptionMenu(mainframe, dungeon_shuffle, *dungeon_shuffle_choices).grid(row=18, column=1)
+orb_rando_menu = tkinter.OptionMenu(mainframe, orb_rando, *orb_rando_choices).grid(row=20, column=1)
+darkrooms_frame = tkinter.Frame(mainframe, borderwidth=1)
+darkrooms_frame.grid(row=22, column=1)
+darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *darkrooms_level_choices, command=dr_maybe_set_cursed).pack(side='left')
+darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed:").pack(side='left')
 darkrooms_cursed_checkbox = tkinter.Checkbutton(darkrooms_frame, variable=darkrooms_cursed, onvalue=1, offvalue=0)
 darkrooms_cursed_checkbox.pack(side='left')
-#level_menu = tkinter.OptionMenu(mainframe, level, *level_choices).grid(row=15, column=1)
+graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=24, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
-tkinter.Button(mainframe, text='Generate Seed', command=generate_seed).grid(row=1, column=2)
-tkinter.Button(mainframe, text='Generate ROM', command=generate_ROM).grid(row=10, column=2)
+tkinter.Button(seed_frame, text='Random Seed', command=generate_seed).pack(side='left')
+tkinter.Button(mainframe, text='Generate ROM', command=generate_ROM).grid(row=1, column=2)
 
 tkinter.Button(mainframe, text='?', command=diff_help).grid(row=2, column=2)
-tkinter.Button(mainframe, text='?', command=goal_help).grid(row=3, column=2)
-tkinter.Button(mainframe, text='?', command=logic_help).grid(row=4, column=2)
-tkinter.Button(mainframe, text='?', command=firebird_help).grid(row=5, column=2)
+tkinter.Button(mainframe, text='?', command=logic_help).grid(row=3, column=2)
+tkinter.Button(mainframe, text='?', command=goal_help).grid(row=4, column=2)
 tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
 tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
 tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=17, column=2)
+tkinter.Button(mainframe, text='?', command=orb_rando_help).grid(row=20, column=2)
+tkinter.Button(mainframe, text='?', command=darkrooms_help).grid(row=22, column=2)
 
 root.mainloop()
