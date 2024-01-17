@@ -291,7 +291,7 @@ class World:
                         self.logic[edge][0] = 1
                         if dest not in to_visit:
                             to_visit.append(dest)
-                        self.verbose("  -Found node "+str(dest)+" "+str(self.graph[dest][5]))
+                            self.verbose("  -Found node "+str(dest)+" "+str(self.graph[dest][5]))
                     else:
                         bad_edges.append(edge)
                 if not test:
@@ -300,7 +300,8 @@ class World:
         return [visited,new_items]
 
 
-    # Return list of logic edges that originate in an accessible node.
+    # Return list of logic edges that originate in an accessible node in nodes, and
+    # either are locked or terminate outside of nodes.
     # include_redundant to include edges whose destination is already traversed.
     def get_open_edges(self,nodes=[],include_redundant=False):
         test_edges = self.open_edges[:]
@@ -311,7 +312,7 @@ class World:
         for edge in test_edges:
             origin = self.logic[edge][1]
             dest = self.logic[edge][2]
-            if self.logic[edge][0] >= 0 and (include_redundant or not self.is_accessible(dest)) and dest not in nodes:
+            if self.logic[edge][0] >= 0 and edge not in open_edges and (include_redundant or not self.is_accessible(dest)) and (dest not in nodes or self.logic[edge][0] == 0):
                 open_edges.append(edge)
         return open_edges
 
@@ -3953,7 +3954,7 @@ class World:
             44: [False, [],   2, [1,2,0,16], 0, "Underground Tunnel: Map 16", [], False, [], [], [], [], [], [], [], []],
             45: [False, [],   2, [1,2,0,17], 0, "Underground Tunnel: Map 17", [], False, [], [], [], [], [], [], [], []],
             47: [False, [],   2, [1,2,0,18], 0, "Underground Tunnel: Map 18 (entrance)", [], False, [], [], [], [], [], [], [], []],
-            720: [False, [47],2, [1,2,0,18], 0, "Underground Tunnel: Map 18 (Dark Space)", [], False, [], [], [], [], [], [], [], []],
+            720: [False, [],  2, [1,2,0,18], 0, "Underground Tunnel: Map 18 (Dark Space)", [], False, [], [], [], [], [], [], [], []],
             704: [False, [],  2, [1,2,0,18], 0, "Underground Tunnel: Map 18 (Skeleton 1 area)", [], False, [], [], [], [], [], [], [], []],
             705: [False, [],  2, [1,2,0,18], 0, "Underground Tunnel: Map 18 (Skeleton 2 area)", [], False, [], [], [], [], [], [], [], []],
             706: [False, [],  2, [1,2,0,18], 0, "Underground Tunnel: Map 18 (Ending area)", [], False, [], [], [], [], [], [], [], []],
@@ -4047,7 +4048,7 @@ class World:
             134: [False, [],    2,     [2,8,0,63], 0, "Diamond Mine: Map 63 (main)", [], False, [], [], [], [], [], [], [], []],
             136: [False, [],    2,     [2,8,0,64], 0, "Diamond Mine: Map 64 (main)", [], False, [], [], [], [], [], [], [], []],
             137: [False, [136], 2,     [2,8,0,64], 0, "Diamond Mine: Map 64 (trapped laborer)", [], False, [], [], [], [], [], [], [], []],
-            721: [False, [136], 2,     [2,8,0,64], 0, "Diamond Mine: Map 64 (Dark Space)", [], False, [], [], [], [], [], [], [], []],
+            721: [False, [],    2,     [2,8,0,64], 0, "Diamond Mine: Map 64 (Dark Space)", [], False, [], [], [], [], [], [], [], []],
             138: [False, [],    2,     [2,8,0,65], 0, "Diamond Mine: Map 65 (main)", [], False, [], [], [], [], [], [], [], []],
             710: [False, [138], 2,     [2,8,0,65], 0, "Diamond Mine: Map 65 (worm for ramp)", [], False, [], [], [], [], [], [], [], []],
             139: [False, [138,710], 2, [2,8,0,65], 0, "Diamond Mine: Map 65 (behind ramp)", [], False, [], [], [], [], [], [], [], []],
@@ -4483,7 +4484,7 @@ class World:
 
             # Edward's / Tunnel
             60: [0, 32, 33, False, [[2, 1]], True],     # Escape/Enter cell w/Prison Key
-            703: [0,47, 720,False, [[704, 1]], False],  # Worm orb opens Dark Space
+            703: [0,47, 720,False, [[704, 1]], True],   # Worm orb opens Dark Space
             63: [0, 47 ,704,  True, [], False],         # Bridge to second area via Freedan
             704: [0,704,705,False, [[705, 1]], True],   # Skeleton barrier between 2nd and 3rd areas
             705: [0,705,706,False, [[706, 1]], True],   # Skeleton barrier between 3rd and final areas
@@ -4519,7 +4520,7 @@ class World:
             714: [0, 709, 131, False, [[716, 1]], True],            # Map 61 N fence progression via monster
             #702: [0, 709, 701, False, [[607, 1], [610, 1]], False], # Map 61 C lizard from N via ranged in DSC
             114: [0, 136, 137, False, [[608, 1]], False],           # Map 64 trapped laborer w/ Will ability
-            715: [0, 136, 721, False, [[718, 1]], False],           # Map 64 appearing DS via worm orb
+            715: [0, 136, 721, False, [[718, 1]], True],            # Map 64 appearing DS via worm orb
             117: [0, 138, 139, False, [[63, 1]], False],            # Map 65 ramp access via Spin Dash
             716: [0, 138, 139, False, [[719, 1]], False],           # Map 65 ramp access via worm orb
             118: [0, 138, 710, False, [[610, 1]], False],           # Map 65 worm access via ranged
@@ -4974,13 +4975,13 @@ class World:
             # Inca Ruins
             27: [1, 0, [0,0], "Moon Tribe Cave",     3, 0x0045, 0x004a, [10], False, []],
             29: [1, 1, [0,0], "Inca Exterior",       1, 0x004b, 0x0059, [10], True, [31,32,33,34,35,37,38]],
-            30: [-1,0, [0,0], "Inca Near Castoth",   4, 0,      0,      [], False, [36,41]],
+            30: [-1,0, [0,0], "Inca Near Castoth",   4, 0,      0,      [], False, [34,41]],
             31: [-1,0, [0,0], "Inca Statue Puzzle",  2, 0,      0,      [], False, [29,40]],
             32: [1, 1, [0,0], "Inca Will Ability",   1, 0x005e, 0x0065, [], False, [29,35]],
             33: [2, 1, [0,0], "Inca Water",          1, 0x0066, 0x007a, [6, 10], True, [29,35]],
-            34: [2, 1, [0,0], "Inca Big",            2, 0x007b, 0x008e, [], True, [29,36,38]],
+            34: [2, 1, [0,0], "Inca Big",            2, 0x007b, 0x008e, [], True, [29,30,38]],
             35: [2, 1, [0,0], "Inca E/W Jump",       1, 0x008f, 0x009d, [6, 10], False, [29,32,33]],
-            36: [-1,0, [0,0], "Inca Golden Tile",    2, 0,      0,      [], False, [34,30]],
+            #36: [-1,0, [0,0], "Inca Golden Tile",    2, 0,      0,      [], False, [34,30]],
             37: [1, 1, [0,0], "Inca D.Block",        1, 0x009e, 0x00a9, [], False, [29,39]],
             38: [1, 1, [0,0], "Inca Divided",        3, 0x00aa, 0x00b3, [], True, [29,34]],
             39: [1, 1, [0,0], "Inca West of D.Block",2, 0x00b4, 0x00c4, [], False, [37]],
