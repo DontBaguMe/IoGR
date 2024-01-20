@@ -30,7 +30,7 @@ class World:
         prefixes = ["Error: ", "Warning: ", "", ""]
         prefix = prefixes[severity]
         print(prefix+message)
-        if severity == 0:
+        if severity == 0 and self.print_log > 1:
             breakpoint()
             pass
         return
@@ -369,25 +369,19 @@ class World:
             return False
 
         to_place = items[:]
-        to_fill = item_locations[:]
+        to_fill = [loc for loc in item_locations[:] if not self.item_locations[loc][2]]
 
         while to_place:
             item = to_place.pop(0)
-            item_type = self.item_pool[item][1]
-
-            placed = False
-            i = 0
             for dest in to_fill:
-                if not placed:
-                    region = self.item_locations[dest][0]
-                    location_type = self.item_locations[dest][1]
-                    filled = self.item_locations[dest][2]
-                    restrictions = self.item_locations[dest][4]
-                    if not filled and self.are_item_loc_pooled(item,dest) and item not in restrictions:
-                        if not accessible or region != INACCESSIBLE:
-                            if self.fill_item(item, dest, False, False):
-                                to_fill.remove(dest)
-                                placed = True
+                region = self.item_locations[dest][0]
+                filled = self.item_locations[dest][2]
+                restrictions = self.item_locations[dest][4]
+                if not filled and self.are_item_loc_pooled(item,dest) and item not in restrictions:
+                    if not accessible or region != INACCESSIBLE:
+                        if self.fill_item(item, dest, False, False):
+                            to_fill.remove(dest)
+                            break
 
         return True
 
@@ -739,7 +733,7 @@ class World:
         # Lock the DS that covers the greatest number of remaining F nodes, breaking ties randomly
         while freedan_required_nodes and f_nodes_under_ds_node:
             lock_node = max(f_nodes_under_ds_node, key=lambda ds_node : len(freedan_required_nodes.intersection(f_nodes_under_ds_node[ds_node]))+random.random() )
-            lock_loc = next(loc for loc in self.item_locations if self.item_locations[loc][0] == lock_node)
+            lock_loc = next(loc for loc in self.item_locations if self.item_locations[loc][0] == lock_node and self.item_locations[loc][1] == 2)
             self.item_locations[lock_loc][2] = True   # Mark the DS as occupied, remove it from the pool, and clear its contents if any
             if self.item_locations[lock_loc][3]:
                 self.unfill_item(lock_loc)
@@ -1391,13 +1385,20 @@ class World:
                 self.link_exits(414,414,False)
                 self.link_exits(415,415,False)
 
-        # Coupled Dungeon Chaos uses a special algorithm to build the dungeon
+        # Coupled dungeon shuffles need special handling
         if self.dungeon_shuffle == "Chaos" and self.entrance_shuffle != "Uncoupled":
             # Link Pyramid room-pairs as in vanilla, reducing Pymd corridor count from 13 to 6.
             dc_exits_within_pyramid_rooms = [638, 644, 650, 656, 658, 664, 670]
             for exitnum in dc_exits_within_pyramid_rooms:
                 self.join_exits(exitnum, self.exits[exitnum][0])
             self.shuffle_chaos_dungeon()
+        elif self.dungeon_shuffle == "Basic" and self.entrance_shuffle != "Uncoupled":
+            # Ensure DS access for the top of rooms 3A and 5A
+            db_exits_from_freedan_rooms = [649, 663]
+            db_exits_from_pymd_branch = [636, 642, 648, 654, 662, 668]
+            random.shuffle(db_exits_from_pymd_branch)
+            self.join_exits(db_exits_from_freedan_rooms[0], db_exits_from_pymd_branch[0])
+            self.join_exits(db_exits_from_freedan_rooms[1], db_exits_from_pymd_branch[1])
             
         # If using a coupled shuffle, map one-way exits to one-way dests
         exit_log = []

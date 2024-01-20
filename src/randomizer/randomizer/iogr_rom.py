@@ -710,7 +710,6 @@ class Randomizer:
             self.w = World(settings, statues_required, statues, statue_req, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
             done = self.w.randomize(seed_adj,PRINT_LOG)
             seed_adj += 1
-        #breakpoint()
         self.w.generate_spoiler(VERSION)
         self.w.populate_asar_defines()
         for wdef in self.w.asar_defines:
