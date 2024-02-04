@@ -2,6 +2,209 @@ arch 65816
 hirom
 table "table_dialogue.txt",rtl
 
+; Pseudo-opcode notes for the curious:
+; db $C0    ; prompts, clears, and returns (as $D0,$C8,$CA)
+; db $C1 : db PosX, PosY    ; box position, minimum 1,1
+; db $C2 : db TemplateId    ; includes the referenced template from pointers at $81CA95
+; db $C3 : db NewPal        ; changes the text palette
+; db $C4    ; hangs the game. In the J version this scrolled the text forward.
+; db $C5 : dw AddrOfPtrList, AddrOfIndex    ; indexed include, addrs in the same bank as the text
+; db $C6 : dw NumDigits, AddrOfNumber    ; draws a bytewise little-endian number
+; db $C7 : db SizeX, SizeY    ; sets box size; SizeY is measured in lines of text
+; db $C8    ; clears the screen
+; db $C9 : db Delay    ; one-time delay
+; db $CA    ; return to caller
+; db $CB    ; newline (i.e. CRLF)
+; db $CC : db SkipSize       ; advance cursor by SkipSize/2 letters
+; db $CD : dl IncludeAddr    ; long include
+; db $CE    ; page advance, i.e. clear box and return "cursor" to upper-left
+; db $CF    ; pause awaiting input and then advance page (as $D0,$CE)
+; db $D0    ; pause awaiting input
+; db $D1 : dw JumpAddr    ; jump within bank
+; db $D2 : db SoundId    ; sets sound
+; db $D3    ; draw default dialogue box with default palette, sound, and speed
+; db $D4 : db PalWord : dw NewValue    ; set text color; generally should set words $11 (text center) and $12 (text top+bottom) then run $C3,$04
+; db $D5 : db SetDelay    ; sets delay between drawing letters; 0 isn't instantaneous, so to draw all at once, use $D3, not $D5
+; db $D6 : db DictIndex   ; include text from dictionary indexed at $81eba8
+; db $D7 : db DictIndex   ; include text from dictionary indexed at $81f54d
+; db $D8 : db Char1,<Char2,...>,$00    ; draw characters, ignoring opcodes; used for drawing characters $C0 and above
+
+
+
+TextJewelerImHolding:
+db "I have_" : db $c6 : dw $0002, $0ab0 : db "_Jewels,",$cb
+db "one for each of ya."
+db $ca
+
+TextJewelerMainMenu:
+db "What did you ever want?",$cb
+db "_Just wanted to see you",$cb
+db "_Give you Red Jewels",$cb
+db "_See your inventory"
+db $ca
+
+TextJewelerGoodbye:
+db "Forgive me if I don't",$cb
+db "shake hands."
+db $ca
+
+TextJewelerGiveZeroJewels:
+db "I apologize, I forgot you",$cb
+db "were there. You may go",$cb
+db "now."
+db $ca
+
+TextJewelerYourInvFull:
+db "Maybe poker's just not",$cb
+db "your game, Ike."
+db $ca
+
+TextJewelerGetSecrets:
+db "You're no daisy! You're",$cb
+db "no daisy at all!"
+db $ca
+
+TextJewelerSeeInventory:
+db "You're a daisy if you do."
+db $ca
+
+
+TextMoonTribeHealUs:
+db "Moon Tribe:",$cb
+db "Heal us...",$cb
+db "The Teapot..."
+db $ca
+
+
+TextNativesHaveNoFood:
+db "He looks hungry...",$cb
+db "You want to give him",$cb
+db "some food?"
+db $ca
+
+TextNativesOfferWarp:
+db "Let him guide you to Dao?",$cb
+db "_No",$cb
+db "_Yes"
+db $ca
+
+TextNativesRequestFood:
+db "He points frantically",$cb
+db "to your pack, then to",$cb
+db "his mouth."
+db $CF
+db $CE
+db "Give him the roast?",$cb
+db "_No",$cb
+db "_Yes"
+db $ca
+
+
+TextWatBrightRoomIntro:
+db "Setting one foot inside,",$cb
+db "the floating crystal",$cb
+db "started to glow!"
+db $ca
+
+
+TextWatermiaOfferTravel:
+db "Do you own one of these",$cb
+db "Kruks? You'll need one",$cb
+db "to go to Euro.",$cb
+db "_No" : db $CC,$14 : db "Yes"
+db $ca
+
+
+TextAngelVillageSign:
+db $CB
+db "____- Passage to Mu -",$cb
+db "___Beware of vampires"
+db $ca
+
+
+TextSeaPalaceRightCoffinNoLilly:
+db $c2 : db $00
+db "Will: The coffins are",$cb
+db "lined up..."
+db $c3 : db $00
+db $ca
+
+
+TextNeilCantTravel:
+db "Neil: Hey, Will! I'd love",$CB
+db "to take you up in my",$CB
+db "plane, but..."
+db $CF
+db "Actually, I forgot how",$CB
+db "to fly it!"
+db $ca
+
+TextNeilOfferTravel:
+db "Where'd you like to go?",$cb
+db "_Quit________Neil's",$CB
+db "_Euro________Babel Tower",$CB
+db "_Dao"
+db $ca
+
+
+TextErikNoTravel:
+db "Erik: I can hear Seth",$cb
+db "from this cave, but I",$cb
+db "don't know Morse Code."
+db $ca
+
+TextErikFirstTravel:
+db "Erik: Oh great, you know",$cb
+db "Morse Code? Let's see",$cb
+db "what Seth is saying!"
+db $CF
+db $CE
+db $C2,$0A
+db $C2,$05
+db $D5,$00
+db "Seth: Will, I can take",$cb
+db "you across the sea..."
+db $ca
+
+TextErikOfferTravel:
+db "Where'd you like to go?",$cb
+db "_Quit________Diamond Coast",$cb
+db "_Watermia____South Cape"
+db $ca
+
+
+TextEdwardGoToJail:
+db "Go to jail.",$cb
+db "Go directly to jail."
+db $CF
+db "Do not pass Go.",$cb
+db "Do not collect 200",$cb
+db "dollars."
+db $ca
+
+TextEdwardJailedPerson:
+db "Please... tell",$cb
+db "SmashManiac I'm waiting",$cb
+db "for him..."
+db $ca
+
+
+TextGiveLillyNecklace:
+db "Lilly: Oh, you found my",$cb
+db "necklace! Thank you so",$cb
+db "much!"
+db $CF
+db $CE
+db $C2,$02
+db "Let me join you, I may be"
+db $CB
+db "of help down the road!"
+db $ca
+
+
+
+
+
 TextPyramidWarpNotUnlocked:
 db $d3
 db "For some reason, you",$cb
@@ -16,12 +219,16 @@ db "use these portals.)"
 db $ca
 
 TextPyramidOfferWarp:
-db $C2,$0B,$64,$87,$84,$AC,$D7,$58,$A4,$8E,$AC,$A4,$87,$84,$AC,$60,$A9,$A2,$80,$8C,$88,$83,$CB,$80,$A0,$A0,$84,$80,$A2,$A3,$AC,$88,$8D,$AC,$A4,$87,$84,$AC,$8B,$88,$86,$87,$A4,$2A,$2A,$2A,$CB,$AC,$61,$A5,$88,$A4,$CB,$AC,$49,$A5,$8C,$A0,$AC,$88,$8D,$CA
+db $C2,$0B
+db "The door to the Pyramid",$cb
+db "appears in the light...",$cb
+db "_Ignore it",$cb
+db "_Jump in"
+db $ca
 
 
 TextLongShadowsFormUnlocked:
-db $d6,$4c  ; "Shadow's "
-db "form unlocked!"
+db "Shadow's form unlocked!"
 db $ca
 
 
@@ -38,7 +245,8 @@ db $cd : dl TextUsedRedJewelRJM
 db $ca
 else
 db $D3
-db $22,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F
+db "Two Jewels were sent",$cb
+db "to the Jeweler!"
 db $ca
 endif
 
@@ -48,11 +256,10 @@ db $cd : dl TextUsedRedJewelRJM
 db $ca
 else
 db $D3
-db $23,$AC,$D6,$22,$D6,$F2,$A3,$84,$8D,$A4,$AC,$A4,$8E,$CB,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$4F
+db "Three Jewels were sent",$cb
+db "to the Jeweler!"
 db $ca
 endif
-
-
 
 TextUsedHerbOverflow:
 if !SettingOHKO == 1
@@ -118,13 +325,25 @@ db $CE,$41,$44,$40,$64,$48,$4D,$46,$AC,$64,$47,$44,$AC,$46,$40,$4C,$44,$2F,$AC,$
 TextBlueJournalOption1RJH:
 db $CE,$41,$44,$40,$64,$48,$4D,$46,$AC,$64,$47,$44,$AC,$46,$40,$4C,$44,$2F,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$D6,$1D,$80,$AC,$62,$84,$83,$AC,$49,$84,$A7,$84,$8B,$AC,$87,$A5,$8D,$A4,$4F,$AC,$CB,$64,$87,$84,$AC,$8E,$81,$89,$84,$82,$A4,$88,$A6,$84,$AC,$88,$A3,$AC,$A3,$A5,$A0,$84,$A2,$AC,$CB,$A3,$88,$8C,$A0,$8B,$84,$2F,$CF,$45,$88,$8D,$83,$AC,$A4,$87,$84,$AC,$62,$84,$83,$AC,$D6,$22,$A9,$8E,$A5,$AC,$CB,$8D,$84,$84,$83,$AB,$AC,$80,$8D,$83,$AC,$D7,$AC,$A4,$8E,$AC,$A4,$87,$84,$AC,$CB,$49,$84,$A7,$84,$8B,$84,$A2,$2A,$AC,$D6,$53,$88,$A4,$4F,$CF,$42,$87,$84,$82,$8A,$AC,$A4,$87,$84,$AC,$49,$84,$A7,$84,$8B,$84,$A2,$0E,$A3,$AC,$CB,$D6,$A0,$A4,$8E,$AC,$D6,$90,$8E,$A5,$A4,$AC,$87,$8E,$A7,$AC,$CB,$D6,$B6,$62,$84,$83,$AC,$D6,$22,$A9,$8E,$A5,$AC,$D6,$BA,$CB,$A4,$8E,$AC,$81,$84,$80,$A4,$AC,$A4,$87,$84,$AC,$86,$80,$8C,$84,$2A,$CF,$47,$80,$A0,$A0,$A9,$AC,$87,$A5,$8D,$A4,$88,$8D,$86,$4F,$CA
 
-
 TextBlueJournalOption2:
 db $CE,$44,$68,$60,$4B,$4E,$62,$48,$4D,$46,$AC,$64,$47,$44,$AC,$67,$4E,$62,$4B,$43,$2F,$AC,$AC,$AC,$AC,$CB,$D6,$61,$A9,$8E,$A5,$AC,$A3,$A4,$80,$A2,$A4,$AC,$A4,$87,$84,$AC,$86,$80,$8C,$84,$AB,$AC,$CB,$A9,$8E,$A5,$AC,$D7,$89,$D6,$98,$80,$82,$82,$84,$A3,$A3,$AC,$A4,$8E,$AC,$80,$AC,$CB,$85,$84,$A7,$AC,$8B,$8E,$82,$80,$A4,$88,$8E,$8D,$A3,$2A,$CF,$40,$A3,$AC,$A9,$8E,$A5,$AC,$86,$80,$88,$8D,$AC,$D6,$B7,$88,$A4,$84,$8C,$A3,$AB,$AC,$CB,$A9,$8E,$A5,$AC,$D6,$EF,$81,$84,$AC,$80,$81,$8B,$84,$AC,$A4,$8E,$AC,$A6,$88,$A3,$88,$A4,$AC,$CB,$D6,$BD,$82,$8E,$8D,$A4,$88,$8D,$84,$8D,$A4,$A3,$AC,$80,$8D,$83,$AC,$CB,$80,$82,$82,$84,$A3,$A3,$AC,$D6,$B7,$8B,$8E,$82,$80,$A4,$88,$8E,$8D,$A3,$2A,$CF,$47,$84,$A2,$84,$AC,$80,$A2,$84,$AC,$D6,$D0,$8E,$85,$AC,$A4,$87,$84,$AC,$CB,$87,$84,$8B,$A0,$85,$A5,$8B,$AC,$A4,$A2,$80,$A6,$84,$8B,$AC,$88,$A4,$84,$8C,$A3,$AC,$A9,$8E,$A5,$AC,$CB,$82,$80,$8D,$AC,$D6,$90,$88,$8D,$AC,$A4,$87,$84,$AC,$86,$80,$8C,$84,$2F,$CF,$6D,$AC,$D6,$2D,$4B,$84,$A4,$A4,$84,$A2,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$48,$85,$AC,$A9,$8E,$A5,$AC,$D6,$90,$D6,$D6,$8B,$84,$A4,$A4,$84,$A2,$AB,$AC,$CB,$A2,$84,$80,$83,$AC,$88,$A4,$AC,$80,$8D,$83,$AC,$86,$8E,$AC,$A3,$84,$84,$AC,$44,$A2,$88,$8A,$AC,$CB,$88,$8D,$AC,$D6,$47,$42,$80,$A0,$84,$2A,$CF,$6D,$AC,$64,$87,$84,$AC,$64,$84,$80,$A0,$8E,$A4,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$48,$85,$AC,$A9,$8E,$A5,$AC,$A5,$A3,$84,$AC,$A4,$87,$84,$AC,$64,$84,$80,$A0,$8E,$A4,$AC,$88,$8D,$AC,$CB,$A4,$87,$84,$AC,$D6,$31,$64,$A2,$88,$81,$84,$AC,$82,$80,$8C,$A0,$AB,$AC,$A9,$8E,$A5,$AC,$CB,$82,$80,$8D,$AC,$A4,$A2,$80,$A6,$84,$8B,$AC,$81,$A9,$AC,$63,$8A,$A9,$AC,$46,$80,$A2,$83,$84,$8D,$2A,$CF,$6D,$AC,$D7,$1D,$D6,$34,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$D7,$27,$D6,$D6,$D6,$B4,$88,$8D,$AC,$CB,$D6,$37,$42,$8E,$A4,$A4,$80,$86,$84,$AB,$AC,$80,$8D,$83,$AC,$87,$84,$0E,$8B,$8B,$AC,$CB,$85,$8B,$A9,$AC,$A9,$8E,$A5,$AC,$88,$8D,$AC,$87,$88,$A3,$AC,$80,$88,$A2,$A0,$8B,$80,$8D,$84,$2A,$CF,$6D,$AC,$64,$87,$84,$AC,$67,$88,$8B,$8B,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$D7,$37,$D6,$D6,$83,$8E,$82,$A5,$8C,$84,$8D,$A4,$AC,$A4,$8E,$AC,$A4,$87,$84,$AC,$CB,$A3,$A4,$80,$81,$8B,$84,$AC,$8C,$80,$A3,$A4,$84,$A2,$A3,$AC,$88,$8D,$AC,$84,$88,$A4,$87,$84,$A2,$AC,$CB,$67,$80,$A4,$84,$A2,$8C,$88,$80,$AC,$8E,$A2,$AC,$44,$A5,$A2,$8E,$2A,$CF,$6D,$AC,$64,$87,$84,$AC,$4B,$80,$A2,$86,$84,$AC,$62,$8E,$80,$A3,$A4,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$46,$88,$A6,$84,$AC,$D6,$D6,$A4,$8E,$AC,$A4,$87,$84,$AC,$87,$A5,$8D,$86,$A2,$A9,$AC,$CB,$82,$87,$88,$8B,$83,$AC,$88,$8D,$AC,$A4,$87,$84,$AC,$4D,$80,$A4,$88,$A6,$84,$A3,$0E,$AC,$CB,$66,$88,$8B,$8B,$80,$86,$84,$2A,$CF,$48,$85,$AC,$D6,$FF,$D7,$5D,$A3,$A4,$A5,$82,$8A,$AC,$88,$8D,$AC,$80,$AC,$CB,$8B,$8E,$82,$80,$A4,$88,$8E,$8D,$AB,$AC,$D6,$90,$80,$AC,$D6,$0C,$CB,$63,$A0,$80,$82,$84,$2A,$AC,$46,$80,$88,$80,$AC,$82,$80,$8D,$AC,$D7,$44,$CB,$A2,$84,$A4,$A5,$A2,$8D,$AC,$A9,$8E,$A5,$AC,$A4,$8E,$AC,$D6,$47,$42,$80,$A0,$84,$2A,$CA
 
 TextBlueJournalOption3:
 db $CE,$67,$47,$40,$64,$AC,$48,$45,$AC,$48,$0E,$4C,$AC,$63,$64,$65,$42,$4A,$0D,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$D6,$52,$80,$A2,$84,$AC,$80,$AC,$8B,$8E,$A4,$AC,$8E,$85,$AC,$88,$A4,$84,$8C,$AC,$CB,$8B,$8E,$82,$80,$A4,$88,$8E,$8D,$A3,$AC,$88,$8D,$AC,$D6,$D6,$86,$80,$8C,$84,$4F,$AC,$CB,$D6,$1D,$84,$80,$A3,$A9,$AC,$A4,$8E,$AC,$86,$84,$A4,$AC,$A3,$A4,$A5,$82,$8A,$2A,$CF,$47,$84,$A2,$84,$AC,$80,$A2,$84,$AC,$D6,$D0,$A2,$84,$A3,$8E,$A5,$A2,$82,$84,$A3,$AC,$CB,$D6,$D7,$8C,$88,$86,$87,$A4,$AC,$87,$84,$8B,$A0,$AC,$A9,$8E,$A5,$2F,$CF,$6D,$AC,$66,$88,$83,$84,$8E,$AC,$64,$A5,$A4,$8E,$A2,$88,$80,$8B,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$63,$84,$80,$A2,$82,$87,$AC,$69,$8E,$A5,$64,$A5,$81,$84,$AC,$85,$8E,$A2,$AC,$80,$AC,$CB,$A6,$88,$83,$84,$8E,$AC,$86,$A5,$88,$83,$84,$AC,$8E,$85,$AC,$D6,$D6,$CB,$A2,$80,$8D,$83,$8E,$8C,$88,$AA,$84,$A2,$2A,$CF,$6D,$AC,$44,$8C,$8E,$64,$A2,$80,$82,$8A,$84,$A2,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$43,$8E,$A7,$8D,$8B,$8E,$80,$83,$AC,$A4,$87,$84,$AC,$48,$8E,$46,$62,$AC,$CB,$A0,$80,$82,$8A,$80,$86,$84,$2A,$AC,$48,$8D,$82,$8B,$A5,$83,$84,$A3,$AC,$80,$AC,$8C,$80,$A0,$AC,$CB,$A4,$A2,$80,$82,$8A,$84,$A2,$4F,$CF,$6D,$AC,$40,$A3,$8A,$AC,$A4,$87,$84,$AC,$42,$8E,$8C,$8C,$A5,$8D,$88,$A4,$A9,$AC,$AC,$AC,$AC,$AC,$CB,$45,$88,$8D,$83,$AC,$A4,$87,$84,$AC,$48,$8E,$46,$62,$AC,$82,$8E,$8C,$8C,$A5,$8D,$88,$A4,$A9,$AC,$CB,$8E,$8D,$AC,$43,$88,$A3,$82,$8E,$A2,$83,$4F,$AC,$D6,$4D,$D6,$EF,$CB,$81,$84,$AC,$87,$80,$A0,$A0,$A9,$AC,$A4,$8E,$AC,$87,$84,$8B,$A0,$AC,$A9,$8E,$A5,$2A,$CF,$6D,$AC,$4C,$80,$A0,$AC,$47,$8E,$A5,$A3,$84,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$44,$8D,$A4,$84,$A2,$AC,$A4,$87,$84,$AC,$84,$80,$A3,$A4,$6D,$8C,$8E,$A3,$A4,$AC,$D7,$70,$CB,$88,$8D,$AC,$D6,$47,$42,$80,$A0,$84,$AC,$A4,$8E,$AC,$82,$87,$84,$82,$8A,$AC,$CB,$D6,$FE,$82,$8E,$8B,$8B,$84,$82,$A4,$88,$8E,$8D,$AC,$A2,$80,$A4,$84,$2A,$CF,$6D,$AC,$63,$A0,$8E,$88,$8B,$84,$A2,$AC,$4B,$8E,$86,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$CB,$44,$A6,$84,$A2,$A9,$AC,$A3,$84,$84,$83,$AC,$82,$8E,$8C,$84,$A3,$AC,$D6,$F0,$80,$AC,$CB,$83,$84,$A4,$80,$88,$8B,$84,$83,$AC,$D7,$7C,$8E,$85,$AC,$D6,$F4,$CB,$84,$A6,$84,$A2,$A9,$AC,$88,$A4,$84,$8C,$AC,$82,$80,$8D,$AC,$81,$84,$AC,$85,$8E,$A5,$8D,$83,$2A,$CA
 
+TextUseApple:
+db "Great an apple."
+db $ca
+
+TextUseLolasLetter:
+db "Will, I heard you need to",$cb
+db "learn Morse Code. Bill",$cb
+db "knows it, I've enclosed",$cb
+db "his explanation. -Lola"
+db $CF
+db $C3,$00
+db "You now know Morse Code!"
+db $ca
 
 
 TextRoofWarpingWomanAskChoice:

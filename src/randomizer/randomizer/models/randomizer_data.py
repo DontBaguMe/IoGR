@@ -4,25 +4,30 @@ from .enums.difficulty import Difficulty
 from .enums.goal import Goal
 from .enums.statue_req import StatueReq
 from .enums.logic import Logic
-from .enums.entrance_shuffle import EntranceShuffle
 from .enums.dungeon_shuffle import DungeonShuffle
 from .enums.orb_rando import OrbRando
 from .enums.darkrooms import DarkRooms
 from .enums.enemizer import Enemizer
 from .enums.start_location import StartLocation
 from .enums.sprites import Sprite
-#from .enums.level import Level
 
 
 class RandomizerData:
-    def __init__(self, seed: int = random.randint(0, 999999999),
+    def __init__(self, 
+                 seed: int = random.randint(0, 999999999),
                  difficulty: Difficulty = Difficulty.NORMAL, 
                  goal: Goal = Goal.DARK_GAIA, 
                  logic: Logic = Logic.COMPLETABLE,
                  statues: str = "4", 
                  statue_req: StatueReq = StatueReq.GAME_CHOICE, 
-                 enemizer: Enemizer = Enemizer.NONE,
                  start_location: StartLocation = StartLocation.SOUTH_CAPE, 
+                 enemizer: Enemizer = Enemizer.NONE,
+                 coupled_exits : bool = False,
+                 town_shuffle : bool = False,
+                 dungeon_shuffle: DungeonShuffle = DungeonShuffle.NONE,
+                 overworld_shuffle: bool = False,
+                 orb_rando: OrbRando = OrbRando.NONE,
+                 darkrooms: DarkRooms = DarkRooms.NONE,
                  firebird: bool = False, 
                  ohko: bool = False,
                  red_jewel_madness: bool = False, 
@@ -30,14 +35,9 @@ class RandomizerData:
                  boss_shuffle: bool = False,
                  open_mode: bool = False, 
                  z3: bool = False, 
-                 overworld_shuffle: bool = False,
-                 entrance_shuffle: EntranceShuffle = EntranceShuffle.NONE, 
                  race_mode: bool = False, 
                  fluteless: bool = False,
-                 sprite: Sprite = Sprite.WILL, 
-                 dungeon_shuffle: DungeonShuffle = DungeonShuffle.NONE,
-                 orb_rando: OrbRando = OrbRando.NONE,
-                 darkrooms: DarkRooms = DarkRooms.NONE
+                 sprite: Sprite = Sprite.WILL
                  ):
         self.seed = seed
         self.difficulty = difficulty
@@ -53,14 +53,14 @@ class RandomizerData:
         self.red_jewel_madness = red_jewel_madness
         self.allow_glitches = allow_glitches
         self.boss_shuffle = boss_shuffle
+        self.coupled_exits = coupled_exits
+        self.town_shuffle = town_shuffle
         self.overworld_shuffle = overworld_shuffle
         self.dungeon_shuffle = dungeon_shuffle
         self.orb_rando = orb_rando
         self.darkrooms = darkrooms
         self.open_mode = open_mode
         self.z3 = z3
-        self.overworld_shuffle = overworld_shuffle
-        self.entrance_shuffle = entrance_shuffle
         self.race_mode = race_mode
         self.fluteless = fluteless
         self.sprite = sprite

@@ -4,17 +4,17 @@ import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
 import random
+import zipfile
 
 from randomizer.iogr_rom import generate_filename
 from randomizer.models.enums.difficulty import Difficulty
-#from randomizer.models.enums.level import Level
 from randomizer.models.enums.enemizer import Enemizer
 from randomizer.models.enums.goal import Goal
 from randomizer.models.enums.statue_req import StatueReq
 from randomizer.models.enums.logic import Logic
 from randomizer.models.enums.sprites import Sprite
 from randomizer.models.enums.entrance_shuffle import EntranceShuffle
-from randomizer.models.enums.dungeon_shuffle import DungeonShuffle
+#from randomizer.models.enums.dungeon_shuffle import DungeonShuffle
 from randomizer.models.enums.orb_rando import OrbRando
 from randomizer.models.enums.darkrooms import DarkRooms
 from randomizer.models.enums.start_location import StartLocation
@@ -185,18 +185,38 @@ def generate_ROM():
 
     try:
         seed_int = int(seed_str)
-        settings = RandomizerData(seed_int, get_difficulty(), get_goal(), get_logic(), statues.get(), get_statue_req(), get_enemizer(), get_start_location(),
-            firebird.get(), ohko.get(), red_jewel_madness.get(), glitches.get(), boss_shuffle.get(), open_mode.get(), z3_mode.get(),
-            overworld_shuffle.get(), get_entrance_shuffle(), race_mode_toggle.get(), fluteless.get(), get_sprite(),
-            get_dungeon_shuffle(), get_orb_rando(), get_darkrooms())
+        settings = RandomizerData(
+            seed = seed_int, 
+            difficulty = get_difficulty(), 
+            goal = get_goal(), 
+            logic = get_logic(), 
+            statues = statues.get(), 
+            statue_req = get_statue_req(), 
+            start_location = get_start_location(),
+            enemizer = get_enemizer(), 
+            firebird = firebird.get(), 
+            ohko = ohko.get(), 
+            red_jewel_madness = red_jewel_madness.get(), 
+            allow_glitches = glitches.get(), 
+            boss_shuffle = boss_shuffle.get(), 
+            open_mode = open_mode.get(), 
+            z3 = z3_mode.get(),
+            coupled_exits = coupled_exits.get(),
+            town_shuffle = town_shuffle.get(),
+            dungeon_shuffle = dungeon_shuffle.get(), 
+            overworld_shuffle = overworld_shuffle.get(), 
+            race_mode = race_mode_toggle.get(), 
+            fluteless = fluteless.get(), 
+            sprite = get_sprite(),
+            orb_rando = get_orb_rando(), 
+            darkrooms = get_darkrooms()
+            )
 
         rom_filename = generate_filename(settings, "sfc")
         asm_filename = generate_filename(settings, "asr")
         spoiler_filename = generate_filename(settings, "json")
-        graph_viz_filename = generate_filename(settings, "png")
 
         randomizer = Randomizer(rompath)
-
         patch = randomizer.generate_rom(rom_filename, settings)
 
         if not patch[0]:
@@ -208,9 +228,6 @@ def generate_ROM():
                 write_spoiler(spoiler, spoiler_filename, rompath)
                 asm_dump = randomizer.generate_asm_dump()
                 write_asm_dump(asm_dump, asm_filename, rompath)
-                if graph_viz_toggle.get():
-                    graph_viz = randomizer.generate_graph_visualization()
-                    write_graph_viz(graph_viz, graph_viz_filename, rompath)
             tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
         tkinter.messagebox.showerror("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
@@ -230,13 +247,6 @@ def write_asm_dump(asm_dump, filename, rom_path):
     f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w+")
     f.write(asm_dump)
     f.close()
-
-
-def write_graph_viz(graph_viz, filename, rom_path):
-    import os
-    if "Graphviz" in os.environ['PATH']:
-        graph_viz.format = 'png'
-        graph_viz.render(os.path.dirname(rom_path) + os.path.sep + filename, view="False")
 
 
 def sort_patch(val):
@@ -305,18 +315,18 @@ def start_help():
              "UNSAFE:", " - You start the game in front of a random Dark Space, could be in a town or a dungeon", "",
              "FORCED UNSAFE:", " - You're guaranteed to start the game in the middle of a dungeon"]
     tkinter.messagebox.showinfo("Start Location", "\n".join(lines))
+    
+def overworld_shuffle_help():
+    lines = ["Overworld Shuffle randomizes which overworld-connected rooms are on each continent for overworld travel."]
+    tkinter.messagebox.showinfo("Overworld Shuffle", "\n".join(lines))
 
 def entrance_shuffle_help():
-    lines = ["Overworld Shuffle randomizes which overworld maps are on each continent for overworld travel.",
+    lines = ["Town Shuffle randomizes doors and other transitions outside of dungeons.",
+             "Dungeon Shuffle randomizes transitions within dungeons.",
              "",
-             "Entrance Shuffle randomizes doors and other transitions outside of dungeons.",
-             " - Coupled: Doors and exits are reversible, i.e. if you backtrack through an exit you'll return to where you entered.",
-             " - Uncoupled: Backtracking generally will not return you to the room you came from.",
-             "",
-             "Dungeon Shuffle randomizes transitions within dungeons. Transitions are reversible unless non-dungeon Entrance Shuffle is enabled and set as Uncoupled.",
-             " - Basic: Dungeon rooms only connect to other rooms from the same dungeon.",
-             " - Chaos: All dungeon rooms are shuffled and connected randomly."]
-    tkinter.messagebox.showinfo("Room and Map Shuffles", "\n".join(lines))
+             "Coupled transitions are reversible: after taking an exit, you can backtrack through the paired exit on the other side.",
+             "If coupling is turned off, backtracking generally won't return you to the room you came from."]
+    tkinter.messagebox.showinfo("Transition Shuffles", "\n".join(lines))
     
 def orb_rando_help():
     lines = ["Randomizes the orbs that open doors and barriers, that are produced when some monsters are destroyed.",
@@ -338,6 +348,13 @@ def dr_maybe_set_cursed(drlevel):
         darkrooms_cursed.set(1)
     else:
         darkrooms_cursed_checkbox.config(state='normal')
+
+def er_maybe_force_coupled():
+    if not dungeon_shuffle.get() and not town_shuffle.get():
+        coupled_exits.set(1)
+        coupled_exits_checkbox.config(state='disabled')
+    else:
+        coupled_exits_checkbox.config(state='normal')
 
 def checkbox_clear_rjm():
     red_jewel_madness.set(0)
@@ -377,10 +394,9 @@ tkinter.Label(mainframe, text="Gameplay Variants").grid(row=7, column=0, sticky=
 tkinter.Label(mainframe, text="Enemizer").grid(row=9, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Overworld Shuffle").grid(row=16, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=17, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=18, column=0, sticky=tkinter.W)
+#tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=18, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Orb Rando").grid(row=20, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Dark Rooms").grid(row=22, column=0, sticky=tkinter.W)
-tkinter.Label(mainframe, text="Generate graph").grid(row=24, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -422,13 +438,21 @@ z3_mode.set(0)
 overworld_shuffle = tkinter.IntVar(root)
 overworld_shuffle.set(0)
 
-entrance_shuffle = tkinter.StringVar(root)
-entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
-entrance_shuffle.set("None")
+#entrance_shuffle = tkinter.StringVar(root)
+#entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
+#entrance_shuffle.set("None")
 
-dungeon_shuffle = tkinter.StringVar(root)
-dungeon_shuffle_choices = ["None", "Basic", "Chaos"]
-dungeon_shuffle.set("None")
+coupled_exits = tkinter.IntVar(root)
+coupled_exits.set(1)
+
+town_shuffle = tkinter.IntVar(root)
+town_shuffle.set(0)
+
+#dungeon_shuffle = tkinter.StringVar(root)
+#dungeon_shuffle_choices = ["None", "Basic", "Chaos"]
+#dungeon_shuffle.set("None")
+dungeon_shuffle = tkinter.IntVar(root)
+dungeon_shuffle.set(0)
 
 orb_rando = tkinter.StringVar(root)
 orb_rando_choices = ["None", "Basic", "Orbsanity"]
@@ -439,9 +463,6 @@ darkrooms_level_choices = ["None", "Few", "Some", "Many", "All"]
 darkrooms_level.set("None")
 darkrooms_cursed = tkinter.IntVar(root)
 darkrooms_cursed.set(0)
-
-graph_viz_toggle = tkinter.IntVar(root)
-graph_viz_toggle.set(0)
 
 race_mode_toggle = tkinter.IntVar(root)
 race_mode_toggle.set(0)
@@ -517,8 +538,20 @@ boss_shuffle_label = tkinter.Label(enemy_rando_frame, text="Boss shuffle:").pack
 boss_shuffle_checkbox = tkinter.Checkbutton(enemy_rando_frame, variable=boss_shuffle, onvalue=1, offvalue=0).pack(side='left')
 
 overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(row=16, column=1)
-entrance_shuffle_menu = tkinter.OptionMenu(mainframe, entrance_shuffle, *entrance_shuffle_choices).grid(row=17, column=1)
-dungeon_shuffle_menu = tkinter.OptionMenu(mainframe, dungeon_shuffle, *dungeon_shuffle_choices).grid(row=18, column=1)
+
+er_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
+er_frame.grid(row=17, column=1)
+er_frame.columnconfigure(0, weight=1)
+er_frame.rowconfigure(0, weight=1)
+town_shuffle_label = tkinter.Label(er_frame, text="Towns:").grid(row=0, column=0, sticky=tkinter.E)
+town_shuffle_checkbox = tkinter.Checkbutton(er_frame, variable=town_shuffle, onvalue=1, offvalue=0, command=er_maybe_force_coupled).grid(row=0, column=1)
+dungeon_shuffle_label = tkinter.Label(er_frame, text="Dungeons:").grid(row=1, column=0, sticky=tkinter.E)
+dungeon_shuffle_checkbox = tkinter.Checkbutton(er_frame, variable=dungeon_shuffle, onvalue=1, offvalue=0, command=er_maybe_force_coupled).grid(row=1, column=1)
+coupled_exits_label = tkinter.Label(er_frame, text="Coupled:").grid(row=0, column=3, rowspan=2, sticky=tkinter.E)
+coupled_exits_checkbox = tkinter.Checkbutton(er_frame, variable=coupled_exits, onvalue=1, offvalue=0)
+coupled_exits_checkbox.grid(row=0, column=4, rowspan=2, sticky=tkinter.W)
+coupled_exits_checkbox.config(state='disabled')
+
 orb_rando_menu = tkinter.OptionMenu(mainframe, orb_rando, *orb_rando_choices).grid(row=20, column=1)
 darkrooms_frame = tkinter.Frame(mainframe, borderwidth=1)
 darkrooms_frame.grid(row=22, column=1)
@@ -526,7 +559,6 @@ darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *dar
 darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed:").pack(side='left')
 darkrooms_cursed_checkbox = tkinter.Checkbutton(darkrooms_frame, variable=darkrooms_cursed, onvalue=1, offvalue=0)
 darkrooms_cursed_checkbox.pack(side='left')
-graph_viz_toggle_checkbox = tkinter.Checkbutton(mainframe, variable=graph_viz_toggle, onvalue=1, offvalue=0).grid(row=24, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(seed_frame, text='Random Seed', command=generate_seed).pack(side='left')
@@ -538,6 +570,7 @@ tkinter.Button(mainframe, text='?', command=goal_help).grid(row=4, column=2)
 tkinter.Button(mainframe, text='?', command=start_help).grid(row=6, column=2)
 tkinter.Button(mainframe, text='?', command=variant_help).grid(row=7, column=2)
 tkinter.Button(mainframe, text='?', command=enemizer_help).grid(row=9, column=2)
+tkinter.Button(mainframe, text='?', command=overworld_shuffle_help).grid(row=16, column=2)
 tkinter.Button(mainframe, text='?', command=entrance_shuffle_help).grid(row=17, column=2)
 tkinter.Button(mainframe, text='?', command=orb_rando_help).grid(row=20, column=2)
 tkinter.Button(mainframe, text='?', command=darkrooms_help).grid(row=22, column=2)

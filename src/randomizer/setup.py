@@ -13,10 +13,8 @@ setuptools.setup(
     author='dontbagume,bryon_w,raeven0',
     packages=setuptools.find_packages(),
     package_data={'': [
-        'bin/*.bin',
-        'bin/plugins/**/*.bin',
-        'bin/plugins/**/**/*.bin'
+        'bin/*.bin'
     ]},
-    install_requires=['bitstring', 'graphviz'],
+    install_requires=['bitstring'],
     python_requires='>=3.7'
 )

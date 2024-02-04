@@ -1,0 +1,35 @@
+arch 65816
+hirom
+
+; Generates an address for all parameters required by IOGR.
+; Addresses can be read from the symbol file after assembling.
+
+namespace Config
+
+BankAnchor:
+dw $0000
+
+macro MAddConfigAddr(ConfigName)
+<ConfigName>:
+if defined("ConfigName")
+dw !{<ConfigName>}
+else
+dw $0000
+endif
+endmacro
+
+
+
+
+
+
+namespace off
+
+
+
+
+
+
+
+
+

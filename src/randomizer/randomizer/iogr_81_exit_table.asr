@@ -1293,7 +1293,7 @@ db $FF
 db $FF
 .MapB3:
 db $77,$1F,$02,$01,!MapB3Exit01
-db $6A,$0D,$06,$02,!MapB3Exit02
+;db $6A,$0D,$06,$02,!MapB3Exit02
 db $08,$0C,$02,$01,!MapB3Exit03
 db $07,$1F,$02,$01,!MapB3Exit04
 db $FF

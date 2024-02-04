@@ -592,7 +592,7 @@ db $11,$11,$00 : dl $80EA96 : db $00
 db $03,$07,$00 : dl $89BC8B : db $00
 db $1C,$07,$00 : dl $89BCD1 : db $00
 db $1C,$07,$00 : dl $89BDB5 : db $00
-db $0B,$0B,$00 : dl $89AA40 : db $00
+db $0B,$0B,$00 : dl ECDandelionFinal-3 : db $00    ; i.e. Lilly button helper
 db $FF,$CA 
 
 ActorList_Map12:
@@ -1703,7 +1703,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $21,$41,$00 : dl $80EA96 : db $00
 db $2F,$0A,$00 : dl $868FEB : db $00
-db $2B,$0A,$00 : dl $8691AC : db $00
+db $2B,$0A,$00 : dl ESeaPLillyAtLeftCoffin-3 : db $00   ; i.e. $8691AC
 db $2A,$39,$01 : dl $868A59 : db $00
 db $1B,$3B,$23 : dl $868A59 : db $00
 db $1C,$2B,$65 : dl $868A59 : db $00
@@ -1967,7 +1967,7 @@ db $11,$11,$00 : dl $80EA96 : db $00
 db $0A,$09,!Monster01FFParam : dl !Monster01FFAddr : db !Monster01FFStats,$00,!Monster01FFItemFlag
 db $05,$09,!Monster0200Param : dl !Monster0200Addr : db !Monster0200Stats,$00,!Monster0200ItemFlag
 db $07,$11,$30 : dl $86A410 : db $00
-db $07,$12,$30 : dl $86A2BE : db $00
+;db $07,$12,$30 : dl $86A2BE : db $00    ; Erik sprite
 db $07,$22,$30 : dl $86A745 : db $00
 db $08,$22,$30 : dl $86A828 : db $00
 db $07,$23,$30 : dl $86A846 : db $00

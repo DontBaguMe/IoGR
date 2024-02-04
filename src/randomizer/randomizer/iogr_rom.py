@@ -25,25 +25,8 @@ VERSION = "4.7.0"
 MAX_RANDO_RETRIES = 100
 PRINT_LOG = -1
 
-KARA_EDWARDS = 1
-KARA_MINE = 2
-KARA_ANGEL = 3
-KARA_KRESS = 4
-KARA_ANKORWAT = 5
-
-GEMS_EASY = 35
-GEMS_NORMAL = 40
-GEMS_HARD = 45
-GEMS_EXTREME = 50
-
-GEMS_Z3_EASY = 24
-GEMS_Z3_NORMAL = 28
-GEMS_Z3_HARD = 31
-GEMS_Z3_EXTREME = 34
-
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
-AG_PLUGIN_PATH: str = BIN_PATH + "plugins" + os.path.sep + "AG" + os.path.sep
 
 os.add_dll_directory(os.getcwd()+"/src/randomizer/randomizer")    # So python can find asar.dll.
 
@@ -56,126 +39,128 @@ def __get_data_file__(data_filename: str) -> BinaryIO:
 def generate_filename(settings: RandomizerData, extension: str):
     def getDifficulty(difficulty):
         if difficulty.value == Difficulty.EASY.value:
-            return "_easy"
+            return "_E"
         if difficulty.value == Difficulty.NORMAL.value:
-            return "_normal"
+            return "_N"
         if difficulty.value == Difficulty.HARD.value:
-            return "_hard"
+            return "_H"
         if difficulty.value == Difficulty.EXTREME.value:
-            return "_extreme"
+            return "_X"
 
     def getGoal(goal, statues, statue_req):
         if goal.value is Goal.DARK_GAIA.value:
-            return "_DG" + statues[0] + getStatueReq(statue_req)
+            return "-D" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.APO_GAIA.value:
-            return "_AG" + statues[0] + getStatueReq(statue_req)
+            return "-A" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.RANDOM_GAIA.value:
-            return "_RG" + statues[0] + getStatueReq(statue_req)
+            return "-R" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.RED_JEWEL_HUNT.value:
-            return "_RJ"
+            return "-J"
 
     def getStatueReq(statue_req):
         if statue_req.value == StatueReq.PLAYER_CHOICE.value:
-            return "p"
+            return "P"
         if statue_req.value == StatueReq.RANDOM_CHOICE.value:
-            return "r"
+            return "R"
         else:
-            return ""
+            return "G"
 
     def getLogic(logic):
         if logic.value == Logic.COMPLETABLE.value:
-            return ""
+            return "C"
         if logic.value == Logic.BEATABLE.value:
-            return "_L(b)"
+            return "B"
         if logic.value == Logic.CHAOS.value:
-            return "_L(x)"
+            return "X"
 
-    def getEntranceShuffle(entrance_shuffle):
-        if entrance_shuffle.value == EntranceShuffle.COUPLED.value:
-            return "_ER"
-        if entrance_shuffle.value == EntranceShuffle.UNCOUPLED.value:
-            return "_ER(x)"
-        if entrance_shuffle.value == EntranceShuffle.NONE.value:
+    def getEntranceShuffle(coupled_exits, town_shuffle, dungeon_shuffle, overworld_shuffle):
+        if not town_shuffle and not overworld_shuffle and not dungeon_shuffle:
             return ""
- 
-    def getDungeonShuffle(dungeon_shuffle):
-        if dungeon_shuffle.value == DungeonShuffle.BASIC.value:
-            return "_dsb"
-        if dungeon_shuffle.value == DungeonShuffle.CHAOS.value:
-            return "_dsx"
-        if dungeon_shuffle.value == DungeonShuffle.NONE.value:
-            return ""
-        if dungeon_shuffle.value == DungeonShuffle.CLUSTERED.value:
-            return "_dsc"
+        affix = "_er"
+        if coupled_exits:
+            affix += "C"
+        else:
+            affix += "U"
+        affix += "-"
+        if overworld_shuffle:
+            affix += "W"
+        if town_shuffle:
+            affix += "T"
+        if dungeon_shuffle:
+            affix += "D"
+        return affix
     
     def getOrbRando(orb_rando):
         if orb_rando.value == OrbRando.BASIC.value:
-            return "_ob"
+            return "_oB"
         if orb_rando.value == OrbRando.ORBSANITY.value:
-            return "_ox"
+            return "_oX"
         return ""
     
     def getDarkRooms(darkrooms):
         if abs(darkrooms.value) == DarkRooms.NONE.value:
             return ""
         if abs(darkrooms.value) == DarkRooms.FEW.value:
-            affix = "_drf"
+            affix = "_drF"
         if abs(darkrooms.value) == DarkRooms.SOME.value:
-            affix = "_drs"
+            affix = "_drS"
         if abs(darkrooms.value) == DarkRooms.MANY.value:
-            affix = "_drm"
+            affix = "_drM"
         if abs(darkrooms.value) == DarkRooms.ALL.value:
-            affix = "_dra"
+            affix = "_drA"
         if darkrooms.value < 0:
-            affix += "c"
+            affix += "C"
         return affix
 
     def getStartingLocation(start_location):
         if start_location.value == StartLocation.SOUTH_CAPE.value:
             return ""
         if start_location.value == StartLocation.SAFE.value:
-            return "_S(s)"
+            return "_sS"
         if start_location.value == StartLocation.UNSAFE.value:
-            return "_S(u)"
+            return "_sU"
         if start_location.value == StartLocation.FORCED_UNSAFE.value:
-            return "_S(f)"
+            return "_sF"
 
-    def getEnemizer(enemizer):
-        if enemizer.value == Enemizer.NONE.value:
+    def getEnemizer(enemizer, boss_shuffle):
+        if enemizer.value == Enemizer.NONE.value and not boss_shuffle:
             return ""
+        affix = "_en"
         if enemizer.value == Enemizer.BALANCED.value:
-            return "_E(b)"
+            affix += "B"
         if enemizer.value == Enemizer.LIMITED.value:
-            return "_E(l)"
+            affix += "L"
         if enemizer.value == Enemizer.FULL.value:
-            return "_E(f)"
+            affix += "F"
         if enemizer.value == Enemizer.INSANE.value:
-            return "_E(i)"
+            affix += "I"
+        if boss_shuffle:
+            affix += "-B"
+        return affix
 
     def getSwitch(switch, param):
         if switch:
-            return "_" + param
+            return param
         return ""
 
-    filename = "IoGR_v" + VERSION
+    filename = "IoGR" + VERSION
     filename += getDifficulty(settings.difficulty)
-    filename += getGoal(settings.goal, settings.statues, settings.statue_req)
     filename += getLogic(settings.logic)
-    filename += getEntranceShuffle(settings.entrance_shuffle)
+    filename += getGoal(settings.goal, settings.statues, settings.statue_req)
     filename += getStartingLocation(settings.start_location)
-    filename += getEnemizer(settings.enemizer)
-    filename += getSwitch(settings.open_mode, "o")
-    filename += getSwitch(settings.overworld_shuffle, "w")
-    filename += getSwitch(settings.boss_shuffle, "b")
-    filename += getSwitch(settings.firebird, "f")
-    filename += getSwitch(settings.ohko, "ohko")
-    filename += getSwitch(settings.z3, "z3")
-    filename += getDungeonShuffle(settings.dungeon_shuffle)
+    filename += getEnemizer(settings.enemizer, settings.boss_shuffle)
+    filename += getEntranceShuffle(settings.coupled_exits, settings.town_shuffle, settings.dungeon_shuffle, settings.overworld_shuffle)
     filename += getOrbRando(settings.orb_rando)
     filename += getDarkRooms(settings.darkrooms)
-    filename += getSwitch(settings.allow_glitches, "g")
-    filename += getSwitch(settings.fluteless, "fl")
-    filename += getSwitch(settings.red_jewel_madness, "rjm")
+    if (settings.open_mode or settings.firebird or settings.ohko or settings.z3 or settings.allow_glitches or settings.fluteless or settings.red_jewel_madness):
+        filename += "_v"
+        filename += getSwitch(settings.open_mode, "O")
+        filename += getSwitch(settings.firebird, "F")
+        filename += getSwitch(settings.allow_glitches, "G")
+        filename += getSwitch(settings.ohko, "1")
+        filename += getSwitch(settings.z3, "Z")
+        filename += getSwitch(settings.fluteless, "-FL")
+        filename += getSwitch(settings.red_jewel_madness, "-RJM")
     filename += "_" + str(settings.seed)
     filename += getSwitch(settings.race_mode, "R")
     filename += "."
@@ -366,13 +351,13 @@ class Randomizer:
 
             if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
                 if settings.difficulty.value == 0:
-                    gem[6] = GEMS_Z3_EASY
+                    gem[6] = 24
                 elif settings.difficulty.value == 1:
-                    gem[6] = GEMS_Z3_NORMAL
+                    gem[6] = 28
                 elif settings.difficulty.value == 2:
-                    gem[6] = GEMS_Z3_HARD
+                    gem[6] = 31
                 elif settings.difficulty.value == 3:
-                    gem[6] = GEMS_Z3_EXTREME
+                    gem[6] = 34
         else:
             gem.append(random.randint(1, 3))
             gem.append(random.randint(4, 6))
@@ -384,13 +369,13 @@ class Randomizer:
 
             if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
                 if settings.difficulty.value == 0:
-                    gem[6] = GEMS_EASY
+                    gem[6] = 35
                 elif settings.difficulty.value == 1:
-                    gem[6] = GEMS_NORMAL
+                    gem[6] = 40
                 elif settings.difficulty.value == 2:
-                    gem[6] = GEMS_HARD
+                    gem[6] = 45
                 elif settings.difficulty.value == 3:
-                    gem[6] = GEMS_EXTREME
+                    gem[6] = 50
 
         i = 1
         while i <= 7:
@@ -441,7 +426,9 @@ class Randomizer:
                     self.asar_defines["Statue6Required"] = 1
                 i += 1
 
-        # Teacher at start spoils required Mystic Statues
+        # Teacher at start spoils required Mystic Statues.
+        # If you change this to use ASCII instead of hand-coded hex, remember to add quotes around
+        # the TextTeacherStatuesString define in the assembly code.
         statue_str = ""
         statues_hex.sort()
         if len(statues_hex) == 0:
@@ -1221,8 +1208,8 @@ class Randomizer:
         self.asar_defines["SettingZ3"] = 1 if settings.z3 else 0
         self.asar_defines["SettingFluteless"] = 1 if settings.fluteless else 0
         self.asar_defines["SettingEnemizer"] = settings.enemizer.value
-        self.asar_defines["SettingEntranceShuffle"] = settings.entrance_shuffle.value
-        self.asar_defines["SettingDungeonShuffle"] = settings.dungeon_shuffle.value
+        self.asar_defines["SettingTownShuffle"] = 1 if settings.town_shuffle else 0
+        self.asar_defines["SettingDungeonShuffle"] = 1 if settings.dungeon_shuffle else 0
         self.asar_defines["SettingOrbRando"] = settings.orb_rando.value
         self.asar_defines["SettingDarkRoomsLevel"] = abs(settings.darkrooms.value)
         
@@ -1237,7 +1224,6 @@ class Randomizer:
             return asar_patch_result
         else:
             asar_error_list = asar.geterrors()
-            #breakpoint()
             return [False, asar_error_list]
 
     def generate_spoiler(self) -> str:
@@ -1250,30 +1236,11 @@ class Randomizer:
             defdump += "!" + d + " = " + defines_sorted[d] + "\n"
         return defdump
 
-    def generate_graph_visualization(self) -> graphviz.Digraph:
-        self.w.complete_graph_visualization()
-        return self.w.graph_viz
-
     def __get_required_statues__(self, settings: RandomizerData) -> int:
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
             return 0
-
         if settings.statues.lower() == "random":
             return random.randint(0, 6)
-
         return int(settings.statues)
 
-    def __generate_patch__(self):
-        data = copy.deepcopy(self.original_rom_data)
 
-        return Patch(data, self.logger)
-
-    def __get_offset__(self, patch):
-        header = b"\x49\x4C\x4C\x55\x53\x49\x4F\x4E\x20\x4F\x46\x20\x47\x41\x49\x41\x20\x55\x53\x41"
-
-        patch.seek(0)
-        h_addr = patch.find(header)
-        if h_addr < 0:
-            raise OffsetError
-
-        return h_addr - int("ffc0", 16)
