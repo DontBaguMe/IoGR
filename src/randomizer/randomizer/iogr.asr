@@ -13,6 +13,10 @@ macro MTryGiveItemAndFlag(Item16,Flag)
     db <Flag>
 endmacro
 
+macro MClzIfHasFlute()
+  lda $0a02 : bit #$0008
+endmacro
+
 incsrc "iogr_exit_ledger.asr"
 incsrc "iogr_asset_ledger.asr"
 incsrc "iogr_monster_defaults.asr"
@@ -42,6 +46,11 @@ elseif !SettingZ3 == 1
 lda #$0006    ; Start with 6 HP instead of 8
 else
 lda #$0008    ; Default, vanilla
+endif
+
+org $808244
+if !SettingDebug
+jmp $825c    ; Update HUD every frame.
 endif
 
 ; Two bytes are optimized out of this routine, to align CopHandler_Pointers at $808485.
@@ -391,6 +400,10 @@ jsr SR_IncreaseHpByThree   ; replaces inc $0aca in boss reward code
 endif
 
 
+org $80c44b
+jsr SR_SetWillAbilitySpriteSetOnFlute80   ; replaces cop #$8E : db $04
+
+
 org $80c66f
 db $00 : dw $3000
 ;ERedJewelPickup:    ; Not enough space here for IOGR implementation,
@@ -658,6 +671,13 @@ lda $0aca
 endif
 
 
+; In pullable-object code, instead of cop #$21 : db $0f : dw Here+$01, additionally check telekinesis
+org $80e263
+jsr SR_SecIfShouldBePulledByPlayer : bcs $01
+org $80E3D3
+jsr SR_SecIfShouldBePulledByPlayer : bcs $01
+
+
 ; Set up Early Firebird and run other IOGR map-level code.
 org $80eaed
 db $00 : dw $2c00
@@ -680,6 +700,9 @@ lda #$09c4 : jsl LR_SecOnAnyFlagA : bcc .PostDsWarpCheck
   cop #$9C : dl EDarkSpaceWarper : dw $2000
   lda $0bf6 : sta $0026,y
 .PostDsWarpCheck:
+if !SettingDebug == 1
+jsr SR_CameraUpdatesPositionHundreds
+endif
 rts
 
 
@@ -726,6 +749,7 @@ rtl
 db $00 : dw $3000
 ERedJewelSpot:
 {
+lda #$0200 : tsb $12
 cop #$C0 : dw .OnInteract
 cop #$88 : dl $8ee000
 cop #$8D : db $00
@@ -959,6 +983,45 @@ cop #$60 : db $01,$02
 cop #$61 : dl $7e8800 : db $0d
 rtl
 
+SR_SetWillAbilitySpriteSetOnFlute80:
+%MClzIfHasFlute() : bne .WithFlute
+.NoFlute:
+cop #$8E : db $07
+rts
+.WithFlute:
+cop #$8E : db $04
+rts
+
+SR_SecIfShouldBePulledByPlayer:
+cop #$21 : db $0f : dw .MaybePullable
+.NotPullable:
+clc
+rts
+.MaybePullable:
+lda $0ad4 : bne .IsPullable
+%MClzIfHasFlute() : bne .IsPullable
+lda.l Config_SettingFluteOpt : cmp #$0001 : beq .NotPullable
+.IsPullable:
+sec
+rts
+
+SR_CameraUpdatesPositionHundreds:
+stz $1ffc
+lda $1014
+-:
+sec : sbc.w #100 : bmi +
+inc $1ffc
+bra -
++:
+stz $1ffe
+lda $1016
+-:
+sec : sbc.w #100 : bmi +
+inc $1ffe
+bra -
++:
+lda #$1000
+rts
 
 
 warnpc $80FFB0
@@ -1644,6 +1707,21 @@ dl $DE2A6E    ; Memory Melody
 endif
 warnpc $81cc00
 
+; Add Fluteless Will sprite source
+org $81D971
+Table_PlayerSpriteSources:
+{
+; Format: dl AnimList, dl CharData
+dl $958000, $9A8000   ; Will
+dl $8E8000, $9AC000   ; Freedan
+dl $948000, $9BC000   ; Shadow
+dl $958000, AVramWillFluteless    ; Fluteless Will
+dl $8F8000, $9A8000   ; Will abilities
+dl $8FC000, $9B8000   ; Transformations
+dl $97A000, $9C8000   ; Freedan abilities
+dl $8F8000, AVramWillFluteless   ; Fluteless Will abilities
+dl $97C000, $9BC000   ; Shadow abilities
+}
 
 org $81da4c
 table "table_invtext.txt",rtl
@@ -2094,11 +2172,11 @@ dw .LolasLetter
 dw .FathersJournal   
 dw .CrystalRing      
 dw .Apple            
-dw .Blank29
-dw .Blank2A
-dw .Blank2B
-dw .Blank2C
-dw .Blank2D
+dw .Blank29   ; Artificial item IDs for upgrades
+dw .Blank2A   ; Artificial item IDs for upgrades
+dw .Blank2B   ; Artificial item IDs for upgrades
+dw .Blank2C   ; Artificial item IDs for upgrades
+dw .Blank2D   ; Artificial item IDs for upgrades
 dw .TwoRedJewels     
 dw .ThreeRedJewels   
 }
@@ -2115,14 +2193,17 @@ db "Zilch."
 db $00
 .PrisonKey:
 db $0D
-db "Your get-out-of-",$0D
-db "jail-free card."
+db $02 : dl TextInvPrisonKey
 db $00
 .IncaStatueA:
+db $0d
+db """I throw the",$0d
+db "ball to Naturally."""
+db $00
 .IncaStatueB:
 db $0D
-db $10,$0C,$73,$68,$61,$70,$65,$64,$0D
-db $6C,$69,$6B,$65,$40,$61,$40,$73,$70,$69,$72,$69,$74,$20
+db """No, you throw",$0d
+db "the ball to Who."""
 db $00
 .Herb:
 db $0D
@@ -2137,9 +2218,7 @@ db "hole."
 db $00
 .WindMelody:
 db $0D
-db "North winds blow!",$0d
-db "South winds blow!",$0d
-db "Typhoons! ...SMOG!"
+db $02 : dl TextInvWindMelody
 db $00
 .LolasMelody:
 db $0D
@@ -2147,8 +2226,9 @@ db "Brigadooooon"
 db $00
 .Meat:
 db $0D
-db "Enough to feed",$0D
-db "a village."
+db "Delivered right",$0D
+db "to your village",$0d
+db "by Blue Tunic!"
 db $00
 .MineKeyA:
 .MineKeyB:
@@ -2169,78 +2249,76 @@ db "hole."
 db $00
 .MineElevatorKey:
 db $0D
-db "Mind the gap."
+db "Mined the gap."
 db $00
 .MuPalaceKey:
 db $0D
-db $4B,$65,$79,$40,$74,$6F,$0D
-db $4D,$75,$40,$74,$75,$6E,$6E,$65,$6C,$20
+db "Includes Bubble",$0d
+db "Armor! But it's",$0d
+db "too small for you."
 db $00
 .PurifyStone:
 db $0D
-db $50,$75,$72,$69,$66,$69,$65,$73,$40,$66,$6F,$75,$6E,$74,$61,$69,$6E,$0D
-db $69,$6E,$40,$70,$61,$6C,$61,$63,$65,$20
+db "Removes even the",$0d
+db "toughest stains!",$0d
+db "Oil! Grass! Blood!"
 db $00
 .HopeStatue:
 db $0D
-db $10,$0C,$63,$6F,$6E,$74,$61,$69,$6E,$69,$6E,$67,$0D
-db $68,$6F,$70,$65,$73,$40,$6F,$66,$0D
-db $4D,$75,$40,$70,$65,$6F,$70,$6C,$65,$20
+db "Grants any wish,",$0d
+db "as long as the wish",$0d
+db "is for drought."
 db $00
 .RamaStatue:
 db $0D
-db $10,$0C,$77,$68,$69,$63,$68,$0D
-db $62,$72,$65,$61,$6B,$73,$40,$74,$68,$65,$40,$73,$65,$61,$6C,$0D
-db $6F,$66,$40,$52,$61,$6D,$61,$20
+db "Fuzzy Rama,",$0d
+db "funny Rama,",$0d
+db "Rama, Rama, Duck"
 db $00
 .MagicDust:
 db $0D
-db $4D,$61,$67,$69,$63,$40,$70,$6F,$77,$64,$65,$72,$20,$0D
-db $52,$65,$6C,$65,$61,$73,$65,$73,$40,$70,$65,$72,$73,$6F,$6E,$0D
-db $10,$0E,$70,$61,$69,$6E,$74,$69,$6E,$67,$20
+db "The only magical",$0d
+db "item. All others",$0d
+db "are true science."
 db $00
 .BlueJournal:
 db $0D
-db "Learn to play",$0D
-db "the game."
+db "tl;dr"
 db $00
 .LancesLetter:
 db $0D
-db $4C,$65,$74,$74,$65,$72,$40,$10,$0E,$0D
-db $4C,$61,$6E,$63,$65,$20
+db $02 : dl TextInvLancesLetter
 db $00
 .Necklace:
 db $0D
-db $4E,$65,$63,$6B,$6C,$61,$63,$65,$40,$4C,$61,$6E,$63,$65,$0D
-db $6D,$61,$64,$65,$40,$66,$6F,$72,$40,$4C,$69,$6C,$6C,$79,$20
+db "Well, it's the",$0d
+db "thought that",$0d
+db "counts."
 db $00
 .RussianGlassWill:
 db $0D
-db $57,$69,$6C,$6C,$40,$67,$69,$76,$65,$6E,$40,$74,$6F,$0D
-db $52,$75,$73,$73,$69,$61,$6E,$40,$47,$6C,$61,$73,$73,$0D
-db $4F,$70,$70,$6F,$6E,$65,$6E,$74,$20
+db "You cheated and won",$0d
+db "a dying man's",$0d
+db "fortune. Heroism!"
 db $00
 .Teapot:
 db $0D
-db "Fifty percent tea.",$0d
-db "Fifty percent pot."
+db $02 : dl TextInvTeapot
 db $00
 .MushroomDrops:
 db $0D
-db $47,$72,$6F,$77,$73,$40,$70,$6C,$61,$6E,$74,$73,$0D
-db $10,$0E,$65,$6E,$64,$73,$40,$6F,$66,$0D
-db $73,$74,$61,$6C,$6B,$73,$20
+db "Wait until Happy",$0d
+db "Gardener's Monthly",$0d
+db "hears about this!"
 db $00
 .BlackGlasses:
 db $0D
-db $42,$6C,$61,$63,$6B,$40,$67,$6C,$61,$73,$73,$65,$73,$20,$0D
-db $50,$72,$6F,$74,$65,$63,$74,$73,$40,$66,$72,$6F,$6D,$0D
-db $62,$72,$69,$67,$68,$74,$40,$6C,$69,$67,$68,$74,$20
+db "Lookin' sharp!",$0d
+db "Lookin' for love!"
 db $00
 .GorgonFlower:
 db $0D
-db $10,$09,$74,$68,$69,$6E,$67,$73,$0D
-db $74,$75,$72,$6E,$65,$64,$40,$74,$6F,$40,$73,$74,$6F,$6E,$65,$20
+db "Smells like ozone."
 db $00
 .Hieroglyph1E:
 .Hieroglyph1F:
@@ -2255,9 +2333,9 @@ db "hole."
 db $00
 .Aura:
 db $0D
-db $10,$02,$4B,$6E,$69,$67,$68,$74,$0D
-db $53,$68,$61,$64,$6F,$77,$5C,$73,$40,$42,$6F,$64,$79,$0D
-db $74,$75,$72,$6E,$73,$40,$74,$6F,$40,$77,$61,$74,$65,$72,$20
+db "What's Shadow's",$0d
+db "favorite fruit?",$0d
+db ".....Auranges"
 db $00
 .LolasLetter:
 db $0D
@@ -2267,9 +2345,9 @@ db "dot dotdotdash dot-"
 db $00
 .FathersJournal:
 db $0D
-db $57,$69,$6C,$6C,$5C,$73,$40,$66,$61,$74,$68,$65,$72,$5C,$73,$0D
-db $6A,$6F,$75,$72,$6E,$61,$6C,$20,$40,$49,$6E,$66,$6F,$40,$6F,$6E,$40,$0D
-db $50,$79,$72,$61,$6D,$69,$64,$20
+db "This is, like,",$0d
+db "90 percent self-",$0d
+db "insert fanfiction."
 db $00
 .CrystalRing:
 db $0D
@@ -2293,6 +2371,23 @@ db "Shiny!"
 db $00
 }
 warnpc $81e5ec
+
+org $81e7f6    ; HUD structure.
+if !SettingDebug == 1
+db $01 : dw $0046
+db $03 : db $14
+db $02 : dl Bg3_DebugPositionTracker    ; Ref. x/y tracker.
+db $01 : dw $0084 
+db $03 : db $08 
+db $0A 
+db $01 : dw $009C 
+db $03 : db $14 
+db $05 : db $01 : dw $0AD8 
+db $01 : dw $00A2 
+db $0e : dw $0AD6 
+db $00 
+endif
+warnpc $81e818
 
 org $81EA70
 db $03 : db $00 
@@ -2348,6 +2443,13 @@ db $2d,$31,$44,$45,$46
 db $00
 }
 
+Bg3_DebugPositionTracker:
+db $0e : dw $1ffc
+db $0e : dw $1014
+db $03 : db $20
+db $0e : dw $1ffe
+db $0e : dw $1016
+db $00
 
 } ; end bank $81
 
@@ -2464,6 +2566,14 @@ rts
 }
 warnpc $82a7b8
 
+if !SettingDebug == 1
+org $82b065
+ldx #$0180    ; Push 1 more row...
+org $82b078
+ldx #$7820    ; ...to 1 row higher...
+org $82b07e
+ldx #$0240    ; ...sourced 1 row higher.
+endif
 
 org $82b7b3
 EPlayerChargeListenerSpawner:
@@ -2637,10 +2747,24 @@ warnpc $82b97f
 }
 
 
+org $82bec4
+jsr SR_SetWillAbilitySpriteSetOnFlute   ; Instead of cop #$8E : db $04, here and below.
+org $82bed7
+jsr SR_SetWillAbilitySpriteSetOnFlute
+org $82beea
+jsr SR_SetWillAbilitySpriteSetOnFlute
+org $82befa
+jsr SR_SetWillAbilitySpriteSetOnFlute
+org $82c0be
+jsr SR_SetWillAbilitySpriteSetOnFlute
+org $82cc05
+jsr SR_SetWillAbilitySpriteSetOnFlute
+org $82cc58
+jsr SR_SetWillAbilitySpriteSetOnFlute
+
+
 org $82ca63
-if !SettingFluteless == 1
-jsr SR_AllowBlockIfNotWill    ; Instead of lda #$0100.
-endif
+jsr SR_MaybeAllowBlock    ; Instead of lda #$0100 in EPlayer_ShieldCommon.
 
 
 ; Early Firebird checks.
@@ -2659,23 +2783,12 @@ org $82ceee
 SR_PlayerAttackFreezeAndSound:
 lda $0656 : and #$0F00 : sta $0656
   ora #$8000 : sta $0658
-if !SettingFluteless == 1
 lda $0AD4 : beq .AsWill
 lda #$0100 : trb $10
 cop #$06 : db $02
 rts
 .AsWill:
-jsr SR_DisableAttackDamage
-rts
-else
-lda #$0100 : trb $10
-lda $0AD4 : beq .AsWill
-cop #$06 : db $02
-rts
-.AsWill:
-cop #$06 : db $01
-rts
-endif
+jmp SR_PlayerAttackFreezeAndSound_SetupWill
 warnpc $82cf0f
 
 
@@ -2742,13 +2855,10 @@ rts
 SR_SecIfFirebirdAllowed:
 {
 lda $0644 : cmp #$00e8 : beq .OkayFirebird
-if !SettingEarlyFirebird == 0
-bra .NoFirebird
-else
+lda.l Config_SettingEarlyFirebird : beq .NoFirebird
 lda $0ad4 : cmp #$0002 : bne .NoFirebird
 cop #$D0 : db $3e,$00 : dw .NoFirebird
 cop #$D0 : db $8a,$00 : dw .NoFirebird
-endif
 .OkayFirebird:
 lda $213f : adc $2137 : adc $213c : adc $0036
   and #$000f : sec : sbc #$0004 : sta $09e2   ; Firebird damage randomizer.
@@ -3668,14 +3778,22 @@ lda $0aa2 : bit #$0010 : bne +
 +:
 jmp EPlayerChargeListener_SR_QuitAbilityIfForbidden
 
-SR_AllowBlockIfNotWill:
-lda $0ad4 : beq +
-  lda #$0100
+SR_MaybeAllowBlock:
+lda $0ad4 : bne +
+%MClzIfHasFlute() : bne +
+  lda #$0000
+  rts
 +:
+lda #$0100
 rts
-SR_DisableAttackDamage:
-lda #$0400 : tsb $10
-lda #$0200 : trb $10
+SR_PlayerAttackFreezeAndSound_SetupWill:
+%MClzIfHasFlute() : bne .HasFlute
+  lda #$0400 : tsb $10
+  lda #$0200 : trb $10
+  rts
+.HasFlute:
+lda #$0100 : trb $10
+cop #$06 : db $01
 rts
 SR_SecIfCombatEnabledOrSnakeGame:
 lda $0644 : cmp #$00C6 : beq .SecAndReturn
@@ -3685,6 +3803,27 @@ clc
 rts
 .SecAndReturn:
 sec
+rts
+
+;SR_SecIfCanTelekinesisAndPressingLR:
+;bit #$0300 : beq .ClcAndReturn
+;lda $0ad4 : bne .SecAndReturn
+;lda.l Config_SettingFluteOpt : cmp #$0001 : bne .SecAndReturn
+;%MClzIfHasFlute() : bne .SecAndReturn
+;.ClcAndReturn:
+;clc
+;rts
+;.SecAndReturn:
+;sec
+;rts
+
+SR_SetWillAbilitySpriteSetOnFlute:
+%MClzIfHasFlute() : bne .WithFlute
+.NoFlute:
+cop #$8E : db $07
+rts
+.WithFlute:
+cop #$8E : db $04
 rts
 
 }
@@ -3710,7 +3849,9 @@ inc $0002
 inx : inx : inx : inx : inx : jmp $828e
 
 
-org $83848d
+org $83843f
+; LR_HandleUseItem_Pointers:
+skip 2*$27
 dw SR_UseItemCrystalRing    ; Item $27
 dw SR_UseItemApple    ; Item $28
 skip 2    ; Item $29, artificial for HP upgrade
@@ -3752,8 +3893,14 @@ warnpc $838566
 org $8385cf
 db $13    ; Allow Prison Key use from south of door.
 org $8385dc
-cop #$D5 : db $02   ; No need to check whether the key is being re-used. Just remove it here.
-nop : nop : nop
+; Remove the key; don't run cop #$33 here, and instead just set flag $24 and let the listener do so.
+cop #$D5 : db $02
+cop #$BF : dw $861f
+cop #$CC : db $24
+cop #$08 : db $0e,$0e
+cop #$10 : db $0e,$11
+cop #$10 : db $0f,$11
+rts
 
 
 org $83888a
@@ -3793,12 +3940,15 @@ db $ca
 warnpc $838917
 
 
+org $83899a
+SR_UseItemWindMelody:
+jsr SR_SecIfCanPlayMusic : db $90   ; i.e. jsr ... : bcc ..., replacing lda $0ad4 : bne ...
+
+
 org $838BA4
 SR_UseItemLolasMelody:
 {
-lda $0AD4 : beq +
-  jmp .NoFlute
-+:
+jsr SR_SecIfCanPlayMusic : bcc .NoFlute
 lda $0644 : cmp #$0015 : bne .NothingHappened
 .InItory:
 cop #$D0 : db $40, $01 : dw .NothingHappened
@@ -3840,11 +3990,12 @@ db $D3
 db "Lay down dat funk, cat."
 db $C0
 }
+warnpc $838d67
 
 org $838f17
 SR_UseItemMemoryMelody:
 {
-lda $0ad4 : beq +
+jsr SR_SecIfCanPlayMusic : bcs +
   cop #$BF : dw TextUsedSongNoFlute
   rts
 +:
@@ -3892,6 +4043,7 @@ db "Will began playing the",$cb
 db "melody he remembered."
 db $ca
 }
+warnpc $838ff3
 
 org $839174
 rts   ; End Mu key use before excessive text.
@@ -3955,6 +4107,14 @@ db $8a
 org $839427
 SR_UseItemBlueJournal:
 {
+if !SettingDebug == 1
+phx
+phd
+jsl LR_DebugSubActor
+pld
+plx
+rts
+else
 cop #$BF : dw .TextIntro
 cop #$BE : db $03,$01 : dw .UseOptions
 .UseOptions:
@@ -3991,8 +4151,10 @@ db $c0
 .TextOption3:
 db $cd : dl TextBlueJournalOption3
 db $c0
+endif
 }
 
+warnpc $83950c
 org $83950c
 ; Lance's letter
 {
@@ -4434,6 +4596,11 @@ bra .TryNextSprite
 }
 warnpc $83c926
 
+org $83c936
+; Override body sprite source to allow fluteless Will.
+jsr SR_GetBodySpriteSourceIndex
+bra $04;nop : nop : nop : nop : nop : nop
+
 org $83CA55
 LR_AnimateSprite:
 {
@@ -4650,11 +4817,25 @@ org $83e93c
 }
 
 
+org $83ecc2
+if !SettingDebug == 1
+db $80   ; bcs -> bra in bg3 number draw, to not hide 10s in numbers
+endif
+
+
 org $83ef97
 ; In case I've missed any explicit "jsl $83ef97" in the code.
 LR_GiveItemAnchor:
 jml LR_GiveNormalItemA8OrSec
 warnpc $83f08d
+
+
+org $83f177
+; Pointers to lists of effective facing directions for special body values.
+skip 2   ; Body $04 = Will abilities
+skip 2   ; Body $05
+skip 2   ; Bdoy $06
+dw $f17f   ; Body $07 is fluteless Will abilities, so should match body $04
 
 
 ; Bank $83 free space begins here.
@@ -4770,6 +4951,29 @@ tyx
 lda $820003,x
 plx
 rtl
+
+SR_GetBodySpriteSourceIndex:
+lda $0ad4 : bne ++
+%MClzIfHasFlute() : bne +
+  lda.w #18
+  rts
++:
+lda #$0000
+rts
+++:
+asl : adc $0ad4 : asl
+rts
+
+SR_SecIfCanPlayMusic:
+lda $0ad4 : bne .ClcAndReturn
+lda.l Config_SettingFluteOpt : cmp #$0001 : bne .SecAndReturn
+%MClzIfHasFlute() : beq .ClcAndReturn
+.SecAndReturn:
+sec
+rts
+.ClcAndReturn:
+clc
+rts
 
 }
 
@@ -4995,26 +5199,53 @@ db $C0
 }
 
 ; Several tweaks to skip the prison cell cutscene.
-org $84d205
-cop #$D0 : db $24,$01 : dw PrisonCutsceneSkipPoint
-
-org $84d22a
-nop : nop : nop : nop   ; Skip Will's prison chatter
-
-org $84d234
-PrisonCutsceneSkipPoint:
-cop #$D0 : db $23,$00 : dw $d2d6
+db $23 : dw $3800
+ECPlotDriver:
+cop #$D0 : db $24,$01 : dw .DoorAlreadyOpen
+cop #$0F : db $0e,$11
+cop #$0F : db $0f,$11
+cop #$9C : dl ECDoorOpeningListener : dw $2000
+lda #$0800 : trb $10
+.DoorAlreadyOpen:
+cop #$D0 : db $23,$01 : dw .Die ; $d2d6
+.SpawnHamlet:
+lda #$1000 : tsb $10
+lda #$2000 : trb $10
+cop #$BF : dw $d4a5
+cop #$86 : db $27,$06,$02
+cop #$8A
+cop #$85 : db $29,$02,$01
+cop #$8A
+cop #$82 : db $27,$12
+cop #$89
+cop #$9E : dl ECHamletItemGiver : dw $0000, $fff0, $1000
+cop #$D2 : db $23,$01
+cop #$86 : db $26, $0e, $01
+cop #$8A
+.Die:
 cop #$E0
 
-org $84d329
-; Hamlet
+ECHamletItemGiver:
+lda #$0200 : tsb $12
+cop #$88 : dl $8ee000
+cop #$C0 : dw .OnInteract
+cop #$80 : db $00
+cop #$89
+cop #$D2 : db $23,$01
+.Die:
+cop #$E0
+.OnInteract:
 %MTryGiveItemAndFlag(!EDHamletItem,$23)
-cop #$D0 : db $23,$01 : dw HamletItemGiverDie
+cop #$D0 : db $23,$01 : dw .Die
 rtl
-HamletItemGiverDie:
+
+ECDoorOpeningListener:
+cop #$D2 : db $24,$01
+cop #$32 : db $06
+cop #$33
+cop #$CD : dw $0106
 cop #$E0
-org $84db15
-cop #$E0
+warnpc $84d329
 
 org $84dc5e
 ; Dialogue of person in west dungeon cell
@@ -5148,7 +5379,14 @@ org $84f373
 rtl
 
 org $84f8b7
-lda.w #$!MoonTribeTimeLimit    ; The code requires this input to be BCD, so e.g. 30 seconds = $30.
+; Moon tribe time limit in seconds, as BCD (e.g. 20 seconds = $20), is enemizer-dependent
+if !SettingEnemizer == 0
+lda #$0020
+elseif !SettingEnemizer == 1
+lda #$0025
+else
+lda #$0030
+endif
 
 org $84fadf
 ; Moon Tribe cave statue
@@ -5238,7 +5476,7 @@ cop #$C5
 .TextOfferTravel:
 db $D3
 db "Ready to set sail?",$CB
-db "_No"
+db "_No",$cb
 db "_Yes"
 db $CA
 .TextDeclineTravel:
@@ -5850,8 +6088,8 @@ cop #$CD : dw $013B
 cop #$DA : db $3B
 lda #$00A0 : sta $16
 lda #$2000 : trb $10
-%MTryGiveItemAndFlag(!SeaPalCoffinItem, $13)    ; Surrogate flag $13 for this item.
-cop #$D0 : db $13,$00 : dw .CancelItemGet
+%MTryGiveItemAndFlag(!SeaPalCoffinItem, $18)    ; Surrogate flag $18 for this item.
+cop #$D0 : db $18,$00 : dw .CancelItemGet
 cop #$DA : db $03
 lda #$CFF0 : tsb $065A
 cop #$84 : db $33, $04
@@ -6127,6 +6365,13 @@ db "you had Magic Dust..."
 db $c0
 }
 
+
+org $86d792
+; This line of EAVIshtarDoorManager clears the BG1 cache, to reload door graphics.
+; My code relies on the tilemap not being reloaded when entering a puzzle room.
+; So, I nop out this line, and have EAVIshtarPuzzleManager clear the cache if the player's in a puzzle room.
+nop : nop : nop   ; replaces stz $067f
+
 org $86D8BC
 db $00 : dw $3000
 EAVIshtarPuzzleManager:
@@ -6135,49 +6380,70 @@ EAVIshtarPuzzleManager:
 lda $09A4 : cmp #$00F0 : bcc ++
   ; Player spawned in the corridor
   cop #$48 : dec : bne +
-    ; Player spawned facing north, which means entered from non-puzzle room. Reset puzzle.
-    stz $0aa6
+    stz $0aa6   ; Spawned facing north, so entered from outside -> do reset
   +:
-  ; Puzzle manager isn't needed in the corridor.
-  cop #$E0
+  jsr SR_DrawIshtarMapDifferences
+  cop #$E0   ; Puzzle manager isn't otherwise needed in the corridor
 ++:
 ; If we get here, the player spawned in a puzzle room. Close all the doors from the corridor.
 ; This line is equivalent to cop #$CF for all flags from $0149 to $0150, but more compact.
 lda $0a29 : and #$fe01 : sta $0a29
+stz $067f   ; Clear BG1 tilemap cache
 jmp $d8ea   ; where EAVIshtarPuzzleManager picks up after our mods
+warnpc $86d8ea
 
 org $86d95e
-lda $24 : cmp.w #!IshtarRoom1TargetWest : bcc $1B
-  cmp.w #!IshtarRoom1TargetEast : bcs $16
-lda $26 : cmp.w #!IshtarRoom1TargetNorth : bcc $0F
-  cmp.w #!IshtarRoom1TargetSouth : bcs $0A
-
-org $86d976
-cop #$BF : dw $db2c    ; Override Ishtar puzzle 1 success text with puzzle 2 text
+;lda $24 : cmp.w #!IshtarRoom1TargetWest : bcc $1B
+;  cmp.w #!IshtarRoom1TargetEast : bcs $16
+;lda $26 : cmp.w #!IshtarRoom1TargetNorth : bcc $0F
+;  cmp.w #!IshtarRoom1TargetSouth : bcs $0A
+jsr SR_SecIfIshtarCursorAtDifference : bcc +
+  cop #$BF : dw $db2c    ; Puzzles 1-3 have the same success text
+  inc $0aa6
+  jmp $da0c
++:
+cop #$BF : dw $daa0   ; And the same failure text
+jmp $da07
 
 org $86d98a
-lda $24 : cmp.w #!IshtarRoom2TargetWest : bcc $1A
-  cmp.w #!IshtarRoom2TargetEast : bcs $15
-lda $26 : cmp.w #!IshtarRoom2TargetNorth : bcc $0E
-  cmp.w #!IshtarRoom2TargetSouth : bcs $09
+;lda $24 : cmp.w #!IshtarRoom2TargetWest : bcc $1A
+;  cmp.w #!IshtarRoom2TargetEast : bcs $15
+;lda $26 : cmp.w #!IshtarRoom2TargetNorth : bcc $0E
+;  cmp.w #!IshtarRoom2TargetSouth : bcs $09
+jsr SR_SecIfIshtarCursorAtDifference : bcc +
+  cop #$BF : dw $db2c    ; Puzzles 1-3 have the same success text
+  inc $0aa6
+  jmp $da0c
++:
+cop #$BF : dw $daa0   ; And the same failure text
+jmp $da07
 
 org $86d9b4
-lda $24 : cmp.w #!IshtarRoom3TargetWest : bcc $1A
-  cmp.w #!IshtarRoom3TargetEast : bcs $15
-lda $26 : cmp.w #!IshtarRoom3TargetNorth : bcc $0E
-  cmp.w #!IshtarRoom3TargetSouth : bcs $09
-
-org $86d9cc
-cop #$BF : dw $db2c    ; Override Ishtar puzzle 3 success text with puzzle 2 text
+;lda $24 : cmp.w #!IshtarRoom3TargetWest : bcc $1A
+;  cmp.w #!IshtarRoom3TargetEast : bcs $15
+;lda $26 : cmp.w #!IshtarRoom3TargetNorth : bcc $0E
+;  cmp.w #!IshtarRoom3TargetSouth : bcs $09
+jsr SR_SecIfIshtarCursorAtDifference : bcc +
+  cop #$BF : dw $db2c    ; Puzzles 1-3 have the same success text
+  inc $0aa6
+  jmp $da0c
++:
+cop #$BF : dw $daa0   ; And the same failure text
+jmp $da07
 
 org $86d9de
-lda $24 : cmp.w #!IshtarRoom4TargetWest : bcc $1E
-  cmp.w #!IshtarRoom4TargetEast : bcs $19
-lda $26 : cmp.w #!IshtarRoom4TargetNorth : bcc $12
-  cmp.w #!IshtarRoom4TargetSouth : bcs $0D
-
-org $86d9fa
-nop : nop : nop   ; Replaces cop #$CC : db $89, so Ishtar's game doesn't close
+;lda $24 : cmp.w #!IshtarRoom4TargetWest : bcc $1E
+;  cmp.w #!IshtarRoom4TargetEast : bcs $19
+;lda $26 : cmp.w #!IshtarRoom4TargetNorth : bcc $12
+;  cmp.w #!IshtarRoom4TargetSouth : bcs $0D
+jsr SR_SecIfIshtarCursorAtDifference : bcc +
+  cop #$BF : dw $db9f
+  cop #$CD : dw $0151
+  jmp $da0c
++:
+cop #$BF : dw $daa0
+jmp $da07
+warnpc $86da07
 
 org $86db9f
 ; Skip ahead in Ishtar's room 4 puzzle text
@@ -6191,11 +6457,12 @@ org $86dc50
 ; The Ishtar's-Apprentice actor also creates wind for Will's hair, if applicable
 db $04 : dw $1000
 EAVIshtarsApprentice:
-cop #$45 : db $20*!IshtarRoomWithHairDifference-$10,$00, $20*!IshtarRoomWithHairDifference,$10 : dw .EnableWind
+jsr SR_SecIfThisIshtarRoomHasWind : bcs .EnableWind
 bra .CheckIfFirstPhase
+nop : nop : nop
 .EnableWind:
 cop #$CC : db $00
-lda #$FFFF : sta $09b4
+lda #$0011 : sta $1028   ; Changed to set Will's sprite instead of force him to run weirdly for one frame
 .CheckIfFirstPhase:    ; this is $86dc66
 
 org $86dc97
@@ -6535,6 +6802,380 @@ cld
 rts
 }
 
+SR_SecIfIshtarChestsAreDifferent:
+lda.w #!AnglPuzzleChest1Item : cmp.w #!AnglPuzzleChest2Item : bne .AreDifferent
+.NotDifferent:
+clc
+rts
+.AreDifferent:
+sec
+rts
+
+SR_GetIshtarRoomAddrOffsetForXPos:
+and #$ff00 : xba : lsr : clc : asl : asl : asl
+rts
+
+SR_SecIfThisIshtarRoomHasWind:
+phx
+lda $1016 : cmp #$0100 : bcs .NoWind
+lda $1014 : jsr SR_GetIshtarRoomAddrOffsetForXPos : tax
+lda.l 0+Config_IshtarRoomDifferencesAnchor,x : beq .RightRoomHasWind
+lda.l 2+Config_IshtarRoomDifferencesAnchor,x : beq .HasWind
+lda.l 4+Config_IshtarRoomDifferencesAnchor,x : beq .HasWind
+.NoWind:
+plx
+clc
+rts
+.RightRoomHasWind:
+lda $1014 : and #$0100 : beq .NoWind
+.HasWind:
+plx
+sec
+rts
+
+SR_SecIfIshtarCursorAtDifference:
+{
+; Room 3 (chests) is a special case
+lda $24 : cmp #$0500 : bcc .NotInChestRoom
+  cmp #$0600 : bcs .NotInChestRoom
+.IsInChestRoom:
+jsr SR_SecIfIshtarChestsAreDifferent : bcc .ChestRoomDifferenceNotChest
+lda $24 : cmp #$0570 : bcc ..WrongAnswer
+  cmp #$0590 : bcs ..WrongAnswer
+lda $26 : cmp #$0070 : bcc ..WrongAnswer
+  cmp #$0090 : bcs ..WrongAnswer
+..RightAnswer:
+sec
+rts
+..WrongAnswer:
+clc
+rts
+.ChestRoomDifferenceNotChest:
+.NotInChestRoom:
+; If there's no difference between this tilemap and the left one, then the room's difference is Will's hair
+phx
+lda $24 : and #$ff00 : sec : sbc #$0100 : tax
+ldy #$0000
+sep #$20
+-:
+lda $7ea000,x : cmp #$f8 : bcs +   ; --but chest open vs. closed doesn't count as a difference
+  cmp $7ea100,x : bne .DifferenceNotHair
++:
+inx
+iny
+cpy #$0100 : bcc -
+.DifferenceIsHair:
+rep #$20
+plx
+; Hair target area is [PlayerX-$10, PlayerX+$10] x [PlayerY-$20, PlayerY]
+lda $1014 : sec : sbc #$0010 : cmp $24 : bcs ..WrongAnswer
+  clc : adc #$0020 : cmp $24 : bcc ..WrongAnswer
+lda $1016 : cmp $26 : bcc ..WrongAnswer
+  sec : sbc #$0020 : cmp $26 : bcs ..WrongAnswer
+..RightAnswer:
+sec
+rts
+..WrongAnswer:
+clc
+rts
+.DifferenceNotHair:
+rep #$20
+lda $24 : dec : dec : lsr : lsr : lsr : lsr : sta $0018
+lda $26 : dec : dec : lsr : lsr : lsr : lsr : sta $001c
+lda #$0000 : tax : tcd
+jsl $82B0A3   ; = jsl LR_GetTileTableIndex82; returns index in X
+txa : sec : sbc #$0100 : tax
+sep #$20
+  lda $7ea000,x : cmp #$f8 : bcs +    ; Chest open vs. closed doesn't count as a difference
+    cmp $7ea100,x
+    bra ++
++:
+lda #$00
+++:
+rep #$20
+bne ..RightAnswer
+..WrongAnswer:
+plx
+txa : tcd
+clc
+rts
+..RightAnswer:
+plx
+txa : tcd
+sec
+rts
+}
+
+SR_DrawIshtarMapDifferences:
+; First overwrite the right-room tilemaps to be the same as the left
+{
+phx
+ldx #$0000
+ldy #$0000
+sep #$20
+-:
+lda $7ea000,x : cmp #$f8 : bcs +   ; (but don't overwrite chest tiles)
+  sta $7ea100,x
++:
+inx
+iny
+cpy #$0100 : bcc -
+ldy #$0000
+rep #$20
+txa : clc : adc #$0100 : tax
+sep #$20
+cpx #$0600 : bcc -
+rep #$20
+; Then draw indexed differences on the tilemaps
+lda #$0000 : tcd
+lda #$0000 : pha   ; $01,s = whether we've drawn Index1 for this room
+lda #$0000 : pha   ; $01,s = room index (0,1,2,3); $03,s = is this Index > 1
+.DrawNextRoom:
+lda $01,s : asl : tax
+lda.l .TablePointers,x : pha   ; $01,s = #.TableRoomN; $03,s = room index; $05,s = is this difference index > 1
+lda $03,s : asl : xba : clc : adc #$0080 : jsr SR_GetIshtarRoomAddrOffsetForXPos : tax
+phx   ; $01,s = base offset from DifferencesAnchor for this room; $03,s = #.TableRoomN; $05,s = room index; $07,s = is this difference index > 1
+.DrawNextDiff:   ; Here X = $01,s should be DifferenceIndexM - DifferencesAnchor; $03,s = #.TableRoomN; $05,s = room index; $07,s = is M>1.
+..CheckRoom3Special:
+lda $05,s : cmp #$0002 : bne ..CheckDifferenceIndex
+lda $07,s : bne ..CheckDifferenceIndex
+jsr SR_SecIfIshtarChestsAreDifferent : bcs ..SkipDifferenceIndex
+..CheckDifferenceIndex:
+lda.l Config_IshtarRoomDifferencesAnchor,x : bmi .PrepNextRoom
+  bne ..GotGoodDifferenceIndex
+..SkipDifferenceIndex:
+    inx : inx
+    lda #$0001 : sta $07,s
+    bra .DrawNextDiff   ; Skip the diff if it's 0 (wind, handled elsewhere), or if it's the first diff in room 3 and the difference is supposed to be chest contents
+..GotGoodDifferenceIndex:
+  asl : clc : adc $03,s : tax   ; X = #.TableRoomN + 2 * DifferenceIndex
+lda.l $ff0000&SR_DrawIshtarMapDifferences,x : tax   ; X = #.TableRoomN_IndexM
+..DrawNextTile:
+lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : cmp #$00ff : beq .PrepNextDiff
+  sta $18
+inx
+lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : sta $1c
+inx
+lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : pha   ; note this pha temporarily shifts the stack
+inx
+lda $07,s : asl : xba : lsr : lsr : lsr : lsr : clc : adc $18 : sta $18
+phx   ; X = addr of next line of #.TableRoomN_IndexM
+ldx #$0000
+jsl $82B0A3   ; = jsl LR_GetTileTableIndex82; returns index in X
+ply   ; Y = addr of next line of #.TableRoomN_IndexM
+pla   ; A = tile type to draw
+sep #$20
+  sta $7ea100,x   ; Update MapLayer
+  phx
+    tax
+    lda $7f0000,x
+  plx
+  sta $7fc100,x   ; Update CollisionLayer
+  lda $07,s : beq +
+    lda $7ea100,x : sta $7ea000,x   ; DifferenceIndexes after 1 are drawn in both sides of the room
+    lda $7fc100,x : sta $7fc000,x
++:
+rep #$20
+tyx
+bra ..DrawNextTile
+.PrepNextRoom:
+lda #$0000 : sta $07,s   ; Next DifferenceIndex will be 1
+pla   ; Discard the DifferenceIndexM offset for this room
+pla   ; Discard #.TableRoomN
+pla : inc : cmp #$0004 : bcs .Done
+  pha   ; Update room index
+jmp .DrawNextRoom
+.PrepNextDiff:
+lda #$0001 : sta $07,s   ; Next DifferenceIndex will be >1
+lda $01,s : inc : inc : sta $01,s   ; Advance to next difference for this room
+  tax
+jmp .DrawNextDiff
+.Done:
+pla   ; Discard whether M>1
+plx   ; Restore ActorID
+txa : tcd
+rts
+
+.TablePointers:
+dw .TableRoom1
+dw .TableRoom2
+dw .TableRoom3
+dw .TableRoom4
+.TableRoom1:
+{
+dw ..Index0
+dw ..Index1
+dw ..Index2
+dw ..Index3
+dw ..Index4
+dw ..Index5
+dw ..Index6
+dw ..Index7
+dw ..Index8
+dw ..Index9
+dw ..IndexA
+..Index0:
+db $ff
+..Index1:
+db $0b,$07,$7b
+db $0b,$08,$84
+db $ff
+..Index2:
+db $05,$07,$7b
+db $05,$08,$84
+db $ff
+..Index3:
+db $04,$07,$83
+db $04,$08,$87
+db $ff
+..Index4:
+db $05,$06,$74
+db $ff
+..Index5:
+db $05,$06,$76
+db $ff
+..Index6:
+db $06,$06,$75
+db $ff
+..Index7:
+db $06,$06,$74
+db $ff
+..Index8:
+db $07,$05,$12
+db $08,$05,$12
+db $07,$06,$1a
+db $08,$06,$1a
+db $ff
+..Index9:
+db $0a,$05,$12
+db $0b,$05,$12
+db $0a,$06,$1a
+db $0b,$06,$1a
+db $ff
+..IndexA:
+db $0a,$07,$83
+db $0b,$07,$22
+db $0a,$08,$87
+db $0b,$08,$13
+db $ff
+}
+.TableRoom2:
+{
+dw ..Index0
+dw ..Index1
+dw ..Index2
+dw ..Index3
+dw ..Index4
+dw ..Index5
+dw ..Index6
+dw ..Index7
+..Index0:
+db $ff
+..Index1:
+db $03,$0a,$7c
+db $03,$0b,$84
+db $ff
+..Index2:
+db $04,$0a,$7c
+db $04,$0b,$84
+db $ff
+..Index3:
+db $0d,$0b,$73
+db $ff
+..Index4:
+db $05,$09,$7d
+db $06,$09,$7e
+db $05,$0a,$85
+db $06,$0a,$86
+db $05,$0b,$8d
+db $06,$0b,$8e
+db $ff
+..Index5:
+db $07,$05,$88
+db $08,$05,$89
+db $07,$06,$90
+db $08,$06,$91
+db $ff
+..Index6:
+db $02,$0b,$77
+db $ff
+..Index7:
+db $0d,$0b,$8f
+db $ff
+}
+.TableRoom3:
+{
+dw ..Index0
+dw ..Index1
+dw ..Index2
+dw ..Index3
+dw ..Index4
+..Index0:
+db $ff
+..Index1:
+db $0d,$0b,$73
+db $ff
+..Index2:
+db $02,$0b,$77
+db $ff
+..Index3:
+db $07,$05,$88
+db $08,$05,$89
+db $07,$06,$90
+db $08,$06,$91
+db $ff
+..Index4:
+db $0d,$0b,$8f
+db $ff
+}
+.TableRoom4:
+{
+dw ..Index0
+dw ..Index1
+dw ..Index2
+dw ..Index3
+dw ..Index4
+dw ..Index5
+dw ..Index6
+dw ..Index7
+dw ..Index8
+dw ..Index9
+..Index0:
+db $ff
+..Index1:
+db $0d,$0b,$73
+db $ff
+..Index2:
+db $02,$0b,$77
+db $ff
+..Index3:
+db $02,$0b,$8f
+db $ff
+..Index4:
+db $03,$0a,$7c
+db $03,$0b,$84
+db $ff
+..Index5:
+db $03,$0a,$7f
+db $03,$0b,$87
+db $ff
+..Index6:
+db $0c,$0a,$7c
+db $0c,$0b,$84
+db $ff
+..Index7:
+db $0c,$0a,$7f
+db $0c,$0b,$87
+db $ff
+..Index8:
+db $04,$0b,$69
+db $05,$0b,$6a
+db $ff
+..Index9:
+db $0d,$0b,$8f
+db $ff
+}
+}
 
 }
 
@@ -7401,6 +8042,11 @@ else
 db $10,$00
 endif
 
+org $88cdbc
+if !SettingDungeonShuffle > 0
+dl EPymdPortalToFoyer_EVanishingPlayerSprite
+endif
+
 org $88cdcd
 cop #$26 : db !MapMQEntranceString
 cop #$C1
@@ -8246,18 +8892,50 @@ org $89c5bb
 lda #$eff0 : trb $065a
 cop #$E0
 
-org $89c660
-; Remove Wind Melody when door opens.
-WindMelodyOpenAndRemove:
+
+org $89c614
+; Golden Tile room changes, overwriting unused singing-statue text.
+; Can't use cop #$4B for these tile draws, because that doesn't run on the effect layer.
+db $00,$00,$23
+EGoldenTileListener:
+lda #$0000 : sta $7ec384   ; Remove the Golden Tile from the EffectLayer tilemap
+  sta $7ec394
+phx
+; Drawing the tile in 1 pass is safe only because no possible position crosses a screen boundary
+lda.l Config_IncaTileX : asl : clc : adc #$0004 : sta $0018
+  sta $14   ; Not our final X, but we need the initial calculation later, anyway
+lda.l Config_IncaTileY : asl : clc : adc #$0010 : sta $001c
+  sta $16   ; Not our final Y, but we need the initial calculation later, anyway
+lda #$0000 : tcd
+ldx #$0000
+jsl $82B0A3   ; = jsl LR_GetTileTableIndex82; returns index in X
+lda #$4140 : sta $7ec000,x
+lda #$4342 : sta $7ec010,x
+plx
+txa : tcd
+; Put this actor on the tile so we can use cop #$21 instead of cop #$45
+lda $14 : inc : asl : asl : asl : asl : sta $14
+lda $16 : inc : asl : asl : asl : asl : inc : inc : inc : inc : sta $16
+; Mostly-normal code resumes here
+cop #$D1 : dw $0112 : db $01 : dw .Die
+.WaitLoop:
+lda #$0258 : sta $7f0010,x
+cop #$C1
+cop #$21 : db $01 : dw .DecCounter
+cop #$C4 : dl .WaitLoop
+.DecCounter:
+lda $7f0010,x : dec : beq .OpenDoor
+  sta $7f0010,x
+  rtl
+.OpenDoor:
+cop #$08 : db $0f,$0f
+cop #$32 : db $12
+cop #$33
 cop #$CD : dw $0112
-cop #$D5 : db $08
+.Die:
+cop #$D5 : db $08   ; Remove Wind Melody when door opens (or if it's already open)
 cop #$E0
-org $89c676
-db $67
-org $89c681   ; Change Inca glowing tile check area (graphic loc handled elsewhere).
-cop #$45 : db !IncaTileWest,!IncaTileNorth,!IncaTileEast,!IncaTileSouth
-org $89c6a3
-cop #$D0 : db $10,$01 : dw WindMelodyOpenAndRemove
+warnpc $89c6a9
 
 
 org $89cfaa
@@ -8372,6 +9050,12 @@ rts
 
 ; Bank $8A
 {
+
+org $8A8835
+; Make the pullable statues destructible in EdDg
+db $36 : dw $0100
+cop #$C7 : dl $85f8c3
+
 
 org $8a8b1e
 EMPMudGolem:
@@ -8530,6 +9214,14 @@ cop #$D8
 jmp $c796
 
 
+org $8bc8de
+if !SettingDebug == 1
+; Skip logo/title screens
+cop #$26 : db $fa : dw $0000,$0000 : db $00,$00,$11
+cop #$E0
+endif
+
+
 org $8bd32b
 nop : jsr SR_OverrideEndgameWithZeroHp   ; replacing cop #$BF : $d558
 
@@ -8582,9 +9274,134 @@ org $8be515
 jsl LR_WarpToStart
 jmp EIogrGameInitFlagSetter
 
-; Back to difficulty settings.
 org $8be7b5
-db $03    ; --- and on the other menu too
+db $03    ; 3 difficulty levels available on the other menu too
+
+
+org $8bee20
+EDebugWarper:
+{
+.Menu1:
+cop #$BF : dw .TextDebugMapListPageOne
+cop #$BE : db $0a, $00 : dw ..Options
+..Options:
+  dw .Cancel
+  dw .EdwardsCastle, .EdwardsDungeon, .Itory, .MoonTribe, .Inca
+  dw .Freejia, .DiamondMine, .SkyGarden, .SeaPalace
+  dw .Menu2
+.Menu2:
+cop #$BF : dw .TextDebugMapListPageTwo
+cop #$BE : db $0a, $00 : dw ..Options
+..Options:
+  dw .Cancel
+  dw .Mu, .AngelVillage, .Watermia, .GreatWall, .Euro
+  dw .NativesVillage, .AngkorWat, .Dao, .Babel, .Comet
+.Cancel:
+cop #$BF : dw .TextDebugMapOkay
+cop #$E0 
+.EdwardsCastle:
+cop #$26 : db $0A : dw $01E3,$00A0 : db $83,$00,$45
+rtl 
+.EdwardsDungeon:
+cop #$26 : db $0b : dw $00f0,$0140 : db $80,$00,$32
+rtl 
+.Itory:
+cop #$26 : db $15 : dw $0339,$01B0 : db $80,$00,$35
+rtl 
+.MoonTribe:
+cop #$26 : db $1A : dw $0110,$00C3 : db $80,$00,$22
+rtl 
+.Inca:
+cop #$26 : db $1C : dw $006C,$0174 : db $87,$00,$22
+rtl 
+.Freejia:
+cop #$26 : db $32 : dw $0138,$0360 : db $87,$00,$45
+rtl 
+.DiamondMine:
+cop #$26 : db $3E : dw $00B0,$03D0 : db $87,$00,$42
+rtl 
+.SkyGarden:
+cop #$26 : db $4C : dw $0100,$0136 : db $87,$00,$22
+rtl 
+.SeaPalace:
+cop #$26 : db $5A : dw $0088,$00A0 : db $87,$00,$64
+rtl 
+.Mu:
+cop #$26 : db $5F : dw $0088,$0050 : db $87,$00,$44
+rtl 
+.AngelVillage:
+cop #$26 : db $69 : dw $02A8,$00A0 : db $87,$00,$13
+rtl
+.Watermia:
+cop #$26 : db $78 : dw $027E,$03A0 : db $87,$00,$45
+rtl 
+.GreatWall:
+cop #$26 : db $82 : dw $0020,$0090 : db $87,$00,$18
+rtl 
+.Euro:
+cop #$26 : db $91 : dw $0370,$0430 : db $83,$00,$54
+rtl 
+.NativesVillage:
+cop #$26 : db $AC : dw $01C0,$01D0 : db $87,$00,$22
+rtl 
+.AngkorWat:
+cop #$26 : db $B0 : dw $0200,$04D0 : db $87,$00,$54
+rtl 
+.Dao:
+cop #$26 : db $C3 : dw $0010,$00E8 : db $87,$00,$23
+rtl 
+.Pyramid:
+cop #$26 : db $CC : dw $002C,$00E0 : db $87,$00,$44
+rtl 
+.Babel:
+cop #$26 : db $DE : dw $0088,$00A0 : db $80,$00,$11
+rtl 
+.Comet:
+cop #$26 : db $E7 : dw $0088,$00A0 : db $80,$00,$11
+rtl 
+
+.TextDebugMapListPageOne:
+db $c1 : db $02,$06
+db $c7 : db $0e,$0a
+db $ce
+db $d2,$00
+db "_Edward's Castle",$cb    ; Edward's Castle
+db "_Edward's Tunnel",$cb
+db "_Itory",$cb    ; Itory
+db "_",$d6,$31,"Tribe",$cb
+db "_",$d6,$1e,$cb    ; Inca 
+db "_Freejia",$cb 
+db "_",$d6,$0e,"Mine",$cb
+db "_Sky Garden",$cb
+db "_",$d7,$32,"Palace",$cb    ; Seaside Palace
+db "_Other..."    ; other ...
+db $ca
+
+.TextDebugMapListPageTwo:
+db $c1 : db $02,$06
+db $c7 : db $0e,$0a
+db $ce
+db $d2,$00
+db "_Mu",$cb
+db "_",$d6,$01,"Village",$cb    ; Angel Village
+db "_Watermia",$cb    ; Watermia
+db "_",$d6,$16,"Wall",$cb
+db "_Euro",$cb
+db "_Natives' Village",$cb    ; Native's Village
+db "_",$d6,$04,"Wat",$cb
+db "_Dao",$cb
+db "_Babel",$cb
+db "_Comet"
+db $ca
+
+.TextDebugMapOkay:
+db $ce
+db "Okay."
+db $c0
+}
+warnpc $8bf178
+
+
 org $8bf5d2
 db "Level"    ; Change "Sound" to "Level"
 org $8bf55a
@@ -8685,6 +9502,13 @@ cop #$CE : db $F4   ; For Apocalypse Gaia.
 stz $0bfc   ; Default to fast item-get text speed.
 lda #$2800 : trb $09ae
 jsl LR_MarkRoomRewardsObtainedByDifficulty
+lda.l Config_SettingFluteOpt : bne +
+  cop #$CC : db $13   ; Set "has Flute" flag if starting with flute
++:
+if !SettingDebug == 1
+lda #$0015 : sta $0ab4
+sta $0ac6
+endif
 cop #$E0
 }
 
@@ -9550,10 +10374,36 @@ org $8d8000
 incsrc "iogr_8D_asset_table.asr"
 warnpc $8DB001
 
-org $8f8fa4
-if !SettingFluteless == 1
-incbin "iogr_fluteless_melody_anim.bin"    ; So Will whistles instead of playing his flute.
-endif
+org $8f8058
+; Replace credits-exclusive body $04 sprite $01 with a fluteless-flute-playing sprite
+dw $0013, MetaWillFlutelessFlute1
+dw $0013, MetaWillFlutelessFlute2
+dw $ffff
+
+org $8f8bf5   ; Overwriting an unused 8-tile metasprite
+MetaWillFlutelessFlute1:
+db $08,$10 : db $24,$08
+db $f8,$f0 : db $01,$01
+db $f8,$10 : db $f0,$10
+db $06
+db $01 : db $02,$08, $02,$10 : dw $0006
+db $01 : db $00,$08, $0C,$1C : dw $0160 
+db $01 : db $08,$00, $0C,$18 : dw $0161 
+db $00 : db $04,$0E, $1B,$09 : dw $006E 
+db $00 : db $0A,$08, $1B,$09 : dw $006F 
+db $01 : db $03,$07, $1C,$00 : dw $000E 
+org $8fcf65   ; Overwriting an unused 8-tile metasprite
+MetaWillFlutelessFlute2:
+db $08,$10 : db $24,$08 
+db $F8,$F0 : db $01,$01 
+db $F8,$10 : db $F0,$10 
+db $06
+db $01 : db $02,$08, $03,$10 : dw $0046 ; Head
+db $01 : db $00,$08, $0C,$18 : dw $0160 ; Torso 1
+db $01 : db $08,$10, $0C,$18 : dw $0161 ; Torso 2
+db $00 : db $04,$10, $1B,$10 : dw $006E ; Right foot
+db $00 : db $0A,$08, $1B,$1C : dw $006F ; Left foot
+db $01 : db $03,$00, $1C,$18 : dw $000E ; Shadow
 
 
 org $90803c
@@ -9595,43 +10445,9 @@ db $01,$00,$00,$00,$00,$02,$0C
 
 
 ; Bank $9A / $DA 
-{
 org $da5a37
 ; Remove a rock, preventing a Spin Dash softlock.
 incbin "Tilemap6D.bin"
-
-; Fluteless Will sprite tiles
-if !SettingFluteless == 1
-fillbyte $00
-org $9a8540
-fill $60
-org $9a8740
-fill $60
-org $9aa120
-fill $40
-org $9aa560
-fill $20
-org $9aa720
-fill $60
-org $9aa8e0
-fill $80
-org $9aab00
-fill $20
-org $9aac60
-fill $40
-org $9aae60
-fill $40
-org $9ab400
-fill $80
-org $9ab600
-fill $80
-org $9ab800
-fill $40
-org $9aba00
-fill $40
-endif
-
-}
 
 
 org $a08000
@@ -9640,9 +10456,48 @@ incsrc "iogr_code_overflow.asr"
 
 incsrc "iogr_dialogue_overflow.asr"
 
-if !ApocalypseGaia == 1
 incsrc "apocalypse_gaia_2.asr"
+
+org $a18000
+incsrc "ConfigValueArray.asr"
+
+; Construct fluteless-Will sprites
+!SprSrcAddr = $9a8000
+AVramWillFluteless:
+while !SprSrcAddr < $9ac000
+db read1(!SprSrcAddr)
+!SprSrcAddr #= !SprSrcAddr+1
 endif
+fillbyte $00
+org AVramWillFluteless+$0540
+fill $60
+org AVramWillFluteless+$0740
+fill $60
+org AVramWillFluteless+$2120
+fill $40
+org AVramWillFluteless+$2560
+fill $20
+org AVramWillFluteless+$2720
+fill $60
+org AVramWillFluteless+$28e0
+fill $80
+org AVramWillFluteless+$2b00
+fill $20
+org AVramWillFluteless+$2c60
+fill $40
+org AVramWillFluteless+$2e60
+fill $40
+org AVramWillFluteless+$3400
+fill $80
+org AVramWillFluteless+$3600
+fill $80
+org AVramWillFluteless+$3800
+fill $40
+org AVramWillFluteless+$3a00
+fill $40
+
+warnpc $a1ffff
+
 
 
 org $de28a5
@@ -9652,17 +10507,6 @@ incbin "TilemapMuPassage.bin"
 org $df2ce7
 ; Need to make Comet BG2 tilemap 2 high, so scrolling works in the AG fight.
 db $02
-
-org $df3ea0
-ATlMpIncaTileRoomTile:
-db 2,2
-db !IncaTileRoomCompTilemap
-
-
-org $df4100
-ATlMpIshtarRoom:
-db 8,2
-db !IshtarRoomCompTilemap
 
 
 org $e00000

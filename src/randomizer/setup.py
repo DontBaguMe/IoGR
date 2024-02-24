@@ -8,13 +8,12 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='iog-randomizer',
-    version='4.7.0',
+    version='4.7.1',
     description='The Illusion of Gaia Randomizer',
     author='dontbagume,bryon_w,raeven0',
     packages=setuptools.find_packages(),
     package_data={'': [
         'bin/*.bin'
     ]},
-    install_requires=['bitstring'],
     python_requires='>=3.7'
 )

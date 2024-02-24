@@ -1,23 +1,68 @@
 arch 65816
 hirom
 
-; Generates an address for all parameters required by IOGR.
-; Addresses can be read from the symbol file after assembling.
+; The randomizer API will write all game parameters to ROM in this table.
+; The ROM address for each parameter should be read from the base patch symbol file.
+; All parameters are 2 bytes wide.
+; The base patch will read parameters from here via calls like lda.l Config_<ParamName>.
+; To add a parameter, call the macro as %MAddConfigAddr("ParamName",DefaultValue),
+; and pass the assembler a define called ParamName.
+; The value at BankAnchor can be used as a version check;
+; increment it if you add or change parameter.
 
 namespace Config
 
 BankAnchor:
-dw $0000
+dw $0001
 
-macro MAddConfigAddr(ConfigName)
+macro MAddConfigAddr(ConfigName,DefaultValue)
 <ConfigName>:
-if defined("ConfigName")
+if defined("<ConfigName>")
 dw !{<ConfigName>}
 else
-dw $0000
+dw <DefaultValue>
 endif
 endmacro
 
+%MAddConfigAddr("SettingEarlyFirebird",0)    ; 0=No, 1=Yes
+
+%MAddConfigAddr("SettingFluteOpt",0)    ; 0=Start, 1=Shuffle, 2=Fluteless
+
+%MAddConfigAddr("IncaTileX",2)   ; 12 wide, range [0,11]
+%MAddConfigAddr("IncaTileY",4)   ; 6 high, range [0,5]
+
+; The code assumes 8 bytes per room.
+; DifferenceIndex1 is applied to the right room; 2 and 3 are applied to both.
+; Room 3 automatically ignores Index1 if the chest contents are different.
+IshtarRoomDifferencesAnchor:
+IshtarRoom1DifferenceIndex1:
+dw !IshtarRoom1DifferenceIndex1
+IshtarRoom1DifferenceIndex2:
+dw !IshtarRoom1DifferenceIndex2
+IshtarRoom1DifferenceIndex3:
+dw !IshtarRoom1DifferenceIndex3
+dw $ffff
+IshtarRoom2DifferenceIndex1:
+dw !IshtarRoom2DifferenceIndex1
+IshtarRoom2DifferenceIndex2:
+dw !IshtarRoom2DifferenceIndex2
+IshtarRoom2DifferenceIndex3:
+dw !IshtarRoom2DifferenceIndex3
+dw $ffff
+IshtarRoom3DifferenceIndex1:
+dw !IshtarRoom3DifferenceIndex1
+IshtarRoom3DifferenceIndex2:
+dw !IshtarRoom3DifferenceIndex2
+IshtarRoom3DifferenceIndex3:
+dw !IshtarRoom3DifferenceIndex3
+dw $ffff
+IshtarRoom4DifferenceIndex1:
+dw !IshtarRoom4DifferenceIndex1
+IshtarRoom4DifferenceIndex2:
+dw !IshtarRoom4DifferenceIndex2
+IshtarRoom4DifferenceIndex3:
+dw !IshtarRoom4DifferenceIndex3
+dw $ffff
 
 
 

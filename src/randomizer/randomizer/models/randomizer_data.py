@@ -1,16 +1,17 @@
 import random
 
-from .enums.difficulty import Difficulty
-from .enums.goal import Goal
-from .enums.statue_req import StatueReq
-from .enums.logic import Logic
-from .enums.dungeon_shuffle import DungeonShuffle
-from .enums.orb_rando import OrbRando
-from .enums.darkrooms import DarkRooms
-from .enums.enemizer import Enemizer
-from .enums.start_location import StartLocation
-from .enums.sprites import Sprite
-
+#from .enums.difficulty import Difficulty
+#from .enums.goal import Goal
+#from .enums.statue_req import StatueReq
+#from .enums.logic import Logic
+#from .enums.dungeon_shuffle import DungeonShuffle
+#from .enums.orb_rando import OrbRando
+#from .enums.darkrooms import DarkRooms
+#from .enums.enemizer import Enemizer
+#from .enums.start_location import StartLocation
+#from .enums.flute import FluteOpt
+#from .enums.sprites import Sprite
+from .enums import *
 
 class RandomizerData:
     def __init__(self, 
@@ -36,8 +37,12 @@ class RandomizerData:
                  open_mode: bool = False, 
                  z3: bool = False, 
                  race_mode: bool = False, 
-                 fluteless: bool = False,
-                 sprite: Sprite = Sprite.WILL
+                 flute: FluteOpt = FluteOpt.START,
+                 sprite: Sprite = Sprite.WILL,
+                 printlevel: PrintLevel = PrintLevel.SILENT,
+                 break_on_error: bool = False,
+                 break_on_init: bool = False,
+                 ingame_debug: bool = False
                  ):
         self.seed = seed
         self.difficulty = difficulty
@@ -62,5 +67,9 @@ class RandomizerData:
         self.open_mode = open_mode
         self.z3 = z3
         self.race_mode = race_mode
-        self.fluteless = fluteless
+        self.flute = flute
         self.sprite = sprite
+        self.printlevel = printlevel
+        self.break_on_error = break_on_error
+        self.break_on_init = break_on_init
+        self.ingame_debug = ingame_debug

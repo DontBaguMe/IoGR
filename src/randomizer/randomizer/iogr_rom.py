@@ -3,37 +3,29 @@ from typing import BinaryIO
 
 from .patch import Patch
 from .classes import World
-from .quintet_comp import compress as qt_compress
+#from .quintet_comp import compress as qt_compress
 from .quintet_text import encode as qt_encode
 from .errors import FileNotFoundError, OffsetError
 from .models.randomizer_data import RandomizerData
-from .models.enums.difficulty import Difficulty
-from .models.enums.goal import Goal
-from .models.enums.statue_req import StatueReq
-from .models.enums.logic import Logic
-from .models.enums.entrance_shuffle import EntranceShuffle
-from .models.enums.dungeon_shuffle import DungeonShuffle
-from .models.enums.orb_rando import OrbRando
-from .models.enums.darkrooms import DarkRooms
-from .models.enums.enemizer import Enemizer
-from .models.enums.start_location import StartLocation
+#from .models.enums.difficulty import Difficulty
+#from .models.enums.goal import Goal
+#from .models.enums.statue_req import StatueReq
+#from .models.enums.logic import Logic
+#from .models.enums.entrance_shuffle import EntranceShuffle
+#from .models.enums.dungeon_shuffle import DungeonShuffle
+#from .models.enums.orb_rando import OrbRando
+#from .models.enums.darkrooms import DarkRooms
+#from .models.enums.enemizer import Enemizer
+#from .models.enums.flute import FluteOpt
+#from .models.enums.start_location import StartLocation
+from .models.enums import *
 
 from . import asar
 
-VERSION = "4.7.0"
-
+VERSION = "4.7.1"
 MAX_RANDO_RETRIES = 100
-PRINT_LOG = -1
-
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
-BIN_PATH: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "bin" + os.path.sep
-
 os.add_dll_directory(os.getcwd()+"/src/randomizer/randomizer")    # So python can find asar.dll.
-
-
-def __get_data_file__(data_filename: str) -> BinaryIO:
-    path = BIN_PATH + data_filename
-    return open(path, "rb")
 
 
 def generate_filename(settings: RandomizerData, extension: str):
@@ -49,13 +41,13 @@ def generate_filename(settings: RandomizerData, extension: str):
 
     def getGoal(goal, statues, statue_req):
         if goal.value is Goal.DARK_GAIA.value:
-            return "-D" + statues[0] + getStatueReq(statue_req)
+            return "D" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.APO_GAIA.value:
-            return "-A" + statues[0] + getStatueReq(statue_req)
+            return "A" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.RANDOM_GAIA.value:
-            return "-R" + statues[0] + getStatueReq(statue_req)
+            return "R" + statues[0] + getStatueReq(statue_req)
         if goal.value is Goal.RED_JEWEL_HUNT.value:
-            return "-J"
+            return "J"
 
     def getStatueReq(statue_req):
         if statue_req.value == StatueReq.PLAYER_CHOICE.value:
@@ -137,6 +129,13 @@ def generate_filename(settings: RandomizerData, extension: str):
         if boss_shuffle:
             affix += "-B"
         return affix
+    
+    def getFluteOpt(flute):
+        if flute.value == FluteOpt.SHUFFLE.value:
+            return "-fs"
+        if flute.value == FluteOpt.FLUTELESS.value:
+            return "-fl"
+        return ""
 
     def getSwitch(switch, param):
         if switch:
@@ -152,19 +151,19 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getEntranceShuffle(settings.coupled_exits, settings.town_shuffle, settings.dungeon_shuffle, settings.overworld_shuffle)
     filename += getOrbRando(settings.orb_rando)
     filename += getDarkRooms(settings.darkrooms)
-    if (settings.open_mode or settings.firebird or settings.ohko or settings.z3 or settings.allow_glitches or settings.fluteless or settings.red_jewel_madness):
+    if (settings.open_mode or settings.firebird or settings.ohko or settings.z3 or settings.allow_glitches or settings.flute.value > 0 or settings.red_jewel_madness):
         filename += "_v"
-        filename += getSwitch(settings.open_mode, "O")
-        filename += getSwitch(settings.firebird, "F")
-        filename += getSwitch(settings.allow_glitches, "G")
+        filename += getSwitch(settings.open_mode, "o")
+        filename += getSwitch(settings.firebird, "f")
+        filename += getSwitch(settings.allow_glitches, "g")
         filename += getSwitch(settings.ohko, "1")
-        filename += getSwitch(settings.z3, "Z")
-        filename += getSwitch(settings.fluteless, "-FL")
-        filename += getSwitch(settings.red_jewel_madness, "-RJM")
+        filename += getSwitch(settings.z3, "z")
+        filename += getFluteOpt(settings.flute)
+        filename += getSwitch(settings.red_jewel_madness, "-rjm")
     filename += "_" + str(settings.seed)
     filename += getSwitch(settings.race_mode, "R")
-    filename += "."
-    filename += extension
+    if extension != "":
+        filename += "." + extension
 
     return filename
 
@@ -189,7 +188,7 @@ class Randomizer:
         logging.basicConfig(filename=log_file_path, filemode='w', format='%(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("IOGR")
 
-    def generate_rom(self, filename: str, settings: RandomizerData):
+    def generate_rom(self, filename: str, settings: RandomizerData, profile_base_filepath=""):
         self.asar_defines = { "DummyRandomizerDefine": "DummyRandomizerDefine" }
 
         random.seed(settings.seed)
@@ -232,16 +231,6 @@ class Randomizer:
             i += 1
 
         self.asar_defines["RandoTitleScreenHashString"] = hash_final
-        
-        ##########################################################################
-        #                   Adjust Moon Tribe timer for enemizer
-        ##########################################################################
-        timer = 20
-        if settings.enemizer.value != Enemizer.NONE.value:
-            timer += 5
-            if settings.enemizer.value != Enemizer.LIMITED.value:
-                timer += 5
-        self.asar_defines["MoonTribeTimeLimit"] = timer
 
         ##########################################################################
         #                            Randomize Inca tile
@@ -249,36 +238,8 @@ class Randomizer:
         # Set random X/Y for new Inca tile
         inca_x = random.randint(0, 11)
         inca_y = random.randint(0, 5)
-        inca_tile_west =  2 * inca_x + 4
-        inca_tile_north = 2 * inca_y + 15
-        inca_tile_east =  2 * inca_x + 7
-        inca_tile_south = 2 * inca_y + 18
-
-        # Determine address location for new tile in uncompressed map data
-        row = 32 + 2 * inca_y + 16 * int(inca_x / 6)
-        column = 2 * ((inca_x + 2) % 8)
-        addr = 16 * row + column
-
-        # Create empty map, insert tile, and compress
-        incamap_data = b"\x00"
-        while len(incamap_data) < 0x400:
-            incamap_data += b"\x00"
-        incamap_data = incamap_data[:addr] + b"\x40\x41\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x42\x43" + incamap_data[addr+18:]
-        incamap_compressed = qt_compress(incamap_data)
-        
-        # The tilemap define is awkward because it has to be a text representation, not raw bytes.
-        self.asar_defines["IncaTileRoomCompTilemap"] = ""
-        i = 0
-        while i < len(incamap_compressed):
-            self.asar_defines["IncaTileRoomCompTilemap"] += "$"+format(incamap_compressed[i],"02X")
-            i += 1
-            if i < len(incamap_compressed):
-                self.asar_defines["IncaTileRoomCompTilemap"] += ","
-        # The other defines are normal.
-        self.asar_defines["IncaTileWest"] = inca_tile_west
-        self.asar_defines["IncaTileNorth"] = inca_tile_north
-        self.asar_defines["IncaTileEast"] = inca_tile_east
-        self.asar_defines["IncaTileSouth"] = inca_tile_south
+        self.asar_defines["IncaTileX"] = inca_x
+        self.asar_defines["IncaTileY"] = inca_y
 
         ##########################################################################
         #                       Randomize heiroglyph order
@@ -306,7 +267,7 @@ class Randomizer:
         #                          Randomize Snake Game
         ##########################################################################
         snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
-        if settings.fluteless:
+        if settings.flute.value >= 1:
             snakes_per_sec = [i/4.0 for i in snakes_per_sec]
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
         snake_timer = 5 * random.randint(2,12)             # Timer between 10 and 60 sec (inc 5)
@@ -686,17 +647,44 @@ class Randomizer:
         #                   Randomize item and ability placement
         ##########################################################################
         done = False
-        seed_adj = 0
+        self.seed_adj = 0
         while not done:
-            if seed_adj > MAX_RANDO_RETRIES:
+            if self.seed_adj > MAX_RANDO_RETRIES:
                 self.logger.error("ERROR: Max number of seed adjustments exceeded")
                 raise RecursionError
-            elif seed_adj > 0:
-                if PRINT_LOG > -1:
-                    print("Trying again... attempt", seed_adj+1)
+            elif self.seed_adj > 0:
+                if settings.printlevel.value > -1:
+                    print("Trying again... attempt", self.seed_adj+1)
             self.w = World(settings, statues_required, statues, statue_req, kara_location, gem, [inca_x + 1, inca_y + 1], hieroglyph_order, boss_order)
-            done = self.w.randomize(seed_adj,PRINT_LOG)
-            seed_adj += 1
+            done = self.w.randomize(self.seed_adj, settings.printlevel.value, settings.break_on_error, settings.break_on_init)
+            if profile_base_filepath != "":
+                val_messages = self.w.validate()
+                f = open(profile_base_filepath + "_" + format(self.seed_adj,"02") + ".txt","w")
+                f.write("Error log:\n")
+                if not self.w.errorlog:
+                    f.write("No errors\n")
+                else:
+                    for m in self.w.errorlog:
+                        f.write(m + "\n")
+                f.write("\n\n")
+                f.write("Validation log:\n")
+                for m in val_messages:
+                    f.write(m + "\n")
+                f.write("\n\n")
+                f.write("World graph:\n")
+                for n in sorted(self.w.graph):
+                    f.write(str(n) + ": " + str(self.w.graph[n]) + "\n")
+                f.write("\n\n")
+                f.write("World edges:\n")
+                for e in sorted(self.w.logic):
+                    f.write(str(e) + ": " + str(self.w.logic[e]) + "\n")
+                f.write("\n\n")
+                f.write("World exits:\n")
+                for x in sorted(self.w.exits):
+                    f.write(str(x) + ": " + str(self.w.exits[x]) + "\n")
+                f.write("\n\n")
+                f.close()
+            self.seed_adj += 1
         self.w.generate_spoiler(VERSION)
         self.w.populate_asar_defines()
         for wdef in self.w.asar_defines:
@@ -719,434 +707,30 @@ class Randomizer:
         ##########################################################################
         #                        Randomize Ishtar puzzle
         ##########################################################################
-        # Create temporary map file
-        f_ishtarmapblank = open(BIN_PATH + "ishtarmapblank.bin", "rb")
-        ishtarmapdata = f_ishtarmapblank.read()
-        f_ishtarmapblank.close()
-        f_ishtarmap = tempfile.TemporaryFile()
-        f_ishtarmap.write(ishtarmapdata)
-
-        # Initialize data
-        coords = [[],[],[],[]]
-        idx_diff = [[],[],[],[]]
-        other_changes = [[],[],[],[]]
-        changes = [list(range(11)), list(range(8)), list(range(5)), list(range(10))]
-
-        # Check if chest contents in room 3 are identical
-        same_chest = (self.w.item_locations[80][3] == self.w.item_locations[81][3])
-        
-        # This is required, and should be 0 if no room's difference is Will's hair
-        self.asar_defines["IshtarRoomWithHairDifference"] = 0
-
-        # Loop through the four rooms, determine and apply map changes
-        for room in range(4):
-            random.shuffle(changes[room])
-
-            # Pick correct change (second room only)
-            idx_diff[room] = changes[room].pop(0)
-
-            # Set additional changes for both rooms (higher difficulties only)
+        used_hair = False
+        for room,maxchg in [(1,10), (2,7), (3,4), (4,9)]:
+            minchg = 1 if used_hair else 0
+            change1 = random.randint(minchg,maxchg)
+            if change1 == 0:
+                used_hair = True
+                minchg = 1
+            self.asar_defines["IshtarRoom"+str(room)+"DifferenceIndex1"] = change1
             if settings.difficulty.value >= 2:
-                # Will's hair can only be changed in second room
-                if 0 in changes[room]:
-                    changes[room].remove(0)
-                other_changes[room] = changes[room][:settings.difficulty.value]
-
-            if PRINT_LOG > -1:
-                print("Ishtar room",room+1,":",idx_diff[room],other_changes[room])
-            done = False
-            while not done:
-                if other_changes[room]:
-                    change_id = other_changes[room].pop(0)
-                else:
-                    change_id = idx_diff[room]
-                    done = True
-                if change_id == 0 and self.asar_defines["IshtarRoomWithHairDifference"] > 0:
-                    change_id = 1    # Only one room can have hair as the difference
-
-                # Set change for Room 1
-                if room == 0:
-                    if change_id == 0:  # Will's hair
-                        self.asar_defines["IshtarRoomWithHairDifference"] = 1
-                        coords[room] = [0x01a0, 0x01c0, 0x00b0, 0x00d0]
-
-                    elif change_id == 1:  # Change right vase to light (vanilla)
-                        f_ishtarmap.seek(int("17b", 16))
-                        f_ishtarmap.write(b"\x7b")
-                        f_ishtarmap.seek(int("18b", 16))
-                        f_ishtarmap.write(b"\x84")
-                        if done:
-                            coords[room] = [0x01B0, 0x01C0, 0x0070, 0x0090]
-                        else:
-                            f_ishtarmap.seek(int("7b", 16))
-                            f_ishtarmap.write(b"\x7b")
-                            f_ishtarmap.seek(int("8b", 16))
-                            f_ishtarmap.write(b"\x84")
-
-                    elif change_id == 2:  # Change middle vase to light
-                        f_ishtarmap.seek(int("175", 16))
-                        f_ishtarmap.write(b"\x7b")
-                        f_ishtarmap.seek(int("185", 16))
-                        f_ishtarmap.write(b"\x84")
-                        if done:
-                            coords[room] = [0x0150, 0x0160, 0x0070, 0x0090]
-                        else:
-                            f_ishtarmap.seek(int("75", 16))
-                            f_ishtarmap.write(b"\x7b")
-                            f_ishtarmap.seek(int("85", 16))
-                            f_ishtarmap.write(b"\x84")
-
-                    elif change_id == 3:  # Change left vase to dark
-                        f_ishtarmap.seek(int("174", 16))
-                        f_ishtarmap.write(b"\x83")
-                        f_ishtarmap.seek(int("184", 16))
-                        f_ishtarmap.write(b"\x87")
-                        if done:
-                            coords[room] = [0x0140, 0x0150, 0x0070, 0x0090]
-                        else:
-                            f_ishtarmap.seek(int("74", 16))
-                            f_ishtarmap.write(b"\x83")
-                            f_ishtarmap.seek(int("84", 16))
-                            f_ishtarmap.write(b"\x87")
-
-                    elif change_id == 4:  # Change left shelf to empty
-                        f_ishtarmap.seek(int("165", 16))
-                        f_ishtarmap.write(b"\x74")
-                        if done:
-                            coords[room] = [0x0150, 0x0160, 0x0058, 0x0070]
-                        else:
-                            f_ishtarmap.seek(int("65", 16))
-                            f_ishtarmap.write(b"\x74")
-
-                    elif change_id == 5:  # Change left shelf to books
-                        f_ishtarmap.seek(int("165", 16))
-                        f_ishtarmap.write(b"\x76")
-                        if done:
-                            coords[room] = [0x0150, 0x0160, 0x0058, 0x0070]
-                        else:
-                            f_ishtarmap.seek(int("65", 16))
-                            f_ishtarmap.write(b"\x76")
-
-                    elif change_id == 6:  # Change right shelf to jar
-                        f_ishtarmap.seek(int("166", 16))
-                        f_ishtarmap.write(b"\x75")
-                        if done:
-                            coords[room] = [0x0160, 0x0170, 0x0058, 0x0070]
-                        else:
-                            f_ishtarmap.seek(int("66", 16))
-                            f_ishtarmap.write(b"\x75")
-
-                    elif change_id == 7:  # Change right shelf to empty
-                        f_ishtarmap.seek(int("166", 16))
-                        f_ishtarmap.write(b"\x74")
-                        if done:
-                            coords[room] = [0x0160, 0x0170, 0x0058, 0x0070]
-                        else:
-                            f_ishtarmap.seek(int("66", 16))
-                            f_ishtarmap.write(b"\x74")
-
-                    elif change_id == 8:  # Remove left sconce
-                        f_ishtarmap.seek(int("157", 16))
-                        f_ishtarmap.write(b"\x12\x12")
-                        f_ishtarmap.seek(int("167", 16))
-                        f_ishtarmap.write(b"\x1a\x1a")
-                        if done:
-                            coords[room] = [0x0170, 0x0190, 0x0050, 0x0070]
-                        else:
-                            f_ishtarmap.seek(int("57", 16))
-                            f_ishtarmap.write(b"\x12\x12")
-                            f_ishtarmap.seek(int("67", 16))
-                            f_ishtarmap.write(b"\x1a\x1a")
-
-                    elif change_id == 9:  # Remove right sconce
-                        f_ishtarmap.seek(int("15a", 16))
-                        f_ishtarmap.write(b"\x12\x12")
-                        f_ishtarmap.seek(int("16a", 16))
-                        f_ishtarmap.write(b"\x1a\x1a")
-                        if done:
-                            coords[room] = [0x01a0, 0x01c0, 0x0050, 0x0070]
-                        else:
-                            f_ishtarmap.seek(int("5a", 16))
-                            f_ishtarmap.write(b"\x12\x12")
-                            f_ishtarmap.seek(int("6a", 16))
-                            f_ishtarmap.write(b"\x1a\x1a")
-
-                    elif change_id == 10:  # Shift right vase
-                        f_ishtarmap.seek(int("17a", 16))
-                        f_ishtarmap.write(b"\x83\x22")
-                        f_ishtarmap.seek(int("18a", 16))
-                        f_ishtarmap.write(b"\x87\x13")
-                        if done:
-                            coords[room] = [0x01a0, 0x01b0, 0x0070, 0x0090]
-                        else:
-                            f_ishtarmap.seek(int("7a", 16))
-                            f_ishtarmap.write(b"\x83\x22")
-                            f_ishtarmap.seek(int("8a", 16))
-                            f_ishtarmap.write(b"\x87\x13")
-
-
-                # Set change for Room 2
-                elif room == 1:
-                    if change_id == 0:  # Will's hair
-                        self.asar_defines["IshtarRoomWithHairDifference"] = 2
-                        coords[room] = [0x0390, 0x03b0, 0x00a0, 0x00c0]
-
-                    elif change_id == 1:  # Change left vase to light
-                        f_ishtarmap.seek(int("3a3", 16))
-                        f_ishtarmap.write(b"\x7c")
-                        f_ishtarmap.seek(int("3b3", 16))
-                        f_ishtarmap.write(b"\x84")
-                        if done:
-                            coords[room] = [0x0330, 0x0340, 0x00a0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("2a3", 16))
-                            f_ishtarmap.write(b"\x7c")
-                            f_ishtarmap.seek(int("2b3", 16))
-                            f_ishtarmap.write(b"\x84")
-
-                    elif change_id == 2:  # Change right vase to light
-                        f_ishtarmap.seek(int("3a4", 16))
-                        f_ishtarmap.write(b"\x7c")
-                        f_ishtarmap.seek(int("3b4", 16))
-                        f_ishtarmap.write(b"\x84")
-                        if done:
-                            coords[room] = [0x0340, 0x0350, 0x00a0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("2a4", 16))
-                            f_ishtarmap.write(b"\x7c")
-                            f_ishtarmap.seek(int("2b4", 16))
-                            f_ishtarmap.write(b"\x84")
-
-                    elif change_id == 3:  # Remove rock
-                        f_ishtarmap.seek(int("3bd", 16))
-                        f_ishtarmap.write(b"\x73")
-                        if done:
-                            coords[room] = [0x03d0, 0x03e0, 0x00b0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("2bd", 16))
-                            f_ishtarmap.write(b"\x73")
-
-                    elif change_id == 4:  # Add round table
-                        f_ishtarmap.seek(int("395", 16))
-                        f_ishtarmap.write(b"\x7d\x7e")
-                        f_ishtarmap.seek(int("3a5", 16))
-                        f_ishtarmap.write(b"\x85\x86")
-                        f_ishtarmap.seek(int("3b5", 16))
-                        f_ishtarmap.write(b"\x8d\x8e")
-                        if done:
-                            coords[room] = [0x0350, 0x0370, 0x0090, 0x00b0]
-                        else:
-                            f_ishtarmap.seek(int("295", 16))
-                            f_ishtarmap.write(b"\x7d\x7e")
-                            f_ishtarmap.seek(int("2a5", 16))
-                            f_ishtarmap.write(b"\x85\x86")
-                            f_ishtarmap.seek(int("2b5", 16))
-                            f_ishtarmap.write(b"\x8d\x8e")
-
-                    elif change_id == 5:  # Add sconce
-                        f_ishtarmap.seek(int("357", 16))
-                        f_ishtarmap.write(b"\x88\x89")
-                        f_ishtarmap.seek(int("367", 16))
-                        f_ishtarmap.write(b"\x90\x91")
-                        if done:
-                            coords[room] = [0x0370, 0x0390, 0x0050, 0x0070]
-                        else:
-                            f_ishtarmap.seek(int("257", 16))
-                            f_ishtarmap.write(b"\x88\x89")
-                            f_ishtarmap.seek(int("267", 16))
-                            f_ishtarmap.write(b"\x90\x91")
-
-                    elif change_id == 6:  # Add rock
-                        f_ishtarmap.seek(int("3b2", 16))
-                        f_ishtarmap.write(b"\x77")
-                        if done:
-                            coords[room] = [0x0320, 0x0330, 0x00b0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("2b2", 16))
-                            f_ishtarmap.write(b"\x77")
-
-                    elif change_id == 7:  # Put moss on rock
-                        f_ishtarmap.seek(int("3bd", 16))
-                        f_ishtarmap.write(b"\x8f")
-                        if done:
-                            coords[room] = [0x03d0, 0x03e0, 0x00b0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("2bd", 16))
-                            f_ishtarmap.write(b"\x8f")
-
-
-                # Set change for Room 3
-                elif room == 2:
-                    if not same_chest:
-                        coords[room] = [0x0570, 0x0590, 0x0070, 0x0090]
-                        done = True
-                    
-                    elif (not done or same_chest) and change_id == 0:  # Will's hair
-                        self.asar_defines["IshtarRoomWithHairDifference"] = 3
-                        coords[room] = [0x0590, 0x05b0, 0x00a0, 0x00c0]
-
-                    elif (not done or same_chest) and change_id == 1:  # Remove rock
-                        f_ishtarmap.seek(int("5bd", 16))
-                        f_ishtarmap.write(b"\x73")
-                        if (done and same_chest):
-                            coords[room] = [0x05d0, 0x05e0, 0x00b0, 0x00c0]
-                        elif not done:
-                            f_ishtarmap.seek(int("4bd", 16))
-                            f_ishtarmap.write(b"\x73")
-
-                    elif (not done or same_chest) and change_id == 2:  # Add rock
-                        f_ishtarmap.seek(int("5b2", 16))
-                        f_ishtarmap.write(b"\x77")
-                        if (done and same_chest):
-                            coords[room] = [0x0520, 0x0530, 0x00b0, 0x00c0]
-                        elif not done:
-                            f_ishtarmap.seek(int("4b2", 16))
-                            f_ishtarmap.write(b"\x77")
-
-                    elif (not done or same_chest) and change_id == 3:  # Add sconce
-                        f_ishtarmap.seek(int("557", 16))
-                        f_ishtarmap.write(b"\x88\x89")
-                        f_ishtarmap.seek(int("567", 16))
-                        f_ishtarmap.write(b"\x90\x91")
-                        if (done and same_chest):
-                            coords[room] = [0x0570, 0x0590, 0x0050, 0x0070]
-                        elif not done:
-                            f_ishtarmap.seek(int("457", 16))
-                            f_ishtarmap.write(b"\x88\x89")
-                            f_ishtarmap.seek(int("467", 16))
-                            f_ishtarmap.write(b"\x90\x91")
-
-                    elif (not done or same_chest) and change_id == 4:  # Moss rock
-                        f_ishtarmap.seek(int("5bd", 16))
-                        f_ishtarmap.write(b"\x8f")
-                        if (done and same_chest):
-                            coords[room] = [0x05d0, 0x05e0, 0x00b0, 0x00c0]
-                        elif not done:
-                            f_ishtarmap.seek(int("4bd", 16))
-                            f_ishtarmap.write(b"\x8f")
-
-
-                # Set change for Room 4
-                elif room == 3:
-                    if change_id == 0:  # Will's hair (vanilla)
-                        self.asar_defines["IshtarRoomWithHairDifference"] = 4
-                        coords[room] = [0x0790, 0x07b0, 0x00a0, 0x00c0]
-
-                    if change_id == 1:  # Remove rock
-                        f_ishtarmap.seek(int("7bd", 16))
-                        f_ishtarmap.write(b"\x73")
-                        if done:
-                            coords[room] = [0x07d0, 0x07e0, 0x00b0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6bd", 16))
-                            f_ishtarmap.write(b"\x73")
-
-                    if change_id == 2:  # Add rock L
-                        f_ishtarmap.seek(int("7b2", 16))
-                        f_ishtarmap.write(b"\x77")
-                        if done:
-                            coords[room] = [0x0720, 0x0730, 0x00b0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6b2", 16))
-                            f_ishtarmap.write(b"\x77")
-
-                    if change_id == 3:  # Add moss rock L
-                        f_ishtarmap.seek(int("7b2", 16))
-                        f_ishtarmap.write(b"\x8f")
-                        if done:
-                            coords[room] = [0x0720, 0x0730, 0x00b0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6b2", 16))
-                            f_ishtarmap.write(b"\x8f")
-
-                    if change_id == 4:  # Add light vase L
-                        f_ishtarmap.seek(int("7a3", 16))
-                        f_ishtarmap.write(b"\x7c")
-                        f_ishtarmap.seek(int("7b3", 16))
-                        f_ishtarmap.write(b"\x84")
-                        if done:
-                            coords[room] = [0x0730, 0x0740, 0x00a0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6a3", 16))
-                            f_ishtarmap.write(b"\x7c")
-                            f_ishtarmap.seek(int("6b3", 16))
-                            f_ishtarmap.write(b"\x84")
-
-                    if change_id == 5:  # Add dark vase L
-                        f_ishtarmap.seek(int("7a3", 16))
-                        f_ishtarmap.write(b"\x7f")
-                        f_ishtarmap.seek(int("7b3", 16))
-                        f_ishtarmap.write(b"\x87")
-                        if done:
-                            coords[room] = [0x0730, 0x0740, 0x00a0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6a3", 16))
-                            f_ishtarmap.write(b"\x7f")
-                            f_ishtarmap.seek(int("6b3", 16))
-                            f_ishtarmap.write(b"\x87")
-
-                    if change_id == 6:  # Add light vase R
-                        f_ishtarmap.seek(int("7ac", 16))
-                        f_ishtarmap.write(b"\x7c")
-                        f_ishtarmap.seek(int("7bc", 16))
-                        f_ishtarmap.write(b"\x84")
-                        if done:
-                            coords[room] = [0x07c0, 0x07d0, 0x00a0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6ac", 16))
-                            f_ishtarmap.write(b"\x7c")
-                            f_ishtarmap.seek(int("6bc", 16))
-                            f_ishtarmap.write(b"\x84")
-
-                    if change_id == 7:  # Add dark vase R
-                        f_ishtarmap.seek(int("7ac", 16))
-                        f_ishtarmap.write(b"\x7f")
-                        f_ishtarmap.seek(int("7bc", 16))
-                        f_ishtarmap.write(b"\x87")
-                        if done:
-                            coords[room] = [0x07c0, 0x07d0, 0x00a0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6ac", 16))
-                            f_ishtarmap.write(b"\x7f")
-                            f_ishtarmap.seek(int("6bc", 16))
-                            f_ishtarmap.write(b"\x87")
-
-                    if change_id == 8:  # Crease in floor
-                        f_ishtarmap.seek(int("7b4", 16))
-                        f_ishtarmap.write(b"\x69\x6a")
-                        if done:
-                            coords[room] = [0x0740, 0x0760, 0x00b0, 0x00c8]
-                        else:
-                            f_ishtarmap.seek(int("6b4", 16))
-                            f_ishtarmap.write(b"\x69\x6a")
-
-                    if change_id == 9:  # Moss rock R
-                        f_ishtarmap.seek(int("7bd", 16))
-                        f_ishtarmap.write(b"\x8f")
-                        if done:
-                            coords[room] = [0x07d0, 0x07e0, 0x00b0, 0x00c0]
-                        else:
-                            f_ishtarmap.seek(int("6bd", 16))
-                            f_ishtarmap.write(b"\x8f")
-
-        # Update cursor check ranges
-        for i in range(4):
-            self.asar_defines["IshtarRoom"+str(i+1)+"TargetWest"] = coords[i][0]
-            self.asar_defines["IshtarRoom"+str(i+1)+"TargetEast"] = coords[i][1]
-            self.asar_defines["IshtarRoom"+str(i+1)+"TargetNorth"] = coords[i][2]
-            self.asar_defines["IshtarRoom"+str(i+1)+"TargetSouth"] = coords[i][3]
-
-        # Compress map data and write. A bit awkward because output needs to be a string.
-        f_ishtarmap.seek(0)
-        ishtarmapcomp = qt_compress(f_ishtarmap.read())
-        f_ishtarmap.close()
-        self.asar_defines["IshtarRoomCompTilemap"] = ""
-        i = 0
-        while i < len(ishtarmapcomp):
-            self.asar_defines["IshtarRoomCompTilemap"] += "$" + format(ishtarmapcomp[i],"02x")
-            i += 1
-            if i < len(ishtarmapcomp):
-                self.asar_defines["IshtarRoomCompTilemap"] += ","
+                change2 = change1
+                while change2 == change1:
+                    change2 = random.randint(minchg,maxchg)
+                if change2 == 0:
+                    used_hair = True
+                    minchg = 1
+                self.asar_defines["IshtarRoom"+str(room)+"DifferenceIndex2"] = change2
+                if settings.difficulty.value >= 3:
+                    change3 = change2
+                    while change3 == change2 or change3 == change1:
+                        change3 = random.randint(minchg,maxchg)
+                    if change3 == 0:
+                        used_hair = True
+                        minchg = 1
+                    self.asar_defines["IshtarRoom"+str(room)+"DifferenceIndex3"] = change3
 
         ##########################################################################
         #                                   Plugins
@@ -1206,12 +790,13 @@ class Randomizer:
         self.asar_defines["SettingOpenMode"] = 1 if settings.open_mode else 0
         self.asar_defines["SettingOHKO"] = 1 if settings.ohko else 0
         self.asar_defines["SettingZ3"] = 1 if settings.z3 else 0
-        self.asar_defines["SettingFluteless"] = 1 if settings.fluteless else 0
+        self.asar_defines["SettingFluteOpt"] = settings.flute.value
         self.asar_defines["SettingEnemizer"] = settings.enemizer.value
         self.asar_defines["SettingTownShuffle"] = 1 if settings.town_shuffle else 0
         self.asar_defines["SettingDungeonShuffle"] = 1 if settings.dungeon_shuffle else 0
         self.asar_defines["SettingOrbRando"] = settings.orb_rando.value
         self.asar_defines["SettingDarkRoomsLevel"] = abs(settings.darkrooms.value)
+        self.asar_defines["SettingDebug"] = 1 if settings.ingame_debug else 0
         
         self.asar_defines["OptionMuteMusic"] = 0
         

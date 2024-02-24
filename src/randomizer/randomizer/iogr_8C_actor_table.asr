@@ -2,6 +2,11 @@ arch 65816
 hirom
 fillbyte $FF
 
+!SettingFluteless = 0
+if !SettingFluteOpt > 0
+!SettingFluteless = 1
+endif
+
 !DungeonShuffleDracoOffset = 0
 if !SettingDungeonShuffle > 0
 !DungeonShuffleDracoOffset = 2
@@ -464,15 +469,9 @@ ActorList_Map0B:
 db $0A,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $0B,$20,$00 : dl $84D202 : db $00
+db $0B,$20,$00 : dl ECPlotDriver-3 : db $00
 db $02,$14,$00 : dl $84DC19 : db $00
 db $12,$08,!DkSpPrisonCellType : dl $88D6A9 : db $00    ; DS moved for IOGR.
-db $0D,$11,$00 : dl $84DB12 : db $00
-db $0E,$11,$00 : dl $84DB12 : db $00
-db $0F,$11,$00 : dl $84DB12 : db $00
-db $10,$11,$00 : dl $84DB12 : db $00
-db $12,$07,$00 : dl $84DB4A : db $00
-db $0B,$0D,$00 : dl $84DB4A : db $00
 db $0C,$08,$00 : dl $84DBD9 : db $00
 db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$44,$83,$A7,$80,$A2,$83,$0E,$A3,$AC,$D7,$26,$CA 
@@ -513,7 +512,7 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $2B,$10,!Monster0013Param : dl !Monster0013Addr : db !Monster0013Stats,$13,!Monster0013ItemFlag
 db $1F,$1B,!Monster0014Param : dl !Monster0014Addr : db !Monster0014Stats,$14,!Monster0014ItemFlag
-db $11,$15,!Monster0015Param : dl !Monster0015Addr : db !Monster0015Stats,$15,!Monster0015ItemFlag
+db $11,$15-!SettingFluteless,!Monster0015Param : dl !Monster0015Addr : db !Monster0015Stats,$15,!Monster0015ItemFlag
 db $08-!FlutelessEnemizerEdDgWaterSpawnOffset,$0B,!Monster0016Param : dl !Monster0016Addr : db !Monster0016Stats,$16,!Monster0016ItemFlag
 db $37,$04,!Monster0017Param : dl !Monster0017Addr : db !Monster0017Stats,$17,!Monster0017ItemFlag
 db $3D,$07,!Monster0018Param : dl !Monster0018Addr : db !Monster0018Stats,$18,!Monster0018ItemFlag
@@ -532,12 +531,10 @@ db $3E,$11,$00 : dl $8A8835 : db $00
 db $06,$1B,$00 : dl $8A8AAE : db $00
 db $27,$16,$00 : dl $8A8AAE : db $00
 db $23,$17,$80 : dl $8A8AAE : db $00
-if !SettingFluteless == 0
 db $14,$15,$00 : dl $8A89DE : db $00
 db $15,$15,$00 : dl $8A8A0F : db $00
 db $16,$1C,$00 : dl $8A8A46 : db $00
 db $16,$1D,$00 : dl $8A8A7D : db $00
-endif
 endif
 db $17,$18,$00 : dl $8A8931 : db $00
 db $3D,$0E,$00 : dl $89A915 : db $00
@@ -880,7 +877,7 @@ ActorList_Map24:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
-db $00,$01,$00 : dl $89C66E : db $00
+db $00,$01,$00 : dl EGoldenTileListener-3 : db $00
 db $FF,$CA 
 
 ActorList_Map25:

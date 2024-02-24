@@ -599,7 +599,7 @@ db $10 : db $36,$23,$00 : dl $CC4524
 db $03 : db $00,$10,$10 : dl $C3190A : db $00
 db $05 : db $00,$20,$00,$02 : dl $D83A4A
 db $06 : db $01 : dl $DD42A2
-db $06 : db $02 : dl $DF3EA0
+db $06 : db $02 : dl $DF38d9
 db $15 : db $40
 db $00
 
@@ -1424,7 +1424,7 @@ db !Map75CardMusic
 db $03 : db $00,$20,$00 : dl $908F07 : db $00
 db $04 : db $00,$70,$10 : dl $DE49F3
 db $05 : db $00,$20,$00,$01 : dl $D65344
-db $06 : db $01 : dl $DF4100
+db $06 : db $01 : dl $D93D25
 db $15 : db $25
 db $00
 

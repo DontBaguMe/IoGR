@@ -391,3 +391,16 @@ LR_PlaceSelfBetween04And06 = $8aa41c
 }
 
 
+; Ishtar room differences
+{
+!IshtarRoom1DifferenceIndex2 ?= $ffff
+!IshtarRoom1DifferenceIndex3 ?= $ffff
+!IshtarRoom2DifferenceIndex2 ?= $ffff
+!IshtarRoom2DifferenceIndex3 ?= $ffff
+!IshtarRoom3DifferenceIndex2 ?= $ffff
+!IshtarRoom3DifferenceIndex3 ?= $ffff
+!IshtarRoom4DifferenceIndex2 ?= $ffff
+!IshtarRoom4DifferenceIndex3 ?= $ffff
+}
+
+

@@ -7,20 +7,22 @@ import random
 import zipfile
 
 from randomizer.iogr_rom import generate_filename
-from randomizer.models.enums.difficulty import Difficulty
-from randomizer.models.enums.enemizer import Enemizer
-from randomizer.models.enums.goal import Goal
-from randomizer.models.enums.statue_req import StatueReq
-from randomizer.models.enums.logic import Logic
-from randomizer.models.enums.sprites import Sprite
-from randomizer.models.enums.entrance_shuffle import EntranceShuffle
-#from randomizer.models.enums.dungeon_shuffle import DungeonShuffle
-from randomizer.models.enums.orb_rando import OrbRando
-from randomizer.models.enums.darkrooms import DarkRooms
-from randomizer.models.enums.start_location import StartLocation
+#from randomizer.models.enums.difficulty import Difficulty
+#from randomizer.models.enums.enemizer import Enemizer
+#from randomizer.models.enums.goal import Goal
+#from randomizer.models.enums.statue_req import StatueReq
+#from randomizer.models.enums.logic import Logic
+#from randomizer.models.enums.sprites import Sprite
+#from randomizer.models.enums.entrance_shuffle import EntranceShuffle
+##from randomizer.models.enums.dungeon_shuffle import DungeonShuffle
+#from randomizer.models.enums.orb_rando import OrbRando
+#from randomizer.models.enums.darkrooms import DarkRooms
+#from randomizer.models.enums.start_location import StartLocation
+#from randomizer.models.enums.flute import FluteOpt
 from randomizer.iogr_rom import Randomizer, VERSION
 from randomizer.models.randomizer_data import RandomizerData
 from randomizer.errors import FileNotFoundError, OffsetError
+from randomizer.models.enums import *
 
 
 def find_ROM():
@@ -90,6 +92,14 @@ def generate_ROM():
             return Logic.BEATABLE
         if l == "Chaos":
             return Logic.CHAOS
+    
+    def get_flute_opt():
+        f = flute_opt.get()
+        if f == "Shuffle Flute":
+            return FluteOpt.SHUFFLE
+        if f == "Fluteless":
+            return FluteOpt.FLUTELESS
+        return FluteOpt.START
 
     def get_enemizer():
         e = enemizer.get()
@@ -179,6 +189,18 @@ def generate_ROM():
         if sp == "Sye":
             return Sprite.SYE
 
+    def get_printlevel():
+        m = printlevel.get()
+        if m == "Error":
+            return PrintLevel.ERROR
+        if m == "Warn":
+            return PrintLevel.WARN
+        if m == "Info":
+            return PrintLevel.INFO
+        if m == "Verbose":
+            return PrintLevel.VERBOSE
+        return PrintLevel.SILENT
+
     if not seed_str.isdigit():
         tkinter.messagebox.showinfo("ERROR", "Please enter or generate a valid seed")
         return
@@ -206,29 +228,56 @@ def generate_ROM():
             dungeon_shuffle = dungeon_shuffle.get(), 
             overworld_shuffle = overworld_shuffle.get(), 
             race_mode = race_mode_toggle.get(), 
-            fluteless = fluteless.get(), 
+            flute = get_flute_opt(), 
             sprite = get_sprite(),
             orb_rando = get_orb_rando(), 
-            darkrooms = get_darkrooms()
+            darkrooms = get_darkrooms(),
+            printlevel = get_printlevel(),
+            break_on_error = break_on_error.get(),
+            break_on_init = break_on_init.get(),
+            ingame_debug = ingame_debug.get()
             )
 
-        rom_filename = generate_filename(settings, "sfc")
-        asm_filename = generate_filename(settings, "asr")
-        spoiler_filename = generate_filename(settings, "json")
-
+        base_filename = generate_filename(settings, "")
+        rom_filename = base_filename + ".sfc"
+        asm_filename = base_filename + ".asr"
+        spoiler_filename = base_filename + ".json"
         randomizer = Randomizer(rompath)
-        patch = randomizer.generate_rom(rom_filename, settings)
-
-        if not patch[0]:
-            tkinter.messagebox.showerror("Error", "Assembling failed. The first error was:" + str(patch[1][0]) )
+        if do_profile.get():
+            random.seed(seed_int)
+            import cProfile, pstats, io
+            profiling_path = os.path.dirname(rompath) + os.path.sep + "iogr" + os.path.sep + base_filename + os.path.sep
+            if not os.path.exists(os.path.dirname(profiling_path)):
+                os.makedirs(os.path.dirname(profiling_path))
+            profile = cProfile.Profile()
+            profile.enable()
+            test_number = 1
+            while test_number <= 20:
+                settings.seed = random.randint(0, 99999999)
+                patch = randomizer.generate_rom("", settings, profiling_path + "Test" + format(test_number,"02"))
+                test_number += 1
+            profile.disable()
+            #statstream = io.StringIO()
+            statfile = open(profiling_path + os.path.sep + "profile.txt","w")
+            runstats = pstats.Stats(profile, stream=statfile)
+            runstats.strip_dirs()
+            runstats.sort_stats('time')
+            runstats.print_stats()
+            #statfile.write(statstream.read())
+            statfile.close()
+            tkinter.messagebox.showinfo("Success","Profiling complete; results in ./iogr/"+base_filename+"/")
         else:
-            write_patch(patch, rompath, rom_filename, settings)
-            if not race_mode_toggle.get():
-                spoiler = randomizer.generate_spoiler()
-                write_spoiler(spoiler, spoiler_filename, rompath)
-                asm_dump = randomizer.generate_asm_dump()
-                write_asm_dump(asm_dump, asm_filename, rompath)
-            tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
+            patch = randomizer.generate_rom(rom_filename, settings)
+            if not patch[0]:
+                tkinter.messagebox.showerror("Error", "Assembling failed. The first error was:" + str(patch[1][0]) )
+            else:
+                write_patch(patch, rompath, rom_filename, settings)
+                if not race_mode_toggle.get():
+                    spoiler = randomizer.generate_spoiler()
+                    write_spoiler(spoiler, spoiler_filename, rompath)
+                    asm_dump = randomizer.generate_asm_dump()
+                    write_asm_dump(asm_dump, asm_filename, rompath)
+                tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
         tkinter.messagebox.showerror("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
     except FileNotFoundError:
@@ -397,6 +446,7 @@ tkinter.Label(mainframe, text="Entrance Shuffle").grid(row=17, column=0, sticky=
 #tkinter.Label(mainframe, text="Dungeon Shuffle").grid(row=18, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Orb Rando").grid(row=20, column=0, sticky=tkinter.W)
 tkinter.Label(mainframe, text="Dark Rooms").grid(row=22, column=0, sticky=tkinter.W)
+tkinter.Label(mainframe, text="Dev Tools").grid(row=50, column=0, sticky=tkinter.W)
 
 difficulty = tkinter.StringVar(root)
 diff_choices = ["Easy", "Normal", "Hard", "Extreme"]
@@ -438,19 +488,12 @@ z3_mode.set(0)
 overworld_shuffle = tkinter.IntVar(root)
 overworld_shuffle.set(0)
 
-#entrance_shuffle = tkinter.StringVar(root)
-#entrance_shuffle_choices = ["None", "Coupled", "Uncoupled"]
-#entrance_shuffle.set("None")
-
 coupled_exits = tkinter.IntVar(root)
 coupled_exits.set(1)
 
 town_shuffle = tkinter.IntVar(root)
 town_shuffle.set(0)
 
-#dungeon_shuffle = tkinter.StringVar(root)
-#dungeon_shuffle_choices = ["None", "Basic", "Chaos"]
-#dungeon_shuffle.set("None")
 dungeon_shuffle = tkinter.IntVar(root)
 dungeon_shuffle.set(0)
 
@@ -467,8 +510,9 @@ darkrooms_cursed.set(0)
 race_mode_toggle = tkinter.IntVar(root)
 race_mode_toggle.set(0)
 
-fluteless = tkinter.IntVar(root)
-fluteless.set(0)
+flute_opt = tkinter.StringVar(root)
+flute_opt_choices = ["Start with Flute", "Shuffle Flute", "Fluteless"]
+flute_opt.set("Start with Flute")
 
 enemizer = tkinter.StringVar(root)
 enemizer_choices = ["None", "Limited", "Balanced", "Full", "Insane"]
@@ -485,6 +529,18 @@ statues.set("4")
 statue_req = tkinter.StringVar(root)
 statue_req_choices = ["Game Choice", "Player Choice", "Random Choice"]
 statue_req.set("Game Choice")
+
+printlevel = tkinter.StringVar(root)
+printlevel_choices = ["Silent", "Error", "Warn", "Info", "Verbose"]
+printlevel.set("Silent")
+break_on_error = tkinter.IntVar(root)
+break_on_error.set(0)
+break_on_init = tkinter.IntVar(root)
+break_on_init.set(0)
+do_profile = tkinter.IntVar(root)
+do_profile.set(0)
+ingame_debug = tkinter.IntVar(root)
+ingame_debug.set(0)
 
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)
@@ -516,8 +572,8 @@ ohko_checkbox = tkinter.Checkbutton(variants_frame, variable=ohko, onvalue=1, of
 #variants_col_split_label = tkinter.Label(variants_frame, text=" ").grid(row=0, column=2)
 rjm_label = tkinter.Label(variants_frame, text="Red Jewel Madness:").grid(row=0, column=3, sticky=tkinter.E)
 rjm_checkbox = tkinter.Checkbutton(variants_frame, variable=red_jewel_madness, onvalue=1, offvalue=0, command=checkbox_clear_ohko).grid(row=0, column=4)
-fluteless_label = tkinter.Label(variants_frame, text="Fluteless:").grid(row=1, column=0, sticky=tkinter.E)
-fluteless_checkbox = tkinter.Checkbutton(variants_frame, variable=fluteless, onvalue=1, offvalue=0).grid(row=1, column=1)
+#fluteless_label = tkinter.Label(variants_frame, text="Fluteless:").grid(row=1, column=0, sticky=tkinter.E)
+#fluteless_checkbox = tkinter.Checkbutton(variants_frame, variable=fluteless, onvalue=1, offvalue=0).grid(row=1, column=1)
 z3_mode_label = tkinter.Label(variants_frame, text="Z3 Mode:").grid(row=1, column=3, sticky=tkinter.E)
 z3_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=z3_mode, onvalue=1, offvalue=0).grid(row=1, column=4)
 glitches_label = tkinter.Label(variants_frame, text="Glitches:").grid(row=2, column=0, sticky=tkinter.E)
@@ -528,6 +584,8 @@ open_mode_label = tkinter.Label(variants_frame, text="Open:").grid(row=3, column
 open_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=open_mode, onvalue=1, offvalue=0).grid(row=3, column=1)
 race_mode_label = tkinter.Label(variants_frame, text="Race Seed:").grid(row=3, column=3, sticky=tkinter.E)
 race_mode_toggle_checkbox = tkinter.Checkbutton(variants_frame, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(row=3, column=4)
+flute_label = tkinter.Label(variants_frame, text="Flute:").grid(row=4, column=0, sticky=tkinter.E)
+flute_menu = tkinter.OptionMenu(variants_frame, flute_opt, *flute_opt_choices).grid(row=4, column=1, columnspan=4, sticky=tkinter.W)
 
 enemy_rando_frame = tkinter.Frame(mainframe, borderwidth=1)
 enemy_rando_frame.grid(row=9, column=1)
@@ -559,6 +617,21 @@ darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *dar
 darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed:").pack(side='left')
 darkrooms_cursed_checkbox = tkinter.Checkbutton(darkrooms_frame, variable=darkrooms_cursed, onvalue=1, offvalue=0)
 darkrooms_cursed_checkbox.pack(side='left')
+
+devtools_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
+devtools_frame.grid(row=50, column=1)
+devtools_frame.columnconfigure(0, weight=1)
+devtools_frame.rowconfigure(0, weight=1)
+printlevel_label = tkinter.Label(devtools_frame, text="Console:").grid(row=0, column=0, sticky=tkinter.E)
+printlevel_menu = tkinter.OptionMenu(devtools_frame, printlevel, *printlevel_choices).grid(row=0, column=1, columnspan=4, sticky=tkinter.W)
+break_on_error_label = tkinter.Label(devtools_frame, text="Break on Error:").grid(row=1, column=0, sticky=tkinter.E)
+break_on_error_checkbox = tkinter.Checkbutton(devtools_frame, variable=break_on_error, onvalue=1, offvalue=0).grid(row=1, column=1)
+break_on_init_label = tkinter.Label(devtools_frame, text="Break on Init:").grid(row=1, column=3, sticky=tkinter.E)
+break_on_init_checkbox = tkinter.Checkbutton(devtools_frame, variable=break_on_init, onvalue=1, offvalue=0).grid(row=1, column=4)
+ingame_debug_label = tkinter.Label(devtools_frame, text="In-Game Debug:").grid(row=2, column=0, sticky=tkinter.E)
+ingame_debug_checkbox = tkinter.Checkbutton(devtools_frame, variable=ingame_debug, onvalue=1, offvalue=0).grid(row=2, column=1)
+do_profile_label = tkinter.Label(devtools_frame, text="Profile:").grid(row=2, column=3, sticky=tkinter.E)
+do_profile_checkbox = tkinter.Checkbutton(devtools_frame, variable=do_profile, onvalue=1, offvalue=0).grid(row=2, column=4)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(seed_frame, text='Random Seed', command=generate_seed).pack(side='left')

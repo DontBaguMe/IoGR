@@ -557,9 +557,67 @@ db $40,$40 : db "No"
 db $0d 
 db $40,$40 : db "Yes"
 db $00
+
+TextInvPrisonKey:
+db "Etched on the side",$0d
+db "is a message: ""Get",$0d
+db "Out Of Jail Free"""
+db $00
+
+TextInvWindMelody:
+db "North winds blow!",$0d
+db "South winds blow!",$0d
+db "Typhoons! ...SMOG!"
+db $00
+
+TextInvLancesLetter:
+db "He has eyes every-",$0d
+db "where. Good thing",$0d
+db "he's on your side."
+db $00
+
+TextInvTeapot:
+db "um ACTUALLY it's an",$0d
+db "Herbal Infusion Pot",$0d
+db "since technically--"
+db $00
 table "table_dialogue.txt",rtl
 
 
+
+TextDebugItemListPageOne:
+db $c1 : db $02,$06
+db $c7 : db $0e,$0a
+db $ce
+db $d2,$00
+db "_",$d6,$22,$cb    ; Jewels
+db "_",$d7,$26,"Key,_",$d6,$2d,$d6,$34,$cb    ; Prison Key, Lola's Melody
+db "_",$d6,$1e,$d6,$a0,$cb    ; Inca inventory
+db "_Herb",$cb
+db "_Meat",$cb
+db "_Mine keys,_",$d7,$1d,$d6,$34,$cb    ; Mine keys, Memory Melody
+db "_",$d6,$07,"Balls",$cb
+db "_Mu_",$d7,$93,"key, P._",$d7,$9d,$cb    ; Mu palace key, P. stone
+db "_Hope, Rama_",$d6,$d2,$cb    ; Hope, Rama statues
+db "_",$d6,$bd,"..."    ; other ...
+db $ca
+
+TextDebugItemListPageTwo:
+db $c1 : db $02,$06
+db $c7 : db $0e,$0a
+db $ce
+db $d2,$00
+db "_Magic Dust",$cb
+db "_Lance's Letter, Will",$cb
+db "_Shroom Drops, Teapot",$cb
+db "_Glasses,_",$d7,$13,$d7,$68,$cb    ; Glasses, Gorgon Flower
+db "_Hieroglyphs",$cb    ; hieroglyph x6
+db "_",$d6,$03,$cb    ; Aura
+db "_",$d6,$2d,"Letter, Journal",$cb    ; Lola's Letter, Journal
+db "_",$d6,$07,"Ring",$cb
+db "_Apple",$cb
+db "_Empty_",$d6,$a0;,$cb    ; Empty inventory
+db $ca
 
 
 
