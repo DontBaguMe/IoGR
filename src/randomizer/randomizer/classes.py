@@ -7396,6 +7396,7 @@ class World:
             5:  [ 90,  [[608, 1]], 0, False ],   # Itory cave wall
             6:  [ 152, [[8, 1], [611, 1]], 0, False ],     # Inca Golden Tile
             7:  [ 126, [[524, 1]], 2, False ],   # Inca Diamond Block
+            52: [ 118, [[612, 1]], 0, False ],   # Inca statue puzzle requires pulling the statues
             8:  [ 234, [[528, 1]], 0, False ],   # Mine tunnel wall
             9:  [ 224, [[15, 1]], 0, False ],    # Mine elevator
             50: [ 226, [[609, 1]], 0, False],    # Mine big room requires hitting buttons
