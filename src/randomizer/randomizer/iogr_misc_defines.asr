@@ -404,3 +404,10 @@ LR_PlaceSelfBetween04And06 = $8aa41c
 }
 
 
+; SRAM and Multiworld
+{
+!SettingInfiniteInventory ?= 0
+!SramInvActivePageAddr = $306400
+!SramInvTopLineAddr #= 2+!SramInvActivePageAddr
+!SramInvPagesAddr #= 4+!SramInvTopLineAddr
+}

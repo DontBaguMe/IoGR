@@ -20,9 +20,43 @@ macro MAddConfigAddr(ConfigName,DefaultValue)
 if defined("<ConfigName>")
 dw !{<ConfigName>}
 else
+!<ConfigName> = <DefaultValue>
 dw <DefaultValue>
 endif
 endmacro
+
+%MAddConfigAddr("KaraLocation",1)   ; 1/2/3/4/5 = EdDg/Mine/Angl/Kres/Ankr
+
+%MAddConfigAddr("SettingStatuesPlayerChoice",0)
+%MAddConfigAddr("StatuesRequiredCount",0)
+%MAddConfigAddr("Statue1Required",0)
+%MAddConfigAddr("Statue2Required",0)
+%MAddConfigAddr("Statue3Required",0)
+%MAddConfigAddr("Statue4Required",0)
+%MAddConfigAddr("Statue5Required",0)
+%MAddConfigAddr("Statue6Required",0)
+%MAddConfigAddr("Boss1Id",1)
+%MAddConfigAddr("Boss2Id",2)
+%MAddConfigAddr("Boss3Id",3)
+%MAddConfigAddr("Boss4Id",4)
+%MAddConfigAddr("Boss5Id",5)
+%MAddConfigAddr("Boss6Id",6)
+%MAddConfigAddr("Boss7Id",7)
+
+macro MAddDungeonRequired(Id)
+!ThisDungeonStatue #= min(6, !{Boss<Id>Id})
+Dungeon<Id>Required:
+dw !{Statue!{ThisDungeonStatue}Required}
+endmacro
+!BossIdIterator = 1
+while !BossIdIterator < 8
+%MAddDungeonRequired(!BossIdIterator)
+!BossIdIterator #= 1+!BossIdIterator
+endif
+
+%MAddConfigAddr("InitialHp",8)
+
+%MAddConfigAddr("SettingZ3",0)    ; Not fully implemented
 
 %MAddConfigAddr("SettingEarlyFirebird",0)    ; 0=No, 1=Yes
 
@@ -63,7 +97,6 @@ dw !IshtarRoom4DifferenceIndex2
 IshtarRoom4DifferenceIndex3:
 dw !IshtarRoom4DifferenceIndex3
 dw $ffff
-
 
 
 

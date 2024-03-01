@@ -1,4 +1,4 @@
-import binascii, hashlib, logging, os, random, tempfile, json, copy, graphviz
+import binascii, hashlib, logging, os, random, tempfile, json, copy
 from typing import BinaryIO
 
 from .patch import Patch
@@ -169,9 +169,7 @@ def generate_filename(settings: RandomizerData, extension: str):
 
 
 class Randomizer:
-    offset: int = 0
     statues_required = 0
-    current_position = 0
 
     def __init__(self, rom_path: str):
         self.rom_path = rom_path
@@ -180,6 +178,12 @@ class Randomizer:
         data_file = open(self.rom_path, "rb")
         self.original_rom_data = data_file.read()
         data_file.close()
+        if len(self.original_rom_data) >= 0x200200:
+            self.original_rom_data = self.original_rom_data[0x200:]    # Strip the 512-byte header
+        basehash = hashlib.md5()
+        basehash.update(self.original_rom_data)
+        if basehash.hexdigest() != 'a7c7a76b4d6f6df389bd631757b91b76':
+            raise OffsetError
 
         log_file_path = os.path.dirname(rom_path) + os.path.sep + "iogr" + os.path.sep + "logs" + os.path.sep + "app.log"
         if not os.path.exists(os.path.dirname(log_file_path)):
@@ -797,16 +801,24 @@ class Randomizer:
         self.asar_defines["SettingOrbRando"] = settings.orb_rando.value
         self.asar_defines["SettingDarkRoomsLevel"] = abs(settings.darkrooms.value)
         self.asar_defines["SettingDebug"] = 1 if settings.ingame_debug else 0
+        if settings.red_jewel_madness:
+            self.asar_defines["InitialHp"] = 40
+        elif settings.ohko:
+            self.asar_defines["InitialHp"] = 1
+        elif settings.z3:
+            self.asar_defines["InitialHp"] = 6
+        else:
+            self.asar_defines["InitialHp"] = 8
         
         self.asar_defines["OptionMuteMusic"] = 0
         
         for d in self.asar_defines:
             self.asar_defines[d] = str(self.asar_defines[d])   # The library requires defines to be string type.
         asar.init("asar.dll")
-        asar_patch_result = asar.patch(os.getcwd()+"/src/randomizer/randomizer/iogr.asr", romdata, [], True, self.asar_defines)
+        self.asar_patch_result = asar.patch(os.getcwd()+"/src/randomizer/randomizer/iogr.asr", romdata, [], True, self.asar_defines)
         
-        if asar_patch_result[0]:
-            return asar_patch_result
+        if self.asar_patch_result[0]:
+            return self.asar_patch_result
         else:
             asar_error_list = asar.geterrors()
             return [False, asar_error_list]

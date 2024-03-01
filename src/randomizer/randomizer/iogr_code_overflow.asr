@@ -1,13 +1,18 @@
 arch 65816
 hirom
 
-; Reserved RAM:
+; Reserved RAM (in addition to base game):
+; $0aaa = number of stacked herbs
+; $0bf2 = number of stacked Crystal Balls
+; $0bf4 = number of stacked Red Jewels
 ; $0bf6 = stores index of last DS visited
 ; $0bf8 = during DS warp, DS index of text lines and of selected DS
 ; $0bfa = used on radar screen to choose "FORCE" text
 ; $0bfc = used during item pickup to write text slowly (for chests)
 ; $0bfe = used during item pickup to flag a stat as maxed out
-; Reserved flags:
+; $1ffc = Player X pos in debug mode
+; $1ffe = Player Y pos in debug mode
+; Reserved flags (in addition to base game):
 ; $022f - $0247 : Monster item flags $01 - $18
 ; $0290 - $02af : Monster item flags $19 - $2A, and 13 extras
 ; $02b0 - $02b1 : Statue placed in the Left/Right Hope Room
@@ -1371,20 +1376,29 @@ lda #%00010011 : sta $212f
 lda #%00000000 : sta $2130
 lda #%10000011 : sta $2131
 ; Map the range of spot radii [50,100] to darkness indexes [31 = full dark, 0 = full light].
-; The 12-point range [13,1] works for all maps, though it's a bit bright on some tilesets.
-;;lda $0644 : cmp #$3d : bcc .NotInDiamondMine
-;;  cmp #$48 : bcs .NotInDiamondMine
-;;.IsInDiamondMine:
+lda $0644 : cmp #$3d : bcc .TilemapIsLight
+  cmp #$48 : bcc .TilemapIsDark
+  cmp #$6a : bcc .TilemapIsLight
+  cmp #$76 : bcc .TilemapIsDark
+  cmp #$cc : bcc .TilemapIsLight
+  cmp #$de : bcc .TilemapIsDark
+.TilemapIsLight:
 lda $7f0002,x : sec : sbc.b #50 : lsr : lsr
   eor #$ff : inc
-  clc : adc.b #13
-;;;  bra .GotDarknessIndex
-;;;.NotInDiamondMine:
-;;;lda $7f0002,x : sec : sbc.b #50 : lsr
-;;;  eor #$ff : inc
-;;;  clc : adc.b #28
-;;;  ;bra .GotDarknessIndex
-;;;.GotDarknessIndex:
+  clc : adc.b #14   ; [50,100] -> [14,2]
+  cmp.b #10 : bcc +
+    lda.b #9   ; Clamp to [9,2]
++:
+bra .GotDarknessLevel
+.TilemapIsDark:   ; Mine, Angel Dungeon, Pyramid
+lda $7f0002,x : sec : sbc.b #50 : lsr : lsr
+  eor #$ff : inc
+  clc : adc.b #14   ; [50,100] -> [14,2]
+  cmp.b #7 : bcc +
+    lda.b #6   ; Clamp to [6,2]
++:
+;bra .GotDarknessLevel
+.GotDarknessLevel:
 ora.b #$e0 : sta $7f0c00
 lda.b #$00 : sta $7f0c01
   sta $7f0c02
@@ -2577,6 +2591,50 @@ stz $0b1c
 ;stz $0aa2
 rtl
 }
+
+
+
+LR_SecIfAtKaraLocation:
+{
+phx
+lda.l Config_KaraLocation : dec : tax
+lda.l .LutLocMaps,x : and #$00ff : cmp $0644 : bne .ClcAndReturn
+txa : asl : tax
+lda.l .LutLocPointers,x : dec
+  plx
+  pha : rts
+.InEdDg:
+cop #$45 : db $0b,$0b,$0d,$0d : dw .SecAndReturn
+bra .ClcAndReturn
+.InMine:
+cop #$45 : db $0b,$24,$0d,$26 : dw .SecAndReturn
+bra .ClcAndReturn
+.InAngl:
+cop #$45 : db $07,$08,$09,$0a : dw .SecAndReturn
+bra .ClcAndReturn
+.InKres:
+cop #$45 : db $12,$06,$14,$08 : dw .SecAndReturn
+bra .ClcAndReturn
+.InAnkr:
+cop #$45 : db $1a,$10,$1c,$12 : dw .SecAndReturn
+;bra .ClcAndReturn
+.ClcAndReturn:
+clc
+rtl
+.SecAndReturn:
+sec
+rtl
+.LutLocMaps:
+db $13, $47, $74, $a9, $bf
+.LutLocPointers:
+dw .InEdDg
+dw .InMine
+dw .InAngl
+dw .InKres
+dw .InAnkr
+}
+
+
 
 
 

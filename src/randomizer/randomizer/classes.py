@@ -3503,17 +3503,17 @@ class World:
             51: [1, 1, 0x89, "DEF Upgrade", False, 3, 0, 0],
             52: [2, 1, 0x88, "STR Upgrade", False, 3, 0, 0],
             53: [1, 1, 0x8a, "Dash Upgrade", False, 3, 0, 0],
-            54: [2, 1, 0x8b, "Friar Upgrade", False, 3, 0, 0],
+            54: [2, 1, 0x8b, "Friar Upgrade", False, 3, 0, 1],
             55: [0, 1, 0x8e, "Heart Piece", False, 3, 0, 0],
 
             # Abilities
             60: [0, 2, "", "Nothing", False, 3, 0, 0],
             61: [1, 2, "", "Psycho Dash", False, 1, 0, 0],
             62: [1, 2, "", "Psycho Slider", False, 1, 0, 3],
-            63: [1, 2, "", "Spin Dash", False, 1, 0, 6],
+            63: [1, 2, "", "Spin Dash", False, 1, 0, 3],
             64: [1, 2, "", "Dark Friar", False, 1, 0, 3],
             65: [1, 2, "", "Aura Barrier", False, 1, 0, 0],
-            66: [1, 2, "", "Earthquaker", False, 1, 0, 0],
+            66: [1, 2, "", "Earthquaker", False, 1, 0, 3],
             67: [1, 6, "", "Firebird", False, 3, 0, 0],
 
             # Mystic Statues
@@ -4084,7 +4084,7 @@ class World:
             92: [False, [91],     2, [1,5,0,38], 0, "Inca: Divided Room (38/$26) S Chest", [], False, [], [], [], [], [], [], [], []],
             93: [False, [],       2, [1,5,0,38], 0, "Inca: Divided Room (38/$26) N", [], False, [], [], [], [], [], [], [], []],
             94: [False, [],       2, [1,5,0,39], 0, "Inca: West of DBlock (39/$27)", [], False, [], [], [], [], [], [], [], []],
-            95: [False, [96],     2, [1,5,0,40], 0, "Inca: DS Spike Hall (40/$28) E", [], False, [], [], [], [], [], [], [], []],
+            95: [False, [],       2, [1,5,0,40], 0, "Inca: DS Spike Hall (40/$28) E", [], False, [], [], [], [], [], [], [], []],
             96: [False, [],       2, [1,5,0,40], 0, "Inca: DS Spike Hall (40/$28) SW", [], False, [], [], [], [], [], [], [], []],
             97: [False, [98],     2, [1,5,0,41], 0, "Inca: Boss Room", [], True, [], [], [], [], [], [], [], []],
             98: [False, [97],     2, [1,5,0,41], 0, "Inca: Behind Boss Room", [], False, [], [], [], [], [], [], [], []],
@@ -4571,6 +4571,7 @@ class World:
             709: [0,  85,  86,     0, [[711, 1]], False],        # Inca E/W ramp (35) via whirligig orb
             97:  [0,  91,  92,     0, [[608, 1]], False],        # Map 38 break statues w/ Will ability
             711: [0,  96,  95,     0, [[713, 1]], False],        # Map 40 reverse via 4-Way orb
+            98:  [0,  95,  96,     0, [[609, 1]], False],        # DS spike hall requires an attack to pass the 4-Way
 
             # Diamond Mine
             712: [0, 130, 708,    0, [[715, 1]], True],            # Map 61 S fence progression via monster

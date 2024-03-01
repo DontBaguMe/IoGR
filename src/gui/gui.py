@@ -271,7 +271,7 @@ def generate_ROM():
             if not patch[0]:
                 tkinter.messagebox.showerror("Error", "Assembling failed. The first error was:" + str(patch[1][0]) )
             else:
-                write_patch(patch, rompath, rom_filename, settings)
+                write_patch(patch, rompath, rom_filename)
                 if not race_mode_toggle.get():
                     spoiler = randomizer.generate_spoiler()
                     write_spoiler(spoiler, spoiler_filename, rompath)
@@ -302,14 +302,9 @@ def sort_patch(val):
     return val['index']
 
 
-def write_patch(patch, rom_path, filename, settings):
-    original = open(rom_path, "rb")
-
+def write_patch(patch, rom_path, filename):
     randomized = open(os.path.dirname(rom_path) + os.path.sep + filename, "wb")
     randomized.write(patch[1])
-
-    original.close()
-
     randomized.close()
 
 

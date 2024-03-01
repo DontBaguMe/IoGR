@@ -36,17 +36,11 @@ skip 4
 VectorBrk:
 jml BrkHandler
 
-
+; A few bytes are optimized out to allow loading HP from a far address
 org $808067
-if !SettingRedJewelMadness == 1
-lda #$0028    ; RJM max health overrides OHKO max health
-elseif !SettingOHKO == 1
-lda #$0001
-elseif !SettingZ3 == 1
-lda #$0006    ; Start with 6 HP instead of 8
-else
-lda #$0008    ; Default, vanilla
-endif
+lda.l Config_InitialHp : sta $0aca : sta $0ace
+lda #$0001 : sta $0ade
+nop : nop : nop : nop : nop   ; (in particular, writing 0 to $0adc is not necessary because mem was init'd to 0)
 
 org $808244
 if !SettingDebug
@@ -56,6 +50,7 @@ endif
 ; Two bytes are optimized out of this routine, to align CopHandler_Pointers at $808485.
 org $808438
 SR_DmaClearOamStage:
+{
 php
 sep #$20
   lda #$00 : sta $2183
@@ -73,6 +68,7 @@ rts
 .Data:
 db $e0
 nop
+}
 
 ; Optimized COP+BRK vector.
 ; I developed this to reduce lag during the Apocalypse Gaia fight,
@@ -395,9 +391,7 @@ db $29,$00,$00,$00
 
 
 org $80c381
-if !SettingZ3 == 0
-jsr SR_IncreaseHpByThree   ; replaces inc $0aca in boss reward code
-endif
+jsr SR_IncHpOnceByZ3Setting   ; replaces inc $0aca in boss reward code
 
 
 org $80c44b
@@ -664,11 +658,11 @@ EMonsterDeathDoorOpener:
 
 
 org $80e03c
-if !SettingZ3 == 0
-inc $0aca : inc $0aca : inc $0aca   ; HP jewel gives 3 HP now.
-nop : nop : nop   ; Replaces (unused) lda #$0255
+; HP room reward, replacing the unnecessarily complex 
+; lda $0ACA : clc : adc #$0001 : bvc $03 : lda #$0255 : sta $0aca
+jsr SR_IncHpOnceByZ3Setting
+nop : nop : nop : nop : nop : nop : nop : nop : nop
 lda $0aca
-endif
 
 
 ; In pullable-object code, instead of cop #$21 : db $0f : dw Here+$01, additionally check telekinesis
@@ -697,7 +691,7 @@ org $80f48f
 SR_RunIogrMapCode:
 lda #$09c4 : jsl LR_SecOnAnyFlagA : bcc .PostDsWarpCheck
   cop #$CF : dw $09c4
-  cop #$9C : dl EDarkSpaceWarper : dw $2000
+  cop #$9C : dl EDarkSpaceWarper : dw $2300
   lda $0bf6 : sta $0026,y
 .PostDsWarpCheck:
 if !SettingDebug == 1
@@ -840,9 +834,12 @@ rtl
 }
 
 
-SR_IncreaseHpByThree:   ; For boss room reward code.
-inc $0aca
-inc $0aca
+; Room rewards are +3 HP normally, but +1 HP in Z3 mode.
+SR_IncHpOnceByZ3Setting:
+lda.l Config_SettingZ3 : bne +
+  inc $0aca
+  inc $0aca
++:
 inc $0aca
 rts
 
@@ -1754,7 +1751,7 @@ dw .MuPalaceKey      ; Item $10
 dw .PurifyStone      ; 
 dw .HopeStatue       ; 
 dw .RamaStatue       ; 
-dw .MagicDust      ; 
+dw .MagicDust        ; 
 dw .BlueJournal      ; 
 dw .LancesLetter     ; 
 dw .Necklace         ; 
@@ -2109,18 +2106,9 @@ org $81e12a
 Lut_ItemDroppableFlags:    ; or "not-droppable" perhaps I should have written
 db %10011111 ;$9f
 db %11111111 ;$ff
-if !Statue3Required == 1 || !SettingStatuesPlayerChoice == 1
 db %10011111 ;$9f
-else
-db %10010111;$97
-endif
-if !Statue5Required == 1 || !SettingStatuesPlayerChoice == 1
 db %11111111 ;$ff
 db %11111111 ;$ff
-else
-db %00111111 ;$3f
-db %10110000 ;$b0
-endif
 db %11000001 ;$01
 db $00
 db $00
@@ -2388,6 +2376,32 @@ db $0e : dw $0AD6
 db $00 
 endif
 warnpc $81e818
+
+; Updates to inv menus
+org $81e905
+db "Warp"
+db $00
+
+org $81e919
+if !SettingInfiniteInventory == 1
+db $03 : db $00 
+db $01 : dw $0596 
+db $02 : dl TextInvItemMenuHoverFragment
+db $03 : db $14 
+db $04 : dl $81E94C : dw $0B26   ; Draws "B" or "Y" based on controller setting.
+db $03 : db $00 
+db " in-game to use",$0d
+db "an equipped item."
+db $00 
+endif
+warnpc $81e94c
+
+org $81ea39
+db $03 : db $00 
+db $01 : dw $0584 
+db "Cond;",$0d
+db "Warp"
+db $00 
 
 org $81EA70
 db $03 : db $00 
@@ -2746,7 +2760,6 @@ rts
 warnpc $82b97f
 }
 
-
 org $82bec4
 jsr SR_SetWillAbilitySpriteSetOnFlute   ; Instead of cop #$8E : db $04, here and below.
 org $82bed7
@@ -2798,13 +2811,17 @@ lda $0ade    ; Instead of lda #$0001, doubles jump-slash damage
 endif
 
 
+org $82e6bd
+jsr SR_ClcIfItemAIsDroppable   ; replacing a call to this routine with a call to my customized version
+
+
 org $82e719
 EInvScreenManager_CondMenu:
-lda $18,s : and #$00ff : cmp #$00e6 : bne +   ; You're already inside a DS
+jsr SR_SecIfCanDsWarpFromMenu : bcs +
   cop #$06 : db $12
   jmp $e40c   ; Return to main menu loop
 +:
-lda #$0000 : sta $0AE6
+stz $0AE6
 cop #$BD : dl $81E90B   ; Clear the upper-right box
 cop #$BD : dl $81EA39   ; "Dark Power" in the upper-right box
 sty $20
@@ -2821,6 +2838,7 @@ lda $28 : beq .DeclineWarp
 .AcceptWarp:
 cop #$06 : db $11
 cop #$CD : dw $09c4
+cop #$CC : db $00   ; Queue exit from inv screen
 jmp $e40c
 .DeclineWarp:
 cop #$CF : dw $09c4
@@ -3779,6 +3797,7 @@ lda $0aa2 : bit #$0010 : bne +
 jmp EPlayerChargeListener_SR_QuitAbilityIfForbidden
 
 SR_MaybeAllowBlock:
+{
 lda $0ad4 : bne +
 %MClzIfHasFlute() : bne +
   lda #$0000
@@ -3804,18 +3823,7 @@ rts
 .SecAndReturn:
 sec
 rts
-
-;SR_SecIfCanTelekinesisAndPressingLR:
-;bit #$0300 : beq .ClcAndReturn
-;lda $0ad4 : bne .SecAndReturn
-;lda.l Config_SettingFluteOpt : cmp #$0001 : bne .SecAndReturn
-;%MClzIfHasFlute() : bne .SecAndReturn
-;.ClcAndReturn:
-;clc
-;rts
-;.SecAndReturn:
-;sec
-;rts
+}
 
 SR_SetWillAbilitySpriteSetOnFlute:
 %MClzIfHasFlute() : bne .WithFlute
@@ -3825,6 +3833,84 @@ rts
 .WithFlute:
 cop #$8E : db $04
 rts
+
+SR_SecIfCanDsWarpFromMenu:
+; Reserved for future use
+sec
+rts
+
+SR_ClcIfItemAIsDroppable:
+{
+cmp #$0013 : beq .IsDungeon3Item   ; Rama Statue
+cmp #$001e : bcc .IsNormalItem   ; Hieroglyphs are $1e - $23
+cmp #$0024 : bcc .IsDungeon5Item
+cmp #$0026 : beq .IsDungeon5Item   ; Father's Journal
+.IsNormalItem:
+phx
+sta $0000
+lsr : lsr : lsr : tay
+lda #$0000
+sep #$20
+lda $0000 : and #$07 : tax
+lda.l ..PowersOfTwo,x : and.w Lut_ItemDroppableFlags,y : sec : bne +
+  clc
++:
+rep #$20
+plx
+rts
+..PowersOfTwo:
+db $01,$02,$04,$08,$10,$20,$40,$80
+.IsDungeon3Item:
+lda.l Config_Dungeon3Required : bne .NoDropSpecial
+.CanDropSpecial:
+clc
+rts
+.NoDropSpecial:
+sec
+rts
+.IsDungeon5Item:
+lda.l Config_Dungeon5Required : bne .NoDropSpecial
+bra .CanDropSpecial
+}
+
+SR_CycleInventoryPage:
+lda $7f0010,x : tay   ; This is slot 0; need to advance Y to slot 4
+lda $0006,y : tay
+lda $0006,y : tay
+lda $0006,y : tay
+lda $0006,y : tay
+lda.l !SramInvActivePageAddr : inc : cmp #$0003 : bcc +
+  lda #$0000
++:
+sta.l !SramInvActivePageAddr
+asl : asl : pha
+  asl : clc : adc $01,s : sta $01,s
+pla : tax
+; Now X = 12*ActivePageNumber, Y = ActorID of slot 4; refresh and update the 12 slots
+lda.w #12 : sta $000e
+-:
+dec $000e : bmi .Done
+lda #$e8cd : sta $0000,y
+lda #$0000 : sta $0008,y
+  sta $002a,y
+sep #$20
+lda.l !SramInvPagesAddr,x : sta $0028,y
+  sta $0ab8,x
+rep #$20
+lda $0006,y : tay
+inx
+bra -
+.Done:
+tdc : tax
+lda $0ac4 : cmp #$0004 : bcc +
+  ; Unequip the equipped item if it was on slots 4-15
+  lda #$ffff : sta $0ac4
+    sta $1a
+  stz $0ac6
++:
+rts
+
+
 
 }
 
@@ -4081,28 +4167,16 @@ warnpc $8392FB
 org $8393a5
 ; Magic Dust check.
 {
-lda $0644
-if !KaraLocation == 1
-cmp #$0013 : bne $08
-cop #$45 : db $0b,$0b,$0d,$0d
-elseif !KaraLocation == 2
-cmp #$0047 : bne $08
-cop #$45 : db $0b,$24,$0d,$26
-elseif !KaraLocation == 3
-cmp #$0074 : bne $08
-cop #$45 : db $07,$08,$09,$0a
-elseif !KaraLocation == 4
-cmp #$00a9 : bne $08
-cop #$45 : db $12,$06,$14,$08
-else
-cmp #$00bf : bne $08
-cop #$45 : db $1a,$10,$1c,$12
-endif
+jsl LR_SecIfAtKaraLocation : bcs +
+  cop #$BF : dw $93ea
+  rts
++:
+cop #$BF : dw $93fa
+cop #$D5 : db $14
+cop #$CC : db $8a   ; Sets a unique flag instead of temp flag $01
+rts
 }
-
-org $8393c3
-; Magic Dust sets unique flag
-db $8a
+warnpc $8393c5
 
 org $839427
 SR_UseItemBlueJournal:
@@ -4158,7 +4232,9 @@ warnpc $83950c
 org $83950c
 ; Lance's letter
 {
+lda.l Config_KaraLocation : dec : sta $0db8
 cop #$BF : dw Text_LancesLetter    ; $9514
+stz $0db8
 cop #$CC : db $8e
 rts
 
@@ -4166,20 +4242,32 @@ Text_LancesLetter:
 db $D3
 db $C2,$04
 db "Will, Kara is in",$cb
-if !KaraLocation == 1   ; Edward's
-db "Edward's Prison"
-elseif !KaraLocation == 2   ; Mine
-db "Diamond Mine"
-elseif !KaraLocation == 3   ; Angel Village
-db "Angel Village"
-elseif !KaraLocation == 4   ; Kress
-db "Mt. Kress"
-else   ; Angkor Wat
-db "Ankor Wat"
-endif
+db $C5 : dw .LocNames, $0db8
 db $CB 
 db "________-Lance",$C0
+.LocNames:
+dw ..EdDg
+dw ..Mine
+dw ..Angl
+dw ..Kres
+dw ..Ankr
+..EdDg:
+db "Edward's Prison"
+db $ca
+..Mine:
+db "Diamond Mine"
+db $ca
+..Angl:
+db "Angel Village"
+db $ca
+..Kres:
+db "Mt. Kress"
+db $ca
+..Ankr:
+db "Ankor Wat"
+db $ca
 }
+warnpc $83966a
 
 org $83983d
 ; Teapot
@@ -4690,11 +4778,11 @@ lda [$3E],y
 rep #$20
 beq .DoneOrSkippedRearrange
 jsl LR_GetItemId8ForMonsterItemFlagA
-jsl $82a363    ; jsl LR_StageMapRearrange
+jsl $82a363    ; = jsl LR_StageMapRearrange
 bcs .DoneOrSkippedRearrange
 ldy $3E : phy
 ldy $40 : phy
-jsl $82a220    ; jsl LR_DoMapRearrange
+jsl $82a220    ; = jsl LR_DoMapRearrange
 ply : sty $40
 ply : sty $3E
 endif
@@ -5209,6 +5297,7 @@ lda #$0800 : trb $10
 .DoorAlreadyOpen:
 cop #$D0 : db $23,$01 : dw .Die ; $d2d6
 .SpawnHamlet:
+cop #$C2
 lda #$1000 : tsb $10
 lda #$2000 : trb $10
 cop #$BF : dw $d4a5
@@ -5636,30 +5725,32 @@ rtl
 }
 
 org $85d223
-if !KaraLocation != 2
-db $28
-else
-db $1a
-endif
-dw $1000
+db $1a : dw $1000
 EMineSam:
-nop : nop : nop : nop : nop : nop
 lda #$0200 : tsb $12
 cop #$0B
-if !KaraLocation != 2
-cop #$9C : dl $85D49E : dw $0100   ; slave chain
-cop #$C0 : dw $D299
-else
+lda.l Config_KaraLocation : cmp #$0002 : beq .ChainCut   ; Kara in mine = no chain to cut
+.KaraNotInMine:
+cop #$80 : db $28   ; Use slave sprite
+cop #$89
+cop #$9C : dl $85D49E : dw $0100   ; Spawn and await slave chain
+cop #$C0 : dw $d299    ; i.e. EMineSam_DemandCutChain
 cop #$C1
-jmp $D24B
-endif
-
-org $85d24f
-rtl   ; No singing Sam.
-
-org $85d2a4
+ldy $06
+lda $0010,y : bit #$0040 : bne .ChainCut
+rtl
+.ChainCut:
+cop #$C0 : dw .TryGiveItem
+cop #$C1
+rtl
+.TryGiveItem:
+cop #$D0 : db $5e,$01 : dw ..AlreadyGiven
 %MTryGiveItemAndFlag(!MineSamItem, $5e)
 rtl
+..AlreadyGiven:
+cop #$BF : dw $d48e   ; "I'll always remember you!"
+rtl
+warnpc $85d299
 
 org $85d4d0
 EMorgueItemPickup_OnInteract:
@@ -6345,11 +6436,7 @@ org $86d153
 {
 db $8a   ; Flag
 org $86d15b
-if !KaraLocation == 3
-cop #$B6 : db $10
-else
-cop #$B6 : db $30 ; Portrait sprite needs high priority.
-endif
+cop #$B6 : db $30 ; Portrait sprite needs high priority in non-Angl, and this is harmless in Angl.
 org $86d169
 cop #$D2 : db $8a,$01  ; Flag check
 cop #$E0
@@ -6819,15 +6906,19 @@ SR_SecIfThisIshtarRoomHasWind:
 phx
 lda $1016 : cmp #$0100 : bcs .NoWind
 lda $1014 : jsr SR_GetIshtarRoomAddrOffsetForXPos : tax
-lda.l 0+Config_IshtarRoomDifferencesAnchor,x : beq .RightRoomHasWind
+lda.l 0+Config_IshtarRoomDifferencesAnchor,x : beq .MaybeHasWind
 lda.l 2+Config_IshtarRoomDifferencesAnchor,x : beq .HasWind
 lda.l 4+Config_IshtarRoomDifferencesAnchor,x : beq .HasWind
 .NoWind:
 plx
 clc
 rts
-.RightRoomHasWind:
+.MaybeHasWind:
+; Room difference is wind, so right room has wind, unless it's room 3 and the chests are different
 lda $1014 : and #$0100 : beq .NoWind
+lda $1014 : cmp #$0400 : bcc .HasWind
+  cmp #$0600 : bcs .HasWind
+jsr SR_SecIfIshtarChestsAreDifferent : bcs .NoWind
 .HasWind:
 plx
 sec
@@ -9261,22 +9352,58 @@ db $c8
 db $ca
 }
 
+if !SettingInfiniteInventory == 1
+; Main menu has 3 options (no Copy)
+org $8be2ff
+lda #$0002
+org $8be316
+cmp #$0003
+org $8be34c
+dw $e354, $ea55, $e6ba   ; Start, Erase, Options
+
+; Start-game menu: enforce all actions on the one save file
+org $8be364
+stz $0d8c
+nop : nop : nop
+stz $0d92
+org $8be398   ; Ignore up input
+rtl
+org $8be3b1   ; Ignore down input
+rtl
+endif
 
 ; Replace sound type selection with difficulty selection.
-table "table_dialogue.txt",rtl
 org $8be43f
 lda #$0001 : sta $0d90    ; Default is Intermediate
 org $8be4ae
-db $03    ; 3 difficulty levels available
+db $03    ; 4 difficulty levels available
 
-; Entr'acte: upon starting a new game, set IOGR flags.
+; Upon starting a new game, set IOGR flags.
 org $8be515
 jsl LR_WarpToStart
 jmp EIogrGameInitFlagSetter
 
-org $8be7b5
-db $03    ; 3 difficulty levels available on the other menu too
+org $8be6a6
+nop : nop : nop : nop : nop : nop    ; Disable code that disables X button.
+org $8be6b3
+nop : nop : nop : nop : nop : nop    ; Disable other code that disables X button.
 
+; 4 difficulty levels available on the other menu too
+org $8be7b5
+db $03
+org $8be855
+db $04
+
+if !SettingInfiniteInventory == 1
+org $8be905   ; Ignore up input on erase/option/copy file selects
+rtl
+org $8be91e   ; Ignore down input on erase/option/copy file selects
+rtl
+org $8bea86   ; Ignore up input on erase/option/copy file selects
+rtl
+org $8bea9f   ; Ignore down input on erase/option/copy file selects
+rtl
+endif
 
 org $8bee20
 EDebugWarper:
@@ -9402,6 +9529,44 @@ db $c0
 warnpc $8bf178
 
 
+table "table_dialogue.txt",rtl
+if !SettingInfiniteInventory == 1
+org $8bf3f4
+; Main menu: no Copy option because there's only one save file
+db $C1 : db $06,$0A
+db $C7 : db $0A,$03
+db "Start Journey",$cb
+db "Erase Journey",$cb
+db "Change Options"
+db $CA
+warnpc $8bf437
+org $8bf437
+; Start-game menu: only one save file
+db $c1 : db 2,8
+db $c7 : db $0e,$03
+org $8bf457
+; Stop drawing text after the first save file
+db $ca
+org $8bf476
+; Option menu: only one save file
+db $c1 : db 2,8
+db $c7 : db $0e,$03
+org $8bf48c
+; Copy menu: only one save file
+db $c1 : db 2,8
+db $c7 : db $0e,$03
+org $8bf4a7
+; Erase menu: only one save file
+db $c1 : db 2,8
+db $c7 : db $0e,$03
+org $8bf4ea
+; No text for second save file (unnecessary?)
+db $ca
+org $8bf511
+; No text for third save file (unnecessary?)
+db $ca
+endif
+
 org $8bf5d2
 db "Level"    ; Change "Sound" to "Level"
 org $8bf55a
@@ -9508,6 +9673,14 @@ lda.l Config_SettingFluteOpt : bne +
 if !SettingDebug == 1
 lda #$0015 : sta $0ab4
 sta $0ac6
+endif
+if !SettingInfiniteInventory == 1
+ldx #$0000
+lda #$0000
+-:
+sta $306400,x
+inx : inx : cpx #$0400 : bcc -
+tdc : tax
 endif
 cop #$E0
 }

@@ -534,6 +534,14 @@ db $D3,$D2,$00,$D5,$00,$42,$8E,$8D,$A4,$A2,$88,$81,$A5,$A4,$8E,$A2,$A3,$AC,$80,$
 
 
 table "table_invtext.txt",rtl
+TextInvItemMenuHoverFragment:
+db "Your stuff.",$0d
+db $03 : db $14
+db "X"
+db $03 : db $00
+db " to cycle pages.",$0d
+db $00
+
 TextInvCondMenuYouWillWarp:
 db $03 : db $00 
 db $01 : dw $0596 
