@@ -4,7 +4,8 @@ import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
 import random
-import zipfile
+import zipfile, zlib
+import bsdiff4, ips
 
 from randomizer.iogr_rom import generate_filename
 #from randomizer.models.enums.difficulty import Difficulty
@@ -240,8 +241,12 @@ def generate_ROM():
 
         base_filename = generate_filename(settings, "")
         rom_filename = base_filename + ".sfc"
-        asm_filename = base_filename + ".asr"
-        spoiler_filename = base_filename + ".json"
+        defs_filename = base_filename + "_defs.txt"
+        cfg_filename = base_filename + "_cfg.tsv"
+        ips_smc_filename = base_filename + "_smcpatch.ips"
+        ips_sfc_filename = base_filename + "_sfcpatch.ips"
+        bsdiff_filename = base_filename + "_bspatch.bsdiff"
+        spoiler_filename = base_filename + "_spoiler.json"
         randomizer = Randomizer(rompath)
         if do_profile.get():
             random.seed(seed_int)
@@ -257,13 +262,11 @@ def generate_ROM():
                 patch = randomizer.generate_rom("", settings, profiling_path + "Test" + format(test_number,"02"))
                 test_number += 1
             profile.disable()
-            #statstream = io.StringIO()
             statfile = open(profiling_path + os.path.sep + "profile.txt","w")
             runstats = pstats.Stats(profile, stream=statfile)
             runstats.strip_dirs()
             runstats.sort_stats('time')
             runstats.print_stats()
-            #statfile.write(statstream.read())
             statfile.close()
             tkinter.messagebox.showinfo("Success","Profiling complete; results in ./iogr/"+base_filename+"/")
         else:
@@ -271,12 +274,21 @@ def generate_ROM():
             if not patch[0]:
                 tkinter.messagebox.showerror("Error", "Assembling failed. The first error was:" + str(patch[1][0]) )
             else:
-                write_patch(patch, rompath, rom_filename)
+                write_patch(patch, rom_filename, rompath)
                 if not race_mode_toggle.get():
                     spoiler = randomizer.generate_spoiler()
-                    write_spoiler(spoiler, spoiler_filename, rompath)
-                    asm_dump = randomizer.generate_asm_dump()
-                    write_asm_dump(asm_dump, asm_filename, rompath)
+                    write_text_file(spoiler, spoiler_filename, rompath)
+                if gen_patches_toggle.get():
+                    def_dump = randomizer.generate_def_dump()
+                    cfg_dump = randomizer.generate_config_addrs()
+                    write_text_file(def_dump, defs_filename, rompath)
+                    write_text_file(cfg_dump, cfg_filename, rompath)
+                    ips_sfc = bytes(ips.Patch.create(randomizer.original_rom_data, patch[1]))
+                    ips_smc = bytes(ips.Patch.create(bytearray(0x200)+randomizer.original_rom_data, bytearray(0x200)+patch[1]))
+                    bspatch = bsdiff4.diff(randomizer.original_rom_data, patch[1])
+                    write_bin_file(ips_sfc, ips_sfc_filename, rompath)
+                    write_bin_file(ips_smc, ips_smc_filename, rompath)
+                    write_bin_file(bspatch, bsdiff_filename, rompath)
                 tkinter.messagebox.showinfo("Success!", rom_filename + " has been successfully created!")
     except OffsetError:
         tkinter.messagebox.showerror("ERROR", "This randomizer is only compatible with the (US) version of Illusion of Gaia")
@@ -286,23 +298,19 @@ def generate_ROM():
         tkinter.messagebox.showerror("ERROR", e)
 
 
-def write_spoiler(spoiler, filename, rom_path):
-    f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w+")
-    f.write(spoiler)
+def write_text_file(text, filename, rom_path):
+    f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w")
+    f.write(text)
     f.close()
 
 
-def write_asm_dump(asm_dump, filename, rom_path):
-    f = open(os.path.dirname(rom_path) + os.path.sep + filename, "w+")
-    f.write(asm_dump)
+def write_bin_file(bin, filename, rom_path):
+    f = open(os.path.dirname(rom_path) + os.path.sep + filename, "wb")
+    f.write(bin)
     f.close()
 
 
-def sort_patch(val):
-    return val['index']
-
-
-def write_patch(patch, rom_path, filename):
+def write_patch(patch, filename, rom_path):
     randomized = open(os.path.dirname(rom_path) + os.path.sep + filename, "wb")
     randomized.write(patch[1])
     randomized.close()
@@ -536,6 +544,8 @@ do_profile = tkinter.IntVar(root)
 do_profile.set(0)
 ingame_debug = tkinter.IntVar(root)
 ingame_debug.set(0)
+gen_patches_toggle = tkinter.IntVar(root)
+gen_patches_toggle.set(0)
 
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)
@@ -627,6 +637,8 @@ ingame_debug_label = tkinter.Label(devtools_frame, text="In-Game Debug:").grid(r
 ingame_debug_checkbox = tkinter.Checkbutton(devtools_frame, variable=ingame_debug, onvalue=1, offvalue=0).grid(row=2, column=1)
 do_profile_label = tkinter.Label(devtools_frame, text="Profile:").grid(row=2, column=3, sticky=tkinter.E)
 do_profile_checkbox = tkinter.Checkbutton(devtools_frame, variable=do_profile, onvalue=1, offvalue=0).grid(row=2, column=4)
+gen_patches_label = tkinter.Label(devtools_frame, text="Create Patches:").grid(row=3, column=0, sticky=tkinter.E)
+gen_patches_checkbox = tkinter.Checkbutton(devtools_frame, variable=gen_patches_toggle, onvalue=1, offvalue=0).grid(row=3, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(seed_frame, text='Random Seed', command=generate_seed).pack(side='left')

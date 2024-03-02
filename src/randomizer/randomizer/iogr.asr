@@ -3861,6 +3861,7 @@ rts
 ..PowersOfTwo:
 db $01,$02,$04,$08,$10,$20,$40,$80
 .IsDungeon3Item:
+lda.l Config_SettingStatuesPlayerChoice : bne .NoDropSpecial
 lda.l Config_Dungeon3Required : bne .NoDropSpecial
 .CanDropSpecial:
 clc
@@ -3869,6 +3870,7 @@ rts
 sec
 rts
 .IsDungeon5Item:
+lda.l Config_SettingStatuesPlayerChoice : bne .NoDropSpecial
 lda.l Config_Dungeon5Required : bne .NoDropSpecial
 bra .CanDropSpecial
 }

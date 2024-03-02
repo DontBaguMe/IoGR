@@ -826,12 +826,28 @@ class Randomizer:
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)
 
-    def generate_asm_dump(self) -> str:
-        defines_sorted = dict(sorted(self.asar_defines.items()))
+    def generate_def_dump(self) -> str:
+        defkeys_sorted = []
+        defs = {}
+        if self.asar_patch_result[0]:
+            defs = {define: val for define,val in asar.getalldefines().items() if define[:7] not in ["Default","Monster","PlayerD","AG_Spr_","DG_Spr_"]}
+            defkeys_sorted = sorted(defs)
         defdump = ""
-        for d in defines_sorted:
-            defdump += "!" + d + " = " + defines_sorted[d] + "\n"
+        for d in defkeys_sorted:
+            defdump += "!" + d + " = " + defs[d] + "\n"
         return defdump
+    
+    def generate_config_addrs(self) -> str:
+        cfgkeys_sorted = []
+        config_labels = {}
+        if self.asar_patch_result[0]:
+            labels = asar.getalllabels()
+            config_labels = {label: val for label,val in labels.items() if label[:7] == "Config_"}
+            cfgkeys_sorted = sorted(config_labels)
+        addrdump = ""
+        for d in cfgkeys_sorted:
+            addrdump += d + "\t" + str(int(config_labels[d])&0x3fffff) + "\n"
+        return addrdump
 
     def __get_required_statues__(self, settings: RandomizerData) -> int:
         if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
