@@ -437,18 +437,23 @@ class Randomizer:
         ##########################################################################
         boss_order = [*range(1,8)]
         if settings.boss_shuffle:
-            non_will_bosses = [5]               # Can't be forced to play Mummy Queen as Will
-            if settings.difficulty.value < 3:   # Solid Arm cannot be shuffled in non-Extreme seeds
-                boss_order.remove(7)
-                if settings.difficulty.value < 2:
-                    non_will_bosses.append(3)   # In Easy/Normal, can't be forced to play Vampires as Will
+            non_will_bosses = [5]               # Never forced to play Mummy Queen as Will
+            if settings.flute.value == FluteOpt.FLUTELESS.value:
+                non_will_bosses.append(1)       # Can't beat Castoth as Will without Flute (or generous ability shuffle and lots of patience)
+            if settings.difficulty.value < 3:   # For non-Extreme seeds:
+                boss_order.remove(7)            # - Don't shuffle Solid Arm;
+                if settings.flute.value == FluteOpt.FLUTELESS.value:
+                    non_will_bosses.append(3)   # - Don't require fluteless Vamps.
+            if settings.difficulty.value < 2:   # In Easy/Normal, can't be forced to play Vampires as Will
+                if 3 not in non_will_bosses:
+                    non_will_bosses.append(3)
             random.shuffle(non_will_bosses)
         
             # Determine statue order for shuffle
             for x in non_will_bosses:
                 boss_order.remove(x)
             random.shuffle(boss_order)
-            non_will_dungeons = [0,1,2,4]
+            non_will_dungeons = [0,1,2,4]   # i.e., the dungeons that don't force Will at the boss door
             random.shuffle(non_will_dungeons)
             non_will_dungeons = non_will_dungeons[:len(non_will_bosses)]
             non_will_dungeons.sort()

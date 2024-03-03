@@ -291,6 +291,9 @@ class World:
     # Returns every accessible node from to_visit. Marks edges as traversed. 
     # If not test: marks nodes as traversed, collects self.items_collected/self.open_edges,
     # adds graph connections, and updates DS access.
+    # Bug: if W can't reach a ForceWillForm node but F/S can, this traverses the node without propagating any
+    # form access. I think currently this just causes a small number of boss shuffle + ER seeds to be
+    # incorrectly rejected as unwinnable.
     def traverse(self,to_visit=[],test=False):
         self.verbose(" Beginning traversal...")
         visited = []
@@ -2123,33 +2126,12 @@ class World:
         elif self.kara == 5:
             self.required_items += [28, 66]
 
-        # Update inventory space logic
-        if 3 in self.dungeons_req:   # Rama Statues can't be dropped
-            self.item_pool[19][4] = True
-        if 5 in self.dungeons_req:   # Hieroglyphs and Journal can't be dropped
-            for item in [30,31,32,33,34,35,38]:
-                self.item_pool[item][4] = True
-
-        # Non-Extreme logic won't assume you can get to Babel via Solid Arm
-        if self.difficulty < 3:
-            self.exits[21][4] = self.exits[21][3]
-
         # Various gameplay variants
-        if "Allow Glitches" in self.variant:
-            free_items.append(601)
-        else:
-            unused_items.append(601)
         if self.firebird:
             free_items.append(602)
         else:
             unused_items.append(602)
-        if "Z3 Mode" in self.variant:
-            self.item_pool[1][0] = 29  # Red Jewels
-            self.item_pool[50][0] = 5  # HP upgrades
-            self.item_pool[51][0] = 2  # DEF upgrades
-            self.item_pool[52][0] = 3  # STR upgrades
-            self.item_pool[55][0] = 12  # HP Pieces
-        else:
+        if "Z3 Mode" not in self.variant:
             unused_items.append(55)   # Heart pieces don't exist
         if "Open Mode" in self.variant:
             # Set all travel item edges open (Letter, M.Melody, Teapot, Will, Roast)
@@ -2253,28 +2235,6 @@ class World:
                 unused_items.extend([100,101,102,103,104,105])
             else:
                 unused_items.append(106)
-
-        # Change graph logic depending on Kara's location
-        unused_kara_edges = [400,401,402,403,404]
-        if self.kara == 1:
-            kara_edge = 400
-            self.graph[49][6].append(20)
-        elif self.kara == 2:
-            kara_edge = 401
-            self.graph[150][6].append(20)
-            self.area_short_name[45] = "Samlet"  # instead of "Sam"
-        elif self.kara == 3:
-            kara_edge = 402
-            self.graph[270][6].append(20)
-        elif self.kara == 4:
-            kara_edge = 403
-            self.graph[345][6].append(20)
-        elif self.kara == 5:
-            kara_edge = 404
-            self.graph[391][6].append(20)
-        self.unrestrict_edge(kara_edge)
-        unused_kara_edges.remove(kara_edge)
-        unused_edges.extend(unused_kara_edges)
         
         # Remove Jeweler edges that require more RJ items than exist, to help the traverser
         if self.gem[6] > self.item_pool[1][0]:
@@ -2286,24 +2246,13 @@ class World:
 
         # Dungeon Shuffle.
         # Clean up unused nodes and artificial items
-        dungeon_shuffle_unused_ids = [605,606,607]
         if not self.dungeon_shuffle: # if self.dungeon_shuffle == "None" or self.dungeon_shuffle == "Basic":
             free_items.append(525)   # Pyramid portals open
             unused_locs.append(525)  # Loc is unused as item is free
             unused_nodes.append(525) # Node is unused as item is free
             if True: # self.dungeon_shuffle == "None":
-                world_dungeon_shuffle_id = 605
                 unused_items.append(800)
-                free_items.append(801)
-            #elif self.dungeon_shuffle == "Basic":
-            #    world_dungeon_shuffle_id = 606
-        else: # elif self.dungeon_shuffle == "Chaos":
-            world_dungeon_shuffle_id = 607
-        free_items.append(world_dungeon_shuffle_id)
-        dungeon_shuffle_unused_ids.remove(world_dungeon_shuffle_id)
-        unused_items.extend(dungeon_shuffle_unused_ids)
-        unused_locs.extend(dungeon_shuffle_unused_ids)
-        unused_nodes.extend(dungeon_shuffle_unused_ids)        
+                free_items.append(801)     
         if self.dungeon_shuffle and self.coupled_exits: # == "Chaos":
             # Reduce walking times by removing some empty corridors; stabilize dungeon generation by removing lower Mu corridors.
             # Inca U-turn + statue "puzzle"; Mine elevator; Angl empty water room;
@@ -2341,8 +2290,9 @@ class World:
         self.delete_objects(items=unused_items,locs=unused_locs,nodes=unused_nodes,edges=unused_edges,exits=unused_exits,with_close=True)
         self.delete_objects(items=free_items,with_close=False)
         
-        # Clean up edges that now require neither items nor a specific form
+        # Clean up edges that now require neither items nor a specific form, or that go nowhere
         free_edges = [edge for edge in self.logic if self.edge_formless(edge) and not self.logic[edge][4]]
+        free_edges.extend([edge for edge in self.logic if self.logic[edge][1] == self.logic[edge][2]])
         for edge in free_edges:
             here_node = self.logic[edge][1]
             other_node = self.logic[edge][2]
@@ -3456,7 +3406,7 @@ class World:
         self.item_pool = {
             # Items
             0: [2, 1,  0x00, "Nothing", False, 3, 0, 0],
-            1: [45, 1, 0x01, "Red Jewel", False, 1, 0, 1],
+            1: [45 if "Z3 Mode" not in self.variant else 29, 1, 0x01, "Red Jewel", False, 1, 0, 1],
             2: [1, 1,  0x02, "Prison Key", True, 1, 0, 0],
             3: [1, 1,  0x03, "Inca Statue A", True, 1, 0, 0],
             4: [1, 1,  0x04, "Inca Statue B", True, 2, 0, 0],
@@ -3474,7 +3424,7 @@ class World:
             16: [1, 1, 0x10, "Mu Palace Key", True, 1, 0, 0],
             17: [1, 1, 0x11, "Purity Stone", True, 1, 0, 0],
             18: [2, 1, 0x12, "Hope Statue", True, 1, 0, -2*settings.dungeon_shuffle],
-            19: [2, 1, 0x13, "Rama Statue", False, 2, 0, 0],
+            19: [2, 1, 0x13, "Rama Statue", bool(3 in self.dungeons_req), 2, 0, 0],
             20: [1, 1, 0x14, "Magic Dust", True, 2, 0, 0],
             21: [0, 1, 0x15, "Blue Journal", False, 3, 0, 0],
             22: [1, 1, 0x16, "Lance Letter", False, 3, 0, 0],
@@ -3483,18 +3433,18 @@ class World:
             25: [1, 1, 0x19, "Teapot", True, 1, 0, 0],
             26: [3, 1, 0x1a, "Mushroom Drops", True, 1, 0, 0],
             #27: [0, 1, 0x1b, "Bag of Gold", False, 3, 0, 0],  # Not implemented
-            28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 8 if settings.darkrooms.value != 0 else 0],
+            28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 3*self.difficulty if settings.darkrooms.value != 0 else 0],
             29: [1, 1, 0x1d, "Gorgon Flower", True, 1, 0, 0],
-            30: [1, 1, 0x1e, "Hieroglyph", False, 2, 0, 0],
-            31: [1, 1, 0x1f, "Hieroglyph", False, 2, 0, 0],
-            32: [1, 1, 0x20, "Hieroglyph", False, 2, 0, 0],
-            33: [1, 1, 0x21, "Hieroglyph", False, 2, 0, 0],
-            34: [1, 1, 0x22, "Hieroglyph", False, 2, 0, 0],
-            35: [1, 1, 0x23, "Hieroglyph", False, 2, 0, 0],
-            36: [1, 1, 0x24, "Aura", True, 1, 0, 4*self.dungeon_shuffle],
+            30: [1, 1, 0x1e, "Hieroglyph", bool(5 in self.dungeons_req), 2, 0, 0],
+            31: [1, 1, 0x1f, "Hieroglyph", bool(5 in self.dungeons_req), 2, 0, 0],
+            32: [1, 1, 0x20, "Hieroglyph", bool(5 in self.dungeons_req), 2, 0, 0],
+            33: [1, 1, 0x21, "Hieroglyph", bool(5 in self.dungeons_req), 2, 0, 0],
+            34: [1, 1, 0x22, "Hieroglyph", bool(5 in self.dungeons_req), 2, 0, 0],
+            35: [1, 1, 0x23, "Hieroglyph", bool(5 in self.dungeons_req), 2, 0, 0],
+            36: [1, 1, 0x24, "Aura", True, 1, 0, 2*self.difficulty*self.dungeon_shuffle],
             37: [1, 1, 0x25, "Lola's Letter", False, 1, 0, 0],
-            38: [1, 1, 0x26, "Journal", False, 2, 0, 0],
-            39: [1, 1, 0x27, "Crystal Ring", False, 1, 0, 8 if settings.darkrooms.value != 0 else 0],
+            38: [1, 1, 0x26, "Journal", bool(5 in self.dungeons_req), 2, 0, 0],
+            39: [1, 1, 0x27, "Crystal Ring", False, 1, 0, 3*self.difficulty if settings.darkrooms.value != 0 else 0],
             40: [1, 1, 0x28, "Apple", True, 1, 0, 0],
             41: [1, 1, 0x2e, "2 Red Jewels", False, 1, 0, -2],
             42: [1, 1, 0x2f, "3 Red Jewels", False, 1, 0, -2],
@@ -3502,12 +3452,12 @@ class World:
             # Status Upgrades
             # Mapped to artificial items whose IDs are $5E lower (e.g. $87 -> $29),
             # so $8c/$8d are skipped since they'd map to $2e/$2f which are in use.
-            50: [3, 1, 0x87, "HP Upgrade", False, 3, 0, 0],
-            51: [1, 1, 0x89, "DEF Upgrade", False, 3, 0, 0],
-            52: [2, 1, 0x88, "STR Upgrade", False, 3, 0, 0],
+            50: [3 if "Z3 Mode" not in self.variant else 5, 1, 0x87, "HP Upgrade", False, 3, 0, 0],
+            51: [1 if "Z3 Mode" not in self.variant else 2, 1, 0x89, "DEF Upgrade", False, 3, 0, 0],
+            52: [2 if "Z3 Mode" not in self.variant else 3, 1, 0x88, "STR Upgrade", False, 3, 0, 0],
             53: [1, 1, 0x8a, "Dash Upgrade", False, 3, 0, 0],
             54: [2, 1, 0x8b, "Friar Upgrade", False, 3, 0, 1],
-            55: [0, 1, 0x8e, "Heart Piece", False, 3, 0, 0],
+            55: [0 if "Z3 Mode" not in self.variant else 12, 1, 0x8e, "Heart Piece", False, 3, 0, 0],
 
             # Abilities
             60: [0, 2, "", "Nothing", False, 3, 0, 0],
@@ -3563,14 +3513,9 @@ class World:
             531: [1, 4, "", "Mu: Beat Vampires", False, 1, 0, 0],
 
             # Misc. game states
-            #600: [0, 6, "", "Freedan Access", False, 1, 0, 0],
-            601: [1, 6, "", "Glitches", False, 1, 0, 0],
             602: [1, 6, "", "Early Firebird enabled", False, 1, 0, 0],
             #603: [0, 6, "", "Firebird", False, 1, 0, 0],   # Firebird item is 67 instead of this
-            604: [1, 1, 0x8f, "Flute", False, 1, 0, 8],
-            605: [1, 6, "", "Dungeon Shuffle: No", False, 1, 0, 0],
-            606: [1, 6, "", "Dungeon Shuffle: Basic", False, 1, 0, 0],
-            607: [1, 6, "", "Dungeon Shuffle: Chaos", False, 1, 0, 0],
+            604: [1, 1, 0x8f, "Flute", False, 1, 0, 2*(1+self.difficulty)],
             608: [0, 6, "", "Has Any Will Ability", False, 1, 0, 0],   # Expanded to PDash|Slider|SDash during init
             609: [0, 6, "", "Has Any Attack", False, 1, 0, 0],   # Expanded to many options during init, if not starting with flute
             610: [0, 6, "", "Has Any Ranged Attack", False, 1, 0, 0],  # Expanded to Friar|Firebird during init
@@ -3579,12 +3524,12 @@ class World:
             
             # Orbs that open doors
             700: [1, 5, 0x01, "Open Underground Tunnel Skeleton Cage", False, 3, 0, 0],
-            701: [1, 5, 0x02, "Open Underground Tunnel First Worm Door", False, 1, 0, -1],
-            702: [1, 5, 0x03, "Open Underground Tunnel Second Worm Door", False, 1, 0, -1],
-            703: [1, 5, 0x05, "Open Underground Tunnel West Room Bat Door", False, 1, 0, -1],
-            704: [1, 5, 0x16, "Open Underground Tunnel Hidden Dark Space", False, 1, 0, -1],
-            705: [1, 5, 0x17, "Open Underground Tunnel Red Skeleton Barrier 1", False, 1, 0, -1],
-            706: [1, 5, 0x18, "Open Underground Tunnel Red Skeleton Barrier 2", False, 1, 0, -1],
+            701: [1, 5, 0x02, "Open Underground Tunnel First Worm Door", False, 1, 0, -3],
+            702: [1, 5, 0x03, "Open Underground Tunnel Second Worm Door", False, 1, 0, -3],
+            703: [1, 5, 0x05, "Open Underground Tunnel West Room Bat Door", False, 1, 0, -3],
+            704: [1, 5, 0x16, "Open Underground Tunnel Hidden Dark Space", False, 1, 0, -3],
+            705: [1, 5, 0x17, "Open Underground Tunnel Red Skeleton Barrier 1", False, 1, 0, -3],
+            706: [1, 5, 0x18, "Open Underground Tunnel Red Skeleton Barrier 2", False, 1, 0, -3],
             707: [1, 5, 0x0d, "Open Incan Ruins West Ladder", False, 1, 0, 0],
             708: [1, 5, 0x0e, "Open Incan Ruins Final Ladder", False, 1, 0, 0],
             709: [1, 5, 0x0f, "Open Incan Ruins Entrance Ladder", False, 1, 0, 3*settings.orb_rando.value],
@@ -3592,9 +3537,9 @@ class World:
             711: [1, 5, 0x0b, "Open Incan Ruins East-West Freedan Ramp", False, 1, 0, 0],
             712: [1, 5, 0x0a, "Open Incan Ruins Diamond Block Stairs", False, 3, 0, 0],
             713: [1, 5, 0x10, "Open Incan Ruins Singing Statue Stairs", False, 1, 0, 0],
-            714: [1, 5, 0x34, "Open Diamond Mine Tunnel Middle Fence", False, 1, 0, -1],
-            715: [1, 5, 0x35, "Open Diamond Mine Tunnel South Fence", False, 1, 0, -1],
-            716: [1, 5, 0x36, "Open Diamond Mine Tunnel North Fence", False, 1, 0, -1],
+            714: [1, 5, 0x34, "Open Diamond Mine Tunnel Middle Fence", False, 1, 0, -2],
+            715: [1, 5, 0x35, "Open Diamond Mine Tunnel South Fence", False, 1, 0, -2],
+            716: [1, 5, 0x36, "Open Diamond Mine Tunnel North Fence", False, 1, 0, -2],
             717: [1, 5, 0x22, "Open Diamond Mine Big Room Monster Cage", False, 3, 0, 0],
             718: [1, 5, 0x32, "Open Diamond Mine Hidden Dark Space", False, 1, 0, 0],
             719: [1, 5, 0x23, "Open Diamond Mine Ramp Room Worm Fence", False, 1, 0, 0],
@@ -3950,14 +3895,9 @@ class World:
             531: [531, 4, True, 531, [], "", "Mu: Beat Vampires", 0, 0, [] ],
 
             # Misc
-            #600: [600, 6, True, 600, [], "", "Freedan Access", 0, 0, [] ],
-            #601: [601, 6, True, 601, [], "", "Glitches", 0, 0, [] ],
             #602: [0, 6, True, 602, [], "", "Early Firebird enabled", 0, 0, [] ],
             603: [491, 6, True, 67,  [], "", "Firebird access", 0, 0, [] ],
             #604: [604, 6, True, 604, [], "", "Flute", 0, 0, [] ],
-            #605: [0, 6, True, 605, [], "", "Dungeon Shuffle: No", 0, 0, [] ],
-            #606: [0, 6, True, 606, [], "", "Dungeon Shuffle: Basic", 0, 0, [] ],
-            #607: [0, 6, True, 607, [], "", "Dungeon Shuffle: Chaos", 0, 0, [] ],
             #608: [608, 6, True, 608, [], "", "Has Any Will Ability", 0, 0, [] ],
             #609: [609, 6, True, 609, [], "", "Has Any Attack", 0, 0, [] ],
             #610: [610, 6, True, 610, [], "", "Has Any Ranged Attack", 0, 0]
@@ -4455,7 +4395,7 @@ class World:
             482: [False, [523], 2, [6,23,0,234], 0, "Jeweler's Mansion: Solid Arm", [], False, [], [], [], [], [], [], [], []],
 
             # Game End
-            490: [False, [500], 0, [0,0,0,0], 0, "Kara Released", [], False, [], [], [], [], [], [], [], []],
+            490: [False, [500], 0, [0,0,0,0], 0, "Kara Released", [20], False, [], [], [], [], [], [], [], []],
             491: [False,    [], 0, [0,0,0,0], 0, "Firebird access", [], False, [], [], [], [], [], [], [], []],
             492: [False,    [], 0, [0,0,0,0], 0, "Dark Gaia/End Game", [], False, [], [], [], [], [], [], [], []],
 
@@ -4558,14 +4498,14 @@ class World:
 
             # Moon Tribe
             80: [0, 61, 62, 0, [[608, 1]], False],   # Cave challenge w/ Will ability
-            600:[0, 61, 62, 0, [[601, 1], [604, 1]], False],   # Cave challenge itemless w/ glitches and flute
+            600:[0, 61, 62 if settings.allow_glitches else 61, 0, [[604, 1]], False],   # Cave challenge itemless w/ glitches and flute
 
             # Inca / Gold Ship / Freejia
-            88:  [0, 99, 75 if self.coupled_exits else 99,       0, [], False],  # Materialize Z-ladder door coupling if applicable
-            89:  [0, 72, 99 if self.enemizer == "None" else 72,  0, [[601, 1]], False],  # Map 29 progression w/ Z-ladder glitch
-            706: [0,  72,  70,     0, [[709, 1], [801, 1]], True],  # Inca exterior (29) N<->NE via 4-Way orb, ignored for DSC
-            707: [0,  74,  72,     0, [[707, 1], [801, 1]], True],  # Inca exterior (29) SW<->N via 4-Way orb, ignored for DSC
-            708: [0,  75,  72,     0, [[708, 1], [801, 1]], True],  # Inca exterior (29) SE<->N via 4-Way orb, ignored for DSC
+            88:  [0,  99,  75 if self.coupled_exits else 99, 0, [], False],  # Materialize Z-ladder door coupling if applicable
+            89:  [0,  72,  99 if self.enemizer == "None" and settings.allow_glitches else 72, 0, [], False],  # Map 29 progression w/ Z-ladder glitch
+            706: [0,  72,  70,     0, [[709, 1], [801, 1]], True],  # Inca exterior (29) N<->NE via 4-Way orb, ignored during dungeon construction
+            707: [0,  74,  72,     0, [[707, 1], [801, 1]], True],  # Inca exterior (29) SW<->N via 4-Way orb, ignored during dungeon construction
+            708: [0,  75,  72,     0, [[708, 1], [801, 1]], True],  # Inca exterior (29) SE<->N via 4-Way orb, ignored during dungeon construction
             700: [0,  73, 700,     0, [[64, 1], [54, 2]], False],   # Inca west 4-Way orb from C with upgraded Friar
             90:  [0,  77,  78,     0, [[3, 1], [4, 1]], False],  # Map 30 to Castoth w/ Inca Statues
             91:  [0,  80,  530,    0, [[608, 1]], False],        # Break blocking slug statue w/ Will ability
@@ -4606,12 +4546,12 @@ class World:
             141: [0, 181, 182,     0, [[63, 1]], False],            # SW Top (81) ramps w/ Spin Dash
             142: [0, 181, 184,     0, [[63, 1]], False],            # SW Top (81) ramps w/ Spin Dash
             143: [0, 182, 185,     0, [[63, 1]], False],            # SW Top (81) ramps w/ Spin Dash
-            601: [0, 181, 182,     0, [[601, 1]], False],           # SW Top (81) ramps w/ glitches
-            602: [0, 181, 184,     0, [[601, 1]], False],           # SW Top (81) ramps w/ glitches
-            603: [0, 182, 185,     0, [[601, 1]], False],           # SW Top (81) ramps w/ glitches
+            601: [0, 181, 182 if settings.allow_glitches else 181, 0, [], False],  # SW Top (81) ramps w/ glitches
+            602: [0, 181, 184 if settings.allow_glitches else 181, 0, [], False],  # SW Top (81) ramps w/ glitches
+            603: [0, 182, 185 if settings.allow_glitches else 182, 0, [], False],  # SW Top (81) ramps w/ glitches
             739: [0, 187, 508,     0, [[725, 1], [609, 1], [612, 1]], False],   # SW Bot (82) switch via fire cage orb, attack, and telekinesis
             144: [0, 188, 189,  0x06, [], False],                   # SW Bot (82) cage switch w/ reach
-            145: [0, 188, 189,     0, [[601, 1], [604, 1]], False], # SW Bot (82) cage switch w/ Glitches + Flute
+            145: [0, 188, 189 if settings.allow_glitches else 188, 0, [[604, 1]], False], # SW Bot (82) cage switch w/ Glitches + Flute
             146: [0, 192, 190,     0, [[63, 1]], False],            # NW Top (83) backward w/ Spin Dash
             148: [0, 195, 509,     0, [[610, 1], [612, 1]], False], # NW Bot (84) statue w/ ranged and telekinesis
             149: [0, 195, 509,     0, [[65, 1], [612, 1]], False],  # NW Bot (84) statue w/ Aura Barrier and telekinesis
@@ -4629,7 +4569,7 @@ class World:
             753: [0, 723, 726,  0, [[610, 1]], False],            # Mu NE, N orb from S, via ranged
             754: [0, 217, 724,  0, [[610, 1]], False],            # Mu NE, S orb from N, via ranged
             175: [0, 222, 221,  0, [[511, 1], [610, 1]], False],  # Map 97 midN->island w/ water lowered 1 & ranged
-            176: [0, 222, 221,  0, [[511, 1], [601, 1]], False],  # Map 97 midN->island w/ water lowered 1 & glitches
+            176: [0, 222, 221 if settings.allow_glitches else 222,  0, [[511, 1]], False],  # Map 97 midN->island w/ water lowered 1 & glitches
             178: [0, 226, 227,  0, [[511, 1]], True],             # Map 98 top-midE w/ water lowered 1
             179: [0, 227, 229,  0, [[512, 1]], True],             # Map 98 midE-botE w/ water lowered 2
             180: [0, 228, 230,  0, [[512, 1]], True],             # Map 98 midW-botW w/ water lowered 2
@@ -4642,7 +4582,7 @@ class World:
             188: [0, 526, 512,  0, [[18, 2], [527, 1], [511, 1]], False],  # Water lowered 2 w/ Hope Statues, both rooms, and water lowered 1
             189: [0, 527, 512,  0, [[18, 2], [526, 1], [511, 1]], False],  # Water lowered 2 w/ Hope Statues, both rooms, and water lowered 1
             190: [0, 244, 531,0x6, [], False],                    # Vampires as F/S
-            191: [0, 244, 531,  0, [[604, 1]], False],            # Vampires with Flute
+            191: [0, 244, 531,  0, [[604 if self.difficulty < 3 else 609, 1]], False], # Vampires with Flute, or any attack if playing Extreme
             192: [0, 244, 242,  0, [[531, 1]], False],            # Pass Vampires if defeated
 
             # Angel Dungeon
@@ -4653,7 +4593,7 @@ class World:
             # Great Wall
             218: [0, 292, 293,     0, [[609, 1]], False],           # Drop room forward requires an attack for the button
             219: [0, 293, 291,     0, [[63, 1]], True],             # Map 131 (drop room) backwards w/ Spin Dash
-            220: [0, 296, 295,     0, [[601, 1], [604, 1]], False], # Map 133 E->C w/ glitches and Flute
+            220: [0, 296, 295 if settings.allow_glitches else 296, 0, [[604, 1]], False], # Map 133 E->C w/ glitches and Flute
             221: [0, 296, 295,     0, [[63, 1]], False],            # Map 133 E->C w/ Spin Dash
             222: [0, 296, 295,  0x06, [], False],                   # Map 133 E->C w/ Freedan or Shadow
             223: [0, 296, 294,     0, [[63, 1]], False],            # Map 133 C->W w/ Spin Dash
@@ -4664,13 +4604,9 @@ class World:
 
             # Mt. Temple
             240: [0, 331, 332, 0, [[63, 1]], True],              # Map 161 progression w/ Spin Dash
-            242: [0, 333, 514, 0, [[26, 1], [605, 1]], False],   # Use Mushroom drops 1, no dungeon shuffle
-            510: [0, 333, 514, 0, [[26, 3], [606, 1]], False],   # Use Mushroom drops in dungeon shuffle
-            530: [0, 333, 514, 0, [[26, 3], [607, 1]], False],   # Use Mushroom drops in dungeon shuffle
+            242: [0, 333, 514, 0, [[26, 1 if not self.dungeon_shuffle else 3]], False],   # Use Mushroom drops 1
             750: [0, 333, 335, 0, [[514, 1]], True],             # Drops vine 1
-            244: [0, 339, 515, 0, [[26, 2], [605, 1]], False],   # Use Mushroom drops 2, no dungeon shuffle
-            511: [0, 339, 515, 0, [[26, 3], [606, 1]], False],   # Use Mushroom drops in dungeon shuffle
-            531: [0, 339, 515, 0, [[26, 3], [607, 1]], False],   # Use Mushroom drops in dungeon shuffle
+            244: [0, 339, 515, 0, [[26, 2 if not self.dungeon_shuffle else 3]], False],   # Use Mushroom drops 2
             751: [0, 339, 340, 0, [[515, 1]], True],             # Drops vine 2
             246: [0, 340, 516, 0, [[26, 3]], False],             # Use Mushroom drops 3
             752: [0, 340, 341, 0, [[516, 1]], True],             # Drops vine 3
@@ -4680,7 +4616,7 @@ class World:
 
             # Ankor Wat
             260: [0, 361, 739,    0, [[64, 1], [54, 2]], False],    # Map 177 orb w/ upgraded Friar
-            729: [0, 361, 362,    0, [[735, 1], [801, 1]], True],   # Wat Outer South (177) via scarab orb, ignored in DSC
+            729: [0, 361, 362,    0, [[735, 1], [801, 1]], True],   # Wat Outer South (177) via scarab orb, ignored during dungeon construction
             261: [0, 363, 364,    0, [[63, 1]], False],             # Map 178 S->C w/ Spin Dash
             262: [0, 364, 365,    0, [[62, 1], [736, 1]], False],   # Map 178 C->N w/ Psycho Slider and scarab key
             263: [0, 365, 364,    0, [[62, 1]], False],             # Map 178 N->C w/ Psycho Slider
@@ -4689,18 +4625,18 @@ class World:
             266: [0, 370, 371,    0, [[63, 1]], False],             # Map 181 C->S w/ Spin Dash
             267: [0, 373, 374,    0, [[66, 1]], False],             # Map 183 S->NW w/ Earthquaker
             268: [0, 373, 374,    0, [[64, 1], [54, 2]], False],    # Map 183 S->NW w/ upgraded Friar
-            269: [0, 373, 374,    0, [[64, 1], [601, 1]], False],   # Map 183 S->NW w/ Friar and glitches
+            269: [0, 373, 374 if settings.allow_glitches else 373, 0, [[64, 1]], False],   # Map 183 S->NW w/ Friar and glitches
             271: [0, 376, 727,    0, [[64, 1]], False],             # Map 184 orb access via Friar
             272: [0, 376, 727,    0, [[36, 1]], False],             # Map 184 orb access via Shadow
             731: [0, 376, 377,    0, [[738, 1]], True],             # Map 184 S<->N w/ skull orb
-            273: [0, 384, 385,    0, [[62, 1], [601, 1]], True],    # Map 188 S-N w/ Slider and glitches
+            273: [0, 384, 385 if settings.allow_glitches else 384, 0, [[62, 1]], True],    # Map 188 S-N w/ Slider and glitches
             274: [0, 384, 385,    0, [[62, 1], [28, 1]], True],     # Map 188 S-N w/ Slider and Glasses
             275: [0, 386, 387,    0, [[62, 1]], True],              # Map 189 S-N w/ Slider
 
             # Pyramid
             290: [0, 410, 411,    0, [[62, 1]], True],              # Map 204 pass orbs w/ Slider
             291: [0, 410, 411,    0, [[63, 1]], True],              # Map 204 pass orbs w/ Spin
-            292: [0, 410, 411,    0, [[601, 1]], True],             # Map 204 pass orbs w/ "glitches"
+            292: [0, 410, 411 if settings.allow_glitches else 410, 0, [], True], # Map 204 pass orbs w/ "glitches"
             736: [0, 411, 713,    0, [[739, 1]], False],            # Map 204 top DS w/ orb orb
             293: [0, 713, 412,    0, [[36, 1], [739, 1]], False],   # Map 204 progression w/ Aura and DS orb
             294: [0, 713, 413,    0, [[36, 1], [739, 1]], False],   # Map 204 progression w/ Aura and DS orb
@@ -4730,9 +4666,7 @@ class World:
             522: [0, 437, 411,    0, [[525, 1]], False],            # Pyramid portal
             523: [0, 441, 411,    0, [[525, 1]], False],            # Pyramid portal
             524: [0, 450, 411,    0, [[525, 1]], False],            # Pyramid portal
-            525: [0,   0, 525,    0, [[605, 1]], False],            # No shuffle: portals always open
-            526: [0,   0, 525,    0, [[606, 1]], False],            # Basic shuffle: portals always open
-            527: [0,   0, 525, 0x0f, [[607, 1], [36, 1]], False],   # Dungeon Chaos: portals with Aura, any form works
+            525: [0,   0, 525, 0x0f, [] if not self.dungeon_shuffle else [[36, 1]], False], # Portals require Aura in dungeon shuffle
 
             # Babel / Mansion items 740,741
             320: [0, 461, 462, 0x0f, [[36, 1], [39, 1]], False],    # Map 223 w/ Aura and Ring, any form
@@ -4743,11 +4677,7 @@ class World:
             323: [0, 715, 481,    0, [[62, 1]], True],              # Mansion progression w/ Slider
 
             # Endgame / Misc
-            400: [-1, 49, 490,    0, [[20, 1]], False],                       # Rescue Kara from Edward's w/ Magic Dust
-            401: [-1, 150,490,    0, [[20, 1]], False],                      # Rescue Kara from Mine w/ Magic Dust
-            402: [-1, 270,490,    0, [[20, 1]], False],                      # Rescue Kara from Angel w/ Magic Dust
-            403: [-1, 345,490,    0, [[20, 1]], False],                      # Rescue Kara from Mt. Temple w/ Magic Dust
-            404: [-1, 391,490,    0, [[20, 1]], False],                      # Rescue Kara from Ankor Wat w/ Magic Dust
+            400: [0, [49,150,270,345,391][self.kara - 1], 490, 0, [[20, 1]], False],   # Rescue Kara w/ Magic Dust
             405: [0, 490, 491, 0x0f, [[36, 1], [39, 1], [602, 1]], False],    # (Early) Firebird w/ Kara, Aura, Ring, and the setting
             406: [0, 490, 492, 0x0f, [[36, 1], [100, 0], [101, 0], [102, 0], [103, 0], [104, 0], [105, 0]], False], # Beat Game w/Statues and Aura
             407: [0, 490, 492, 0x0f, [[36, 1], [106, self.statues_required]], False]  # Beat Game w/Statues and Aura (player choice)
@@ -4839,7 +4769,7 @@ class World:
             42: "Laborer",
             43: "Diamond Mine",
             44: "Laborer",
-            45: "Sam",
+            45: "Sam" if self.kara != 2 else "Samlet",
             46: "Diamond Mine",
             47: "Diamond Mine",
             48: "Diamond Mine",
@@ -7329,15 +7259,13 @@ class World:
             25: [ 368, [[512, 1]], 2, False ],   # Mu-SE exit door (Bot)
             26: [ 408, [[62, 1]], 0, True ],     # Angl chest slider
             27: [ 414, [[62, 1]], 0, True ],     # Angl Ishtar slider
-            28: [ 591, [[28, 1]], 2, False],     # Wat bright room N
-            29: [ 591, [[601, 1]], 2, False],    # Wat bright room N
-            30: [ 592, [[28, 1]], 2, False],     # Wat bright room S
-            31: [ 592, [[601, 1]], 2, False],    # Wat bright room S
+            28: [ 591, [] if settings.allow_glitches else [[28, 1]], 2, False],     # Wat bright room N
+            30: [ 592, [] if settings.allow_glitches else [[28, 1]], 2, False],     # Wat bright room S
             # Require an attack for bosses; Castoth and Vamps are special
             # Rigorously we need a "defeated" flag item for each boss, but this suffices for now
             101: [ 5, [[609, 1]], 2, False ],     # Viper
             103: [ 11, [[609, 1]], 2, False ],    # Fanger
-            104: [ 14, [[609, 1]], 2, False ],    # MQ
-            105: [ 20, [[609, 1]], 2, False ]    # Solid Arm
+            104: [ 14, [[36, 1]], 2, False ],     # MQ
+            106: [ 20, [[609, 1]], 2, False ]     # Solid Arm
         }
     
