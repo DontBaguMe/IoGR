@@ -2527,11 +2527,11 @@ class World:
                 self.update_graph(True,True,False)
             traverse_result = self.traverse()
             new_nodes = traverse_result[0]
-            # A node needs a txform DS if it has a formful edge, isn't accessible by that form, and has no open alternative path
+            # A node needs a txform DS if it has an open formful edge, isn't accessible by that form, and the edge goes to an unreached area
             f_missing_nodes = {self.logic[e][1] for e in self.open_edges if not self.edge_formless(e) and not (self.logic[e][3] & self.graph[self.logic[e][1]][4]) and not self.is_accessible(self.logic[e][2])}
             orig_count_missing_nodes = len(f_missing_nodes)
             if not f_missing_nodes and not ds_items:
-                break
+                break    # Success: no DS items left to place and no open formful edges to new areas
             if f_missing_nodes:
                 # Lock txform DSes to cover nodes that need a form and aren't known to be accessible by that form
                 f_nodes_under_ds_node = {}
@@ -2559,7 +2559,8 @@ class World:
                     del f_nodes_under_ds_node[lock_node]
                     while any(len(f_nodes_under_ds_node[ds_node]) == 0 for ds_node in f_nodes_under_ds_node):
                         del f_nodes_under_ds_node[next(ds_node for ds_node in f_nodes_under_ds_node if len(f_nodes_under_ds_node[ds_node]) == 0)]
-                if len(f_missing_nodes) == orig_count_missing_nodes and not ds_items:   # so there's no way to make progress
+                if len(f_missing_nodes) == orig_count_missing_nodes and not ds_items:
+                    # Can't expand formful access, and there are no more items to grant progress, so we're stuck
                     for n in f_missing_nodes:
                         self.warn("No formless access from or formful access to "+str(n)+" "+self.graph[n][5])
                     self.error("World is unsolvable: missing form access")
@@ -2569,7 +2570,7 @@ class World:
             if ds_items:
                 # Now no accessible nodes are missing a form due to DS access, so we can safely place a DS item
                 progression_result = self.progression_list(ignore_inv=True,penalty_threshold=(6-len(ds_items)))
-                if not progression_result[0]:   # --then try again without the penalty
+                if not progression_result[0]:   # try again without the penalty
                     progression_result = self.progression_list(ignore_inv=True)
                 progression_list = [itemset for itemset in progression_result[0] if itemset[0] in ds_items]
                 if progression_list:
@@ -2586,13 +2587,15 @@ class World:
                         for item in items:
                             ds_items.remove(item)
                     elif orig_count_missing_nodes == 0:
+                        # Failed to place any DS items and no formful edges are left that require txform, so we're stuck
                         self.error("World is unsolvable: no remaining DSes can contain required items")
                         return False
-                    elif len(f_missing_nodes) == orig_count_missing_nodes:   # i.e. we neither locked a DS nor placed an item, so we're stuck
+                    elif len(f_missing_nodes) == orig_count_missing_nodes:
+                        # Failed to place any DS items and also failed to open any formful edges, so we're stuck
                         self.error("World is unsolvable: no way to lock a txform DS nor place a DS item")
                         return False
                 elif len(new_nodes) == 1:   # (the start node always counts as new)
-                    # The graph maxed out and the other items aren't progression, so place them randomly
+                    # The graph is maxed out and the other DS items aren't progression, so place them randomly
                     if self.forward_fill(ds_items, item_locations, False, self.logic_mode == "Chaos"):
                         self.info(" Placed remaining DS items")
                         ds_items = []
@@ -3480,7 +3483,7 @@ class World:
             25: [1, 1, 0x19, "Teapot", True, 1, 0, 0],
             26: [3, 1, 0x1a, "Mushroom Drops", True, 1, 0, 0],
             #27: [0, 1, 0x1b, "Bag of Gold", False, 3, 0, 0],  # Not implemented
-            28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 10 if settings.darkrooms.value != 0 else 0],
+            28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 8 if settings.darkrooms.value != 0 else 0],
             29: [1, 1, 0x1d, "Gorgon Flower", True, 1, 0, 0],
             30: [1, 1, 0x1e, "Hieroglyph", False, 2, 0, 0],
             31: [1, 1, 0x1f, "Hieroglyph", False, 2, 0, 0],
@@ -3491,7 +3494,7 @@ class World:
             36: [1, 1, 0x24, "Aura", True, 1, 0, 4*self.dungeon_shuffle],
             37: [1, 1, 0x25, "Lola's Letter", False, 1, 0, 0],
             38: [1, 1, 0x26, "Journal", False, 2, 0, 0],
-            39: [1, 1, 0x27, "Crystal Ring", False, 1, 0, 10 if settings.darkrooms.value != 0 else 0],
+            39: [1, 1, 0x27, "Crystal Ring", False, 1, 0, 8 if settings.darkrooms.value != 0 else 0],
             40: [1, 1, 0x28, "Apple", True, 1, 0, 0],
             41: [1, 1, 0x2e, "2 Red Jewels", False, 1, 0, -2],
             42: [1, 1, 0x2f, "3 Red Jewels", False, 1, 0, -2],
@@ -3529,7 +3532,7 @@ class World:
             500: [1, 4, "", "Kara Released", False, 1, 0, 0],
             501: [1, 4, "", "Itory: Got Lilly", False, 1, 0, 0],
             502: [1, 4, "", "Moon Tribe: Healed Spirits", False, 1, 0, 0],
-            #503: [1, 4, "", "Inca: Beat Castoth", False, 1, 0, 0],
+            503: [1, 4, "", "Inca: Beat Castoth", False, 1, 0, 0],
             504: [1, 4, "", "Freejia: Found Laborer", False, 1, 0, 0],
             505: [1, 4, "", "Neil's: Memory Restored", False, 1, 0, 0],
             506: [1, 4, "", "Sky Garden: Map 82 NW Switch", False, 1, 0, 0],
@@ -3557,13 +3560,14 @@ class World:
             528: [1, 4, "", "Mine: Blocked Tunnel Open", False, 1, 0, 0],
             529: [1, 4, "", "Underground Tunnel: Bridge Open", False, 1, 0, 0],
             530: [1, 4, "", "Inca: Slug Statue Broken", False, 1, 0, 0],
+            531: [1, 4, "", "Mu: Beat Vampires", False, 1, 0, 0],
 
             # Misc. game states
             #600: [0, 6, "", "Freedan Access", False, 1, 0, 0],
             601: [1, 6, "", "Glitches", False, 1, 0, 0],
             602: [1, 6, "", "Early Firebird enabled", False, 1, 0, 0],
             #603: [0, 6, "", "Firebird", False, 1, 0, 0],   # Firebird item is 67 instead of this
-            604: [1, 1, 0x8f, "Flute", False, 1, 0, 9],
+            604: [1, 1, 0x8f, "Flute", False, 1, 0, 8],
             605: [1, 6, "", "Dungeon Shuffle: No", False, 1, 0, 0],
             606: [1, 6, "", "Dungeon Shuffle: Basic", False, 1, 0, 0],
             607: [1, 6, "", "Dungeon Shuffle: Chaos", False, 1, 0, 0],
@@ -3824,7 +3828,7 @@ class World:
             99:  [323, 1, False, 0, [], "EuroShop1Item", "Euro: Store Item 1", 0, 0, [] ],
             100: [323, 1, False, 0, [], "EuroShop2Item", "Euro: Store Item 2", 0, 0, [] ],
             101: [321, 1, False, 0, [], "EuroSlaveRoomBarrelItem", "Euro: Shrine", 0, 0, [] ],
-            102: [315, 1, False, 0, [], "EuroAnnItem", "Euro: Ann", 0, 0, [] ],
+            102: [314, 1, False, 0, [], "EuroAnnItem", "Euro: Ann", 0, 0, [[40, 1]] ],
 
             103: [325, 2, False, 0, [], "DkSpEuroType", "Euro: Dark Space", 0, 0, [] ],
 
@@ -3915,7 +3919,7 @@ class World:
             500: [500, 4, True, 500, [], "", "Kara", 0, 0, [] ],
             501: [ 55, 4, True, 501, [], "", "Lilly", 0, 0, [[23, 1]] ],
             502: [502, 4, True, 502, [], "", "Moon Tribe: Spirits Healed", 0, 0, [] ],
-            #503: [503, 4, True, 503, [], "", "Inca: Castoth defeated", 0, 0, [] ],
+            503: [503, 4, True, 503, [], "", "Inca: Castoth defeated", 0, 0, [] ],
             504: [122, 4, True, 504, [], "", "Freejia: Found Laborer", 0, 0, [] ],
             505: [505, 4, True, 505, [], "", "Neil's Memory Restored", 0, 0, [] ],
             506: [186, 4, True, 506, [], "", "Sky Garden: Map 82 NW Switch pressed", 0, 0, [[609, 1]] ],
@@ -3943,6 +3947,7 @@ class World:
             528: [131, 4, True, 528, [], "", "Mine: Blocked Tunnel Open", 0, 0, [[608, 1]] ],
             529: [529, 4, True, 529, [], "", "Underground Tunnel: Bridge Open", 0, 0, [] ],
             530: [530, 4, True, 530, [], "", "Inca: Slug Statue Broken", 0, 0, [] ],
+            531: [531, 4, True, 531, [], "", "Mu: Beat Vampires", 0, 0, [] ],
 
             # Misc
             #600: [600, 6, True, 600, [], "", "Freedan Access", 0, 0, [] ],
@@ -4086,8 +4091,8 @@ class World:
             94: [False, [],       2, [1,5,0,39], 0, "Inca: West of DBlock (39/$27)", [], False, [], [], [], [], [], [], [], []],
             95: [False, [],       2, [1,5,0,40], 0, "Inca: DS Spike Hall (40/$28) E", [], False, [], [], [], [], [], [], [], []],
             96: [False, [],       2, [1,5,0,40], 0, "Inca: DS Spike Hall (40/$28) SW", [], False, [], [], [], [], [], [], [], []],
-            97: [False, [98],     2, [1,5,0,41], 0, "Inca: Boss Room", [], True, [], [], [], [], [], [], [], []],
-            98: [False, [97],     2, [1,5,0,41], 0, "Inca: Behind Boss Room", [], False, [], [], [], [], [], [], [], []],
+            97: [False, [],       2, [1,5,0,41], 0, "Inca: Boss Room", [], False, [], [], [], [], [], [], [], []],
+            98: [False, [97],     2, [1,5,0,41], 0, "Inca: Behind Boss Room", [], True, [], [], [], [], [], [], [], []],
             99: [False, [],       2, [1,5,0,29], 0, "Inca: (29/$1d) SE door", [], False, [], [], [], [], [], [], [], []],
 
             # Gold Ship / Diamond Coast
@@ -4134,7 +4139,7 @@ class World:
             142: [False, [],    2,     [2,8,0,66], 0, "D.Mine: Caverns (66/$42) Dark Space", [], False, [], [], [], [], [], [], [], []],
             143: [False, [],    2,     [2,8,0,66], 0, "D.Mine: Caverns (66/$42) Slave", [], False, [], [], [], [], [], [], [], []],
             144: [False, [145], 2,     [2,8,0,67], 0, "D.Mine: Chairlift (67/$43) E", [], False, [], [], [], [], [], [], [], []],
-            145: [False, [144], 2,     [2,8,0,67], 0, "D.Mine: Chairlift (67/$43) W", [], False, [], [], [], [], [], [], [], []],         # potential softlock?
+            145: [False, [144], 2,     [2,8,0,67], 0, "D.Mine: Chairlift (67/$43) W", [], False, [], [], [], [], [], [], [], []],
             146: [False, [],    2,     [2,8,0,68], 0, "D.Mine: End Branch (68/$44)", [], False, [], [], [], [], [], [], [], []],
             148: [False, [],    2,     [2,8,0,69], 0, "D.Mine: End Morgue (69/$45)", [], False, [], [], [], [], [], [], [], []],
             149: [False, [],    2,     [2,8,0,70], 0, "D.Mine: End East Room (70/$46)", [], False, [], [], [], [], [], [], [], []],
@@ -4228,9 +4233,9 @@ class World:
             239: [False, [],         2, [3,12,2,101], 0, "Mu: SE (101/$65) Bot", [], False, [], [], [], [], [], [], [], []],
             240: [False, [],         2, [3,12,0,102], 0, "Mu: Rama rooms (102/$66) Pedestal area", [19, 19], False, [], [], [], [], [], [], [], []],
             241: [False, [],         2, [3,12,0,102], 0, "Mu: Rama rooms (102/$66) Statues Placed", [], False, [], [], [], [], [], [], [], []],
-            242: [False, [],         2, [3,12,0,102], 0, "Mu: Rama rooms (102/$66) Statue-Get", [], False, [], [], [], [], [], [], [], []],
+            242: [False, [],         2, [3,12,0,102], 0, "Mu: Rama rooms (102/$66) Statue-Get", [], True, [], [], [], [], [], [], [], []],
             243: [False, [244],      2, [3,12,0,103], 0, "Mu: Boss Room (103/$67) Entrance", [], False, [], [], [], [], [], [], [], []],
-            244: [False, [242,243],  2, [3,12,0,103], 0, "Mu: Boss Room (103/$67) Main", [], True, [], [], [], [], [], [], [], []],
+            244: [False, [243],      2, [3,12,0,103], 0, "Mu: Boss Room (103/$67) Main", [], False, [], [], [], [], [], [], [], []],
 
             # Angel Village
             250: [False, [12], 1, [3,13,0,105], 0, "Angel Village: Outside", [], True, [], [], [], [], [], [], [], []],
@@ -4242,12 +4247,12 @@ class World:
 
             # Angel Dungeon
             260: [False,    [], 2, [3,13,0,109], 0, "Angel Dungeon: Entrance (109/$6d)", [], False, [], [], [], [], [], [], [], []],
-            261: [False, [278], 2, [3,13,0,110], 0, "Angel Dungeon: Maze (110/$6e) Main", [], False, [], [], [], [], [], [], [], []],
-            278: [False, [261], 2, [3,13,0,110], 0, "Angel Dungeon: Maze (110/$6e) Behind Draco", [], False, [], [], [], [], [], [], [], []],
+            261: [False,    [], 2, [3,13,0,110], 0, "Angel Dungeon: Maze (110/$6e) Main", [], False, [], [], [], [], [], [], [], []],
+            278: [False,    [], 2, [3,13,0,110], 0, "Angel Dungeon: Maze (110/$6e) Behind Draco", [], False, [], [], [], [], [], [], [], []],
             262: [False,    [], 2, [3,13,0,111], 0, "Angel Dungeon: Dark room (111/$6f)", [], False, [], [], [], [], [], [], [], []],
             259: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Entrance before false wall", [], False, [], [], [], [], [], [], [], []],
-            263: [False, [279], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Main", [], False, [], [], [], [], [], [], [], []],
-            279: [False, [263], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Behind Draco", [], False, [], [], [], [], [], [], [], []],
+            263: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Main", [], False, [], [], [], [], [], [], [], []],
+            279: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Behind Draco", [], False, [], [], [], [], [], [], [], []],
             265: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Alcove", [], False, [], [], [], [], [], [], [], []],
             266: [False,    [], 2, [3,13,0,113], 0, "Angel Dungeon: Wind Tunnel (113/$71)", [], False, [], [], [], [], [], [], [], []],
             267: [False,    [], 2, [3,13,0,114], 0, "Angel Dungeon: Long Room (114/$72)", [], False, [], [], [], [], [], [], [], []],
@@ -4294,7 +4299,6 @@ class World:
             312: [False, [],    2, [4,16,0,148], 0, "Euro: Rolek Company", [], False, [], [], [], [], [], [], [], []],
             313: [False, [],    2, [4,16,0,152], 0, "Euro: West House", [], False, [], [], [], [], [], [], [], []],
             314: [False, [],    2, [4,16,0,149], 0, "Euro: Rolek Mansion", [40], False, [], [], [], [], [], [], [], []],
-            315: [False, [314], 0, [4,16,0,149], 0, "Euro: Ann", [], False, [], [], [], [], [], [], [], []],
             316: [False, [],    2, [4,16,0,150], 0, "Euro: Guest Room", [], False, [], [], [], [], [], [], [], []],
             317: [False, [],    2, [4,16,0,146], 0, "Euro: Central House", [], False, [], [], [], [], [], [], [], []],
             318: [False, [1],   2, [4,16,0,155], 0, "Euro: Jeweler House", [], False, [], [], [], [], [], [], [], []],
@@ -4458,6 +4462,7 @@ class World:
             # Event Switches
             500: [False, [], 0, [0,0,0,0], 0, "Kara", [], False, [], [], [], [], [], [], [], []],
             502: [False, [], 0, [0,0,0,26], 0, "Moon Tribe: Spirits Healed", [], False, [], [], [], [], [], [], [], []],
+            503: [False, [], 0, [0,0,0,0], 0, "Inca: Castoth Defeated", [], False, [], [], [], [], [], [], [], []],
             505: [False, [], 0, [0,0,0,0], 0, "Neil's Memory Restored", [], False, [], [], [], [], [], [], [], []],
             508: [False, [], 0, [0,0,0,82], 0, "Sky Garden: Map 82 SE Switch", [], False, [], [], [], [], [], [], [], []],
             509: [False, [], 0, [0,0,0,84], 0, "Sky Garden: Map 84 Switch", [], False, [], [], [], [], [], [], [], []],
@@ -4477,7 +4482,8 @@ class World:
             526: [False, [], 0, [0,0,0,0], 0, "Mu: Access to Hope Room 1", [], False, [], [], [], [], [], [], [], []],
             527: [False, [], 0, [0,0,0,0], 0, "Mu: Access to Hope Room 2", [], False, [], [], [], [], [], [], [], []],
             529: [False, [], 0, [0,0,0,0], 0, "Underground Tunnel: Bridge Open", [], False, [], [], [], [], [], [], [], []],
-            530: [False, [80, 81], 0, [0,0,0,0], 0, "Inca: Slug Statue Open", [], False, [], [], [], [], [], [], [], []]
+            530: [False, [80, 81], 0, [0,0,0,0], 0, "Inca: Slug Statue Open", [], False, [], [], [], [], [], [], [], []],
+            531: [False, [], 0, [0,0,0,0], 0, "Mu: Beat Vampires", [], False, [], [], [], [], [], [], [], []]
 
         }
 
@@ -4555,12 +4561,12 @@ class World:
             600:[0, 61, 62, 0, [[601, 1], [604, 1]], False],   # Cave challenge itemless w/ glitches and flute
 
             # Inca / Gold Ship / Freejia
-            88:  [0,  99,  75,     0, [[800, 1]], False],        # Materialize coupling for dungeon shuffle
-            89:  [0,  72,  99,     0, [[601, 1]], False],        # Map 29 progression w/ Z-ladder glitch
+            88:  [0, 99, 75 if self.coupled_exits else 99,       0, [], False],  # Materialize Z-ladder door coupling if applicable
+            89:  [0, 72, 99 if self.enemizer == "None" else 72,  0, [[601, 1]], False],  # Map 29 progression w/ Z-ladder glitch
             706: [0,  72,  70,     0, [[709, 1], [801, 1]], True],  # Inca exterior (29) N<->NE via 4-Way orb, ignored for DSC
             707: [0,  74,  72,     0, [[707, 1], [801, 1]], True],  # Inca exterior (29) SW<->N via 4-Way orb, ignored for DSC
             708: [0,  75,  72,     0, [[708, 1], [801, 1]], True],  # Inca exterior (29) SE<->N via 4-Way orb, ignored for DSC
-            #700: [0,  73, 700,    0, [[607, 1], [610, 1]], False], # Inca west 4-Way orb from C via ranged in DSC
+            700: [0,  73, 700,     0, [[64, 1], [54, 2]], False],   # Inca west 4-Way orb from C with upgraded Friar
             90:  [0,  77,  78,     0, [[3, 1], [4, 1]], False],  # Map 30 to Castoth w/ Inca Statues
             91:  [0,  80,  530,    0, [[608, 1]], False],        # Break blocking slug statue w/ Will ability
             92:  [0,  81,  530,    0, [[608, 1]], False],        # Break blocking slug statue w/ Will ability
@@ -4572,12 +4578,15 @@ class World:
             97:  [0,  91,  92,     0, [[608, 1]], False],        # Map 38 break statues w/ Will ability
             711: [0,  96,  95,     0, [[713, 1]], False],        # Map 40 reverse via 4-Way orb
             98:  [0,  95,  96,     0, [[609, 1]], False],        # DS spike hall requires an attack to pass the 4-Way
+            99:  [0,  97, 503,  0x06, [], False],                # Castoth as F/S
+            100: [0,  97, 503,     0, [[604, 1]], False],        # Castoth with Flute
+            101: [0,  97,  98,     0, [[503, 1]], False],        # Pass Castoth; if you add the exit behind Castoth to exits, move this to exit_logic
 
             # Diamond Mine
             712: [0, 130, 708,    0, [[715, 1]], True],            # Map 61 S fence progression via monster
             713: [0, 708, 709,    0, [[714, 1]], True],            # Map 61 C fence progression via monster
             714: [0, 709, 131,    0, [[716, 1]], True],            # Map 61 N fence progression via monster
-            #702: [0, 709, 701,   0, [[607, 1], [610, 1]], False], # Map 61 C lizard from N via ranged in DSC
+            702: [0, 709, 701,    0, [[610, 1]], False],           # Map 61 C lizard from N via ranged
             715: [0, 136, 721,    0, [[718, 1]],  True],           # Map 64 appearing DS via worm orb
             117: [0, 138, 139,    0, [[63, 1]],  False],           # Map 65 ramp access via Spin Dash
             716: [0, 138, 139,    0, [[719, 1]], False],           # Map 65 ramp access via worm orb
@@ -4617,8 +4626,8 @@ class World:
             174: [0, 217, 218,  0, [[511, 1]], True],             # Map 96 top-mid w/ water lowered 1
             726: [0, 217, 725,  0, [[727, 1]], True],             # Mu NE (96) N/S semiprogression via rocks
             727: [0, 723, 725,  0, [[728, 1]], True],             # Mu NE (96) N/S semiprogression via rocks
-            #753: [0, 723, 726, 0, [[607, 1], [610, 1]], False],  # Mu NE, N orb from S, via ranged in DSC
-            #754: [0, 217, 724, 0, [[607, 1], [610, 1]], False],  # Mu NE, S orb from N, via ranged in DSC
+            753: [0, 723, 726,  0, [[610, 1]], False],            # Mu NE, N orb from S, via ranged
+            754: [0, 217, 724,  0, [[610, 1]], False],            # Mu NE, S orb from N, via ranged
             175: [0, 222, 221,  0, [[511, 1], [610, 1]], False],  # Map 97 midN->island w/ water lowered 1 & ranged
             176: [0, 222, 221,  0, [[511, 1], [601, 1]], False],  # Map 97 midN->island w/ water lowered 1 & glitches
             178: [0, 226, 227,  0, [[511, 1]], True],             # Map 98 top-midE w/ water lowered 1
@@ -4632,9 +4641,14 @@ class World:
             187: [0, 527, 511,  0, [[18, 1]], False],             # Water lowered 1 w/ Hope Statue
             188: [0, 526, 512,  0, [[18, 2], [527, 1], [511, 1]], False],  # Water lowered 2 w/ Hope Statues, both rooms, and water lowered 1
             189: [0, 527, 512,  0, [[18, 2], [526, 1], [511, 1]], False],  # Water lowered 2 w/ Hope Statues, both rooms, and water lowered 1
+            190: [0, 244, 531,0x6, [], False],                    # Vampires as F/S
+            191: [0, 244, 531,  0, [[604, 1]], False],            # Vampires with Flute
+            192: [0, 244, 242,  0, [[531, 1]], False],            # Pass Vampires if defeated
 
             # Angel Dungeon
             214: [0, 272, 273, 0, [[513, 1]], False],   # Ishtar's chest w/ puzzle complete
+            215: [0, 261, 278, 0, [[609, 1]], True],    # Passing a Draco requires an attack
+            216: [0, 263, 279, 0, [[609, 1]], True],    # Passing a Draco requires an attack
 
             # Great Wall
             218: [0, 292, 293,     0, [[609, 1]], False],           # Drop room forward requires an attack for the button
@@ -4647,9 +4661,6 @@ class World:
             227: [0, 298, 712,     0, [[610, 1]], False],           # Map 135 archer via ranged
             228: [0, 299, 712,     0, [[610, 1]], False],           # Map 135 archer via ranged
             229: [0, 300, 301,     0, [[63, 1]], True],             # Map 136 progression w/ Spin Dash
-
-            # Euro
-            230: [0, 314, 315, 0, [[40, 1]], False],    # Ann item w/ Apple
 
             # Mt. Temple
             240: [0, 331, 332, 0, [[63, 1]], True],              # Map 161 progression w/ Spin Dash
@@ -4668,7 +4679,7 @@ class World:
             250: [0, 353, 354, 0, [[29, 1]], False],    # Statues awake w/ Gorgon Flower
 
             # Ankor Wat
-            #260: [0, 361, 739,   0, [[64, 1], [54, 2], [607, 1]], False],  # Map 177 orb w/ upgraded Friar and DSC
+            260: [0, 361, 739,    0, [[64, 1], [54, 2]], False],    # Map 177 orb w/ upgraded Friar
             729: [0, 361, 362,    0, [[735, 1], [801, 1]], True],   # Wat Outer South (177) via scarab orb, ignored in DSC
             261: [0, 363, 364,    0, [[63, 1]], False],             # Map 178 S->C w/ Spin Dash
             262: [0, 364, 365,    0, [[62, 1], [736, 1]], False],   # Map 178 C->N w/ Psycho Slider and scarab key
@@ -6714,8 +6725,8 @@ class World:
             14: [13, 0, 0,   0,   0, "MapMQReturnString", 0, True, 10, 0, "Mummy Queen entrance (out)" ],
             15: [ 0, 0, 0, 448, 415, "MapMQExitString", 0, True, 10, 0, "Mummy Queen exit" ],
 
-            16: [17, 0, 0, 470, 471, "MapE2Exit02", 0, True, 11, 0, "Babel entrance (in)" ],
-            17: [16, 0, 0,   0,   0, "MapE3Exit01", 0, True, 11, 0, "Babel entrance (out)" ],
+            16: [17, 0, 0, 470, 471, "MapE2Exit02", 0, True, 11, 0, "Babel statue boss entrance (in)" ],
+            17: [16, 0, 0,   0,   0, "MapE3Exit01", 0, True, 11, 0, "Babel statue boss entrance (out)" ],
             18: [ 0, 0, 0, 472, 400, "MapBabelDaoWarpString", 0, True, 11, 0, "Dao passage (Babel)" ],
 
             19: [20, 0, 0, 481, 482, "MapE9Exit01", 0, True, 12, 0, "Solid Arm entrance (in)" ],
@@ -6761,20 +6772,20 @@ class World:
             54: [ 0, 0, 0, 30, 32, "MapPrisonWarpString", 0, False, 0, 1, "Prison entrance (king)" ],
 
             # Tunnel
-            60: [61, 0, 0, 40, 41, "Map0CExit02", 0, False, 1, 3, "U. Tunnel: Entry->East (12->13)" ],
-            61: [60, 0, 0,  0,  0, "Map0DExit01", 0, False, 1, 2, "U. Tunnel: East->Entry (13->12)" ],
-            62: [63, 0, 0, 41, 38, "Map0DExit02", 0, False, 1, 2, "U. Tunnel: East->South (13->14)" ],
-            63: [62, 0, 0,  0,  0, "Map0EExit01", 0, False, 1, 2, "U. Tunnel: South->East (14->13)" ],
-            64: [65, 0, 0, 42, 43, "Map0EExit02", 0, False, 1, 2, "U. Tunnel: South->West (14->15)" ],
-            65: [64, 0, 0,  0,  0, "Map0FExit02", 0, False, 1, 2, "U. Tunnel: West->South (15->14)" ],
-            66: [67, 0, 0, 43, 44, "Map0FExit03", 0, False, 1, 2, "U. Tunnel: West->Chest (15->16)" ],
-            67: [66, 0, 0,  0,  0, "Map10Exit01", 0, False, 1, 2, "U. Tunnel: Chest->West (16->15)" ],
-            68: [69, 0, 0, 43, 45, "Map0FExit01", 0, False, 1, 2, "U. Tunnel: West->Flower (15->17)" ],
-            69: [68, 0, 0,  0,  0, "Map11Exit01", 0, False, 1, 2, "U. Tunnel: Flower->West (17->15)" ],
-            70: [71, 0, 0, 45, 47, "Map11Exit02", 0, False, 1, 2, "U. Tunnel: Flower->BigRoom (17->18)" ],
-            71: [70, 0, 0,  0,  0, "Map12Exit01", 0, False, 1, 2, "U. Tunnel: BigRoom->Flower (18->17)" ],
-            72: [73, 0, 0,706, 49, "Map12Exit02", 0, False, 1, 2, "U. Tunnel: BigRoom->End (18->19)" ],
-            73: [72, 0, 0,  0,  0, "Map13Exit01", 0, False, 1, 3 if self.town_shuffle else 2, "U. Tunnel: End->BigRoom (19->18)" ],
+            60: [61, 0, 0, 40, 41, "Map0CExit02", 0, False, 1, 3, "U. Tunnel: Entry exit to East (12->13)" ],
+            61: [60, 0, 0,  0,  0, "Map0DExit01", 0, False, 1, 2, "U. Tunnel: East room N exit (13->12)" ],
+            62: [63, 0, 0, 41, 38, "Map0DExit02", 0, False, 1, 2, "U. Tunnel: East room S exit (13->14)" ],
+            63: [62, 0, 0,  0,  0, "Map0EExit01", 0, False, 1, 2, "U. Tunnel: South room NE exit (14->13)" ],
+            64: [65, 0, 0, 42, 43, "Map0EExit02", 0, False, 1, 2, "U. Tunnel: South room NW exit (14->15)" ],
+            65: [64, 0, 0,  0,  0, "Map0FExit02", 0, False, 1, 2, "U. Tunnel: West room S exit (15->14)" ],
+            66: [67, 0, 0, 43, 44, "Map0FExit03", 0, False, 1, 2, "U. Tunnel: West room C exit (15->16)" ],
+            67: [66, 0, 0,  0,  0, "Map10Exit01", 0, False, 1, 2, "U. Tunnel: Chest room exit (16->15)" ],
+            68: [69, 0, 0, 43, 45, "Map0FExit01", 0, False, 1, 2, "U. Tunnel: West room N exit (15->17)" ],
+            69: [68, 0, 0,  0,  0, "Map11Exit01", 0, False, 1, 2, "U. Tunnel: Flower room S door (17->15)" ],
+            70: [71, 0, 0, 45, 47, "Map11Exit02", 0, False, 1, 2, "U. Tunnel: Flower room N door (17->18)" ],
+            71: [70, 0, 0,  0,  0, "Map12Exit01", 0, False, 1, 2, "U. Tunnel: BigRoom S exit (18->17)" ],
+            72: [73, 0, 0,706, 49, "Map12Exit02", 0, False, 1, 2, "U. Tunnel: BigRoom N exit (18->19)" ],
+            73: [72, 0, 0,  0,  0, "Map13Exit01", 0, False, 1, 3 if self.town_shuffle else 2, "U. Tunnel: Barrel room S exit (19->18)" ],
             
             # Itory
             80: [81, 0, 0, 51, 53, "Map15Exit01", 0, False, 0, 1, "Itory: West House (in)" ],
@@ -6801,42 +6812,42 @@ class World:
             #114: [  0, 0, 0, 65, 102, "", 0, False, False,  True, "Inca: Diamond Coast passage" ],
             
             # Inca Ruins
-            118: [119, 0, 0, 79,  69, "Map1FExit02", 0, False,  2, 2, "Inca: Statue Puzzle -> U-Turn (31->31)" ],
-            119: [118, 0, 0,  0,   0, "Map1FExit03", 0, False,  2, 2, "Inca: U-Turn -> Statue Puzzle (31->31)" ],
+            118: [119, 0, 0, 79,  69, "Map1FExit02", 0, False,  2, 2, "Inca: Statue Puzzle N door (31->31)" ],
+            119: [118, 0, 0,  0,   0, "Map1FExit03", 0, False,  2, 2, "Inca: U-Turn SE door (31->31)" ],
             120: [121, 0, 0, 70,  89, "Map1DExit07", 0, False,  2, 2, "Inca: Exterior->DBlock (29->37) East door" ],
             121: [120, 0, 0,  0,   0, "Map25Exit01", 0, False,  2, 2, "Inca: DBlock->Exterior (37->29) East door" ],
-            122: [123, 0, 0, 89,  94, "Map25Exit03", 0, False,  2, 2, "Inca: DBlock to West (37->39)" ],
-            123: [122, 0, 0,  0,   0, "Map27Exit01", 0, False,  2, 2, "Inca: Room West of DBlock -> DBlock (39->37)" ],
-            124: [125, 0, 0, 94,  71, "Map27Exit02", 0, False,  2, 2, "Inca: Room West of DBlock -> Exterior (39->29)" ],
-            125: [124, 0, 0,  0,   0, "Map1DExit0A", 0, False,  2, 2, "Inca: Exterior NW -> Room West of DBlock (29->39)" ],
+            122: [123, 0, 0, 89,  94, "Map25Exit03", 0, False,  2, 2, "Inca: DBlock room W exit (37->39)" ],
+            123: [122, 0, 0,  0,   0, "Map27Exit01", 0, False,  2, 2, "Inca: Room West of DBlock, E exit (39->37)" ],
+            124: [125, 0, 0, 94,  71, "Map27Exit02", 0, False,  2, 2, "Inca: Room West of DBlock, S exit (39->29)" ],
+            125: [124, 0, 0,  0,   0, "Map1DExit0A", 0, False,  2, 2, "Inca: Exterior NW chest door (29->39)" ],
             126: [127, 0, 0, 89,  72, "Map25Exit02", 0, False,  2, 2, "Inca: DBlock->Exterior (37->29) West door" ],
             127: [126, 0, 0,  0,   0, "Map1DExit08", 0, False,  2, 2, "Inca: Exterior->DBlock (29->37) West door" ],
-            128: [129, 0, 0, 72,  91, "Map1DExit09", 0, False,  2, 2, "Inca: Exterior -> Divided Room South (29->38)" ],
-            129: [128, 0, 0,  0,   0, "Map26Exit02", 0, False,  2, 2, "Inca: Divided Room South -> Exterior (38->29)" ],
-            130: [131, 0, 0, 73,  80, "Map1DExit03", 0, False,  2, 2, "Inca: Exterior -> Slug Room (29->32)" ],
-            131: [130, 0, 0,  0,   0, "Map20Exit01", 0, False,  2, 2, "Inca: Slug Room S -> Exterior (32->29)" ],
-            132: [133, 0, 0, 81,  85, "Map20Exit02", 0, False,  2, 2, "Inca: Slug Room N -> Freedan room (32->35)" ],
-            133: [132, 0, 0,  0,   0, "Map23Exit01", 0, False,  2, 2, "Inca: Freedan room -> Slug Room (35->32)" ],
-            134: [135, 0, 0, 85,  74, "Map23Exit03", 0, False,  2, 2, "Inca: Freedan room -> Exterior W (35->29)" ],
-            135: [134, 0, 0,  0,   0, "Map1DExit06", 0, False,  2, 2, "Inca: Exterior W -> Freedan room (29->35)" ],
-            136: [137, 0, 0, 74,  79, "Map1DExit02", 0, False,  2, 2, "Inca: Exterior -> Statue Puzzle (29->31)" ],
-            137: [136, 0, 0,  0,   0, "Map1FExit04", 0, False,  2, 2, "Inca: Statue Puzzle -> Exterior (31->29)" ],
-            138: [139, 0, 0, 69,  95, "Map1FExit01", 0, False,  2, 2, "Inca: Statue U-Turn -> DS Spike Hall (31->40)" ],
-            139: [138, 0, 0,  0,   0, "Map28Exit01", 0, False,  2, 2, "Inca: DS Spike Hall -> Statue U-Turn (40->31)" ],
-            140: [141, 0, 0, 96,  76, "Map28Exit02", 0, False,  2, 2, "Inca: DS Spike Hall -> Exterior Singing Statue (40->29)" ],
-            141: [140, 0, 0,  0,   0, "Map1DExit0B", 0, False,  2, 2, "Inca: Exterior Singing Statue -> DS Spike Hall (29->40)" ],
-            142: [143, 0, 0, 86,  82, "Map23Exit02", 0, False,  2, 2, "Inca: Freedan room -> Water room N (35->33)" ],
-            143: [142, 0, 0,  0,   0, "Map21Exit02", 0, False,  2, 2, "Inca: Water room N -> Freedan room (33->35)" ],
-            144: [145, 0, 0, 83,  75, "Map21Exit01", 0, False,  2, 2, "Inca: Water room S -> Exterior (33->29)" ],
-            145: [144, 0, 0,  0,   0, "Map1DExit04", 0, False,  2, 2, "Inca: Exterior -> Water room S (29->33)" ],
-            146: [147, 0, 0, 99,  84, "Map1DExit05", 0, False,  2, 2, "Inca: Exterior SE door -> BigRoom (29->34)" ], # Special quasi-coupled case to allow for Z-ladder glitch
-            147: [146, 0, 0, 84,  75, "Map22Exit01", 0, False,  2, 2, "Inca: BigRoom -> Exterior SE door (34->29)" ],
-            148: [149, 0, 0, 84,  93, "Map22Exit03", 0, False,  2, 2, "Inca: BigRoom -> Divided Room North (34->38)" ],
-            149: [148, 0, 0,  0,   0, "Map26Exit01", 0, False,  2, 2, "Inca: Divided Room North -> BigRoom (38->34)" ],
-            150: [151, 0, 0, 84,  87, "Map22Exit02", 0, False,  2, 2, "Inca: BigRoom -> Golden Tile Room (34->36)" ],
-            151: [150, 0, 0,  0,   0, "Map24Exit01", 0, False,  2, 2, "Inca: Golden Tile Room -> BigRoom (36->34)" ],
-            152: [153, 0, 0, 87,  77, "Map24Exit02", 0, False,  2, 2, "Inca: Golden Tile Room -> Outside Castoth (36->30)" ],
-            153: [152, 0, 0,  0,   0, "Map1EExit01", 0, False,  2, 2, "Inca: Outside Castoth -> Golden Tile Room (30->36)" ],
+            128: [129, 0, 0, 72,  91, "Map1DExit09", 0, False,  2, 2, "Inca: Exterior Center-East Exit (29->38)" ],
+            129: [128, 0, 0,  0,   0, "Map26Exit02", 0, False,  2, 2, "Inca: Divided Room South Exit (38->29)" ],
+            130: [131, 0, 0, 73,  80, "Map1DExit03", 0, False,  2, 2, "Inca: Exterior Center Drop-Down Exit (29->32)" ],
+            131: [130, 0, 0,  0,   0, "Map20Exit01", 0, False,  2, 2, "Inca: Slug room S exit (32->29)" ],
+            132: [133, 0, 0, 81,  85, "Map20Exit02", 0, False,  2, 2, "Inca: Slug room N exit (32->35)" ],
+            133: [132, 0, 0,  0,   0, "Map23Exit01", 0, False,  2, 2, "Inca: Freedan room N exit (35->32)" ],
+            134: [135, 0, 0, 85,  74, "Map23Exit03", 0, False,  2, 2, "Inca: Freedan room SE exit (35->29)" ],
+            135: [134, 0, 0,  0,   0, "Map1DExit06", 0, False,  2, 2, "Inca: Exterior Center-West Lower Exit (29->35)" ],
+            136: [137, 0, 0, 74,  79, "Map1DExit02", 0, False,  2, 2, "Inca: Exterior Center-West Upper Exit (29->31)" ],
+            137: [136, 0, 0,  0,   0, "Map1FExit04", 0, False,  2, 2, "Inca: Statue Puzzle S door (31->29)" ],
+            138: [139, 0, 0, 69,  95, "Map1FExit01", 0, False,  2, 2, "Inca: U-Turn SW door (31->40)" ],
+            139: [138, 0, 0,  0,   0, "Map28Exit01", 0, False,  2, 2, "Inca: DS Spike Hall NE exit (40->31)" ],
+            140: [141, 0, 0, 96,  76, "Map28Exit02", 0, False,  2, 2, "Inca: DS Spike Hall S exit (40->29)" ],
+            141: [140, 0, 0,  0,   0, "Map1DExit0B", 0, False,  2, 2, "Inca: Exterior Singing Statue door (29->40)" ],
+            142: [143, 0, 0, 86,  82, "Map23Exit02", 0, False,  2, 2, "Inca: Freedan room SW exit (35->33)" ],
+            143: [142, 0, 0,  0,   0, "Map21Exit02", 0, False,  2, 2, "Inca: Water room N exit (33->35)" ],
+            144: [145, 0, 0, 83,  75, "Map21Exit01", 0, False,  2, 2, "Inca: Water room S exit (33->29)" ],
+            145: [144, 0, 0,  0,   0, "Map1DExit04", 0, False,  2, 2, "Inca: Exterior far SW door (29->33)" ],
+            146: [147, 0, 0, 99,  84, "Map1DExit05", 0, False,  2, 2, "Inca: Exterior far SE door (29->34)" ], # Special quasi-coupled case to allow for Z-ladder glitch
+            147: [146, 0, 0, 84,  75, "Map22Exit01", 0, False,  2, 2, "Inca: BigRoom SW exit (34->29)" ],
+            148: [149, 0, 0, 84,  93, "Map22Exit03", 0, False,  2, 2, "Inca: BigRoom NE exit (34->38)" ],
+            149: [148, 0, 0,  0,   0, "Map26Exit01", 0, False,  2, 2, "Inca: Divided Room North Exit (38->34)" ],
+            150: [151, 0, 0, 84,  87, "Map22Exit02", 0, False,  2, 2, "Inca: BigRoom SE exit (34->36)" ],
+            151: [150, 0, 0,  0,   0, "Map24Exit01", 0, False,  2, 2, "Inca: Golden Tile Room N exit (36->34)" ],
+            152: [153, 0, 0, 87,  77, "Map24Exit02", 0, False,  2, 2, "Inca: Golden Tile Room S exit (36->30)" ],
+            153: [152, 0, 0,  0,   0, "Map1EExit01", 0, False,  2, 2, "Inca: Outside Castoth, E exit (30->36)" ],
             154: [  0, 0, 0, 98, 100, "", 0, False,  0, 0, "Gold Ship entrance" ],
             
             # Gold Ship
@@ -6880,32 +6891,32 @@ class World:
             211: [210, 0, 0,   0,   0, "Map3CExit01", 0, False, 0, 1, "Freejia: Labor Market (out)" ],
             
             # Diamond Mine
-            222: [223, 0, 0, 133, 134, "Map3EExit01", 0, False,  3, 3, "Diamond Mine: Map 62 to Map 63" ], # Entrance to bigroom
-            223: [222, 0, 0,   0,   0, "Map3FExit01", 0, False,  3, 2, "Diamond Mine: Map 63 to Map 62" ],
-            224: [225, 0, 0, 134, 140, "Map3FExit03", 0, False,  3, 2, "Diamond Mine: Map 63 to Map 66" ], # Bigroom to elevator
-            225: [224, 0, 0,   0,   0, "Map42Exit01", 0, False,  3, 2, "Diamond Mine: Map 66 to Map 63" ],
-            226: [227, 0, 0, 134, 136, "Map3FExit02", 0, False,  3, 2, "Diamond Mine: Map 63 to Map 64" ], # Bigroom to spiral
-            227: [226, 0, 0,   0,   0, "Map40Exit01", 0, False,  3, 2, "Diamond Mine: Map 64 to Map 63" ],
-            228: [229, 0, 0, 136, 138, "Map40Exit02", 0, False,  3, 2, "Diamond Mine: Map 64 to Map 65" ],
-            229: [228, 0, 0,   0,   0, "Map41Exit01", 0, False,  3, 2, "Diamond Mine: Map 65 to Map 64" ],
-            230: [231, 0, 0, 139, 143, "Map41Exit02", 0, False,  3, 2, "Diamond Mine: Map 65 to Map 66" ],
-            231: [230, 0, 0,   0,   0, "Map42Exit06", 0, False,  3, 2, "Diamond Mine: Map 66 to Map 65" ],
-            232: [233, 0, 0, 138, 130, "Map41Exit03", 0, False,  3, 2, "Diamond Mine: Map 65 to Map 61" ], # Friar room to tunnel
-            233: [232, 0, 0,   0,   0, "Map3DExit01", 0, False,  3, 2, "Diamond Mine: Map 61 to Map 65" ], # Tunnel to Friar room
-            234: [235, 0, 0, 131, 142, "Map3DExit02", 0, False,  3, 2, "Diamond Mine: Map 61 to Map 66" ],
-            235: [234, 0, 0,   0,   0, "Map42Exit05", 0, False,  3, 2, "Diamond Mine: Map 66 to Map 61" ],
-            236: [237, 0, 0, 140, 144, "Map42Exit02", 0, False,  3, 2, "Diamond Mine: Map 66 to Map 67 (1)" ],
-            237: [236, 0, 0,   0,   0, "Map43Exit01", 0, False,  3, 2, "Diamond Mine: Map 67 to Map 66 (1)" ],
-            238: [239, 0, 0, 145, 141, "Map43Exit02", 0, False,  3, 2, "Diamond Mine: Map 67 to Map 66 (2)" ],
-            239: [238, 0, 0,   0,   0, "Map42Exit03", 0, False,  3, 2, "Diamond Mine: Map 66 to Map 67 (2)" ],
-            240: [241, 0, 0, 141, 146, "Map42Exit04", 0, False,  3, 2, "Diamond Mine: Map 66 to Map 68" ],
-            241: [240, 0, 0,   0,   0, "Map44Exit01", 0, False,  3, 2, "Diamond Mine: Map 68 to Map 66" ], # Final branch to elevator
-            242: [243, 0, 0, 146, 148, "Map44Exit02", 0, False,  3, 2, "Diamond Mine: Map 68 to Map 69" ], # Final branch to Morgue
-            243: [242, 0, 0,   0,   0, "Map45Exit01", 0, False,  3, 2, "Diamond Mine: Map 69 to Map 68" ],
-            244: [245, 0, 0, 146, 149, "Map44Exit04", 0, False,  3, 2, "Diamond Mine: Map 68 to Map 70" ], # Final branch to other combat room
-            245: [244, 0, 0,   0,   0, "Map46Exit01", 0, False,  3, 2, "Diamond Mine: Map 70 to Map 68" ],
-            246: [247, 0, 0, 146, 150, "Map44Exit03", 0, False,  3, 2, "Diamond Mine: Map 68 to Map 71" ], # Final branch to Sam
-            247: [246, 0, 0,   0,   0, "Map47Exit01", 0, False,  3, 2, "Diamond Mine: Map 71 to Map 68" ],
+            222: [223, 0, 0, 133, 134, "Map3EExit01", 0, False,  3, 3, "Mine: Entrance N exit (62->63)" ],
+            223: [222, 0, 0,   0,   0, "Map3FExit01", 0, False,  3, 2, "Mine: BigRoom SW exit (63->62)" ],
+            224: [225, 0, 0, 134, 140, "Map3FExit03", 0, False,  3, 2, "Mine: BigRoom elevator exit (63->66)" ],
+            225: [224, 0, 0,   0,   0, "Map42Exit01", 0, False,  3, 2, "Mine: East Elevator, N exit toward BigRoom (66->63)" ],
+            226: [227, 0, 0, 134, 136, "Map3FExit02", 0, False,  3, 2, "Mine: BigRoom Center exit (63->64)" ],
+            227: [226, 0, 0,   0,   0, "Map40Exit01", 0, False,  3, 2, "Mine: Cave-In Room N exit (64->63)" ],
+            228: [229, 0, 0, 136, 138, "Map40Exit02", 0, False,  3, 2, "Mine: Cave-In Room S exit (64->65)" ],
+            229: [228, 0, 0,   0,   0, "Map41Exit01", 0, False,  3, 2, "Mine: Friar Room SE exit (65->64)" ],
+            230: [231, 0, 0, 139, 143, "Map41Exit02", 0, False,  3, 2, "Mine: Friar Room upper NE exit (65->66)" ],
+            231: [230, 0, 0,   0,   0, "Map42Exit06", 0, False,  3, 2, "Mine: Single dead-end slave exit (66->65)" ],
+            232: [233, 0, 0, 138, 130, "Map41Exit03", 0, False,  3, 2, "Mine: Friar Room lower NE exit (65->61)" ],
+            233: [232, 0, 0,   0,   0, "Map3DExit01", 0, False,  3, 2, "Mine: Fence Tunnel S exit (61->65)" ],
+            234: [235, 0, 0, 131, 142, "Map3DExit02", 0, False,  3, 2, "Mine: Fence Tunnel N blocked exit (61->66)" ],
+            235: [234, 0, 0,   0,   0, "Map42Exit05", 0, False,  3, 2, "Mine: Dead-end Dark Space exit (66->61)" ],
+            236: [237, 0, 0, 140, 144, "Map42Exit02", 0, False,  3, 2, "Mine: East Elevator, S exit toward chairlift (66->67) (1)" ],
+            237: [236, 0, 0,   0,   0, "Map43Exit01", 0, False,  3, 2, "Mine: Chairlift E exit (67->66) (1)" ],
+            238: [239, 0, 0, 145, 141, "Map43Exit02", 0, False,  3, 2, "Mine: Chairlift W exit (67->66) (2)" ],
+            239: [238, 0, 0,   0,   0, "Map42Exit03", 0, False,  3, 2, "Mine: West Elevator, E exit toward chairlift (66->67) (2)" ],
+            240: [241, 0, 0, 141, 146, "Map42Exit04", 0, False,  3, 2, "Mine: West Elevator, S exit (66->68)" ],
+            241: [240, 0, 0,   0,   0, "Map44Exit01", 0, False,  3, 2, "Mine: End branch N exit (68->66)" ],
+            242: [243, 0, 0, 146, 148, "Map44Exit02", 0, False,  3, 2, "Mine: End branch W exit (68->69)" ],
+            243: [242, 0, 0,   0,   0, "Map45Exit01", 0, False,  3, 2, "Mine: Morgue exit (69->68)" ],
+            244: [245, 0, 0, 146, 149, "Map44Exit04", 0, False,  3, 2, "Mine: End branch E exit (68->70)" ],
+            245: [244, 0, 0,   0,   0, "Map46Exit01", 0, False,  3, 2, "Mine: Final combat room exit (70->68)" ],
+            246: [247, 0, 0, 146, 150, "Map44Exit03", 0, False,  3, 2, "Mine: End branch C exit behind gate (68->71)" ],
+            247: [246, 0, 0,   0,   0, "Map47Exit01", 0, False,  3, 2, "Mine: Sam's room exit (71->68)" ],
             
             # Nazca
             260: [261, 0, 0, 162, 170, "MapGardenEntranceString", 0, False, 4, 1, "Nazca: Sky Garden entrance" ],
@@ -6913,42 +6924,42 @@ class World:
             
             # Sky Garden
             #270: [  0, 0, 0, 171,  16, "", 0, False,  4,  True, "Moon Tribe: Sky Garden passage" ],
-            273: [274, 0, 0, 170, 172, "Map4CExit02", 0, False,  4, 2, "Sky Garden: Map 76 to Map 77" ], # Foyer to NE
-            274: [273, 0, 0,   0,   0, "Map4DExit01", 0, False,  4, 2, "Sky Garden: Map 77 to Map 76" ],
-            275: [276, 0, 0, 170, 176, "Map4CExit03", 0, False,  4, 2, "Sky Garden: Map 76 to Map 79" ], # Foyer to SE
-            276: [275, 0, 0,   0,   0, "Map4FExit01", 0, False,  4, 2, "Sky Garden: Map 79 to Map 76" ],
-            277: [278, 0, 0, 170, 181, "Map4CExit05", 0, False,  4, 2, "Sky Garden: Map 76 to Map 81" ], # Foyer to SW
-            278: [277, 0, 0,   0,   0, "Map51Exit01", 0, False,  4, 2, "Sky Garden: Map 81 to Map 76" ],
-            279: [280, 0, 0, 170, 190, "Map4CExit04", 0, False,  4, 2, "Sky Garden: Map 76 to Map 83" ], # Foyer to NW
-            280: [279, 0, 0,   0,   0, "Map53Exit01", 0, False,  4, 2, "Sky Garden: Map 83 to Map 76" ],
-            281: [282, 0, 0, 172, 175, "Map4DExit02", 0, False,  4, 2, "Sky Garden: Map 77 to Map 78 (E)" ],
-            282: [281, 0, 0,   0,   0, "Map4EExit01", 0, False,  4, 2, "Sky Garden: Map 78 to Map 77 (W)" ],
-            283: [284, 0, 0, 175, 173, "Map4EExit03", 0, False,  4, 2, "Sky Garden: Map 78 to Map 77 (SE)" ],
-            284: [283, 0, 0,   0,   0, "Map4DExit04", 0, False,  4, 2, "Sky Garden: Map 77 to Map 78 (SW)" ],
-            285: [286, 0, 0, 175, 174, "Map4EExit02", 0, False,  4, 2, "Sky Garden: Map 78 to Map 77 (SW)" ],
-            286: [285, 0, 0,   0,   0, "Map4DExit03", 0, False,  4, 2, "Sky Garden: Map 77 to Map 78 (SE)" ],
-            287: [288, 0, 0, 176, 169, "Map4FExit05", 0, False,  4, 2, "Sky Garden: Map 79 to Map 86" ], # SE Top to blue room
-            288: [287, 0, 0,   0,   0, "Map56Exit01", 0, False,  4, 2, "Sky Garden: Map 86 to Map 79" ],
-            289: [290, 0, 0, 176, 179, "Map4FExit02", 0, False,  4, 2, "Sky Garden: Map 79 to Map 80 (NE)" ],
-            290: [289, 0, 0,   0,   0, "Map50Exit01", 0, False,  4, 2, "Sky Garden: Map 80 to Map 79 (NW)" ],
-            291: [292, 0, 0, 179, 177, "Map50Exit02", 0, False,  4, 2, "Sky Garden: Map 80 to Map 79 (N)" ],
-            292: [291, 0, 0,   0,   0, "Map4FExit03", 0, False,  4, 2, "Sky Garden: Map 79 to Map 80 (N)" ], # SE Top before Friar
-            293: [294, 0, 0, 178, 180, "Map4FExit04", 0, False,  4, 2, "Sky Garden: Map 79 to Map 80 (S)" ], # SE Top behind Friar
-            294: [293, 0, 0,   0,   0, "Map50Exit03", 0, False,  4, 2, "Sky Garden: Map 80 to Map 79 (S)" ],
-            295: [296, 0, 0, 168, 186, "Map51Exit02", 0, False,  4, 2, "Sky Garden: Map 81 to Map 82 (NE)" ], # SW Top to chest
-            296: [295, 0, 0,   0,   0, "Map52Exit01", 0, False,  4, 2, "Sky Garden: Map 82 to Map 81 (NW)" ],
-            297: [298, 0, 0, 182, 188, "Map51Exit03", 0, False,  4, 2, "Sky Garden: Map 81 to Map 82 (NW)" ], # SW Top to DS switch
-            298: [297, 0, 0,   0,   0, "Map52Exit02", 0, False,  4, 2, "Sky Garden: Map 82 to Map 81 (NE)" ],
-            299: [300, 0, 0, 184, 187, "Map51Exit04", 0, False,  4, 2, "Sky Garden: Map 81 to Map 82 (SE)" ], # SW Top to fire cages
-            300: [299, 0, 0,   0,   0, "Map52Exit03", 0, False,  4, 2, "Sky Garden: Map 82 to Map 81 (SW)" ],
-            301: [302, 0, 0, 191, 196, "Map53Exit05", 0, False,  4, 2, "Sky Garden: Map 83 to Map 84 (NW)" ], # NW Top to deadend
-            302: [301, 0, 0,   0,   0, "Map54Exit04", 0, False,  4, 2, "Sky Garden: Map 84 to Map 83 (NE)" ],
-            303: [304, 0, 0, 192, 195, "Map53Exit02", 0, False,  4, 2, "Sky Garden: Map 83 to Map 84 (C)" ], # NW Top center
-            304: [303, 0, 0,   0,   0, "Map54Exit01", 0, False,  4, 2, "Sky Garden: Map 84 to Map 83 (C)" ],
-            305: [306, 0, 0, 197, 193, "Map54Exit02", 0, False,  4, 2, "Sky Garden: Map 84 to Map 83 (SE)" ],
-            306: [305, 0, 0,   0,   0, "Map53Exit03", 0, False,  4, 2, "Sky Garden: Map 83 to Map 84 (SW)" ], # NW Top before chests
-            307: [308, 0, 0, 167, 195, "Map53Exit04", 0, False,  4, 2, "Sky Garden: Map 83 to Map 84 (E)" ], # NW Top after chests
-            308: [307, 0, 0,   0,   0, "Map54Exit03", 0, False,  4, 2, "Sky Garden: Map 84 to Map 83 (W)" ],
+            273: [274, 0, 0, 170, 172, "Map4CExit02", 0, False,  4, 2, "Sky Garden: Foyer NE exit (76->77)" ],
+            274: [273, 0, 0,   0,   0, "Map4DExit01", 0, False,  4, 2, "Sky Garden: NE Top room, NW exit (77->76)" ],
+            275: [276, 0, 0, 170, 176, "Map4CExit03", 0, False,  4, 2, "Sky Garden: Foyer SE exit (76->79)" ],
+            276: [275, 0, 0,   0,   0, "Map4FExit01", 0, False,  4, 2, "Sky Garden: SE Top room, NW exit (79->76)" ],
+            277: [278, 0, 0, 170, 181, "Map4CExit05", 0, False,  4, 2, "Sky Garden: Foyer SW exit (76->81)" ],
+            278: [277, 0, 0,   0,   0, "Map51Exit01", 0, False,  4, 2, "Sky Garden: SW Top room, NE exit (81->76)" ],
+            279: [280, 0, 0, 170, 190, "Map4CExit04", 0, False,  4, 2, "Sky Garden: Foyer NW exit (76->83)" ],
+            280: [279, 0, 0,   0,   0, "Map53Exit01", 0, False,  4, 2, "Sky Garden: NW Top room, NE exit (83->76)" ],
+            281: [282, 0, 0, 172, 175, "Map4DExit02", 0, False,  4, 2, "Sky Garden: NE Top room, E exit (77->78)" ],
+            282: [281, 0, 0,   0,   0, "Map4EExit01", 0, False,  4, 2, "Sky Garden: NE Bot room, W exit (78->77)" ],
+            283: [284, 0, 0, 175, 173, "Map4EExit03", 0, False,  4, 2, "Sky Garden: NE Bot room, SE exit (78->77)" ],
+            284: [283, 0, 0,   0,   0, "Map4DExit04", 0, False,  4, 2, "Sky Garden: NE Top room, SW exit (77->78)" ],
+            285: [286, 0, 0, 175, 174, "Map4EExit02", 0, False,  4, 2, "Sky Garden: NE Bot room, SW exit (78->77)" ],
+            286: [285, 0, 0,   0,   0, "Map4DExit03", 0, False,  4, 2, "Sky Garden: NE Top room, SE exit (77->78)" ],
+            287: [288, 0, 0, 176, 169, "Map4FExit05", 0, False,  4, 2, "Sky Garden: SE Top room, statue door (79->86)" ],
+            288: [287, 0, 0,   0,   0, "Map56Exit01", 0, False,  4, 2, "Sky Garden: Dead-end Dark Space room exit (86->79)" ],
+            289: [290, 0, 0, 176, 179, "Map4FExit02", 0, False,  4, 2, "Sky Garden: SE Top room, NE exit (79->80)" ],
+            290: [289, 0, 0,   0,   0, "Map50Exit01", 0, False,  4, 2, "Sky Garden: SE Bottom corridor, W exit (80->79)" ],
+            291: [292, 0, 0, 179, 177, "Map50Exit02", 0, False,  4, 2, "Sky Garden: SE Bottom corridor, E exit (80->79)" ],
+            292: [291, 0, 0,   0,   0, "Map4FExit03", 0, False,  4, 2, "Sky Garden: SE Top room, exit before Friar barrier (79->80)" ],
+            293: [294, 0, 0, 178, 180, "Map4FExit04", 0, False,  4, 2, "Sky Garden: SE Top room, exit after Friar barrier (79->80)" ],
+            294: [293, 0, 0,   0,   0, "Map50Exit03", 0, False,  4, 2, "Sky Garden: SE Bottom chest area exit (80->79)" ],
+            295: [296, 0, 0, 168, 186, "Map51Exit02", 0, False,  4, 2, "Sky Garden: SW Top, N exit behind pegs (81->82)" ],
+            296: [295, 0, 0,   0,   0, "Map52Exit01", 0, False,  4, 2, "Sky Garden: SW Bot, N exit near chest (82->81)" ],
+            297: [298, 0, 0, 182, 188, "Map51Exit03", 0, False,  4, 2, "Sky Garden: SW Top, NW exit near Dark Space cage (81->82)" ],
+            298: [297, 0, 0,   0,   0, "Map52Exit02", 0, False,  4, 2, "Sky Garden: SW Bot, NE exit near cage switch (82->81)" ],
+            299: [300, 0, 0, 184, 187, "Map51Exit04", 0, False,  4, 2, "Sky Garden: SW Top, SE exit with ramp (81->82)" ],
+            300: [299, 0, 0,   0,   0, "Map52Exit03", 0, False,  4, 2, "Sky Garden: SW Bot, SW exit near fire cages (82->81)" ],
+            301: [302, 0, 0, 191, 196, "Map53Exit05", 0, False,  4, 2, "Sky Garden: NW Top, useless NW exit (83->84)" ],
+            302: [301, 0, 0,   0,   0, "Map54Exit04", 0, False,  4, 2, "Sky Garden: NW Bot, NE exit after one-way ledge (84->83)" ],
+            303: [304, 0, 0, 192, 195, "Map53Exit02", 0, False,  4, 2, "Sky Garden: NW Top, Center exit (83->84)" ],
+            304: [303, 0, 0,   0,   0, "Map54Exit01", 0, False,  4, 2, "Sky Garden: NW Bot, Center exit (84->83)" ],
+            305: [306, 0, 0, 197, 193, "Map54Exit02", 0, False,  4, 2, "Sky Garden: NW Bot, SE exit behind statue (84->83)" ],
+            306: [305, 0, 0,   0,   0, "Map53Exit03", 0, False,  4, 2, "Sky Garden: NW Top, SW exit before chests (83->84)" ],
+            307: [308, 0, 0, 167, 195, "Map53Exit04", 0, False,  4, 2, "Sky Garden: NW Top, E exit after chests (83->84)" ],
+            308: [307, 0, 0,   0,   0, "Map54Exit03", 0, False,  4, 2, "Sky Garden: NW Bot, useless W exit (84->83)" ],
             
             # Seaside Palace
             310: [311, 0, 0, 210, 200, "Map5EExit03", 0, False, 0, 0, "Seaside entrance" ],  # always linked
@@ -6968,43 +6979,43 @@ class World:
             
             # Mu
             330: [331, 0, 0, 210, 212, "Map5EExit02", 0, False,  5, 1, "Mu entrance" ],
-            331: [330, 0, 0,   0,   0, "Map5FExit01", 0, False,  5, 1, "Mu exit" ], # NW to Palace corridor
-            332: [333, 0, 0, 722, 217, "Map5FExit02", 0, False,  5, 2, "Mu: Map 95 to Map 96" ], # NW to NE
-            333: [332, 0, 0,   0,   0, "Map60Exit01", 0, False,  5, 2, "Mu: Map 96 to Map 95" ],
-            334: [335, 0, 0, 723, 220, "Map60Exit02", 0, False,  5, 2, "Mu: Map 96 to Map 97 (top)" ],
-            335: [334, 0, 0,   0,   0, "Map61Exit01", 0, False,  5, 2, "Mu: Map 97 to Map 96 (top)" ],
-            336: [337, 0, 0, 220, 231, "Map61Exit07", 0, False,  5, 2, "Mu: Map 97 to Map 99" ], # E to Hope Room 1
-            337: [336, 0, 0,   0,   0, "Map63Exit01", 0, False,  5, 2, "Mu: Map 99 to Map 97" ],
-            338: [339, 0, 0, 220, 225, "Map61Exit04", 0, False,  5, 2, "Mu: Map 97 to Map 98 (top)" ],
-            339: [338, 0, 0,   0,   0, "Map62Exit02", 0, False,  5, 2, "Mu: Map 98 to Map 97 (top)" ],
-            340: [341, 0, 0, 218, 222, "Map60Exit03", 0, False,  5, 2, "Mu: Map 96 to Map 97 (middle)" ],
-            341: [340, 0, 0,   0,   0, "Map61Exit02", 0, False,  5, 2, "Mu: Map 97 to Map 96 (middle)" ], # E-Mid to NE-Mid
-            342: [343, 0, 0, 223, 227, "Map61Exit05", 0, False,  5, 2, "Mu: Map 97 to Map 98 (middle)" ],
-            343: [342, 0, 0,   0,   0, "Map62Exit03", 0, False,  5, 2, "Mu: Map 98 to Map 97 (middle)" ],
-            346: [347, 0, 0, 227, 233, "Map62Exit06", 0, False,  5, 2, "Mu: Map 98 to Map 100 (middle E)" ],
-            347: [346, 0, 0,   0,   0, "Map64Exit01", 0, False,  5, 2, "Mu: Map 100 to Map 98 (middle E)" ],
-            348: [349, 0, 0, 245, 237, "Map64Exit04", 0, False,  5, 2, "Mu: Map 100 to Map 101 (middle N)" ],
-            349: [348, 0, 0,   0,   0, "Map65Exit01", 0, False,  5, 2, "Mu: Map 101 to Map 100 (middle N)" ],
-            350: [351, 0, 0, 237, 234, "Map65Exit03", 0, False,  5, 2, "Mu: Map 101 to Map 100 (middle S)" ],
-            351: [350, 0, 0,   0,   0, "Map64Exit06", 0, False,  5, 2, "Mu: Map 100 to Map 101 (middle S)" ],
-            352: [353, 0, 0, 234, 228, "Map64Exit03", 0, False,  5, 2, "Mu: Map 100 to Map 98 (middle W)" ],
-            353: [352, 0, 0,   0,   0, "Map62Exit08", 0, False,  5, 2, "Mu: Map 98 to Map 100 (middle W)" ],
-            354: [355, 0, 0, 213, 232, "Map5FExit05", 0, False,  5, 2, "Mu: Map 95 to Map 99" ], # NW to Hope Room 2
-            355: [354, 0, 0,   0,   0, "Map63Exit02", 0, False,  5, 2, "Mu: Map 99 to Map 95" ],
-            356: [357, 0, 0, 722, 226, "",            0, False,  5, 0, "Mu: Map 95 to Map 98 (top)" ], # Slider, always linked
-            357: [356, 0, 0,   0,   0, "",            0, False,  5, 0, "Mu: Map 98 to Map 95 (top)" ], # Slider, always linked
-            358: [359, 0, 0, 229, 224, "Map62Exit04", 0, False,  5, 2, "Mu: Map 98 to Map 97 (bottom)" ],
-            359: [358, 0, 0,   0,   0, "Map61Exit06", 0, False,  5, 2, "Mu: Map 97 to Map 98 (bottom)" ],
-            360: [361, 0, 0, 224, 219, "Map61Exit03", 0, False,  5, 2, "Mu: Map 97 to Map 96 (bottom)" ],
-            361: [360, 0, 0,   0,   0, "Map60Exit04", 0, False,  5, 2, "Mu: Map 96 to Map 97 (bottom)" ],
-            362: [363, 0, 0, 230, 216, "Map62Exit01", 0, False,  5, 2, "Mu: Map 98 to Map 95 (bottom)" ],
-            363: [362, 0, 0,   0,   0, "Map5FExit03", 0, False,  5, 2, "Mu: Map 95 to Map 98 (bottom)" ],
-            364: [365, 0, 0, 230, 235, "Map62Exit07", 0, False,  5, 2, "Mu: Map 98 to Map 100 (bottom)" ],
-            365: [364, 0, 0,   0,   0, "Map64Exit02", 0, False,  5, 2, "Mu: Map 100 to Map 98 (bottom)" ],
-            366: [367, 0, 0, 235, 239, "Map64Exit05", 0, False,  5, 2, "Mu: Map 100 to Map 101 (bottom)" ],
-            367: [366, 0, 0,   0,   0, "Map65Exit02", 0, False,  5, 2, "Mu: Map 101 to Map 100 (bottom)" ],
-            368: [369, 0, 0, 239, 240, "Map65Exit04", 0, False,  5, 0, "Mu: Map 101 to Map 102" ], # Not randomized; Mu boss always requires Hope+Rama Statues
-            369: [368, 0, 0,   0,   0, "Map66Exit02", 0, False,  5, 0, "Mu: Map 102 to Map 101" ],
+            331: [330, 0, 0,   0,   0, "Map5FExit01", 0, False,  5, 1, "Mu exit toward Palace corridor" ], # NW to Palace corridor
+            332: [333, 0, 0, 722, 217, "Map5FExit02", 0, False,  5, 2, "Mu: NW room, NE exit (95->96)" ],
+            333: [332, 0, 0,   0,   0, "Map60Exit01", 0, False,  5, 2, "Mu: NE room, NW exit (96->95)" ],
+            334: [335, 0, 0, 723, 220, "Map60Exit02", 0, False,  5, 2, "Mu: NE room, upper SE exit (96->97)" ],
+            335: [334, 0, 0,   0,   0, "Map61Exit01", 0, False,  5, 2, "Mu: E room, upper N exit (97->96)" ],
+            336: [337, 0, 0, 220, 231, "Map61Exit07", 0, False,  5, 2, "Mu: E room door to Hope Room (97->99)" ], # E to Hope Room 1
+            337: [336, 0, 0,   0,   0, "Map63Exit01", 0, False,  5, 2, "Mu: Hope Room 1 exit out (99->97)" ],
+            338: [339, 0, 0, 220, 225, "Map61Exit04", 0, False,  5, 2, "Mu: E room, upper SW exit (97->98)" ],
+            339: [338, 0, 0,   0,   0, "Map62Exit02", 0, False,  5, 2, "Mu: W room, SE exit from Hope Statue dead-end (98->97)" ],
+            340: [341, 0, 0, 218, 222, "Map60Exit03", 0, False,  5, 2, "Mu: NE room, mid-water SE exit (96->97)" ],
+            341: [340, 0, 0,   0,   0, "Map61Exit02", 0, False,  5, 2, "Mu: E room, mid-water N exit (97->96)" ], # E-Mid to NE-Mid
+            342: [343, 0, 0, 223, 227, "Map61Exit05", 0, False,  5, 2, "Mu: E room, mid-water W exit (97->98)" ],
+            343: [342, 0, 0,   0,   0, "Map62Exit03", 0, False,  5, 2, "Mu: W room, mid-water E exit (98->97)" ],
+            346: [347, 0, 0, 227, 233, "Map62Exit06", 0, False,  5, 2, "Mu: W room, eastern mid-water S exit (98->100)" ],
+            347: [346, 0, 0,   0,   0, "Map64Exit01", 0, False,  5, 2, "Mu: SW room, east side, N exit (100->98)" ],
+            348: [349, 0, 0, 245, 237, "Map64Exit04", 0, False,  5, 2, "Mu: SW room, east side, SE exit (100->101)" ],
+            349: [348, 0, 0,   0,   0, "Map65Exit01", 0, False,  5, 2, "Mu: SE room, northern mid-water exit (101->100)" ],
+            350: [351, 0, 0, 237, 234, "Map65Exit03", 0, False,  5, 2, "Mu: SE room, southern mid-water exit (101->100)" ],
+            351: [350, 0, 0,   0,   0, "Map64Exit06", 0, False,  5, 2, "Mu: SW room, lower SE exit (100->101)" ],
+            352: [353, 0, 0, 234, 228, "Map64Exit03", 0, False,  5, 2, "Mu: SW room, south/west corridor, NW exit (100->98)" ],
+            353: [352, 0, 0,   0,   0, "Map62Exit08", 0, False,  5, 2, "Mu: W room, western mid-water S exit (98->100)" ],
+            354: [355, 0, 0, 213, 232, "Map5FExit05", 0, False,  5, 2, "Mu: NW room door to Hope Room (95->99)" ], # NW to Hope Room 2
+            355: [354, 0, 0,   0,   0, "Map63Exit02", 0, False,  5, 2, "Mu: Hope Room 2 exit out (99->95)" ],
+            356: [357, 0, 0, 722, 226, "",            0, False,  5, 0, "Mu: NW room Slider hole (95->98)" ], # Slider, always linked
+            357: [356, 0, 0,   0,   0, "",            0, False,  5, 0, "Mu: W room Slider hole (98->95)" ], # Slider, always linked
+            358: [359, 0, 0, 229, 224, "Map62Exit04", 0, False,  5, 2, "Mu: W room, lower E exit (98->97)" ],
+            359: [358, 0, 0,   0,   0, "Map61Exit06", 0, False,  5, 2, "Mu: E room, lower corridor W exit (97->98)" ],
+            360: [361, 0, 0, 224, 219, "Map61Exit03", 0, False,  5, 2, "Mu: E room, lower corridor N exit (97->96)" ],
+            361: [360, 0, 0,   0,   0, "Map60Exit04", 0, False,  5, 2, "Mu: NE room, lower S exit (96->97)" ],
+            362: [363, 0, 0, 230, 216, "Map62Exit01", 0, False,  5, 2, "Mu: W room, lower N exit (98->95)" ],
+            363: [362, 0, 0,   0,   0, "Map5FExit03", 0, False,  5, 2, "Mu: NW room, lower S exit (95->98)" ],
+            364: [365, 0, 0, 230, 235, "Map62Exit07", 0, False,  5, 2, "Mu: W room, lower S exit (98->100)" ],
+            365: [364, 0, 0,   0,   0, "Map64Exit02", 0, False,  5, 2, "Mu: SW room, lower corridor N exit (100->98)" ],
+            366: [367, 0, 0, 235, 239, "Map64Exit05", 0, False,  5, 2, "Mu: SW room, lower corridor SE exit (100->101)" ],
+            367: [366, 0, 0,   0,   0, "Map65Exit02", 0, False,  5, 2, "Mu: SE room, lower W exit (101->100)" ],
+            368: [369, 0, 0, 239, 240, "Map65Exit04", 0, False,  5, 0, "Mu: SE room, boss door (101->102)" ], # Not randomized; Mu boss always requires Hope+Rama Statues
+            369: [368, 0, 0,   0,   0, "Map66Exit02", 0, False,  5, 0, "Mu: Rama Statue room exit out (102->101)" ],
             
             # Angel Village
             382: [383, 0, 0, 250, 210, "Map69Exit01", 0, False, 0, 1, "Angel: Mu Passage (in)" ],
@@ -7021,24 +7032,24 @@ class World:
             393: [392, 0, 0,   0,   0, "Map6CExit03", 0, False, 0, 1, "Angel: DS Room (out)" ],
             
             # Angel Dungeon
-            398: [399, 0, 0, 259, 263, "Map70Exit04", 0, False, 6, 2, "Angel Dungeon: Map 112(N) to Map 112(main)" ],
-            399: [398, 0, 0,   0,   0, "Map70Exit05", 0, False, 6, 2, "Angel Dungeon: Map 112(main) to Map 112(N)" ],
-            400: [401, 0, 0, 251, 260, "Map6BExit06", 0, False, 6, 1, "Angel Dungeon entrance" ],
-            401: [400, 0, 0,   0,   0, "Map6DExit02", 0, False, 6, 1, "Angel Dungeon exit" ],
-            402: [403, 0, 0, 260, 261, "Map6DExit01", 0, False, 6, 3, "Angel Dungeon: Map 109 to Map 110" ],
-            403: [402, 0, 0,   0,   0, "Map6EExit01", 0, False, 6, 2, "Angel Dungeon: Map 110 to Map 109" ],
-            404: [405, 0, 0, 278, 262, "Map6EExit02", 0, False, 6, 2, "Angel Dungeon: Map 110 to Map 111" ],
-            405: [404, 0, 0,   0,   0, "Map6FExit01", 0, False, 6, 2, "Angel Dungeon: Map 111 to Map 110" ],
-            406: [407, 0, 0, 262, 259, "Map6FExit02", 0, False, 6, 2, "Angel Dungeon: Map 111 to Map 112(N)" ],
-            407: [406, 0, 0,   0,   0, "Map70Exit01", 0, False, 6, 2, "Angel Dungeon: Map 112(N) to Map 111" ],
-            408: [409, 0, 0, 263, 265, "Map70Exit02", 0, False, 6, 2, "Angel Dungeon: Map 112 to Chest" ],  # Slider
-            409: [408, 0, 0,   0,   0, "Map70Exit03", 0, False, 6, 2, "Angel Dungeon: Chest to Map 112" ],  # Slider
-            410: [411, 0, 0, 279, 266, "Map70Exit06", 0, False, 6, 2, "Angel Dungeon: Map 112 to Map 113" ],
-            411: [410, 0, 0,   0,   0, "Map71Exit01", 0, False, 6, 2, "Angel Dungeon: Map 113 to Map 112" ],
-            412: [413, 0, 0, 266, 267, "Map71Exit02", 0, False, 6, 2, "Angel Dungeon: Map 113 to Map 114" ],
-            413: [412, 0, 0,   0,   0, "Map72Exit01", 0, False, 6, 2, "Angel Dungeon: Map 114 to Map 113" ],
-            414: [415, 0, 0, 267, 277, "Map72Exit02", 0, False, 6, 2, "Angel Dungeon: Map 114 to Ishtar Foyer" ],  # Slider
-            415: [414, 0, 0,   0,   0, "Map73Exit01", 0, False, 6, 2, "Angel Dungeon: Ishtar Foyer to Map 114" ],  # Slider
+            398: [399, 0, 0, 259, 263, "Map70Exit04", 0, False, 6, 2, "Angel: Water room hidden door (112->112)" ],
+            399: [398, 0, 0,   0,   0, "Map70Exit05", 0, False, 6, 2, "Angel: Water room monster area SW door (112->112)" ],
+            400: [401, 0, 0, 251, 260, "Map6BExit06", 0, False, 6, 1, "Angel Dungeon entrance (in)" ],
+            401: [400, 0, 0,   0,   0, "Map6DExit02", 0, False, 6, 1, "Angel Dungeon exit (out)" ],
+            402: [403, 0, 0, 260, 261, "Map6DExit01", 0, False, 6, 3, "Angel: First room SE door (109->110)" ],
+            403: [402, 0, 0,   0,   0, "Map6EExit01", 0, False, 6, 2, "Angel: Maze room NW door (110->109)" ],
+            404: [405, 0, 0, 278, 262, "Map6EExit02", 0, False, 6, 2, "Angel: Maze room SE door (110->111)" ],
+            405: [404, 0, 0,   0,   0, "Map6FExit01", 0, False, 6, 2, "Angel: Dark room W door (111->110)" ],
+            406: [407, 0, 0, 262, 259, "Map6FExit02", 0, False, 6, 2, "Angel: Dark room E door (111->112)" ],
+            407: [406, 0, 0,   0,   0, "Map70Exit01", 0, False, 6, 2, "Angel: Water room area without monsters, W door (112->111)" ],
+            408: [409, 0, 0, 263, 265, "Map70Exit02", 0, False, 6, 2, "Angel: Water room Slider hole to chest (112->112)" ],  # Slider
+            409: [408, 0, 0,   0,   0, "Map70Exit03", 0, False, 6, 2, "Angel: Slider hole from chest toward water room (112->112)" ],  # Slider
+            410: [411, 0, 0, 279, 266, "Map70Exit06", 0, False, 6, 2, "Angel: Water room monster area E door (112->113)" ],
+            411: [410, 0, 0,   0,   0, "Map71Exit01", 0, False, 6, 2, "Angel: Wind Tunnel W door (113->112)" ],
+            412: [413, 0, 0, 266, 267, "Map71Exit02", 0, False, 6, 2, "Angel: Wind Tunnel E door (113->114)" ],
+            413: [412, 0, 0,   0,   0, "Map72Exit01", 0, False, 6, 2, "Angel: Long room W door (114->113)" ],
+            414: [415, 0, 0, 267, 277, "Map72Exit02", 0, False, 6, 2, "Angel: Long room Slider hole toward Ishtar (114->115)" ],  # Slider
+            415: [414, 0, 0,   0,   0, "Map73Exit01", 0, False, 6, 2, "Angel: Ishtar foyer Slider hole (115->114)" ],  # Slider
             
             # Ishtar's Studio
             420: [421, 0, 0, 277, 269, "Map73Exit02", 0, False, 6, 1, "Ishtar entrance" ],
@@ -7069,16 +7080,16 @@ class World:
             453: [452, 0, 0,   0,   0, "",            0, False, 0, 0, "Euro: Watermia passage" ],
             
             # Great Wall
-            462: [463, 0, 0, 290, 291, "Map82Exit01", 0, False, 7, 3, "Great Wall: Map 130 to Map 131" ], # Entrance to Long Drop
-            463: [462, 0, 0,   0,   0, "Map83Exit01", 0, False, 7, 2, "Great Wall: Map 131 to Map 130" ],
-            464: [465, 0, 0, 293, 294, "Map83Exit02", 0, False, 7, 2, "Great Wall: Map 131 to Map 133" ], # Long Drop to Forced Ramps
-            465: [464, 0, 0,   0,   0, "Map85Exit01", 0, False, 7, 2, "Great Wall: Map 133 to Map 131" ],
-            466: [467, 0, 0, 296, 297, "Map85Exit02", 0, False, 7, 2, "Great Wall: Map 133 to Map 134" ], # Forced Ramps to DS
-            467: [466, 0, 0,   0,   0, "Map86Exit01", 0, False, 7, 2, "Great Wall: Map 134 to Map 133" ],
-            468: [469, 0, 0, 297, 298, "Map86Exit02", 0, False, 7, 2, "Great Wall: Map 134 to Map 135" ], # DS to Friar room
-            469: [468, 0, 0,   0,   0, "Map87Exit01", 0, False, 7, 2, "Great Wall: Map 135 to Map 134" ],
-            470: [471, 0, 0, 299, 300, "Map87Exit02", 0, False, 7, 2, "Great Wall: Map 135 to Map 136" ], # Friar room to final DS room
-            471: [470, 0, 0,   0,   0, "Map88Exit01", 0, False, 7, 2, "Great Wall: Map 136 to Map 135" ],
+            462: [463, 0, 0, 290, 291, "Map82Exit01", 0, False, 7, 3, "Great Wall: Entrance room E exit (130->131)" ],
+            463: [462, 0, 0,   0,   0, "Map83Exit01", 0, False, 7, 2, "Great Wall: Long drop room W exit (131->130)" ],
+            464: [465, 0, 0, 293, 294, "Map83Exit02", 0, False, 7, 2, "Great Wall: Long drop room E exit (131->133)" ],
+            465: [464, 0, 0,   0,   0, "Map85Exit01", 0, False, 7, 2, "Great Wall: Forced ramp room W exit (133->131)" ],
+            466: [467, 0, 0, 296, 297, "Map85Exit02", 0, False, 7, 2, "Great Wall: Forced ramp room E exit (133->134)" ],
+            467: [466, 0, 0,   0,   0, "Map86Exit01", 0, False, 7, 2, "Great Wall: Dark Space platform room W exit (134->133)" ],
+            468: [469, 0, 0, 297, 298, "Map86Exit02", 0, False, 7, 2, "Great Wall: Dark Space platform room E exit (134->135)" ],
+            469: [468, 0, 0,   0,   0, "Map87Exit01", 0, False, 7, 2, "Great Wall: Friar room W exit (135->134)" ],
+            470: [471, 0, 0, 299, 300, "Map87Exit02", 0, False, 7, 2, "Great Wall: Friar room E exit (135->136)" ],
+            471: [470, 0, 0,   0,   0, "Map88Exit01", 0, False, 7, 2, "Great Wall: Final Dark Space room W exit (136->135)" ],
             
             # Euro
             482: [483, 0, 0, 310, 312, "Map91Exit03", 0, False, 0, 1, "Euro: Rolek Company (in)" ],
@@ -7111,28 +7122,28 @@ class World:
             509: [508, 0, 0,   0,   0, "Map99Exit01", 0, False, 0, 1, "Euro: Dark Space House (out)" ],
             
             # Mt. Kress
-            522: [523, 0, 0, 330, 331, "MapA0Exit01", 0, False, 8, 3, "Mt. Kress: Map 160 to Map 161" ],
-            523: [522, 0, 0,   0,   0, "MapA1Exit01", 0, False, 8, 2, "Mt. Kress: Map 161 to Map 160" ], # First DS room to foyer
-            524: [525, 0, 0, 332, 333, "MapA1Exit02", 0, False, 8, 2, "Mt. Kress: Map 161 to Map 162 (W)" ],
-            525: [524, 0, 0,   0,   0, "MapA2Exit01", 0, False, 8, 2, "Mt. Kress: Map 162 to Map 161 (W)" ],
-            526: [527, 0, 0, 332, 334, "MapA1Exit03", 0, False, 8, 2, "Mt. Kress: Map 161 to Map 162 (E)" ],
-            527: [526, 0, 0,   0,   0, "MapA2Exit02", 0, False, 8, 2, "Mt. Kress: Map 162 to Map 161 (E)" ],
-            528: [529, 0, 0, 333, 337, "MapA2Exit04", 0, False, 8, 2, "Mt. Kress: Map 162 to Map 163 (N)" ], # Vine room 1 to E room
-            529: [528, 0, 0,   0,   0, "MapA3Exit02", 0, False, 8, 2, "Mt. Kress: Map 163 to Map 162 (N)" ],
-            530: [531, 0, 0, 337, 336, "MapA3Exit01", 0, False, 8, 2, "Mt. Kress: Map 163 to Map 162 (S)" ],
-            531: [530, 0, 0,   0,   0, "MapA2Exit03", 0, False, 8, 2, "Mt. Kress: Map 162 to Map 163 (S)" ],
-            532: [533, 0, 0, 333, 338, "MapA2Exit05", 0, False, 8, 2, "Mt. Kress: Map 162 to Map 164" ], # Vine rm 1 to W room
-            533: [532, 0, 0,   0,   0, "MapA4Exit01", 0, False, 8, 2, "Mt. Kress: Map 164 to Map 162" ],
-            534: [535, 0, 0, 335, 339, "MapA2Exit06", 0, False, 8, 2, "Mt. Kress: Map 162 to Map 165" ], # Vine rm 1 to Vine rm 2
-            535: [534, 0, 0,   0,   0, "MapA5Exit01", 0, False, 8, 2, "Mt. Kress: Map 165 to Map 162" ],
-            536: [537, 0, 0, 339, 342, "MapA5Exit02", 0, False, 8, 2, "Mt. Kress: Map 165 to Map 166" ], # Vine rm 2 to mushroom arena
-            537: [536, 0, 0,   0,   0, "MapA6Exit01", 0, False, 8, 2, "Mt. Kress: Map 166 to Map 165" ],
-            538: [539, 0, 0, 340, 343, "MapA5Exit03", 0, False, 8, 2, "Mt. Kress: Map 165 to Map 167" ], # Vine rm 2 to N room
-            539: [538, 0, 0,   0,   0, "MapA7Exit01", 0, False, 8, 2, "Mt. Kress: Map 167 to Map 165" ],
-            540: [541, 0, 0, 341, 344, "MapA5Exit04", 0, False, 8, 2, "Mt. Kress: Map 165 to Map 168" ], # Vine rm 2 to final combat room
-            541: [540, 0, 0,   0,   0, "MapA8Exit01", 0, False, 8, 2, "Mt. Kress: Map 168 to Map 165" ],
-            542: [543, 0, 0, 344, 345, "MapA8Exit02", 0, False, 8, 2, "Mt. Kress: Map 168 to Map 169" ], # Final combat room to chest
-            543: [542, 0, 0,   0,   0, "MapA9Exit01", 0, False, 8, 2, "Mt. Kress: Map 169 to Map 168" ],
+            522: [523, 0, 0, 330, 331, "MapA0Exit01", 0, False, 8, 3, "Mt. Kress: Entrance room NW exit (160->161)" ],
+            523: [522, 0, 0,   0,   0, "MapA1Exit01", 0, False, 8, 2, "Mt. Kress: First DS room, E exit (161->160)" ],
+            524: [525, 0, 0, 332, 333, "MapA1Exit02", 0, False, 8, 2, "Mt. Kress: First DS room, western N exit (161->162)" ],
+            525: [524, 0, 0,   0,   0, "MapA2Exit01", 0, False, 8, 2, "Mt. Kress: First vine room, SW exit (162->161)" ],
+            526: [527, 0, 0, 332, 334, "MapA1Exit03", 0, False, 8, 2, "Mt. Kress: First DS room, eastern N exit (161->162)" ],
+            527: [526, 0, 0,   0,   0, "MapA2Exit02", 0, False, 8, 2, "Mt. Kress: First vine room, S exit before ramp (162->161)" ],
+            528: [529, 0, 0, 333, 337, "MapA2Exit04", 0, False, 8, 2, "Mt. Kress: First vine room, E exit (162->163)" ],
+            529: [528, 0, 0,   0,   0, "MapA3Exit02", 0, False, 8, 2, "Mt. Kress: Second DS room, NW exit (163->162)" ],
+            530: [531, 0, 0, 337, 336, "MapA3Exit01", 0, False, 8, 2, "Mt. Kress: Second DS room, SW exit (163->162)" ],
+            531: [530, 0, 0,   0,   0, "MapA2Exit03", 0, False, 8, 2, "Mt. Kress: First vine room, exit from chest area (162->163)" ],
+            532: [533, 0, 0, 333, 338, "MapA2Exit05", 0, False, 8, 2, "Mt. Kress: First vine room, W exit (162->164)" ],
+            533: [532, 0, 0,   0,   0, "MapA4Exit01", 0, False, 8, 2, "Mt. Kress: West Drops chest room exit (164->162)" ],
+            534: [535, 0, 0, 335, 339, "MapA2Exit06", 0, False, 8, 2, "Mt. Kress: First vine room NW exit (162->165)" ],
+            535: [534, 0, 0,   0,   0, "MapA5Exit01", 0, False, 8, 2, "Mt. Kress: Second vine room SW exit (165->162)" ],
+            536: [537, 0, 0, 339, 342, "MapA5Exit02", 0, False, 8, 2, "Mt. Kress: Second vine room SE exit (165->166)" ],
+            537: [536, 0, 0,   0,   0, "MapA6Exit01", 0, False, 8, 2, "Mt. Kress: Mushroom arena exit (166->165)" ],
+            538: [539, 0, 0, 340, 343, "MapA5Exit03", 0, False, 8, 2, "Mt. Kress: Second vine room NE exit (165->167)" ],
+            539: [538, 0, 0,   0,   0, "MapA7Exit01", 0, False, 8, 2, "Mt. Kress: Third Drops/DS room exit (167->165)" ],
+            540: [541, 0, 0, 341, 344, "MapA5Exit04", 0, False, 8, 2, "Mt. Kress: Second vine room NW exit (165->168)" ],
+            541: [540, 0, 0,   0,   0, "MapA8Exit01", 0, False, 8, 2, "Mt. Kress: Final combat corridor E exit (168->165)" ],
+            542: [543, 0, 0, 344, 345, "MapA8Exit02", 0, False, 8, 2, "Mt. Kress: Final combat corridor NW exit (168->169)" ],
+            543: [542, 0, 0,   0,   0, "MapA9Exit01", 0, False, 8, 2, "Mt. Kress: End Teapot chest room exit (169->168)" ],
             
             # Native's Village
             552: [553, 0, 0, 350, 352, "MapACExit01", 0, False, 0, 1, "Native's Village: West House (in)" ],
@@ -7143,50 +7154,50 @@ class World:
             557: [556, 0, 0,   0,   0, "",            0, False, 0, 0, "Dao: Natives' Passage" ],
             
             # Ankor Wat
-            562: [563, 0, 0, 360, 361, "MapB0Exit01", 0, False, 9, 3, "Ankor Wat: Map 176 to Map 177" ], # Foyer to Outer-South
-            563: [562, 0, 0,   0,   0, "MapB1Exit01", 0, False, 9, 2, "Ankor Wat: Map 177 to Map 176" ],
-            564: [565, 0, 0, 361, 363, "MapB1Exit02", 0, False, 9, 2, "Ankor Wat: Map 177 to Map 178" ], # Outer-South to Outer-East
-            565: [564, 0, 0,   0,   0, "MapB2Exit01", 0, False, 9, 2, "Ankor Wat: Map 178 to Map 177" ],
-            566: [567, 0, 0, 365, 366, "MapB2Exit02", 0, False, 9, 2, "Ankor Wat: Map 178 to Map 179" ],
-            567: [566, 0, 0,   0,   0, "MapB3Exit01", 0, False, 9, 2, "Ankor Wat: Map 179 to Map 178" ],
-            568: [569, 0, 0, 368, 367, "MapB4Exit01", 0, False, 9, 2, "Ankor Wat: Map 180 to Map 179" ],
-            569: [568, 0, 0,   0,   0, "MapB3Exit03", 0, False, 9, 2, "Ankor Wat: Map 179 to Map 180" ],
-            570: [571, 0, 0, 367, 369, "MapB3Exit04", 0, False, 9, 2, "Ankor Wat: Map 179 to Map 181" ],
-            571: [570, 0, 0,   0,   0, "MapB5Exit01", 0, False, 9, 2, "Ankor Wat: Map 181 to Map 179" ],
-            572: [573, 0, 0, 371, 362, "MapB5Exit02", 0, False, 9, 2, "Ankor Wat: Map 181 to Map 177" ],
-            573: [572, 0, 0,   0,   0, "MapB1Exit04", 0, False, 9, 2, "Ankor Wat: Map 177 to Map 181" ],
-            574: [575, 0, 0, 362, 372, "MapB1Exit03", 0, False, 9, 2, "Ankor Wat: Map 177 to Map 182" ], # Outer-South to Garden
-            575: [574, 0, 0,   0,   0, "MapB6Exit01", 0, False, 9, 2, "Ankor Wat: Map 182 to Map 177" ],
-            576: [577, 0, 0, 372, 373, "MapB6Exit02", 0, False, 9, 2, "Ankor Wat: Map 182 to Map 183" ],
-            577: [576, 0, 0,   0,   0, "MapB7Exit01", 0, False, 9, 2, "Ankor Wat: Map 183 to Map 182" ], # Inner-South to Garden
-            578: [579, 0, 0, 373, 376, "MapB7Exit04", 0, False, 9, 2, "Ankor Wat: Map 183 to Map 184" ],
-            579: [578, 0, 0,   0,   0, "MapB8Exit01", 0, False, 9, 2, "Ankor Wat: Map 184 to Map 183" ],
-            580: [581, 0, 0, 374, 378, "MapB7Exit02", 0, False, 9, 2, "Ankor Wat: Map 183 to Map 185 (W)" ],
-            581: [580, 0, 0,   0,   0, "MapB9Exit01", 0, False, 9, 2, "Ankor Wat: Map 185 to Map 183 (W)" ],
-            582: [583, 0, 0, 378, 375, "MapB9Exit02", 0, False, 9, 2, "Ankor Wat: Map 185 to Map 183 (E)" ],
-            583: [582, 0, 0,   0,   0, "MapB7Exit03", 0, False, 9, 2, "Ankor Wat: Map 183 to Map 185 (E)" ],
-            584: [585, 0, 0, 375, 379, "MapB7Exit05", 0, False, 9, 2, "Ankor Wat: Map 183 to Map 186" ], # Inner-South to Road
-            585: [584, 0, 0,   0,   0, "MapBAExit01", 0, False, 9, 2, "Ankor Wat: Map 186 to Map 183" ],
-            586: [587, 0, 0, 379, 381, "MapBAExit02", 0, False, 9, 2, "Ankor Wat: Map 186 to Map 187 (W)" ],
-            587: [586, 0, 0,   0,   0, "MapBBExit01", 0, False, 9, 2, "Ankor Wat: Map 187 to Map 186 (W)" ],
-            588: [589, 0, 0, 381, 380, "MapBBExit02", 0, False, 9, 2, "Ankor Wat: Map 187 to Map 186 (E)" ],
-            589: [588, 0, 0,   0,   0, "MapBAExit03", 0, False, 9, 2, "Ankor Wat: Map 186 to Map 187 (E)" ],
-            590: [591, 0, 0, 381, 384, "MapBBExit03", 0, False, 9, 2, "Ankor Wat: Map 187 to Map 188" ], # 1F to brightroom
-            591: [590, 0, 0,   0,   0, "MapBCExit01", 0, False, 9, 2, "Ankor Wat: Map 188 to Map 187" ], # brightroom to 1F
-            592: [593, 0, 0, 385, 386, "MapBCExit06", 0, False, 9, 2, "Ankor Wat: Map 188 to Map 189" ], # brightroom to 3F
-            593: [592, 0, 0,   0,   0, "MapBDExit01", 0, False, 9, 2, "Ankor Wat: Map 189 to Map 188" ],
-            594: [595, 0, 0, 387, 389, "MapBDExit03", 0, False, 9, 2, "Ankor Wat: Map 189 to Map 190 (E)" ],
-            595: [594, 0, 0,   0,   0, "MapBEExit02", 0, False, 9, 2, "Ankor Wat: Map 190 to Map 189 (E)" ],
-            596: [597, 0, 0, 388, 390, "MapBDExit02", 0, False, 9, 2, "Ankor Wat: Map 189 to Map 190 (W)" ],
-            597: [596, 0, 0,   0,   0, "MapBEExit01", 0, False, 9, 2, "Ankor Wat: Map 190 to Map 189 (W)" ],
-            598: [599, 0, 0, 390, 391, "MapBEExit04", 0, False, 9, 2, "Ankor Wat: Map 190 to Map 191" ],
-            599: [598, 0, 0,   0,   0, "MapBFExit01", 0, False, 9, 2, "Ankor Wat: Map 191 to Map 190" ],
-            600: [  0, 0, 0, 366, 368, "MapB3Exit02", 0, False, 9, 2, "Ankor Wat: Map 179 to Map 180 (drop)" ],
-            601: [  0, 0, 0, 384, 381, "MapBCExit02", 0, False, 9, 2, "Ankor Wat: Map 188 to Map 187 NW-L (drop)" ],
-            602: [  0, 0, 0, 384, 381, "MapBCExit03", 0, False, 9, 2, "Ankor Wat: Map 188 to Map 187 NW-R (drop)" ],
-            603: [  0, 0, 0, 384, 383, "MapBCExit04", 0, False, 9, 2, "Ankor Wat: Map 188 to Map 187 NE (drop)" ],
-            604: [  0, 0, 0, 385, 382, "MapBCExit05", 0, False, 9, 2, "Ankor Wat: Map 188 to Map 187 SW (drop)" ],
-            605: [  0, 0, 0, 389, 388, "MapBEExit03", 0, False, 9, 2, "Ankor Wat: Map 190 to Map 189 (drop)" ],
+            562: [563, 0, 0, 360, 361, "MapB0Exit01", 0, False, 9, 3, "Ankor Wat: Exterior entry door (176->177)" ],
+            563: [562, 0, 0,   0,   0, "MapB1Exit01", 0, False, 9, 2, "Ankor Wat: Outer-South room S door (177->176)" ],
+            564: [565, 0, 0, 361, 363, "MapB1Exit02", 0, False, 9, 2, "Ankor Wat: Outer-South room NE door (177->178)" ],
+            565: [564, 0, 0,   0,   0, "MapB2Exit01", 0, False, 9, 2, "Ankor Wat: Outer-East room S door (178->177)" ],
+            566: [567, 0, 0, 365, 366, "MapB2Exit02", 0, False, 9, 2, "Ankor Wat: Outer-East room N door (178->179)" ],
+            567: [566, 0, 0,   0,   0, "MapB3Exit01", 0, False, 9, 2, "Ankor Wat: Outer-North room SE door (179->178)" ],
+            568: [569, 0, 0, 368, 367, "MapB4Exit01", 0, False, 9, 2, "Ankor Wat: Pit exit (180->179)" ],
+            569: [568, 0, 0,   0,   0, "MapB3Exit03", 0, False, 9, 2, "Ankor Wat: Outer-North room NW door (179->180)" ],
+            570: [571, 0, 0, 367, 369, "MapB3Exit04", 0, False, 9, 2, "Ankor Wat: Outer-North room SW door (179->181)" ],
+            571: [570, 0, 0,   0,   0, "MapB5Exit01", 0, False, 9, 2, "Ankor Wat: Outer-West room N door (181->179)" ],
+            572: [573, 0, 0, 371, 362, "MapB5Exit02", 0, False, 9, 2, "Ankor Wat: Outer-West room S door (181->177)" ],
+            573: [572, 0, 0,   0,   0, "MapB1Exit04", 0, False, 9, 2, "Ankor Wat: Outer-South room NW door (177->181)" ],
+            574: [575, 0, 0, 362, 372, "MapB1Exit03", 0, False, 9, 2, "Ankor Wat: Outer-South room N door toward Garden (177->182)" ],
+            575: [574, 0, 0,   0,   0, "MapB6Exit01", 0, False, 9, 2, "Ankor Wat: Garden S exit (182->177)" ],
+            576: [577, 0, 0, 372, 373, "MapB6Exit02", 0, False, 9, 2, "Ankor Wat: Garden N exit (182->183)" ],
+            577: [576, 0, 0,   0,   0, "MapB7Exit01", 0, False, 9, 2, "Ankor Wat: Inner-South room, main area S door (183->182)" ],
+            578: [579, 0, 0, 373, 376, "MapB7Exit04", 0, False, 9, 2, "Ankor Wat: Inner-South room, main area NE door (183->184)" ],
+            579: [578, 0, 0,   0,   0, "MapB8Exit01", 0, False, 9, 2, "Ankor Wat: Inner-East room S door (184->183)" ],
+            580: [581, 0, 0, 374, 378, "MapB7Exit02", 0, False, 9, 2, "Ankor Wat: Inner-South room, NW door behind Quake (183->185)" ],
+            581: [580, 0, 0,   0,   0, "MapB9Exit01", 0, False, 9, 2, "Ankor Wat: Inner-West room, SW exit (185->183)" ],
+            582: [583, 0, 0, 378, 375, "MapB9Exit02", 0, False, 9, 2, "Ankor Wat: Inner-West room, SE exit (185->183)" ],
+            583: [582, 0, 0,   0,   0, "MapB7Exit03", 0, False, 9, 2, "Ankor Wat: Inner-South room, north corridor NW exit (183->185)" ],
+            584: [585, 0, 0, 375, 379, "MapB7Exit05", 0, False, 9, 2, "Ankor Wat: Inner-South room, north corridor N exit toward Main Hall (183->186)" ],
+            585: [584, 0, 0,   0,   0, "MapBAExit01", 0, False, 9, 2, "Ankor Wat: Road to Main Hall S door (186->183)" ],
+            586: [587, 0, 0, 379, 381, "MapBAExit02", 0, False, 9, 2, "Ankor Wat: Road to Main Hall N door (186->187)" ],
+            587: [586, 0, 0,   0,   0, "MapBBExit01", 0, False, 9, 2, "Ankor Wat: Main Hall 1F, SW exit (187->186)" ],
+            588: [589, 0, 0, 381, 380, "MapBBExit02", 0, False, 9, 2, "Ankor Wat: Main Hall 1F, SE exit (187->186)" ],
+            589: [588, 0, 0,   0,   0, "MapBAExit03", 0, False, 9, 2, "Ankor Wat: Road to Main Hall, dead-end Glasses area exit (186->187)" ],
+            590: [591, 0, 0, 381, 384, "MapBBExit03", 0, False, 9, 2, "Ankor Wat: Main Hall 1F, stairs up (187->188)" ],
+            591: [590, 0, 0,   0,   0, "MapBCExit01", 0, False, 9, 2, "Ankor Wat: Main Hall 2F, N stairs down (188->187)" ],
+            592: [593, 0, 0, 385, 386, "MapBCExit06", 0, False, 9, 2, "Ankor Wat: Main Hall 2F, S stairs up (188->189)" ],
+            593: [592, 0, 0,   0,   0, "MapBDExit01", 0, False, 9, 2, "Ankor Wat: Main Hall 3F, S stairs down (189->188)" ],
+            594: [595, 0, 0, 387, 389, "MapBDExit03", 0, False, 9, 2, "Ankor Wat: Main Hall 3F, NE stairs up (189->190)" ],
+            595: [594, 0, 0,   0,   0, "MapBEExit02", 0, False, 9, 2, "Ankor Wat: Main Hall 4F chest area, NE stairs down (190->189)" ],
+            596: [597, 0, 0, 388, 390, "MapBDExit02", 0, False, 9, 2, "Ankor Wat: Main Hall 3F above ledge, NW stairs up (189->190)" ],
+            597: [596, 0, 0,   0,   0, "MapBEExit01", 0, False, 9, 2, "Ankor Wat: Main Hall 4F final corridor, NW stairs down (190->189)" ],
+            598: [599, 0, 0, 390, 391, "MapBEExit04", 0, False, 9, 2, "Ankor Wat: Main Hall 4F final corridor, center stairs (190->191)" ],
+            599: [598, 0, 0,   0,   0, "MapBFExit01", 0, False, 9, 2, "Ankor Wat: Spirit room exit (191->190)" ],
+            600: [  0, 0, 0, 366, 368, "MapB3Exit02", 0, False, 9, 2, "Ankor Wat: Outer-North room drop (179->180)" ],
+            601: [  0, 0, 0, 384, 381, "MapBCExit02", 0, False, 9, 2, "Ankor Wat: Main Hall 2F, left useless drop (188->187)" ],
+            602: [  0, 0, 0, 384, 381, "MapBCExit03", 0, False, 9, 2, "Ankor Wat: Main Hall 2F, right useless drop (188->187)" ],
+            603: [  0, 0, 0, 384, 383, "MapBCExit04", 0, False, 9, 2, "Ankor Wat: Main Hall 2F, E drop toward DS (188->187)" ],
+            604: [  0, 0, 0, 385, 382, "MapBCExit05", 0, False, 9, 2, "Ankor Wat: Main Hall 2F, SW drop toward chest (188->187)" ],
+            605: [  0, 0, 0, 389, 388, "MapBEExit03", 0, False, 9, 2, "Ankor Wat: Main Hall 4F chest area drop (190->189)" ],
             
             # Dao
             612: [613, 0, 0, 400, 401, "MapC3Exit01", 0, False, 0, 1, "Dao: NW House (in)" ],
@@ -7203,185 +7214,83 @@ class World:
             623: [622, 0, 0,   0,   0, "MapC9Exit01", 0, False, 0, 1, "Dao: SE House (out)" ],
             
             # Pyramid
-            634: [635, 0, 0, 411, 415, "",            0, False, 10, 0, "Pyramid: Map 204 to Map 205" ], # Hieroglyph room, ALWAYS LINKED (1a33e)
-            635: [634, 0, 0,   0,   0, "",            0, False, 10, 0, "Pyramid: Map 205 to Map 204" ], # Hieroglyph room, ALWAYS LINKED (1a394)
-            636: [637, 0, 0, 413, 416, "MapCCExit02", 0, False, 10, 2, "Pyramid: Map 204 to Map 206" ], # Foyer to Room 1 (Will ramps)
-            637: [636, 0, 0,   0,   0, "MapCEExit01", 0, False, 10, 2, "Pyramid: Map 206 to Map 204" ],
-            638: [639, 0, 0, 417, 418, "MapCEExit02", 0, False, 10, 2, "Pyramid: Map 206 to Map 207" ],
-            639: [638, 0, 0,   0,   0, "MapCFExit01", 0, False, 10, 2, "Pyramid: Map 207 to Map 206" ],
-            640: [641, 0, 0, 419, 442, "MapCFExit02", 0, False, 10, 2, "Pyramid: Map 207 to Map 218" ],
-            641: [640, 0, 0,   0,   0, "MapDAExit01", 0, False, 10, 2, "Pyramid: Map 218 to Map 207" ],
-            642: [643, 0, 0, 413, 420, "MapCCExit03", 0, False, 10, 2, "Pyramid: Map 204 to Map 208" ], # Foyer to Room 2 (breakable floors)
-            643: [642, 0, 0,   0,   0, "MapD0Exit01", 0, False, 10, 2, "Pyramid: Map 208 to Map 204" ],
-            644: [645, 0, 0, 421, 422, "MapD0Exit02", 0, False, 10, 2, "Pyramid: Map 208 to Map 209" ],
-            645: [644, 0, 0,   0,   0, "MapD1Exit01", 0, False, 10, 2, "Pyramid: Map 209 to Map 208" ],
-            646: [647, 0, 0, 423, 443, "MapD1Exit02", 0, False, 10, 2, "Pyramid: Map 209 to Map 218" ],
-            647: [646, 0, 0,   0,   0, "MapDAExit02", 0, False, 10, 2, "Pyramid: Map 218 to Map 209" ],
-            648: [649, 0, 0, 413, 431, "MapCCExit04", 0, False, 10, 2, "Pyramid: Map 204 to Map 214" ], # Foyer to Room 3 (Friar, Killer 6, Will chest)
-            649: [648, 0, 0,   0,   0, "MapD6Exit01", 0, False, 10, 2, "Pyramid: Map 214 to Map 204" ],
-            650: [651, 0, 0, 434, 435, "MapD6Exit02", 0, False, 10, 2, "Pyramid: Map 214 to Map 215" ],
-            651: [650, 0, 0,   0,   0, "MapD7Exit01", 0, False, 10, 2, "Pyramid: Map 215 to Map 214" ],
-            652: [653, 0, 0, 450, 444, "MapD7Exit02", 0, False, 10, 2, "Pyramid: Map 215 to Map 218" ],
-            653: [652, 0, 0,   0,   0, "MapDAExit05", 0, False, 10, 2, "Pyramid: Map 218 to Map 215" ],
-            654: [655, 0, 0, 413, 436, "MapCCExit05", 0, False, 10, 2, "Pyramid: Map 204 to Map 216" ], # Foyer to Room 4 (crushers, req. Spin Dash)
-            655: [654, 0, 0,   0,   0, "MapD8Exit01", 0, False, 10, 2, "Pyramid: Map 216 to Map 204" ],
-            656: [657, 0, 0, 437, 438, "MapD8Exit02", 0, False, 10, 2, "Pyramid: Map 216 to Map 217" ],
-            657: [656, 0, 0,   0,   0, "MapD9Exit01", 0, False, 10, 2, "Pyramid: Map 217 to Map 216" ],
-            658: [659, 0, 0, 439, 440, "MapD9Exit02", 0, False, 10, 2, "Pyramid: Map 217 to Map 219" ],
-            659: [658, 0, 0,   0,   0, "MapDBExit01", 0, False, 10, 2, "Pyramid: Map 219 to Map 217" ],
-            660: [661, 0, 0, 441, 445, "MapDBExit02", 0, False, 10, 2, "Pyramid: Map 219 to Map 218" ],
-            661: [660, 0, 0,   0,   0, "MapDAExit06", 0, False, 10, 2, "Pyramid: Map 218 to Map 219" ],
-            662: [663, 0, 0, 413, 426, "MapCCExit06", 0, False, 10, 2, "Pyramid: Map 204 to Map 212" ], # Foyer to Room 5 (Quake/Aura one-way)
-            663: [662, 0, 0,   0,   0, "MapD4Exit01", 0, False, 10, 2, "Pyramid: Map 212 to Map 204" ],
-            664: [665, 0, 0, 429, 430, "MapD4Exit02", 0, False, 10, 2, "Pyramid: Map 212 to Map 213" ],
-            665: [664, 0, 0,   0,   0, "MapD5Exit01", 0, False, 10, 2, "Pyramid: Map 213 to Map 212" ],
-            666: [667, 0, 0, 430, 446, "MapD5Exit02", 0, False, 10, 2, "Pyramid: Map 213 to Map 218" ],
-            667: [666, 0, 0,   0,   0, "MapDAExit04", 0, False, 10, 2, "Pyramid: Map 218 to Map 213" ],
-            668: [669, 0, 0, 413, 424, "MapCCExit07", 0, False, 10, 2, "Pyramid: Map 204 to Map 210" ], # Foyer to Room 6 (mummies)
-            669: [668, 0, 0,   0,   0, "MapD2Exit01", 0, False, 10, 2, "Pyramid: Map 210 to Map 204" ],
-            670: [671, 0, 0, 424, 425, "MapD2Exit02", 0, False, 10, 2, "Pyramid: Map 210 to Map 211" ],
-            671: [670, 0, 0,   0,   0, "MapD3Exit01", 0, False, 10, 2, "Pyramid: Map 211 to Map 210" ],
-            672: [673, 0, 0, 425, 447, "MapD3Exit02", 0, False, 10, 2, "Pyramid: Map 211 to Map 218" ],
-            673: [672, 0, 0,   0,   0, "MapDAExit03", 0, False, 10, 2, "Pyramid: Map 218 to Map 211" ],
+            634: [635, 0, 0, 411, 415, "",            0, False, 10, 0, "Pyramid: Foyer N exit (204->205)" ], # Hieroglyph room, ALWAYS LINKED
+            635: [634, 0, 0,   0,   0, "",            0, False, 10, 0, "Pyramid: Hieroglyph room exit (205->204)" ], # Hieroglyph room, ALWAYS LINKED
+            636: [637, 0, 0, 413, 416, "MapCCExit02", 0, False, 10, 2, "Pyramid: Lower foyer door 1 (204->206)" ], # Foyer to Room 1 (Will ramps)
+            637: [636, 0, 0,   0,   0, "MapCEExit01", 0, False, 10, 2, "Pyramid: Room 1A (Will ramps) upper exit (206->204)" ],
+            638: [639, 0, 0, 417, 418, "MapCEExit02", 0, False, 10, 2, "Pyramid: Room 1A (Will ramps) lower exit (206->207)" ],
+            639: [638, 0, 0,   0,   0, "MapCFExit01", 0, False, 10, 2, "Pyramid: Room 1B (Will ramps) upper exit (207->206)" ],
+            640: [641, 0, 0, 419, 442, "MapCFExit02", 0, False, 10, 2, "Pyramid: Room 1B (Will ramps) lower exit (207->218)" ],
+            641: [640, 0, 0,   0,   0, "MapDAExit01", 0, False, 10, 2, "Pyramid: Hieroglyph 1 exit (218->207)" ],
+            642: [643, 0, 0, 413, 420, "MapCCExit03", 0, False, 10, 2, "Pyramid: Lower foyer door 2 (204->208)" ], # Foyer to Room 2 (breakable floors)
+            643: [642, 0, 0,   0,   0, "MapD0Exit01", 0, False, 10, 2, "Pyramid: Room 2A (breakable floors) upper exit (208->204)" ],
+            644: [645, 0, 0, 421, 422, "MapD0Exit02", 0, False, 10, 2, "Pyramid: Room 2A (breakable floors) lower exit (208->209)" ],
+            645: [644, 0, 0,   0,   0, "MapD1Exit01", 0, False, 10, 2, "Pyramid: Room 2B (breakable floors) upper exit (209->208)" ],
+            646: [647, 0, 0, 423, 443, "MapD1Exit02", 0, False, 10, 2, "Pyramid: Room 2B (breakable floors) lower exit (209->218)" ],
+            647: [646, 0, 0,   0,   0, "MapDAExit02", 0, False, 10, 2, "Pyramid: Hieroglyph 2 exit (218->209)" ],
+            648: [649, 0, 0, 413, 431, "MapCCExit04", 0, False, 10, 2, "Pyramid: Lower foyer door 3 (204->214)" ], # Foyer to Room 3 (Friar, Killer 6, Will chest)
+            649: [648, 0, 0,   0,   0, "MapD6Exit01", 0, False, 10, 2, "Pyramid: Room 3A (Friar+K6+Will chest) upper exit (214->204)" ],
+            650: [651, 0, 0, 434, 435, "MapD6Exit02", 0, False, 10, 2, "Pyramid: Room 3A (Friar+K6+Will chest) lower exit (214->215)" ],
+            651: [650, 0, 0,   0,   0, "MapD7Exit01", 0, False, 10, 2, "Pyramid: Room 3B (Friar+K6+Will chest) upper exit (215->214)" ],
+            652: [653, 0, 0, 450, 444, "MapD7Exit02", 0, False, 10, 2, "Pyramid: Room 3B (Friar+K6+Will chest) lower exit (215->218)" ],
+            653: [652, 0, 0,   0,   0, "MapDAExit05", 0, False, 10, 2, "Pyramid: Hieroglyph 3 exit (218->215)" ],
+            654: [655, 0, 0, 413, 436, "MapCCExit05", 0, False, 10, 2, "Pyramid: Lower foyer door 4 (204->216)" ], # Foyer to Room 4 (crushers, req. Spin Dash)
+            655: [654, 0, 0,   0,   0, "MapD8Exit01", 0, False, 10, 2, "Pyramid: Room 4A (crusher ceilings) upper exit (216->204)" ],
+            656: [657, 0, 0, 437, 438, "MapD8Exit02", 0, False, 10, 2, "Pyramid: Room 4A (crusher ceilings) lower exit (216->217)" ],
+            657: [656, 0, 0,   0,   0, "MapD9Exit01", 0, False, 10, 2, "Pyramid: Room 4B (crusher ceilings) W exit (217->216)" ],
+            658: [659, 0, 0, 439, 440, "MapD9Exit02", 0, False, 10, 2, "Pyramid: Room 4B (crusher ceilings) E exit (217->219)" ],
+            659: [658, 0, 0,   0,   0, "MapDBExit01", 0, False, 10, 2, "Pyramid: Room 4C (crusher ceilings) W exit (219->217)" ],
+            660: [661, 0, 0, 441, 445, "MapDBExit02", 0, False, 10, 2, "Pyramid: Room 4C (crusher ceilings) E door (219->218)" ],
+            661: [660, 0, 0,   0,   0, "MapDAExit06", 0, False, 10, 2, "Pyramid: Hieroglyph 4 exit (218->219)" ],
+            662: [663, 0, 0, 413, 426, "MapCCExit06", 0, False, 10, 2, "Pyramid: Lower foyer door 5 (204->212)" ], # Foyer to Room 5 (Quake/Aura one-way)
+            663: [662, 0, 0,   0,   0, "MapD4Exit01", 0, False, 10, 2, "Pyramid: Room 5A (Quake/Aura one-way) upper exit (212->204)" ],
+            664: [665, 0, 0, 429, 430, "MapD4Exit02", 0, False, 10, 2, "Pyramid: Room 5A (Quake/Aura one-way) lower exit (212->213)" ],
+            665: [664, 0, 0,   0,   0, "MapD5Exit01", 0, False, 10, 2, "Pyramid: Room 5B (Quake/Aura one-way) upper exit (213->212)" ],
+            666: [667, 0, 0, 430, 446, "MapD5Exit02", 0, False, 10, 2, "Pyramid: Room 5B (Quake/Aura one-way) lower exit (213->218)" ],
+            667: [666, 0, 0,   0,   0, "MapDAExit04", 0, False, 10, 2, "Pyramid: Hieroglyph 5 exit (218->213)" ],
+            668: [669, 0, 0, 413, 424, "MapCCExit07", 0, False, 10, 2, "Pyramid: Lower foyer door 6 (204->210)" ], # Foyer to Room 6 (mummies)
+            669: [668, 0, 0,   0,   0, "MapD2Exit01", 0, False, 10, 2, "Pyramid: Room 6A (mummy doors) upper exit (210->204)" ],
+            670: [671, 0, 0, 424, 425, "MapD2Exit02", 0, False, 10, 2, "Pyramid: Room 6A (mummy doors) lower exit (210->211)" ],
+            671: [670, 0, 0,   0,   0, "MapD3Exit01", 0, False, 10, 2, "Pyramid: Room 6B (mummy doors) upper exit (211->210)" ],
+            672: [673, 0, 0, 425, 447, "MapD3Exit02", 0, False, 10, 2, "Pyramid: Room 6B (mummy doors) lower exit (211->218)" ],
+            673: [672, 0, 0,   0,   0, "MapDAExit03", 0, False, 10, 2, "Pyramid: Hieroglyph 6 exit (218->211)" ],
             
             # Babel
-            682: [683, 0, 0, 460, 461, "MapDEExit01", 0, False, 11, 0, "Babel: Map 222 to Map 223" ],
-            683: [682, 0, 0,   0,   0, "MapDFExit01", 0, False, 11, 0, "Babel: Map 223 to Map 222" ],
-            684: [685, 0, 0, 462, 463, "MapDFExit02", 0, False, 11, 0, "Babel: Map 223 to Map 224" ],
-            685: [684, 0, 0,   0,   0, "MapE0Exit01", 0, False, 11, 0, "Babel: Map 224 to Map 223" ],
-            686: [687, 0, 0, 463, 474, "",            0, False, 11, 0, "Babel: Map 224 to Map 242" ],  # Castoth, ALWAYS LINKED (1a81e)
-            687: [686, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 242 to Map 224" ],  # Castoth, ALWAYS LINKED (a9af9)
-            688: [689, 0, 0, 463, 475, "",            0, False, 11, 0, "Babel: Map 224 to Map 243" ],  # Viper, ALWAYS LINKED (1a82a)
-            689: [688, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 243 to Map 224" ],  # Viper, ALWAYS LINKED (ad165)
-            690: [691, 0, 0, 463, 465, "MapE0Exit02", 0, False, 11, 0, "Babel: Map 224 to Map 225 (bottom)" ],
-            691: [690, 0, 0,   0,   0, "MapE1Exit01", 0, False, 11, 0, "Babel: Map 225 to Map 224 (bottom)" ],
-            692: [693, 0, 0, 466, 464, "MapE1Exit02", 0, False, 11, 0, "Babel: Map 225 to Map 224 (top)" ],
-            693: [692, 0, 0,   0,   0, "MapE0Exit03", 0, False, 11, 0, "Babel: Map 224 to Map 225 (top)" ],
-            694: [695, 0, 0, 464, 476, "",            0, False, 11, 0, "Babel: Map 224 to Map 244" ],  # Vampires, ALWAYS LINKED (1a836)
-            695: [694, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 244 to Map 224" ],  # Vampires, ALWAYS LINKED (af1ed)
-            696: [697, 0, 0, 464, 477, "",            0, False, 11, 0, "Babel: Map 224 to Map 245" ],  # Sand Fanger, ALWAYS LINKED (1a842)
-            697: [696, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 245 to Map 224" ],  # Sand Fanger, ALWAYS LINKED (b8130)
-            698: [699, 0, 0, 464, 469, "MapE0Exit04", 0, False, 11, 0, "Babel: Map 224 to Map 226" ],
-            699: [698, 0, 0,   0,   0, "MapE2Exit01", 0, False, 11, 0, "Babel: Map 226 to Map 224" ],
-            #700: [701, 0, 0, 470, 471, "",           0, False, 11, 0, "Babel: Map 226 to Map 227" ],  #DUPLICATE W/BOSS EXITS
-            #701: [700, 0, 0,   0,   0, "",           0, False, 11, 0, "Babel: Map 227 to Map 226" ],
-            702: [703, 0, 0, 471, 478, "",            0, False, 11, 0, "Babel: Map 227 to Map 246" ],  # Mummy Queen -- EVERYTHING HERE DOWN ALWAYS LINKED
-            703: [702, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 246 to Map 227" ],
-            704: [705, 0, 0, 471, 467, "",            0, False, 11, 0, "Babel: Map 227 to Map 225 (bottom)" ],
-            705: [704, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 225 to Map 227 (bottom)" ],
-            706: [707, 0, 0, 468, 472, "",            0, False, 11, 0, "Babel: Map 225 to Map 227 (top)" ],
-            707: [706, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 227 to Map 225 (top)" ],
-            708: [709, 0, 0, 472, 473, "",            0, False, 11, 0, "Babel: Map 227 to Map 222" ],
-            709: [708, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Map 222 to Map 227" ],
+            682: [683, 0, 0, 460, 461, "MapDEExit01", 0, False, 11, 0, "Babel: Entry door in (222->223)" ],
+            683: [682, 0, 0,   0,   0, "MapDFExit01", 0, False, 11, 0, "Babel: Flute room SW exit (223->222)" ],
+            684: [685, 0, 0, 462, 463, "MapDFExit02", 0, False, 11, 0, "Babel: Flute room upper exit (223->224)" ],
+            685: [684, 0, 0,   0,   0, "MapE0Exit01", 0, False, 11, 0, "Babel: Castoth/Viper hall lower exit (224->223)" ],
+            686: [687, 0, 0, 463, 474, "",            0, False, 11, 0, "Babel: Castoth Door (224->242)" ],
+            687: [686, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Return from Castoth (242->224)" ],
+            688: [689, 0, 0, 463, 475, "",            0, False, 11, 0, "Babel: Viper Door (224->243)" ],
+            689: [688, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Return from Viper (243->224)" ],
+            690: [691, 0, 0, 463, 465, "MapE0Exit02", 0, False, 11, 0, "Babel: Castoth/Viper hall upper exit (224->225)" ],
+            691: [690, 0, 0,   0,   0, "MapE1Exit01", 0, False, 11, 0, "Babel: First elevator lower exit (225->224)" ],
+            692: [693, 0, 0, 466, 464, "MapE1Exit02", 0, False, 11, 0, "Babel: First elevator upper exit (225->224)" ],
+            693: [692, 0, 0,   0,   0, "MapE0Exit03", 0, False, 11, 0, "Babel: Vamps/Fanger hall lower exit (224->225)" ],
+            694: [695, 0, 0, 464, 476, "",            0, False, 11, 0, "Babel: Vampires Door (224->244)" ],
+            695: [694, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Return from Vampires (244->224)" ],
+            696: [697, 0, 0, 464, 477, "",            0, False, 11, 0, "Babel: Fanger Door (224->245)" ],
+            697: [696, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Return from Fanger (245->224)" ],
+            698: [699, 0, 0, 464, 469, "MapE0Exit04", 0, False, 11, 0, "Babel: Vamps/Fanger hall upper exit (224->226)" ],
+            699: [698, 0, 0,   0,   0, "MapE2Exit01", 0, False, 11, 0, "Babel: Exterior lower exit (226->224)" ],
+            #700: [701, 0, 0, 470, 471, "",           0, False, 11, 0, "Babel:  (226->227)" ], # Treated as a boss room exit, up there with the boss room exits
+            #701: [700, 0, 0,   0,   0, "",           0, False, 11, 0, "Babel:  (227->226)" ], # Treated as a boss room exit, up there with the boss room exits
+            702: [703, 0, 0, 471, 478, "",            0, False, 11, 0, "Babel: Mummy Queen door (227->246)" ],
+            703: [702, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Return from Mummy Queen (246->227)" ],
+            704: [705, 0, 0, 471, 467, "",            0, False, 11, 0, "Babel: MQ hall upper exit (227->225)" ],
+            705: [704, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Last elevator lower exit (225->227)" ],
+            706: [707, 0, 0, 468, 472, "",            0, False, 11, 0, "Babel: Last elevator upper exit (225->227)" ],
+            707: [706, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: End hall lower exit (227->225)" ],
+            708: [709, 0, 0, 472, 473, "",            0, False, 11, 0, "Babel: End hall upper exit (227->222)" ],
+            709: [708, 0, 0,   0,   0, "",            0, False, 11, 0, "Babel: Olman room exit (222->227)" ],
             
             # Jeweler's Mansion
             720: [721, 0, 0,   8, 480, "MapMansionEntranceString", 0, False, 12, 1, "Mansion entrance" ],
             721: [720, 0, 0, 480, 400, "MapMansionExitString",     0, False, 12, 1, "Mansion exit" ]
         }
         
-        # Flags restricting how exits can be joined in dungeon shuffles.
-        # Format: { ID: [0: Will is enforced to use this exit,
-        #                1: Will is required for progression,
-        #                2: Freedan is enforced to use this exit,
-        #                3: Freedan is required for progression,
-        #                4: Blocked (don't use to grow dungeon)
-        #               ] }
-        self.exit_shuffle_flags = {
-            #10:  [True,  True,  False, False, False], # Great Wall final DS east exit -- not currently randomized
-            #19:  [True,  True,  False, False, False], # Mansion north exit -- not currently randomized
-            60:  [True,  False, False, False, False], # EdDg foyer, Will enforced by jail
-            71:  [False, False, False, True,  False], # EdDg final DS
-            72:  [False, False, False, False, True ], # Back of EdDg
-            120: [True,  False, False, False, False], # Inca exterior NE, Will enforced by overworld
-            126: [False, False, False, False, True ], # Behind DBlock
-            129: [False, True,  False, False, False], # S half of Inca divided room
-            130: [False, False, False, False, True ], # Inca exterior center (drop)
-            131: [True,  True,  False, False, False], # Inca Will slug room
-            132: [True,  True,  False, False, False], # Inca Will slug room
-            133: [False, False, False, True,  False], # Inca Freedan room
-            134: [False, False, False, True,  False], # Inca Freedan room
-            151: [False, True,  False, False, False], # Golden Tile room (N exit)
-            222: [True,  False, False, False, False], # Mine foyer, Will enforced by overworld
-            227: [False, True,  False, False, False], # Mine spiral room
-            228: [False, True,  False, False, False], # Mine spiral room
-            229: [False, True,  False, True,  False], # Mine Friar room
-            230: [False, True,  False, True,  False], # Mine Friar room
-            233: [False, True,  False, False, False], # Mine front of tunnel
-            234: [False, False, False, False, True ], # Mine back of tunnel
-            278: [False, True,  False, False, False], # SkGn SW main entrance
-            292: [False, False, False, True,  False], # SkGn SE before Friar orb
-            293: [False, False, False, False, True ], # SkGn SE behind Friar orb
-            295: [False, True,  False, False, True ], # SkGn SW behind pegs
-            298: [False, False, False, True,  False], # SkGn SW DS switch
-            302: [False, False, False, False, True ], # SkGn NW bot ledge
-            303: [False, True,  False, False, False], # SkGn NW center
-            304: [False, False, False, True,  False], # SkGn NW bot (DS island)
-            305: [False, False, False, False, True ], # SkGn NW bot behind statue
-            307: [False, False, False, False, True ], # SkGn NW top after chests
-            308: [False, False, False, True,  False], # SkGn NW bot (DS island)
-            331: [False, True,  False, False, False], # Mu NW (for Slider)
-            332: [False, True,  False, False, False], # Mu NW (for Slider)
-            354: [False, True,  False, False, False], # Mu NW (for Slider)
-            341: [False, False, False, True,  False], # Mu Mid-E "glitchless"
-            342: [False, False, True,  False, False], # Mu Mid-E "glitchless"
-            343: [False, True,  False, False, False], # Mu W (for Slider)
-            346: [False, True,  False, False, False], # Mu W (for Slider)
-            349: [False, True,  False, False, False], # Mu SE (for Slider)
-            350: [False, True,  False, False, False], # Mu SE (for Slider)
-            358: [False, True,  False, False, False], # Mu W (for Slider)
-            399: [False, True,  False, False, False], # Angl Slider
-            402: [True,  False, False, False, False], # Angl foyer, Will enforced by town
-            410: [False, True,  False, False, False], # Angl Slider
-            413: [True,  True,  False, False, False], # Angl final long room
-            420: [True,  True,  False, False, False], # Angl Ishtar foyer
-            464: [False, True,  False, False, False], # GtWl long drop from E
-            465: [True,  True,  False, True,  False], # GtWl forced ramps W
-            465: [False, True,  False, True,  False], # GtWl forced ramps E
-            469: [False, False, False, True,  False], # GtWl Friar room
-            470: [False, False, False, True,  False], # GtWl Friar room
-            471: [False, True,  False, False, False], # GtWl final DS W exit
-            523: [True,  True,  False, False, False], # Kress first DS E
-            524: [False, True,  False, False, False], # Kress first DS W1
-            526: [False, True,  False, False, False], # Kress first DS W2
-            534: [False, False, False, False, True ], # Kress behind Drops 1
-            538: [False, False, False, False, True ], # Kress behind Drops 2
-            565: [True,  True,  False, False, False], # Ankr Outer-East
-            566: [True,  True,  False, False, False], # Ankr Outer-East
-            567: [True,  False, False, False, True ], # Outer-North E (behind Spin Dash)
-            569: [False, True,  False, False, False], # Outer-North W
-            570: [False, True,  False, False, False], # Outer-North W
-            571: [True,  True,  False, False, False], # Outer-West N
-            572: [True,  False, False, False, True ], # Outer-West S
-            577: [False, False, False, True,  False], # Inner-South
-            578: [False, False, False, True,  False], # Inner-South
-            579: [False, False, False, True,  False], # Inner-East
-            580: [False, False, True,  False, False], # Inner-South behind golem
-            591: [True,  True,  False, False, False], # Bright room
-            592: [True,  True,  False, False, False], # Bright room
-            593: [True,  True,  False, False, False], # Ankr 3F S of Slider
-            594: [True,  True,  False, False, False], # Ankr 3F N of Slider
-            596: [False, True,  False, False, False], # Ankr 3F above ledge
-            637: [True,  True,  False, False, False], # Pymd Room 1
-            638: [True,  True,  False, False, False], # Pymd Room 1
-            639: [True,  True,  False, False, False], # Pymd Room 1
-            640: [True,  True,  False, False, False], # Pymd Room 1
-            649: [False, True,  True,  True,  False], # Pymd Room 3
-            650: [False, False, True,  True,  False], # Pymd Room 3
-            651: [False, False, True,  True,  False], # Pymd Room 3
-            652: [False, False, True,  True,  False], # Pymd Room 3
-            655: [True,  True,  False, False, False], # Pymd Room 4
-            656: [True,  True,  False, False, False], # Pymd Room 4
-            657: [True,  True,  False, False, False], # Pymd Room 4
-            658: [True,  True,  False, False, False], # Pymd Room 4
-            659: [True,  True,  False, False, False], # Pymd Room 4
-            660: [True,  True,  False, False, True ], # Pymd Room 4
-            663: [False, False, True,  True,  False], # Pymd Room 5
-            664: [False, False, True,  True,  False], # Pymd Room 5
-            665: [False, False, True,  True,  False], # Pymd Room 5
-            666: [False, False, True,  True,  True ]  # Pymd Room 5
-        }
-        
-        # Logic requirements for exits to be traversable.
+        # Logic requirements for exits to be traversable. For more complex logic, manually create an artificial node.
         # During initialization, new nodes are created and entries are added to self.logic as needed.
         # If IsCoupled, the logic will be applied to the coupled exit too.
         # Format: { ID: [0: ExitId,
@@ -7424,10 +7333,9 @@ class World:
             29: [ 591, [[601, 1]], 2, False],    # Wat bright room N
             30: [ 592, [[28, 1]], 2, False],     # Wat bright room S
             31: [ 592, [[601, 1]], 2, False],    # Wat bright room S
-            # Require an attack at boss doors
-            100: [ 2, [[609, 1]], 2, False ],     # Castoth
+            # Require an attack for bosses; Castoth and Vamps are special
+            # Rigorously we need a "defeated" flag item for each boss, but this suffices for now
             101: [ 5, [[609, 1]], 2, False ],     # Viper
-            102: [ 8, [[609, 1]], 2, False ],     # Vamps
             103: [ 11, [[609, 1]], 2, False ],    # Fanger
             104: [ 14, [[609, 1]], 2, False ],    # MQ
             105: [ 20, [[609, 1]], 2, False ]    # Solid Arm
