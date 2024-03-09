@@ -3,11 +3,14 @@ hirom
 
 ; Reserved RAM (in addition to base game):
 ; $0aaa = number of stacked herbs
+; $0bec = number of stacked Hope Statues
+; $0bee = number of stacked Rama Statues
+; $0bf0 = number of stacked Mushroom Drops
 ; $0bf2 = number of stacked Crystal Balls
 ; $0bf4 = number of stacked Red Jewels
 ; $0bf6 = stores index of last DS visited
 ; $0bf8 = during DS warp, DS index of text lines and of selected DS
-; $0bfa = used on radar screen to choose "FORCE" text
+; $0bfa = used on radar screen and inv for text branches ("FORCE" text, inv page number, count spacing, etc.)
 ; $0bfc = used during item pickup to write text slowly (for chests)
 ; $0bfe = used during item pickup to flag a stat as maxed out
 ; $1ffc = Player X pos in debug mode
@@ -166,6 +169,7 @@ dw $02a0 : dl Config_MansionWestGateItem
 dw $ffff
 endif
 
+; Silently gives item A, stacking if appropriate.
 LR_GiveNormalItemA8OrSec:
 {
 stz $0bfe    ; Used by Z3 mode to flag whether we're capped on a stat.
@@ -173,13 +177,18 @@ php
 sep #$20
 bit #$80 : bne .IsStatOrPickup
 pha
-ldy #$0000
-.CheckInvSlotEmpty:
-lda $0AB4,y : bne ..NotEmpty
-jmp .GotEmptyInvSlot
-..NotEmpty:
-iny : cpy #$0010 : bne .CheckInvSlotEmpty
+jsl LR_GetItemAStackedCountBcd : bne .IsStackableAndHasStack
+jsl LR_GetEmptyInvSlotInYOrSec : bcs +
+  jmp .GotEmptyInvSlot
++:
 jmp .InvFull
+
+.IsStackableAndHasStack:
+pla : sta $0DB8
+  jsr SR_GrowStackForItemA
+  stz $0DB9
+ldy #$FF1F
+jmp .ClcAndReturn
 
 .IsStatOrPickup:
 sec : sbc #$80 : bne +
@@ -210,7 +219,7 @@ phd
   cop #$A5 : dl $80dd03 : dw $0000, $2F00    ; EHpPickupCounter
 pld
 cop #$06 : db $22
-jmp .ClcAndRtl
+jmp .ClcAndReturn
 .IsSmallDp:
 lda #$01 : bra .DoAwardDp
 .IsMediumDp:
@@ -224,14 +233,14 @@ and #$00FF : clc : adc $0AD6 : cmp #$03E7 : bcc +
 +:
 sta $0AD6
 cop #$06 : db $22
-jmp .ClcAndRtl
+jmp .ClcAndReturn
 .IsHpJewelItem:    ; In Z3 non-Expert, HP that isn't a room reward awards 2 hit points.
 if !SettingZ3 == 1 && !SettingOHKO == 0
 lda #$80 : trb $09EC
 lda $0aca : inc : inc : sta $0aca
   sec : sbc $0ace : sta $0b22
 ldy #$0000
-jmp .ClcAndRtl
+jmp .ClcAndReturn
 endif
 .IsHpJewel:
 lda #$80 : trb $09EC
@@ -240,7 +249,7 @@ lda $0ACA : inc : sta $0ACA
   sec : sbc $0ACE : sta $0B22
 endif
 ldy #$0000
-bra .ClcAndRtl
+bra .ClcAndReturn
 .IsStrJewelItem:
 .IsStrJewel:
 lda #$80 : trb $09EC
@@ -261,7 +270,7 @@ else
 inc $0ADE
 endif
 ldy #$0000
-bra .ClcAndRtl
+bra .ClcAndReturn
 .IsDefJewelItem:
 .IsDefJewel:
 lda #$80 : trb $09EC
@@ -282,14 +291,25 @@ else
 inc $0ADC
 endif
 ldy #$0000
-bra .ClcAndRtl
+bra .ClcAndReturn
 
 .GotEmptyInvSlot:
-pla : sta $0AB4,y
+lda $01,s : jsr SR_GrowStackForItemA   ; GrowStack is harmless if A is not stackable, and handles 2/3RJ
+if !SettingInfiniteInventory == 1
+lda $01,s : cmp #$2e : beq ++
+  cmp #$2f : bne +
+++:
+lda #$01   ; For the inventory write, use a RJ instead of the 2RJ/3RJ item when creating the stack
++:
+jsl LR_WriteItemAToInvSlotY
+pla
+else
+pla : jsl LR_WriteItemAToInvSlotY
+endif
   sta $0DB8
   stz $0DB9
 ldy #$FF1F
-.ClcAndRtl:
+.ClcAndReturn:
 plp
 clc
 rtl
@@ -302,6 +322,7 @@ sec
 rtl
 }
 
+; Not silent.
 LR_GiveAnyItemA16OrSec:
 {
 pha
@@ -314,12 +335,6 @@ lda $01,s : and #$00ff : cmp #$0080 : bcc +
   clc : adc #$0029
 +:
 sta $0db8
-lda $01,s : and #$00ff : cmp #$0006 : bne ..PostHerbCheck
-  cop #$D5 : db $06    ; "Remove" herb placeholder item so there's room to "give" an herb.
-  sed
-    lda $0aaa : clc : adc #$0001 : sta $0aaa
-  cld
-..PostHerbCheck:
 lda $01,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
 ..IsNotSpecial:
 lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
@@ -1137,6 +1152,313 @@ db $ca
 db "But you're maxed out!"
 db $ca
 
+macro MIncBcd8(addr)
+lda <addr> : clc : adc.b #1 : sta <addr>
+endmacro
+SR_GrowStackForItemA:
+{
+php
+sep #$20
+sed
+cmp #$06 : beq .Herb
+if !SettingInfiniteInventory == 1
+cmp #$01 : beq .OneRedJewel
+cmp #$2e : beq .TwoRedJewels
+cmp #$2f : beq .ThreeRedJewels
+cmp #$0e : beq .CrystalBall
+cmp #$12 : beq .HopeStatue
+cmp #$13 : beq .RamaStatue
+cmp #$1a : beq .MushroomDrops
+endif
+.Done:
+plp
+rts
+.Herb:
+%MIncBcd8($0aaa)
+bra .Done
+.ThreeRedJewels:
+%MIncBcd8($0bf4)
+.TwoRedJewels:
+%MIncBcd8($0bf4)
+.OneRedJewel:
+%MIncBcd8($0bf4)
+bra .Done
+.CrystalBall:
+%MIncBcd8($0bf2)
+bra .Done
+.MushroomDrops:
+%MIncBcd8($0bf0)
+bra .Done
+.RamaStatue:
+%MIncBcd8($0bee)
+bra .Done
+.HopeStatue:
+%MIncBcd8($0bec)
+bra .Done
+}
+
+LR_GetItemAStackedCountBcd:
+{
+php
+sep #$20
+cmp #$06 : beq .Herb
+if !SettingInfiniteInventory == 1
+cmp #$01 : beq .RedJewel
+cmp #$2e : beq .RedJewel
+cmp #$2f : beq .RedJewel
+cmp #$0e : beq .CrystalBall
+cmp #$12 : beq .HopeStatue
+cmp #$13 : beq .RamaStatue
+cmp #$1a : beq .MushroomDrops
+endif
+lda #$00 : xba
+lda #$00
+plp
+rtl
+.Herb:
+plp
+lda $0aaa
+rtl
+.RedJewel:
+plp
+lda $0bf4
+rtl
+.CrystalBall:
+plp
+lda $0bf2
+rtl
+.MushroomDrops:
+plp
+lda $0bf0
+rtl
+.RamaStatue:
+plp
+lda $0bee
+rtl
+.HopeStatue:
+plp
+lda $0bec
+rtl
+}
+
+; Sets carry if the passed item is not stackable. Returns new (BCD) stack size.
+macro MDecBcd8Floored(addr)
+lda <addr> : beq ?+
+  sec : sbc.b #1 : sta <addr>
+?+:
+endmacro
+LR_DecStackForItemAReturningCountOrSec:
+{
+and #$00ff
+php
+sep #$20
+sed
+cmp #$06 : beq .Herb
+if !SettingInfiniteInventory == 1
+cmp #$01 : beq .RedJewel
+cmp #$2e : beq .TwoRedJewels
+cmp #$2f : beq .ThreeRedJewels
+cmp #$0e : beq .CrystalBall
+cmp #$12 : beq .HopeStatue
+cmp #$13 : beq .RamaStatue
+cmp #$1a : beq .MushroomDrops
+endif
+.SecAndReturnZero:
+lda #$00
+.SecAndReturn:
+plp
+sec
+rtl
+.CrystalBall:
+%MDecBcd8Floored($0bf2)
+bra .ClcAndReturn
+.MushroomDrops:
+%MDecBcd8Floored($0bf0)
+bra .ClcAndReturn
+.RamaStatue:
+%MDecBcd8Floored($0bee)
+bra .ClcAndReturn
+.HopeStatue:
+%MDecBcd8Floored($0bec)
+bra .ClcAndReturn
+.Herb:
+%MDecBcd8Floored($0aaa)
+bra .ClcAndReturn
+.ThreeRedJewels:
+%MDecBcd8Floored($0bf4)
+.TwoRedJewels:
+%MDecBcd8Floored($0bf4)
+.RedJewel:
+%MDecBcd8Floored($0bf4)
+;bra .ClcAndReturn
+.ClcAndReturn:
+plp
+clc
+rtl
+}
+
+LR_GetEmptyInvSlotInYOrSec:
+php
+sep #$20
+ldy #$0000
+if !SettingInfiniteInventory == 1
+phb
+lda #$30 : pha : plb
+.CheckInvSlotEmpty:
+lda.w SramInvItems,y : bne ..NotEmpty
+  plb
+  bra .GotEmptyInvSlot
+..NotEmpty:
+iny : cpy.w #(SramInvEndOfList-SramInvItems) : bcc .CheckInvSlotEmpty
+plb
+bra .InvFull    ; Should never happen, but we'll handle it anyway
+else
+.CheckInvSlotEmpty:
+lda $0AB4,y : bne ..NotEmpty
+  bra .GotEmptyInvSlot
+..NotEmpty:
+iny : cpy #$0010 : bne .CheckInvSlotEmpty
+bra .InvFull
+endif
+.GotEmptyInvSlot:
+plp
+clc
+rtl
+.InvFull:
+plp
+sec
+rtl
+
+LR_WriteItemAToInvSlotY:
+php
+sep #$20
+if !SettingInfiniteInventory == 1
+phx
+  phy
+    tyx
+    sta.l SramInvItems,x
+  ply
+  jsl LR_UpdateItemViewForSlotY
+plx
+;bra .Done
+else
+sta $0ab4,y
+;bra .Done
+endif
+.Done:
+plp
+rtl
+
+LR_DoUnequip:
+stz $0ac6
+lda #$ffff : sta $0ac4
+rtl
+
+if !SettingInfiniteInventory == 1
+; If item slot Y is in the active inventory page, updates the inv view (at $0ab4)
+; and equipped status, if applicable, with the item at Y.
+LR_UpdateItemViewForSlotY:
+phx
+tyx
+cpy.w #4 : bcc .DoUpdateWithLocalizedY   ; First four slots are always in the view
+lda.l SramInvActivePageId : beq .ViewingPage1
+  dec : beq .ViewingPage2
+.ViewingPage3:
+cpy.w #28 : bcc .Done
+cpy.w #40 : bcs .Done
+tya : sec : sbc.w #24 : tay
+bra .DoUpdateWithLocalizedY
+.ViewingPage2:
+cpy.w #16 : bcc .Done
+cpy.w #28 : bcs .Done
+tya : sec : sbc.w #12 : tay
+bra .DoUpdateWithLocalizedY
+.ViewingPage1:
+cpy.w #16 : bcs .Done
+.DoUpdateWithLocalizedY:
+sep #$20
+lda.l SramInvItems,x : sta $0ab4,y
+rep #$20
+cpy $0ac4 : bne .Done
+  lda.l SramInvItems,x : and #$00ff : sta $0ac6   ; Change equipped item
+    bne .Done
+      lda #$ffff : sta $0ac4   ; Nothing's equipped, so clear the equipped slot
+.Done:
+plx
+rtl
+
+; Updates the inv view with the contents of the inventory.
+LR_UpdateItemViewFull:
+phx
+lda.l SramInvItems : sta $0ab4
+lda.l 2+SramInvItems : sta $0ab6
+lda.l SramInvActivePageId : beq .ViewingPage1
+  dec : beq .ViewingPage2
+.ViewingPage3:
+ldx.w #4+24
+bra .GotPageOffset
+.ViewingPage2:
+ldx.w #4+12
+bra .GotPageOffset
+.ViewingPage1:
+ldx.w #4
+;bra .GotPageOffset
+.GotPageOffset:
+ldy.w #4
+-:
+lda.l SramInvItems,x : sta $0ab4,y
+inx : inx
+iny : iny
+cpy #$0010 : bcc -
+plx
+rtl
+
+; Updates the inventory with the new item in view slot Y (i.e. at $0ab4,y).
+LR_UpdateInvFromViewSlotY:
+lda $0ab4,y : pha
+cpy.w #4 : bcc .GotTrueInvSlot
+lda.l SramInvActivePageId : beq .GotTrueInvSlot
+  dec : beq .ViewingPage2
+.ViewingPage3:
+tya : clc : adc.w #24 : tay
+bra .GotTrueInvSlot
+.ViewingPage2:
+tya : clc : adc.w #12 : tay
+;bra .GotTrueInvSlot
+.GotTrueInvSlot:
+pla
+phx
+tyx
+sep #$20
+  sta.l SramInvItems,x
+rep #$20
+plx
+rtl
+
+; Silently gives all items in the holding tank.
+LR_GiveQueuedItems:
+phx
+lda #$0000 : tax : tay
+pha
+.NextItem:
+lda.l SramInvHoldingTank,x : and #$00ff : beq ..Given
+  tay
+  sep #$20
+    lda #$00 : sta.l SramInvHoldingTank,x
+  rep #$20
+  lda $03,s : tax
+  tya
+  jsl LR_GiveNormalItemA8OrSec
+..Given:
+pla : inc : cmp #$0100 : bcs .Done
+  tax
+  pha
+  bra .NextItem
+.Done:
+plx
+rtl
+endif
+
 EMonsterDeathDoorOrItem:
 if !SettingOrbRando == 0
 lda $7f0024,x : jsl LR_SetMonsterItemFlagA
@@ -1421,6 +1743,10 @@ jsl LR_SecIfThisMapIsDark : bcc +
   plx
   cop #$9C : dl EDarkRoomSpotlightManager : dw $3000
 +:
+endif
+if !SettingInfiniteInventory == 1
+jsl LR_GiveQueuedItems
+jsl LR_UpdateItemViewFull
 endif
 lda #$1000 : tsb $12
 rtl
@@ -2598,7 +2924,7 @@ LR_SecIfAtKaraLocation:
 {
 phx
 lda.l Config_KaraLocation : dec : tax
-lda.l .LutLocMaps,x : and #$00ff : cmp $0644 : bne .ClcAndReturn
+lda.l .LutLocMaps,x : and #$00ff : cmp $0644 : bne .WrongMap
 txa : asl : tax
 lda.l .LutLocPointers,x : dec
   plx
@@ -2621,6 +2947,9 @@ cop #$45 : db $1a,$10,$1c,$12 : dw .SecAndReturn
 .ClcAndReturn:
 clc
 rtl
+.WrongMap:
+plx
+bra .ClcAndReturn
 .SecAndReturn:
 sec
 rtl
@@ -2634,7 +2963,59 @@ dw .InKres
 dw .InAnkr
 }
 
+if !SettingInfiniteInventory == 1
+; Creator must write the new page ID to $26, to avoid a race condition.
+; By default, the item holes will flash white. To skip the flash, write 0 to $24.
+EInvPagePaletteWriter:
+phx
+ldx #$0000
+-:
+lda.l $7f0a40,x : sta $7f0a60,x
+inx : inx
+cpx #$0020 : bcc -
+plx
+lda $24 : beq +
+  lda.l 0+APaleInvPageFlash : sta $7f0a66
+  lda.l 2+APaleInvPageFlash : sta $7f0a68
+  lda.l 4+APaleInvPageFlash : sta $7f0a6a
+  cop #$DA : db $02
++:
+phx
+lda $26 : asl : pha
+  asl : clc : adc $01,s : sta $01,s
+pla : tax
+lda.l 0+APaleInvAnchor,x : sta $7f0a66
+lda.l 2+APaleInvAnchor,x : sta $7f0a68
+lda.l 4+APaleInvAnchor,x : sta $7f0a6a
+plx
+cop #$E0
 
+
+LR_DecOrClearItemA:
+{
+php
+phx
+tax
+jsl LR_DecStackForItemAReturningCountOrSec : cmp #$0000 : bne .Done
+sep #$20
+txa
+ldx #$0000
+.CheckNextInvSlot:
+cmp.l SramInvItems,x : beq .FoundItem
+  inx : cpx.w #(SramInvEndOfList-SramInvItems) : bne .CheckNextInvSlot
+  bra .Done
+.FoundItem:
+lda #$00 : sta.l SramInvItems,x
+rep #$20
+txy
+jsl LR_UpdateItemViewForSlotY
+.Done:
+plx
+plp
+rtl
+}
+
+endif
 
 
 

@@ -1898,11 +1898,14 @@ db "Hieroglyph",$00
 .Aura:
 db "Aura",$00
 .LolasLetter:
-db "Lola's Letter",$00
+db "Lola's",$11
+db "_Letter",$00
 .FathersJournal:
-db "Father's Journal",$00
+db "Father's",$11
+db "_Journal",$00
 .CrystalRing:
-db "Crystal Ring",$00
+db "Crystal",$11
+db "_Ring",$00
 .Apple:
 db "Red",$11
 db "_Apple",$00
@@ -2015,7 +2018,11 @@ dw .MysticStatue8
 .Blank37:
 db $00
 .RedJewel:
-db "Red Jewel",$00
+db "Red Jewel"
+if !SettingInfiniteInventory == 1
+db $04 : dl TextInvYouHaveCountRedJewelsInclude : dw $0bfa
+endif
+db $00
 .PrisonKey:
 db "Prison Key",$00
 .IncaStatueA:
@@ -2023,7 +2030,9 @@ db "Inca Statue A",$00
 .IncaStatueB:
 db "Inca Statue B",$00
 .Herb:
-db "Herb",$00
+db "Herb"
+db $04 : dl TextInvYouHaveCountHerbsInclude : dw $0bfa
+db $00
 .DiamondBlock:
 db "Diamond Block",$00
 .WindMelody:
@@ -2039,7 +2048,11 @@ db "Mine Key B",$00
 .MemoryMelody:
 db "Memory Melody",$00
 .CrystalBall:
-db "Crystal Ball",$00
+db "Crystal Ball"
+if !SettingInfiniteInventory == 1
+db $04 : dl TextInvYouHaveCountCrystalBallsInclude : dw $0bfa
+endif
+db $00
 .MineElevatorKey:
 db "Elevator Key",$00
 .MuPalaceKey:
@@ -2047,9 +2060,22 @@ db "Mu Palace Key",$00
 .PurifyStone:
 db "Purification Stone",$00
 .HopeStatue:
+if !SettingInfiniteInventory == 1
+db "Statue"
+db $04 : dl TextInvYouHaveCountHopeStatuesInclude : dw $0bfa
+db "of Hope ("
+db $05 : db 1 : dw $0bec
+db ")"
+db $00
+else
 db "Statue of Hope",$00
+endif
 .RamaStatue:
-db "Rama Statue",$00
+db "Rama Statue"
+if !SettingInfiniteInventory == 1
+db $04 : dl TextInvYouHaveCountRamaStatuesInclude : dw $0bfa
+endif
+db $00
 .MagicDust:
 db "Magic Dust",$00
 .BlueJournal:
@@ -2063,7 +2089,13 @@ db "Will",$00
 .Teapot:
 db "Teapot",$00
 .MushroomDrops:
-db "Mushroom Drops",$00
+db "Mushroom Drops"
+if !SettingInfiniteInventory == 1
+db " ("
+db $05 : db 1 : dw $0bf0
+db ")"
+endif
+db $00
 .BlackGlasses:
 db "Black Glasses",$00
 .GorgonFlower:
@@ -2391,7 +2423,7 @@ db $03 : db $14
 db $04 : dl $81E94C : dw $0B26   ; Draws "B" or "Y" based on controller setting.
 db $03 : db $00 
 db " in-game to use",$0d
-db "an equipped item."
+db "equipped item."
 db $00 
 endif
 warnpc $81e94c
@@ -2811,9 +2843,34 @@ lda $0ade    ; Instead of lda #$0001, doubles jump-slash damage
 endif
 
 
+org $82e402
+if !SettingInfiniteInventory == 1
+cop #$C2
+jsr SR_InvInitOverflow
+endif
+
+org $82e487
+; Add setup when an item is pointed at to draw its counter correctly.
+jsr SR_InvSetupPointedItem
+nop : nop : nop : nop : nop : nop : nop : nop
+
+org $82e50b
+; When the pick-item submenu is left, restore the page counter.
+jsr SR_InvCleanupPointedItem
+nop : nop : nop
+
+org $82e64e
+jsr SR_FixInvHandAfterOrdering
+nop : nop : nop
+
 org $82e6bd
 jsr SR_ClcIfItemAIsDroppable   ; replacing a call to this routine with a call to my customized version
 
+org $82e6da
+; Replacing the straightforward ldy $22 : lda $0ab4,y : and #$ff00 : sta $0ab4,y .
+ldy $22
+jsr SR_InvClearItemInViewSlotY
+nop : nop : nop : nop : nop : nop
 
 org $82e719
 EInvScreenManager_CondMenu:
@@ -2856,9 +2913,147 @@ nop : nop
 ; The rest of this code goes as usual.
 
 
+if !SettingInfiniteInventory == 1
+; Called after an item is moved or removed
+org $82e9ed
+SR_RefreshItemSlotIndexA:
+jsr SR_UpdateInvFromViewSlotA    ; Replacing sta $000e
+endif
+
+if !SettingInfiniteInventory == 1
+; Part of the inv screen input handler.
+org $82ec6a
+cop #$40 : dw $6000, $ecbe    ; X button no longer exits the inv screen
+cop #$40 : dw $0040, EInvScreenManager_MaybeChangeInvPage    ; New
+lda $1c
+  inc $1c
+  bit #$000f : bne +
+    jsr SR_InvToggleMainCursorState   ; For space reasons, moved into a separate routine
++:
+clc
+rts
+warnpc $82ec8a
+endif
+
+if !SettingInfiniteInventory == 1
+; In LR_OpenInventoryScreen, a few bytes are optimized out to give holding tank items.
+org $82ed44
+stz $2123
+stz $2125
+stz $2128
+stz $212a
+jsl LR_GiveQueuedItems
+sep #$20
+lda $0a1f : and #$7f : sta $0a1f
+bra $06
+endif
+
+
 
 org $82f08c
 ; Beginning of bank $82 free space.
+
+if !SettingInfiniteInventory == 1
+SR_UpdateInvFromViewSlotA:
+pha
+tay
+jsl LR_UpdateInvFromViewSlotY
+pla : sta $000e
+rts
+
+EInvScreenManager_MaybeChangeInvPage:
+lda #$0040 : tsb $0658    ; Mark button as recently pressed, so it's not detected for a few frames
+lda $0afa : cmp #$0003 : bne +    ; Only when the inventory is in view
+  clc
+  rts
++:
+jsr SR_CycleInventoryPage
+cop #$BD : dl $81E919   ; Re-draw the text
+cop #$06 : db $0D
+clc
+rts
+
+SR_CycleInventoryPage:
+lda $7f0010,x : tay   ; This is slot 0; need to advance Y to slot 4
+lda $0006,y : tay
+lda $0006,y : tay
+lda $0006,y : tay
+lda $0006,y : tay
+lda.l SramInvActivePageId : inc : cmp #$0003 : bcc +
+  lda #$0000
++:
+sta.l SramInvActivePageId
+asl : asl : pha
+  asl : clc : adc $01,s : sta $01,s
+pla : tax
+; Now X = 12*ActivePageNumber, Y = ActorID of slot 4; refresh and update the 12 slots
+lda.w #12 : sta $000e
+-:
+dec $000e : bmi .Done
+lda #$e8cd : sta $0000,y
+lda #$0000 : sta $0008,y
+  sta $002a,y
+sep #$20
+  lda.l SramInvPages,x : sta $0028,y
+rep #$20
+lda $0006,y : tay
+inx
+bra -
+.Done:
+tdc : tax
+jsl LR_UpdateItemViewFull
+lda $0ac4 : cmp #$0004 : bcc +
+  ; Unequip the equipped item if it was on slots 4-15
+  lda #$ffff : sta $0ac4
+    sta $1a
+  stz $0ac6
+  jsr $ea73   ; Remove the item picker hand
++:
+cop #$A5 : dl EInvPagePaletteWriter : db 0,0 : dw $2800
+lda.l SramInvActivePageId : sta $0026,y
+  inc : sta $0bfa
+rts
+
+SR_InvInitOverflow:
+cop #$A5 : dl EInvPagePaletteWriter : db 0,0 : dw $2800
+lda.l SramInvActivePageId : sta $0026,y
+  inc : sta $0bfa
+lda #$0000 : sta $0024,y
+stz $0afa
+rts
+endif
+
+SR_InvClearItemInViewSlotY:
+-:
+lda $0ab4,y : and #$00ff : jsl LR_DecStackForItemAReturningCountOrSec : cmp #$0000 : bne -
+lda $0ab4,y : and #$ff00 : sta $0ab4,y
+if !SettingInfiniteInventory == 1
+jsl LR_UpdateInvFromViewSlotY
+endif
+rts
+
+SR_FixInvHandAfterOrdering:
+lda $0ac4 : bmi +    ; If nothing was selected, there's no bug
+  sta $1a
+  tay
+  lda $0ab4,y : and #$00ff : cmp $0ac6 : beq ++
+    ; If the item in our equipped slot changed, unequip whatever it is.
+    lda #$ffff : sta $0ac4
+      sta $1a
+    stz $0ac6
+++:
+jsr $ea73
++:
+lda #$4040 : tsb $0658
+rts
+
+SR_InvToggleMainCursorState:
+lda $1c : bit #$0010 : bne +
+  jsr $ecce
+  rts
++:
+jsr $ece8
+rts
 
 SR_DrawInvScreenTextForDsWarpState:
 cop #$D1 : dw $09c4 : db $01 : dw .YesWarp
@@ -3875,45 +4070,21 @@ lda.l Config_Dungeon5Required : bne .NoDropSpecial
 bra .CanDropSpecial
 }
 
-SR_CycleInventoryPage:
-lda $7f0010,x : tay   ; This is slot 0; need to advance Y to slot 4
-lda $0006,y : tay
-lda $0006,y : tay
-lda $0006,y : tay
-lda $0006,y : tay
-lda.l !SramInvActivePageAddr : inc : cmp #$0003 : bcc +
-  lda #$0000
-+:
-sta.l !SramInvActivePageAddr
-asl : asl : pha
-  asl : clc : adc $01,s : sta $01,s
-pla : tax
-; Now X = 12*ActivePageNumber, Y = ActorID of slot 4; refresh and update the 12 slots
-lda.w #12 : sta $000e
--:
-dec $000e : bmi .Done
-lda #$e8cd : sta $0000,y
-lda #$0000 : sta $0008,y
-  sta $002a,y
-sep #$20
-lda.l !SramInvPagesAddr,x : sta $0028,y
-  sta $0ab8,x
-rep #$20
-lda $0006,y : tay
-inx
-bra -
-.Done:
-tdc : tax
-lda $0ac4 : cmp #$0004 : bcc +
-  ; Unequip the equipped item if it was on slots 4-15
-  lda #$ffff : sta $0ac4
-    sta $1a
-  stz $0ac6
+SR_InvSetupPointedItem:
+ldy $1a
+lda $0ab4,y : and #$00ff : sta $0ae8
+stz $0bfa
+jsl LR_GetItemAStackedCountBcd : cmp.w #2 : bcc +   ; Count=1 -> $0bfa=0
+  inc $0bfa
+  cmp.w #10 : bcc +    ; 1<Count<10 -> $0bfa=1
+    inc $0bfa
 +:
 rts
 
-
-
+SR_InvCleanupPointedItem:
+lda.l SramInvActivePageId : inc : sta $0bfa
+lda #$c040 : tsb $0658
+rts
 }
 
 
@@ -4002,12 +4173,7 @@ cop #$BE : db $02,$01 : dw .UseOptions
 .ChooseAccept:
 cop #$BF : dw ..Text
 jsr SR_GetHerbHealAmount : sta $0b22    ; Instead of lda #$0008, uses difficulty level to set heal amount.
-sed
-  lda $0aaa : sec : sbc #$0001 : sta $0aaa
-cld
-bne +
-  jsr SR_RemoveHeldItem
-+:
+jsr SR_RemoveHeldItem
 rts
 ..Text:
 db $cd : dl TextUsedHerbOverflow
@@ -4400,6 +4566,17 @@ rts
 db $D3
 db $cd : dl TextUseApple
 db $C0
+
+
+org $839fb2
+; If the held item is a stack, removes one from the stack.
+SR_RemoveHeldItem:
+ldy $0ac4
+lda $0ab4,y : and #$00ff : jsl LR_DecStackForItemAReturningCountOrSec : cmp #$0000 : bne +
+  jsr SR_FullClearHeldItem
++:
+rts
+warnpc $839fca
 
 
 org $83a068
@@ -4914,10 +5091,26 @@ endif
 
 
 org $83ef97
-; In case I've missed any explicit "jsl $83ef97" in the code.
-LR_GiveItemAnchor:
+LR_GiveItemAnchor:   ; Utility for cop #$D4 and other callers. Redirects to my custom handler.
 jml LR_GiveNormalItemA8OrSec
 warnpc $83f08d
+org $83f08d
+LR_RemoveItemA:    ; Utility for cop #$D5 and other callers. If the item is stacked, only removes one.
+if !SettingInfiniteInventory == 1
+jml LR_DecOrClearItemA
+endif
+warnpc $83f0b3
+org $83f0b3
+LR_ClcIfPlayerHasItemA:   ; Utility for cop #$D6 and other callers.
+if !SettingInfiniteInventory == 1
+jsr SR_ClcIfInfiniteInventoryHasItemA : bcc .HasItem
+sec
+rtl
+.HasItem:
+clc
+rtl
+endif
+warnpc $83f0ca
 
 
 org $83f177
@@ -5063,6 +5256,36 @@ sec
 rts
 .ClcAndReturn:
 clc
+rts
+
+SR_ClcIfInfiniteInventoryHasItemA:
+php
+phx
+sep #$20
+ldx #$0000
+.CheckNextInvSlot:
+  cmp.l SramInvItems,x : beq .HasItem
+  inx : cpx.w #(SramInvEndOfList-SramInvItems) : bne .CheckNextInvSlot
+.NoItem:
+plx
+plp
+sec
+rts
+.HasItem:
+plx
+plp
+clc
+rts
+
+SR_FullClearHeldItem:
+ldy $0ac4
+sep #$20
+  lda #$00 : sta $0AB4,y
+rep #$20
+if !SettingInfiniteInventory == 1
+jsl LR_UpdateInvFromViewSlotY
+endif
+jsl LR_DoUnequip
 rts
 
 }
@@ -8222,6 +8445,12 @@ cop #$BF : dw EJeweler_Text_GiveZeroJewels
 rtl
 ...DoGiveJewels:
 sed
+if !SettingInfiniteInventory == 1
+lda $0bf4 : clc : adc $0ab0 : sta $0ab0
+stz $0bf4
+cop #$D5 : db $01
+;bra ...DoneGiving
+else
 sep #$20
 ldy #$0000
 -:
@@ -8233,19 +8462,20 @@ lda $0ab4,y
 iny : cpy #$0010 : bne -
 bra ...DoneGiving
 ....IsThree:
-jsr SR_JewelerDecHP
-jsr SR_JewelerDecHP
+jsr SR_JewelerMaybeDecHP
+jsr SR_JewelerMaybeDecHP
 lda #$03 : bra +
 ....IsTwo:
-jsr SR_JewelerDecHP
+jsr SR_JewelerMaybeDecHP
 lda #$02 : bra +
 ....IsOne:
 lda #$01 ;: bra +
 +:
 clc : adc $0ab0 : sta $0ab0
-jsr SR_JewelerDecHP
+jsr SR_JewelerMaybeDecHP
 lda #$00 : sta $0ab4,y
 bra --
+endif
 ...DoneGiving:
 rep #$20
 cld
@@ -8389,7 +8619,7 @@ db $ce
 db $cd : dl TextJewelerSeeInventory
 db $c0
 
-SR_JewelerDecHP:
+SR_JewelerMaybeDecHP:
 if !SettingRedJewelMadness == 1
 php
 rep #$20
@@ -9672,10 +9902,6 @@ jsl LR_MarkRoomRewardsObtainedByDifficulty
 lda.l Config_SettingFluteOpt : bne +
   cop #$CC : db $13   ; Set "has Flute" flag if starting with flute
 +:
-if !SettingDebug == 1
-lda #$0015 : sta $0ab4
-sta $0ac6
-endif
 if !SettingInfiniteInventory == 1
 ldx #$0000
 lda #$0000
@@ -9683,6 +9909,10 @@ lda #$0000
 sta $306400,x
 inx : inx : cpx #$0400 : bcc -
 tdc : tax
+endif
+if !SettingDebug == 1
+lda #$0015 : sta $0ac6
+  jsl LR_GiveNormalItemA8OrSec
 endif
 cop #$E0
 }
@@ -10691,6 +10921,22 @@ incbin "ATlMpMuSWWaterHighSub_Tilemap1_comp.bin"
 ATlMpMuSEWaterHighSub:
 db 4,4
 incbin "ATlMpMuSEWaterHighSub_Tilemap1_comp.bin"
+
+if !SettingInfiniteInventory == 1
+ATlMpSpecInvBg:
+dw 2,2
+incbin "ATlMpSpecInvBg_comp.bin"
+
+APaleInvAnchor:
+APaleInvPage1:
+dw $2810, $4070, $50f6
+APaleInvPage2:
+dw $0d4e, $15ae, $1a34
+APaleInvPage3:
+dw $1580, $2183, $2a07
+APaleInvPageFlash:
+dw $318c, $39ce, $5294
+endif
 
 warnpc $e08000
 

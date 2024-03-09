@@ -236,7 +236,8 @@ def generate_ROM():
             printlevel = get_printlevel(),
             break_on_error = break_on_error.get(),
             break_on_init = break_on_init.get(),
-            ingame_debug = ingame_debug.get()
+            ingame_debug = ingame_debug.get(),
+            infinite_inventory = infinite_inventory.get()
             )
 
         base_filename = generate_filename(settings, "")
@@ -476,6 +477,9 @@ ohko.set(0)
 red_jewel_madness = tkinter.IntVar(root)
 red_jewel_madness.set(0)
 
+infinite_inventory = tkinter.IntVar(root)
+infinite_inventory.set(0)
+
 glitches = tkinter.IntVar(root)
 glitches.set(0)
 
@@ -577,10 +581,10 @@ ohko_checkbox = tkinter.Checkbutton(variants_frame, variable=ohko, onvalue=1, of
 #variants_col_split_label = tkinter.Label(variants_frame, text=" ").grid(row=0, column=2)
 rjm_label = tkinter.Label(variants_frame, text="Red Jewel Madness:").grid(row=0, column=3, sticky=tkinter.E)
 rjm_checkbox = tkinter.Checkbutton(variants_frame, variable=red_jewel_madness, onvalue=1, offvalue=0, command=checkbox_clear_ohko).grid(row=0, column=4)
-#fluteless_label = tkinter.Label(variants_frame, text="Fluteless:").grid(row=1, column=0, sticky=tkinter.E)
-#fluteless_checkbox = tkinter.Checkbutton(variants_frame, variable=fluteless, onvalue=1, offvalue=0).grid(row=1, column=1)
-z3_mode_label = tkinter.Label(variants_frame, text="Z3 Mode:").grid(row=1, column=3, sticky=tkinter.E)
-z3_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=z3_mode, onvalue=1, offvalue=0).grid(row=1, column=4)
+z3_mode_label = tkinter.Label(variants_frame, text="Z3 Mode:").grid(row=1, column=0, sticky=tkinter.E)
+z3_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=z3_mode, onvalue=1, offvalue=0).grid(row=1, column=1)
+inf_inv_label = tkinter.Label(variants_frame, text="Infinite Inventory:").grid(row=1, column=3, sticky=tkinter.E)
+inf_inv_checkbox = tkinter.Checkbutton(variants_frame, variable=infinite_inventory, onvalue=1, offvalue=0).grid(row=1, column=4)
 glitches_label = tkinter.Label(variants_frame, text="Glitches:").grid(row=2, column=0, sticky=tkinter.E)
 glitches_checkbox = tkinter.Checkbutton(variants_frame, variable=glitches, onvalue=1, offvalue=0).grid(row=2, column=1)
 firebird_label = tkinter.Label(variants_frame, text="Early Firebird:").grid(row=2, column=3, sticky=tkinter.E)

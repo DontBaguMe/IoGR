@@ -42,7 +42,8 @@ class RandomizerData:
                  printlevel: PrintLevel = PrintLevel.SILENT,
                  break_on_error: bool = False,
                  break_on_init: bool = False,
-                 ingame_debug: bool = False
+                 ingame_debug: bool = False,
+                 infinite_inventory: bool = False
                  ):
         self.seed = seed
         self.difficulty = difficulty
@@ -73,3 +74,4 @@ class RandomizerData:
         self.break_on_error = break_on_error
         self.break_on_init = break_on_init
         self.ingame_debug = ingame_debug
+        self.infinite_inventory = infinite_inventory

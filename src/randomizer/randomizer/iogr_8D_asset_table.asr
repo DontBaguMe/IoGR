@@ -2662,7 +2662,11 @@ db $04 : db $00,$80,$80 : dl $DE1F35
 db $14 : db $11
 db $04 : db $00,$70,$10 : dl $DE6A53
 db $03 : db $00,$10,$00 : dl $9D8000 : db $00
+if !SettingInfiniteInventory == 1
+db $17 : db $80 : dl ATlMpSpecInvBg
+else
 db $17 : db $80 : dl $d454e1
+endif
 db $12
 db $00
 

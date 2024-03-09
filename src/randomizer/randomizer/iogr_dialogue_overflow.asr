@@ -535,7 +535,11 @@ db $D3,$D2,$00,$D5,$00,$42,$8E,$8D,$A4,$A2,$88,$81,$A5,$A4,$8E,$A2,$A3,$AC,$80,$
 
 table "table_invtext.txt",rtl
 TextInvItemMenuHoverFragment:
-db "Your stuff.",$0d
+db "Your stuff, page"
+db $03 : db $14
+db $0e : dw $0bfa
+db $03 : db $00
+db ".",$0d
 db $03 : db $14
 db "X"
 db $03 : db $00
@@ -589,6 +593,80 @@ db "um ACTUALLY it's an",$0d
 db "Herbal Infusion Pot",$0d
 db "since technically--"
 db $00
+
+TextInvYouHaveCountRedJewelsInclude:
+.Pointers:
+dw .OnlyOne
+dw .SingleDigitCount
+dw .DoubleDigitCount
+.SingleDigitCount:
+db "s"
+.OnlyOne:
+db " ("
+db $05 : db 1 : dw $0bf4
+db ")"
+db $00
+.DoubleDigitCount:
+db "s ("
+db $05 : db 2 : dw $0bf4
+db ")"
+db $00
+
+TextInvYouHaveCountHerbsInclude:
+.Pointers:
+dw .OnlyOne
+dw .SingleDigitCount
+dw .DoubleDigitCount
+.SingleDigitCount:
+db "s"
+.OnlyOne:
+db " ("
+db $05 : db 1 : dw $0aaa
+db ")"
+db $00
+.DoubleDigitCount:
+db "s ("
+db $05 : db 2 : dw $0aaa
+db ")"
+db $00
+
+TextInvYouHaveCountCrystalBallsInclude:
+.Pointers:
+dw .OnlyOne
+dw .SingleDigitCount
+dw .SingleDigitCount
+.SingleDigitCount:
+db "s"
+.OnlyOne:
+db " ("
+db $05 : db 1 : dw $0bf2
+db ")"
+db $00
+
+TextInvYouHaveCountRamaStatuesInclude:
+.Pointers:
+dw .OnlyOne
+dw .SingleDigitCount
+dw .SingleDigitCount
+.SingleDigitCount:
+db "s"
+.OnlyOne:
+db " ("
+db $05 : db 1 : dw $0bee
+db ")"
+db $00
+
+TextInvYouHaveCountHopeStatuesInclude:
+.Pointers:
+dw .OnlyOne
+dw .SingleDigitCount
+dw .SingleDigitCount
+.SingleDigitCount:
+db "s"
+.OnlyOne:
+db " "
+db $00
+
 table "table_dialogue.txt",rtl
 
 

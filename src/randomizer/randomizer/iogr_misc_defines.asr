@@ -16,7 +16,6 @@ EPlayer_DoAuraBarrier = $82b97f
 EPlayer_DoPsychoDash = $82bea0
 EPlayer_DoSpinDash = $82c0a9
 LR_ParseDialogueScriptAtY = $82f048
-SR_RemoveHeldItem = $839FB2
 LR_PlaceSelfBetween04And06 = $8aa41c
 }
 
@@ -407,7 +406,19 @@ LR_PlaceSelfBetween04And06 = $8aa41c
 ; SRAM and Multiworld
 {
 !SettingInfiniteInventory ?= 0
-!SramInvActivePageAddr = $306400
-!SramInvTopLineAddr #= 2+!SramInvActivePageAddr
-!SramInvPagesAddr #= 4+!SramInvTopLineAddr
+
+org $306400
+SramInvHoldingTank:   ; Items from other worlds; MW writing directly to the inventory is unsafe
+skip $100
+SramInvActivePageId:  ; ID of the current active inventory page
+skip 2
+SramInvItems:         ; Aliased start of the item list, which begins immediately with the top line
+SramInvTopLine:       ; First four inventory slots, which aren't paginated
+skip 4
+SramInvPages:         ; Inventory pages, 12 bytes each
+skip 12
+skip 12
+skip 12
+SramInvEndOfList:     ; End of item list, so we know where to stop when scanning
+
 }

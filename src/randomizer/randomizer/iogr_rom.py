@@ -158,6 +158,7 @@ def generate_filename(settings: RandomizerData, extension: str):
         filename += getSwitch(settings.allow_glitches, "g")
         filename += getSwitch(settings.ohko, "1")
         filename += getSwitch(settings.z3, "z")
+        filename += getSwitch(settings.infinite_inventory, "i")
         filename += getFluteOpt(settings.flute)
         filename += getSwitch(settings.red_jewel_madness, "-rjm")
     filename += "_" + str(settings.seed)
@@ -793,6 +794,7 @@ class Randomizer:
         ##########################################################################
         romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
         
+        self.asar_defines["SettingInfiniteInventory"] = 1 if settings.infinite_inventory else 0
         self.asar_defines["SettingEarlyFirebird"] = 1 if settings.firebird else 0
         self.asar_defines["SettingRedJewelHunt"] = 1 if settings.goal.value is Goal.RED_JEWEL_HUNT.value else 0
         self.asar_defines["SettingRedJewelMadness"] = 1 if settings.red_jewel_madness else 0
