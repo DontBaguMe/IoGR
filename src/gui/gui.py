@@ -249,7 +249,115 @@ def generate_ROM():
         bsdiff_filename = base_filename + "_bspatch.bsdiff"
         spoiler_filename = base_filename + "_spoiler.json"
         randomizer = Randomizer(rompath)
-        if do_profile.get():
+        if do_tests_toggle.get():
+            profiling_path = os.path.dirname(rompath) + os.path.sep + "iogr" + os.path.sep + base_filename + os.path.sep
+            if not os.path.exists(os.path.dirname(profiling_path)):
+                os.makedirs(os.path.dirname(profiling_path))
+            test_number = 1
+            while test_number <= 40:
+                settings.seed = random.randint(0, 2**32-1)
+                settings.town_shuffle = (test_number % 2)
+                settings.dungeon_shuffle = (test_number % 4)//2
+                if not settings.town_shuffle and not settings.dungeon_shuffle:
+                    settings.coupled_exits = 1
+                else:
+                    settings.coupled_exits = (test_number % 8)//4
+                settings.firebird = (settings.seed & 0b1)
+                settings.overworld_shuffle = (settings.seed & 0b10) >> 1
+                if random.randint(0,1):
+                    settings.ohko = 0
+                    settings.red_jewel_madness = (settings.seed & 0b100) >> 2
+                else:
+                    settings.ohko = (settings.seed & 0b100) >> 2
+                    settings.red_jewel_madness = 0
+                settings.allow_glitches = (settings.seed & 0b1000) >> 3
+                settings.boss_shuffle = (settings.seed & 0b10000) >> 4
+                settings.open_mode = (settings.seed & 0b100000) >> 5
+                settings.z3 = (settings.seed & 0b1000000) >> 6
+                settings.race_mode = (settings.seed & 0b10000000) >> 7
+                settings.ingame_debug = ( (settings.seed >> 8) & 0b1 )
+                settings.infinite_inventory = ( (settings.seed >> 8) & 0b10 ) >> 1
+                d = ( (settings.seed >> 8) & 0b1100 ) >> 2
+                if d == 0:
+                    settings.difficulty = Difficulty.EASY
+                elif d == 1:
+                    settings.difficulty = Difficulty.NORMAL
+                elif d == 2:
+                    settings.difficulty = Difficulty.HARD
+                else:
+                    settings.difficulty = Difficulty.EXTREME
+                s = ( (settings.seed >> 8) & 0b110000 ) >> 4
+                if s == 0:
+                    settings.start_location = StartLocation.SOUTH_CAPE
+                elif s == 1:
+                    settings.start_location = StartLocation.SAFE
+                elif s == 2:
+                    settings.start_location = StartLocation.UNSAFE
+                else:
+                    settings.start_location = StartLocation.FORCED_UNSAFE
+                if ( (settings.seed >> 8) & 0b1000000 ) >> 6:
+                    settings.orb_rando = OrbRando.ORBSANITY
+                else:
+                    settings.orb_rando = OrbRando.NONE
+                c = ( (settings.seed >> 8) & 0b10000000 ) >> 7
+                e = ( (settings.seed >> 16) & 0b111 )
+                if e == 0:
+                    settings.enemizer = Enemizer.LIMITED
+                elif e == 1:
+                    settings.enemizer = Enemizer.BALANCED
+                elif e == 2:
+                    settings.enemizer = Enemizer.FULL
+                elif e == 3:
+                    settings.enemizer = Enemizer.INSANE
+                else:
+                    settings.enemizer = Enemizer.NONE
+                f = ( (settings.seed >> 19) & 0b11 )
+                if f == 0:
+                    settings.flute = FluteOpt.SHUFFLE
+                elif f == 1:
+                    settings.flute = FluteOpt.FLUTELESS
+                else:
+                    settings.flute = FluteOpt.START
+                dr = ( (settings.seed >> 21) & 0b111 )
+                if dr == 0:
+                    settings.darkrooms = DarkRooms.FEWCURSED if c else DarkRooms.FEW
+                elif dr == 1:
+                    settings.darkrooms = DarkRooms.SOMECURSED if c else DarkRooms.SOME
+                elif dr == 2:
+                    settings.darkrooms = DarkRooms.MANYCURSED if c else DarkRooms.MANY
+                elif dr == 3:
+                    settings.darkrooms = DarkRooms.ALLCURSED
+                else:
+                    settings.darkrooms = DarkRooms.NONE
+                l = ( (settings.seed >> 24) & 0b11 )
+                if l == 0:
+                    settings.logic = Logic.CHAOS
+                elif l == 1:
+                    settings.logic = Logic.BEATABLE
+                else:
+                    settings.logic = Logic.COMPLETABLE
+                g = ( (settings.seed >> 26) & 0b111 )
+                if g == 0:
+                    settings.goal = Goal.RED_JEWEL_HUNT
+                else:
+                    g -= 1
+                    settings.goal = Goal.DARK_GAIA
+                    if g < 3:
+                        settings.statue_req = StatueReq.PLAYER_CHOICE
+                    else:
+                        g -= 3
+                        settings.statue_req = StatueReq.GAME_CHOICE
+                    if g == 0:
+                        settings.statues = "2"
+                    elif g == 1:
+                        settings.statues = "6"
+                    else:
+                        settings.statues = "4"
+                patch = randomizer.generate_rom("", settings, profiling_path + "Test" + format(test_number,"02"))
+                test_number += 1
+            tkinter.messagebox.showinfo("Success","Profiling complete; results in ./iogr/"+base_filename+"/")
+            pass
+        elif do_profile.get():
             random.seed(seed_int)
             import cProfile, pstats, io
             profiling_path = os.path.dirname(rompath) + os.path.sep + "iogr" + os.path.sep + base_filename + os.path.sep
@@ -421,6 +529,10 @@ def statues_maybe_change_goal(statuechoice):
     if statues.get() != "0" and goal.get() == "Red Jewel Hunt":
         goal.set("Dark Gaia")
 
+def checkbox_clear_profile():
+    do_profile.set(0)
+def checkbox_clear_tests():
+    do_tests_toggle.set(0)
 
 root = tkinter.Tk()
 root.title("Illusion of Gaia Randomizer (v." + VERSION + ")")
@@ -550,6 +662,8 @@ ingame_debug = tkinter.IntVar(root)
 ingame_debug.set(0)
 gen_patches_toggle = tkinter.IntVar(root)
 gen_patches_toggle.set(0)
+do_tests_toggle = tkinter.IntVar(root)
+do_tests_toggle.set(0)
 
 ROM = tkinter.Entry(mainframe, width="40")
 ROM.grid(row=0, column=1)
@@ -639,10 +753,12 @@ break_on_init_label = tkinter.Label(devtools_frame, text="Break on Init:").grid(
 break_on_init_checkbox = tkinter.Checkbutton(devtools_frame, variable=break_on_init, onvalue=1, offvalue=0).grid(row=1, column=4)
 ingame_debug_label = tkinter.Label(devtools_frame, text="In-Game Debug:").grid(row=2, column=0, sticky=tkinter.E)
 ingame_debug_checkbox = tkinter.Checkbutton(devtools_frame, variable=ingame_debug, onvalue=1, offvalue=0).grid(row=2, column=1)
-do_profile_label = tkinter.Label(devtools_frame, text="Profile:").grid(row=2, column=3, sticky=tkinter.E)
-do_profile_checkbox = tkinter.Checkbutton(devtools_frame, variable=do_profile, onvalue=1, offvalue=0).grid(row=2, column=4)
+do_profile_label = tkinter.Label(devtools_frame, text="Profile these:").grid(row=2, column=3, sticky=tkinter.E)
+do_profile_checkbox = tkinter.Checkbutton(devtools_frame, variable=do_profile, onvalue=1, offvalue=0, command=checkbox_clear_tests).grid(row=2, column=4)
 gen_patches_label = tkinter.Label(devtools_frame, text="Create Patches:").grid(row=3, column=0, sticky=tkinter.E)
 gen_patches_checkbox = tkinter.Checkbutton(devtools_frame, variable=gen_patches_toggle, onvalue=1, offvalue=0).grid(row=3, column=1)
+do_tests_label = tkinter.Label(devtools_frame, text="Profile all:").grid(row=3, column=3, sticky=tkinter.E)
+do_tests_checkbox = tkinter.Checkbutton(devtools_frame, variable=do_tests_toggle, onvalue=1, offvalue=0, command=checkbox_clear_profile).grid(row=3, column=4)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(seed_frame, text='Random Seed', command=generate_seed).pack(side='left')

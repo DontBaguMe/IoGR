@@ -22,7 +22,7 @@ from .models.enums import *
 
 from . import asar
 
-VERSION = "4.7.1"
+VERSION = "4.7.2"
 MAX_RANDO_RETRIES = 100
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 os.add_dll_directory(os.getcwd()+"/src/randomizer/randomizer")    # So python can find asar.dll.
@@ -434,8 +434,14 @@ class Randomizer:
                 self.asar_defines["TextTeacherStatuesString"] += ","
 
         ##########################################################################
-        #                           Determine Boss Order
+        #                           Boss shuffle
         ##########################################################################
+        # Edge cases:
+        # - MQ2 and SA post-defeat lead to the top of Babel
+        # - Babel boss and Mansion boss post-defeat lead to Dao (unless the boss is MQ2 or SA)
+        # - The top of Babel leads to the dungeon of MQ2
+        # - Rama Statues are required by the Mu boss, not by Vamps
+        # - S exit from Vamp statue room returns to the dungeon of Vamps
         boss_order = [*range(1,8)]
         if settings.boss_shuffle:
             non_will_bosses = [5]               # Never forced to play Mummy Queen as Will
@@ -670,6 +676,8 @@ class Randomizer:
             if profile_base_filepath != "":
                 val_messages = self.w.validate()
                 f = open(profile_base_filepath + "_" + format(self.seed_adj,"02") + ".txt","w")
+                f.write(generate_filename(settings, ""))
+                f.write("\n\n")
                 f.write("Error log:\n")
                 if not self.w.errorlog:
                     f.write("No errors\n")

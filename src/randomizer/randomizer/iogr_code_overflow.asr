@@ -2978,7 +2978,7 @@ lda $24 : beq +
   lda.l 0+APaleInvPageFlash : sta $7f0a66
   lda.l 2+APaleInvPageFlash : sta $7f0a68
   lda.l 4+APaleInvPageFlash : sta $7f0a6a
-  cop #$DA : db $02
+  cop #$DA : db $05
 +:
 phx
 lda $26 : asl : pha

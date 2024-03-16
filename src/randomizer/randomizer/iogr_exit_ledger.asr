@@ -25,7 +25,7 @@ endif
 !DefaultMapGardenExitString = $4b,$e0,$01,$c0,$02,$03,$00,$44
 !DefaultMapMansionEntranceString = $E9,$30,$03,$d0,$03,$80,$00,$44
 !DefaultMapMansionExitString = $c3,$40,$01,$88,$00,$00,$00,$23
-!DefaultMapBabelWarpString = $C3,$10,$02,$90,$00,$83,$00,$23
+!DefaultMapMansionBossDefeatedWarpString = $C3,$10,$02,$90,$00,$83,$00,$23
 !DefaultMapSolidArmReturnString = $E9,$78,$03,$90,$00,$03,$00,$44
 !DefaultMapBabelDaoWarpString = $c3,$10,$02,$90,$00,$83,$00,$23
 
@@ -810,7 +810,7 @@ endif
 !MapGardenExitString ?= !DefaultMapGardenExitString
 !MapMansionEntranceString ?= !DefaultMapMansionEntranceString
 !MapMansionExitString ?= !DefaultMapMansionExitString
-!MapBabelWarpString ?= !DefaultMapBabelWarpString
+!MapMansionBossDefeatedWarpString ?= !DefaultMapMansionBossDefeatedWarpString
 !MapSolidArmReturnString ?= !DefaultMapSolidArmReturnString
 !MapBabelDaoWarpString ?= !DefaultMapBabelDaoWarpString
 

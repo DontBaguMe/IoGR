@@ -47,7 +47,6 @@ class RandomizerData:
                  ):
         self.seed = seed
         self.difficulty = difficulty
-#        self.level = level
         self.start_location = start_location
         self.goal = goal
         self.statue_req = statue_req
@@ -75,3 +74,8 @@ class RandomizerData:
         self.break_on_init = break_on_init
         self.ingame_debug = ingame_debug
         self.infinite_inventory = infinite_inventory
+        
+        
+        
+        
+        

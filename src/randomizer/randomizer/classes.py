@@ -1316,6 +1316,8 @@ class World:
                 loop_exit2 = loop_island2[1].pop()
                 corridor_exit1 = corridor_island[1].pop()
                 corridor_exit2 = corridor_island[1].pop()
+                corridor_island[2].append(corridor_exit1)
+                corridor_island[2].append(corridor_exit2)
                 self.join_exits(loop_exit1, corridor_exit1)
                 self.join_exits(loop_exit2, corridor_exit2)
                 loop_island1[2].append(loop_exit1)
@@ -1368,38 +1370,6 @@ class World:
             node_to_fix = f_missing_nodes.pop()
             nodes_fixed.append(node_to_fix)
             island_to_fix = next(i for i in skeleton if node_to_fix in i[0])
-            ## Swap a nearby deadend with a redundant deadend DS
-            #nearby_deadend_island = []
-            #redundant_ds_island = []
-            #if len(island_to_fix[2]) == 1:
-            #    # The node missing formful access is already a deadend, so good for swapping
-            #    nearby_deadend_island = island_to_fix
-            #for i in skeleton:
-            #    if nearby_deadend_island and redundant_ds_island:
-            #        break
-            #    if len(i[2]) == 1:   # Deadend
-            #        if not nearby_deadend_island:
-            #            if all(self.graph[n][0] for n in i[0]):   # Visited
-            #                # Must be a true dead end with no progression, not a boss chamber etc.
-            #                joined_node = self.exits[self.exits[i[2][0]][1]][4]
-            #                if all(acc_node in i[0]+[joined_node] for n in i[0] for acc_node in self.graph[n][1]):
-            #                    if all(self.check_access(n, node_to_fix, False, True) for n in i[0]):   # Can reach the target node
-            #                        nearby_deadend_island = i
-            #        elif not redundant_ds_island:
-            #            if any(n in self.graph[n][9] and len(self.graph[n][9]) > 1 for n in i[0]):    # DS node with redundant DS access
-            #                redundant_ds_island = i
-            #if nearby_deadend_island and redundant_ds_island:
-            #    # Swap the islands
-            #    nearby_exit = nearby_deadend_island[2][0]
-            #    nearby_joined_exit = self.exits[self.exits[nearby_exit][0]][2]   # Exit that leads to the area of nearby_exit
-            #    ds_exit = redundant_ds_island[2][0]
-            #    ds_joined_exit = self.exits[self.exits[ds_exit][0]][2]
-            #    self.unjoin_exit(nearby_exit)
-            #    self.unjoin_exit(ds_exit)
-            #    self.join_exits(ds_exit, nearby_joined_exit)
-            #    self.join_exits(nearby_exit, ds_joined_exit)
-            #elif free_ds_corridor_islands:
-            #    # Deadend swap isn't possible, so insert a free DS corridor nearby 
             new_island = free_ds_corridor_islands.pop()
             base_exit = next((x for x in dungeon_exit_keys if self.graph[self.exits[x][3]][0] and not self.graph[self.exits[x][3]][9] and x not in island_to_fix[2] and self.check_access(self.exits[x][3], node_to_fix, False, True)), island_to_fix[2][0])
             new_exit1 = new_island[1].pop()
@@ -2307,22 +2277,19 @@ class World:
                 self.graph[self.logic[y][1]][12].append(y)
                 self.graph[self.logic[y][2]][13].append(y)
         
-        # Boss Shuffle -- boss order is imposed by the World creator, not here
+        # Boss Shuffle -- boss_order[n] is the boss of dungeon n, 0<=n<=6, 1<=boss<=7
         if "Boss Shuffle" in self.variant:
-            boss_entrance_idx = [1,4,7,10,13,16,19]
-            boss_exit_idx = [3,6,9,12,15,18,21]
-            dungeon = 0
+            boss_door_exits = [1,4,7,10,13,16,19]
+            boss_defeat_exits = [3,6,9,12,15,18,21]
             self.verbose("Boss order: "+str(self.boss_order))
-            while dungeon < 7:
-                boss = self.boss_order[dungeon]
-                entrance_old = boss_entrance_idx[dungeon]
-                entrance_new = boss_entrance_idx[boss-1]
-                exit_old = boss_exit_idx[boss-1]
-                exit_new = boss_exit_idx[dungeon]
-                self.link_exits(entrance_old,entrance_new)
-                if self.exits[exit_old][5]:
-                    self.link_exits(exit_old,exit_new)
-                dungeon += 1
+            for dungeon in range(7):
+                this_dungeon_boss = self.boss_order[dungeon]
+                normal_boss_exit = boss_door_exits[dungeon]
+                new_boss_exit = boss_door_exits[this_dungeon_boss-1]
+                self.link_exits(normal_boss_exit, new_boss_exit)
+                normal_defeat_exit = boss_defeat_exits[dungeon]
+                new_defeat_exit = boss_defeat_exits[this_dungeon_boss-1]
+                self.link_exits(normal_defeat_exit, new_defeat_exit)
         
         # Cache the number of item pools, and create empty loc lists for them
         self.item_pool_count = 1 + self.get_max_pool_id()
@@ -2479,9 +2446,9 @@ class World:
             new_nodes = traverse_result[0]
             # A node needs a txform DS if it has an open formful edge, isn't accessible by that form, and the edge goes to an unreached area
             f_missing_nodes = {self.logic[e][1] for e in self.open_edges if not self.edge_formless(e) and not (self.logic[e][3] & self.graph[self.logic[e][1]][4]) and not self.is_accessible(self.logic[e][2])}
-            orig_count_missing_nodes = len(f_missing_nodes)
             if not f_missing_nodes and not ds_items:
                 break    # Success: no DS items left to place and no open formful edges to new areas
+            made_progress = False
             if f_missing_nodes:
                 # Lock txform DSes to cover nodes that need a form and aren't known to be accessible by that form
                 f_nodes_under_ds_node = {}
@@ -2501,6 +2468,7 @@ class World:
                         self.unfill_item(lock_loc)
                     self.item_locations[lock_loc][7] = 0
                     self.info(" Locked for transform: "+str(self.item_locations[lock_loc][6]))
+                    made_progress = True
                     f_missing_nodes = f_missing_nodes.difference(f_nodes_under_ds_node[lock_node])
                     for covered_node in f_nodes_under_ds_node[lock_node]:
                         for ds_node in f_nodes_under_ds_node:
@@ -2509,7 +2477,7 @@ class World:
                     del f_nodes_under_ds_node[lock_node]
                     while any(len(f_nodes_under_ds_node[ds_node]) == 0 for ds_node in f_nodes_under_ds_node):
                         del f_nodes_under_ds_node[next(ds_node for ds_node in f_nodes_under_ds_node if len(f_nodes_under_ds_node[ds_node]) == 0)]
-                if len(f_missing_nodes) == orig_count_missing_nodes and not ds_items:
+                if len(f_missing_nodes) > 0 and not made_progress and not ds_items:
                     # Can't expand formful access, and there are no more items to grant progress, so we're stuck
                     for n in f_missing_nodes:
                         self.warn("No formless access from or formful access to "+str(n)+" "+self.graph[n][5])
@@ -2534,24 +2502,25 @@ class World:
                     items = progression_list.pop(idx)
                     if self.forward_fill(items, item_locations, False, self.logic_mode == "Chaos"):
                         self.info(" Placed "+self.item_pool[items[0]][3]+" for progression")
+                        made_progress = True
                         for item in items:
                             ds_items.remove(item)
-                    elif orig_count_missing_nodes == 0:
-                        # Failed to place any DS items and no formful edges are left that require txform, so we're stuck
-                        self.error("World is unsolvable: no remaining DSes can contain required items")
-                        return False
-                    elif len(f_missing_nodes) == orig_count_missing_nodes:
-                        # Failed to place any DS items and also failed to open any formful edges, so we're stuck
-                        self.error("World is unsolvable: no way to lock a txform DS nor place a DS item")
-                        return False
                 elif len(new_nodes) == 1:   # (the start node always counts as new)
                     # The graph is maxed out and the other DS items aren't progression, so place them randomly
                     if self.forward_fill(ds_items, item_locations, False, self.logic_mode == "Chaos"):
                         self.info(" Placed remaining DS items")
+                        made_progress = True
                         ds_items = []
-                    elif orig_count_missing_nodes == 0:
-                        self.error("World is unsolvable: remaining DSes can't contain remaining DS items")
-                        return False
+            if not made_progress:
+                if len(f_missing_nodes) > 0 and len(ds_items) > 0:
+                    self.error("World is unsolvable: can't lock a txform DS nor place a DS item")
+                elif len(f_missing_nodes) > 0 and len(ds_items) == 0:
+                    self.error("World is unsolvable: can't lock any more DSes")
+                elif len(f_missing_nodes) == 0 and len(ds_items) > 0:
+                    self.error("World is unsolvable: can't place remaining DS items")
+                else:
+                    self.error("Dark Spaces were populated without logging progress")
+                return False
         # Randomly place non-progression items in the open graph
         self.info("Placing junk...")
         non_prog_items = self.list_typed_items(types=[], progress_type=3, shuffled_only=True)
@@ -3388,7 +3357,7 @@ class World:
             129: ["Safe",   0xc3, 0x1f, 0],  # Dao
             130: ["",       0xcc, 0x20, 1],  # Pymd upper
             142: ["Unsafe", 0xcc, 0x21, 1],  # Pymd lower
-            145: ["Forced Unsafe", 0xdf, 0x22, 0],  # Babel lower
+            145: ["Forced Unsafe" if self.difficulty == 3 and self.flute == "Start" else "", 0xdf, 0x22, 0],  # Babel lower
             146: ["Safe",   0xe3, 0x23, 0]   # Babel upper
         }
 
@@ -3420,10 +3389,10 @@ class World:
             12: [1, 1, 0x0c, "Mine Key B", True and not settings.infinite_inventory, 2, 0, 0],
             13: [1, 1, 0x0d, "Memory Melody", True and not settings.infinite_inventory, 1, 0, 0],
             14: [4, 1, 0x0e, "Crystal Ball", True and not settings.infinite_inventory, 2, 0, 0],
-            15: [1, 1, 0x0f, "Elevator Key", True and not settings.infinite_inventory, 1, 0, 0],
+            15: [1, 1, 0x0f, "Elevator Key", True and not settings.infinite_inventory, 1, 0, -1],
             16: [1, 1, 0x10, "Mu Palace Key", True and not settings.infinite_inventory, 1, 0, 0],
             17: [1, 1, 0x11, "Purity Stone", True and not settings.infinite_inventory, 1, 0, 0],
-            18: [2, 1, 0x12, "Hope Statue", True and not settings.infinite_inventory, 1, 0, -2*settings.dungeon_shuffle],
+            18: [2, 1, 0x12, "Hope Statue", True and not settings.infinite_inventory, 1, 0, -2*(1+settings.dungeon_shuffle)],
             19: [2, 1, 0x13, "Rama Statue", bool(3 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
             20: [1, 1, 0x14, "Magic Dust", True and not settings.infinite_inventory, 2, 0, 0],
             21: [0, 1, 0x15, "Blue Journal", False, 3, 0, 0],
@@ -3431,7 +3400,7 @@ class World:
             23: [1, 1, 0x17, "Necklace", True and not settings.infinite_inventory, 1, 0, 0],
             24: [1, 1, 0x18, "Will", True and not settings.infinite_inventory, 1, 0, 0],
             25: [1, 1, 0x19, "Teapot", True and not settings.infinite_inventory, 1, 0, 0],
-            26: [3, 1, 0x1a, "Mushroom Drops", True and not settings.infinite_inventory, 1, 0, 0],
+            26: [3, 1, 0x1a, "Mushroom Drops", True and not settings.infinite_inventory, 1, 0, -1],
             #27: [0, 1, 0x1b, "Bag of Gold", False, 3, 0, 0],  # Not implemented
             28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 3*self.difficulty if settings.darkrooms.value != 0 else 0],
             29: [1, 1, 0x1d, "Gorgon Flower", True and not settings.infinite_inventory, 1, 0, 0],
@@ -3456,7 +3425,7 @@ class World:
             51: [1 if "Z3 Mode" not in self.variant else 2, 1, 0x89, "DEF Upgrade", False, 3, 0, 0],
             52: [2 if "Z3 Mode" not in self.variant else 3, 1, 0x88, "STR Upgrade", False, 3, 0, 0],
             53: [1, 1, 0x8a, "Dash Upgrade", False, 3, 0, 0],
-            54: [2, 1, 0x8b, "Friar Upgrade", False, 3, 0, 1],
+            54: [2, 1, 0x8b, "Friar Upgrade", False, 3, 0, 2],
             55: [0 if "Z3 Mode" not in self.variant else 12, 1, 0x8e, "Heart Piece", False, 3, 0, 0],
 
             # Abilities
@@ -3524,12 +3493,12 @@ class World:
             
             # Orbs that open doors
             700: [1, 5, 0x01, "Open Underground Tunnel Skeleton Cage", False, 3, 0, 0],
-            701: [1, 5, 0x02, "Open Underground Tunnel First Worm Door", False, 1, 0, -3],
-            702: [1, 5, 0x03, "Open Underground Tunnel Second Worm Door", False, 1, 0, -3],
-            703: [1, 5, 0x05, "Open Underground Tunnel West Room Bat Door", False, 1, 0, -3],
-            704: [1, 5, 0x16, "Open Underground Tunnel Hidden Dark Space", False, 1, 0, -3],
-            705: [1, 5, 0x17, "Open Underground Tunnel Red Skeleton Barrier 1", False, 1, 0, -3],
-            706: [1, 5, 0x18, "Open Underground Tunnel Red Skeleton Barrier 2", False, 1, 0, -3],
+            701: [1, 5, 0x02, "Open Underground Tunnel First Worm Door", False, 1, 0, -5],
+            702: [1, 5, 0x03, "Open Underground Tunnel Second Worm Door", False, 1, 0, -5],
+            703: [1, 5, 0x05, "Open Underground Tunnel West Room Bat Door", False, 1, 0, -5],
+            704: [1, 5, 0x16, "Open Underground Tunnel Hidden Dark Space", False, 1, 0, -5],
+            705: [1, 5, 0x17, "Open Underground Tunnel Red Skeleton Barrier 1", False, 1, 0, -5],
+            706: [1, 5, 0x18, "Open Underground Tunnel Red Skeleton Barrier 2", False, 1, 0, -5],
             707: [1, 5, 0x0d, "Open Incan Ruins West Ladder", False, 1, 0, 0],
             708: [1, 5, 0x0e, "Open Incan Ruins Final Ladder", False, 1, 0, 0],
             709: [1, 5, 0x0f, "Open Incan Ruins Entrance Ladder", False, 1, 0, 3*settings.orb_rando.value],
@@ -3537,9 +3506,9 @@ class World:
             711: [1, 5, 0x0b, "Open Incan Ruins East-West Freedan Ramp", False, 1, 0, 0],
             712: [1, 5, 0x0a, "Open Incan Ruins Diamond Block Stairs", False, 3, 0, 0],
             713: [1, 5, 0x10, "Open Incan Ruins Singing Statue Stairs", False, 1, 0, 0],
-            714: [1, 5, 0x34, "Open Diamond Mine Tunnel Middle Fence", False, 1, 0, -2],
-            715: [1, 5, 0x35, "Open Diamond Mine Tunnel South Fence", False, 1, 0, -2],
-            716: [1, 5, 0x36, "Open Diamond Mine Tunnel North Fence", False, 1, 0, -2],
+            714: [1, 5, 0x34, "Open Diamond Mine Tunnel Middle Fence", False, 1, 0, -3],
+            715: [1, 5, 0x35, "Open Diamond Mine Tunnel South Fence", False, 1, 0, -3],
+            716: [1, 5, 0x36, "Open Diamond Mine Tunnel North Fence", False, 1, 0, -3],
             717: [1, 5, 0x22, "Open Diamond Mine Big Room Monster Cage", False, 3, 0, 0],
             718: [1, 5, 0x32, "Open Diamond Mine Hidden Dark Space", False, 1, 0, 0],
             719: [1, 5, 0x23, "Open Diamond Mine Ramp Room Worm Fence", False, 1, 0, 0],
@@ -4675,6 +4644,9 @@ class World:
             732: [0, 480, 714,    0, [[740, 1]], True],             # Mansion east gate with monster orb
             734: [0, 714, 715,    0, [[741, 1]], True],             # Mansion west gate with monster orb
             323: [0, 715, 481,    0, [[62, 1]], True],              # Mansion progression w/ Slider
+            # Solid Arm always warps to top of Babel, but only Extreme difficulty has an edge to include the warp in logic;
+            # this prevents rare scenarios where the traverser would path through Solid Arm to warp to another continent.
+            324: [0, 482, 482 if self.difficulty < 3 else 472, 0, [], False],
 
             # Endgame / Misc
             400: [0, [49,150,270,345,391][self.kara - 1], 490, 0, [[20, 1]], False],   # Rescue Kara w/ Magic Dust
@@ -6634,34 +6606,34 @@ class World:
         #               ] }
         self.deleted_exits = {}
         self.exits = {
-            # Bosses; due to boss shuffle, each needs a return exit and a post-defeat exit, even if artificial
+            # Bosses; due to boss shuffle, all need a return exit and a post-defeat warp
             1:  [ 2, 0, 0,  78,  97, "Map1EExit02", 0, True, 2, 0, "Castoth entrance (in)" ],
             2:  [ 1, 0, 0,   0,   0, "Map29Exit01", 0, True, 2, 0, "Castoth entrance (out)" ],
-            3:  [ 0, 0, 0, 104, 102, "MapShipExitString", 0, True, 2, 0, "Diamond Coast passage (Gold Ship)" ],
+            3:  [ 0, 0, 0, 104, 102, "MapShipExitString", 0, True, 2, 0, "Post-Boss Warp to Diamond Coast" ],
             
             4:  [ 5, 0, 0, 171, 198, "Map4CExit01", 0, True, 4, 0, "Viper entrance (in)" ],
             5:  [ 4, 0, 0,   0,   0, "Map55Exit01", 0, True, 4, 0, "Viper entrance (out)" ],
-            6:  [ 0, 0, 0, 198, 200, "MapViperExitString", 0, True, 4, 0, "Seaside Palace passage (Viper)" ],
+            6:  [ 0, 0, 0, 198, 200, "MapViperExitString", 0, True, 4, 0, "Post-Boss Warp to Sea Palace" ],
             
             7:  [ 8, 0, 0, 241, 243, "MapVampEntranceString", 0, True, 5, 0, "Vampires entrance (in)" ],
             8:  [ 7, 0, 0,   0,   0, "Map67Exit01", 0, True, 5, 0, "Vampires entrance (out)" ],
-            9:  [ 0, 0, 0, 242, 212, "Map66Exit03", 0, True, 5, 0, "Vampires exit" ],
+            9:  [ 0, 0, 0, 242, 240, "Map66Exit03", 0, True, 5, 0, "Post-Boss Warp to Mu" ],  # Treated as warping to pedestals so the traverser doesn't path pedestals->boss->Mu
             
             10: [11, 0, 0, 301, 302, "Map88Exit02", 0, True, 7, 0, "Sand Fanger entrance (in)" ],
             11: [10, 0, 0,   0,   0, "Map8AExit01", 0, True, 7, 0, "Sand Fanger entrance (out)" ],
-            12: [ 0, 0, 0, 303, 290, "Map8AExit02", 0, True, 7, 0, "Sand Fanger exit" ],
+            12: [ 0, 0, 0, 303, 290, "Map8AExit02", 0, True, 7, 0, "Post-Boss Warp to Great Wall" ],
             
             13: [14, 0, 0, 414, 448, "MapMQEntranceString", 0, True, 10, 0, "Mummy Queen entrance (in)" ],
             14: [13, 0, 0,   0,   0, "MapMQReturnString", 0, True, 10, 0, "Mummy Queen entrance (out)" ],
-            15: [ 0, 0, 0, 448, 415, "MapMQExitString", 0, True, 10, 0, "Mummy Queen exit" ],
+            15: [ 0, 0, 0, 448, 415, "MapMQExitString", 0, True, 10, 0, "Post-Boss Warp to Pyramid" ],
 
-            16: [17, 0, 0, 470, 471, "MapE2Exit02", 0, True, 11, 0, "Babel statue boss entrance (in)" ],
-            17: [16, 0, 0,   0,   0, "MapE3Exit01", 0, True, 11, 0, "Babel statue boss entrance (out)" ],
-            18: [ 0, 0, 0, 472, 400, "MapBabelDaoWarpString", 0, True, 11, 0, "Dao passage (Babel)" ],
+            16: [17, 0, 0, 470, 471, "MapE2Exit02", 0, True, 11, 0, "Babel statue boss corridor entrance (in)" ],
+            17: [16, 0, 0,   0,   0, "MapE3Exit01", 0, True, 11, 0, "Babel statue boss corridor entrance (out)" ],
+            18: [ 0, 0, 0, 472, 400, "MapBabelDaoWarpString", 0, True, 11, 0, "Post-Babel Warp to Dao" ],  # Warp effect of talking to the spirit at the top of Dao
 
             19: [20, 0, 0, 481, 482, "MapE9Exit01", 0, True, 12, 0, "Solid Arm entrance (in)" ],
             20: [19, 0, 0,   0,   0, "MapSolidArmReturnString", 0, True, 12, 0, "Solid Arm entrance (out)" ],
-            21: [ 0, 0, 0, 472, 400, "", 0, True, 12, 0, "Solid Arm to Top of Babel" ],
+            21: [ 0, 0, 0, 400, 400, "MapMansionBossDefeatedWarpString", 0, True, 12, 0, "Post-Mansion Warp to Dao"],  # Used if the Mansion boss isn't MQ2 or SA
 
             # Passage Menus
             22: [0, 0, 0, 15,  28, "", 0, False, 0, 0, "Seth: Passage 1 (South Cape)" ],
