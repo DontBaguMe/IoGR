@@ -2289,7 +2289,7 @@ class World:
                 self.link_exits(normal_boss_exit, new_boss_exit)
                 normal_defeat_exit = boss_defeat_exits[dungeon]
                 new_defeat_exit = boss_defeat_exits[this_dungeon_boss-1]
-                self.link_exits(normal_defeat_exit, new_defeat_exit)
+                self.link_exits(new_defeat_exit, normal_defeat_exit)
         
         # Cache the number of item pools, and create empty loc lists for them
         self.item_pool_count = 1 + self.get_max_pool_id()
