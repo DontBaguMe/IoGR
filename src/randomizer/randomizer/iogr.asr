@@ -5,8 +5,10 @@ bank noassume
 
 function BankOf(label) = label>>16
 
-macro MTryGiveItemAndFlag(Item16,Flag)
-  lda.w #<Item16>
+macro MTryGiveItemAndFlag(LocationDefName,Flag)
+  db $a9   ; = lda #
+#Config_<LocationDefName>:
+  dw !{<LocationDefName>}
   jsl LR_GiveAnyItemA16OrSec
   bcs $03
     cop #$CC
@@ -740,6 +742,12 @@ rtl
 
 
 ; custom actor for RJ pickup spots
+macro MTryGiveRedJewelItem(LocationDefName)
+  db $a9   ; = lda #
+#Config_<LocationDefName>:
+  dw !{<LocationDefName>}
+  jsl LR_GiveAnyItemA16OrSec
+endmacro
 db $00 : dw $3000
 ERedJewelSpot:
 {
@@ -760,69 +768,69 @@ cop #$D9 : dw $0000, ..Choices
   dw .Spot00,.Spot01,.Spot02,.Spot03,.Spot04,.Spot05,.Spot06,.Spot07
   dw .Spot08,.Spot09,.Spot0A,.Spot0B,.Spot0C,.Spot0D,.Spot0E,.Spot0F
 .Spot00:
-lda.w #!CapeLancesHouseItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("CapeLancesHouseItem")
 bcs +
 rts
 .Spot01:
-lda.w #!CapeTowerItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("CapeTowerItem")
 bcs +
 rts
 .Spot02:
-lda.w #!EDEndBarrelsItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("EDEndBarrelsItem")
 bcs +
 rts
 .Spot03:
-lda.w #!ItoryLogsItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("ItoryLogsItem")
 bcs +
 rts
 .Spot04:
-lda.w #!DiamondCoastJarItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("DiamondCoastJarItem")
 bcs +
 rts
 .Spot05:
-lda.w #!FrejHotelItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("FrejHotelItem")
 bcs +
 rts
 .Spot06:
-lda.w #!AnglDanceHallItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("AnglDanceHallItem")
 bcs +
 rts
 +:
 bra .InvFull
 .Spot07:
-lda.w #!AnglIshtarSidePotItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("AnglIshtarSidePotItem")
 bcs .InvFull
 rts
 .Spot08:
-lda.w #!WtrmWestJarItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("WtrmWestJarItem")
 bcs .InvFull
 rts
 .Spot09:
-lda.w #!WtrmDesertJarItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("WtrmDesertJarItem")
 bcs .InvFull
 rts
 .Spot0A:
-lda.w #!EuroAlleyItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("EuroAlleyItem")
 bcs .InvFull
 rts
 .Spot0B:
-lda.w #!EuroSlaveRoomBarrelItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("EuroSlaveRoomBarrelItem")
 bcs .InvFull
 rts
 .Spot0C:
-lda.w #!NativesPotItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("NativesPotItem")
 bcs .InvFull
 rts
 .Spot0D:
-lda.w #!DaoGrassItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("DaoGrassItem")
 bcs .InvFull
 rts
 .Spot0E:
-lda.w #!PyramidFoyerItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("PyramidFoyerItem")
 bcs .InvFull
 rts
 .Spot0F:
-lda.w #!BabelPillowItem : jsl LR_GiveAnyItemA16OrSec
+%MTryGiveRedJewelItem("BabelPillowItem")
 bcs .InvFull
 rts
 .GaveItemSuccess:
@@ -1038,6 +1046,7 @@ incsrc "iogr_81_exit_table.asr"
 warnpc $81aade
 org $81aade
 Lut_RoomClearRewards:
+Config_RoomClearRewards:
 {
 db !RoomClearReward00,!RoomClearReward01,!RoomClearReward02,!RoomClearReward03,!RoomClearReward04,!RoomClearReward05,!RoomClearReward06,!RoomClearReward07,!RoomClearReward08,!RoomClearReward09,!RoomClearReward0A,!RoomClearReward0B,!RoomClearReward0C,!RoomClearReward0D,!RoomClearReward0E,!RoomClearReward0F
 db !RoomClearReward10,!RoomClearReward11,!RoomClearReward12,!RoomClearReward13,!RoomClearReward14,!RoomClearReward15,!RoomClearReward16,!RoomClearReward17,!RoomClearReward18,!RoomClearReward19,!RoomClearReward1A,!RoomClearReward1B,!RoomClearReward1C,!RoomClearReward1D,!RoomClearReward1E,!RoomClearReward1F
@@ -1567,61 +1576,161 @@ dw .Nothing    ; Map $FE
 .Nothing:
 db $ff
 .Map0E:
-db $04,$1A : dw !EDSpikeChestItem : db $01 : db $ff
+db $04,$1A
+#Config_EDSpikeChestItem:
+dw !EDSpikeChestItem
+db $01
+db $ff
 .Map10:
-db $07,$08 : dw !EDSmallRoomChestItem : db $02 : db $ff
+db $07,$08
+#Config_EDSmallRoomChestItem:
+dw !EDSmallRoomChestItem
+db $02
+db $ff
 .Map12:
-db $11,$1E : dw !EDEndChestItem : db $03 : db $ff
+db $11,$1E
+#Config_EDEndChestItem:
+dw !EDEndChestItem
+db $03
+db $ff
 .Map1D:
-db $06,$06 : dw !IncaDiamondBlockChestItem : db $04 : db $ff
+db $06,$06
+#Config_IncaDiamondBlockChestItem:
+dw !IncaDiamondBlockChestItem
+db $04
+db $ff
 .Map21:
-db $02,$17 : dw !IncaStatueChestItem : db $05 : db $ff
+db $02,$17
+#Config_IncaStatueChestItem:
+dw !IncaStatueChestItem
+db $05
+db $ff
 .Map26:
-db $10,$1B : dw !IncaMazeChestItem : db $06
-db $08,$1F : dw !IncaWormChestItem : db $07
+db $10,$1B
+#Config_IncaMazeChestItem:
+dw !IncaMazeChestItem
+db $06
+db $08,$1F
+#Config_IncaWormChestItem:
+dw !IncaWormChestItem
+db $07
 db $ff
 .Map2E:
-db $25,$19 : dw $0038 : db $08 : db $ff
+db $25,$19 : dw $0038 : db $08
+db $ff
 .Map3F:
-db $38,$27 : dw !MineChestItem : db $09 : db $ff
+db $38,$27
+#Config_MineChestItem:
+dw !MineChestItem
+db $09
+db $ff
 .Map4D:
-db $39,$31 : dw !SGNEStatueChestItem : db $0A
-db $09,$33 : dw !SGNEWestChestItem : db $0B
-db $34,$05 : dw !SGNENorthChestItem : db $0C
+db $39,$31
+#Config_SGNEStatueChestItem:
+dw !SGNEStatueChestItem
+db $0A
+db $09,$33
+#Config_SGNEWestChestItem:
+dw !SGNEWestChestItem
+db $0B
+db $34,$05
+#Config_SGNENorthChestItem:
+dw !SGNENorthChestItem
+db $0C
 db $ff
 .Map50:
-db $37,$06 : dw !SGSEChestItem : db $0D : db $ff
+db $37,$06
+#Config_SGSEChestItem:
+dw !SGSEChestItem
+db $0D
+db $ff
 .Map51:
-db $03,$2F : dw !SGSWTopChestItem : db $0E : db $ff
+db $03,$2F
+#Config_SGSWTopChestItem:
+dw !SGSWTopChestItem
+db $0E
+db $ff
 .Map52:
-db $07,$08 : dw !SGSWBotChestItem : db $0F : db $ff
+db $07,$08
+#Config_SGSWBotChestItem:
+dw !SGSWBotChestItem
+db $0F
+db $ff
 .Map53:
-db $35,$32 : dw !SGNWTopChestItem : db $10
-db $31,$36 : dw !SGNWBotChestItem : db $11
+db $35,$32
+#Config_SGNWTopChestItem:
+dw !SGNWTopChestItem
+db $10
+db $31,$36
+#Config_SGNWBotChestItem:
+dw !SGNWBotChestItem
+db $11
 db $ff
 .Map5A:
-db $37,$1A : dw !SeaPalSideChestItem : db $12 : db $ff
+db $37,$1A
+#Config_SeaPalSideChestItem:
+dw !SeaPalSideChestItem
+db $12
+db $ff
 .Map5B:
-db $07,$07 : dw !SeaPalTopChestItem : db $13 : db $ff
+db $07,$07
+#Config_SeaPalTopChestItem:
+dw !SeaPalTopChestItem
+db $13
+db $ff
 .Map5C:
-db $09,$17 : dw !SeaPalBotChestItem : db $14 : db $ff
+db $09,$17
+#Config_SeaPalBotChestItem:
+dw !SeaPalBotChestItem
+db $14
+db $ff
 .Map5F:
-db $20,$19 : dw !MuRamaChestNItem : db $15
-db $2F,$27 : dw !MuHopeRoomChestItem : db $16
+db $20,$19
+#Config_MuRamaChestNItem:
+dw !MuRamaChestNItem
+db $15
+db $2F,$27
+#Config_MuHopeRoomChestItem:
+dw !MuHopeRoomChestItem
+db $16
 db $ff
 .Map60:
-db $1E,$18 : dw !MuEmptyChest1Item : db $2E
-db $2D,$1C : dw !MuRamaChestEItem : db $17
+db $1E,$18
+#Config_MuEmptyChest1Item:
+dw !MuEmptyChest1Item
+db $2E
+db $2D,$1C
+#Config_MuRamaChestEItem:
+dw !MuRamaChestEItem
+db $17
 db $ff
 .Map61:
-db $0A,$33 : dw !MuEmptyChest2Item : db $18 : db $ff
+db $0A,$33
+#Config_MuEmptyChest2Item:
+dw !MuEmptyChest2Item
+db $18
+db $ff
 .Map70:
-db $07,$28 : dw !AnglSliderChestItem : db $19 : db $ff
+db $07,$28
+#Config_AnglSliderChestItem:
+dw !AnglSliderChestItem
+db $19
+db $ff
 .Map74:
-db $27,$08 : dw !AnglIshtarWinChestItem : db $1A : db $ff
+db $27,$08
+#Config_AnglIshtarWinChestItem:
+dw !AnglIshtarWinChestItem
+db $1A
+db $ff
 .Map75:
-db $47,$08 : dw !AnglPuzzleChest1Item : db $1B
-db $57,$08 : dw !AnglPuzzleChest2Item : db $1C
+db $47,$08
+#Config_AnglPuzzleChest1Item:
+dw !AnglPuzzleChest1Item
+db $1B
+db $57,$08
+#Config_AnglPuzzleChest2Item:
+dw !AnglPuzzleChest2Item
+db $1C
 db $ff
 }
 warnpc $81B086
@@ -1629,39 +1738,107 @@ warnpc $81B086
 org $81c3c4    ; Due to new 2-byte chest IDs, some chests are moved to this freespace block.
 {
 Lut_Chests_Map83:
-db $1A,$59 : dw !GtWlChest1Item : db $1D : db $ff
+db $1A,$59
+#Config_GtWlChest1Item:
+dw !GtWlChest1Item
+db $1D
+db $ff
 Lut_Chests_Map85:
-db $05,$1A : dw !GtWlChest2Item : db $1E : db $ff
+db $05,$1A
+#Config_GtWlChest2Item:
+dw !GtWlChest2Item
+db $1E
+db $ff
 Lut_Chests_MapA2:
-db $18,$36 : dw !KressChest1Item : db $1F : db $ff
+db $18,$36
+#Config_KressChest1Item:
+dw !KressChest1Item
+db $1F
+db $ff
 Lut_Chests_MapA4:
-db $12,$0B : dw !KressChest2Item : db $20 : db $ff
+db $12,$0B
+#Config_KressChest2Item:
+dw !KressChest2Item
+db $20
+db $ff
 Lut_Chests_MapA6:
-db $05,$08 : dw !KressChest3Item : db $21 : db $ff
+db $05,$08
+#Config_KressChest3Item:
+dw !KressChest3Item
+db $21
+db $ff
 Lut_Chests_MapA7:
-db $22,$10 : dw !KressChest4Item : db $22 : db $ff
+db $22,$10
+#Config_KressChest4Item:
+dw !KressChest4Item
+db $22
+db $ff
 Lut_Chests_MapA9:
-db $0E,$05 : dw !KressChest5Item : db $23 : db $ff
+db $0E,$05
+#Config_KressChest5Item:
+dw !KressChest5Item
+db $23
+db $ff
 Lut_Chests_MapB1:
-db $67,$05 : dw !WatChest1Item : db $24 : db $ff
+db $67,$05
+#Config_WatChest1Item:
+dw !WatChest1Item
+db $24
+db $ff
 Lut_Chests_MapB5:
-db $07,$4E : dw !WatChest2Item : db $25 : db $ff
+db $07,$4E
+#Config_WatChest2Item:
+dw !WatChest2Item
+db $25
+db $ff
 Lut_Chests_MapB9:
-db $07,$06 : dw !WatChest3Item : db $26 : db $ff
+db $07,$06
+#Config_WatChest3Item:
+dw !WatChest3Item
+db $26
+db $ff
 Lut_Chests_MapBB:
-db $11,$20 : dw !WatChest4Item : db $27 : db $ff
+db $11,$20
+#Config_WatChest4Item:
+dw !WatChest4Item
+db $27
+db $ff
 Lut_Chests_MapBE:
-db $05,$16 : dw !WatChest5Item : db $28 : db $ff
+db $05,$16
+#Config_WatChest5Item:
+dw !WatChest5Item
+db $28
+db $ff
 Lut_Chests_MapD1:
-db $37,$59 : dw !PyramidRoom2ChestItem : db $29 : db $ff
+db $37,$59
+#Config_PyramidRoom2ChestItem:
+dw !PyramidRoom2ChestItem
+db $29
+db $ff
 Lut_Chests_MapD4:
-db $46,$49 : dw !PyramidRoom5ChestItem : db $2A : db $ff
+db $46,$49
+#Config_PyramidRoom5ChestItem:
+dw !PyramidRoom5ChestItem
+db $2A
+db $ff
 Lut_Chests_MapD6:
-db $47,$09 : dw !PyramidRoom3ChestItem : db $2B : db $ff
+db $47,$09
+#Config_PyramidRoom3ChestItem:
+dw !PyramidRoom3ChestItem
+db $2B
+db $ff
 Lut_Chests_MapD9:
-db $75,$29 : dw !PyramidRoom4ChestItem : db $2C : db $ff
+db $75,$29
+#Config_PyramidRoom4ChestItem:
+dw !PyramidRoom4ChestItem
+db $2C
+db $ff
 Lut_Chests_MapE9:
-db $37,$16 : dw !MansionChestItem : db $2D : db $ff
+db $37,$16
+#Config_MansionChestItem:
+dw !MansionChestItem
+db $2D
+db $ff
 }
 warnpc $81c455
 
@@ -1722,7 +1899,9 @@ dl $97C000, $9BC000   ; Shadow abilities
 
 org $81da4c
 table "table_invtext.txt",rtl
-db "RANDO CODE: ","!RandoTitleScreenHashString"
+db "RANDO CODE: "
+Config_RandoTitleScreenHashString:
+db "!RandoTitleScreenHashString"
 table "table_dialogue.txt",rtl
 
 
@@ -2453,7 +2632,6 @@ db $04 : dl Bg3_IogrForceText : dw $0bfa
 db $00
 warnpc $81eadc
 
-
 org $81ff6c
 ; Bank $81 freespace begins here.
 Bg3_IogrForceText:
@@ -3025,7 +3203,7 @@ endif
 
 SR_InvClearItemInViewSlotY:
 -:
-lda $0ab4,y : and #$00ff : jsl LR_DecStackForItemAReturningCountOrSec : cmp #$0000 : bne -
+lda $0ab4,y : and #$00ff : jsl LR_DecStackForItemAReturningCountOrSec : bne -
 lda $0ab4,y : and #$ff00 : sta $0ab4,y
 if !SettingInfiniteInventory == 1
 jsl LR_UpdateInvFromViewSlotY
@@ -4056,8 +4234,11 @@ rts
 ..PowersOfTwo:
 db $01,$02,$04,$08,$10,$20,$40,$80
 .IsDungeon3Item:
-lda.l Config_SettingStatuesPlayerChoice : bne .NoDropSpecial
-lda.l Config_Dungeon3Required : bne .NoDropSpecial
+lda.l Config_SettingDungeonShuffle
+  ora.l Config_SettingBossShuffle
+  ora.l Config_SettingStatuesPlayerChoice
+  ora.l Config_Dungeon3Required
+  bne .NoDropSpecial
 .CanDropSpecial:
 clc
 rts
@@ -4065,8 +4246,11 @@ rts
 sec
 rts
 .IsDungeon5Item:
-lda.l Config_SettingStatuesPlayerChoice : bne .NoDropSpecial
-lda.l Config_Dungeon5Required : bne .NoDropSpecial
+lda.l Config_SettingDungeonShuffle
+  ora.l Config_SettingBossShuffle
+  ora.l Config_SettingStatuesPlayerChoice
+  ora.l Config_Dungeon5Required
+  bne .NoDropSpecial
 bra .CanDropSpecial
 }
 
@@ -4400,9 +4584,9 @@ warnpc $83950c
 org $83950c
 ; Lance's letter
 {
-lda.l Config_KaraLocation : dec : sta $0db8
+lda.l Config_KaraLocation : dec : sta $0bfa
 cop #$BF : dw Text_LancesLetter    ; $9514
-stz $0db8
+stz $0bfa
 cop #$CC : db $8e
 rts
 
@@ -4410,7 +4594,7 @@ Text_LancesLetter:
 db $D3
 db $C2,$04
 db "Will, Kara is in",$cb
-db $C5 : dw .LocNames, $0db8
+db $C5 : dw .LocNames, $0bfa
 db $CB 
 db "________-Lance",$C0
 .LocNames:
@@ -4468,19 +4652,19 @@ db $c0
 }
 
 
-org $839b89
-; Set which tile is created by each hieroglyph item.
-db !HieroItemTile1
-skip 4
-db !HieroItemTile2
-skip 4
-db !HieroItemTile3
-skip 4
-db !HieroItemTile4
-skip 4
-db !HieroItemTile5
-skip 4
-db !HieroItemTile6
+;org $839b89
+;; Set which tile is created by each hieroglyph item.
+;db !HieroItemTile1
+;skip 4
+;db !HieroItemTile2
+;skip 4
+;db !HieroItemTile3
+;skip 4
+;db !HieroItemTile4
+;skip 4
+;db !HieroItemTile5
+;skip 4
+;db !HieroItemTile6
 
 
 org $839CDC    ; In SR_UseItemAura, this is the not-Shadow branch.
@@ -4542,10 +4726,41 @@ rts
 db $cd : dl TextUsedThreeRedJewels
 db $C0
 
-org $839e1a
-db $cd : dl TextUseFathersJournal
+org $839e15
+SR_UseItemFathersJournal:
+jsl LR_DisplayFathersJournalText
+rts
+LR_DisplayFathersJournalText:
+phx
+ldy #$0000
+-:
+tyx
+lda.l Config_HieroOrderAnchor,x : dec : asl : tax
+lda.l .HieroCharacters,x
+tyx
+sta.l 1+SramTextBuffer,x
+iny : iny : cpy #$000c : bcc -
+tyx
+lda.l .HieroCharacters,x : sta.l 1+SramTextBuffer,x
+sep #$20
+lda #$d8 : sta.l SramTextBuffer
+rep #$20
+plx
+cop #$BF : dw .Text
+rtl
+.Text:
+db $cd : dl TextUseFathersJournalWithSram
 db $c0
+.HieroCharacters:
+db $c0,$c1
+db $c2,$c3
+db $c4,$c5
+db $c6,$c7
+db $c8,$c9
+db $ca,$cb
+db $00,$ca
 
+warnpc $839f30
 org $839f30
 SR_UseItemCrystalRing:
 cop #$BF : dw .TextBlingBling
@@ -4572,9 +4787,10 @@ org $839fb2
 ; If the held item is a stack, removes one from the stack.
 SR_RemoveHeldItem:
 ldy $0ac4
-lda $0ab4,y : and #$00ff : jsl LR_DecStackForItemAReturningCountOrSec : cmp #$0000 : bne +
+lda $0ab4,y : and #$00ff : jsl LR_DecStackForItemAReturningCountOrSec : bne +
   jsr SR_FullClearHeldItem
 +:
+jsl LR_DoUnequip
 rts
 warnpc $839fca
 
@@ -4990,6 +5206,10 @@ org $83e03a
 nop : nop    ; Load Firebird assets in every map, in case Early Firebird is enabled.
 
 
+org $83e2cb
+dw SR_PadTextToColumn   ; Replace a nonfunctional text-draw routine (card $c4) with a useful one
+
+
 org $83e849
 ; In the base game, on a two-column menu, pressing Up on option 0 underflows to the final option;
 ; but pressing Down on the final option overflows to the top of the second column, not to option 0.
@@ -5288,6 +5508,26 @@ endif
 jsl LR_DoUnequip
 rts
 
+; Used for dynamically drawing Jeweler's inventory, and maybe other things too.
+SR_PadTextToColumn:
+phy
+stx $0998
+txa : and #$003f : lsr : sec
+sep #$20
+  sbc $0000,y
+rep #$20
+  bit #$0080 : beq .Done   ; Nothing to do if here-there>=0 (we're at or past the target column)
+    ora #$ff00 : eor #$ffff : inc : tay
+-:
+lda #$00ac : ora $0986 : ora #$2100 : sta $7f0200,x
+  clc : adc #$0010 : sta $7f0240,x
+inx : inx
+stx $0998
+dey : bne -
+.Done:
+ply
+iny
+rts
 }
 
 
@@ -5301,7 +5541,7 @@ nop
 
 org $848468
 ; Fisherman
-%MTryGiveItemAndFlag(!CapeFisherItem, $d7)
+%MTryGiveItemAndFlag("CapeFisherItem", $d7)
 rtl
 
 org $848a03
@@ -5316,13 +5556,142 @@ cop #$0B
 cop #$C1
 rtl
 .OnInteract:
-cop #$BF : dw .Text
-cop #$CC : db $38
+cop #$CC : db $38   ; Flag for tracker to know that we've talked to the teacher
+if !SettingRedJewelHunt == 1
+cop #$BF : dw .TextNoStatues
 rtl
-.Text:
-db $d3
-db !TextTeacherStatuesString    ; Not currently quoted, because the API provides it as a hex string
+endif
+lda.l Config_SettingStatuesPlayerChoice : beq ..ForGameChoice
+  jmp ..ForPlayerChoice
+..ForGameChoice:
+clc
+lda.l Config_Statue1Required
+  adc.l Config_Statue2Required
+  adc.l Config_Statue3Required
+  adc.l Config_Statue4Required
+  adc.l Config_Statue5Required
+  adc.l Config_Statue6Required
+  sta $0000
+bne ...NonzeroStatues
+  cop #$BF : dw .TextNoStatues
+  rtl
+...NonzeroStatues:
+cmp #$0001 : bne ...SomeStatues
+  ; One statue
+  phx
+  ldx #$0000
+-:
+  lda.l Config_Statue1Required,x : bne +
+  inx : inx
+  bra -
++:
+  txa : lsr : inc : sta $0bfa
+  plx
+  cop #$BF : dw .TextYouNeedStatueSingle
+  rtl
+...SomeStatues:
+phx
+lda #$0000 : sta $0002  ; $0002 = next statue to check
+  sta $0004   ; $0004 = position in text buffer
+ldy $0000   ; Y = count of statue numbers not yet appended
+....CheckNext:
+sep #$20
+lda $0002 : asl : tax
+lda.l Config_Statue1Required,x : bne ....GotStatue
+inc $0002
+bra ....CheckNext
+....GotStatue:
+ldx $0004
+lda $0002 : clc : adc #$21 : sta.l SramTextBuffer,x   ; Char #$21 = 1, etc.
+inx
+inc $0002
+inc $0004
+dey
+cpy #$0000 : beq ....Done
+cpy #$0001 : beq ....OneLeft
+....SomeLeft:
+rep #$20
+db $a9,",_" : sta.l SramTextBuffer,x   ; eq. lda.w #", "
+inx : inx
+stx $0004
+lda #$0000
+bra ....CheckNext
+....OneLeft:
+lda $0000 : cmp #$03 : bcc +
+  db $a9,"," : sta.l SramTextBuffer,x   ; Comma before " and " only if 3 or more statues
+  inx
+  inc $0004
++:
+rep #$20
+db $a9,"_a" : sta.l SramTextBuffer,x
+inx : inx
+db $a9,"nd" : sta.l SramTextBuffer,x
+inx : inx
+sep #$20
+db $a9,"_" : sta.l SramTextBuffer,x
+inx
+stx $0004
+lda #$00 : xba
+bra ....CheckNext
+....Done:
+lda #$CA : sta.l SramTextBuffer,x
+rep #$20
+plx
+cop #$BF : dw .TextYouNeedMysticStatues
+rtl
+..ForPlayerChoice:
+lda.l Config_StatuesRequiredCount : sta $0bfa
+  beq ...NoStatues
+  dec : beq ...OneStatue
+...SomeStatues:
+cop #$BF : dw .TextNumStatues
+rtl
+...OneStatue:
+cop #$BF : dw .TextOneStatue
+rtl
+...NoStatues:
+cop #$BF : dw .TextNoStatues
+rtl
+.TextYouNeedMysticStatues:
+db $cd : dl .TextYouNeedMysticStatueIncl
+db "s_"
+db $cb
+db $cd : dl SramTextBuffer
+db "!"
 db $c0
+.TextYouNeedStatueSingle:
+db $cd : dl .TextYouNeedMysticStatueIncl
+db "_"
+db $c6 : dw 1, $0bfa
+db "!"
+db $c0
+.TextYouNeedMysticStatueIncl:
+db $d3
+db "You need Mystic Statue"
+db $ca
+.TextNoStatues:
+db $d3
+db "No"
+db $cd : dl .TextStatuesAreRequiredIncl
+db $c0
+.TextOneStatue:
+db $d3
+db "One statue is"
+db $cd : dl .TextRequiredIncl
+db $c0
+.TextNumStatues:
+db $d3
+db $c6 : dw 1, $0bfa
+db $cd : dl .TextStatuesAreRequiredIncl
+db $c0
+.TextStatuesAreRequiredIncl:
+db "_statues are"
+db $cd : dl .TextRequiredIncl
+db $ca
+.TextRequiredIncl:
+db "_required!"
+db $ca
+warnpc $848d21
 
 
 org $84922f
@@ -5341,7 +5710,7 @@ org $8499d8
 ; Lola
 {
 cop #$D0 : db $35,$01 : dw LolaGotItem
-%MTryGiveItemAndFlag(!CapeLolaItem, $35)
+%MTryGiveItemAndFlag("CapeLolaItem", $35)
 rtl
 LolaGotItem:
 cop #$BF : dw $9d94
@@ -5415,7 +5784,7 @@ org $84be6a
 db !Map02Exit01
 
 org $84c20e
-%MTryGiveItemAndFlag(!ECHiddenGuardItem, $d8)
+%MTryGiveItemAndFlag("ECHiddenGuardItem", $d8)
 rtl
 
 org $84c297
@@ -5479,7 +5848,7 @@ CastleBasementBarrelInteract:
 cop #$D0 : db $46,$00 : dw CastleBasementBarrelGiveItem
 cop #$E0
 CastleBasementBarrelGiveItem:
-%MTryGiveItemAndFlag(!ECBasementItem, $46)
+%MTryGiveItemAndFlag("ECBasementItem", $46)
 rtl
 }
 
@@ -5549,7 +5918,7 @@ cop #$D2 : db $23,$01
 .Die:
 cop #$E0
 .OnInteract:
-%MTryGiveItemAndFlag(!EDHamletItem,$23)
+%MTryGiveItemAndFlag("EDHamletItem",$23)
 cop #$D0 : db $23,$01 : dw .Die
 rtl
 
@@ -5689,7 +6058,7 @@ db $c0
 
 org $84f373
 ; Itory cave statue
-%MTryGiveItemAndFlag(!ItoryCaveItem, $2d)
+%MTryGiveItemAndFlag("ItoryCaveItem", $2d)
 rtl
 
 org $84f8b7
@@ -5704,7 +6073,7 @@ endif
 
 org $84fadf
 ; Moon Tribe cave statue
-%MTryGiveItemAndFlag(!MoonTribeCaveItem, $48)
+%MTryGiveItemAndFlag("MoonTribeCaveItem", $48)
 rtl
 
 org $84fb3f
@@ -5822,7 +6191,7 @@ db $10,$00    ; "Seth" actor flag
 
 org $859652
 cop #$D0 : db $e0,$01 : dw IncaSethAlreadyGivenItem
-%MTryGiveItemAndFlag(!IncaGoldShipItem, $e0)
+%MTryGiveItemAndFlag("IncaGoldShipItem", $e0)
 rtl
 IncaSethAlreadyGivenItem:
 cop #$BF : dw $96c1
@@ -5860,7 +6229,7 @@ warnpc $85b6c0
 
 
 org $85b6d2
-%MTryGiveItemAndFlag(!FrejEastSlaverItem, $e1)
+%MTryGiveItemAndFlag("FrejEastSlaverItem", $e1)
 rtl
 
 org $85b880
@@ -5882,7 +6251,7 @@ cop #$BF : dw $b9cb
 rtl
 ..SayYes:
 cop #$D0 : db $59,$00 : dw .PlayerDoesNotKnow
-%MTryGiveItemAndFlag(!FrejSnitchItem, $5a)
+%MTryGiveItemAndFlag("FrejSnitchItem", $5a)
 cop #$D0 : db $5a,$00 : dw .InvFull
 cop #$CC : db $5a
 lda #$eff0 : tsb $065a
@@ -5929,7 +6298,7 @@ db $c0
 org $85cf31
 EFreejiaBin2_OnInteract:
 cop #$D0 : db $53,$01 : dw .GotItemAlready
-%MTryGiveItemAndFlag(!FrejBin2Item, $53)
+%MTryGiveItemAndFlag("FrejBin2Item", $53)
 .GotItemAlready:
 rtl
 
@@ -5944,7 +6313,7 @@ cop #$C1
 rtl
 .OnInteract:
 cop #$D0 : db $54,$01 : dw .GotItemAlready
-%MTryGiveItemAndFlag(!FrejBin1Item, $54)
+%MTryGiveItemAndFlag("FrejBin1Item", $54)
 .GotItemAlready:
 rtl
 }
@@ -5970,7 +6339,7 @@ cop #$C1
 rtl
 .TryGiveItem:
 cop #$D0 : db $5e,$01 : dw ..AlreadyGiven
-%MTryGiveItemAndFlag(!MineSamItem, $5e)
+%MTryGiveItemAndFlag("MineSamItem", $5e)
 rtl
 ..AlreadyGiven:
 cop #$BF : dw $d48e   ; "I'll always remember you!"
@@ -5980,7 +6349,7 @@ warnpc $85d299
 org $85d4d0
 EMorgueItemPickup_OnInteract:
 cop #$D0 : db $5d,$01 : dw .GotItemAlready
-%MTryGiveItemAndFlag(!MineMorgueItem, $5d)
+%MTryGiveItemAndFlag("MineMorgueItem", $5d)
 rtl
 .GotItemAlready:
 cop #$E0
@@ -6028,7 +6397,7 @@ lda #$eff0 : tsb $065a
 cop #$DA : db $77
 cop #$CE : db $00
 EMineWallSlave_TryGiveItem:
-%MTryGiveItemAndFlag(!MineWallSlaveItem, $d9)
+%MTryGiveItemAndFlag("MineWallSlaveItem", $d9)
 lda #$EFF0 : trb $065A
 cop #$D0 : db $d9,$00 : dw EMineWallSlave_InvWasFull
 lda #$0080 : tsb $09EC
@@ -6305,7 +6674,7 @@ org $8686fa
 db $10   ; Lilly at Seaside Palace flag
 
 org $868af5
-%MTryGiveItemAndFlag(!SeaPalBuffyItem, $85)
+%MTryGiveItemAndFlag("SeaPalBuffyItem", $85)
 rtl
 
 
@@ -6404,7 +6773,7 @@ cop #$CD : dw $013B
 cop #$DA : db $3B
 lda #$00A0 : sta $16
 lda #$2000 : trb $10
-%MTryGiveItemAndFlag(!SeaPalCoffinItem, $18)    ; Surrogate flag $18 for this item.
+%MTryGiveItemAndFlag("SeaPalCoffinItem", $18)    ; Surrogate flag $18 for this item.
 cop #$D0 : db $18,$00 : dw .CancelItemGet
 cop #$DA : db $03
 lda #$CFF0 : tsb $065A
@@ -6481,11 +6850,11 @@ cop #$C5
 warnpc $8697a6
 
 org $8698b2
-%MTryGiveItemAndFlag(!MuHopeStatue1Item, $79)
+%MTryGiveItemAndFlag("MuHopeStatue1Item", $79)
 rtl
 
 org $86995a
-%MTryGiveItemAndFlag(!MuHopeStatue2Item, $7f)
+%MTryGiveItemAndFlag("MuHopeStatue2Item", $7f)
 rtl
 
 org $8699c7
@@ -6656,26 +7025,64 @@ org $86cef6
 db "Again!"
 db $c0
 
-; Kara's Portrait mods.
-org $86d153
-{
-db $8a   ; Flag
-org $86d15b
-cop #$B6 : db $30 ; Portrait sprite needs high priority in non-Angl, and this is harmless in Angl.
-org $86d169
-cop #$D2 : db $8a,$01  ; Flag check
+org $86d14e
+db $16 : dw $1000
+EKarasPortrait:
+lda $0644 : pha
+lda.l Config_KaraLocation : dec : beq .OnlyInEdDg
+  dec : beq .OnlyInMine
+  dec : beq .OnlyInAngl
+  dec : beq .OnlyInKres
+.OnlyInAnkr:
+pla : cmp #$00bf : bne .Die
+bra .MapOkay
+.OnlyInEdDg:
+pla : cmp #$0013 : bne .Die
+bra .MapOkay
+.OnlyInMine:
+pla : cmp #$0047 : bne .Die
+bra .MapOkay
+.OnlyInAngl:
+pla : cmp #$0074 : bne .Die
+bra .MapOkay
+.OnlyInKres:
+pla : cmp #$00a9 : bne .Die
+;bra .MapOkay
+.MapOkay:
+cop #$D0 : db $8a,$01 : dw .Die
+cop #$BC : db $08,$fd
+cop #$B6 : db $30  ; Portrait sprite needs high priority in non-Angl, and this is harmless in Angl.
+cop #$9E : dl EKaraPortraitInteractor : dw $0000, $0010, $3000
+cop #$D2 : db $8a,$01
+.Die:
 cop #$E0
-org $86d25c
-db $8a   ; Flag
-org $86d27e
-db "Hurry boy, she's waiting",$cb
-db "there for you!"
-db $c0
-org $86d305
+EKaraPortraitInteractor:
+cop #$C0 : dw .OnInteract
+cop #$C1
+rtl
+.OnInteract:
+cop #$D0 : db $8a,$01 : dw ..KaraIsFree
+..KaraNotFree:
+cop #$BF : dw ...Text
+rtl
+...Text:
+db $c2 : db $0a
+db $c2 : db $00
+db $d2 : db $10
 db "Kara's portrait. If only",$cb
 db "you had Magic Dust..."
 db $c0
-}
+..KaraIsFree:
+cop #$BF : dw ...Text
+rtl
+...Text:
+db $c2 : db $0a
+db $c2 : db $00
+db $d2 : db $10
+db "Hurry boy, she's waiting",$cb
+db "there for you!"
+db $c0
+warnpc $86d278
 
 
 org $86d792
@@ -6705,10 +7112,6 @@ jmp $d8ea   ; where EAVIshtarPuzzleManager picks up after our mods
 warnpc $86d8ea
 
 org $86d95e
-;lda $24 : cmp.w #!IshtarRoom1TargetWest : bcc $1B
-;  cmp.w #!IshtarRoom1TargetEast : bcs $16
-;lda $26 : cmp.w #!IshtarRoom1TargetNorth : bcc $0F
-;  cmp.w #!IshtarRoom1TargetSouth : bcs $0A
 jsr SR_SecIfIshtarCursorAtDifference : bcc +
   cop #$BF : dw $db2c    ; Puzzles 1-3 have the same success text
   inc $0aa6
@@ -6718,10 +7121,6 @@ cop #$BF : dw $daa0   ; And the same failure text
 jmp $da07
 
 org $86d98a
-;lda $24 : cmp.w #!IshtarRoom2TargetWest : bcc $1A
-;  cmp.w #!IshtarRoom2TargetEast : bcs $15
-;lda $26 : cmp.w #!IshtarRoom2TargetNorth : bcc $0E
-;  cmp.w #!IshtarRoom2TargetSouth : bcs $09
 jsr SR_SecIfIshtarCursorAtDifference : bcc +
   cop #$BF : dw $db2c    ; Puzzles 1-3 have the same success text
   inc $0aa6
@@ -6731,10 +7130,6 @@ cop #$BF : dw $daa0   ; And the same failure text
 jmp $da07
 
 org $86d9b4
-;lda $24 : cmp.w #!IshtarRoom3TargetWest : bcc $1A
-;  cmp.w #!IshtarRoom3TargetEast : bcs $15
-;lda $26 : cmp.w #!IshtarRoom3TargetNorth : bcc $0E
-;  cmp.w #!IshtarRoom3TargetSouth : bcs $09
 jsr SR_SecIfIshtarCursorAtDifference : bcc +
   cop #$BF : dw $db2c    ; Puzzles 1-3 have the same success text
   inc $0aa6
@@ -6744,10 +7139,6 @@ cop #$BF : dw $daa0   ; And the same failure text
 jmp $da07
 
 org $86d9de
-;lda $24 : cmp.w #!IshtarRoom4TargetWest : bcc $1E
-;  cmp.w #!IshtarRoom4TargetEast : bcs $19
-;lda $26 : cmp.w #!IshtarRoom4TargetNorth : bcc $12
-;  cmp.w #!IshtarRoom4TargetSouth : bcs $0D
 jsr SR_SecIfIshtarCursorAtDifference : bcc +
   cop #$BF : dw $db9f
   cop #$CD : dw $0151
@@ -7115,7 +7506,7 @@ rts
 }
 
 SR_SecIfIshtarChestsAreDifferent:
-lda.w #!AnglPuzzleChest1Item : cmp.w #!AnglPuzzleChest2Item : bne .AreDifferent
+lda.l Config_AnglPuzzleChest1Item : cmp.l Config_AnglPuzzleChest2Item : bne .AreDifferent
 .NotDifferent:
 clc
 rts
@@ -7560,7 +7951,7 @@ cop #$BF : dw TextRussianGlassGotItemAlready
 rtl
 RussianGlassTryGiveItem:
 cop #$BF : dw TextRussianGlassGreeting
-%MTryGiveItemAndFlag(!WtrmRussianGlassItem, $95)
+%MTryGiveItemAndFlag("WtrmRussianGlassItem", $95)
 rtl
 TextRussianGlassGotItemAlready:
 db $D3,$D6,$53,$80,$8B,$8B,$AC,$48,$AC,$86,$8E,$A4,$2B,$AC,$81,$A5,$83,$2A,$AC,$C0
@@ -7579,7 +7970,7 @@ db $e0,$6b    ; Disable Lilly in Watermia
 
 org $87ad1b
 nop : nop : nop : nop   ; "cop #$BF : dw $...." Skip Lance's speech.
-%MTryGiveItemAndFlag(!WtrmLanceItem, $e2)
+%MTryGiveItemAndFlag("WtrmLanceItem", $e2)
 rtl
 
 org $87b59e
@@ -7596,7 +7987,7 @@ cop #$80 : db $02 : cop #$89
 cop #$DA : db $3b
 bra -
 .OnInteract:
-%MTryGiveItemAndFlag(!GtWlNecklace1Item, $98)
+%MTryGiveItemAndFlag("GtWlNecklace1Item", $98)
 cop #$D0 : db $98,$01 : dw .Die
 rtl
 .Die:
@@ -7613,7 +8004,7 @@ cop #$80 : db $02 : cop #$89
 cop #$DA : db $3b
 bra -
 .OnInteract:
-%MTryGiveItemAndFlag(!GtWlNecklace2Item, $99)
+%MTryGiveItemAndFlag("GtWlNecklace2Item", $99)
 cop #$D0 : db $99,$01 : dw .Die
 rtl
 .Die:
@@ -7631,7 +8022,7 @@ db $c4    ; "Change pointer for cannibalized event"
 
 org $87c0a7
 cop #$D0 : db $9a,$01 : dw AppleVendorGotItemAlready
-%MTryGiveItemAndFlag(!EuroAppleVendorItem, $9a)
+%MTryGiveItemAndFlag("EuroAppleVendorItem", $9a)
 rtl
 AppleVendorGotItemAlready:
 cop #$BF : dw $c0dd
@@ -7805,14 +8196,14 @@ cop #$C0 : dw ShopItem1OnInteract
 cop #$C1
 rtl
 ShopItem1OnInteract:
-%MTryGiveItemAndFlag(!EuroShop1Item, $f0)
+%MTryGiveItemAndFlag("EuroShop1Item", $f0)
 cop #$D0 : db $f0,$01 : dw ShopItem1Die
 rtl
 ShopItem1Die:
 cop #$E0
 
 org $87cdf7
-%MTryGiveItemAndFlag(!EuroShop2Item, $f1)
+%MTryGiveItemAndFlag("EuroShop2Item", $f1)
 cop #$D0 : db $f1,$01 : dw ShopItem2Die
 rtl
 ShopItem2Die:
@@ -7845,7 +8236,7 @@ db $c0
 
 org $87df43
 cop #$D5 : db $28
-%MTryGiveItemAndFlag(!EuroAnnItem, $e5)
+%MTryGiveItemAndFlag("EuroAnnItem", $e5)
 rtl
 
 org $87e37a
@@ -7864,7 +8255,7 @@ org $87e517
 ; Euro secret house
 {
 cop #$D0 : db $a6,$01 : dw EuroSecretGotItemAlready
-%MTryGiveItemAndFlag(!EuroHiddenHouseItem, $a6)
+%MTryGiveItemAndFlag("EuroHiddenHouseItem", $a6)
 rtl
 EuroSecretGotItemAlready:
 cop #$BF : dw Text_EuroSecretGotItemAlready
@@ -7969,7 +8360,7 @@ warnpc $889078
 
 org $8893a9
 nop : nop : nop : nop   ; "cop #$BF : dw $...." Skip girl's speech.
-%MTryGiveItemAndFlag(!NativesGirlItem, $e6)
+%MTryGiveItemAndFlag("NativesGirlItem", $e6)
 rtl
 
 
@@ -8038,7 +8429,7 @@ cop #$89
 rtl
 .OnInteract:
 cop #$D0 : db $be,$01 : dw .GotItemAlready
-%MTryGiveItemAndFlag(!WatSpiritItem, $be)
+%MTryGiveItemAndFlag("WatSpiritItem", $be)
 rtl
 .GotItemAlready:
 cop #$BF : dw .TextSpoiler
@@ -8063,7 +8454,7 @@ cop #$89
 cop #$DA : db $3b
 bra -
 .OnInteract:
-%MTryGiveItemAndFlag(!WatGlassesItem, $ba)
+%MTryGiveItemAndFlag("WatGlassesItem", $ba)
 cop #$D0 : db $ba,$01 : dw .Die
 rtl
 .Die:
@@ -8123,7 +8514,7 @@ org $88b010
 EDaoSnakeGameManager_YouWinAndGetPrize:
 {
 cop #$BF : dw Text_SnakeGameWon
-%MTryGiveItemAndFlag(!DaoSnakeGameItem, $e7)
+%MTryGiveItemAndFlag("DaoSnakeGameItem", $e7)
 cop #$E0
 Text_SnakeGameLost:
 db $d3
@@ -8144,8 +8535,8 @@ org $88b16d
 jmp DaoOfferTravelToNatives
 
 org $88b1ae   ; Inventory freespace check is handled by NPC's code earlier.
-%MTryGiveItemAndFlag(!DaoEntrance1Item, $b8)
-%MTryGiveItemAndFlag(!DaoEntrance2Item, $b8)
+%MTryGiveItemAndFlag("DaoEntrance1Item", $b8)
+%MTryGiveItemAndFlag("DaoEntrance2Item", $b8)
 cop #$BF : dw DaoOfferTravelToNatives_TextPostGiveItem
 rtl
 
@@ -8285,7 +8676,8 @@ cop #$D6 : db $26 : dw .GiveBook
 cop #$BF : dw .TextOfferTakeBook
 rtl
 .AlreadyGivenBook:
-cop #$BF : dw .TextReadGivenBook
+jsl LR_DisplayFathersJournalText
+;cop #$BF : dw .TextReadGivenBook
 rtl
 .GiveBook:
 cop #$CC : db $ef
@@ -8298,9 +8690,9 @@ db $c0
 .TextDoTakeBook:
 db $cd : dl TextPyramidGuyDoTakeBook
 db $c0
-.TextReadGivenBook:
-db $cd : dl TextUseFathersJournal
-db $c0
+;.TextReadGivenBook:
+;db $cd : dl TextUseFathersJournal
+;db $c0
 warnpc $88c2da
 
 
@@ -8321,75 +8713,103 @@ nop : nop : nop
 
 ; Hieroglyph locations.
 org $88c7ac
-%MTryGiveItemAndFlag(!PyramidHiero1Item, $c2)
+%MTryGiveItemAndFlag("PyramidHiero1Item", $c2)
 rtl
 org $88c873
-%MTryGiveItemAndFlag(!PyramidHiero2Item, $c3)
+%MTryGiveItemAndFlag("PyramidHiero2Item", $c3)
 rtl
 org $88c91b
-%MTryGiveItemAndFlag(!PyramidHiero3Item, $c4)
+%MTryGiveItemAndFlag("PyramidHiero3Item", $c4)
 rtl
 org $88c9c3
-%MTryGiveItemAndFlag(!PyramidHiero4Item, $c5)
+%MTryGiveItemAndFlag("PyramidHiero4Item", $c5)
 rtl
 org $88ca6b
-%MTryGiveItemAndFlag(!PyramidHiero5Item, $c6)
+%MTryGiveItemAndFlag("PyramidHiero5Item", $c6)
 rtl
 org $88cb13
-%MTryGiveItemAndFlag(!PyramidHiero6Item, $c7)
+%MTryGiveItemAndFlag("PyramidHiero6Item", $c7)
 rtl
+; The hiero text that was here is now unused, so we re-purpose the space for code.
+SR_SecIfHieroPlacementIsCorrect:
+phx
+ldx #$0000
+.CheckNextTile:
+lda.l Config_HieroOrderAnchor,x : dec : cmp $0B28,x : bne .ClcAndReturn
+inx : inx : cpx #$000C : bcc .CheckNextTile
+.SecAndReturn:
+plx
+sec
+rts
+.ClcAndReturn:
+plx
+clc
+rts
+warnpc $88cb94
 
-org $88cb94
-; "which tiles are called from placement flags"
-db !HieroItemTile1
-db !HieroItemTile2
-db !HieroItemTile3
-db !HieroItemTile4
-db !HieroItemTile5
-db !HieroItemTile6
+;org $88cb94
+;; "which tiles are called from placement flags"
+;db !HieroItemTile1
+;db !HieroItemTile2
+;db !HieroItemTile3
+;db !HieroItemTile4
+;db !HieroItemTile5
+;db !HieroItemTile6
 
-org $88cd71
-; MQ and Solid Arm disappear if they're the Pyramid boss; others don't.
-if !Boss5Id == 5
-db $fc,$01
-elseif !Boss5Id == 7
-db $f6,$01
-else
-db $10,$00
-endif
+org $88cbdc
+; Replaces base game's check that placed hieroglyphs are in the order 1-2-3-4-5-6.
+jsr SR_SecIfHieroPlacementIsCorrect : bcs +
+  jmp $cc0b   ; Tiles in wrong order
++:
+jmp $cbef   ; Skip ahead to the correct-order handler
 
-org $88cdbc
+org $88cd6c
+; Formerly, defeated MQ and Solid Arm disappeared if they were the Pyramid boss.
+; Later bug fixes made this unnecessary.
+db $1c : dw $2001
+EPyramidBossPortal:
+; cop #$D0 : db $fc,$01 : dw .Die   ; or flag $f6 for Solid Arm
+cop #$BC : db $08,$0c
+cop #$D2 : db $d1,$01   ; = flag for hiero puzzle complete
+lda #$1000 : tsb $10
+lda #$2000 : trb $10
+lda #$0200 : tsb $12
+cop #$C0 : dw .OnInteract
+cop #$C1
+rtl
+.Die:
+cop #$E0
+.OnInteract:
+lda.l Config_Boss5Id : dec : sta $0bfa
+cop #$BF : dw .TextInteract
+cop #$BE : db $02,$02 : dw ..Options
+..Options:
+  dw ..ChooseNo
+  dw ..ChooseNo, ..ChooseYes
+..ChooseNo:
+cop #$BF : dw .TextClear
+rtl
+..ChooseYes:
+cop #$BF : dw .TextClear
+lda #$2000 : tsb $1010
 if !SettingDungeonShuffle > 0
-dl EPymdPortalToFoyer_EVanishingPlayerSprite
+cop #$9C : dl EPymdPortalToFoyer_EVanishingPlayerSprite : dw $1800
+else
+cop #$9C : dl $88B6F4 : dw $1800   ; This is the normal address for this object. Dungeon Shuffle moves it.
 endif
-
-org $88cdcd
+lda #$0303 : sta $0648
+lda #$0303 : sta $064a
 cop #$26 : db !MapMQEntranceString
 cop #$C1
 rtl
-TextMummyQueenPortal:
+.TextInteract:
 db $d3
-db "Heeeeeeeeeeeeeere's",$cb
-if !Boss5Id == 1
-db "Castoth!"
-elseif !Boss5Id == 2
-db "Viper!"
-elseif !Boss5Id == 3
-db "Vampires!"
-elseif !Boss5Id == 4
-db "Sand Fanger!"
-elseif !Boss5Id == 5
-db "Mummy Queen!"
-elseif !Boss5Id == 6
-db "Mummy Queen 2.0!"
-else
-db "Solid Arm!"
-endif
-db $cb
-db "_Quit",$cb
-db "_Jump in"
+db $cd : dl TextPyramidBossPortal
 db $ca
-warnpc $88ce10
+.TextClear:
+db $c8
+db $ca
+warnpc $88ce12
 
 org $88cea5
 db $10,$00   ; Jeweler doesn't disappear when defeated.
@@ -8398,34 +8818,44 @@ org $88cec9
 EJeweler_OnChat:
 {
 cop #$BF : dw EJeweler_Text_Greeting
-lda $0AB0 : beq .TryGiveRewards
+lda $0ab0 : beq .TryGiveRewards
   cop #$BF : dw EJeweler_Text_ImHolding
 .TryGiveRewards:
+stz $26    ; $26 = Red Jewel count as not-BCD
+sed
+lda $0ab0
+-:
+cmp #$0000 : beq +
+  sec : sbc #$0001
+  inc $26
+  bra -
++:
+cld
 cop #$D0 : db $E9, $01 : dw .PostReward1Check
-lda $0AB0 : cmp.w #$!Jeweler1Cost : bcc .PostReward1Check
+lda $26 : cmp.l Config_Jeweler1Cost : bcc .PostReward1Check
 jmp .TryGiveReward1
 .PostReward1Check:
 cop #$D0 : db $EA, $01 : dw .PostReward2Check
-lda $0AB0 : cmp.w #$!Jeweler2Cost : bcc .PostReward2Check
+lda $26 : cmp.l Config_Jeweler2Cost : bcc .PostReward2Check
 jmp .TryGiveReward2
 .PostReward2Check:
 cop #$D0 : db $EB, $01 : dw .PostReward3Check
-lda $0AB0 : cmp.w #$!Jeweler3Cost : bcc .PostReward3Check
+lda $26 : cmp.l Config_Jeweler3Cost : bcc .PostReward3Check
 jmp .TryGiveReward3
 .PostReward3Check:
 cop #$D0 : db $EC, $01 : dw .PostReward4Check
-lda $0AB0 : cmp.w #$!Jeweler4Cost : bcc .PostReward4Check
+lda $26 : cmp.l Config_Jeweler4Cost : bcc .PostReward4Check
 jmp .TryGiveReward4
 .PostReward4Check:
 cop #$D0 : db $ED, $01 : dw .PostReward5Check
-lda $0AB0 : cmp.w #$!Jeweler5Cost : bcc .PostReward5Check
+lda $26 : cmp.l Config_Jeweler5Cost : bcc .PostReward5Check
 jmp .TryGiveReward5
 .PostReward5Check:
 cop #$D0 : db $EE, $01 : dw .PostReward6Check
-lda $0AB0 : cmp.w #$!Jeweler6Cost : bcc .PostReward6Check
+lda $26 : cmp.l Config_Jeweler6Cost : bcc .PostReward6Check
 jmp .TryGiveReward6
 .PostReward6Check: 
-lda $0AB0 : cmp.w #$!Jeweler7Cost : bcc .PostReward7Check
+lda $26 : cmp.l Config_Jeweler7Cost : bcc .PostReward7Check
 jmp .TryGiveReward7
 .PostReward7Check:
 cop #$BF : dw EJeweler_Text_MenuWithConfig
@@ -8484,58 +8914,40 @@ jmp .TryGiveRewards
 ..ChoseSeeRewards:
 cop #$BF : dw EJeweler_Text_SeeInventory
 cop #$BF : dw EJeweler_Text_DrawInventoryBox
-cop #$D0 : db $E9, $00 : dw ...WriteReward1
-  cop #$BF : dw EJeweler_Text_SetRedPalette
-...WriteReward1:
-cop #$BF : dw EJeweler_Text_Inventory_Reward1
-cop #$D0 : db $EA, $00 : dw ...WriteReward2
-  cop #$BF : dw EJeweler_Text_SetRedPalette
-...WriteReward2:
-cop #$BF : dw EJeweler_Text_Inventory_Reward2
-cop #$D0 : db $EB, $00 : dw ...WriteReward3
-  cop #$BF : dw EJeweler_Text_SetRedPalette
-...WriteReward3:
-cop #$BF : dw EJeweler_Text_Inventory_Reward3
-cop #$D0 : db $EC, $00 : dw ...WriteReward4
-  cop #$BF : dw EJeweler_Text_SetRedPalette
-...WriteReward4:
-cop #$BF : dw EJeweler_Text_Inventory_Reward4
-cop #$D0 : db $ED, $00 : dw ...WriteReward5
-  cop #$BF : dw EJeweler_Text_SetRedPalette
-...WriteReward5:
-cop #$BF : dw EJeweler_Text_Inventory_Reward5
-cop #$D0 : db $EE, $00 : dw ...WriteReward6
-  cop #$BF : dw EJeweler_Text_SetRedPalette
-...WriteReward6:
-cop #$BF : dw EJeweler_Text_Inventory_Reward6
-cop #$BF : dw EJeweler_Text_Inventory_Secrets
+lda #$0001 : jsl LR_SetupAndDrawJewelerInvLineA
+lda #$0002 : jsl LR_SetupAndDrawJewelerInvLineA
+lda #$0003 : jsl LR_SetupAndDrawJewelerInvLineA
+lda #$0004 : jsl LR_SetupAndDrawJewelerInvLineA
+lda #$0005 : jsl LR_SetupAndDrawJewelerInvLineA
+lda #$0006 : jsl LR_SetupAndDrawJewelerInvLineA
+lda #$0007 : jsl LR_SetupAndDrawJewelerInvLineA
 cop #$BF : dw EJeweler_Text_MenuWithConfig
 jmp .MainMenu
 .NoRewardYourInvFull:
 cop #$BF : dw EJeweler_Text_YourInventoryFull
 rtl
 .TryGiveReward1:
-%MTryGiveItemAndFlag(!Jeweler1Item, $e9)
+%MTryGiveItemAndFlag("Jeweler1Item", $e9)
 cop #$D0 : db $e9,$00 : dw .NoRewardYourInvFull
 jmp .PostReward1Check
 .TryGiveReward2:
-%MTryGiveItemAndFlag(!Jeweler2Item, $ea)
+%MTryGiveItemAndFlag("Jeweler2Item", $ea)
 cop #$D0 : db $ea,$00 : dw .NoRewardYourInvFull
 jmp .PostReward2Check
 .TryGiveReward3:
-%MTryGiveItemAndFlag(!Jeweler3Item, $eb)
+%MTryGiveItemAndFlag("Jeweler3Item", $eb)
 cop #$D0 : db $eb,$00 : dw .NoRewardYourInvFull
 jmp .PostReward3Check
 .TryGiveReward4:
-%MTryGiveItemAndFlag(!Jeweler4Item, $ec)
+%MTryGiveItemAndFlag("Jeweler4Item", $ec)
 cop #$D0 : db $ec,$00 : dw .NoRewardYourInvFull
 jmp .PostReward4Check
 .TryGiveReward5:
-%MTryGiveItemAndFlag(!Jeweler5Item, $ed)
+%MTryGiveItemAndFlag("Jeweler5Item", $ed)
 cop #$D0 : db $ed,$00 : dw .NoRewardYourInvFull
 jmp .PostReward5Check
 .TryGiveReward6:
-%MTryGiveItemAndFlag(!Jeweler6Item, $ee)
+%MTryGiveItemAndFlag("Jeweler6Item", $ee)
 cop #$D0 : db $ee,$00 : dw .NoRewardYourInvFull
 jmp .PostReward6Check
 .TryGiveReward7:
@@ -8597,23 +9009,8 @@ db $c1 : db $03,$0b
 db $c7 : db $08,$07
 db $ce
 db $d2 : db $00
-db $ca
-EJeweler_Text_Inventory:
-.Reward1:
 db $ce
-db "!Jeweler1RowText",$cb,$c3,$00,$ca
-.Reward2:
-db "!Jeweler2RowText",$cb,$c3,$00,$ca
-.Reward3:
-db "!Jeweler3RowText",$cb,$c3,$00,$ca
-.Reward4:
-db "!Jeweler4RowText",$cb,$c3,$00,$ca
-.Reward5:
-db "!Jeweler5RowText",$cb,$c3,$00,$ca
-.Reward6:
-db "!Jeweler6RowText",$cb,$c3,$00,$ca
-.Secrets:
-db "!Jeweler7RowText",$c0
+db $ca
 EJeweler_Text_SeeInventory:
 db $ce
 db $cd : dl TextJewelerSeeInventory
@@ -8639,13 +9036,23 @@ cop #$9C : dl $88f687 : dw $2800    ; = EDarkSpaceBgSparkleFactory
 cop #$A0 : dl $89A090 : dw $0080, $0040, $1800    ; = EDarkSpaceGaiaEyes
 cop #$A0 : dl $89A096 : dw $0080, $0058, $1800    ; = EDarkSpaceGaiaMouth
 jsl LR_SetThisDsVisitedAndActive
-lda $0AAC : and #$0003 : sta $0AB2
+jsr SR_FixThisDsType : and #$0003 : sta $0AB2
 stz $0AAC
 sta $0000
 cop #$D9 : dw $0000, .DarkSpaceTypeBranch
 .DarkSpaceTypeBranch:    ; Handlers for DS types 0, 1, 2, and 3
-  dw $d856, $d87c, $d9cc, $da7d
+  dw $d856, $d87c, .DSType02, $da7d
 warnpc $88d7ea
+
+org $88d9cc
+.DSType02:
+; Put the statue base and correct statue on the BG layer
+cop #$32 : db $8a
+cop #$33
+jsr SR_SecIfDsItemStatueShouldBeFreedan : bcs +
+  jmp $d9f4   ; Skip ahead to creating the Will statue
++:
+jmp $da1c   ; Skip ahead to creating the Freedan statue
 
 org $88daf0
 ; Skip a lot of Gaia chatter.
@@ -8671,12 +9078,13 @@ lda #$FFF0 : trb $065A
 lda $0b12 : cmp #$00cc : bne EGaia_MaybeOfferDarkGaia
 lda $0aac : beq EGaia_MaybeOfferDarkGaia   ; Bottom DS has $0aac = 0, top has it = 1.
 cop #$D0 : db $bd,$01 : dw EGaia_MaybeOfferDarkGaia
-%MTryGiveItemAndFlag(!PyramidGaiaItem, $bd)
+%MTryGiveItemAndFlag("PyramidGaiaItem", $bd)
 EGaia_MaybeOfferDarkGaia:
 if !SettingRedJewelHunt == 0
 cop #$D0 : db $8a,$00 : dw EGaia_OfferSave    ; Rescued Kara
 cop #$D0 : db $b4,$00 : dw EGaia_OfferSave    ; Used Aura
-if !SettingStatuesPlayerChoice == 1
+lda.l Config_SettingStatuesPlayerChoice : beq EGaia_CheckSpecificStatuesForDarkGaia
+EGaia_CheckStatueCountForDarkGaia:
 lda $0a1f : sta $0000
 lda #$0000
 clc
@@ -8688,27 +9096,27 @@ lsr $0000 : adc #$00
 lsr $0000 : adc #$00
 lsr $0000 : adc #$00
 rep #$20
-cmp.w #!StatuesRequiredCount : bcc EGaia_OfferSave
-else
-if !Statue1Required == 1
-cop #$D0 : db $f8,$00 : dw EGaia_OfferSave
-endif
-if !Statue2Required == 1
-cop #$D0 : db $f9,$00 : dw EGaia_OfferSave
-endif
-if !Statue3Required == 1
-cop #$D0 : db $fa,$00 : dw EGaia_OfferSave
-endif
-if !Statue4Required == 1
-cop #$D0 : db $fb,$00 : dw EGaia_OfferSave
-endif
-if !Statue5Required == 1
-cop #$D0 : db $fc,$00 : dw EGaia_OfferSave
-endif
-if !Statue6Required == 1
-cop #$D0 : db $fd,$00 : dw EGaia_OfferSave
-endif
-endif
+cmp.l Config_StatuesRequiredCount : bcs EGaia_OfferDarkGaia
+  jmp EGaia_OfferSave
+EGaia_CheckSpecificStatuesForDarkGaia:
+lda.l Config_Statue1Required : beq +
+  cop #$D0 : db $f8,$00 : dw EGaia_OfferSave
++:
+lda.l Config_Statue2Required : beq +
+  cop #$D0 : db $f9,$00 : dw EGaia_OfferSave
++:
+lda.l Config_Statue3Required : beq +
+  cop #$D0 : db $fa,$00 : dw EGaia_OfferSave
++:
+lda.l Config_Statue4Required : beq +
+  cop #$D0 : db $fb,$00 : dw EGaia_OfferSave
++:
+lda.l Config_Statue5Required : beq +
+  cop #$D0 : db $fc,$00 : dw EGaia_OfferSave
++:
+lda.l Config_Statue6Required : beq +
+  cop #$D0 : db $fd,$00 : dw EGaia_OfferSave
++:
 EGaia_OfferDarkGaia:
 cop #$BF : dw EGaia_TextOfferDarkGaia
 cop #$BE : db $02,$01 : dw .Options
@@ -8724,10 +9132,14 @@ EGaia_OfferSave:
 cop #$BF : dw EGaia_TextOfferSave
 cop #$BE : db $02,$02 : dw .Options
 .Options:
-  dw .SayYes, .SayYes, EGaia_OfferWarp
+  dw .SayYes
+  dw .SayYes, EGaia_OfferWarp
 .SayYes:
 lda $0D8C    ; Save file index.
 jsl $83D916  ; Save game routine.
+if !SettingInfiniteInventory == 1
+jsl LR_HardenSram
+endif
 cop #$07 : db $29
 lda #$FFF0 : tsb $065A
 cop #$DA : db $3B
@@ -8794,26 +9206,108 @@ db $CA
 }
 warnpc $88de72
 
-org $88eb15
-nop : nop : nop : nop   ; Replaces cop #$BF : dw $eb85, removing ability explanation text
+org $88e9d4
+EDarkSpaceItemStatueZone:
+jsl LR_GetDsItemFlagForOuterMapOrSec : bcs .Die   ; we're not an item DS, somehow
+jsl LR_SecOnAnyFlagA : bcc +
+.Die:
+cop #$E0
++:
+cop #$8D : db $0A
+lda #$2000 : trb $10
+cop #$C1
+cop #$8B
+cop #$45 : db $03, $0A, $05, $0B : dw .PlayerInArea
+  rtl
+.PlayerInArea:
+lda #$FFF0 : tsb $065A
+cop #$DA : db $05
+jsr SR_SecIfDsItemStatueShouldBeFreedan : bcs .TransformToFreedan
+.TransformToWill:
+lda $0ad4 : beq .GiveItemAfterFormChange
+jsl LR_ForceChangeToWill
+lda #$0800 : tsb $09AE
+bra .GiveItemAfterFormChange
+.TransformToFreedan:
+lda $0ad4 : beq ..FromWill
+dec : beq .GiveItemAfterFormChange
+..FromShadow:
+lda #$0088 : sta $1002
+lda #$F2A3 : sta $1000
+lda #$0000 : sta $1008
+lda #$0800 : tsb $09AE
+bra .GiveItemAfterFormChange
+..FromWill:
+lda #$0088 : sta $1002
+lda #$F26E : sta $1000
+lda #$0000 : sta $1008
+lda #$0800 : tsb $09AE
+;bra .GiveItemAfterFormChange
+.GiveItemAfterFormChange:
+cop #$C1
+cop #$8B
+lda $09AE : bit #$0800 : beq .DoGiveItemAndAnimateOrb
+  rtl
+.DoGiveItemAndAnimateOrb:
+cop #$CA : db $08
+  lda #$FFF0 : tsb $065A
+  cop #$C1
+  cop #$8B
+cop #$CB
+cop #$86 : db $0A, $03, $14
+cop #$8A
+cop #$84 : db $0A, $03
+cop #$8A
+lda $1014 : sta $7F0018,x
+lda $1016 : sec : sbc #$0010 : sta $7F001A,x
+cop #$22 : db $0A, $01
+lda #$2000 : tsb $10
+lda #$0800 : trb $10
+cop #$04 : db $18
+cop #$DA : db $59
+lda #$0002 : sta $0bfc   ; Slow item-get text
+jsl LR_GetDsItemForOuterMapOrSec : jsl LR_GiveAnyItemA16OrSec : bcs +
+  jsl LR_GetDsItemFlagForOuterMapOrSec : jsl LR_SetAnyFlagA
++:
+cop #$C1
+sep #$20
+lda $2141
+rep #$20
+and #$00FF : cmp #$00FF : beq .FanfareFinished
+  rtl
+.FanfareFinished:
+stz $0bfc
+cop #$04 : db $16
+cop #$DA : db $3B
+lda #$FFF0 : trb $065A
+cop #$E0
 
-org $88eb5a
-EDarkSpace_MapAbilityMappings:    ; format: map,ability
-{
-db !DSPsychoDashMap,$01
-db !DSPsychoSliderMap,$02
-db !DSSpinDashMap,$04
-db !DSDarkFriarMap,$10
-db !DSAuraBarrierMap,$20
-db !DSEarthquakerMap,$40
-db $00,$00
-}
+
+; Abilities are 0-2=W, 3-5=F, so inc & 4 distinguishes them.
+; As an added bonus, non-abilities split between the two statues deterministically and roughly evenly.
+SR_SecIfDsItemStatueShouldBeFreedan:
+jsl LR_GetDsItemForOuterMapOrSec : inc : and #$0004 : bne .SecAndReturn
+.ClcAndReturn:
+clc
+rts
+.SecAndReturn:
+sec
+rts
+warnpc $88EB68
 
 org $88eb81
-db $c0   ; "Shorten ability acquisition text"
+db $c0   ; Remove the 2-second delay after "used!" in ability-get text
+
+org $88ebd3
+; Ability descriptions aren't used, so this space is free
+TextItemGetAbilityCanBeUsedIncl:
+db $c5 : dw $eb8f, $0db8   ; $eb8f = Lut_MoveNames_Pointers
+db $cd : dl $88eb70    ; = "\ncan now be used!"
+db $ca
+
 
 org $88f0a1
-db $10   ; Meet Freedan
+db $10   ; Don't check for having-met-Freedan
 
 ; Mansion: don't tamper with BG registers if room is dark
 if !IsMapEADark == 1 || !SettingDarkRoomsLevel == 4
@@ -8931,8 +9425,6 @@ sta $0026,y
 dec $26 : dec $26 : dec $26 : dec $26
 rts
 
-
-org $88feb0
 TextSnakeGameSnakesInSecondsGo:
 db "_snakes in","!SnakeGameTimeLimitSecondsString",$cb
 db "seconds. Go!"
@@ -8969,6 +9461,17 @@ dw !SnakeGameTargetEasy
 dw !SnakeGameTargetIntermediate
 dw !SnakeGameTargetAdvanced
 dw !SnakeGameTargetExpert
+
+; "Ability DS" (type 2) is redundant. This converts type-0/1 to type-2 if the DS has an item.
+SR_FixThisDsType:
+lda $0aac : cmp #$0003 : beq .NoDsItem   ; Used by upper Pyramid to force txform, in case lower Pyramid has an item
+jsl LR_GetDsItemForOuterMapOrSec : bcs .NoDsItem
+.HasDsItem:
+lda #$0002
+rts
+.NoDsItem:
+lda $0aac
+rts
 
 }
 
@@ -9028,9 +9531,11 @@ db $c3,$00
 db $c0
 
 org $898fad
+; Speed up Babel rooftop sequence
 cop #$CC : db $0e
 cop #$CC : db $0f
-rtl     ; Speed up Babel rooftop sequence
+cop #$CE : db $F4
+rtl
 
 ; Speed up Babel warp/elevator sequences
 org $8995a9
@@ -9060,7 +9565,7 @@ org $8999aa
 jmp CrystalRingBarrierLogicOverride2
 
 org $899a49
-%MTryGiveItemAndFlag(!BabelForceFieldItem, $dc)
+%MTryGiveItemAndFlag("BabelForceFieldItem", $dc)
 cop #$D0 : db $dc,$01 : dw BabelForceFieldGotItem
 rtl
 BabelForceFieldGotItem:
@@ -9211,7 +9716,7 @@ endif
 
 org $89c5bb
 ; Singing Statue
-%MTryGiveItemAndFlag(!IncaCliffItem, $32)
+%MTryGiveItemAndFlag("IncaCliffItem", $32)
 lda #$eff0 : trb $065a
 cop #$E0
 
@@ -9420,7 +9925,7 @@ db $0c : dw $1000
 EMineSlave:
 
 org $8aa751
-%MTryGiveItemAndFlag(!MineCombatSlaveItem, $a2)
+%MTryGiveItemAndFlag("MineCombatSlaveItem", $a2)
 cop #$D0 : db $a2,$00 : dw MineSlaveInvFullResponse
 rtl
 MineSlaveInvFullResponse:
@@ -9428,7 +9933,7 @@ lda #$a6f9 : sta $00
 rtl
 
 org $8aa771
-%MTryGiveItemAndFlag(!MineRampSlaveItem, $a3)
+%MTryGiveItemAndFlag("MineRampSlaveItem", $a3)
 cop #$D0 : db $a3,$00 : dw MineSlaveInvFullResponse
 rtl
 
@@ -9473,6 +9978,46 @@ jmp $8b21
 
 ; Bank $8B
 {
+org $8b8060
+; Fix an issue where the statue is lost if you warp away while Fanger is dying.
+EFangerStatueAwardListener:
+cop #$C2   ; -- so the Fanger actor has a frame to die, if applicable
+lda $0aec : bne .FangerNotDead
+.FangerAlreadyDead:
+cop #$D0 : db $fb,$00 : dw .GiveStatue
+cop #$E0
+.FangerNotDead:
+lda $09ae : bit #$0020 : bne +
+  rtl
++:
+bit #$0200 : beq +
+  cop #$C1
+  rtl
++:
+cop #$D3 : dw $016a : db $01
+.GiveStatue:
+lda #$fff0 : tsb $065a
+cop #$DA : db $3b
+cop #$BF : dw $80b5
+lda #$0003 : sta $0aac
+cop #$26 : db $fd : dw $0000,$0000 : db $00,$00,$11
+cop #$E0
+warnpc $8b80b5
+
+org $8b815c
+; Make Fanger spawn the fixed statue listener before it checks whether it's defeated
+db $00 : dw $0100
+EFanger:
+cop #$A5 : dl $8b813a : dw $0000, $2000   ; = EFangerPlayerLayerManager
+cop #$A5 : dl EFangerStatueAwardListener : dw $0000, $2000
+lda #$0003 : jsl $80b05e : bcc +   ; = LR_SecOnDefeatedBossA
+  stz $0aec
+  stz $0aee
+  cop #$E0
++:
+lda #$8019 : tsb $12
+; --and continue on as usual
+
 ; Make Fanger's detection areas cover the arena, in case player moves during quake
 org $8b81a0
 db $01,$19,$3f,$3f
@@ -9602,6 +10147,9 @@ org $8be398   ; Ignore up input
 rtl
 org $8be3b1   ; Ignore down input
 rtl
+
+org $8be3fe
+jsl LR_RestoreSaveFileWithInfiniteInventoryOrSec   ; replaces jsl $83d954
 endif
 
 ; Replace sound type selection with difficulty selection.
@@ -9838,22 +10386,56 @@ db "Expert______",$ca
 ; Game flag initialization.
 {
 EIogrGameInitFlagSetter:
-lda.w #(!HieroOrder1+(!HieroOrder2<<8)) : sta $0a58
-lda.w #(!HieroOrder3+(!HieroOrder4<<8)) : sta $0a5a
-lda.w #(!HieroOrder5+(!HieroOrder6<<8)) : sta $0a5c
-lda.w #!AutotrackerLogicAndKaraVal : sta $0a5e
-cop #$CD : dw (!Statue1Required*$02f8)    ; Flag for autotracker.
-cop #$CD : dw (!Statue2Required*$02f9)    ; Flag for autotracker.
-cop #$CD : dw (!Statue3Required*$02fa)    ; Flag for autotracker.
-cop #$CD : dw (!Statue4Required*$02fb)    ; Flag for autotracker.
-cop #$CD : dw (!Statue5Required*$02fc)    ; Flag for autotracker.
-cop #$CD : dw (!Statue6Required*$02fd)    ; Flag for autotracker.
-lda.w #(($!Jeweler1Cost)<<8) : sta $0a48
-lda.w #(($!Jeweler2Cost)+(($!Jeweler3Cost)<<8)) : sta $0a4a
-lda.w #(($!Jeweler4Cost)+(($!Jeweler5Cost)<<8)) : sta $0a4c
-lda.w #(($!Jeweler6Cost)+(($!Jeweler7Cost)<<8)) : sta $0a4e
-cop #$CD : dw (!SettingStatuesPlayerChoice*$02fe)    ; Flag for autotracker.
-cop #$CD : dw (!SettingOpenMode*$02ff)    ; Flag for autotracker.
+; Copy game settings into RAM for the autotracker.
+sep #$20
+lda.l Config_HieroOrder1 : sta $0a58
+lda.l Config_HieroOrder2 : sta $0a59
+lda.l Config_HieroOrder3 : sta $0a5a
+lda.l Config_HieroOrder4 : sta $0a5b
+lda.l Config_HieroOrder5 : sta $0a5c
+lda.l Config_HieroOrder6 : sta $0a5d
+rep #$20
+lda.l Config_AutotrackerLogicAndKaraVal : sta $0a5e
+lda.l Config_Statue1Required : beq +
+  cop #$CD : dw $02f8
++:
+lda.l Config_Statue2Required : beq +
+  cop #$CD : dw $02f9
++:
+lda.l Config_Statue3Required : beq +
+  cop #$CD : dw $02fa
++:
+lda.l Config_Statue4Required : beq +
+  cop #$CD : dw $02fb
++:
+lda.l Config_Statue5Required : beq +
+  cop #$CD : dw $02fc
++:
+lda.l Config_Statue6Required : beq +
+  cop #$CD : dw $02fd
++:
+lda.l Config_SettingStatuesPlayerChoice : beq +
+  cop #$CD : dw $02fe
++:
+sed
+phx
+ldx #$0000
+-:
+lda.l Config_JewelerCostsAnchor,x : tay
+sep #$20
+lda #$00
+--:
+clc : adc #$01
+dey : bne --
+pha
+txa : lsr : tay
+pla : sta $0a49,y    ; Jeweler costs as BCD are in $0a49-$0a4f
+inx : inx
+cpx.w #14 : bcc -
+cld
+plx
+rep #$20
+cop #$CD : dw (!SettingOpenMode*$02ff)
 if !SettingOpenMode == 1
 lda.w #%1011111011010011 : tsb $0a02   ; Flags $10/6/7/9/a/b/c/d + OpenMode $11/4/f
 else
@@ -9895,7 +10477,12 @@ cop #$CD : dw $0136
 ;; Consider opening Wat entrance stairs if starting in Wat
 ;cop #$CD : dw $016c
 endif
-cop #$CE : db $F4   ; For Apocalypse Gaia.
+; $F4 is used on the attract maps, so needs to be cleared; then indicates whether
+; Kara is in Mine; then later is cleared and indicates whether ApoGaia P2 is defeated.
+cop #$CE : db $F4
+lda.l Config_KaraLocation : cmp #$0002 : bne +
+  cop #$CC : db $F4
++:
 stz $0bfc   ; Default to fast item-get text speed.
 lda #$2800 : trb $09ae
 jsl LR_MarkRoomRewardsObtainedByDifficulty
@@ -10811,14 +11398,14 @@ db $00 : db $0A,$08, $1B,$1C : dw $006F ; Left foot
 db $01 : db $03,$00, $1C,$18 : dw $000E ; Shadow
 
 
-org $90803c
-; Inventory sprite pointers for hieroglyphs.
-dw !HieroSpritePointer1
-dw !HieroSpritePointer2
-dw !HieroSpritePointer3
-dw !HieroSpritePointer4
-dw !HieroSpritePointer5
-dw !HieroSpritePointer6
+;org $90803c
+;; Inventory sprite pointers for hieroglyphs.
+;dw !HieroSpritePointer1
+;dw !HieroSpritePointer2
+;dw !HieroSpritePointer3
+;dw !HieroSpritePointer4
+;dw !HieroSpritePointer5
+;dw !HieroSpritePointer6
 
 org $90805c    ; Add anim pointers for inventory multijewel sprite.
 dw AAnimInvMultijewel

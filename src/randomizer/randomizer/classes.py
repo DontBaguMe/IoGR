@@ -20,7 +20,7 @@ from .models.randomizer_data import RandomizerData
 
 MAX_INVENTORY = 15
 PROGRESS_ADJ = [1.5, 1.25, 1.0, 0.75]  # Required items are more likely to be placed in easier modes
-MAX_CYCLES = 500
+MAX_CYCLES = 200
 
 
 class World:
@@ -1940,13 +1940,12 @@ class World:
         for loc in self.item_locations:
             self.item_locations[loc][7] = self.get_pool_id(loc=loc)
         
-        # Save other "disallowed" items per location
-        if self.logic_mode != "Chaos":
-            # No non-W abilities in towns in Completable
-            non_w_abilities = [item for item in self.form_items[1]+self.form_items[2] if self.item_pool[item][6] == 2]
-            for loc in self.spawn_locations:
-                if loc in self.item_locations and not self.spawn_locations[loc][3]:
-                    self.item_locations[loc][4].extend(non_w_abilities)
+        # Save other "disallowed" items per location (ignored in Chaos logic):
+        # No non-W abilities in towns
+        non_w_abilities = [item for item in self.form_items[1]+self.form_items[2] if self.item_pool[item][6] == 2]
+        for loc in self.spawn_locations:
+            if loc in self.item_locations and not self.spawn_locations[loc][3]:
+                self.item_locations[loc][4].extend(non_w_abilities)
         # Jeweler inventory isn't fun if full of trash or front-loaded with goodies
         for jeweler_loc in [0,2,4]:
             self.item_locations[jeweler_loc + random.randint(0,1)][4].extend([0,1,6,41,42])
@@ -2435,13 +2434,20 @@ class World:
         ds_items = self.list_typed_items(types=[2], shuffled_only=True, incl_placed=False)
         random.shuffle(ds_items)
         self.info("Populating Dark Spaces...")
+        cycle = 0
         while True:
+            cycle += 1
+            if cycle >= MAX_CYCLES:
+                self.error("Couldn't populate DS items for an unknown reason")
+                return False
             if not ds_items:
                 # All remaining unoccupied dungeon DSes are for transform
                 for loc in self.spawn_locations:
                     if self.spawn_locations[loc][3] and loc in self.item_locations and self.item_locations[loc][1] == 2 and not self.item_locations[loc][3]:
                         self.item_locations[loc][2] = True
                 self.update_graph(True,True,False)
+                if self.logic_mode != "Completable":
+                    break    # Good enough: all DSes are populated and formful access isn't mandatory
             traverse_result = self.traverse()
             new_nodes = traverse_result[0]
             # A node needs a txform DS if it has an open formful edge, isn't accessible by that form, and the edge goes to an unreached area
@@ -2481,9 +2487,10 @@ class World:
                     # Can't expand formful access, and there are no more items to grant progress, so we're stuck
                     for n in f_missing_nodes:
                         self.warn("No formless access from or formful access to "+str(n)+" "+self.graph[n][5])
-                    self.error("World is unsolvable: missing form access")
-                    return False
-                # Reinitialize Dark Space access since we just marked several for transform
+                    if self.logic_mode == "Completable":
+                        self.error("World is unsolvable: missing form access")
+                        return False
+                # Reinitialize Dark Space access since more may now be for transform
                 self.update_graph(True,True,False)
             if ds_items:
                 # Now no accessible nodes are missing a form due to DS access, so we can safely place a DS item
@@ -2541,8 +2548,8 @@ class World:
         while not done:
             cycle += 1
             self.info(" Cycle "+str(cycle))
-            if cycle > (1 + 1*self.dungeon_shuffle) * MAX_CYCLES:
-                self.error("Max cycles exceeded")
+            if cycle > MAX_CYCLES:
+                self.error("Max cycles exceeded in item placement")
                 return False
             self.traverse()
             # Good items resist being placed early; very good items can't be placed early at all
@@ -2697,7 +2704,8 @@ class World:
 
         items = []
         for x in self.item_locations:
-            if x < 500 or x >= 700:
+            loc_type = self.item_locations[x][1]
+            if loc_type in [1,2,3] or (self.orb_rando != "None" and loc_type == 5):
                 item = self.item_locations[x][3]
                 location_name = self.item_locations[x][6].strip()
                 item_name = self.item_pool[item][3]
@@ -2718,11 +2726,13 @@ class World:
             for exit in self.exits:
                 exit_name = self.exits[exit][10]
                 linked_exit = self.exits[exit][1]
-                if not linked_exit:
-                    exit_linked_name = exit_name
-                else:
-                    exit_linked_name = self.exits[linked_exit][10]
-                exit_links.append({"entrance": exit_name, "exit": exit_linked_name})
+                if linked_exit:    # i.e. this acts like linked_exit, going to the area normally on the other side of linked_exit
+                    coupled_linked_exit = self.exits[linked_exit][0]
+                    if coupled_linked_exit:    # in this case the exit leads to where the acted-like exit's coupled exit is
+                        target_name = "Near "+self.exits[coupled_linked_exit][10]
+                    else:    # the acted-like exit is one-way, so derive a destination name from the exit name
+                        target_name = "Target of "+self.exits[linked_exit][10]
+                    exit_links.append({"transition": exit_name, "destination": target_name})
             spoiler["exit_links"] = exit_links
 
         self.spoiler = spoiler
@@ -2773,7 +2783,6 @@ class World:
             if reward_tier > 0:
                 reward = self.maps[map][2][0]
                 self.asar_defines["RoomClearReward"+format(map,"02X")] = reward
-
                 # Populate player level logic
                 if reward_tier == 4:
                     self.asar_defines["RemovedRoomRewardIntermediateFlag"+str(idx_tier2)] = 0x300 + map
@@ -2785,7 +2794,8 @@ class World:
                     self.asar_defines["RemovedRoomRewardExpertFlag"+str(idx_tier4)] = 0x300 + map
                     idx_tier4 += 1
 
-        # Items and abilities
+        # Item placement
+        ds_loc_idx = 1
         item_db = {}
         loc_db = {}
         for loc in self.item_locations:
@@ -2799,48 +2809,20 @@ class World:
         for x in loc_db:
             loc_type = loc_db[x][1]
             loc_label = loc_db[x][5]
-
-            # Handle items and orbs
+            # Normal-item and orb locs always have an item, even if empty
             if loc_type == 1 or loc_type == 5:
                 item = loc_db[x][3]
-                
-                if item_db[item][1] == 5:
-                    item_id = 0x1000 + item_db[item][2]
-                else:
-                    item_id = item_db[item][2]
+                item_id = item_db[item][2]
                 self.asar_defines[loc_label] = item_id
-                
-                if x in [0,1,2,3,4,5]:    # Jeweler items
-                    if item_db[item][1] == 5:
-                        item_name = "Open a Door"
-                    else:
-                        item_name = item_db[item][3]
-                    self.asar_defines["Jeweler"+str(x+1)+"RowText"] = item_name
-                
-            # Handle abilities
+            # Only six DS locs have items
             elif loc_type == 2:
-                ability = loc_db[x][3]
+                item = loc_db[x][3]
+                item_id = item_db[item][2]
                 map = self.spawn_locations[x][1]
-
-                if ability in [61, 62, 63, 64, 65, 66]:
-                    self.asar_defines[loc_label] = 0x05
-                    if ability == 61:  # Psycho Dash
-                        ds_label = "DSPsychoDashMap"
-                    if ability == 62:  # Psycho Slide
-                        ds_label = "DSPsychoSliderMap"
-                    if ability == 63:  # Spin Dash
-                        ds_label = "DSSpinDashMap"
-                    if ability == 64:  # Dark Friar
-                        ds_label = "DSDarkFriarMap"
-                    if ability == 65:  # Aura Barrier
-                        ds_label = "DSAuraBarrierMap"
-                    if ability == 66:  # Earthquaker
-                        ds_label = "DSEarthquakerMap"
-                    self.asar_defines[ds_label] = map
-                elif not self.spawn_locations[x][3]:   # Non-ability DSes in towns are empty
-                    self.asar_defines[loc_label] = 0x01
-                else:
-                    self.asar_defines[loc_label] = 0x03
+                if item_id:
+                    self.asar_defines["DarkSpaceItem"+str(ds_loc_idx)+"Item"] = item_id
+                    self.asar_defines["DarkSpaceItem"+str(ds_loc_idx)+"Map"] = map
+                    ds_loc_idx += 1
                     
         # Write in-game spoilers
         i = 0
@@ -2894,7 +2876,7 @@ class World:
                 darkroom_str += "$ff"
                 self.asar_defines["DarkMapList"] = darkroom_str
 
-        # print "ROM successfully created"
+        #print "ROM successfully created"
 
 
     # Pick random start location
@@ -3205,12 +3187,13 @@ class World:
         else:
             self.flute = "Fluteless"
         
-        if settings.orb_rando.value == OrbRando.NONE.value:
-            self.orb_rando = "None"
-        elif settings.orb_rando.value == OrbRando.BASIC.value:
-            self.orb_rando = "Basic"
-        else:
-            self.orb_rando = "Orbsanity"
+        #if settings.orb_rando.value == OrbRando.NONE.value:
+        #    self.orb_rando = "None"
+        #elif settings.orb_rando.value == OrbRando.BASIC.value:
+        #    self.orb_rando = "Basic"
+        #else:
+        #    self.orb_rando = "Orbsanity"
+        self.orb_rando = "Orbsanity" if settings.orb_rando else "None"
         
         if abs(settings.darkrooms.value) == DarkRooms.NONE.value:
             self.darkroom_level = "None"
@@ -3306,6 +3289,12 @@ class World:
         self.max_darkrooms = 0
         self.asar_defines = { "DummyDefine": "DummyDefine" }
         
+        dungeon_keys_nondroppable = []
+        for x in [3,5]:
+            # Generally can't drop Ramas/Hieros/Journal if Gold Ship or passage to a new room might be behind them
+            if x in self.dungeons_req or self.dungeon_shuffle or (self.boss_order != [1,2,3,4,5,6,7]):
+                dungeon_keys_nondroppable.append(x)
+        
         # Items that transfer DS and form access.
         # Items not in any list are assumed to be form-independent.
         self.form_items = {
@@ -3373,7 +3362,7 @@ class World:
         #                ] }
         self.deleted_item_pool = {}
         self.item_pool = {
-            # Items
+            # Normal items, high byte implicitly 0
             0: [2, 1,  0x00, "Nothing", False, 3, 0, 0],
             1: [45 if "Z3 Mode" not in self.variant else 29, 1, 0x01, "Red Jewel", False, 1, 0, 1],
             2: [1, 1,  0x02, "Prison Key", True and not settings.infinite_inventory, 1, 0, 0],
@@ -3381,7 +3370,7 @@ class World:
             4: [1, 1,  0x04, "Inca Statue B", True and not settings.infinite_inventory, 2, 0, 0],
             #5: [0, 1,  0x05, "Inca Melody", True and not settings.infinite_inventory, 3, 0, 0],  # Not implemented
             6: [12, 1, 0x06, "Herb", False, 3, 0, 0],
-            7: [1, 1,  0x07, "Diamond Block", True and not settings.infinite_inventory, 1, 0, 3*settings.orb_rando.value],
+            7: [1, 1,  0x07, "Diamond Block", True and not settings.infinite_inventory, 1, 0, 6*settings.orb_rando],
             8: [1, 1,  0x08, "Wind Melody", True and not settings.infinite_inventory, 1, 0, 0],
             9: [1, 1,  0x09, "Lola's Melody", True and not settings.infinite_inventory, 1, 0, 0],
             10: [1, 1, 0x0a, "Large Roast", True and not settings.infinite_inventory, 1, 0, 0],
@@ -3392,8 +3381,8 @@ class World:
             15: [1, 1, 0x0f, "Elevator Key", True and not settings.infinite_inventory, 1, 0, -1],
             16: [1, 1, 0x10, "Mu Palace Key", True and not settings.infinite_inventory, 1, 0, 0],
             17: [1, 1, 0x11, "Purity Stone", True and not settings.infinite_inventory, 1, 0, 0],
-            18: [2, 1, 0x12, "Hope Statue", True and not settings.infinite_inventory, 1, 0, -2*(1+settings.dungeon_shuffle)],
-            19: [2, 1, 0x13, "Rama Statue", bool(3 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
+            18: [2, 1, 0x12, "Hope Statue", True and not settings.infinite_inventory, 1, 0, -2*(1+self.dungeon_shuffle)],
+            19: [2, 1, 0x13, "Rama Statue", bool(3 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
             20: [1, 1, 0x14, "Magic Dust", True and not settings.infinite_inventory, 2, 0, 0],
             21: [0, 1, 0x15, "Blue Journal", False, 3, 0, 0],
             22: [1, 1, 0x16, "Lance Letter", False, 3, 0, 0],
@@ -3404,15 +3393,15 @@ class World:
             #27: [0, 1, 0x1b, "Bag of Gold", False, 3, 0, 0],  # Not implemented
             28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 3*self.difficulty if settings.darkrooms.value != 0 else 0],
             29: [1, 1, 0x1d, "Gorgon Flower", True and not settings.infinite_inventory, 1, 0, 0],
-            30: [1, 1, 0x1e, "Hieroglyph", bool(5 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
-            31: [1, 1, 0x1f, "Hieroglyph", bool(5 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
-            32: [1, 1, 0x20, "Hieroglyph", bool(5 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
-            33: [1, 1, 0x21, "Hieroglyph", bool(5 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
-            34: [1, 1, 0x22, "Hieroglyph", bool(5 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
-            35: [1, 1, 0x23, "Hieroglyph", bool(5 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
+            30: [1, 1, 0x1e, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            31: [1, 1, 0x1f, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            32: [1, 1, 0x20, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            33: [1, 1, 0x21, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            34: [1, 1, 0x22, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            35: [1, 1, 0x23, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
             36: [1, 1, 0x24, "Aura", True and not settings.infinite_inventory, 1, 0, 2*self.difficulty*self.dungeon_shuffle],
             37: [1, 1, 0x25, "Lola's Letter", False, 1, 0, 0],
-            38: [1, 1, 0x26, "Journal", bool(5 in self.dungeons_req) and not settings.infinite_inventory, 2, 0, 0],
+            38: [1, 1, 0x26, "Journal", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
             39: [1, 1, 0x27, "Crystal Ring", False, 1, 0, 3*self.difficulty if settings.darkrooms.value != 0 else 0],
             40: [1, 1, 0x28, "Apple", True and not settings.infinite_inventory, 1, 0, 0],
             41: [1, 1, 0x2e, "2 Red Jewels", False, 1, 0, -2],
@@ -3430,12 +3419,12 @@ class World:
 
             # Abilities
             60: [0, 2, "", "Nothing", False, 3, 0, 0],
-            61: [1, 2, "", "Psycho Dash", False, 1, 0, 0],
-            62: [1, 2, "", "Psycho Slider", False, 1, 0, 3],
-            63: [1, 2, "", "Spin Dash", False, 1, 0, 3],
-            64: [1, 2, "", "Dark Friar", False, 1, 0, 3],
-            65: [1, 2, "", "Aura Barrier", False, 1, 0, 0],
-            66: [1, 2, "", "Earthquaker", False, 1, 0, 3],
+            61: [1, 2, 0x1100, "Psycho Dash", False, 1, 0, 0],
+            62: [1, 2, 0x1101, "Psycho Slider", False, 1, 0, 3],
+            63: [1, 2, 0x1102, "Spin Dash", False, 1, 0, 3],
+            64: [1, 2, 0x1103, "Dark Friar", False, 1, 0, 3],
+            65: [1, 2, 0x1104, "Aura Barrier", False, 1, 0, 0],
+            66: [1, 2, 0x1105, "Earthquaker", False, 1, 0, 3],
             67: [1, 6, "", "Firebird", False, 3, 0, 0],
 
             # Mystic Statues
@@ -3491,52 +3480,54 @@ class World:
             611: [0, 6, "", "Can Play Songs", False, 1, 0, 0],   # Expanded during init to Flute|Fluteless
             612: [0, 6, "", "Telekinesis", False, 1, 0, 0],   # Expanded during init to Flute|Fluteless|Freedan|Shadow
             
-            # Orbs that open doors
-            700: [1, 5, 0x01, "Open Underground Tunnel Skeleton Cage", False, 3, 0, 0],
-            701: [1, 5, 0x02, "Open Underground Tunnel First Worm Door", False, 1, 0, -5],
-            702: [1, 5, 0x03, "Open Underground Tunnel Second Worm Door", False, 1, 0, -5],
-            703: [1, 5, 0x05, "Open Underground Tunnel West Room Bat Door", False, 1, 0, -5],
-            704: [1, 5, 0x16, "Open Underground Tunnel Hidden Dark Space", False, 1, 0, -5],
-            705: [1, 5, 0x17, "Open Underground Tunnel Red Skeleton Barrier 1", False, 1, 0, -5],
-            706: [1, 5, 0x18, "Open Underground Tunnel Red Skeleton Barrier 2", False, 1, 0, -5],
-            707: [1, 5, 0x0d, "Open Incan Ruins West Ladder", False, 1, 0, 0],
-            708: [1, 5, 0x0e, "Open Incan Ruins Final Ladder", False, 1, 0, 0],
-            709: [1, 5, 0x0f, "Open Incan Ruins Entrance Ladder", False, 1, 0, 3*settings.orb_rando.value],
-            710: [1, 5, 0x0c, "Open Incan Ruins Water Room Ramp", False, 1, 0, 0],
-            711: [1, 5, 0x0b, "Open Incan Ruins East-West Freedan Ramp", False, 1, 0, 0],
-            712: [1, 5, 0x0a, "Open Incan Ruins Diamond Block Stairs", False, 3, 0, 0],
-            713: [1, 5, 0x10, "Open Incan Ruins Singing Statue Stairs", False, 1, 0, 0],
-            714: [1, 5, 0x34, "Open Diamond Mine Tunnel Middle Fence", False, 1, 0, -3],
-            715: [1, 5, 0x35, "Open Diamond Mine Tunnel South Fence", False, 1, 0, -3],
-            716: [1, 5, 0x36, "Open Diamond Mine Tunnel North Fence", False, 1, 0, -3],
-            717: [1, 5, 0x22, "Open Diamond Mine Big Room Monster Cage", False, 3, 0, 0],
-            718: [1, 5, 0x32, "Open Diamond Mine Hidden Dark Space", False, 1, 0, 0],
-            719: [1, 5, 0x23, "Open Diamond Mine Ramp Room Worm Fence", False, 1, 0, 0],
-            720: [1, 5, 0x37, "Open Sky Garden SE Topside Friar Barrier", False, 1, 0, 0],
-            721: [1, 5, 0x30, "Open Sky Garden SE Darkside Chest Barrier", False, 1, 0, 0],
-            722: [1, 5, 0x24, "Open Sky Garden SW Topside Cyber Barrier", False, 1, 0, 0],
-            723: [1, 5, 0x2b, "Open Sky Garden SW Topside Cyber Ledge", False, 3, 0, 0],
-            724: [1, 5, 0x2c, "Open Sky Garden SW Topside Worm Barrier", False, 1, 0, 0],
-            725: [1, 5, 0x31, "Open Sky Garden SW Darkside Fire Cages", False, 1, 0, 0],
-            726: [1, 5, 0x3d, "Open Mu Entrance Room Barrier", False, 1, 0, 0],
-            727: [1, 5, 0x3e, "Open Mu Northeast Room Rock 1", False, 1, 0, 0],
-            728: [1, 5, 0x3f, "Open Mu Northeast Room Rock 2", False, 1, 0, 0],
-            729: [1, 5, 0x42, "Open Mu West Room Slime Cages", False, 3, 0, 0],
-            730: [1, 5, 0x41, "Open Mu East-Facing Stone Head", False, 3, 0, 0],
-            731: [1, 5, 0x40, "Open Mu South-Facing Stone Head", False, 3, 0, 0],
-            732: [1, 5, 0x53, "Open Great Wall Archer Friar Barrier", False, 1, 0, 0],
-            #733: [1, 5, 0x6a, "Open Great Wall Fanger Arena Exit", False, 1, 0, 0], # Probably shouldn't randomize this...
-            734: [1, 5, 0x68, "Open Mt. Temple West Chest Shortcut", False, 3, 0, 0],
-            735: [1, 5, 0x6c, "Open Ankor Wat Entrance Stairs", False, 1, 0, 0],
-            736: [1, 5, 0x6b, "Open Ankor Wat Outer East Slider Hole", False, 1, 0, 0],
-            #737: [1, 5, 0x6d, "Open Ankor Wat Pit Exit", False, 1, 0, 0], # Probably shouldn't randomize this...
-            738: [1, 5, 0x6f, "Open Ankor Wat Dark Space Corridor", False, 1, 0, 0],
-            739: [1, 5, 0x73, "Open Pyramid Foyer Upper Dark Space", False, 1, 0, 0],
-            740: [1, 5, 0x9a, "Open Jeweler's Mansion First Barrier", False, 1, 0, 0],
-            741: [1, 5, 0x9b, "Open Jeweler's Mansion Second Barrier", False, 1, 0, 0],
+            # Orbs that open doors -- ASM ID is the map rearrangement flag + artificial 0x1000
+            700: [1, 5, 0x1001, "Open Underground Tunnel Skeleton Cage", False, 3, 0, 0],
+            701: [1, 5, 0x1002, "Open Underground Tunnel First Worm Door", False, 1, 0, -5],
+            702: [1, 5, 0x1003, "Open Underground Tunnel Second Worm Door", False, 1, 0, -5],
+            703: [1, 5, 0x1005, "Open Underground Tunnel West Room Bat Door", False, 1, 0, -5],
+            704: [1, 5, 0x1016, "Open Underground Tunnel Hidden Dark Space", False, 1, 0, -5],
+            705: [1, 5, 0x1017, "Open Underground Tunnel Red Skeleton Barrier 1", False, 1, 0, -5],
+            706: [1, 5, 0x1018, "Open Underground Tunnel Red Skeleton Barrier 2", False, 1, 0, -5],
+            707: [1, 5, 0x100d, "Open Incan Ruins West Ladder", False, 1, 0, 0],
+            708: [1, 5, 0x100e, "Open Incan Ruins Final Ladder", False, 1, 0, 0],
+            709: [1, 5, 0x100f, "Open Incan Ruins Entrance Ladder", False, 1, 0, 6*settings.orb_rando],
+            710: [1, 5, 0x100c, "Open Incan Ruins Water Room Ramp", False, 1, 0, 0],
+            711: [1, 5, 0x100b, "Open Incan Ruins East-West Freedan Ramp", False, 1, 0, 0],
+            712: [1, 5, 0x100a, "Open Incan Ruins Diamond Block Stairs", False, 3, 0, 0],
+            713: [1, 5, 0x1010, "Open Incan Ruins Singing Statue Stairs", False, 1, 0, 0],
+            714: [1, 5, 0x1034, "Open Diamond Mine Tunnel Middle Fence", False, 1, 0, -3],
+            715: [1, 5, 0x1035, "Open Diamond Mine Tunnel South Fence", False, 1, 0, -3],
+            716: [1, 5, 0x1036, "Open Diamond Mine Tunnel North Fence", False, 1, 0, -3],
+            717: [1, 5, 0x1022, "Open Diamond Mine Big Room Monster Cage", False, 3, 0, 0],
+            718: [1, 5, 0x1032, "Open Diamond Mine Hidden Dark Space", False, 1, 0, 0],
+            719: [1, 5, 0x1023, "Open Diamond Mine Ramp Room Worm Fence", False, 1, 0, 0],
+            720: [1, 5, 0x1037, "Open Sky Garden SE Topside Friar Barrier", False, 1, 0, 0],
+            721: [1, 5, 0x1030, "Open Sky Garden SE Darkside Chest Barrier", False, 1, 0, 0],
+            722: [1, 5, 0x1024, "Open Sky Garden SW Topside Cyber Barrier", False, 1, 0, 0],
+            723: [1, 5, 0x102b, "Open Sky Garden SW Topside Cyber Ledge", False, 3, 0, 0],
+            724: [1, 5, 0x102c, "Open Sky Garden SW Topside Worm Barrier", False, 1, 0, 0],
+            725: [1, 5, 0x1031, "Open Sky Garden SW Darkside Fire Cages", False, 1, 0, 0],
+            726: [1, 5, 0x103d, "Open Mu Entrance Room Barrier", False, 1, 0, 0],
+            727: [1, 5, 0x103e, "Open Mu Northeast Room Rock 1", False, 1, 0, 0],
+            728: [1, 5, 0x103f, "Open Mu Northeast Room Rock 2", False, 1, 0, 0],
+            729: [1, 5, 0x1042, "Open Mu West Room Slime Cages", False, 3, 0, 0],
+            730: [1, 5, 0x1041, "Open Mu East-Facing Stone Head", False, 3, 0, 0],
+            731: [1, 5, 0x1040, "Open Mu South-Facing Stone Head", False, 3, 0, 0],
+            732: [1, 5, 0x1053, "Open Great Wall Archer Friar Barrier", False, 1, 0, 0],
+            #733: [1, 5, 0x106a, "Open Great Wall Fanger Arena Exit", False, 1, 0, 0], # Probably shouldn't randomize this...
+            734: [1, 5, 0x1068, "Open Mt. Temple West Chest Shortcut", False, 3, 0, 0],
+            735: [1, 5, 0x106c, "Open Ankor Wat Entrance Stairs", False, 1, 0, 0],
+            736: [1, 5, 0x106b, "Open Ankor Wat Outer East Slider Hole", False, 1, 0, 0],
+            #737: [1, 5, 0x106d, "Open Ankor Wat Pit Exit", False, 1, 0, 0], # Probably shouldn't randomize this...
+            738: [1, 5, 0x106f, "Open Ankor Wat Dark Space Corridor", False, 1, 0, 0],
+            739: [1, 5, 0x1073, "Open Pyramid Foyer Upper Dark Space", False, 1, 0, 0],
+            740: [1, 5, 0x109a, "Open Jeweler's Mansion First Barrier", False, 1, 0, 0],
+            741: [1, 5, 0x109b, "Open Jeweler's Mansion Second Barrier", False, 1, 0, 0],
             
             800: [1, 6, "", "Dungeon Shuffle artificial logic", False, 3, 0, 0],
-            801: [0, 6, "", "Dungeon Shuffle artificial antilogic", False, 3, 0, 0]
+            801: [0, 6, "", "Dungeon Shuffle artificial antilogic", False, 3, 0, 0],
+    
+            900: [0, 1, 0x32, "Other World Item", False, 1, 0, 0]
         }
 
         # Define Item/Ability/Statue locations
@@ -3545,7 +3536,7 @@ class World:
         #                2: Filled Flag, 
         #                3: Filled Item (default listed here, which is cleared or hardened on init),
         #                4: [Restricted Items],
-        #                5: ASM ID label,
+        #                5: ASM ID label (if applicable),
         #                6: Name,
         #                7: ShufflePool (populated during world initialization),
         #                8: DiscoveredCycle (populated during item placement),
@@ -3567,14 +3558,14 @@ class World:
             8:   [26, 1, False, 0, [], "CapeLancesHouseItem", "South Cape: Lance's House", 0, 0, [] ],
             9:   [23, 1, False, 0, [], "CapeLolaItem",        "South Cape: Lola", 0, 0, [] ],
 
-            10:  [21, 2, False, 0, [], "DkSpSouthCapeType", "South Cape: Dark Space", 0, 0, [] ],
+            10:  [21, 2, False, 0, [], "", "South Cape: Dark Space", 0, 0, [] ],
 
             # Edward's
             11:  [30, 1, False, 0, [], "ECHiddenGuardItem", "Edward's Castle: Hidden Guard", 0, 0, [] ],
             12:  [30, 1, False, 0, [], "ECBasementItem",    "Edward's Castle: Basement", 0, 0, [] ],
             13:  [32, 1, False, 0, [], "EDHamletItem",      "Edward's Prison: Hamlet", 0, 0, [] ],
 
-            14:  [32, 2, False, 0, [], "DkSpPrisonCellType", "Edward's Prison: Dark Space", 0, 0, [] ],
+            14:  [32, 2, False, 0, [], "", "Edward's Prison: Dark Space", 0, 0, [] ],
 
             # Underground Tunnel
             15:  [39, 1, False, 0, [], "EDSpikeChestItem",     "Underground Tunnel: Spike's Chest", 0, 0, [] ],
@@ -3582,7 +3573,7 @@ class World:
             17:  [705,1, False, 0, [], "EDEndChestItem",       "Underground Tunnel: Ribber's Chest  ", 0, 0, [] ],
             18:  [49, 1, False, 0, [], "EDEndBarrelsItem",     "Underground Tunnel: Barrels", 0, 0, [] ],
 
-            19:  [720,2, False, 0, [], "DkSpPrisonEndType", "Underground Tunnel: Dark Space", 0, 0, [] ],
+            19:  [720,2, False, 0, [], "", "Underground Tunnel: Dark Space", 0, 0, [] ],
             
             700: [41, 5, False, 0, [],  "EDCageWormItem",      "Underground Tunnel: Worm for East Skeleton Cage", 0, 0, [[609, 1]] ],
             701: [41, 5, False, 0, [],  "EDSoutheastWormItem", "Underground Tunnel: Worm for East Door", 0, 0, [[609, 1]] ],
@@ -3596,7 +3587,7 @@ class World:
             20:  [51, 1, False, 0, [], "ItoryLogsItem", "Itory Village: Logs", 0, 0, [] ],
             21:  [58, 1, False, 0, [], "ItoryCaveItem", "Itory Village: Cave", 0, 0, [] ],
 
-            22:  [51, 2, False, 0, [], "DkSpItoryType", "Itory Village: Dark Space", 0, 0, [] ],
+            22:  [51, 2, False, 0, [], "", "Itory Village: Dark Space", 0, 0, [] ],
 
             # Moon Tribe
             23:  [62, 1, False, 0, [], "MoonTribeCaveItem", "Moon Tribe: Cave", 0, 0, [] ],
@@ -3608,9 +3599,9 @@ class World:
             27:  [93, 1, False, 0, [], "IncaWormChestItem",         "Inca Ruins: Slugger Chest", 0, 0, [] ],
             28:  [76, 1, False, 0, [], "IncaCliffItem",             "Inca Ruins: Singing Statue", 0, 0, [] ],
 
-            29:  [96, 2, False, 0, [], "DkSpInca1Type",  "Inca Ruins: Dark Space 1", 0, 0, [] ],
-            30:  [93, 2, False, 0, [], "DkSpInca2Type",  "Inca Ruins: Dark Space 2", 0, 0, [] ],
-            31:  [77, 2, False, 0, [], "DkSpIncaEndType","Inca Ruins: Final Dark Space", 0, 0, [] ],
+            29:  [96, 2, False, 0, [], "", "Inca Ruins: Dark Space 1", 0, 0, [] ],
+            30:  [93, 2, False, 0, [], "", "Inca Ruins: Dark Space 2", 0, 0, [] ],
+            31:  [77, 2, False, 0, [], "", "Inca Ruins: Final Dark Space", 0, 0, [] ],
 
             707: [700, 5, False, 0, [], "IncaWestLadderItem",      "Inca Ruins: 4-Way for West Ladder", 0, 0, [[609, 1]] ],
             708: [75, 5, False, 0, [],  "IncaSoutheastLadderItem", "Inca Ruins: 4-Way for SE Ladder", 0, 0, [[609, 1]] ],
@@ -3633,7 +3624,7 @@ class World:
             37:  [110, 1, False, 0, [], "FrejBin2Item",       "Freejia: Trash Can 2", 0, 0, [] ],
             38:  [110, 1, False, 0, [], "FrejSnitchItem",     "Freejia: Snitch", 0, 0, [[504, 1]] ],
 
-            39:  [125, 2, False, 0, [], "DkSpFreejiaType", "Freejia: Dark Space", 0, 0, [] ],
+            39:  [125, 2, False, 0, [], "", "Freejia: Dark Space", 0, 0, [] ],
 
             # Diamond Mine
             40:  [134, 1, False, 0, [], "MineChestItem",       "Diamond Mine: Chest", 0, 0, [] ],
@@ -3643,9 +3634,9 @@ class World:
             44:  [149, 1, False, 0, [], "MineCombatSlaveItem", "Diamond Mine: Laborer w/Mine Key", 0, 0, [[609, 1]] ],
             45:  [150, 1, False, 0, [], "MineSamItem",         "Diamond Mine: Sam", 0, 0, [] ],
 
-            46:  [721, 2, False, 0, [], "DkSpMineAppearingType", "Diamond Mine: Appearing Dark Space", 0, 0, [] ],
-            47:  [131, 2, False, 0, [], "DkSpMineAtWallType",    "Diamond Mine: Dark Space at Wall", 0, 0, [] ],
-            48:  [142, 2, False, 0, [], "DkSpMineBehindType",    "Diamond Mine: Dark Space behind Wall", 0, 0, [] ],
+            46:  [721, 2, False, 0, [], "", "Diamond Mine: Appearing Dark Space", 0, 0, [] ],
+            47:  [131, 2, False, 0, [], "", "Diamond Mine: Dark Space at Wall", 0, 0, [] ],
+            48:  [142, 2, False, 0, [], "", "Diamond Mine: Dark Space behind Wall", 0, 0, [] ],
 
             714: [701, 5, False, 0, [], "MineMidFenceItem",      "Diamond Mine: Lizard for Tunnel Middle Fence", 0, 0, [[609, 1]] ],
             715: [130, 5, False, 0, [], "MineSouthFenceItem",    "Diamond Mine: Eye for Tunnel South Fence", 0, 0, [[609, 1]] ],
@@ -3664,10 +3655,10 @@ class World:
             55:  [194, 1, False, 0, [], "SGNWTopChestItem",    "Sky Garden: (NW) North Chest", 0, 0, [] ],
             56:  [194, 1, False, 0, [], "SGNWBotChestItem",    "Sky Garden: (NW) South Chest", 0, 0, [[609, 1]] ],
 
-            57:  [170, 2, False, 0, [], "DkSpSGFoyerType", "Sky Garden: Dark Space (Foyer)", 0, 0, [] ],
-            58:  [169, 2, False, 0, [], "DkSpSGSEType",    "Sky Garden: Dark Space (SE)", 0, 0, [] ],
-            59:  [183, 2, False, 0, [], "DkSpSGSWType",    "Sky Garden: Dark Space (SW)", 0, 0, [] ],
-            60:  [195, 2, False, 0, [], "DkSpSGNWType",    "Sky Garden: Dark Space (NW)", 0, 0, [] ],
+            57:  [170, 2, False, 0, [], "", "Sky Garden: Dark Space (Foyer)", 0, 0, [] ],
+            58:  [169, 2, False, 0, [], "", "Sky Garden: Dark Space (SE)", 0, 0, [] ],
+            59:  [183, 2, False, 0, [], "", "Sky Garden: Dark Space (SW)", 0, 0, [] ],
+            60:  [195, 2, False, 0, [], "", "Sky Garden: Dark Space (NW)", 0, 0, [] ],
 
             720: [711, 5, False, 0, [], "SGSETopBarrierItem",   "Sky Garden: (SE) Top Robot for Center Barrier", 0, 0, [[609, 1]] ],
             721: [180, 5, False, 0, [], "SGSEBotBarrierItem",   "Sky Garden: (SE) Bottom Robot for Chest", 0, 0, [[609, 1]] ],
@@ -3683,7 +3674,7 @@ class World:
             64:  [200, 1, False, 0, [], "SeaPalBuffyItem",     "Seaside Palace: Buffy", 0, 0, [[510, 1]] ],
             65:  [205, 1, False, 0, [], "SeaPalCoffinItem",    "Seaside Palace: Coffin", 0, 0, [[501, 1]] ],
 
-            66:  [200, 2, False, 0, [], "DkSpSeaPalType", "Seaside Palace: Dark Space", 0, 0, [] ],
+            66:  [200, 2, False, 0, [], "", "Seaside Palace: Dark Space", 0, 0, [] ],
 
             # Mu
             67:  [217, 1, False, 0, [], "MuEmptyChest1Item", "Mu: Empty Chest 1", 0, 0, [] ],
@@ -3694,8 +3685,8 @@ class World:
             72:  [214, 1, False, 0, [], "MuRamaChestNItem", "Mu: Rama Chest N", 0, 0, [] ],
             73:  [219, 1, False, 0, [], "MuRamaChestEItem", "Mu: Rama Chest E", 0, 0, [] ],
 
-            74:  [218, 2, False, 0, [], "DkSpMuTransformType", "Mu: Northeast Dark Space", 0, 0, [] ],
-            75:  [228, 2, False, 0, [], "DkSpMuSliderType", "Mu: Slider Dark Space", 0, 0, [] ],
+            74:  [218, 2, False, 0, [], "", "Mu: Northeast Dark Space", 0, 0, [] ],
+            75:  [228, 2, False, 0, [], "", "Mu: Slider Dark Space", 0, 0, [] ],
 
             726: [212, 5, False, 0, [], "MuEntranceGolemItem", "Mu: Entrance Golem for Gate", 0, 0, [[609, 1]] ],
             727: [726, 5, False, 0, [], "MuDroplet1Item", "Mu: NE Droplet for Rock 1", 0, 0, [[609, 1]] ],
@@ -3706,7 +3697,7 @@ class World:
 
             # Angel Village
             76:  [254, 1, False, 0, [], "AnglDanceHallItem", "Angel Village: Dance Hall", 0, 0, [] ],
-            77:  [255, 2, False, 0, [], "DkSpAngelVillageType", "Angel Village: Dark Space", 0, 0, [] ],
+            77:  [255, 2, False, 0, [], "", "Angel Village: Dark Space", 0, 0, [] ],
 
             # Angel Dungeon
             78:  [265, 1, False, 0, [], "AnglSliderChestItem", "Angel Dungeon: Slider Chest", 0, 0, [] ],
@@ -3721,7 +3712,7 @@ class World:
             86:  [283, 1, False, 0, [], "WtrmDesertJarItem", "Watermia: Gambling House", 0, 0, [] ],
             87:  [280, 1, False, 0, [], "WtrmRussianGlassItem", "Watermia: Russian Glass", 0, 0, [] ],
 
-            88:  [282, 2, False, 0, [], "DkSpWatermiaType", "Watermia: Dark Space", 0, 0, [] ],
+            88:  [282, 2, False, 0, [], "", "Watermia: Dark Space", 0, 0, [] ],
 
             # Great Wall
             89:  [290, 1, False, 0, [], "GtWlNecklace1Item", "Great Wall: Necklace 1", 0, 0, [] ],
@@ -3729,9 +3720,9 @@ class World:
             91:  [292, 1, False, 0, [], "GtWlChest1Item", "Great Wall: Chest 1", 0, 0, [] ],
             92:  [294, 1, False, 0, [], "GtWlChest2Item", "Great Wall: Chest 2", 0, 0, [] ],
 
-            93:  [295, 2, False, 0, [], "DkSpGreatWall1Type", "Great Wall: Archer Dark Space", 0, 0, [] ],
-            94:  [297, 2, False, 0, [], "DkSpGreatWallSpinType", "Great Wall: Platform Dark Space", 0, 0, [] ],
-            95:  [300, 2, False, 0, [], "DkSpGreatWallEndType", "Great Wall: Appearing Dark Space", 0, 0, [] ],
+            93:  [295, 2, False, 0, [], "", "Great Wall: Archer Dark Space", 0, 0, [] ],
+            94:  [297, 2, False, 0, [], "", "Great Wall: Platform Dark Space", 0, 0, [] ],
+            95:  [300, 2, False, 0, [], "", "Great Wall: Appearing Dark Space", 0, 0, [] ],
 
             732: [712, 5, False, 0, [], "GtWlArcherItem", "Great Wall: Archer for Friar Gate", 0, 0, [[609, 1]] ],
 
@@ -3744,7 +3735,7 @@ class World:
             101: [321, 1, False, 0, [], "EuroSlaveRoomBarrelItem", "Euro: Shrine", 0, 0, [] ],
             102: [314, 1, False, 0, [], "EuroAnnItem", "Euro: Ann", 0, 0, [[40, 1]] ],
 
-            103: [325, 2, False, 0, [], "DkSpEuroType", "Euro: Dark Space", 0, 0, [] ],
+            103: [325, 2, False, 0, [], "", "Euro: Dark Space", 0, 0, [] ],
 
             # Mt Temple
             104: [336, 1, False, 0, [], "KressChest1Item", "Mt. Temple: Red Jewel Chest", 0, 0, [] ],
@@ -3753,9 +3744,9 @@ class World:
             107: [343, 1, False, 0, [], "KressChest4Item", "Mt. Temple: Drops Chest 3", 0, 0, [] ],
             108: [345, 1, False, 0, [], "KressChest5Item", "Mt. Temple: Final Chest", 0, 0, [] ],
 
-            109: [332, 2, False, 0, [], "DkSpKress1Type", "Mt. Temple: Dark Space 1", 0, 0, [] ],
-            110: [337, 2, False, 0, [], "DkSpKress2Type", "Mt. Temple: Dark Space 2", 0, 0, [] ],
-            111: [343, 2, False, 0, [], "DkSpKress3Type", "Mt. Temple: Dark Space 3", 0, 0, [] ],
+            109: [332, 2, False, 0, [], "", "Mt. Temple: Dark Space 1", 0, 0, [] ],
+            110: [337, 2, False, 0, [], "", "Mt. Temple: Dark Space 2", 0, 0, [] ],
+            111: [343, 2, False, 0, [], "", "Mt. Temple: Dark Space 3", 0, 0, [] ],
 
             734: [338, 5, False, 0, [], "KressSkullShortcutItem", "Mt. Temple: Skull for Drops Chest 1 Shortcut", 0, 0, [[609, 1]] ],
 
@@ -3763,7 +3754,7 @@ class World:
             112: [353, 1, False, 0, [], "NativesPotItem", "Natives' Village: Statue Room", 0, 0, [] ],
             113: [354, 1, False, 0, [], "NativesGirlItem", "Natives' Village: Statue", 0, 0, [] ],
 
-            114: [350, 2, False, 0, [], "DkSpNativesType", "Natives' Village: Dark Space", 0, 0, [] ],
+            114: [350, 2, False, 0, [], "", "Natives' Village: Dark Space", 0, 0, [] ],
 
             # Ankor Wat
             115: [361, 1, False, 0, [], "WatChest1Item", "Ankor Wat: Ramp Chest", 0, 0, [] ],
@@ -3774,9 +3765,9 @@ class World:
             120: [380, 1, False, 0, [], "WatGlassesItem", "Ankor Wat: Glasses Location", 0, 0, [] ],
             121: [391, 1, False, 0, [], "WatSpiritItem", "Ankor Wat: Spirit", 0, 0, [] ],
 
-            122: [372, 2, False, 0, [], "DkSpWatGardenType", "Ankor Wat: Garden Dark Space", 0, 0, [] ],
-            123: [377, 2, False, 0, [], "DkSpWatQuakeType", "Ankor Wat: Earthquaker Dark Space", 0, 0, [] ],
-            124: [383, 2, False, 0, [], "DkSpWatDropType", "Ankor Wat: Drop Down Dark Space", 0, 0, [] ],
+            122: [372, 2, False, 0, [], "", "Ankor Wat: Garden Dark Space", 0, 0, [] ],
+            123: [377, 2, False, 0, [], "", "Ankor Wat: Earthquaker Dark Space", 0, 0, [] ],
+            124: [383, 2, False, 0, [], "", "Ankor Wat: Drop Down Dark Space", 0, 0, [] ],
 
             735: [739, 5, False, 0, [], "WatSouthScarabItem", "Ankor Wat: Scarab for Outer South Stair", 0, 0, [[609, 1]] ],
             736: [364, 5, False, 0, [], "WatEastSliderHoleItem", "Ankor Wat: Scarab for Outer East Slider Hole", 0, 0, [[609, 1]] ],
@@ -3788,7 +3779,7 @@ class World:
             127: [400, 1, False, 0, [], "DaoGrassItem", "Dao: East Grass", 0, 0, [] ],
             128: [403, 1, False, 0, [], "DaoSnakeGameItem", "Dao: Snake Game", 0, 0, [[609, 1]] ],
 
-            129: [400, 2, False, 0, [], "DkSpDaoType", "Dao: Dark Space", 0, 0, [] ],
+            129: [400, 2, False, 0, [], "", "Dao: Dark Space", 0, 0, [] ],
 
             # Pyramid
             130: [713, 1, False, 0, [], "PyramidGaiaItem", "Pyramid: Dark Space Top", 0, 0, [] ],
@@ -3804,7 +3795,7 @@ class World:
             140: [446, 1, False, 0, [], "PyramidHiero5Item", "Pyramid: Hieroglyph 5", 0, 0, [] ],
             141: [447, 1, False, 0, [], "PyramidHiero6Item", "Pyramid: Hieroglyph 6", 0, 0, [] ],
 
-            142: [413, 2, False, 0, [], "DkSpPyramidBotType", "Pyramid: Dark Space Bottom", 0, 0, [] ],
+            142: [413, 2, False, 0, [], "", "Pyramid: Dark Space Bottom", 0, 0, [] ],
 
             739: [411, 5, False, 0, [], "PyramidEntranceOrbsItem", "Pyramid: Entrance Orbs for DS Gate", 0, 0, [[609, 1]] ],
 
@@ -3812,8 +3803,8 @@ class World:
             143: [461, 1, False, 0, [], "BabelPillowItem", "Babel: Pillow", 0, 0, [] ],
             144: [461, 1, False, 0, [], "BabelForceFieldItem", "Babel: Force Field", 0, 0, [] ],
 
-            145: [461, 2, False, 0, [], "DkSpBabelBotType", "Babel: Dark Space Bottom", 0, 0, [] ],
-            146: [472, 2, False, 0, [], "DkSpBabelTopType", "Babel: Dark Space Top", 0, 0, [] ],
+            145: [461, 2, False, 0, [], "", "Babel: Dark Space Bottom", 0, 0, [] ],
+            146: [472, 2, False, 0, [], "", "Babel: Dark Space Top", 0, 0, [] ],
 
             # Jeweler's Mansion
             147: [715, 1, False, 0, [], "MansionChestItem", "Jeweler's Mansion: Chest", 0, 0, [] ],

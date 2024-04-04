@@ -925,11 +925,8 @@ db $03 : db $00,$10,$10 : dl $9E9BFB : db $00
 db $04 : db $00,$70,$10 : dl $DE3F73
 db $05 : db $00,$20,$00,$01 : dl $D813A8
 db $06 : db $01 : dl $94BEC9
-if !KaraLocation == 2
-db $15 : db $25
-else
+db $13 : db $F4,$25   ; Load portrait assets if Kara is in Mine
 db $15 : db $0C
-endif
 db $00
 
 db $49 : db $00

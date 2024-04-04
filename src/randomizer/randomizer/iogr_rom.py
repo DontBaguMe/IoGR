@@ -1,4 +1,4 @@
-import binascii, hashlib, logging, os, random, tempfile, json, copy
+import binascii, hashlib, logging, os, random, tempfile, json, copy, sys
 from typing import BinaryIO
 
 from .patch import Patch
@@ -23,9 +23,8 @@ from .models.enums import *
 from . import asar
 
 VERSION = "4.7.2"
-MAX_RANDO_RETRIES = 100
+MAX_RANDO_RETRIES = 50
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
-os.add_dll_directory(os.getcwd()+"/src/randomizer/randomizer")    # So python can find asar.dll.
 
 
 def generate_filename(settings: RandomizerData, extension: str):
@@ -82,12 +81,12 @@ def generate_filename(settings: RandomizerData, extension: str):
             affix += "D"
         return affix
     
-    def getOrbRando(orb_rando):
-        if orb_rando.value == OrbRando.BASIC.value:
-            return "_oB"
-        if orb_rando.value == OrbRando.ORBSANITY.value:
-            return "_oX"
-        return ""
+    #def getOrbRando(orb_rando):
+    #    if orb_rando.value == OrbRando.BASIC.value:
+    #        return "_oB"
+    #    if orb_rando.value == OrbRando.ORBSANITY.value:
+    #        return "_oX"
+    #    return ""
     
     def getDarkRooms(darkrooms):
         if abs(darkrooms.value) == DarkRooms.NONE.value:
@@ -149,9 +148,9 @@ def generate_filename(settings: RandomizerData, extension: str):
     filename += getStartingLocation(settings.start_location)
     filename += getEnemizer(settings.enemizer, settings.boss_shuffle)
     filename += getEntranceShuffle(settings.coupled_exits, settings.town_shuffle, settings.dungeon_shuffle, settings.overworld_shuffle)
-    filename += getOrbRando(settings.orb_rando)
+    filename += getSwitch(settings.orb_rando, "_oX")
     filename += getDarkRooms(settings.darkrooms)
-    if (settings.open_mode or settings.firebird or settings.ohko or settings.z3 or settings.allow_glitches or settings.flute.value > 0 or settings.red_jewel_madness):
+    if (settings.open_mode or settings.firebird or settings.ohko or settings.z3 or settings.allow_glitches or settings.flute.value > 0 or settings.infinite_inventory or settings.red_jewel_madness):
         filename += "_v"
         filename += getSwitch(settings.open_mode, "o")
         filename += getSwitch(settings.firebird, "f")
@@ -249,23 +248,23 @@ class Randomizer:
         ##########################################################################
         #                       Randomize heiroglyph order
         ##########################################################################
-        hieroglyph_info = {    # 2-byte text word, sprite addr, tile ID
-            1: [0xc1c0, 0x81de, 0x84],
-            2: [0xc3c2, 0x81e4, 0x85],
-            3: [0xc5c4, 0x81ea, 0x86],
-            4: [0xc7c6, 0x81f0, 0x8c],
-            5: [0xc9c8, 0x81f6, 0x8d],
-            6: [0xcbca, 0x81fc, 0x8e]
-        }
+        #hieroglyph_info = {    # 2-byte text word, sprite addr, tile ID
+        #    1: [0xc1c0, 0x81de, 0x84],
+        #    2: [0xc3c2, 0x81e4, 0x85],
+        #    3: [0xc5c4, 0x81ea, 0x86],
+        #    4: [0xc7c6, 0x81f0, 0x8c],
+        #    5: [0xc9c8, 0x81f6, 0x8d],
+        #    6: [0xcbca, 0x81fc, 0x8e]
+        #}
         hieroglyph_order = [1, 2, 3, 4, 5, 6]
         random.shuffle(hieroglyph_order)
         this_pos = 1
         while this_pos < 7:
             this_hiero = hieroglyph_order[this_pos-1]
             self.asar_defines["HieroOrder"+str(this_pos)] = this_hiero
-            self.asar_defines["HieroSpritePointer"+str(this_pos)] = hieroglyph_info[this_hiero][1]
-            self.asar_defines["HieroItemTile"+str(this_pos)] = hieroglyph_info[this_hiero][2]
-            self.asar_defines["HieroJournalText"+str(this_pos)] = hieroglyph_info[this_hiero][0]
+            #self.asar_defines["HieroSpritePointer"+str(this_pos)] = hieroglyph_info[this_hiero][1]
+            #self.asar_defines["HieroItemTile"+str(this_pos)] = hieroglyph_info[this_hiero][2]
+            #self.asar_defines["HieroJournalText"+str(this_pos)] = hieroglyph_info[this_hiero][0]
             this_pos += 1
 
         ##########################################################################
@@ -392,47 +391,6 @@ class Randomizer:
                     self.asar_defines["Statue6Required"] = 1
                 i += 1
 
-        # Teacher at start spoils required Mystic Statues.
-        # If you change this to use ASCII instead of hand-coded hex, remember to add quotes around
-        # the TextTeacherStatuesString define in the assembly code.
-        statue_str = ""
-        statues_hex.sort()
-        if len(statues_hex) == 0:
-            if statues_required == 0:
-                statue_str = b"\x4d\x8e"
-            else:
-                statue_str = (0x20+statues_required).to_bytes(1,byteorder="little")
-            statue_str += b"\xac\xd6\xd2\x80\xa2\x84\xac\xa2\x84\xa1\xa5\x88\xa2\x84\x83\x4f\xc0"
-        else:
-            statue_str = b"\x69\x8e\xa5\xac\x8d\x84\x84\x83\xac"
-            statue_str += b"\x4c\xa9\xa3\xa4\x88\x82\xac\x63\xa4\x80\xa4\xa5\x84"
-            if len(statues_hex) == 1:
-                statue_str += b"\xac"
-                statue_str += statues_hex[0]
-                statue_str += b"\x4f"
-
-            else:
-                statue_str += b"\xa3\xcb"
-                while statues_hex:
-                    if len(statues_hex) > 1:
-                        statue_str += statues_hex[0]
-                        statue_str += b"\x2b\xac"
-
-                    else:
-                        statue_str += b"\x80\x8d\x83\xac"
-                        statue_str += statues_hex[0]
-                        statue_str += b"\x4f"
-
-                    statues_hex.pop(0)
-
-        self.asar_defines["TextTeacherStatuesString"] = ""
-        i = 0
-        while i < len(statue_str):
-            self.asar_defines["TextTeacherStatuesString"] += "$" + format(statue_str[i],"02x")
-            i += 1
-            if i < len(statue_str):
-                self.asar_defines["TextTeacherStatuesString"] += ","
-
         ##########################################################################
         #                           Boss shuffle
         ##########################################################################
@@ -451,7 +409,7 @@ class Randomizer:
                 boss_order.remove(7)            # - Don't shuffle Solid Arm;
                 if settings.flute.value == FluteOpt.FLUTELESS.value:
                     non_will_bosses.append(3)   # - Don't require fluteless Vamps.
-            if settings.difficulty.value < 2:   # In Easy/Normal, can't be forced to play Vampires as Will
+            if settings.difficulty.value < 2:   # Also, in Easy/Normal, can't be forced to play Vampires as Will
                 if 3 not in non_will_bosses:
                     non_will_bosses.append(3)
             random.shuffle(non_will_bosses)
@@ -496,7 +454,7 @@ class Randomizer:
         self.asar_defines["KaraLocation"] = kara_location
 
         # Set Kara's location and logic mode in RAM switches (for autotracker)
-        ## (hmm, I don't think tracker supports this yet? --rae)
+        ## (hmm, I don't think tracker supports this yet?)
         #if settings.logic.value == Logic.COMPLETABLE.value:
         #    logic_int = 0x10 + kara_location
         #elif settings.logic.value == Logic.BEATABLE.value:
@@ -709,20 +667,6 @@ class Randomizer:
             self.asar_defines[wdef] = self.w.asar_defines[wdef]
 
         ##########################################################################
-        #             Handle Jeweler inventory strings and tracker RAM
-        ##########################################################################
-        if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-            self.asar_defines["Jeweler7RowText"] = "Beat the game"
-        else:
-            self.asar_defines["Jeweler7RowText"] = "My Secrets"
-        for i in [1,2,3,4,5,6,7]:
-            while len(self.asar_defines["Jeweler"+str(i)+"RowText"]) < 14:
-                self.asar_defines["Jeweler"+str(i)+"RowText"] += "_"
-            if gem[i-1] < 10:
-                self.asar_defines["Jeweler"+str(i)+"RowText"] += "_"
-            self.asar_defines["Jeweler"+str(i)+"RowText"] += str(gem[i-1])
-
-        ##########################################################################
         #                        Randomize Ishtar puzzle
         ##########################################################################
         used_hair = False
@@ -791,7 +735,7 @@ class Randomizer:
         superhero_list.append("____Teen Titans, Go!")
         superhero_list.append("_______Cowabunga!")
         superhero_list.append("_______SPOOOOON!!")
-        superhero_list.append("There better be bacon when I get there...")
+        superhero_list.append("There better be bacon]when I get there...")
 
         # Assign final text box
         rand_idx = random.randint(0, len(superhero_list) - 1)
@@ -802,6 +746,7 @@ class Randomizer:
         ##########################################################################
         romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
         
+        self.asar_defines["SettingBossShuffle"] = 1 if settings.boss_shuffle else 0
         self.asar_defines["SettingInfiniteInventory"] = 1 if settings.infinite_inventory else 0
         self.asar_defines["SettingEarlyFirebird"] = 1 if settings.firebird else 0
         self.asar_defines["SettingRedJewelHunt"] = 1 if settings.goal.value is Goal.RED_JEWEL_HUNT.value else 0
@@ -813,7 +758,7 @@ class Randomizer:
         self.asar_defines["SettingEnemizer"] = settings.enemizer.value
         self.asar_defines["SettingTownShuffle"] = 1 if settings.town_shuffle else 0
         self.asar_defines["SettingDungeonShuffle"] = 1 if settings.dungeon_shuffle else 0
-        self.asar_defines["SettingOrbRando"] = settings.orb_rando.value
+        self.asar_defines["SettingOrbRando"] = 1 if settings.orb_rando else 0
         self.asar_defines["SettingDarkRoomsLevel"] = abs(settings.darkrooms.value)
         self.asar_defines["SettingDebug"] = 1 if settings.ingame_debug else 0
         if settings.red_jewel_madness:
@@ -829,14 +774,40 @@ class Randomizer:
         
         for d in self.asar_defines:
             self.asar_defines[d] = str(self.asar_defines[d])   # The library requires defines to be string type.
-        asar.init("asar.dll")
-        self.asar_patch_result = asar.patch(os.getcwd()+"/src/randomizer/randomizer/iogr.asr", romdata, [], True, self.asar_defines)
+        if os.name != "nt":
+            asar.init(os.path.dirname(__file__) + os.path.sep + "asar-x64.so")
+        else:    # Windows
+            os.add_dll_directory(os.path.dirname(__file__))
+            if sys.maxsize > 2**32:    # 64-bit
+                asar.init("asar-x64.dll")
+            else:    # 32-bit
+                asar.init("asar-x86.dll")
+        self.asar_patch_result = asar.patch(os.path.dirname(__file__) + os.path.sep + "iogr.asr", romdata, [], True, self.asar_defines)
         
         if self.asar_patch_result[0]:
             return self.asar_patch_result
         else:
             asar_error_list = asar.geterrors()
             return [False, asar_error_list]
+    
+    # Returns a list of dicts of the form {'index': int, 'address': int, 'data': list of ints}
+    def generate_legacy_patch(self, filename: str, settings: RandomizerData):
+        self.generate_rom(filename, settings)
+        if not self.asar_patch_result[0]:
+            return False
+        legacy_patch = []
+        legacy_idx = 0
+        new_rom_data = self.asar_patch_result[1]
+        import ips
+        ips_patch = ips.Patch.create(self.original_rom_data, new_rom_data)
+        for record in ips_patch.records:
+            if record.rle_size <= 0:
+                payload = [x for x in record.content]
+            else:
+                payload = [record.content[0] for i in range(record.rle_size)]
+            legacy_patch.append({'index': legacy_idx, 'address': record.offset, 'data': payload})
+            legacy_idx += 1
+        return json.dumps(legacy_patch)
 
     def generate_spoiler(self) -> str:
         return json.dumps(self.w.spoiler)

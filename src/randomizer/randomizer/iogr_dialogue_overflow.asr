@@ -226,6 +226,36 @@ db "_Ignore it",$cb
 db "_Jump in"
 db $ca
 
+TextPyramidBossPortal:
+db "Heeeeeeeeeeeeeere's",$cb
+db $c5 : dw .BossNames, $0bfa
+db $cb
+db "_Quit",$cb
+db "_Jump in"
+db $ca
+.BossNames:
+dw ..Castoth
+dw ..Viper
+dw ..Vampires
+dw ..Fanger
+dw ..MummyQueen
+dw ..MQ2
+dw ..SolidArm
+..Castoth:
+db "Castoth!",$ca
+..Viper:
+db "Viper!",$ca
+..Vampires:
+db "Vampires!",$ca
+..Fanger:
+db "Sand Fanger!",$ca
+..MummyQueen:
+db "Mummy Queen!",$ca
+..MQ2:
+db "Mummy Queen 2.0!",$ca
+..SolidArm:
+db "Solid Arm!",$ca
+
 
 TextLongShadowsFormUnlocked:
 db "Shadow's form unlocked!"
@@ -282,7 +312,7 @@ db $D3
 db $47,$84,$AC,$A2,$80,$88,$A3,$84,$A3,$AC,$A4,$87,$84,$AC,$CB
 db $D6,$48,$8E,$85,$AC,$47,$8E,$A0,$84,$2A,$AC,$CF,$CA
 
-TextUseFathersJournal:
+TextUseFathersJournalWithSram:
 db $d3
 db "I've deciphered the",$cb
 db "hieroglyphs. No one",$cb
@@ -294,9 +324,16 @@ db "solving the riddle of",$cb
 db "human history in",$cb
 db "the Pyramid."
 db $cf
-db $d8
-dw !HieroJournalText1,!HieroJournalText2,!HieroJournalText3,!HieroJournalText4,!HieroJournalText5,!HieroJournalText6
-db $00,$cb
+db $cd : dl SramTextBuffer
+;db $d8
+;dw !HieroJournalText1
+;dw !HieroJournalText2
+;dw !HieroJournalText3
+;dw !HieroJournalText4
+;dw !HieroJournalText5
+;dw !HieroJournalText6
+;db $00,$cb
+db $cb
 db "It reads: ",$2d,"He who is",$cb
 db "valiant and pure of",$cb
 db "spirit..."

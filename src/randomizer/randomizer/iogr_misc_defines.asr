@@ -390,7 +390,48 @@ LR_PlaceSelfBetween04And06 = $8aa41c
 }
 
 
-; Ishtar room differences
+; Dark Space types are defines for historical reasons, but this may change
+{
+!DkSpSouthCapeType = $01
+!DkSpPrisonCellType = $01
+!DkSpPrisonEndType = $03
+!DkSpItoryType = $01
+!DkSpIncaEndType = $03
+!DkSpInca2Type = $03
+!DkSpInca1Type = $03
+!DkSpFreejiaType = $01
+!DkSpMineAtWallType = $03
+!DkSpMineAppearingType = $03
+!DkSpMineBehindType = $03
+!DkSpSGFoyerType = $01
+!DkSpSGSWType = $03
+!DkSpSGNWType = $03
+!DkSpSGSEType = $03
+!DkSpSeaPalType = $01
+!DkSpMuTransformType = $03
+!DkSpMuSliderType = $03
+!DkSpAngelVillageType = $01
+!DkSpWatermiaType = $01
+!DkSpGreatWall1Type = $03
+!DkSpGreatWallSpinType = $03
+!DkSpGreatWallEndType = $03
+!DkSpEuroType = $01
+!DkSpKress1Type = $03
+!DkSpKress2Type = $03
+!DkSpKress3Type = $03
+!DkSpNativesType = $01
+!DkSpWatGardenType = $03
+!DkSpWatQuakeType = $03
+!DkSpWatDropType = $03
+!DkSpDaoType = $01
+!DkSpPyramidTopType = $07   ; This type isn't used in bank $8C but is the type of the DS that's spawned
+!DkSpPyramidBotType = $03
+!DkSpBabelBotType = $01
+!DkSpBabelTopType = $01
+}
+
+
+; Ishtar room differences default to "none" for optional indexes
 {
 !IshtarRoom1DifferenceIndex2 ?= $ffff
 !IshtarRoom1DifferenceIndex3 ?= $ffff
@@ -403,11 +444,21 @@ LR_PlaceSelfBetween04And06 = $8aa41c
 }
 
 
-; SRAM and Multiworld
+; SRAM, including infinite inventory and Multiworld
 {
 !SettingInfiniteInventory ?= 0
 
+org $306002
+SramTextBuffer:    ; For drawing complex dynamic text
+skip 100
+
+SramDarkSpaceSeenFormFlags:   ; 2 "flags" per each of 36 DSes for if Will or not-Will has been seen nearby
+skip 9
+
+warnpc $306200
+
 org $306400
+SramStartPermanentData:   ; Data between here and End will be saved by Gaia and restored after a reset
 SramInvHoldingTank:   ; Items from other worlds; MW writing directly to the inventory is unsafe
 skip $100
 SramInvActivePageId:  ; ID of the current active inventory page
@@ -419,6 +470,12 @@ SramInvPages:         ; Inventory pages, 12 bytes each
 skip 12
 skip 12
 skip 12
-SramInvEndOfList:     ; End of item list, so we know where to stop when scanning
+SramInvEndOfList:     ; End of item list
+
+warnpc $3065fe
+org $3065fe
+SramEndPermanentData:   ; End of all data that should be considered part of the game and saved/restored
+skip 2                  ; The value here will be nonzero and non-#$FFFF if there's saved data
+SramHardened:    ; Contents of SRAM inventory at last save, for restoring from a reset or crash
 
 }

@@ -10,8 +10,8 @@ hirom
 ; $0bf4 = number of stacked Red Jewels
 ; $0bf6 = stores index of last DS visited
 ; $0bf8 = during DS warp, DS index of text lines and of selected DS
-; $0bfa = used on radar screen and inv for text branches ("FORCE" text, inv page number, count spacing, etc.)
-; $0bfc = used during item pickup to write text slowly (for chests)
+; $0bfa = used for text branches ("FORCE" text, inv page number, count spacing, Lance's letter, etc.)
+; $0bfc = used during item pickup to write text slowly (for chests and Dark Spaces)
 ; $0bfe = used during item pickup to flag a stat as maxed out
 ; $1ffc = Player X pos in debug mode
 ; $1ffe = Player Y pos in debug mode
@@ -19,6 +19,7 @@ hirom
 ; $022f - $0247 : Monster item flags $01 - $18
 ; $0290 - $02af : Monster item flags $19 - $2A, and 13 extras
 ; $02b0 - $02b1 : Statue placed in the Left/Right Hope Room
+; $02b2 - $02b7 : DS item-get flags
 
 
 LR_SecOnAnyFlagA:
@@ -176,12 +177,19 @@ stz $0bfe    ; Used by Z3 mode to flag whether we're capped on a stat.
 php
 sep #$20
 bit #$80 : bne .IsStatOrPickup
+cmp #$32 : beq .IsOtherWorldItem
 pha
-jsl LR_GetItemAStackedCountBcd : bne .IsStackableAndHasStack
+jsl LR_GetItemAStackedCountBcd : cmp #$00 : bne .IsStackableAndHasStack
 jsl LR_GetEmptyInvSlotInYOrSec : bcs +
   jmp .GotEmptyInvSlot
 +:
 jmp .InvFull
+
+.IsOtherWorldItem:   ; These always count as given, and have no other effects.
+sta $0db8
+stz $0db9
+ldy #$ff1f
+jmp .ClcAndReturn
 
 .IsStackableAndHasStack:
 pla : sta $0DB8
@@ -329,6 +337,9 @@ pha
 and #$ff00 : cmp #$1000 : bne .ItemIsNotUnlockedDoor
   jmp .GiveUnlockedDoor
 .ItemIsNotUnlockedDoor:
+cmp #$1100 : bne .ItemIsNotAbility
+  jmp .GiveAbility
+.ItemIsNotAbility:
 .TryGiveItemA8:
 lda $01,s : and #$00ff : cmp #$0080 : bcc +
   sec : sbc #$0087
@@ -411,10 +422,24 @@ rtl
 db $cd : dl .TextItsADoor
 db $c0
 
+.GiveAbility:   ; Flags $0510-2 for Will, $0514-6 for Freedan
+pla : and #$00ff : sta $0db8
+cmp #$0003 : bcc +
+  inc   ; So "items" 3-5 map to flags ..4-6
++:
+clc : adc #$0510 : jsl LR_SetAnyFlagA
+cop #$BF : dw ..Text
+clc
+rtl
+..Text:
+db $cd : dl .TextAbilityCanNowBeUsed
+db $ca   ; not $c0 here, because we're clumsily including a $c0 upstream
+
 .TextItsAnItem:
 db $d3
 db $c5 : dw TextItemGetSpeeds, $0bfc
 db $d6,$1d    ; "It's "
+db $c5 : dw TextItemGetArticles, $0db8
 db $c5 : dw TextItemGetNames, $0db8
 db "!",$cb
 db $c5 : dw TextZ3UpgradeMaybeMaxedOut, $0bfe
@@ -426,6 +451,13 @@ db $d5,$00
 db "Opened a door!",$cb
 db $c5 : dw TextDoorNames, $0db8
 db $ca
+.TextAbilityCanNowBeUsed:
+db $d3
+db $c5 : dw TextItemGetSpeeds, $0bfc
+db $cd : dl TextItemGetAbilityCanBeUsedIncl
+db $ca
+
+
 }
 
 TextItemGetNames:
@@ -481,13 +513,13 @@ dw .TwoRedJewels
 dw .ThreeRedJewels
 dw .HeartPiece   ; $30
 dw .Flute
+dw .OtherWorldItem
 dw .Null
 dw .Null
 dw .Null
 dw .Null
 dw .Null
-dw .Null
-dw .MysticStatue1   ; $38
+dw .MysticStatue   ; $38
 }
 {
 .Null:
@@ -515,78 +547,321 @@ db "Inca Statue A",$ca
 .IncaStatueB:
 db "Inca Statue B",$ca
 .RedJewel:
-db "a Red Jewel",$ca
+db "Red Jewel",$ca
 .CrystalBall:
-db "a Crystal Ball",$ca
+db "Crystal Ball",$ca
 .HopeStatue:
-db "a Statue of Hope",$ca
+db "Statue of Hope",$ca
 .BlueJournal:
-db "the Blue Journal",$ca
+db "Blue Journal",$ca
 .BagOfGold:
-db "a Bag of Tricks",$ca
+db "Bag of Tricks",$ca
 .Hieroglyph1E:
 .Hieroglyph1F:
 .Hieroglyph20:
 .Hieroglyph21:
 .Hieroglyph22:
 .Hieroglyph23:
-db "a Hieroglyph Tile",$ca
+db "Hieroglyph Tile",$ca
 .DefItem:
 db "DEF",$ca
 .StrItem:
 db "STR",$ca
 .LightJewel:
-db "a Dash Upgrade",$ca
+db "Dash Upgrade",$ca
 .DarkJewel:
-db "a Friar Upgrade",$ca
+db "Friar Upgrade",$ca
 .RamaStatue:
-db "a Rama Statue",$ca
+db "Rama Statue",$ca
 .Herb:
-db "an herb",$ca
+db "herb",$ca
 .Apple:
-db "an apple",$ca
+db "apple",$ca
 .HpItem:
 db "HP",$ca
 .PrisonKey:
-db "the Prison Key",$ca
+db "Prison Key",$ca
 .IncaMelody:
-db "the Inca Melody",$ca
+db "Inca Melody",$ca
 .DiamondBlock:
-db "the Diamond Block",$ca
+db "Diamond Block",$ca
 .WindMelody:
-db "the Wind Melody",$ca
+db "Wind Melody",$ca
 .Meat:
-db "the Large Roast",$ca
+db "Large Roast",$ca
 .MemoryMelody:
-db "the Memory Melody",$ca
+db "Memory Melody",$ca
 .MineElevatorKey:
-db "the Elevator Key",$ca
+db "Elevator Key",$ca
 .MuPalaceKey:
-db "the Mu Palace Key",$ca
+db "Mu Palace Key",$ca
 .PurifyStone:
-db "the Purification",$cb,"Stone",$ca
+db "Purification",$cb,"Stone",$ca
 .MagicPowder:
-db "the Magic Dust",$ca
+db "Magic Dust",$ca
 .Necklace:
-db "the Necklace",$ca
+db "Necklace",$ca
 .RussianGlassWill:
-db "the Will",$ca
+db "Will",$ca
 .Teapot:
-db "the Teapot",$ca
+db "Teapot",$ca
 .BlackGlasses:
-db "the Black Glasses",$ca
+db "Black Glasses",$ca
 .GorgonFlower:
-db "the Gorgon Flower",$ca
+db "Gorgon Flower",$ca
 .Aura:
-db "the Aura",$ca
+db "Aura",$ca
 .CrystalRing:
-db "the Crystal Ring",$ca
+db "Crystal Ring",$ca
 .HeartPiece:
-db "a Heart Piece",$ca
+db "Heart Piece",$ca
 .Flute:
-db "the Flute",$ca
-.MysticStatue1:
-db "a Mystic Statue",$ca
+db "Flute",$ca
+.OtherWorldItem:
+db "something for",$cb,"another world",$ca
+.MysticStatue:
+db "Mystic Statue",$ca
+}
+
+TextItemGetArticles:
+.Pointers:
+{
+dw .Null
+dw .RedJewel
+dw .PrisonKey
+dw .IncaStatueA
+dw .IncaStatueB
+dw .IncaMelody
+dw .Herb
+dw .DiamondBlock
+dw .WindMelody
+dw .LolasMelody
+dw .Meat
+dw .MineKeyA
+dw .MineKeyB
+dw .MemoryMelody
+dw .CrystalBall
+dw .MineElevatorKey
+dw .MuPalaceKey
+dw .PurifyStone
+dw .HopeStatue
+dw .RamaStatue
+dw .MagicPowder
+dw .BlueJournal
+dw .LancesLetter
+dw .Necklace
+dw .RussianGlassWill
+dw .Teapot
+dw .MushroomDrops
+dw .BagOfGold
+dw .BlackGlasses
+dw .GorgonFlower
+dw .Hieroglyph1E
+dw .Hieroglyph1F
+dw .Hieroglyph20
+dw .Hieroglyph21
+dw .Hieroglyph22
+dw .Hieroglyph23
+dw .Aura
+dw .LolasLetter
+dw .FathersJournal
+dw .CrystalRing
+dw .Apple
+dw .HpItem
+dw .StrItem
+dw .DefItem
+dw .LightJewel
+dw .DarkJewel
+dw .TwoRedJewels
+dw .ThreeRedJewels
+dw .HeartPiece   ; $30
+dw .Flute
+dw .OtherWorldItem
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .MysticStatue   ; $38
+}
+{
+.TwoRedJewels:
+.ThreeRedJewels:
+.LolasLetter:
+.FathersJournal:
+.MushroomDrops:
+.LancesLetter:
+.MineKeyA:
+.MineKeyB:
+.LolasMelody:
+.IncaStatueA:
+.IncaStatueB:
+.DefItem:
+.StrItem:
+.HpItem:
+.OtherWorldItem:
+.Null:
+db $ca
+.CrystalBall:
+.HopeStatue:
+.RedJewel:
+.BagOfGold:
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+.LightJewel:
+.DarkJewel:
+.RamaStatue:
+.HeartPiece:
+.MysticStatue:
+db "a ",$ca
+.Herb:
+.Apple:
+db "an ",$ca
+.PrisonKey:
+.IncaMelody:
+.DiamondBlock:
+.WindMelody:
+.Meat:
+.MemoryMelody:
+.MineElevatorKey:
+.MuPalaceKey:
+.PurifyStone:
+.MagicPowder:
+.Necklace:
+.RussianGlassWill:
+.Teapot:
+.BlackGlasses:
+.GorgonFlower:
+.Aura:
+.CrystalRing:
+.Flute:
+.BlueJournal:
+db "the ",$ca
+}
+
+TextItemJewelerInventory:
+.Pointers:
+{
+dw .Null
+dw TextItemGetNames_RedJewel
+dw TextItemGetNames_PrisonKey
+dw TextItemGetNames_IncaStatueA
+dw TextItemGetNames_IncaStatueB
+dw TextItemGetNames_IncaMelody
+dw .Herb
+dw TextItemGetNames_DiamondBlock
+dw TextItemGetNames_WindMelody
+dw TextItemGetNames_LolasMelody
+dw TextItemGetNames_Meat
+dw TextItemGetNames_MineKeyA
+dw TextItemGetNames_MineKeyB
+dw TextItemGetNames_MemoryMelody
+dw TextItemGetNames_CrystalBall
+dw TextItemGetNames_MineElevatorKey
+dw TextItemGetNames_MuPalaceKey
+dw .PurifyStone
+dw .HopeStatue
+dw TextItemGetNames_RamaStatue
+dw TextItemGetNames_MagicPowder
+dw TextItemGetNames_BlueJournal
+dw .LancesLetter
+dw TextItemGetNames_Necklace
+dw TextItemGetNames_RussianGlassWill
+dw TextItemGetNames_Teapot
+dw .MushroomDrops
+dw TextItemGetNames_BagOfGold
+dw TextItemGetNames_BlackGlasses
+dw TextItemGetNames_GorgonFlower
+dw .Hieroglyph1E
+dw .Hieroglyph1F
+dw .Hieroglyph20
+dw .Hieroglyph21
+dw .Hieroglyph22
+dw .Hieroglyph23
+dw TextItemGetNames_Aura
+dw .LolasLetter
+dw .FathersJournal
+dw TextItemGetNames_CrystalRing
+dw .Apple
+dw TextItemGetNames_HpItem
+dw TextItemGetNames_StrItem
+dw TextItemGetNames_DefItem
+dw TextItemGetNames_LightJewel
+dw TextItemGetNames_DarkJewel
+dw TextItemGetNames_TwoRedJewels
+dw TextItemGetNames_ThreeRedJewels
+dw TextItemGetNames_HeartPiece
+dw TextItemGetNames_Flute
+dw .OtherWorldItem
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_MysticStatue
+}
+{
+.Null:
+db "Nothing",$ca
+.LolasLetter:
+db "Lola's Letter",$ca
+.FathersJournal:
+db "Journal",$ca
+.MushroomDrops:
+db "Shroom Drops",$ca
+.LancesLetter:
+db "Lance Letter",$ca
+.HopeStatue:
+db "Hope Statue",$ca
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+db "Hieroglyph",$ca
+.Herb:
+db "Herb",$ca
+.Apple:
+db "Apple",$ca
+.PurifyStone:
+db "Purity Stone",$ca
+.OtherWorldItem:
+db "Offworld Item",$ca
+.OpenADoor:
+db "Open a Door",$ca
+}
+
+TextSpecialJewelerInventory:
+.Pointers:
+{
+dw .PsychoDash
+dw .Slider
+dw .SpinDash
+dw .Friar
+dw .AuraBarrier
+dw .Earthquaker
+dw .OpenADoor
+}
+{
+.OpenADoor:
+db "Open a Door",$ca
+.PsychoDash:
+db $D6,$3C,$43,$80,$A3,$87,$CA
+.Slider:
+db $D6,$3C,$63,$8B,$88,$83,$84,$A2,$CA
+.SpinDash:
+db $D7,$31,$43,$80,$A3,$87,$CA
+.Friar:
+db $D6,$0C,$45,$A2,$88,$80,$A2,$CA
+.AuraBarrier:
+db $40,$A5,$A2,$80,$AC,$41,$80,$A2,$A2,$88,$84,$A2,$CA
+.Earthquaker:
+db $44,$80,$A2,$A4,$87,$A1,$A5,$80,$8A,$84,$A2,$CA
 }
 
 TextDoorNames:
@@ -1136,10 +1411,14 @@ TextItemGetSpeeds:
 .Pointers:
 dw .Instantaneous
 dw .Fast
+dw .Slow
 .Instantaneous:
 db $ca
 .Fast:
 db $d5,$00
+db $ca
+.Slow:
+db $d5,$09
 db $ca
 
 TextZ3UpgradeMaybeMaxedOut:
@@ -1150,6 +1429,137 @@ dw .IsMaxedOut
 db $ca
 .IsMaxedOut:
 db "But you're maxed out!"
+db $ca
+
+TextJewelerInvLineBegin:
+db $cd : dl 0+SramTextBuffer   ; Target shall contain a 2-byte color setting followed by $ca
+db $ca
+
+TextJewelerInvItemPaddedAssumingSram:
+db $cd : dl TextJewelerInvLineBegin
+db $c5 : dw TextItemJewelerInventory, $0bfa
+db $cd : dl TextJewelerInvLineEnd
+db $ca
+
+TextJewelerInvSpecialPaddedAssumingSram:
+db $cd : dl TextJewelerInvLineBegin
+db $c5 : dw TextSpecialJewelerInventory, $0bfa
+db $cd : dl TextJewelerInvLineEnd
+db $ca
+
+TextJewelerInvLineEnd:
+db $c4 : db 17    ; Pad to column of costs
+db $cd : dl 3+SramTextBuffer   ; Target shall contain a number-drawing script, possibly with one leading space
+db $cb
+db $c3,$00
+db $ca
+
+LR_PrepSramTextBufferForJewelerLineA:   ; A = 1-7
+pha
+cmp #$0007 : bcs .BlueText
+clc : adc #$00e8 : jsl LR_SecOnFlagA
+bcs .RedText
+.BlueText:
+lda #$0000
+bra +
+.RedText:
+lda #$0004
++:
+sep #$20
+sta.l 1+SramTextBuffer
+lda #$c3 : sta.l 0+SramTextBuffer
+lda #$ca : sta.l 2+SramTextBuffer
+lda #$cc : sta.l 3+SramTextBuffer
+lda #$00 : sta.l 4+SramTextBuffer   ; Will skip either 0 or 1 spaces depending on number width
+lda #$c6 : sta.l 5+SramTextBuffer
+lda #$ca : sta.l 10+SramTextBuffer
+rep #$20
+pla : clc : adc #$0a48 : sta.l 8+SramTextBuffer
+tay
+lda $0000,y : and #$00ff : cmp #$0010 : bcs .TwoDigitNumber
+.OneDigitNumber:
+sep #$20
+  lda #$02 : sta.l 4+SramTextBuffer   ; "2" skips one space
+rep #$20
+lda #$0001 : sta.l 6+SramTextBuffer
+bra .Done
+.TwoDigitNumber:
+lda #$0002 : sta.l 6+SramTextBuffer
+.Done:
+rtl
+
+LR_SetupAndDrawJewelerInvLineA:   ; A = 1-7
+pha
+jsl LR_PrepSramTextBufferForJewelerLineA
+pla : cmp #$0007 : bcs .IsLine7
+dec : bne +
+  lda.l Config_Jeweler1Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler2Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler3Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler4Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler5Item
+  bra .IsItemLine
++:
+  lda.l Config_Jeweler6Item
+  bra .IsItemLine
+.IsLine7:
+cop #$BF : dw .TextLine7
+rtl
+.IsItemLine:
+bit #$ff00 : beq ..ForNormalItem
+..ForSpecialItem:
+pha
+and #$ff00 : cmp #$1000 : beq ...Door
+  cmp #$1100 : beq ...Ability
+...UnknownItem:
+pla
+lda #$0000
+bra ..ForNormalItem
+...Door:
+pla
+lda #$0006
+bra ...DoDraw
+...Ability:
+pla : and #$000f
+;bra ...DoDraw
+...DoDraw:
+sta $0bfa
+cop #$BF : dw .TextSpecialItem
+rtl
+..ForNormalItem:
+cmp #$0080 : bcc +
+  sec : sbc #$0087
+  clc : adc #$0029
++:
+sta $0bfa
+cop #$BF : dw .TextNormalItem
+rtl
+.TextLine7:
+db $c3 : db $00
+if !SettingRedJewelHunt == 1
+db "Beat the Game_"
+else
+db "My Secrets____"
+endif
+db $cd : dl 3+SramTextBuffer
+db $c0
+.TextNormalItem:
+db $cd : dl TextJewelerInvItemPaddedAssumingSram
+db $ca
+.TextSpecialItem:
+db $cd : dl TextJewelerInvSpecialPaddedAssumingSram
 db $ca
 
 macro MIncBcd8(addr)
@@ -1267,6 +1677,7 @@ endif
 lda #$00
 .SecAndReturn:
 plp
+cmp #$0000   ; to set/clear z
 sec
 rtl
 .CrystalBall:
@@ -1293,6 +1704,7 @@ bra .ClcAndReturn
 ;bra .ClcAndReturn
 .ClcAndReturn:
 plp
+cmp #$0000   ; to set/clear z
 clc
 rtl
 }
@@ -1358,6 +1770,8 @@ if !SettingInfiniteInventory == 1
 ; If item slot Y is in the active inventory page, updates the inv view (at $0ab4)
 ; and equipped status, if applicable, with the item at Y.
 LR_UpdateItemViewForSlotY:
+php
+rep #$20
 phx
 tyx
 cpy.w #4 : bcc .DoUpdateWithLocalizedY   ; First four slots are always in the view
@@ -1385,6 +1799,7 @@ cpy $0ac4 : bne .Done
       lda #$ffff : sta $0ac4   ; Nothing's equipped, so clear the equipped slot
 .Done:
 plx
+plp
 rtl
 
 ; Updates the inv view with the contents of the inventory.
@@ -1457,7 +1872,41 @@ pla : inc : cmp #$0100 : bcs .Done
 .Done:
 plx
 rtl
+
+; Called during Gaia game save. After a reset, permanent SRAM will be restored as it is at this point.
+LR_HardenSram:
+phx
+ldx #$0000
+-:
+lda.l SramStartPermanentData,x : sta.l SramHardened,x
+inx : inx
+cpx.w #(SramEndPermanentData-SramStartPermanentData) : bcc -
+lda #$0001 : sta.l SramHardened,x   ; Artificial, indicates that there's saved data here
+plx
+rtl
+
+; Restores the save file as usual, along with hardened SRAM.
+LR_RestoreSaveFileWithInfiniteInventoryOrSec:
+phx
+jsl $83D954 : bcs .SecAndReturn   ; Normal routine accepts save file ID in A; sets carry if file is blank.
+ldx.w #(SramEndPermanentData-SramStartPermanentData)
+lda.l SramHardened,x : cmp #$0001 : bne .ClcAndReturn
+ldx #$0000
+-:
+lda.l SramHardened,x : sta.l SramStartPermanentData,x
+inx : inx
+cpx.w #2+SramEndPermanentData-SramStartPermanentData : bcc -
+.ClcAndReturn:
+plx
+jsl LR_UpdateItemViewFull
+clc
+rtl
+.SecAndReturn:
+plx
+sec
+rtl
 endif
+
 
 EMonsterDeathDoorOrItem:
 if !SettingOrbRando == 0
@@ -2013,6 +2462,7 @@ phx
 asl : asl : asl : tax
 lda.l TableDsMapSpawnData,x : and #$00ff
   cmp #$0001 : beq .SecAndReturn
+  cmp #$000b : beq .SecAndReturn
   cmp #$0015 : beq .SecAndReturn
   cmp #$0034 : beq .SecAndReturn
   cmp #$005a : beq .SecAndReturn
@@ -2021,6 +2471,8 @@ lda.l TableDsMapSpawnData,x : and #$00ff
   cmp #$0099 : beq .SecAndReturn
   cmp #$00ac : beq .SecAndReturn
   cmp #$00c3 : beq .SecAndReturn
+  cmp #$00df : beq .SecAndReturn
+  cmp #$00e3 : beq .SecAndReturn
 .ClcAndReturn:
 plx
 clc
@@ -2114,7 +2566,7 @@ db $4c : dw $0090,$0070 : db $03,$00,$22   ; Index $0B = Flag $09ab, SkGn foyer
 db $56 : dw $0070,$00a0 : db $03,$00,$11   ; Index $0C = Flag $09ac, SkGn blue room
 db $51 : dw $0030,$00c0 : db $03,$00,$44   ; Index $0D = Flag $09ad, SkGn inside fence
 db $54 : dw $0020,$0070 : db $03,$00,$44   ; Index $0E = Flag $09ae, SkGn NW dark side
-db $5a : dw $02f0,$0090 : db $03,$00,$64   ; Index $0F = Flag $09af, SeaPal
+db $5a : dw $02f0,$0090 : db $03,$00,$14   ; Index $0F = Flag $09af, SeaPal
 db $60 : dw $0070,$0240 : db $03,$00,$44   ; Index $10 = Flag $09b0, Mu NE
 db $62 : dw $0100,$01b0 : db $03,$00,$44   ; Index $11 = Flag $09b1, Mu W
 db $6c : dw $0190,$00b0 : db $03,$01,$12   ; Index $12 = Flag $09b2, Angl
@@ -2137,6 +2589,45 @@ db $df : dw $0790,$01b0 : db $03,$10,$28   ; Index $22 = Flag $09c2, Babel lower
 db $e3 : dw $02b0,$01b0 : db $03,$10,$23   ; Index $23 = Flag $09c3, Babel upper
 ; Index $24 is unused; flag $09c4 means a DS warp has been triggered from the inventory screen
 dw $ffff
+}
+TableDsDefaultTypes:
+{
+db !DkSpSouthCapeType
+db !DkSpPrisonCellType
+db !DkSpPrisonEndType
+db !DkSpItoryType
+db !DkSpIncaEndType
+db !DkSpInca2Type
+db !DkSpInca1Type
+db !DkSpFreejiaType
+db !DkSpMineAtWallType
+db !DkSpMineAppearingType
+db !DkSpMineBehindType
+db !DkSpSGFoyerType
+db !DkSpSGSWType
+db !DkSpSGNWType
+db !DkSpSGSEType
+db !DkSpSeaPalType
+db !DkSpMuTransformType
+db !DkSpMuSliderType
+db !DkSpAngelVillageType
+db !DkSpWatermiaType
+db !DkSpGreatWall1Type
+db !DkSpGreatWallSpinType
+db !DkSpGreatWallEndType
+db !DkSpEuroType
+db !DkSpKress1Type
+db !DkSpKress2Type
+db !DkSpKress3Type
+db !DkSpNativesType
+db !DkSpWatGardenType
+db !DkSpWatQuakeType
+db !DkSpWatDropType
+db !DkSpDaoType
+db !DkSpPyramidTopType
+db !DkSpPyramidBotType
+db !DkSpBabelBotType
+db !DkSpBabelTopType
 }
 
 
@@ -2996,7 +3487,7 @@ LR_DecOrClearItemA:
 php
 phx
 tax
-jsl LR_DecStackForItemAReturningCountOrSec : cmp #$0000 : bne .Done
+jsl LR_DecStackForItemAReturningCountOrSec : bne .Done
 sep #$20
 txa
 ldx #$0000
@@ -3016,6 +3507,45 @@ rtl
 }
 
 endif
+
+LR_GetDsItemForOuterMapOrSec:
+phx
+ldx #$0000
+-:
+lda.l Config_DarkSpaceItemAnchor,x : beq .SecAndReturn
+  and #$00ff : cmp $0b12 : beq .FoundItemIdx
+    inx : inx : inx : inx
+    bra -
+.FoundItemIdx:
+lda.l 2+Config_DarkSpaceItemAnchor,x
+plx
+clc
+rtl
+.SecAndReturn:
+plx
+sec
+rtl
+
+LR_GetDsItemFlagForOuterMapOrSec:
+phx
+ldx #$0000
+-:
+lda.l Config_DarkSpaceItemAnchor,x : beq .SecAndReturn
+  and #$00ff : cmp $0b12 : beq .FoundItemIdx
+    inx : inx : inx : inx
+    bra -
+.FoundItemIdx:
+txa : lsr : clc : adc #$02b2
+plx
+clc
+rtl
+.SecAndReturn:
+lda #$0000
+plx
+sec
+rtl
+
+
 
 
 

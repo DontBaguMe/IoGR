@@ -637,9 +637,7 @@ db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $07,$08,$00 : dl $89BF90 : db $00
 db $0D,$18,$05 : dl ERedJewelSpot-3 : db $00
-if !KaraLocation == 1
-db $0b,$0b,$00 : dl $86d14e : db $00
-endif
+db $0b,$0b,$00 : dl $86d14e : db $00   ; Kara's portrait
 db $FF,$CA 
 
 ActorList_Map15:
@@ -1321,12 +1319,9 @@ db $FF,$CA
 ActorList_Map47:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
-if !KaraLocation == 2
-db $0b,$24,$00 : dl $86d14e : db $00
-else
-db $0B,$25,$00 : dl $85D08E : db $00 
-db $03,$23,$00 : dl $85D15A : db $00 
-endif
+db $0b,$24,$00 : dl $86d14e : db $00   ; Kara's portrait
+;db $0B,$25,$00 : dl $85D08E : db $00 
+;db $03,$23,$00 : dl $85D15A : db $00 
 db $02,$2A,$00 : dl $85D223 : db $00
 db $FF,$CA 
 
@@ -2227,9 +2222,7 @@ db $FF,$CA
 ActorList_Map74:
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
-if !KaraLocation == 3
-db $07,$08,$00 : dl $86D14E : db $00 
-endif
+db $07,$08,$00 : dl $86D14E : db $00   ; Kara's portrait
 db $25,$0B,$00 : dl $86ce82 : db $00
 db $15,$09,$0F : dl ERedJewelSpot-3 : db $00
 db $FF,$CA 
@@ -3103,9 +3096,7 @@ ActorList_MapA9:
 db $05,$0A,$00 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $DF,$DF,$00 : dl $80E94D : db $00
-if !KaraLocation == 4
-db $12,$06,$00 : dl $86d14e : db $00
-endif
+db $12,$06,$00 : dl $86d14e : db $00   ; Kara's portrait
 db $FF,$CA 
 
 ActorList_MapAC:
@@ -3450,9 +3441,7 @@ ActorList_MapBF:
 db $05,$0A,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $0F,$0B,$00 : dl $889AA3 : db $00
-if !KaraLocation == 5
-db $1a,$10,$00 : dl $86d14e : db $00
-endif
+db $1a,$10,$00 : dl $86d14e : db $00   ; Kara's portrait
 db $FF,$CA 
 
 ActorList_MapC0:
@@ -3537,10 +3526,10 @@ ActorList_MapCC:
 db $05,$0A,$30 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $00,$01,$00 : dl $80CA42 : db $00
-db $3B,$3C,$00 : dl $88B6A2 : db $00
+db $3B,$3C,$00 : dl $88B6A2 : db $00   ; Lower portal
 db $1C,$1E,!Monster0416Param : dl !Monster0416Addr : db !Monster0416Stats,$01,!Monster0416ItemFlag
 db $23,$1E,!Monster0417Param : dl !Monster0417Addr : db !Monster0417Stats,$02,!Monster0417ItemFlag
-db $27,$1B,$E7 : dl $88B668 : db $00
+db $27,$1B,$E7 : dl $88B668 : db $00   ; DS spawner (for upper DS) -- always spawns type 3
 db $1C,$38,!DkSpPyramidBotType : dl $88D6A9 : db $00
 db $1F,$13,$00 : dl $88CD6C : db $00
 db $36,$2A,$1D : dl ERedJewelSpot-3 : db $00

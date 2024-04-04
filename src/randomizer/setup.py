@@ -13,7 +13,13 @@ setuptools.setup(
     author='dontbagume,bryon_w,raeven0',
     packages=setuptools.find_packages(),
     package_data={'': [
-        'bin/*.bin'
+        '*.bin',
+        '*.asr',
+        '*.txt',
+        'asar-x86.dll',
+        'asar-x64.dll',
+        'asar-x64.so'
     ]},
+    install_requires=['ips.py', 'bsdiff4'],
     python_requires='>=3.7'
 )

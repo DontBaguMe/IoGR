@@ -124,25 +124,25 @@ def generate_ROM():
         if g == "Uncoupled":
             return EntranceShuffle.UNCOUPLED
  
-    def get_dungeon_shuffle():
-        g = dungeon_shuffle.get()
-        if g == "None":
-            return DungeonShuffle.NONE
-        if g == "Basic":
-            return DungeonShuffle.BASIC
-        if g == "Chaos":
-            return DungeonShuffle.CHAOS
-        if g == "Clustered":
-            return DungeonShuffle.CLUSTERED
+    #def get_dungeon_shuffle():
+    #    g = dungeon_shuffle.get()
+    #    if g == "None":
+    #        return DungeonShuffle.NONE
+    #    if g == "Basic":
+    #        return DungeonShuffle.BASIC
+    #    if g == "Chaos":
+    #        return DungeonShuffle.CHAOS
+    #    if g == "Clustered":
+    #        return DungeonShuffle.CLUSTERED
 
     def get_orb_rando():
         g = orb_rando.get()
         if g == "None":
-            return OrbRando.NONE
+            return False #OrbRando.NONE
         if g == "Basic":
-            return OrbRando.BASIC
+            return True #OrbRando.BASIC
         if g == "Orbsanity":
-            return OrbRando.ORBSANITY
+            return True #OrbRando.ORBSANITY
     
     def get_darkrooms():
         l = darkrooms_level.get()
@@ -296,9 +296,9 @@ def generate_ROM():
                 else:
                     settings.start_location = StartLocation.FORCED_UNSAFE
                 if ( (settings.seed >> 8) & 0b1000000 ) >> 6:
-                    settings.orb_rando = OrbRando.ORBSANITY
+                    settings.orb_rando = True
                 else:
-                    settings.orb_rando = OrbRando.NONE
+                    settings.orb_rando = False
                 c = ( (settings.seed >> 8) & 0b10000000 ) >> 7
                 e = ( (settings.seed >> 16) & 0b111 )
                 if e == 0:
@@ -490,9 +490,8 @@ def entrance_shuffle_help():
     tkinter.messagebox.showinfo("Transition Shuffles", "\n".join(lines))
     
 def orb_rando_help():
-    lines = ["Randomizes the orbs that open doors and barriers, that are produced when some monsters are destroyed.",
-             " - Basic: Orb-generating monsters open a random door instead of their intended one.",
-             " - Orbsanity: Orbs are shuffled with all other items. Orb-generating monsters grant a random item when they're destroyed."]
+    lines = ["Shuffles into the item pool the orbs that open doors and barriers, produced when some monsters are destroyed.",
+             "Orb-generating monsters grant a random item when they're destroyed."]
     tkinter.messagebox.showinfo("Orb Rando", "\n".join(lines))
     
 def darkrooms_help():
@@ -519,8 +518,13 @@ def er_maybe_force_coupled():
 
 def checkbox_clear_rjm():
     red_jewel_madness.set(0)
+def on_enable_rjm():
+    checkbox_clear_ohko()
+    checkbox_clear_infinv()
 def checkbox_clear_ohko():
     ohko.set(0)
+def checkbox_clear_infinv():
+    infinite_inventory.set(0)
 
 def goal_maybe_change_statues(goalchoice):
     if goal.get() == "Red Jewel Hunt":
@@ -617,7 +621,7 @@ dungeon_shuffle = tkinter.IntVar(root)
 dungeon_shuffle.set(0)
 
 orb_rando = tkinter.StringVar(root)
-orb_rando_choices = ["None", "Basic", "Orbsanity"]
+orb_rando_choices = ["None", "Orbsanity"]   # formerly allowed "Basic" as well
 orb_rando.set("None")
 
 darkrooms_level = tkinter.StringVar(root)
@@ -694,11 +698,11 @@ ohko_label = tkinter.Label(variants_frame, text="OHKO:").grid(row=0, column=0, s
 ohko_checkbox = tkinter.Checkbutton(variants_frame, variable=ohko, onvalue=1, offvalue=0, command=checkbox_clear_rjm).grid(row=0, column=1)
 #variants_col_split_label = tkinter.Label(variants_frame, text=" ").grid(row=0, column=2)
 rjm_label = tkinter.Label(variants_frame, text="Red Jewel Madness:").grid(row=0, column=3, sticky=tkinter.E)
-rjm_checkbox = tkinter.Checkbutton(variants_frame, variable=red_jewel_madness, onvalue=1, offvalue=0, command=checkbox_clear_ohko).grid(row=0, column=4)
+rjm_checkbox = tkinter.Checkbutton(variants_frame, variable=red_jewel_madness, onvalue=1, offvalue=0, command=on_enable_rjm).grid(row=0, column=4)
 z3_mode_label = tkinter.Label(variants_frame, text="Z3 Mode:").grid(row=1, column=0, sticky=tkinter.E)
 z3_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=z3_mode, onvalue=1, offvalue=0).grid(row=1, column=1)
 inf_inv_label = tkinter.Label(variants_frame, text="Infinite Inventory:").grid(row=1, column=3, sticky=tkinter.E)
-inf_inv_checkbox = tkinter.Checkbutton(variants_frame, variable=infinite_inventory, onvalue=1, offvalue=0).grid(row=1, column=4)
+inf_inv_checkbox = tkinter.Checkbutton(variants_frame, variable=infinite_inventory, onvalue=1, offvalue=0, command=checkbox_clear_rjm).grid(row=1, column=4)
 glitches_label = tkinter.Label(variants_frame, text="Glitches:").grid(row=2, column=0, sticky=tkinter.E)
 glitches_checkbox = tkinter.Checkbutton(variants_frame, variable=glitches, onvalue=1, offvalue=0).grid(row=2, column=1)
 firebird_label = tkinter.Label(variants_frame, text="Early Firebird:").grid(row=2, column=3, sticky=tkinter.E)
