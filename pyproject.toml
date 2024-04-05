@@ -1,0 +1,30 @@
+[metadata]
+license_files = ["LICENSE"]
+
+[project]
+name = "iog-randomizer"
+authors = [
+    { "name" = "dontbagume" },
+    { "name" = "bryon_w" },
+    { "name" = "raeven0" }
+]
+version = "4.7.2"
+description = "The Illusion of Gaia Randomizer"
+urls.Homepage = "https://iogr.app/"
+urls.Source = "https://github.com/dontbagume/iogr"
+dynamic = ["dependencies"]
+readme = { file = "README.md", content-type = "text/markdown" }
+
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project.scripts]
+iogr_cli = "iog_randomizer.cli.__main__:cli"
+iogr_gui = "iog_randomizer.gui.gui:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["iog_randomizer.*"]
+
+[tool.setuptools.dynamic]
+dependencies.file = "requirements.txt"
