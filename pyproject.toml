@@ -20,6 +20,8 @@ requires = ["setuptools", "wheel"]
 
 [project.scripts]
 iogr_cli = "iog_randomizer.cli.__main__:cli"
+
+[project.gui-scripts]
 iogr_gui = "iog_randomizer.gui.gui:main"
 
 [tool.setuptools.packages.find]

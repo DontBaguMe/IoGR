@@ -34,7 +34,7 @@ def save_ROM(rompath):
 
 def generate_seed():
     seed.delete(0, tkinter.END)
-    seed.insert(10, random.randint(0, 99999999))
+    seed.insert(10, str(random.randint(0, 99999999)))
 
 
 def generate_ROM():
@@ -102,26 +102,6 @@ def generate_ROM():
             return Enemizer.FULL
         if e == "Insane":
             return Enemizer.INSANE
-
-    # def get_entrance_shuffle():
-    #     g = entrance_shuffle.get()
-    #     if g == "None":
-    #         return EntranceShuffle.NONE
-    #     if g == "Coupled":
-    #         return EntranceShuffle.COUPLED
-    #     if g == "Uncoupled":
-    #         return EntranceShuffle.UNCOUPLED
-
-    # def get_dungeon_shuffle():
-    #    g = dungeon_shuffle.get()
-    #    if g == "None":
-    #        return DungeonShuffle.NONE
-    #    if g == "Basic":
-    #        return DungeonShuffle.BASIC
-    #    if g == "Chaos":
-    #        return DungeonShuffle.CHAOS
-    #    if g == "Clustered":
-    #        return DungeonShuffle.CLUSTERED
 
     def get_orb_rando():
         g = orb_rando.get()
@@ -394,7 +374,7 @@ def generate_ROM():
     except FileNotFoundError:
         tkinter.messagebox.showerror("ERROR", "ROM file does not exist")
     except Exception as e:
-        tkinter.messagebox.showerror("ERROR", e)
+        tkinter.messagebox.showerror("ERROR", str(e))
 
 
 def write_text_file(text, filename, rom_path):
@@ -514,21 +494,21 @@ def darkrooms_help():
 def dr_maybe_set_cursed(drlevel):
     if darkrooms_level.get() == "All":
         darkrooms_cursed_checkbox.config(state='disabled')
-        darkrooms_cursed.set(1)
+        darkrooms_cursed.set(True)
     else:
         darkrooms_cursed_checkbox.config(state='normal')
 
 
 def er_maybe_force_coupled():
     if not dungeon_shuffle.get() and not town_shuffle.get():
-        coupled_exits.set(1)
+        coupled_exits.set(True)
         coupled_exits_checkbox.config(state='disabled')
     else:
         coupled_exits_checkbox.config(state='normal')
 
 
 def checkbox_clear_rjm():
-    red_jewel_madness.set(0)
+    red_jewel_madness.set(False)
 
 
 def on_enable_rjm():
@@ -537,11 +517,11 @@ def on_enable_rjm():
 
 
 def checkbox_clear_ohko():
-    ohko.set(0)
+    ohko.set(False)
 
 
 def checkbox_clear_infinv():
-    infinite_inventory.set(0)
+    infinite_inventory.set(False)
 
 
 def goal_maybe_change_statues(goalchoice):
@@ -555,11 +535,11 @@ def statues_maybe_change_goal(statuechoice):
 
 
 def checkbox_clear_profile():
-    do_profile.set(0)
+    do_profile.set(False)
 
 
 def checkbox_clear_tests():
-    do_tests_toggle.set(0)
+    do_tests_toggle.set(False)
 
 
 root = tkinter.Tk()
@@ -604,45 +584,45 @@ logic = tkinter.StringVar(root)
 logic_choices = ["Completable", "Beatable", "Chaos"]
 logic.set("Completable")
 
-firebird = tkinter.IntVar(root)
-firebird.set(0)
+firebird = tkinter.BooleanVar(root)
+firebird.set(False)
 
 start = tkinter.StringVar(root)
 start_choices = ["South Cape", "Safe", "Unsafe", "Forced Unsafe"]
 start.set("South Cape")
 
-ohko = tkinter.IntVar(root)
-ohko.set(0)
+ohko = tkinter.BooleanVar(root)
+ohko.set(False)
 
-red_jewel_madness = tkinter.IntVar(root)
-red_jewel_madness.set(0)
+red_jewel_madness = tkinter.BooleanVar(root)
+red_jewel_madness.set(False)
 
-infinite_inventory = tkinter.IntVar(root)
-infinite_inventory.set(0)
+infinite_inventory = tkinter.BooleanVar(root)
+infinite_inventory.set(False)
 
-glitches = tkinter.IntVar(root)
-glitches.set(0)
+glitches = tkinter.BooleanVar(root)
+glitches.set(False)
 
-boss_shuffle = tkinter.IntVar(root)
-boss_shuffle.set(0)
+boss_shuffle = tkinter.BooleanVar(root)
+boss_shuffle.set(False)
 
-open_mode = tkinter.IntVar(root)
-open_mode.set(0)
+open_mode = tkinter.BooleanVar(root)
+open_mode.set(False)
 
-z3_mode = tkinter.IntVar(root)
-z3_mode.set(0)
+z3_mode = tkinter.BooleanVar(root)
+z3_mode.set(False)
 
-overworld_shuffle = tkinter.IntVar(root)
-overworld_shuffle.set(0)
+overworld_shuffle = tkinter.BooleanVar(root)
+overworld_shuffle.set(False)
 
-coupled_exits = tkinter.IntVar(root)
-coupled_exits.set(1)
+coupled_exits = tkinter.BooleanVar(root)
+coupled_exits.set(True)
 
-town_shuffle = tkinter.IntVar(root)
-town_shuffle.set(0)
+town_shuffle = tkinter.BooleanVar(root)
+town_shuffle.set(False)
 
-dungeon_shuffle = tkinter.IntVar(root)
-dungeon_shuffle.set(0)
+dungeon_shuffle = tkinter.BooleanVar(root)
+dungeon_shuffle.set(False)
 
 orb_rando = tkinter.StringVar(root)
 orb_rando_choices = ["None", "Orbsanity"]  # formerly allowed "Basic" as well
@@ -651,11 +631,12 @@ orb_rando.set("None")
 darkrooms_level = tkinter.StringVar(root)
 darkrooms_level_choices = ["None", "Few", "Some", "Many", "All"]
 darkrooms_level.set("None")
-darkrooms_cursed = tkinter.IntVar(root)
-darkrooms_cursed.set(0)
 
-race_mode_toggle = tkinter.IntVar(root)
-race_mode_toggle.set(0)
+darkrooms_cursed = tkinter.BooleanVar(root)
+darkrooms_cursed.set(False)
+
+race_mode_toggle = tkinter.BooleanVar(root)
+race_mode_toggle.set(False)
 
 flute_opt = tkinter.StringVar(root)
 flute_opt_choices = ["Start with Flute", "Shuffle Flute", "Fluteless"]
@@ -680,20 +661,20 @@ statue_req.set("Game Choice")
 printlevel = tkinter.StringVar(root)
 printlevel_choices = ["Silent", "Error", "Warn", "Info", "Verbose"]
 printlevel.set("Silent")
-break_on_error = tkinter.IntVar(root)
-break_on_error.set(0)
-break_on_init = tkinter.IntVar(root)
-break_on_init.set(0)
-do_profile = tkinter.IntVar(root)
-do_profile.set(0)
-ingame_debug = tkinter.IntVar(root)
-ingame_debug.set(0)
-gen_patches_toggle = tkinter.IntVar(root)
-gen_patches_toggle.set(0)
-do_tests_toggle = tkinter.IntVar(root)
-do_tests_toggle.set(0)
+break_on_error = tkinter.BooleanVar(root)
+break_on_error.set(False)
+break_on_init = tkinter.BooleanVar(root)
+break_on_init.set(False)
+do_profile = tkinter.BooleanVar(root)
+do_profile.set(False)
+ingame_debug = tkinter.BooleanVar(root)
+ingame_debug.set(False)
+gen_patches_toggle = tkinter.BooleanVar(root)
+gen_patches_toggle.set(False)
+do_tests_toggle = tkinter.BooleanVar(root)
+do_tests_toggle.set(False)
 
-ROM = tkinter.Entry(mainframe, width="40")
+ROM = tkinter.Entry(mainframe, width=40)
 ROM.grid(row=0, column=1)
 ROM.insert(0, load_ROM())
 
@@ -703,110 +684,181 @@ seed_frame.columnconfigure(0, weight=1)
 seed_frame.rowconfigure(0, weight=1)
 seed = tkinter.Entry(seed_frame)
 seed.pack(side='left')
-seed.insert(10, random.randint(0, 999999))
+seed.insert(10, str(random.randint(0, 99999999)))
 
-diff_menu = tkinter.OptionMenu(mainframe, difficulty, *diff_choices).grid(row=2, column=1)
-logic_menu = tkinter.OptionMenu(mainframe, logic, *logic_choices).grid(row=3, column=1)
-goal_menu = tkinter.OptionMenu(mainframe, goal, *goal_choices, command=goal_maybe_change_statues).grid(row=4, column=1)
+tkinter.OptionMenu(mainframe,
+                   difficulty,
+                   *diff_choices).grid(row=2, column=1)
+tkinter.OptionMenu(mainframe,
+                   logic,
+                   *logic_choices).grid(row=3, column=1)
+tkinter.OptionMenu(mainframe,
+                   goal,
+                   *goal_choices,
+                   command=goal_maybe_change_statues).grid(row=4, column=1)
 statues_frame = tkinter.Frame(mainframe)
 statues_frame.grid(row=5, column=1)
-statues_menu = tkinter.OptionMenu(statues_frame, statues, *statue_choices, command=statues_maybe_change_goal).pack(
-    side='left')
-statue_req_menu = tkinter.OptionMenu(statues_frame, statue_req, *statue_req_choices).pack(side='left')
-start_menu = tkinter.OptionMenu(mainframe, start, *start_choices).grid(row=6, column=1)
+tkinter.OptionMenu(statues_frame,
+                   statues,
+                   *statue_choices,
+                   command=statues_maybe_change_goal).pack(side='left')
+tkinter.OptionMenu(statues_frame,
+                   statue_req,
+                   *statue_req_choices).pack(side='left')
+tkinter.OptionMenu(mainframe,
+                   start,
+                   *start_choices).grid(row=6, column=1)
 
 variants_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
 variants_frame.grid(row=7, column=1)
 variants_frame.columnconfigure(0, weight=1)
 variants_frame.rowconfigure(0, weight=1)
-ohko_label = tkinter.Label(variants_frame, text="OHKO:").grid(row=0, column=0, sticky=tkinter.E)
-ohko_checkbox = tkinter.Checkbutton(variants_frame, variable=ohko, onvalue=1, offvalue=0,
-                                    command=checkbox_clear_rjm).grid(row=0, column=1)
-# variants_col_split_label = tkinter.Label(variants_frame, text=" ").grid(row=0, column=2)
-rjm_label = tkinter.Label(variants_frame, text="Red Jewel Madness:").grid(row=0, column=3, sticky=tkinter.E)
-rjm_checkbox = tkinter.Checkbutton(variants_frame, variable=red_jewel_madness, onvalue=1, offvalue=0,
-                                   command=on_enable_rjm).grid(row=0, column=4)
-z3_mode_label = tkinter.Label(variants_frame, text="Z3 Mode:").grid(row=1, column=0, sticky=tkinter.E)
-z3_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=z3_mode, onvalue=1, offvalue=0).grid(row=1, column=1)
-inf_inv_label = tkinter.Label(variants_frame, text="Infinite Inventory:").grid(row=1, column=3, sticky=tkinter.E)
-inf_inv_checkbox = tkinter.Checkbutton(variants_frame, variable=infinite_inventory, onvalue=1, offvalue=0,
-                                       command=checkbox_clear_rjm).grid(row=1, column=4)
-glitches_label = tkinter.Label(variants_frame, text="Glitches:").grid(row=2, column=0, sticky=tkinter.E)
-glitches_checkbox = tkinter.Checkbutton(variants_frame, variable=glitches, onvalue=1, offvalue=0).grid(row=2, column=1)
-firebird_label = tkinter.Label(variants_frame, text="Early Firebird:").grid(row=2, column=3, sticky=tkinter.E)
-firebird_checkbox = tkinter.Checkbutton(variants_frame, variable=firebird, onvalue=1, offvalue=0).grid(row=2, column=4)
-open_mode_label = tkinter.Label(variants_frame, text="Open:").grid(row=3, column=0, sticky=tkinter.E)
-open_mode_checkbox = tkinter.Checkbutton(variants_frame, variable=open_mode, onvalue=1, offvalue=0).grid(row=3,
-                                                                                                         column=1)
-race_mode_label = tkinter.Label(variants_frame, text="Race Seed:").grid(row=3, column=3, sticky=tkinter.E)
-race_mode_toggle_checkbox = tkinter.Checkbutton(variants_frame, variable=race_mode_toggle, onvalue=1, offvalue=0).grid(
-    row=3, column=4)
-flute_label = tkinter.Label(variants_frame, text="Flute:").grid(row=4, column=0, sticky=tkinter.E)
-flute_menu = tkinter.OptionMenu(variants_frame, flute_opt, *flute_opt_choices).grid(row=4, column=1, columnspan=4,
-                                                                                    sticky=tkinter.W)
+
+tkinter.Label(variants_frame, text="OHKO:").grid(row=0, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=ohko,
+                    command=checkbox_clear_rjm).grid(row=0, column=1)
+
+tkinter.Label(variants_frame,
+              text="Red Jewel Madness:").grid(row=0, column=3, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=red_jewel_madness,
+                    command=on_enable_rjm).grid(row=0, column=4)
+
+tkinter.Label(variants_frame, text="Z3 Mode:").grid(row=1, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=z3_mode).grid(row=1, column=1)
+
+tkinter.Label(variants_frame,
+              text="Infinite Inventory:").grid(row=1, column=3, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=infinite_inventory,
+                    command=checkbox_clear_rjm).grid(row=1, column=4)
+
+tkinter.Label(variants_frame,
+              text="Glitches:").grid(row=2, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=glitches).grid(row=2, column=1)
+
+tkinter.Label(variants_frame,
+              text="Early Firebird:").grid(row=2, column=3, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=firebird).grid(row=2, column=4)
+
+tkinter.Label(variants_frame,
+              text="Open:").grid(row=3, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=open_mode).grid(row=3, column=1)
+
+tkinter.Label(variants_frame,
+              text="Race Seed:").grid(row=3, column=3, sticky=tkinter.E)
+tkinter.Checkbutton(variants_frame,
+                    variable=race_mode_toggle).grid(row=3, column=4)
+
+tkinter.Label(variants_frame,
+              text="Flute:").grid(row=4, column=0, sticky=tkinter.E)
+tkinter.OptionMenu(variants_frame,
+                   flute_opt,
+                   *flute_opt_choices).grid(row=4, column=1, columnspan=4, sticky=tkinter.W)
 
 enemy_rando_frame = tkinter.Frame(mainframe, borderwidth=1)
 enemy_rando_frame.grid(row=9, column=1)
 enemy_rando_frame.columnconfigure(0, weight=1)
 enemy_rando_frame.rowconfigure(0, weight=1)
-enemizer_menu = tkinter.OptionMenu(enemy_rando_frame, enemizer, *enemizer_choices).pack(side='left')
-boss_shuffle_label = tkinter.Label(enemy_rando_frame, text="Boss shuffle:").pack(side='left')
-boss_shuffle_checkbox = tkinter.Checkbutton(enemy_rando_frame, variable=boss_shuffle, onvalue=1, offvalue=0).pack(
+
+tkinter.OptionMenu(enemy_rando_frame,
+                   enemizer,
+                   *enemizer_choices).pack(side='left')
+
+tkinter.Label(enemy_rando_frame,
+              text="Boss shuffle:").pack(side='left')
+tkinter.Checkbutton(enemy_rando_frame, variable=boss_shuffle).pack(
     side='left')
 
-overworld_shuffle_checkbox = tkinter.Checkbutton(mainframe, variable=overworld_shuffle, onvalue=1, offvalue=0).grid(
-    row=16, column=1)
+tkinter.Checkbutton(mainframe,
+                    variable=overworld_shuffle).grid(row=16, column=1)
 
 er_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
 er_frame.grid(row=17, column=1)
 er_frame.columnconfigure(0, weight=1)
 er_frame.rowconfigure(0, weight=1)
-town_shuffle_label = tkinter.Label(er_frame, text="Towns:").grid(row=0, column=0, sticky=tkinter.E)
-town_shuffle_checkbox = tkinter.Checkbutton(er_frame, variable=town_shuffle, onvalue=1, offvalue=0,
-                                            command=er_maybe_force_coupled).grid(row=0, column=1)
-dungeon_shuffle_label = tkinter.Label(er_frame, text="Dungeons:").grid(row=1, column=0, sticky=tkinter.E)
-dungeon_shuffle_checkbox = tkinter.Checkbutton(er_frame, variable=dungeon_shuffle, onvalue=1, offvalue=0,
-                                               command=er_maybe_force_coupled).grid(row=1, column=1)
-coupled_exits_label = tkinter.Label(er_frame, text="Coupled:").grid(row=0, column=3, rowspan=2, sticky=tkinter.E)
-coupled_exits_checkbox = tkinter.Checkbutton(er_frame, variable=coupled_exits, onvalue=1, offvalue=0)
+
+tkinter.Label(er_frame,
+              text="Towns:").grid(row=0, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(er_frame,
+                    variable=town_shuffle,
+                    command=er_maybe_force_coupled).grid(row=0, column=1)
+
+tkinter.Label(er_frame,
+              text="Dungeons:").grid(row=1, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(er_frame,
+                    variable=dungeon_shuffle,
+                    command=er_maybe_force_coupled).grid(row=1, column=1)
+
+tkinter.Label(er_frame,
+              text="Coupled:").grid(row=0, column=3, rowspan=2, sticky=tkinter.E)
+coupled_exits_checkbox = tkinter.Checkbutton(er_frame,
+                                             variable=coupled_exits)
 coupled_exits_checkbox.grid(row=0, column=4, rowspan=2, sticky=tkinter.W)
 coupled_exits_checkbox.config(state='disabled')
 
-orb_rando_menu = tkinter.OptionMenu(mainframe, orb_rando, *orb_rando_choices).grid(row=20, column=1)
+tkinter.OptionMenu(mainframe,
+                   orb_rando,
+                   *orb_rando_choices).grid(row=20, column=1)
+
 darkrooms_frame = tkinter.Frame(mainframe, borderwidth=1)
 darkrooms_frame.grid(row=22, column=1)
-darkrooms_level_menu = tkinter.OptionMenu(darkrooms_frame, darkrooms_level, *darkrooms_level_choices,
-                                          command=dr_maybe_set_cursed).pack(side='left')
-darkrooms_label = tkinter.Label(darkrooms_frame, text="Cursed:").pack(side='left')
-darkrooms_cursed_checkbox = tkinter.Checkbutton(darkrooms_frame, variable=darkrooms_cursed, onvalue=1, offvalue=0)
+tkinter.OptionMenu(darkrooms_frame,
+                   darkrooms_level,
+                   *darkrooms_level_choices,
+                   command=dr_maybe_set_cursed).pack(side='left')
+tkinter.Label(darkrooms_frame,
+              text="Cursed:").pack(side='left')
+darkrooms_cursed_checkbox = tkinter.Checkbutton(darkrooms_frame,
+                                                variable=darkrooms_cursed)
 darkrooms_cursed_checkbox.pack(side='left')
 
 devtools_frame = tkinter.Frame(mainframe, borderwidth=1, relief='sunken')
 devtools_frame.grid(row=50, column=1)
 devtools_frame.columnconfigure(0, weight=1)
 devtools_frame.rowconfigure(0, weight=1)
-printlevel_label = tkinter.Label(devtools_frame, text="Console:").grid(row=0, column=0, sticky=tkinter.E)
-printlevel_menu = tkinter.OptionMenu(devtools_frame, printlevel, *printlevel_choices).grid(row=0, column=1,
-                                                                                           columnspan=4,
-                                                                                           sticky=tkinter.W)
-break_on_error_label = tkinter.Label(devtools_frame, text="Break on Error:").grid(row=1, column=0, sticky=tkinter.E)
-break_on_error_checkbox = tkinter.Checkbutton(devtools_frame, variable=break_on_error, onvalue=1, offvalue=0).grid(
-    row=1, column=1)
-break_on_init_label = tkinter.Label(devtools_frame, text="Break on Init:").grid(row=1, column=3, sticky=tkinter.E)
-break_on_init_checkbox = tkinter.Checkbutton(devtools_frame, variable=break_on_init, onvalue=1, offvalue=0).grid(row=1,
-                                                                                                                 column=4)
-ingame_debug_label = tkinter.Label(devtools_frame, text="In-Game Debug:").grid(row=2, column=0, sticky=tkinter.E)
-ingame_debug_checkbox = tkinter.Checkbutton(devtools_frame, variable=ingame_debug, onvalue=1, offvalue=0).grid(row=2,
-                                                                                                               column=1)
-do_profile_label = tkinter.Label(devtools_frame, text="Profile these:").grid(row=2, column=3, sticky=tkinter.E)
-do_profile_checkbox = tkinter.Checkbutton(devtools_frame, variable=do_profile, onvalue=1, offvalue=0,
-                                          command=checkbox_clear_tests).grid(row=2, column=4)
-gen_patches_label = tkinter.Label(devtools_frame, text="Create Patches:").grid(row=3, column=0, sticky=tkinter.E)
-gen_patches_checkbox = tkinter.Checkbutton(devtools_frame, variable=gen_patches_toggle, onvalue=1, offvalue=0).grid(
-    row=3, column=1)
-do_tests_label = tkinter.Label(devtools_frame, text="Profile all:").grid(row=3, column=3, sticky=tkinter.E)
-do_tests_checkbox = tkinter.Checkbutton(devtools_frame, variable=do_tests_toggle, onvalue=1, offvalue=0,
-                                        command=checkbox_clear_profile).grid(row=3, column=4)
+tkinter.Label(devtools_frame,
+              text="Console:").grid(row=0, column=0, sticky=tkinter.E)
+tkinter.OptionMenu(devtools_frame,
+                   printlevel,
+                   *printlevel_choices).grid(row=0, column=1, columnspan=4, sticky=tkinter.W)
+
+tkinter.Label(devtools_frame,
+              text="Break on Error:").grid(row=1, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(devtools_frame,
+                    variable=break_on_error).grid(row=1, column=1)
+
+tkinter.Label(devtools_frame,
+              text="Break on Init:").grid(row=1, column=3, sticky=tkinter.E)
+tkinter.Checkbutton(devtools_frame,
+                    variable=break_on_init).grid(row=1, column=4)
+
+tkinter.Label(devtools_frame,
+              text="In-Game Debug:").grid(row=2, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(devtools_frame,
+                    variable=ingame_debug).grid(row=2, column=1)
+
+tkinter.Label(devtools_frame,
+              text="Profile these:").grid(row=2, column=3, sticky=tkinter.E)
+tkinter.Checkbutton(devtools_frame,
+                    variable=do_profile,
+                    command=checkbox_clear_tests).grid(row=2, column=4)
+
+tkinter.Label(devtools_frame,
+              text="Create Patches:").grid(row=3, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(devtools_frame,
+                    variable=gen_patches_toggle).grid(row=3, column=1)
+
+tkinter.Label(devtools_frame,
+              text="Profile all:").grid(row=3, column=3, sticky=tkinter.E)
+tkinter.Checkbutton(devtools_frame,
+                    variable=do_tests_toggle,
+                    command=checkbox_clear_profile).grid(row=3, column=4)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(seed_frame, text='Random Seed', command=generate_seed).pack(side='left')
