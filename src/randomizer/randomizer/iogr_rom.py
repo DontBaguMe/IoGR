@@ -22,7 +22,7 @@ from .models.enums import *
 
 from . import asar
 
-VERSION = "4.7.2"
+VERSION = "4.7.2.1"
 MAX_RANDO_RETRIES = 50
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 
@@ -178,11 +178,16 @@ class Randomizer:
         data_file = open(self.rom_path, "rb")
         self.original_rom_data = data_file.read()
         data_file.close()
-        if len(self.original_rom_data) >= 0x200200:
+        if len(self.original_rom_data) == 0x200200:
             self.original_rom_data = self.original_rom_data[0x200:]    # Strip the 512-byte header
-        basehash = hashlib.md5()
-        basehash.update(self.original_rom_data)
-        if basehash.hexdigest() != 'a7c7a76b4d6f6df389bd631757b91b76':
+        if len(self.original_rom_data) == 0x200000:
+            # Validate a 2MB input
+            basehash = hashlib.md5()
+            basehash.update(self.original_rom_data)
+            if basehash.hexdigest() != 'a7c7a76b4d6f6df389bd631757b91b76':
+                raise OffsetError
+        elif len(self.original_rom_data) != 0x400000:
+            # If caller gives a 4MB input, assume it knows what it's doing; otherwise fail
             raise OffsetError
 
         log_file_path = os.path.dirname(rom_path) + os.path.sep + "iogr" + os.path.sep + "logs" + os.path.sep + "app.log"
@@ -744,7 +749,10 @@ class Randomizer:
         ##########################################################################
         #            Pass all defines to assembler and return patch
         ##########################################################################
-        romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
+        if len(self.original_rom_data) == 0x200000:
+            romdata = copy.deepcopy(self.original_rom_data) + bytearray(0x200000)
+        else:   # Caller provided a pre-expanded input
+            romdata = copy.deepcopy(self.original_rom_data)
         
         self.asar_defines["SettingBossShuffle"] = 1 if settings.boss_shuffle else 0
         self.asar_defines["SettingInfiniteInventory"] = 1 if settings.infinite_inventory else 0
