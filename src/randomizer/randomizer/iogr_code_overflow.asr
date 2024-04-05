@@ -1,0 +1,3551 @@
+arch 65816
+hirom
+
+; Reserved RAM (in addition to base game):
+; $0aaa = number of stacked herbs
+; $0bec = number of stacked Hope Statues
+; $0bee = number of stacked Rama Statues
+; $0bf0 = number of stacked Mushroom Drops
+; $0bf2 = number of stacked Crystal Balls
+; $0bf4 = number of stacked Red Jewels
+; $0bf6 = stores index of last DS visited
+; $0bf8 = during DS warp, DS index of text lines and of selected DS
+; $0bfa = used for text branches ("FORCE" text, inv page number, count spacing, Lance's letter, etc.)
+; $0bfc = used during item pickup to write text slowly (for chests and Dark Spaces)
+; $0bfe = used during item pickup to flag a stat as maxed out
+; $1ffc = Player X pos in debug mode
+; $1ffe = Player Y pos in debug mode
+; Reserved flags (in addition to base game):
+; $022f - $0247 : Monster item flags $01 - $18
+; $0290 - $02af : Monster item flags $19 - $2A, and 13 extras
+; $02b0 - $02b1 : Statue placed in the Left/Right Hope Room
+; $02b2 - $02b7 : DS item-get flags
+
+
+LR_SecOnAnyFlagA:
+jsl $80b4ba    ; i.e. 3+LR_SecOnFlagA
+rtl
+LR_SetAnyFlagA:
+jsl $80b4c1    ; i.e. 3+LR_SetFlagA
+rtl
+LR_ClearAnyFlagA:
+jsl $80b4c8    ; i.e. 3+LR_ClearFlagA
+rtl
+
+; Flags $022f - $0247 (chest block) and $0290 - $02bf (RJ block) are free in IOGR.
+; Monster item flags are mapped to a subset of those.
+SR_MapMonsterItemFlagA:
+dec : clc : adc #$022f : cmp #$0248 : bcc +
+  clc : adc #$0048
++:
+rts
+LR_SecOnMonsterItemFlagA:
+jsr SR_MapMonsterItemFlagA
+jsl $80b4ba    ; i.e. 3+LR_SecOnFlagA
+rtl
+LR_SetMonsterItemFlagA:
+jsr SR_MapMonsterItemFlagA
+jsl $80b4c1    ; i.e. 3+LR_SetFlagA
+rtl
+LR_ClearMonsterItemFlagA:
+jsr SR_MapMonsterItemFlagA
+jsl $80b4c8    ; i.e. 3+LR_ClearFlagA
+rtl
+
+if 0
+LR_GiveItemForFlagA:
+phx
+pha
+ldx #$0000
+.CheckNext:
+lda.l .LutAddrByFlag,x : cmp #$ffff : beq .DoneAllChecks
+  cmp $01,s : bne ..DoneThisCheck
+..TryGiveItem:
+    phx
+      lda.l 2+.LutAddrByFlag,x : tax
+      lda.l Config_BankAnchor&$ff0000,x : jsl LR_GiveAnyItemA16OrSec
+    plx
+    bcs .DoneAllChecks
+..DoneThisCheck:
+inx : inx : inx : inx : inx
+bra .CheckNext
+.DoneAllChecks:
+pla
+plx
+rtl
+.LutAddrByFlag:
+dw $00d7 : dl Config_CapeFisherItem
+dw $0035 : dl Config_CapeLolaItem
+dw $00d8 : dl Config_ECHiddenGuardItem
+dw $0046 : dl Config_ECBasementItem
+dw $0023 : dl Config_EDHamletItem
+dw $002d : dl Config_ItoryCaveItem
+dw $0048 : dl Config_MoonTribeCaveItem
+dw $00e0 : dl Config_IncaGoldShipItem
+dw $00e1 : dl Config_FrejEastSlaverItem
+dw $005a : dl Config_FrejSnitchItem
+dw $0053 : dl Config_FrejBin2Item
+dw $0054 : dl Config_FrejBin1Item
+dw $005e : dl Config_MineSamItem
+dw $005d : dl Config_MineMorgueItem
+dw $00d9 : dl Config_MineWallSlaveItem
+dw $0085 : dl Config_SeaPalBuffyItem
+dw $0013 : dl Config_SeaPalCoffinItem
+dw $0079 : dl Config_MuHopeStatue1Item
+dw $007f : dl Config_MuHopeStatue2Item
+dw $0095 : dl Config_WtrmRussianGlassItem
+dw $00e2 : dl Config_WtrmLanceItem
+dw $0098 : dl Config_GtWlNecklace1Item
+dw $0099 : dl Config_GtWlNecklace2Item
+dw $009a : dl Config_EuroAppleVendorItem
+dw $00f0 : dl Config_EuroShop1Item
+dw $00f1 : dl Config_EuroShop2Item
+dw $00e5 : dl Config_EuroAnnItem
+dw $00a6 : dl Config_EuroHiddenHouseItem
+dw $00e6 : dl Config_NativesGirlItem
+dw $00be : dl Config_WatSpiritItem
+dw $00ba : dl Config_WatGlassesItem
+dw $00e7 : dl Config_DaoSnakeGameItem
+dw $00b8 : dl Config_DaoEntrance1Item
+dw $00b8 : dl Config_DaoEntrance2Item
+dw $00c2 : dl Config_PyramidHiero1Item
+dw $00c3 : dl Config_PyramidHiero2Item
+dw $00c4 : dl Config_PyramidHiero3Item
+dw $00c5 : dl Config_PyramidHiero4Item
+dw $00c6 : dl Config_PyramidHiero5Item
+dw $00c7 : dl Config_PyramidHiero6Item
+dw $00e9 : dl Config_Jeweler1Item
+dw $00ea : dl Config_Jeweler2Item
+dw $00eb : dl Config_Jeweler3Item
+dw $00ec : dl Config_Jeweler4Item
+dw $00ed : dl Config_Jeweler5Item
+dw $00ee : dl Config_Jeweler6Item
+dw $00bd : dl Config_PyramidGaiaItem
+dw $00dc : dl Config_BabelForceFieldItem
+dw $0032 : dl Config_IncaCliffItem
+dw $00a2 : dl Config_MineCombatSlaveItem
+dw $00a3 : dl Config_MineRampSlaveItem
+dw $022f : dl Config_EDCageWormItem
+dw $0230 : dl Config_EDSoutheastWormItem
+dw $0231 : dl Config_EDSouthwestWormItem
+dw $0232 : dl Config_EDDoorBatItem
+dw $0233 : dl Config_EDDarkSpaceWormItem
+dw $0234 : dl Config_EDSkeleton1Item
+dw $0235 : dl Config_EDSkeleton2Item
+dw $0236 : dl Config_IncaWestLadderItem
+dw $0237 : dl Config_IncaSoutheastLadderItem
+dw $0238 : dl Config_IncaNortheastLadderItem
+dw $0239 : dl Config_IncaNSRampItem
+dw $023a : dl Config_IncaEWRampItem
+dw $023b : dl Config_IncaDBlockMonsterItem
+dw $023c : dl Config_IncaWMelodyMonsterItem
+dw $023d : dl Config_MineMidFenceItem
+dw $023e : dl Config_MineNorthFenceItem
+dw $023f : dl Config_MineSouthFenceItem
+dw $0240 : dl Config_MineWormCageItem
+dw $0241 : dl Config_MineWormDarkSpaceItem
+dw $0242 : dl Config_MineFriarFenceItem
+dw $0243 : dl Config_SGSETopBarrierItem
+dw $0244 : dl Config_SGSEBotBarrierItem
+dw $0245 : dl Config_SGSWTopPegGateItem
+dw $0246 : dl Config_SGSWTopRobotRampItem
+dw $0247 : dl Config_SGSWTopWormGateItem
+dw $0290 : dl Config_SGSWBotFireCageItem
+dw $0291 : dl Config_MuEntranceGolemItem
+dw $0292 : dl Config_MuDroplet1Item
+dw $0293 : dl Config_MuDroplet2Item
+dw $0294 : dl Config_MuSlimeCageItem
+dw $0295 : dl Config_MuEastFacingHeadGolemItem
+dw $0296 : dl Config_MuSouthFacingHeadGolemItem
+dw $0297 : dl Config_GtWlArcherItem
+dw $0298 : dl Config_GtWlFangerItem
+dw $0299 : dl Config_KressSkullShortcutItem
+dw $029a : dl Config_WatSouthScarabItem
+dw $029b : dl Config_WatEastSliderHoleItem
+dw $029c : dl Config_WatPitExitItem
+dw $029d : dl Config_WatDarkSpaceHallItem
+dw $029e : dl Config_PyramidEntranceOrbsItem
+dw $029f : dl Config_MansionEastGateItem
+dw $02a0 : dl Config_MansionWestGateItem
+dw $ffff
+endif
+
+; Silently gives item A, stacking if appropriate.
+LR_GiveNormalItemA8OrSec:
+{
+stz $0bfe    ; Used by Z3 mode to flag whether we're capped on a stat.
+php
+sep #$20
+bit #$80 : bne .IsStatOrPickup
+cmp #$32 : beq .IsOtherWorldItem
+pha
+jsl LR_GetItemAStackedCountBcd : cmp #$00 : bne .IsStackableAndHasStack
+jsl LR_GetEmptyInvSlotInYOrSec : bcs +
+  jmp .GotEmptyInvSlot
++:
+jmp .InvFull
+
+.IsOtherWorldItem:   ; These always count as given, and have no other effects.
+sta $0db8
+stz $0db9
+ldy #$ff1f
+jmp .ClcAndReturn
+
+.IsStackableAndHasStack:
+pla : sta $0DB8
+  jsr SR_GrowStackForItemA
+  stz $0DB9
+ldy #$FF1F
+jmp .ClcAndReturn
+
+.IsStatOrPickup:
+sec : sbc #$80 : bne +
+    jmp .IsHpJewel   ; $80
++:
+  dec : bne + 
+    jmp .IsStrJewel  ; $81
++:
+  dec : bne + 
+    jmp .IsDefJewel  ; $82
++:
+  dec : beq .IsSmallDp   ; $83
+  dec : beq .IsMediumDp  ; $84
+  dec : beq .IsBigDp     ; $85
+  dec : beq .IsHpPickup  ; $86
+  dec : bne + 
+    jmp .IsHpJewelItem   ; $87
++:
+  dec : bne + 
+    jmp .IsStrJewelItem  ; $88
++:
+jmp .IsDefJewelItem  ; $89
+.IsHpPickup:
+rep #$20
+lda #$0005 : clc : adc $0B22 : sta $0B22
+phd
+  txa : tcd
+  cop #$A5 : dl $80dd03 : dw $0000, $2F00    ; EHpPickupCounter
+pld
+cop #$06 : db $22
+jmp .ClcAndReturn
+.IsSmallDp:
+lda #$01 : bra .DoAwardDp
+.IsMediumDp:
+lda #$02 : bra .DoAwardDp
+.IsBigDp:
+lda #$05
+.DoAwardDp:
+rep #$20
+and #$00FF : clc : adc $0AD6 : cmp #$03E7 : bcc +
+  lda #$03E7
++:
+sta $0AD6
+cop #$06 : db $22
+jmp .ClcAndReturn
+.IsHpJewelItem:    ; In Z3 non-Expert, HP that isn't a room reward awards 2 hit points.
+if !SettingZ3 == 1 && !SettingOHKO == 0
+lda #$80 : trb $09EC
+lda $0aca : inc : inc : sta $0aca
+  sec : sbc $0ace : sta $0b22
+ldy #$0000
+jmp .ClcAndReturn
+endif
+.IsHpJewel:
+lda #$80 : trb $09EC
+if !SettingOHKO == 0
+lda $0ACA : inc : sta $0ACA
+  sec : sbc $0ACE : sta $0B22
+endif
+ldy #$0000
+bra .ClcAndReturn
+.IsStrJewelItem:
+.IsStrJewel:
+lda #$80 : trb $09EC
+if !SettingZ3 == 1   ; In Z3, STR is capped at 8/4/2/1 for difficulty 0/1/2/3.
+phx
+  ldx $0b24
+  lda $0ade : cmp.l ..MaxStrByDifficulty,x
+plx
+bcs +
+  asl $0ade
+  bra ++
+..MaxStrByDifficulty:
+db 8,4,2,1
++:
+lda #$01 : sta $0bfe
+++:
+else
+inc $0ADE
+endif
+ldy #$0000
+bra .ClcAndReturn
+.IsDefJewelItem:
+.IsDefJewel:
+lda #$80 : trb $09EC
+if !SettingZ3 == 1   ; In Z3, DEF is capped at 2/2/1/0 for difficulty 0/1/2/3.
+phx
+  ldx $0b24
+  lda $0adc : cmp.l ..MaxDefByDifficulty,x
+plx
+bcs +
+  inc $0adc
+  bra ++
+..MaxDefByDifficulty:
+db 2,2,1,0
++:
+lda #$01 : sta $0bfe
+++:
+else
+inc $0ADC
+endif
+ldy #$0000
+bra .ClcAndReturn
+
+.GotEmptyInvSlot:
+lda $01,s : jsr SR_GrowStackForItemA   ; GrowStack is harmless if A is not stackable, and handles 2/3RJ
+if !SettingInfiniteInventory == 1
+lda $01,s : cmp #$2e : beq ++
+  cmp #$2f : bne +
+++:
+lda #$01   ; For the inventory write, use a RJ instead of the 2RJ/3RJ item when creating the stack
++:
+jsl LR_WriteItemAToInvSlotY
+pla
+else
+pla : jsl LR_WriteItemAToInvSlotY
+endif
+  sta $0DB8
+  stz $0DB9
+ldy #$FF1F
+.ClcAndReturn:
+plp
+clc
+rtl
+.InvFull:
+pla : sta $0DB8
+  stz $0DB9
+ldy #$FF02
+plp
+sec
+rtl
+}
+
+; Not silent.
+LR_GiveAnyItemA16OrSec:
+{
+pha
+and #$ff00 : cmp #$1000 : bne .ItemIsNotUnlockedDoor
+  jmp .GiveUnlockedDoor
+.ItemIsNotUnlockedDoor:
+cmp #$1100 : bne .ItemIsNotAbility
+  jmp .GiveAbility
+.ItemIsNotAbility:
+.TryGiveItemA8:
+lda $01,s : and #$00ff : cmp #$0080 : bcc +
+  sec : sbc #$0087
+  clc : adc #$0029
++:
+sta $0db8
+lda $01,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
+..IsNotSpecial:
+lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
+..GotItem:
+cop #$BF : dw ...Text
+stz $0db8
+stz $0bfc
+pla
+clc
+rtl
+...Text:
+db $cd : dl .TextItsAnItem
+db $c0
+..InvFull:
+cop #$BF : dw ...Text
+stz $0db8
+stz $0bfc
+pla
+sec
+rtl
+...Text:
+db $cd : dl .TextItsAnItem
+db "But your inventory's full!"
+db $c0
+..IsSpecial:    ; Handling for upgrades, duplicate stat items, and Heart Pieces.
+lda $01,s : cmp #$008a : bcs ..IsNotStatUpgrade
+..IsStatUpgrade:
+jsl LR_GiveNormalItemA8OrSec
+bra ..GotItem
+..IsNotStatUpgrade:
+cmp #$008a : beq ...LightUpgrade
+cmp #$008b : beq ...DarkUpgrade
+cmp #$008e : beq ...HeartPiece
+...Flute:
+cop #$CC : db $13
+jmp ..GotItem
+...HeartPiece:
+php
+sep #$20
+lda $0b24 : bit #$02 : beq ....DoGiveHp
+lda $0a1e : bit #$80 : bne ....CompleteHeart
+  ora #$80 : sta $0a1e
+  bra ....NoGiveHp
+....CompleteHeart:
+eor #$80 : sta $0a1e
+....DoGiveHp:
+plp
+lda #$0080 : jsl LR_GiveNormalItemA8OrSec
+jmp ..GotItem
+....NoGiveHp:
+plp
+jmp ..GotItem
+...LightUpgrade:
+inc $0b16
+jmp ..GotItem
+...DarkUpgrade:
+inc $0b1c
+jmp ..GotItem
+
+.GiveUnlockedDoor:
+pla : and #$00ff
+pha
+jsl $80b4e0    ; jsl LR_SetFlag10A
+lda $01,s : asl : asl : asl : tay
+lda $d3ce,y : and #$00ff : cmp $0644 : bne ..PostThisMapCheck
+  lda $01,s : jsl $82A363   ; jsl LR_StageMapRearrange
+  cop #$33
+..PostThisMapCheck:
+pla : sta $0db8
+cop #$BF : dw ..Text
+clc
+rtl
+..Text:
+db $cd : dl .TextItsADoor
+db $c0
+
+.GiveAbility:   ; Flags $0510-2 for Will, $0514-6 for Freedan
+pla : and #$00ff : sta $0db8
+cmp #$0003 : bcc +
+  inc   ; So "items" 3-5 map to flags ..4-6
++:
+clc : adc #$0510 : jsl LR_SetAnyFlagA
+cop #$BF : dw ..Text
+clc
+rtl
+..Text:
+db $cd : dl .TextAbilityCanNowBeUsed
+db $ca   ; not $c0 here, because we're clumsily including a $c0 upstream
+
+.TextItsAnItem:
+db $d3
+db $c5 : dw TextItemGetSpeeds, $0bfc
+db $d6,$1d    ; "It's "
+db $c5 : dw TextItemGetArticles, $0db8
+db $c5 : dw TextItemGetNames, $0db8
+db "!",$cb
+db $c5 : dw TextZ3UpgradeMaybeMaxedOut, $0bfe
+db $cb
+db $ca
+.TextItsADoor:
+db $d3
+db $d5,$00
+db "Opened a door!",$cb
+db $c5 : dw TextDoorNames, $0db8
+db $ca
+.TextAbilityCanNowBeUsed:
+db $d3
+db $c5 : dw TextItemGetSpeeds, $0bfc
+db $cd : dl TextItemGetAbilityCanBeUsedIncl
+db $ca
+
+
+}
+
+TextItemGetNames:
+.Pointers:
+{
+dw .Null
+dw .RedJewel
+dw .PrisonKey
+dw .IncaStatueA
+dw .IncaStatueB
+dw .IncaMelody
+dw .Herb
+dw .DiamondBlock
+dw .WindMelody
+dw .LolasMelody
+dw .Meat
+dw .MineKeyA
+dw .MineKeyB
+dw .MemoryMelody
+dw .CrystalBall
+dw .MineElevatorKey
+dw .MuPalaceKey
+dw .PurifyStone
+dw .HopeStatue
+dw .RamaStatue
+dw .MagicPowder
+dw .BlueJournal
+dw .LancesLetter
+dw .Necklace
+dw .RussianGlassWill
+dw .Teapot
+dw .MushroomDrops
+dw .BagOfGold
+dw .BlackGlasses
+dw .GorgonFlower
+dw .Hieroglyph1E
+dw .Hieroglyph1F
+dw .Hieroglyph20
+dw .Hieroglyph21
+dw .Hieroglyph22
+dw .Hieroglyph23
+dw .Aura
+dw .LolasLetter
+dw .FathersJournal
+dw .CrystalRing
+dw .Apple
+dw .HpItem
+dw .StrItem
+dw .DefItem
+dw .LightJewel
+dw .DarkJewel
+dw .TwoRedJewels
+dw .ThreeRedJewels
+dw .HeartPiece   ; $30
+dw .Flute
+dw .OtherWorldItem
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .MysticStatue   ; $38
+}
+{
+.Null:
+db "nothing",$ca
+.TwoRedJewels:
+db "2 Red Jewels",$ca
+.ThreeRedJewels:
+db "3 Red Jewels",$ca
+.LolasLetter:
+db "Lola's letter",$ca
+.FathersJournal:
+db "your father's",$cb,"journal",$ca
+.MushroomDrops:
+db "Mushroom Drops",$ca
+.LancesLetter:
+db "Lance's letter",$ca
+.MineKeyA:
+db "Mine Key A",$ca
+.MineKeyB:
+db "Mine Key B",$ca
+.LolasMelody:
+db "Lola's Melody",$ca
+.IncaStatueA:
+db "Inca Statue A",$ca
+.IncaStatueB:
+db "Inca Statue B",$ca
+.RedJewel:
+db "Red Jewel",$ca
+.CrystalBall:
+db "Crystal Ball",$ca
+.HopeStatue:
+db "Statue of Hope",$ca
+.BlueJournal:
+db "Blue Journal",$ca
+.BagOfGold:
+db "Bag of Tricks",$ca
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+db "Hieroglyph Tile",$ca
+.DefItem:
+db "DEF",$ca
+.StrItem:
+db "STR",$ca
+.LightJewel:
+db "Dash Upgrade",$ca
+.DarkJewel:
+db "Friar Upgrade",$ca
+.RamaStatue:
+db "Rama Statue",$ca
+.Herb:
+db "herb",$ca
+.Apple:
+db "apple",$ca
+.HpItem:
+db "HP",$ca
+.PrisonKey:
+db "Prison Key",$ca
+.IncaMelody:
+db "Inca Melody",$ca
+.DiamondBlock:
+db "Diamond Block",$ca
+.WindMelody:
+db "Wind Melody",$ca
+.Meat:
+db "Large Roast",$ca
+.MemoryMelody:
+db "Memory Melody",$ca
+.MineElevatorKey:
+db "Elevator Key",$ca
+.MuPalaceKey:
+db "Mu Palace Key",$ca
+.PurifyStone:
+db "Purification",$cb,"Stone",$ca
+.MagicPowder:
+db "Magic Dust",$ca
+.Necklace:
+db "Necklace",$ca
+.RussianGlassWill:
+db "Will",$ca
+.Teapot:
+db "Teapot",$ca
+.BlackGlasses:
+db "Black Glasses",$ca
+.GorgonFlower:
+db "Gorgon Flower",$ca
+.Aura:
+db "Aura",$ca
+.CrystalRing:
+db "Crystal Ring",$ca
+.HeartPiece:
+db "Heart Piece",$ca
+.Flute:
+db "Flute",$ca
+.OtherWorldItem:
+db "something for",$cb,"another world",$ca
+.MysticStatue:
+db "Mystic Statue",$ca
+}
+
+TextItemGetArticles:
+.Pointers:
+{
+dw .Null
+dw .RedJewel
+dw .PrisonKey
+dw .IncaStatueA
+dw .IncaStatueB
+dw .IncaMelody
+dw .Herb
+dw .DiamondBlock
+dw .WindMelody
+dw .LolasMelody
+dw .Meat
+dw .MineKeyA
+dw .MineKeyB
+dw .MemoryMelody
+dw .CrystalBall
+dw .MineElevatorKey
+dw .MuPalaceKey
+dw .PurifyStone
+dw .HopeStatue
+dw .RamaStatue
+dw .MagicPowder
+dw .BlueJournal
+dw .LancesLetter
+dw .Necklace
+dw .RussianGlassWill
+dw .Teapot
+dw .MushroomDrops
+dw .BagOfGold
+dw .BlackGlasses
+dw .GorgonFlower
+dw .Hieroglyph1E
+dw .Hieroglyph1F
+dw .Hieroglyph20
+dw .Hieroglyph21
+dw .Hieroglyph22
+dw .Hieroglyph23
+dw .Aura
+dw .LolasLetter
+dw .FathersJournal
+dw .CrystalRing
+dw .Apple
+dw .HpItem
+dw .StrItem
+dw .DefItem
+dw .LightJewel
+dw .DarkJewel
+dw .TwoRedJewels
+dw .ThreeRedJewels
+dw .HeartPiece   ; $30
+dw .Flute
+dw .OtherWorldItem
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .MysticStatue   ; $38
+}
+{
+.TwoRedJewels:
+.ThreeRedJewels:
+.LolasLetter:
+.FathersJournal:
+.MushroomDrops:
+.LancesLetter:
+.MineKeyA:
+.MineKeyB:
+.LolasMelody:
+.IncaStatueA:
+.IncaStatueB:
+.DefItem:
+.StrItem:
+.HpItem:
+.OtherWorldItem:
+.Null:
+db $ca
+.CrystalBall:
+.HopeStatue:
+.RedJewel:
+.BagOfGold:
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+.LightJewel:
+.DarkJewel:
+.RamaStatue:
+.HeartPiece:
+.MysticStatue:
+db "a ",$ca
+.Herb:
+.Apple:
+db "an ",$ca
+.PrisonKey:
+.IncaMelody:
+.DiamondBlock:
+.WindMelody:
+.Meat:
+.MemoryMelody:
+.MineElevatorKey:
+.MuPalaceKey:
+.PurifyStone:
+.MagicPowder:
+.Necklace:
+.RussianGlassWill:
+.Teapot:
+.BlackGlasses:
+.GorgonFlower:
+.Aura:
+.CrystalRing:
+.Flute:
+.BlueJournal:
+db "the ",$ca
+}
+
+TextItemJewelerInventory:
+.Pointers:
+{
+dw .Null
+dw TextItemGetNames_RedJewel
+dw TextItemGetNames_PrisonKey
+dw TextItemGetNames_IncaStatueA
+dw TextItemGetNames_IncaStatueB
+dw TextItemGetNames_IncaMelody
+dw .Herb
+dw TextItemGetNames_DiamondBlock
+dw TextItemGetNames_WindMelody
+dw TextItemGetNames_LolasMelody
+dw TextItemGetNames_Meat
+dw TextItemGetNames_MineKeyA
+dw TextItemGetNames_MineKeyB
+dw TextItemGetNames_MemoryMelody
+dw TextItemGetNames_CrystalBall
+dw TextItemGetNames_MineElevatorKey
+dw TextItemGetNames_MuPalaceKey
+dw .PurifyStone
+dw .HopeStatue
+dw TextItemGetNames_RamaStatue
+dw TextItemGetNames_MagicPowder
+dw TextItemGetNames_BlueJournal
+dw .LancesLetter
+dw TextItemGetNames_Necklace
+dw TextItemGetNames_RussianGlassWill
+dw TextItemGetNames_Teapot
+dw .MushroomDrops
+dw TextItemGetNames_BagOfGold
+dw TextItemGetNames_BlackGlasses
+dw TextItemGetNames_GorgonFlower
+dw .Hieroglyph1E
+dw .Hieroglyph1F
+dw .Hieroglyph20
+dw .Hieroglyph21
+dw .Hieroglyph22
+dw .Hieroglyph23
+dw TextItemGetNames_Aura
+dw .LolasLetter
+dw .FathersJournal
+dw TextItemGetNames_CrystalRing
+dw .Apple
+dw TextItemGetNames_HpItem
+dw TextItemGetNames_StrItem
+dw TextItemGetNames_DefItem
+dw TextItemGetNames_LightJewel
+dw TextItemGetNames_DarkJewel
+dw TextItemGetNames_TwoRedJewels
+dw TextItemGetNames_ThreeRedJewels
+dw TextItemGetNames_HeartPiece
+dw TextItemGetNames_Flute
+dw .OtherWorldItem
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_Null
+dw TextItemGetNames_MysticStatue
+}
+{
+.Null:
+db "Nothing",$ca
+.LolasLetter:
+db "Lola's Letter",$ca
+.FathersJournal:
+db "Journal",$ca
+.MushroomDrops:
+db "Shroom Drops",$ca
+.LancesLetter:
+db "Lance Letter",$ca
+.HopeStatue:
+db "Hope Statue",$ca
+.Hieroglyph1E:
+.Hieroglyph1F:
+.Hieroglyph20:
+.Hieroglyph21:
+.Hieroglyph22:
+.Hieroglyph23:
+db "Hieroglyph",$ca
+.Herb:
+db "Herb",$ca
+.Apple:
+db "Apple",$ca
+.PurifyStone:
+db "Purity Stone",$ca
+.OtherWorldItem:
+db "Offworld Item",$ca
+.OpenADoor:
+db "Open a Door",$ca
+}
+
+TextSpecialJewelerInventory:
+.Pointers:
+{
+dw .PsychoDash
+dw .Slider
+dw .SpinDash
+dw .Friar
+dw .AuraBarrier
+dw .Earthquaker
+dw .OpenADoor
+}
+{
+.OpenADoor:
+db "Open a Door",$ca
+.PsychoDash:
+db $D6,$3C,$43,$80,$A3,$87,$CA
+.Slider:
+db $D6,$3C,$63,$8B,$88,$83,$84,$A2,$CA
+.SpinDash:
+db $D7,$31,$43,$80,$A3,$87,$CA
+.Friar:
+db $D6,$0C,$45,$A2,$88,$80,$A2,$CA
+.AuraBarrier:
+db $40,$A5,$A2,$80,$AC,$41,$80,$A2,$A2,$88,$84,$A2,$CA
+.Earthquaker:
+db $44,$80,$A2,$A4,$87,$A1,$A5,$80,$8A,$84,$A2,$CA
+}
+
+TextDoorNames:
+.Pointers:
+{
+dw .Door00
+dw .Door01
+dw .Door02
+dw .Door03
+dw .Door04
+dw .Door05
+dw .Door06
+dw .Door07
+dw .Door08
+dw .Door09
+dw .Door0A
+dw .Door0B
+dw .Door0C
+dw .Door0D
+dw .Door0E
+dw .Door0F
+dw .Door10
+dw .Door11
+dw .Door12
+dw .Door13
+dw .Door14
+dw .Door15
+dw .Door16
+dw .Door17
+dw .Door18
+dw .Door19
+dw .Door1A
+dw .Door1B
+dw .Door1C
+dw .Door1D
+dw .Door1E
+dw .Door1F
+dw .Door20
+dw .Door21
+dw .Door22
+dw .Door23
+dw .Door24
+dw .Door25
+dw .Door26
+dw .Door27
+dw .Door28
+dw .Door29
+dw .Door2A
+dw .Door2B
+dw .Door2C
+dw .Door2D
+dw .Door2E
+dw .Door2F
+dw .Door30
+dw .Door31
+dw .Door32
+dw .Door33
+dw .Door34
+dw .Door35
+dw .Door36
+dw .Door37
+dw .Door38
+dw .Door39
+dw .Door3A
+dw .Door3B
+dw .Door3C
+dw .Door3D
+dw .Door3E
+dw .Door3F
+dw .Door40
+dw .Door41
+dw .Door42
+dw .Door43
+dw .Door44
+dw .Door45
+dw .Door46
+dw .Door47
+dw .Door48
+dw .Door49
+dw .Door4A
+dw .Door4B
+dw .Door4C
+dw .Door4D
+dw .Door4E
+dw .Door4F
+dw .Door50
+dw .Door51
+dw .Door52
+dw .Door53
+dw .Door54
+dw .Door55
+dw .Door56
+dw .Door57
+dw .Door58
+dw .Door59
+dw .Door5A
+dw .Door5B
+dw .Door5C
+dw .Door5D
+dw .Door5E
+dw .Door5F
+dw .Door60
+dw .Door61
+dw .Door62
+dw .Door63
+dw .Door64
+dw .Door65
+dw .Door66
+dw .Door67
+dw .Door68
+dw .Door69
+dw .Door6A
+dw .Door6B
+dw .Door6C
+dw .Door6D
+dw .Door6E
+dw .Door6F
+dw .Door70
+dw .Door71
+dw .Door72
+dw .Door73
+dw .Door74
+dw .Door75
+dw .Door76
+dw .Door77
+dw .Door78
+dw .Door79
+dw .Door7A
+dw .Door7B
+dw .Door7C
+dw .Door7D
+dw .Door7E
+dw .Door7F
+dw .Door80
+dw .Door81
+dw .Door82
+dw .Door83
+dw .Door84
+dw .Door85
+dw .Door86
+dw .Door87
+dw .Door88
+dw .Door89
+dw .Door8A
+dw .Door8B
+dw .Door8C
+dw .Door8D
+dw .Door8E
+dw .Door8F
+dw .Door90
+dw .Door91
+dw .Door92
+dw .Door93
+dw .Door94
+dw .Door95
+dw .Door96
+dw .Door97
+dw .Door98
+dw .Door99
+dw .Door9A
+dw .Door9B
+dw .Door9C
+dw .Door9D
+}
+{
+.DoorUndefined:
+{
+.Door00:
+.Door04:
+.Door06:
+.Door07:
+.Door08:
+.Door09:
+.Door11:
+.Door12:
+.Door13:
+.Door14:
+.Door15:
+.Door19:
+.Door1A:
+.Door1B:
+.Door1C:
+.Door1D:
+.Door1E:
+.Door1F:
+.Door20:
+.Door21:
+.Door25:
+.Door26:
+.Door27:
+.Door28:
+.Door29:
+.Door2A:
+.Door2D:
+.Door2E:
+.Door2F:
+.Door33:
+.Door38:
+.Door39:
+.Door3A:
+.Door3B:
+.Door3C:
+.Door43:
+.Door44:
+.Door45:
+.Door46:
+.Door47:
+.Door48:
+.Door49:
+.Door4A:
+.Door4B:
+.Door4C:
+.Door4D:
+.Door4E:
+.Door4F:
+.Door50:
+.Door51:
+.Door52:
+.Door54:
+.Door55:
+.Door56:
+.Door57:
+.Door58:
+.Door59:
+.Door5A:
+.Door5B:
+.Door5C:
+.Door5D:
+.Door5E:
+.Door5F:
+.Door60:
+.Door61:
+.Door62:
+.Door63:
+.Door64:
+.Door65:
+.Door66:
+.Door67:
+.Door69:
+.Door6E:
+.Door70:
+.Door71:
+.Door72:
+.Door74:
+.Door75:
+.Door76:
+.Door77:
+.Door78:
+.Door79:
+.Door7A:
+.Door7B:
+.Door7C:
+.Door7D:
+.Door7E:
+.Door7F:
+.Door80:
+.Door81:
+.Door82:
+.Door83:
+.Door84:
+.Door85:
+.Door86:
+.Door87:
+.Door88:
+.Door89:
+.Door8A:
+.Door8B:
+.Door8C:
+.Door8D:
+.Door8E:
+.Door8F:
+.Door90:
+.Door91:
+.Door92:
+.Door93:
+.Door94:
+.Door95:
+.Door96:
+.Door97:
+.Door98:
+.Door99:
+.Door9C:
+.Door9D:
+}
+db "Undefined door"
+db $ca
+
+.Door01:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Skeleton Cage"
+db $ca
+
+.Door02:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__First Worm Door"
+db $ca
+
+.Door03:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Second Worm Door"
+db $ca
+
+.Door05:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__West Room Bat Door"
+db $ca
+
+.Door16:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Hidden Dark Space"
+db $ca
+
+.Door17:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Red Skeleton Barrier 1"
+db $ca
+
+.Door18:
+db $cd : dl TextDoorsAbbreviateEdDg
+db "__Red Skeleton Barrier 2"
+db $ca
+
+.Door0D:
+db $cd : dl TextDoorsAbbreviateInca
+db "__West Ladder"
+db $ca
+
+.Door0E:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Final Ladder"
+db $ca
+
+.Door0F:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Entrance Ladder"
+db $ca
+
+.Door0C:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Water Room Ramp"
+db $ca
+
+.Door0B:
+db $cd : dl TextDoorsAbbreviateInca
+db "__East-West Freedan Ramp"
+db $ca
+
+.Door0A:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Diamond Block Stairs"
+db $ca
+
+.Door10:
+db $cd : dl TextDoorsAbbreviateInca
+db "__Singing Statue Stairs"
+db $ca
+
+.Door34:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Tunnel, Middle Fence"
+db $ca
+
+.Door35:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Tunnel, South Fence"
+db $ca
+
+.Door36:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Tunnel, North Fence"
+db $ca
+
+.Door22:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Big Room Monster Cage"
+db $ca
+
+.Door32:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Hidden Dark Space"
+db $ca
+
+.Door23:
+db $cd : dl TextDoorsAbbreviateMine
+db "__Ramp Room Worm Fence"
+db $ca
+
+.Door37:
+db $cd : dl TextDoorsAbbreviateSGSE
+db "__Topside Friar Barrier"
+db $ca
+
+.Door30:
+db $cd : dl TextDoorsAbbreviateSGSE
+db "__Darkside Chest Barrier"
+db $ca
+
+.Door24:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Topside Cyber Barrier"
+db $ca
+
+.Door2B:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Topside Cyber Ledge"
+db $ca
+
+.Door2C:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Topside Worm Barrier"
+db $ca
+
+.Door31:
+db $cd : dl TextDoorsAbbreviateSGSW
+db "__Darkside Fire Cages"
+db $ca
+
+.Door3D:
+db $cd : dl TextDoorsAbbreviateMu
+db "__Entrance Room Barrier"
+db $ca
+
+.Door3E:
+db $cd : dl TextDoorsAbbreviateMu
+db "__Northeast Room Rock 1"
+db $ca
+
+.Door3F:
+db $cd : dl TextDoorsAbbreviateMu
+db "__Northeast Room Rock 2"
+db $ca
+
+.Door42:
+db $cd : dl TextDoorsAbbreviateMu
+db "__West Room Slime Cages"
+db $ca
+
+.Door41:
+db $cd : dl TextDoorsAbbreviateMu
+db "__East-Facing Stone Head"
+db $ca
+
+.Door40:
+db $cd : dl TextDoorsAbbreviateMu
+db "__South-Facing Stone Head"
+db $ca
+
+.Door53:
+db $cd : dl TextDoorsAbbreviateGtWl
+db "__Archer Friar Barrier"
+db $ca
+
+.Door68:
+db $cd : dl TextDoorsAbbreviateKress
+db "__West Chest Shortcut"
+db $ca
+
+.Door6A:
+db $cd : dl TextDoorsAbbreviateGtWl
+db "__Fanger Arena Exit"
+db $ca
+
+.Door6C:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Entrance Stairs"
+db $ca
+
+.Door6B:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Outer East Slider Hole"
+db $ca
+
+.Door6D:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Dark Pit Exit"
+db $ca
+
+.Door6F:
+db $cd : dl TextDoorsAbbreviateAnkr
+db "__Dark Space Corridor"
+db $ca
+
+.Door73:
+db $cd : dl TextDoorsAbbreviatePymd
+db "__Foyer Upper Dark Space"
+db $ca
+
+.Door9A:
+db $cd : dl TextDoorsAbbreviateMansion
+db "__First Barrier"
+db $ca
+
+.Door9B:
+db $cd : dl TextDoorsAbbreviateMansion
+db "__Second Barrier"
+db $ca
+}
+
+; Area name abbreviations for door names.
+{
+TextDoorsAbbreviateEdDg:
+db "__Underground Tunnel:",$cb
+db $ca
+
+TextDoorsAbbreviateInca:
+db "__Incan Ruins:",$cb
+db $ca
+
+TextDoorsAbbreviateMine:
+db "__Diamond Mine:",$cb
+db $ca
+
+TextDoorsAbbreviateSGSE:
+db "__Sky Garden, Southeast:",$cb
+db $ca
+
+TextDoorsAbbreviateSGSW:
+db "__Sky Garden, Southwest:",$cb
+db $ca
+
+TextDoorsAbbreviateMu:
+db "__Mu:",$cb
+db $ca
+
+TextDoorsAbbreviateGtWl:
+db "__Great Wall:",$cb
+db $ca
+
+TextDoorsAbbreviateKress:
+db "__Mt. Temple:",$cb
+db $ca
+
+TextDoorsAbbreviateAnkr:
+db "__Ankor Wat:",$cb
+db $ca
+
+TextDoorsAbbreviatePymd:
+db "__Pyramid:",$cb
+db $ca
+
+TextDoorsAbbreviateMansion:
+db "__Jeweler's Mansion:",$cb
+db $ca
+}
+
+TextItemGetSpeeds:
+.Pointers:
+dw .Instantaneous
+dw .Fast
+dw .Slow
+.Instantaneous:
+db $ca
+.Fast:
+db $d5,$00
+db $ca
+.Slow:
+db $d5,$09
+db $ca
+
+TextZ3UpgradeMaybeMaxedOut:
+.Pointers:
+dw .NotMaxedOut
+dw .IsMaxedOut
+.NotMaxedOut:
+db $ca
+.IsMaxedOut:
+db "But you're maxed out!"
+db $ca
+
+TextJewelerInvLineBegin:
+db $cd : dl 0+SramTextBuffer   ; Target shall contain a 2-byte color setting followed by $ca
+db $ca
+
+TextJewelerInvItemPaddedAssumingSram:
+db $cd : dl TextJewelerInvLineBegin
+db $c5 : dw TextItemJewelerInventory, $0bfa
+db $cd : dl TextJewelerInvLineEnd
+db $ca
+
+TextJewelerInvSpecialPaddedAssumingSram:
+db $cd : dl TextJewelerInvLineBegin
+db $c5 : dw TextSpecialJewelerInventory, $0bfa
+db $cd : dl TextJewelerInvLineEnd
+db $ca
+
+TextJewelerInvLineEnd:
+db $c4 : db 17    ; Pad to column of costs
+db $cd : dl 3+SramTextBuffer   ; Target shall contain a number-drawing script, possibly with one leading space
+db $cb
+db $c3,$00
+db $ca
+
+LR_PrepSramTextBufferForJewelerLineA:   ; A = 1-7
+pha
+cmp #$0007 : bcs .BlueText
+clc : adc #$00e8 : jsl LR_SecOnFlagA
+bcs .RedText
+.BlueText:
+lda #$0000
+bra +
+.RedText:
+lda #$0004
++:
+sep #$20
+sta.l 1+SramTextBuffer
+lda #$c3 : sta.l 0+SramTextBuffer
+lda #$ca : sta.l 2+SramTextBuffer
+lda #$cc : sta.l 3+SramTextBuffer
+lda #$00 : sta.l 4+SramTextBuffer   ; Will skip either 0 or 1 spaces depending on number width
+lda #$c6 : sta.l 5+SramTextBuffer
+lda #$ca : sta.l 10+SramTextBuffer
+rep #$20
+pla : clc : adc #$0a48 : sta.l 8+SramTextBuffer
+tay
+lda $0000,y : and #$00ff : cmp #$0010 : bcs .TwoDigitNumber
+.OneDigitNumber:
+sep #$20
+  lda #$02 : sta.l 4+SramTextBuffer   ; "2" skips one space
+rep #$20
+lda #$0001 : sta.l 6+SramTextBuffer
+bra .Done
+.TwoDigitNumber:
+lda #$0002 : sta.l 6+SramTextBuffer
+.Done:
+rtl
+
+LR_SetupAndDrawJewelerInvLineA:   ; A = 1-7
+pha
+jsl LR_PrepSramTextBufferForJewelerLineA
+pla : cmp #$0007 : bcs .IsLine7
+dec : bne +
+  lda.l Config_Jeweler1Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler2Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler3Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler4Item
+  bra .IsItemLine
++:
+dec : bne +
+  lda.l Config_Jeweler5Item
+  bra .IsItemLine
++:
+  lda.l Config_Jeweler6Item
+  bra .IsItemLine
+.IsLine7:
+cop #$BF : dw .TextLine7
+rtl
+.IsItemLine:
+bit #$ff00 : beq ..ForNormalItem
+..ForSpecialItem:
+pha
+and #$ff00 : cmp #$1000 : beq ...Door
+  cmp #$1100 : beq ...Ability
+...UnknownItem:
+pla
+lda #$0000
+bra ..ForNormalItem
+...Door:
+pla
+lda #$0006
+bra ...DoDraw
+...Ability:
+pla : and #$000f
+;bra ...DoDraw
+...DoDraw:
+sta $0bfa
+cop #$BF : dw .TextSpecialItem
+rtl
+..ForNormalItem:
+cmp #$0080 : bcc +
+  sec : sbc #$0087
+  clc : adc #$0029
++:
+sta $0bfa
+cop #$BF : dw .TextNormalItem
+rtl
+.TextLine7:
+db $c3 : db $00
+if !SettingRedJewelHunt == 1
+db "Beat the Game_"
+else
+db "My Secrets____"
+endif
+db $cd : dl 3+SramTextBuffer
+db $c0
+.TextNormalItem:
+db $cd : dl TextJewelerInvItemPaddedAssumingSram
+db $ca
+.TextSpecialItem:
+db $cd : dl TextJewelerInvSpecialPaddedAssumingSram
+db $ca
+
+macro MIncBcd8(addr)
+lda <addr> : clc : adc.b #1 : sta <addr>
+endmacro
+SR_GrowStackForItemA:
+{
+php
+sep #$20
+sed
+cmp #$06 : beq .Herb
+if !SettingInfiniteInventory == 1
+cmp #$01 : beq .OneRedJewel
+cmp #$2e : beq .TwoRedJewels
+cmp #$2f : beq .ThreeRedJewels
+cmp #$0e : beq .CrystalBall
+cmp #$12 : beq .HopeStatue
+cmp #$13 : beq .RamaStatue
+cmp #$1a : beq .MushroomDrops
+endif
+.Done:
+plp
+rts
+.Herb:
+%MIncBcd8($0aaa)
+bra .Done
+.ThreeRedJewels:
+%MIncBcd8($0bf4)
+.TwoRedJewels:
+%MIncBcd8($0bf4)
+.OneRedJewel:
+%MIncBcd8($0bf4)
+bra .Done
+.CrystalBall:
+%MIncBcd8($0bf2)
+bra .Done
+.MushroomDrops:
+%MIncBcd8($0bf0)
+bra .Done
+.RamaStatue:
+%MIncBcd8($0bee)
+bra .Done
+.HopeStatue:
+%MIncBcd8($0bec)
+bra .Done
+}
+
+LR_GetItemAStackedCountBcd:
+{
+php
+sep #$20
+cmp #$06 : beq .Herb
+if !SettingInfiniteInventory == 1
+cmp #$01 : beq .RedJewel
+cmp #$2e : beq .RedJewel
+cmp #$2f : beq .RedJewel
+cmp #$0e : beq .CrystalBall
+cmp #$12 : beq .HopeStatue
+cmp #$13 : beq .RamaStatue
+cmp #$1a : beq .MushroomDrops
+endif
+lda #$00 : xba
+lda #$00
+plp
+rtl
+.Herb:
+plp
+lda $0aaa
+rtl
+.RedJewel:
+plp
+lda $0bf4
+rtl
+.CrystalBall:
+plp
+lda $0bf2
+rtl
+.MushroomDrops:
+plp
+lda $0bf0
+rtl
+.RamaStatue:
+plp
+lda $0bee
+rtl
+.HopeStatue:
+plp
+lda $0bec
+rtl
+}
+
+; Sets carry if the passed item is not stackable. Returns new (BCD) stack size.
+macro MDecBcd8Floored(addr)
+lda <addr> : beq ?+
+  sec : sbc.b #1 : sta <addr>
+?+:
+endmacro
+LR_DecStackForItemAReturningCountOrSec:
+{
+and #$00ff
+php
+sep #$20
+sed
+cmp #$06 : beq .Herb
+if !SettingInfiniteInventory == 1
+cmp #$01 : beq .RedJewel
+cmp #$2e : beq .TwoRedJewels
+cmp #$2f : beq .ThreeRedJewels
+cmp #$0e : beq .CrystalBall
+cmp #$12 : beq .HopeStatue
+cmp #$13 : beq .RamaStatue
+cmp #$1a : beq .MushroomDrops
+endif
+.SecAndReturnZero:
+lda #$00
+.SecAndReturn:
+plp
+cmp #$0000   ; to set/clear z
+sec
+rtl
+.CrystalBall:
+%MDecBcd8Floored($0bf2)
+bra .ClcAndReturn
+.MushroomDrops:
+%MDecBcd8Floored($0bf0)
+bra .ClcAndReturn
+.RamaStatue:
+%MDecBcd8Floored($0bee)
+bra .ClcAndReturn
+.HopeStatue:
+%MDecBcd8Floored($0bec)
+bra .ClcAndReturn
+.Herb:
+%MDecBcd8Floored($0aaa)
+bra .ClcAndReturn
+.ThreeRedJewels:
+%MDecBcd8Floored($0bf4)
+.TwoRedJewels:
+%MDecBcd8Floored($0bf4)
+.RedJewel:
+%MDecBcd8Floored($0bf4)
+;bra .ClcAndReturn
+.ClcAndReturn:
+plp
+cmp #$0000   ; to set/clear z
+clc
+rtl
+}
+
+LR_GetEmptyInvSlotInYOrSec:
+php
+sep #$20
+ldy #$0000
+if !SettingInfiniteInventory == 1
+phb
+lda #$30 : pha : plb
+.CheckInvSlotEmpty:
+lda.w SramInvItems,y : bne ..NotEmpty
+  plb
+  bra .GotEmptyInvSlot
+..NotEmpty:
+iny : cpy.w #(SramInvEndOfList-SramInvItems) : bcc .CheckInvSlotEmpty
+plb
+bra .InvFull    ; Should never happen, but we'll handle it anyway
+else
+.CheckInvSlotEmpty:
+lda $0AB4,y : bne ..NotEmpty
+  bra .GotEmptyInvSlot
+..NotEmpty:
+iny : cpy #$0010 : bne .CheckInvSlotEmpty
+bra .InvFull
+endif
+.GotEmptyInvSlot:
+plp
+clc
+rtl
+.InvFull:
+plp
+sec
+rtl
+
+LR_WriteItemAToInvSlotY:
+php
+sep #$20
+if !SettingInfiniteInventory == 1
+phx
+  phy
+    tyx
+    sta.l SramInvItems,x
+  ply
+  jsl LR_UpdateItemViewForSlotY
+plx
+;bra .Done
+else
+sta $0ab4,y
+;bra .Done
+endif
+.Done:
+plp
+rtl
+
+LR_DoUnequip:
+stz $0ac6
+lda #$ffff : sta $0ac4
+rtl
+
+if !SettingInfiniteInventory == 1
+; If item slot Y is in the active inventory page, updates the inv view (at $0ab4)
+; and equipped status, if applicable, with the item at Y.
+LR_UpdateItemViewForSlotY:
+php
+rep #$20
+phx
+tyx
+cpy.w #4 : bcc .DoUpdateWithLocalizedY   ; First four slots are always in the view
+lda.l SramInvActivePageId : beq .ViewingPage1
+  dec : beq .ViewingPage2
+.ViewingPage3:
+cpy.w #28 : bcc .Done
+cpy.w #40 : bcs .Done
+tya : sec : sbc.w #24 : tay
+bra .DoUpdateWithLocalizedY
+.ViewingPage2:
+cpy.w #16 : bcc .Done
+cpy.w #28 : bcs .Done
+tya : sec : sbc.w #12 : tay
+bra .DoUpdateWithLocalizedY
+.ViewingPage1:
+cpy.w #16 : bcs .Done
+.DoUpdateWithLocalizedY:
+sep #$20
+lda.l SramInvItems,x : sta $0ab4,y
+rep #$20
+cpy $0ac4 : bne .Done
+  lda.l SramInvItems,x : and #$00ff : sta $0ac6   ; Change equipped item
+    bne .Done
+      lda #$ffff : sta $0ac4   ; Nothing's equipped, so clear the equipped slot
+.Done:
+plx
+plp
+rtl
+
+; Updates the inv view with the contents of the inventory.
+LR_UpdateItemViewFull:
+phx
+lda.l SramInvItems : sta $0ab4
+lda.l 2+SramInvItems : sta $0ab6
+lda.l SramInvActivePageId : beq .ViewingPage1
+  dec : beq .ViewingPage2
+.ViewingPage3:
+ldx.w #4+24
+bra .GotPageOffset
+.ViewingPage2:
+ldx.w #4+12
+bra .GotPageOffset
+.ViewingPage1:
+ldx.w #4
+;bra .GotPageOffset
+.GotPageOffset:
+ldy.w #4
+-:
+lda.l SramInvItems,x : sta $0ab4,y
+inx : inx
+iny : iny
+cpy #$0010 : bcc -
+plx
+rtl
+
+; Updates the inventory with the new item in view slot Y (i.e. at $0ab4,y).
+LR_UpdateInvFromViewSlotY:
+lda $0ab4,y : pha
+cpy.w #4 : bcc .GotTrueInvSlot
+lda.l SramInvActivePageId : beq .GotTrueInvSlot
+  dec : beq .ViewingPage2
+.ViewingPage3:
+tya : clc : adc.w #24 : tay
+bra .GotTrueInvSlot
+.ViewingPage2:
+tya : clc : adc.w #12 : tay
+;bra .GotTrueInvSlot
+.GotTrueInvSlot:
+pla
+phx
+tyx
+sep #$20
+  sta.l SramInvItems,x
+rep #$20
+plx
+rtl
+
+; Silently gives all items in the holding tank.
+LR_GiveQueuedItems:
+phx
+lda #$0000 : tax : tay
+pha
+.NextItem:
+lda.l SramInvHoldingTank,x : and #$00ff : beq ..Given
+  tay
+  sep #$20
+    lda #$00 : sta.l SramInvHoldingTank,x
+  rep #$20
+  lda $03,s : tax
+  tya
+  jsl LR_GiveNormalItemA8OrSec
+..Given:
+pla : inc : cmp #$0100 : bcs .Done
+  tax
+  pha
+  bra .NextItem
+.Done:
+plx
+rtl
+
+; Called during Gaia game save. After a reset, permanent SRAM will be restored as it is at this point.
+LR_HardenSram:
+phx
+ldx #$0000
+-:
+lda.l SramStartPermanentData,x : sta.l SramHardened,x
+inx : inx
+cpx.w #(SramEndPermanentData-SramStartPermanentData) : bcc -
+lda #$0001 : sta.l SramHardened,x   ; Artificial, indicates that there's saved data here
+plx
+rtl
+
+; Restores the save file as usual, along with hardened SRAM.
+LR_RestoreSaveFileWithInfiniteInventoryOrSec:
+phx
+jsl $83D954 : bcs .SecAndReturn   ; Normal routine accepts save file ID in A; sets carry if file is blank.
+ldx.w #(SramEndPermanentData-SramStartPermanentData)
+lda.l SramHardened,x : cmp #$0001 : bne .ClcAndReturn
+ldx #$0000
+-:
+lda.l SramHardened,x : sta.l SramStartPermanentData,x
+inx : inx
+cpx.w #2+SramEndPermanentData-SramStartPermanentData : bcc -
+.ClcAndReturn:
+plx
+jsl LR_UpdateItemViewFull
+clc
+rtl
+.SecAndReturn:
+plx
+sec
+rtl
+endif
+
+
+EMonsterDeathDoorOrItem:
+if !SettingOrbRando == 0
+lda $7f0024,x : jsl LR_SetMonsterItemFlagA
+lda $7f0024,x : jsl LR_GetItemId8ForMonsterItemFlagA : sta $7f0024,x
+  jsl $80b4e0    ; jsl LR_SetFlag10A
+cop #$C7 : dl EMonsterDeathDoorOpener
+else
+cop #$B7 : db $00
+lda #$0342 : sta $10
+lda #$6000 : trb $12
+cop #$88 : dl $8EE000
+cop #$82 : db $29, $02
+cop #$89
+cop #$82 : db $29, $12
+cop #$89
+cop #$B6 : db $30
+lda #$0001 : sta $0bfc    ; Slow text speed.
+lda $7f0024,x : jsl LR_GetItemId16ForMonsterItemFlagA : jsl LR_GiveAnyItemA16OrSec : bcs .AnimateAndDie
+.ItemGiven:
+lda $7f0024,x : jsl LR_SetMonsterItemFlagA
+cop #$D8
+.AnimateAndDie:
+stz $0bfc
+cop #$80 : db $02
+cop #$89
+cop #$E0
+endif
+
+
+LR_GetItemId16ForMonsterItemFlagA:
+{
+phx
+  dec : asl : tax
+  lda.l .ItemList,x
+plx
+rtl
+.ItemList:
+dw !EDCageWormItem           ; db !MonsterItem01Id, !MonsterItem01Type
+dw !EDSoutheastWormItem      ; db !MonsterItem02Id, !MonsterItem02Type
+dw !EDSouthwestWormItem      ; db !MonsterItem03Id, !MonsterItem03Type
+dw !EDDoorBatItem            ; db !MonsterItem04Id, !MonsterItem04Type
+dw !EDDarkSpaceWormItem      ; db !MonsterItem05Id, !MonsterItem05Type
+dw !EDSkeleton1Item          ; db !MonsterItem06Id, !MonsterItem06Type
+dw !EDSkeleton2Item          ; db !MonsterItem07Id, !MonsterItem07Type
+dw !IncaWestLadderItem       ; db !MonsterItem08Id, !MonsterItem08Type
+dw !IncaSoutheastLadderItem  ; db !MonsterItem09Id, !MonsterItem09Type
+dw !IncaNortheastLadderItem  ; db !MonsterItem0AId, !MonsterItem0AType
+dw !IncaNSRampItem           ; db !MonsterItem0BId, !MonsterItem0BType
+dw !IncaEWRampItem           ; db !MonsterItem0CId, !MonsterItem0CType
+dw !IncaDBlockMonsterItem    ; db !MonsterItem0DId, !MonsterItem0DType
+dw !IncaWMelodyMonsterItem   ; db !MonsterItem0EId, !MonsterItem0EType
+dw !MineMidFenceItem         ; db !MonsterItem0FId, !MonsterItem0FType
+dw !MineNorthFenceItem       ; db !MonsterItem10Id, !MonsterItem10Type
+dw !MineSouthFenceItem       ; db !MonsterItem11Id, !MonsterItem11Type
+dw !MineWormCageItem         ; db !MonsterItem12Id, !MonsterItem12Type
+dw !MineWormDarkSpaceItem    ; db !MonsterItem13Id, !MonsterItem13Type
+dw !MineFriarFenceItem       ; db !MonsterItem14Id, !MonsterItem14Type
+dw !SGSETopBarrierItem       ; db !MonsterItem15Id, !MonsterItem15Type
+dw !SGSEBotBarrierItem       ; db !MonsterItem16Id, !MonsterItem16Type
+dw !SGSWTopPegGateItem       ; db !MonsterItem17Id, !MonsterItem17Type
+dw !SGSWTopRobotRampItem     ; db !MonsterItem18Id, !MonsterItem18Type
+dw !SGSWTopWormGateItem      ; db !MonsterItem19Id, !MonsterItem19Type
+dw !SGSWBotFireCageItem      ; db !MonsterItem1AId, !MonsterItem1AType
+dw !MuEntranceGolemItem      ; db !MonsterItem1BId, !MonsterItem1BType
+dw !MuDroplet1Item           ; db !MonsterItem1CId, !MonsterItem1CType
+dw !MuDroplet2Item           ; db !MonsterItem1DId, !MonsterItem1DType
+dw !MuSlimeCageItem          ; db !MonsterItem1EId, !MonsterItem1EType
+dw !MuEastFacingHeadGolemItem   ; db !MonsterItem1FId, !MonsterItem1FType
+dw !MuSouthFacingHeadGolemItem  ; db !MonsterItem20Id, !MonsterItem20Type
+dw !GtWlArcherItem           ; db !MonsterItem21Id, !MonsterItem21Type
+dw $106a ;!GtWlFangerItem           ; db !MonsterItem22Id, !MonsterItem22Type
+dw !KressSkullShortcutItem   ; db !MonsterItem23Id, !MonsterItem23Type
+dw !WatSouthScarabItem       ; db !MonsterItem24Id, !MonsterItem24Type
+dw !WatEastSliderHoleItem    ; db !MonsterItem25Id, !MonsterItem25Type
+dw $106d ;!WatPitExitItem           ; db !MonsterItem26Id, !MonsterItem26Type
+dw !WatDarkSpaceHallItem     ; db !MonsterItem27Id, !MonsterItem27Type
+dw !PyramidEntranceOrbsItem  ; db !MonsterItem28Id, !MonsterItem28Type
+dw !MansionEastGateItem      ; db !MonsterItem29Id, !MonsterItem29Type
+dw !MansionWestGateItem      ; db !MonsterItem2AId, !MonsterItem2AType
+}
+
+LR_GetItemId8ForMonsterItemFlagA:
+jsl LR_GetItemId16ForMonsterItemFlagA : and #$00ff
+rtl
+
+LR_DecHP:
+lda $0aca : beq +
+  dec $0aca
++:
+lda $0ace : cmp $0aca : beq +
+  bcc +
+    dec $0ace
++:
+rtl
+LR_IncJewelCounter:
+sed
+  lda $0ab0 : clc : adc #$0001 : sta $0ab0
+cld
+rtl
+
+
+
+
+; The first half of this code works around start-of-map camera behavior.
+; Camera is clamped after 2 actor frames, then actors are frozen for
+; fade-in (LR_InitMemForNewMap calls LR_ActActors twice). Spotlight needs to
+; idle for 1 frame, then correct its position if the camera needs to be clamped. 
+db $00 : dw $3000
+EDarkRoomSpotlightManager:
+{
+.StartOfMap:
+jsr .SR_SaveTargetDiameter
+lda $24 : sta $26   ; $24 = target diameter, $26 = current diameter
+jsr .SR_SaveSpotBounds
+cop #$3C : dl TDarkRoomCmathWriter
+  tya : sta $7f1020,x
+phx
+  tyx
+  lda #$0804 : sta $7f000e,x
+plx
+cop #$C2
+lda $068a : clc : adc #$0100 : cmp $06da : bcs ..WithClampRight
+lda $06d6 : cmp $068a : bcc ..NoClampLR
+..WithClampLeft:
+lda $068a : sec : sbc $06d6
+  clc : adc $09a2
+  sec : sbc $068a
+  clc : adc #$0008
+  cmp $28 : bcs ++
+    lda $28
+++:
+  sta $00f6
+bra +
+..NoClampLR:
+lda $09a2 : sec : sbc $068a : clc : adc #$0008 : sta $00f6
+bra +
+..WithClampRight:
+lda $09a2 : clc : adc #$0100 : sec : sbc $06da : clc : adc #$0008 : cmp $2c : bcc ++
+  lda $2c
+++:
+  sta $00f6
++:
+lda $068e : clc : adc #$0100 : cmp $06dc : bcs ..WithClampDown
+..NoClampDown:
+lda $09a4 : sec : sbc $068e : sta $00fa
+bra +
+..WithClampDown:
+lda $09a4 : clc : adc #$0100 : sec : sbc $06dc : cmp $2e : bcc ++
+  lda $2e
+++:
+  sta $00fa
++:
+lda $26 : sta $00fe
+jsr .SR_UpdateCmathWriter
+jsr .SR_SaveSpotBounds
+cop #$C2    ; Regular frame-by-frame behavior begins here.
+.Main:
+lda $1010 : bit #$2000 : beq ..GetPosEW
+  jsr .SR_SaveSpotBounds
+  rtl   ; Rough attempt to fix the spot while climbing stairs, by freezing it on-screen.
+..GetPosEW:
+lda $09a2 : sec : sbc $068a : clc : adc #$0008 : cmp $28 : bcs ...OkayW
+...FixW:
+lda $28 : bra ...GotPosEW
+...OkayW:
+cmp $2c : bcc ...GotPosEW
+...FixE:
+lda $2c ;: bra ...GotPosEW
+...GotPosEW:
+sta $00f6
+..GetPosNS:
+lda $09a4 : sec : sbc $068e : cmp $2a : bcs ...OkayN
+...FixN:
+lda $2a : bra ...GotPosNS
+...OkayN:
+cmp $2e : bcc ...GotPosNS
+...FixS:
+lda $2e ;: bra ...GotPosNS
+...GotPosNS:
+sta $00fa
+lda $26 : sta $00fe
+jsr .SR_UpdateCmathWriter
+; Occasionally check whether the spot size needs to be adjusted
+lda $0036 : and #$000f : bne ..DoneCheckingUpdates
+jsr .SR_SaveTargetDiameter
+lda $26 : cmp $24 : beq ..DoneCheckingUpdates
+bcc +
+  dec : dec : sta $26
+  bra ++
++:
+inc : inc : sta $26
+++:
+jsr .SR_SaveSpotBounds
+;bra ..DoneCheckingUpdates
+..DoneCheckingUpdates:
+rtl
+.SR_SaveTargetDiameter:
+stz $24
+lda.w #50 : pha
+lda #$00f5 : jsl LR_SecOnFlagA : bcc ..PostGlassesCheck
+  inc $24   ; Black Glasses
+..PostGlassesCheck:
+lda #$003e : jsl LR_SecOnFlagA : bcc ..PostRingCheck
+  inc $24   ; Crystal Ring
+..PostRingCheck:
+lda $24 : beq ..NoLightItems
+  dec : beq ..OneLightItem
+..TwoLightItems:
+pla : clc : adc.w #22 : pha
+..OneLightItem:
+pla : clc : adc.w #22 : pha
+..NoLightItems:
+lda $0ad4 : cmp #$0002 : bne ..PostShadowCheck
+  pla : clc : adc.w #6 : pha
+..PostShadowCheck:
+pla : sta $24
+rts
+.SR_SaveSpotBounds:
+lda $26 : sta $28   ; Spot west bound
+lda $26 : sta $2a   ; Spot north bound
+lda $26 : eor #$ffff : inc : clc : adc #$0100 : sta $2c   ; Spot east bound
+lda $26 : eor #$ffff : inc : clc : adc #$0100 : sta $2e   ; Spot south bound
+rts
+.SR_UpdateCmathWriter:
+phx
+  lda $7f1020,x : tax
+  lda $26 : sta $7f0002,x
+plx
+rts
+
+TDarkRoomCmathWriter:
+sep #$20
+lda #%00110011 : sta $2123
+lda #%00000011 : sta $2125
+lda #%00010111 : sta $212e
+lda #%00010011 : sta $212f
+lda #%00000000 : sta $2130
+lda #%10000011 : sta $2131
+; Map the range of spot radii [50,100] to darkness indexes [31 = full dark, 0 = full light].
+lda $0644 : cmp #$3d : bcc .TilemapIsLight
+  cmp #$48 : bcc .TilemapIsDark
+  cmp #$6a : bcc .TilemapIsLight
+  cmp #$76 : bcc .TilemapIsDark
+  cmp #$cc : bcc .TilemapIsLight
+  cmp #$de : bcc .TilemapIsDark
+.TilemapIsLight:
+lda $7f0002,x : sec : sbc.b #50 : lsr : lsr
+  eor #$ff : inc
+  clc : adc.b #14   ; [50,100] -> [14,2]
+  cmp.b #10 : bcc +
+    lda.b #9   ; Clamp to [9,2]
++:
+bra .GotDarknessLevel
+.TilemapIsDark:   ; Mine, Angel Dungeon, Pyramid
+lda $7f0002,x : sec : sbc.b #50 : lsr : lsr
+  eor #$ff : inc
+  clc : adc.b #14   ; [50,100] -> [14,2]
+  cmp.b #7 : bcc +
+    lda.b #6   ; Clamp to [6,2]
++:
+;bra .GotDarknessLevel
+.GotDarknessLevel:
+ora.b #$e0 : sta $7f0c00
+lda.b #$00 : sta $7f0c01
+  sta $7f0c02
+rep #$20
+lda #$0000 : sta $7f0a00
+rtl
+
+}
+
+
+
+LR_SetupIogrMap:
+cop #$3B : db $71 : dl TFirebirdPaletteManager
+if !SettingDarkRoomsLevel > 0
+jsl LR_SecIfThisMapIsDark : bcc +
+  cop #$3C : dl $85FB34    ; HDMA spotlight thinker
+  phx
+    tyx
+    lda #$0804 : sta $7f000e,x
+  plx
+  cop #$9C : dl EDarkRoomSpotlightManager : dw $3000
++:
+endif
+if !SettingInfiniteInventory == 1
+jsl LR_GiveQueuedItems
+jsl LR_UpdateItemViewFull
+endif
+lda #$1000 : tsb $12
+rtl
+
+LR_SecIfThisMapIsDark:
+if !SettingDarkRoomsLevel == 4
+; All rooms are dark other than hardcoded exceptions.
+phx
+lda $0644 : cmp #$00ff : beq .ClcAndReturn
+ldx #$0000
+.CheckNextMap:
+lda.l .LightMapList,x : and #$00ff : cmp #$00ff : beq .SecAndReturn
+  cmp $0644 : beq .ClcAndReturn
+  inx
+  bra .CheckNextMap
+.SecAndReturn:
+plx
+sec
+rtl
+.ClcAndReturn:
+plx
+clc
+rtl
+.LightMapList:
+db $00
+db $01,$02,$03,$04,$05,$06,$07,$08,$0A   ; South Cape, Castle
+db $15,$16,$17,$18,$1A    ; Itory, Moon Tribe exterior
+db $24    ; Inca Golden Tile room
+db $30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$3A,$3B,$3C,$49   ; Freejia, Neil's
+db $5a,$5b,$5c,$5d,$5e,$63   ; Sea Palace, Hope Room
+db $67,$f4   ; Vamps due to lightning orb
+db $69,$6A,$6B,$6C   ; Angel Village
+;db $75   ; Angel Dungeon puzzle rooms
+db $78,$79,$7A,$7B,$7C,$7D,$7E,$7F   ; Watermia
+db $91,$92,$93,$94,$95,$96,$97,$98,$99,$9a,$9b,$9c,$9d   ; Euro
+db $ac,$ad,$ae   ; Natives'
+db $bc   ; Wat bright room
+db $C3,$c4,$c5,$c6,$c7,$c8,$c9   ; Town EffectLayers don't work well with cmath
+db $de,$df,$e0,$e1,$e2,$e3,$e4,$e5,$e8   ; Babel, Comet
+db $89,$8c,$8d,$8e,$8f,$90,$f0,$f7,$fa,$fb,$fc,$fd,$fe   ; Attract/cutscene/finale/menu maps
+db $ff
+else
+; Rooms provided by the randomizer are dark.
+phx
+ldx #$0000
+.CheckNextMap:
+lda.l .DarkMapList,x : and #$00ff : cmp #$00ff : beq .ClcAndReturn
+  cmp $0644 : beq .SecAndReturn
+  inx
+  bra .CheckNextMap
+.SecAndReturn:
+plx
+sec
+rtl
+.ClcAndReturn:
+plx
+clc
+rtl
+.DarkMapList:
+!DarkMapList ?= $ff
+db !DarkMapList,$ff
+endif
+
+db $00 : dw $2000
+EMonsterRespawner:
+jsl LR_ClearMonsterKilledFlags
+cop #$E0
+
+-:
+cop #$C1
+TFirebirdPaletteManager:
+lda $0AD4 : cmp #$0002 : beq +
+  rtl
++:
+cop #$36
+cop #$39
+bra -
+
+
+db $00 : dw $2000
+EMuDSCEntranceReturnListener:
+{
+cop #$D0 : db $7e,$01 : dw .Die   ; No water
+stz $24
+jsr .SR_StoreJmpAddrOrSec : bcs .Die
+lda #$2200 : tsb $1010   ; invisible and invulnerable
+lda #$fff0 : tsb $065a
+cop #$DA : db $20
+cop #$BF : dw .TextMustTurnBack
+lda.w #.Die : sta $00
+lda $24 : dec : pha : rts
+.Die:
+cop #$E0
+.TextMustTurnBack:
+table "table_dialogue.txt",rtl
+db $d3
+db "This path is flooded.",$cb
+db "You'll have to turn",$cb
+db "back."
+db $c0
+.TableHighWater: ; Structure: db Map,XLeft,YTop,XRight,YBot : dw JmpAddr
+db $5f, 47,2, 52,7 : dw .ReturnNWExitN
+db $60, 10,55, 17,64 : dw .ReturnNEExitS2
+db $61, 10,0, 17,6 : dw .ReturnEEExitN2
+db $61, 0,39, 8,48 : dw .ReturnEEExitW2
+db $62, 1,53, 11,63 : dw .ReturnWWExitS1
+db $62, 22,53, 29,63 : dw .ReturnWWExitS3
+db $62, 58,38, 65,48 : dw .ReturnWWExitE2
+db $64, 2,0, 10,8 : dw .ReturnSWExitN1
+db $64, 21,0, 29,9 : dw .ReturnSWExitN3
+db $64, 26,37, 33,46 : dw .ReturnSWExitE1
+db $64, 25,56, 34,63 : dw .ReturnSWExitE3
+db $65, 0,37, 8,46 : dw .ReturnSEExitW1
+db $65, 0,56, 11,63 : dw .ReturnSEExitW3
+.TableMidWater:
+db $5f, 17,56, 27,64 : dw .ReturnNWExitS
+db $60, 3,55, 10,64 : dw .ReturnNEExitS1
+db $61, 4,0, 10,7 : dw .ReturnEEExitN1
+db $61, 0,29, 8,39 : dw .ReturnEEExitW1
+db $62, 18,0, 24,8 : dw .ReturnWWExitN
+db $62, 56,29, 65,39 : dw .ReturnWWExitE1
+db $62, 11,54, 22,64 : dw .ReturnWWExitS2
+db $64, 11,0, 21,8 : dw .ReturnSWExitN2
+db $64, 25,47, 33,56 : dw .ReturnSWExitE2
+db $65, 0,46, 8,56 : dw .ReturnSEExitW2
+db $65, 8,36, 16,46 : dw .ReturnSEExitC
+dw $ffff
+.SR_StoreJmpAddrOrSec:
+phx
+ldx #$0000
+lda #$007b : jsl LR_SecOnFlagA : bcc ..CheckIfInArea
+  ldx.w #.TableMidWater-.TableHighWater   ; If the flag is set, start .X in the MidWater table.
+..CheckIfInArea:
+lda.l .TableHighWater,x : cmp #$ffff : beq ..NotInAnyArea
+  and #$00ff : cmp $0644 : bne ..CheckNext   ; Wrong map.
+lda.l 1+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1014 : bcs ..CheckNext
+lda.l 2+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1016 : bcs ..CheckNext
+lda.l 3+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1014 : bcc ..CheckNext
+lda.l 4+.TableHighWater,x : and #$00ff : asl : asl : asl : asl : cmp $1016 : bcc ..CheckNext
+..IsInThisArea:
+lda.l 5+.TableHighWater,x : sta $24
+plx
+clc
+rts
+..CheckNext:
+inx : inx : inx : inx : inx : inx : inx
+bra ..CheckIfInArea
+..NotInAnyArea:
+plx
+sec
+rts
+.ReturnNWExitN:
+cop #$26 : db !Map5FExit05
+rtl
+.ReturnNWExitS:
+cop #$26 : db !Map5FExit03
+rtl
+.ReturnNEExitS1:
+cop #$26 : db !Map60Exit04
+rtl
+.ReturnNEExitS2:
+cop #$26 : db !Map60Exit03
+rtl
+.ReturnEEExitN1:
+cop #$26 : db !Map61Exit03
+rtl
+.ReturnEEExitN2:
+cop #$26 : db !Map61Exit02
+rtl
+.ReturnEEExitW1:
+cop #$26 : db !Map61Exit06
+rtl
+.ReturnEEExitW2:
+cop #$26 : db !Map61Exit05
+rtl
+.ReturnWWExitN:
+cop #$26 : db !Map62Exit01
+rtl
+.ReturnWWExitS1:
+cop #$26 : db !Map62Exit08
+rtl
+.ReturnWWExitS2:
+cop #$26 : db !Map62Exit07
+rtl
+.ReturnWWExitS3:
+cop #$26 : db !Map62Exit06
+rtl
+.ReturnWWExitE1:
+cop #$26 : db !Map62Exit04
+rtl
+.ReturnWWExitE2:
+cop #$26 : db !Map62Exit03
+rtl
+.ReturnSWExitN1:
+cop #$26 : db !Map64Exit03
+rtl
+.ReturnSWExitN2:
+cop #$26 : db !Map64Exit02
+rtl
+.ReturnSWExitN3:
+cop #$26 : db !Map64Exit01
+rtl
+.ReturnSWExitE1:
+cop #$26 : db !Map64Exit04
+rtl
+.ReturnSWExitE2:
+cop #$26 : db !Map64Exit05
+rtl
+.ReturnSWExitE3:
+cop #$26 : db !Map64Exit06
+rtl
+.ReturnSEExitW1:
+cop #$26 : db !Map65Exit01
+rtl
+.ReturnSEExitW2:
+cop #$26 : db !Map65Exit02
+rtl
+.ReturnSEExitW3:
+cop #$26 : db !Map65Exit03
+rtl
+.ReturnSEExitC:
+cop #$26 : db !Map65Exit04
+rtl
+}
+
+LR_LowerMuWaterOneStep:
+cop #$D0 : db $7b,$01 : dw .ToNoWater
+.ToMidWater:
+cop #$CC : db $7b
+rtl
+.ToNoWater:
+cop #$CC : db $7e
+rtl
+
+
+
+; Spawn this and set its $26 to the target DS index from TableDsMapSpawnData.
+EDarkSpaceWarper:
+{
+lda #$1000 : tsb $12   ; Ignore Earthquaker
+lda #$fff0 : tsb $065a
+lda $1010 : ora #$2000 : sta $1010
+cop #$08 : db $0C, $0C
+lda $1014 : sta $14
+lda $1016 : sta $16
+lda #$2000 : trb $10
+cop #$88 : dl $8ee000
+cop #$80 : db $1c
+cop #$89
+cop #$DA : db $0d
+lda $26 : jsr SR_SecIfDsIndexAForcesWill : bcc +
+  stz $0ad4
++:
+lda $26 : jsl LR_WarpToDsIndexA
+stz $0aac
+lda #$0202 : sta $0648
+lda #$0101 : sta $064a
+jsl LR_ClearMonsterKilledFlags
+cop #$E0
+}
+
+SR_SecIfDsIndexAForcesWill:
+phx
+asl : asl : asl : tax
+lda.l TableDsMapSpawnData,x : and #$00ff
+  cmp #$0001 : beq .SecAndReturn
+  cmp #$000b : beq .SecAndReturn
+  cmp #$0015 : beq .SecAndReturn
+  cmp #$0034 : beq .SecAndReturn
+  cmp #$005a : beq .SecAndReturn
+  cmp #$006c : beq .SecAndReturn
+  cmp #$007c : beq .SecAndReturn
+  cmp #$0099 : beq .SecAndReturn
+  cmp #$00ac : beq .SecAndReturn
+  cmp #$00c3 : beq .SecAndReturn
+  cmp #$00df : beq .SecAndReturn
+  cmp #$00e3 : beq .SecAndReturn
+.ClcAndReturn:
+plx
+clc
+rts
+.SecAndReturn:
+plx
+sec
+rts
+
+LR_SetThisDsVisitedAndActive:
+phx
+ldx #$0000
+.CheckNextMap:
+lda.l TableDsMapSpawnData,x : cmp #$ffff : beq .Done
+  and #$00ff : cmp $0b12 : beq .GotLineCheckPymd
+txa : clc : adc #$0008 : tax
+bra .CheckNextMap
+.GotLineCheckPymd:   ; DS index = X/8, push to stack and post-process
+txa : lsr : lsr : lsr : pha
+txa : lda.l TableDsMapSpawnData,x : and #$00ff : cmp #$00cc : bne ..PostPymdCheck
+..IsPymd:    ; Add 1 to index if this is the lower Pyramid DS
+lda $0b0c : cmp #$0020
+pla : adc #$0000 : pha    ; (will add 1 if $0b0c > #$0020)
+..PostPymdCheck:
+pla : sta $0bf6
+  clc : adc #$09a0 : jsl LR_SetAnyFlagA
+.Done:
+plx
+rtl
+
+LR_WarpToDsIndexA:
+clc
+jsr SR_WarpToDsIndexA
+rtl
+
+LR_WarpToDsIndexAWithForceSetDeathWarp:
+sec
+jsr SR_WarpToDsIndexA
+rtl
+
+SR_WarpToDsIndexA:
+phx
+php
+asl : asl : asl : tax
+lda.l TableDsMapSpawnData,x : and #$00ff : sta $0642
+lda.l 1+TableDsMapSpawnData,x : sta $064c
+lda.l 3+TableDsMapSpawnData,x : sta $064e
+lda.l 5+TableDsMapSpawnData,x : and #$00ff : sta $0650
+lda.l 6+TableDsMapSpawnData,x : sta $0652
+plp
+lda $0650 : bcs .DoSetDeathWarp
+  bit #$0080 : bne .DoSetDeathWarp
+.Done:
+plx
+rts
+.DoSetDeathWarp:
+and #$FF7F : sta $0650
+txa : clc : adc.w #TableDsMapSpawnData : sta $0af0
+  sta $0af4
+lda.w #BankOf(TableDsMapSpawnData) : sta $0af2
+  sta $0af6
+bra .Done
+
+LR_WarpToStart:
+if !StartAtWarpLocation == 1
+lda.w #!StartDsIndex : sta $0bf6
+  jsl LR_WarpToDsIndexAWithForceSetDeathWarp
+else
+stz $0bf6
+cop #$26 : db $08 : dw $0050, $00a0 : db $80, $00, $12
+endif
+rtl
+
+
+
+; The usual cop #$26 arguments
+TableDsMapSpawnData:
+{
+db $01 : dw $00E0,$0070 : db $03,$00,$43   ; Index $00 = Flag $09a0, Cape exterior
+db $0b : dw $0120,$0090 : db $03,$00,$32   ; Index $01 = Flag $09a1, Prison
+db $12 : dw $00A0,$04D0 : db $03,$00,$74   ; Index $02 = Flag $09a2, EdDg final
+db $15 : dw $0430,$0090 : db $03,$00,$35   ; Index $03 = Flag $09a3, Itory
+db $28 : dw $0110,$0090 : db $03,$00,$32   ; Index $04 = Flag $09a4, Inca near melody
+db $26 : dw $01C0,$0150 : db $03,$00,$32   ; Index $05 = Flag $09a5, Inca slug DS
+db $1e : dw $02c0,$0060 : db $03,$00,$24   ; Index $06 = Flag $09a6, Inca Castoth
+db $34 : dw $0040,$00a0 : db $03,$00,$11   ; Index $07 = Flag $09a7, Freejia
+db $40 : dw $01b0,$0170 : db $03,$00,$32   ; Index $08 = Flag $09a8, Mine hidden
+db $3d : dw $00d0,$00c0 : db $03,$00,$61   ; Index $09 = Flag $09a9, Mine near false wall
+db $42 : dw $0270,$0070 : db $03,$02,$13   ; Index $0A = Flag $09aa, Mine behind false wall
+db $4c : dw $0090,$0070 : db $03,$00,$22   ; Index $0B = Flag $09ab, SkGn foyer
+db $56 : dw $0070,$00a0 : db $03,$00,$11   ; Index $0C = Flag $09ac, SkGn blue room
+db $51 : dw $0030,$00c0 : db $03,$00,$44   ; Index $0D = Flag $09ad, SkGn inside fence
+db $54 : dw $0020,$0070 : db $03,$00,$44   ; Index $0E = Flag $09ae, SkGn NW dark side
+db $5a : dw $02f0,$0090 : db $03,$00,$14   ; Index $0F = Flag $09af, SeaPal
+db $60 : dw $0070,$0240 : db $03,$00,$44   ; Index $10 = Flag $09b0, Mu NE
+db $62 : dw $0100,$01b0 : db $03,$00,$44   ; Index $11 = Flag $09b1, Mu W
+db $6c : dw $0190,$00b0 : db $03,$01,$12   ; Index $12 = Flag $09b2, Angl
+db $7c : dw $0040,$00a0 : db $03,$00,$11   ; Index $13 = Flag $09b3, Wtrm
+db $85 : dw $0060,$02c0 : db $03,$20,$38   ; Index $14 = Flag $09b4, GtWl 1
+db $86 : dw $0150,$0480 : db $03,$00,$63   ; Index $15 = Flag $09b5, GtWl Spin Dash
+db $88 : dw $01c0,$0290 : db $03,$20,$34   ; Index $16 = Flag $09b6, GtWl final
+db $99 : dw $00b0,$00b0 : db $03,$00,$11   ; Index $17 = Flag $09b7, Euro
+db $a1 : dw $01f0,$0310 : db $03,$00,$44   ; Index $18 = Flag $09b8, Kress 1
+db $a3 : dw $07c0,$00c0 : db $03,$00,$28   ; Index $19 = Flag $09b9, Kress 2
+db $a7 : dw $0790,$0320 : db $03,$00,$48   ; Index $1A = Flag $09ba, Kress 3
+db $ac : dw $01c0,$0050 : db $03,$00,$22   ; Index $1B = Flag $09bb, NtVl
+db $b6 : dw $0420,$0330 : db $03,$00,$46   ; Index $1C = Flag $09bc, Ankr Garden
+db $b8 : dw $0080,$0070 : db $03,$00,$61   ; Index $1D = Flag $09bd, Ankr inner east
+db $bb : dw $02b0,$01c0 : db $03,$00,$33   ; Index $1E = Flag $09be, Ankr dropdown
+db $c3 : dw $0020,$0080 : db $03,$00,$23   ; Index $1F = Flag $09bf, Dao
+db $cc : dw $0270,$01c0 : db $03,$00,$44   ; Index $20 = Flag $09c0, Pymd upper
+db $cc : dw $01c0,$0390 : db $03,$00,$44   ; Index $21 = Flag $09c1, Pymd lower
+db $df : dw $0790,$01b0 : db $03,$10,$28   ; Index $22 = Flag $09c2, Babel lower
+db $e3 : dw $02b0,$01b0 : db $03,$10,$23   ; Index $23 = Flag $09c3, Babel upper
+; Index $24 is unused; flag $09c4 means a DS warp has been triggered from the inventory screen
+dw $ffff
+}
+TableDsDefaultTypes:
+{
+db !DkSpSouthCapeType
+db !DkSpPrisonCellType
+db !DkSpPrisonEndType
+db !DkSpItoryType
+db !DkSpIncaEndType
+db !DkSpInca2Type
+db !DkSpInca1Type
+db !DkSpFreejiaType
+db !DkSpMineAtWallType
+db !DkSpMineAppearingType
+db !DkSpMineBehindType
+db !DkSpSGFoyerType
+db !DkSpSGSWType
+db !DkSpSGNWType
+db !DkSpSGSEType
+db !DkSpSeaPalType
+db !DkSpMuTransformType
+db !DkSpMuSliderType
+db !DkSpAngelVillageType
+db !DkSpWatermiaType
+db !DkSpGreatWall1Type
+db !DkSpGreatWallSpinType
+db !DkSpGreatWallEndType
+db !DkSpEuroType
+db !DkSpKress1Type
+db !DkSpKress2Type
+db !DkSpKress3Type
+db !DkSpNativesType
+db !DkSpWatGardenType
+db !DkSpWatQuakeType
+db !DkSpWatDropType
+db !DkSpDaoType
+db !DkSpPyramidTopType
+db !DkSpPyramidBotType
+db !DkSpBabelBotType
+db !DkSpBabelTopType
+}
+
+
+
+macro MDsWarpTextRedIfNotVisited(DsIndex)
+lda.w #<DsIndex> : sta $0bf8
+cop #$D1 : dw $09a0+<DsIndex> : db $01 : dw ?+
+  cop #$BF : dw TextDsWarpSetRedPalette
+?+:
+cop #$BF : dw TextDsWarpTargetLineShell
+endmacro
+
+macro MDsWarpTargetMenuForIds(...)
+!thisDsMenuArgCount #= sizeof(...)
+
+cop #$BF : dw TextDsWarpDrawBoxFor!{thisDsMenuArgCount}Options
+
+!thisDsMenuLine #= 0
+while !thisDsMenuLine < !thisDsMenuArgCount
+%MDsWarpTextRedIfNotVisited(<!thisDsMenuLine>)
+!thisDsMenuLine #= 1+!thisDsMenuLine
+endif
+cop #$BF : dw TextDsWarpBack
+
+cop #$BE : db $01+!thisDsMenuArgCount, select(greater(!thisDsMenuArgCount,7),0,1) : dw ?+
+?+:
+dw EDsWarpMenuChoseBack
+!thisDsMenuLine #= 0
+while !thisDsMenuLine < !thisDsMenuArgCount
+dw ?EDsWarpMenuChoseLoc<!thisDsMenuLine>
+!thisDsMenuLine #= 1+!thisDsMenuLine
+endif
+dw EDsWarpMenuChoseBack
+
+!thisDsMenuLine #= 0
+while !thisDsMenuLine < !thisDsMenuArgCount
+?EDsWarpMenuChoseLoc<!thisDsMenuLine>:
+cop #$D1 : dw $09a0+<!thisDsMenuLine> : db $00 : dw EDsWarpMenuChoseLocNotVisited
+lda.w #<!thisDsMenuLine> : sta $0bf8
+jmp EDsWarpMenuChoseGoodLoc
+!thisDsMenuLine #= 1+!thisDsMenuLine
+endif
+
+endmacro
+
+
+EGaia_DsWarpMainMenu:
+{
+cop #$BF : dw TextDsWarpBaseMenu
+cop #$BE : db $d7,$01 : dw .MainMenuOptions
+.MainMenuOptions:
+  dw ..ChooseCancel
+  dw ..ChooseStart, ..ChooseEdDg, ..ChooseMine, ..ChooseMu, ..ChooseKress, ..ChoosePymd, ..ChooseCancel
+  dw ..ChooseTowns, ..ChooseInca, ..ChooseSkGn, ..ChooseGtWl, ..ChooseAnkr, ..ChooseBabel
+..ChooseCancel:
+cop #$BF : dw TextDsWarpClearScreen
+cop #$BF : dw ...TextPrepForThenGo
+jml EGaia_ThenGo
+...TextPrepForThenGo:
+db $d3
+db $ca
+..ChooseStart:
+lda.w #!StartDsIndex : sta $0bf8
+jmp EDsWarpMenuChoseGoodLoc
+..ChooseTowns:
+%MDsWarpTargetMenuForIds(0,3,7,18,19,23,27,31)
+..ChooseEdDg:
+%MDsWarpTargetMenuForIds(1,2)
+..ChooseInca:
+%MDsWarpTargetMenuForIds(4,5,6)
+..ChooseMine:
+%MDsWarpTargetMenuForIds(8,9,10)
+..ChooseSkGn:
+%MDsWarpTargetMenuForIds(11,12,13,14)
+..ChooseMu:
+%MDsWarpTargetMenuForIds(15,16,17)
+..ChooseGtWl:
+%MDsWarpTargetMenuForIds(20,21,22)
+..ChooseKress:
+%MDsWarpTargetMenuForIds(24,25,26)
+..ChooseAnkr:
+%MDsWarpTargetMenuForIds(28,29,30)
+..ChoosePymd:
+%MDsWarpTargetMenuForIds(32,33)
+..ChooseBabel:
+%MDsWarpTargetMenuForIds(34,35)
+
+EDsWarpMenuChoseGoodLoc:
+cop #$BF : dw TextDsWarpClearScreen
+cop #$9C : dl EDarkSpaceWarper : dw $2000
+lda $0bf8 : sta $0026,y
+  sta $0bf6
+cop #$C1
+rtl
+
+TextDsWarpClearScreen:
+db $ce
+db $c8
+db $ca
+
+EDsWarpMenuChoseLocNotVisited:
+cop #$BF : dw TextDsWarpNotYetVisited
+jmp EGaia_DsWarpMainMenu
+
+EDsWarpMenuChoseBack:
+jmp EGaia_DsWarpMainMenu
+
+; Towns: 8 (Cape, Itry, Frej, Angl, Wtrm, Euro, NtVl, Dao)
+; Edward's: 2, Inca: 3
+; Mine: 3, Sky Garden: 4
+; Sea Palace: 1
+; Mu: 2, Great Wall: 3
+; Kress: 3, Ankor Wat: 3
+; Pymd: 2, Babel: 2
+TextDsWarpDrawBoxFor2Options:
+db $ce
+;db $c1 : db 3,5
+;db $c7 : db 12,5
+;db $d2 : db $00
+db $cd : dl TextDsWarpToWhereLine
+;db $cd : dl TextDsWarpBackLine
+db $ca
+TextDsWarpDrawBoxFor3Options:
+db $ce
+;db $c1 : db 3,5
+;db $c7 : db 12,6
+;db $d2 : db $00
+db $cd : dl TextDsWarpToWhereLine
+;db $cd : dl TextDsWarpBackLine
+db $ca
+TextDsWarpDrawBoxFor4Options:
+db $ce
+;db $c1 : db 3,5
+;db $c7 : db 12,7
+;db $d2 : db $00
+db $cd : dl TextDsWarpToWhereLine
+;db $cd : dl TextDsWarpBackLine
+db $ca
+TextDsWarpDrawBoxFor8Options:
+db $ce
+;db $c1 : db 3,5
+;db $c7 : db 12,11
+;db $d2 : db $00
+;db $cd : dl TextDsWarpToWhereLine
+;db $cd : dl TextDsWarpBackLine
+db $ca
+
+TextDsWarpSetRedPalette:
+db $c3,$04
+db $ca
+
+TextDsWarpNotYetVisited:
+;db $ce
+db $c8
+db $d3
+db "You have not yet",$cb
+db "visited that Dark Space."
+db $cf
+
+TextDsWarpBaseMenu:
+;db $ce
+db $c1 : db 3,7
+db $c7 : db 13,9
+db $d2 : db $00
+db $cd : dl TextDsWarpToWhereLine
+db "_Start_______Towns",$cb
+db "_Edward's____Inca",$cb
+db "_D._Mine_____Sky_Garden",$cb
+db "_Mu/Palace___Great Wall",$cb
+db "_Kress_______Ankor Wat",$cb
+db "_Pyramid_____Babel",$cb
+db "_(Cancel)"
+db $ca
+
+TextDsWarpToWhereLine:
+db "Warp to where?",$cb
+db $c3,$00
+db $ca
+TextDsWarpBack:
+db "_(Back)"
+db $c3,$00
+db $ca
+TextDsWarpCancelLine:
+db "_(Cancel)",$cb
+db $c3,$00
+db $ca
+TextDsWarpTargetLineShell:
+db $c5 : dw TextDsWarpTargets, $0bf8
+db $cb
+db $c3,$00
+db $ca
+
+TextDsWarpTargets:
+.Pointers:
+{
+dw .Cape
+dw .Prison
+dw .EdDgFinal
+dw .Itory
+dw .Inca1
+dw .Inca2
+dw .Inca3
+dw .Freejia
+dw .Mine1
+dw .Mine2
+dw .Mine3
+dw .SkGn1
+dw .SkGn2
+dw .SkGn3
+dw .SkGn4
+dw .SeaPal
+dw .Mu1
+dw .Mu2
+dw .Angl
+dw .Watermia
+dw .GtWl1
+dw .GtWl2
+dw .GtWl3
+dw .Euro
+dw .Kress1
+dw .Kress2
+dw .Kress3
+dw .Natives
+dw .Ankr1
+dw .Ankr2
+dw .Ankr3
+dw .Dao
+dw .Pymd1
+dw .Pymd2
+dw .Babel1
+dw .Babel2
+}
+{
+.Cape:
+db "_South Cape"
+db $ca
+.Prison:
+db "_Edward's prison cell"
+db $ca
+.EdDgFinal:
+db "_Edward's hidden DS"
+db $ca
+.Itory:
+db "_Itory"
+db $ca
+.Inca1:
+db "_Inca, near Wind Melody"
+db $ca
+.Inca2:
+db "_Inca, near slug chest"
+db $ca
+.Inca3:
+db "_Inca, outside Castoth"
+db $ca
+.Freejia:
+db "_Freejia"
+db $ca
+.Mine1:
+db "_Mine, hidden DS"
+db $ca
+.Mine2:
+db "_Mine, near false wall"
+db $ca
+.Mine3:
+db "_Mine, behind false wall"
+db $ca
+.SkGn1:
+db "_Sky Garden foyer"
+db $ca
+.SkGn2:
+db "_Sky Garden blue room"
+db $ca
+.SkGn3:
+db "_Sky Garden inside fence"
+db $ca
+.SkGn4:
+db "_Sky Garden NW dark side"
+db $ca
+.SeaPal:
+db "_Sea Palace"
+db $ca
+.Mu1:
+db "_Mu Northeast"
+db $ca
+.Mu2:
+db "_Mu West"
+db $ca
+.Angl:
+db "_Angel Village"
+db $ca
+.Watermia:
+db "_Watermia"
+db $ca
+.GtWl1:
+db "_Great Wall, first DS"
+db $ca
+.GtWl2:
+db "_Great Wall, Spin Dash DS"
+db $ca
+.GtWl3:
+db "_Great Wall, final DS"
+db $ca
+.Euro:
+db "_Euro"
+db $ca
+.Kress1:
+db "_Kress, first DS"
+db $ca
+.Kress2:
+db "_Kress, second DS"
+db $ca
+.Kress3:
+db "_Kress, final DS"
+db $ca
+.Natives:
+db "_Natives' Village"
+db $ca
+.Ankr1:
+db "_Ankor Wat, Garden DS"
+db $ca
+.Ankr2:
+db "_Ankor Wat, behind wall"
+db $ca
+.Ankr3:
+db "_Ankor Wat, drop-down DS"
+db $ca
+.Dao:
+db "_Dao"
+db $ca
+.Pymd1:
+db "_Pyramid, upper foyer"
+db $ca
+.Pymd2:
+db "_Pyramid, lower foyer"
+db $ca
+.Babel1:
+db "_Babel, lower"
+db $ca
+.Babel2:
+db "_Babel, upper"
+db $ca
+}
+
+}
+
+
+
+EAWOuterDropFloorOpener_WhileOpen:
+{
+cop #$C1
+cop #$45 : db $6a,$0d, $6f,$0f : dw .DoTransition
+lda $1010 : bit #$0004 : beq +   ; Only offer transition if player is touching the pit.
+cop #$45 : db $68,$0c, $69,$11 : dw .OfferTransition
+cop #$45 : db $69,$11, $70,$12 : dw .OfferTransition
++:
+rtl
+.OfferTransition:
+cop #$BF : dw .TextOfferTransition
+cop #$BE : db $02,$01 : dw ..Options
+..Options:
+  dw ..ChooseDecline
+  dw ..ChooseDecline, ..ChooseAccept
+..ChooseDecline:
+cop #$BF : dw .TextClear
+cop #$C1
+cop #$45 : db $68,$0b, $70,$12 : dw ...AwaitPlayerLeaveArea
+jmp EAWOuterDropFloorOpener_WhileOpen
+...AwaitPlayerLeaveArea:
+rtl
+..ChooseAccept:
+cop #$BF : dw .TextClear
+lda $1014 : sta $14
+lda $1016 : sta $16
+lda #$0082 : sta $1002    ; i.e. BankOf(EPlayer_StartFall)
+lda #$c61e : sta $1000    ; i.e. EPlayer_StartFall
+stz $1008
+stz $102a
+lda #$0800 : tsb $09ae
+cop #$CA : db $14
+lda #$cff0 : tsb $065a
+lda $14 : cmp #$06a0 : bcs +
+  inc $14
++:
+cmp #$06f0 : bcc +
+  dec $14
++:
+lda $16 : cmp #$0100 : bcc +
+  dec $16 : dec $16 : dec $16
++:
+lda $14 : sta $1014
+lda $16 : sta $1016
+cop #$CB
+.DoTransition:
+cop #$26 : db !MapB3Exit02
+cop #$C1
+rtl
+.TextOfferTransition:
+db $d3
+db "Jump into the pit?",$cb
+db "_No",$cb
+db "_Yes"
+db $ca
+.TextClear:
+db $c8
+db $ca
+}
+
+
+
+LR_DebugSubActor:
+{
+lda $09AA : tcd : tax
+cop #$BF : dw .OptionText
+cop #$BE : db $63,$01 : dw .OptionList
+.OptionList:
+  dw .OptCancel
+  dw .OptTeleport, .OptBody, .OptNoclip, .OptPower, .OptItems, .OptOther
+.OptCancel:
+cop #$BF : dw ..Text
+jmp .Return
+..Text:
+;db $d3
+db $CE,$d6,$56,"go.",$C0
+.OptTeleport:
+cop #$A4 : dl EDebugWarper : dw $0000,$2000
+jmp .Return
+.OptBody:
+stz $0ad4
+cop #$BF : dw ..BodyOptionText
+cop #$BE : db $03,$00 : dw ..BodyOptionList
+..BodyOptionList:
+  dw .OptCancel, ..OptWill, ..OptFreedan, ..OptShadow
+..OptShadow:
+inc $0ad4
+..OptFreedan:
+inc $0ad4
+..OptWill:
+jmp .PrintDone
+..BodyOptionText:
+db $d3
+db $ac, $d6,$51, $cb
+db $ac, $d6,$15, $cb
+db $ac, $d6,$4c, $ca
+.OptNoclip:
+lda $1010 : eor #$0008 : sta $1010
+jmp .PrintDone
+.OptPower:
+cop #$BF : dw ..PowerOptionText 
+cop #$BE : db $84,$00 : dw ..PowerOptionList
+..PowerOptionList:
+  dw .OptCancel
+  dw ..OptNone, ..OptViper, ..OptFanger, ..OptSuper
+  dw ..OptCastoth, ..OptVampires, ..OptMummyQueen, ..OptEdit
+..OptEdit:
+cop #$BF : dw ...EditOptionText
+cop #$BE : db $e7,$00 : dw ...EditOptionList
+...EditOptionList:
+  dw .OptCancel
+  dw ...OptAddHp, ...OptAddStr, ...OptAddDef, ...OptAddPow1, ...OptAddPow2, ...OptAddPow3, ...OptUpgrade
+  dw ...OptSubHp, ...OptSubStr, ...OptSubDef, ...OptSubPow1, ...OptSubPow2, ...OptSubPow3, ...OptDowngrade
+...OptAddHp:
+inc $0aca
+inc $0ace
+bra ...Done
+...OptSubHp:
+dec $0aca
+dec $0ace
+bra ...Done
+...OptAddStr:
+inc $0ade
+bra ...Done
+...OptSubStr:
+dec $0ade
+bra ...Done
+...OptAddDef:
+inc $0adc
+bra ...Done
+...OptSubDef:
+dec $0adc
+bra ...Done
+...OptAddPow1:
+lda #$0011 : tsb $0aa2
+bra ...Done
+...OptSubPow1:
+lda #$0011 : trb $0aa2
+bra ...Done
+...OptAddPow2:
+lda #$0022 : tsb $0aa2
+bra ...Done
+...OptSubPow2:
+lda #$0022 : trb $0aa2
+bra ...Done
+...OptAddPow3:
+lda #$0044 : tsb $0aa2
+bra ...Done
+...OptSubPow3:
+lda #$0044 : trb $0aa2
+bra ...Done
+...OptUpgrade:
+lda #$0001 : sta $0b16
+lda $0b1c : inc : cmp #$0003 : bcc +
+  lda #$0002
++:
+sta $0b1c
+bra ...Done
+...OptDowngrade:
+stz $0b16
+lda $0b1c : dec : bpl +
+  lda #$0000
++:
+sta $0b1c
+bra ...Done
+...Done:
+jmp .PrintDone
+...EditOptionText:
+db $c1 : db $03,$0c
+db $c7 : db $0d,$07
+db $ce
+db $d2,$00
+db "_Inc HP______Dec. HP",$cb
+db "_Inc STR_____Dec. STR",$cb
+db "_Inc DEF_____Dec. DEF",$cb
+db "_Add Pow. 1__Rem. Pow. 1",$cb
+db "_Add Pow. 2__Rem. Pow. 2",$cb
+db "_Add Pow. 3__Rem. Pow. 3",$cb
+db "_Upgrade_____Downgrade"
+db $ca
+..OptNone:
+stz $0aa2
+jsl LR_ResetStatsForDebugPower
+jmp .PrintDone
+..OptSuper:
+lda #$00FF : sta $0AA2
+lda #$00b0 : sta $0ADE : sta $0ADC : sta $0ACA : sta $0ACE
+lda #$0001 : sta $0b16
+lda #$0002 : sta $0b1c
+jmp .PrintDone
+..OptCastoth:
+lda #$0001 : sta $0aa2
+lda #$0029 : bra ..GiveStatsByBoss
+..OptViper:
+lda #$0011 : sta $0aa2
+lda #$0055 : bra ..GiveStatsByBoss
+..OptVampires:
+lda #$0013 : sta $0aa2
+lda #$0067 : bra ..GiveStatsByBoss
+..OptFanger:
+lda #$0017 : sta $0aa2
+lda #$008a : bra ..GiveStatsByBoss
+..OptMummyQueen:
+lda #$0077 : sta $0aa2
+lda #$00dd : bra ..GiveStatsByBoss
+..GiveStatsByBoss:
+pha
+jsl LR_ResetStatsForDebugPower
+pla
+jsl LR_GiveStatsUpToRoomA
+jmp .PrintDone
+..PowerOptionText:
+db $d3
+db "_None________Castoth",$cb
+db "_Viper_______",$d6,$5f,$cb
+db "_Fanger______Mummy_Queen",$cb
+db "_Super_______Edit"
+db $ca
+.OptItems:
+cop #$BF : dw TextDebugItemListPageOne
+cop #$BE : db $0a,$00 : dw ..ItemOptionsListPageOne
+..ItemOptionsListPageOne:
+dw .OptCancel
+dw ..Opt10, ..Opt11, ..Opt12, ..Opt13, ..Opt14
+dw ..Opt15, ..Opt16, ..Opt17, ..Opt18, ..Opt19
+..Opt10:   ; Jewels
+cop #$D4 : db $01 : dw .PrintDone
+cop #$D4 : db $01 : dw .PrintDone
+cop #$D4 : db $01 : dw .PrintDone
+cop #$D4 : db $01 : dw .PrintDone
+cop #$D4 : db $01 : dw .PrintDone
+jmp .PrintDone
+..Opt11:   ; Prison Key + Lola's Melody
+cop #$D4 : db $02 : dw .PrintDone
+cop #$D4 : db $09 : dw .PrintDone
+jmp .PrintDone
+..Opt12:   ; Inca items
+cop #$D4 : db $03 : dw .PrintDone
+cop #$D4 : db $04 : dw .PrintDone
+cop #$D4 : db $07 : dw .PrintDone
+cop #$D4 : db $08 : dw .PrintDone
+jmp .PrintDone
+..Opt13:   ; Herb
+cop #$D4 : db $06 : dw .PrintDone
+jmp .PrintDone
+..Opt14:   ; Meat
+cop #$D4 : db $0a : dw .PrintDone
+jmp .PrintDone
+..Opt15:   ; Mine keys, Memory Melody
+cop #$D4 : db $0b : dw .PrintDone
+cop #$D4 : db $0c : dw .PrintDone
+cop #$D4 : db $0d : dw .PrintDone
+cop #$D4 : db $0f : dw .PrintDone
+jmp .PrintDone
+..Opt16:   ; Crystal Balls
+cop #$D4 : db $0e : dw .PrintDone
+cop #$D4 : db $0e : dw .PrintDone
+jmp .PrintDone
+..Opt17:   ; Mu palace key, Purification Stone
+cop #$D4 : db $10 : dw .PrintDone
+cop #$D4 : db $11 : dw .PrintDone
+jmp .PrintDone
+..Opt18:   ; Hope and Rama Statues
+cop #$D4 : db $12 : dw .PrintDone
+cop #$D4 : db $13 : dw .PrintDone
+jmp .PrintDone
+..Opt19:   ; Next page
+cop #$BF : dw TextDebugItemListPageTwo
+cop #$BE : db $0a,$00 : dw ..ItemOptionsListPageTwo
+..ItemOptionsListPageTwo:
+dw .OptCancel
+dw ..Opt20, ..Opt21, ..Opt22, ..Opt23, ..Opt24
+dw ..Opt25, ..Opt26, ..Opt27, ..Opt28, ..Opt29
+..Opt20:   ; Magic Powder
+cop #$D4 : db $14 : dw .PrintDone
+jmp .PrintDone
+..Opt21:   ; Lance's Letter, Will
+cop #$D4 : db $16 : dw .PrintDone
+cop #$D4 : db $18 : dw .PrintDone
+jmp .PrintDone
+..Opt22:   ; Mushroom Drops, Teapot
+cop #$D4 : db $19 : dw .PrintDone
+cop #$D4 : db $1a : dw .PrintDone
+jmp .PrintDone
+..Opt23:   ; Glasses, Flower
+cop #$D4 : db $1c : dw .PrintDone
+cop #$D4 : db $1d : dw .PrintDone
+jmp .PrintDone
+..Opt24:   ; Hieroglyphs
+cop #$D4 : db $1e : dw .PrintDone
+cop #$D4 : db $1f : dw .PrintDone
+cop #$D4 : db $20 : dw .PrintDone
+cop #$D4 : db $21 : dw .PrintDone
+cop #$D4 : db $22 : dw .PrintDone
+cop #$D4 : db $23 : dw .PrintDone
+jmp .PrintDone
+..Opt25:   ; Aura
+cop #$D4 : db $24 : dw .PrintDone
+jmp .PrintDone
+..Opt26:   ; Lola's Letter, Journal
+cop #$D4 : db $25 : dw .PrintDone
+cop #$D4 : db $26 : dw .PrintDone
+jmp .PrintDone
+..Opt27:   ; Crystal Ring
+cop #$D4 : db $27 : dw .PrintDone
+jmp .PrintDone
+..Opt28:   ; Apple
+cop #$D4 : db $28 : dw .PrintDone
+jmp .PrintDone
+..Opt29:   ; Empty inventory
+sep #$20
+ldy #$0000
+-:
+lda $0ab4,y : cmp #$15 : beq +
+lda #$00 : sta $0ab4,y
++:
+iny : cpy #$0010 : bcc -
+rep #$20
+jmp .PrintDone
+.OptOther:
+cop #$BF : dw .OptionText2
+cop #$BE : db $03,$00 : dw ..Options
+..Options:
+  dw .OptCancel
+  dw .OptResetFlags, .OptResetRng, .OptScrambleRng
+.OptResetFlags:
+ldy #$0002
+lda #$0000
+-:
+sta $0a00,y
+iny : iny
+cpy #$00a2 : bcc -
+jmp .PrintDone
+.OptResetRng:
+ldy #$000e
+lda #$0000
+-:
+sta $0410,y
+dey : dey : bpl -
+jmp .PrintDone
+.OptScrambleRng:
+lda $0036 : and #$00ff : clc : adc #$00ff
+-:
+pha
+cop #$23
+pla : dec : bpl -
+jmp .PrintDone
+.PrintDone:
+cop #$BF : dw .DoneText
+.Return:
+rtl
+.OptionText:
+db $d3
+db $D6,$62, $88,$a3,$ac, $d6,$fe, $a7,$88,$a3,$87, $0d, $cb ; What is your wish?
+db $ac, "Warp", $ac,$ac,$ac,$ac,$ac,$ac,$ac,$ac, $d7,$25, $cb ; Warp   Power
+db $ac, "Body", $ac,$ac,$ac,$ac,$ac,$ac,$ac,$ac, "Items", $cb ; Body   Items
+db $ac, "Noclip", $ac,$ac,$ac,$ac,$ac,$ac, "Other"
+db $ca
+.OptionText2:
+db $d3
+db "_Reset flags",$cb
+db "_Reset RNG",$cb
+db "_Scramble RNG"
+db $ca
+.DoneText:
+;db $d3
+db $CE, "Done.", $C0
+
+}
+
+LR_GiveStatsUpToRoomA:
+{
+sta $000e
+ldy #$0000
+sep #$20
+bra .CheckNextRoom
+.AwardGivenCheckNext:
+sep #$20
+iny
+.CheckNextRoom:
+lda.w $aade,y : bne .RoomHasAward
+  iny : cpy $000e : bcc .CheckNextRoom
+    bra .Done
+.RoomHasAward:
+rep #$20
+and #$00ff : sta $0004
+tya
+phy
+  jsl $80b496
+ply
+bcs .AwardGivenCheckNext
+phy
+  tya : jsl $80b4a1
+ply
+lda $0004
+pea.w .AwardGivenCheckNext-1
+dec : bne .NotHp
+.IsHp:
+  inc $0aca
+  inc $0ace
+  rts
+.NotHp:
+dec : bne .NotStr
+.IsStr:
+  inc $0ade
+  rts
+.NotStr:
+dec : beq .IsDef
+  rts
+.IsDef:
+inc $0adc
+rts
+.Done:
+rep #$20
+rtl
+}
+
+LR_ResetStatsForDebugPower:
+{
+ldy #$0060
+lda #$0000
+-:
+sta $0a00,y
+iny : iny
+cpy #$007f : bcc -
+lda #$0008 : sta $0aca : sta $0ace
+stz $0adc
+lda #$0001 : sta $0ade
+stz $0b16
+stz $0b1c
+;stz $0aa2
+rtl
+}
+
+
+
+LR_SecIfAtKaraLocation:
+{
+phx
+lda.l Config_KaraLocation : dec : tax
+lda.l .LutLocMaps,x : and #$00ff : cmp $0644 : bne .WrongMap
+txa : asl : tax
+lda.l .LutLocPointers,x : dec
+  plx
+  pha : rts
+.InEdDg:
+cop #$45 : db $0b,$0b,$0d,$0d : dw .SecAndReturn
+bra .ClcAndReturn
+.InMine:
+cop #$45 : db $0b,$24,$0d,$26 : dw .SecAndReturn
+bra .ClcAndReturn
+.InAngl:
+cop #$45 : db $07,$08,$09,$0a : dw .SecAndReturn
+bra .ClcAndReturn
+.InKres:
+cop #$45 : db $12,$06,$14,$08 : dw .SecAndReturn
+bra .ClcAndReturn
+.InAnkr:
+cop #$45 : db $1a,$10,$1c,$12 : dw .SecAndReturn
+;bra .ClcAndReturn
+.ClcAndReturn:
+clc
+rtl
+.WrongMap:
+plx
+bra .ClcAndReturn
+.SecAndReturn:
+sec
+rtl
+.LutLocMaps:
+db $13, $47, $74, $a9, $bf
+.LutLocPointers:
+dw .InEdDg
+dw .InMine
+dw .InAngl
+dw .InKres
+dw .InAnkr
+}
+
+if !SettingInfiniteInventory == 1
+; Creator must write the new page ID to $26, to avoid a race condition.
+; By default, the item holes will flash white. To skip the flash, write 0 to $24.
+EInvPagePaletteWriter:
+phx
+ldx #$0000
+-:
+lda.l $7f0a40,x : sta $7f0a60,x
+inx : inx
+cpx #$0020 : bcc -
+plx
+lda $24 : beq +
+  lda.l 0+APaleInvPageFlash : sta $7f0a66
+  lda.l 2+APaleInvPageFlash : sta $7f0a68
+  lda.l 4+APaleInvPageFlash : sta $7f0a6a
+  cop #$DA : db $05
++:
+phx
+lda $26 : asl : pha
+  asl : clc : adc $01,s : sta $01,s
+pla : tax
+lda.l 0+APaleInvAnchor,x : sta $7f0a66
+lda.l 2+APaleInvAnchor,x : sta $7f0a68
+lda.l 4+APaleInvAnchor,x : sta $7f0a6a
+plx
+cop #$E0
+
+
+LR_DecOrClearItemA:
+{
+php
+phx
+tax
+jsl LR_DecStackForItemAReturningCountOrSec : bne .Done
+sep #$20
+txa
+ldx #$0000
+.CheckNextInvSlot:
+cmp.l SramInvItems,x : beq .FoundItem
+  inx : cpx.w #(SramInvEndOfList-SramInvItems) : bne .CheckNextInvSlot
+  bra .Done
+.FoundItem:
+lda #$00 : sta.l SramInvItems,x
+rep #$20
+txy
+jsl LR_UpdateItemViewForSlotY
+.Done:
+plx
+plp
+rtl
+}
+
+endif
+
+LR_GetDsItemForOuterMapOrSec:
+phx
+ldx #$0000
+-:
+lda.l Config_DarkSpaceItemAnchor,x : beq .SecAndReturn
+  and #$00ff : cmp $0b12 : beq .FoundItemIdx
+    inx : inx : inx : inx
+    bra -
+.FoundItemIdx:
+lda.l 2+Config_DarkSpaceItemAnchor,x
+plx
+clc
+rtl
+.SecAndReturn:
+plx
+sec
+rtl
+
+LR_GetDsItemFlagForOuterMapOrSec:
+phx
+ldx #$0000
+-:
+lda.l Config_DarkSpaceItemAnchor,x : beq .SecAndReturn
+  and #$00ff : cmp $0b12 : beq .FoundItemIdx
+    inx : inx : inx : inx
+    bra -
+.FoundItemIdx:
+txa : lsr : clc : adc #$02b2
+plx
+clc
+rtl
+.SecAndReturn:
+lda #$0000
+plx
+sec
+rtl
+
+
+
+
+

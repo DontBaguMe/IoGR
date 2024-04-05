@@ -1,0 +1,1517 @@
+arch 65816
+hirom
+
+; Dungeon Shuffle removes most mid-dungeon respawn points.
+!MaybeRemoveRespawnPoint = $ff
+if !SettingDungeonShuffle > 0
+!MaybeRemoveRespawnPoint = $7f
+endif
+
+; We need a list of "defaults" i.e. vanilla assignments, to incsrc early.
+; Separately, we need a list of "defines" i.e. IOGR assignments, which will be of the form:
+; !Map01Exit01 = !DefaultMapXYExitUW
+; and so forth.
+; Both of these ledgers are also separate from the actual bank $81 exit table.
+
+!DefaultMapShipExitString = $30,$48,$00,$10,$01,$83,$00,$21
+!DefaultMapViperExitString = $5a,$90,$00,$70,$00,$83,$00,$14
+!DefaultMapVampEntranceString = $67,$78,$01,$d0,$01,$80,$01,$22
+!DefaultMapMQEntranceString = $dd,$f8,$00,$b0,$01,$00,$00,$22
+!DefaultMapMQReturnString = $CC,$F8,$01,$20,$01,$03,$00,$44
+!DefaultMapMQExitString = $cd,$70,$00,$A0,$00,$00,$00,$11
+!DefaultMapPrisonWarpString = $0B,$E8,$00,$A0,$00,$83,$00,$32
+!DefaultMapMoonWarpString = $4c,$68,$01,$40,$00,$83,$00,$22
+!DefaultMapGardenEntranceString = $4c,$68,$01,$40,$00,$83,$00,$22
+!DefaultMapGardenExitString = $4b,$e0,$01,$c0,$02,$03,$00,$44
+!DefaultMapMansionEntranceString = $E9,$30,$03,$d0,$03,$80,$00,$44
+!DefaultMapMansionExitString = $c3,$40,$01,$88,$00,$00,$00,$23
+!DefaultMapMansionBossDefeatedWarpString = $C3,$10,$02,$90,$00,$83,$00,$23
+!DefaultMapSolidArmReturnString = $E9,$78,$03,$90,$00,$03,$00,$44
+!DefaultMapBabelDaoWarpString = $c3,$10,$02,$90,$00,$83,$00,$23
+
+!DefaultMap01Exit01 = $08,$B8,$01,$80,$00,$00,$00,$12
+!DefaultMap01Exit02 = $08,$B8,$01,$80,$00,$00,$00,$12
+!DefaultMap01Exit03 = $03,$58,$00,$C0,$00,$00,$00,$11
+!DefaultMap01Exit04 = $04,$C8,$00,$C0,$01,$00,$10,$22
+!DefaultMap01Exit05 = $05,$98,$00,$C0,$00,$00,$00,$11
+!DefaultMap01Exit06 = $06,$58,$00,$C0,$01,$00,$10,$21
+!DefaultMap01Exit07 = $07,$90,$00,$d0,$03,$00,$00,$44
+!DefaultMap01Exit08 = $02,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMap01Exit09 = $08,$40,$00,$70,$00,$01,$00,$12
+!DefaultMap01Exit0A = $04,$30,$00,$90,$00,$01,$00,$12
+
+!DefaultMap02Exit01 = $01,$90,$02,$B0,$02,$03,$00,$43
+
+!DefaultMap03Exit01 = $01,$20,$01,$50,$02,$03,$00,$43
+
+!DefaultMap04Exit01 = $01,$20,$02,$10,$02,$03,$00,$43
+!DefaultMap04Exit02 = $01,$10,$02,$50,$01,$00,$00,$43
+
+!DefaultMap05Exit01 = $01,$70,$00,$50,$02,$03,$00,$43
+
+!DefaultMap06Exit01 = $01,$00,$02,$E0,$00,$03,$00,$43
+
+!DefaultMap07Exit01 = $01,$90,$02,$E0,$00,$03,$00,$43
+
+!DefaultMap08Exit01 = $01,$C0,$00,$B0,$00,$07,$00,$43
+!DefaultMap08Exit02 = $01,$38,$01,$E0,$00,$03,$00,$43
+
+!DefaultMap0AExit01 = $13,$78,$00,$50,$00,$03,$00,$21
+
+!DefaultMap0BExit01 = $0C,$58,$00,$50,$00,$03,$00,$12
+
+!DefaultMap0CExit01 = $0B,$F8,$00,$D0,$02,$00,$00,$32
+!DefaultMap0CExit02 = $0D,$58,$00,$50,$00,$03,$00,$42
+
+!DefaultMap0DExit01 = $0C,$A8,$01,$B0,$00,$00,$00,$12
+!DefaultMap0DExit02 = $0E,$08,$03,$60,$00,$03,$00,$24
+
+!DefaultMap0EExit01 = $0D,$58,$00,$D0,$03,$00,$00,$42
+!DefaultMap0EExit02 = $0F,$78,$00,$D0,$05,$00,$00,$61
+
+!DefaultMap0FExit01 = $11,$F8,$00,$C0,$00,$00,$00,$12
+!DefaultMap0FExit02 = $0E,$58,$00,$40,$00,$03,$00,$24
+!DefaultMap0FExit03 = $10,$78,$00,$C0,$00,$00,$00,$11
+
+!DefaultMap10Exit01 = $0F,$B8,$00,$A0,$02,$03,$00,$61
+
+!DefaultMap11Exit01 = $0F,$78,$00,$50,$00,$03,$00,$61
+!DefaultMap11Exit02 = $12,$78,$02,$D0,$05,$00,$00,$63
+
+!DefaultMap12Exit01 = $11,$F8,$00,$A0,$00,$03,$00,$12
+!DefaultMap12Exit02 = $13,$78,$00,$E0,$01,$00,$00,$21
+
+!DefaultMap13Exit01 = $12,$88,$01,$50,$00,$03,$00,$63
+!DefaultMap13Exit02 = $0A,$60,$00,$70,$03,$03,$30,$44
+
+!DefaultMap15Exit01 = $16,$88,$00,$C0,$00,$00,$00,$11
+!DefaultMap15Exit02 = $17,$10,$00,$A8,$00,$07,$00,$11
+!DefaultMap15Exit03 = $17,$98,$00,$C0,$00,$00,$00,$11
+!DefaultMap15Exit04 = $18,$58,$00,$C0,$00,$00,$00,$11
+!DefaultMap15Exit05 = $19,$78,$00,$C0,$01,$00,$00,$21
+
+!DefaultMap16Exit01 = $15,$90,$02,$40,$02,$03,$00,$35
+
+!DefaultMap17Exit01 = $15,$10,$04,$E0,$01,$06,$00,$35
+!DefaultMap17Exit02 = $15,$D0,$04,$70,$02,$03,$00,$35
+
+!DefaultMap18Exit01 = $15,$20,$03,$70,$01,$03,$00,$35
+
+!DefaultMap19Exit01 = $15,$A0,$00,$C0,$02,$03,$00,$35
+!DefaultMap19Exit02 = $19,$78,$00,$C0,$02,$00,$20,$31
+!DefaultMap19Exit03 = $19,$90,$00,$70,$00,$03,$00,$21
+
+!DefaultMap1AExit01 = $15,$D8,$02,$B0,$02,$00,$00,$35
+!DefaultMap1AExit02 = $1B,$F8,$00,$C0,$01,$80,$00,$22
+
+!DefaultMap1BExit01 = $1A,$C0,$00,$90,$01,$03,$00,$22
+
+!DefaultMap1CExit01 = $1D,$A8,$02,$60,$00,$83,$00,$63
+
+!DefaultMap1DExit01 = $1C,$A0,$01,$D0,$00,$03,$00,$22
+!DefaultMap1DExit02 = $1F,$38,$00,$D0,$01,$00,$00,$22
+!DefaultMap1DExit03 = $20,$B8,$00,$C0,$01,$00,$00,$22
+!DefaultMap1DExit04 = $21,$38,$01,$D0,$03,$00,$00,$44
+!DefaultMap1DExit05 = $22,$58,$00,$D0,$03,$00,$00,$44
+!DefaultMap1DExit06 = $23,$B8,$01,$D0,$02,$00,$00,$34
+!DefaultMap1DExit07 = $25,$98,$01,$C0,$01,$00,$00,$23
+!DefaultMap1DExit08 = $25,$98,$00,$D0,$01,$00,$00,$23
+!DefaultMap1DExit09 = $26,$98,$00,$C0,$02,$00,$00,$32
+!DefaultMap1DExit0A = $27,$78,$01,$C0,$01,$00,$00,$24
+!DefaultMap1DExit0B = $28,$78,$01,$C0,$02,$00,$00,$32
+
+!DefaultMap1EExit01 = $24,$F8,$00,$D0,$01,$00,$00,$22
+!DefaultMap1EExit02 = $29,$78,$00,$C0,$00,$00,$00,$11
+
+!DefaultMap1FExit01 = $28,$98,$01,$40,$00,$03,$00,$32
+!DefaultMap1FExit02 = $1F,$B8,$01,$B0,$02,$00,$21,$32
+!DefaultMap1FExit03 = $1F,$F8,$00,$60,$00,$03,$00,$22
+!DefaultMap1FExit04 = $1D,$48,$00,$80,$02,$03,$00,$53
+
+!DefaultMap20Exit01 = $1D,$98,$01,$40,$02,$03,$00,$53
+!DefaultMap20Exit02 = $23,$D8,$02,$40,$00,$03,$00,$34
+
+!DefaultMap21Exit01 = $1D,$48,$00,$80,$04,$03,$00,$53
+!DefaultMap21Exit02 = $23,$08,$01,$B0,$02,$00,$00,$34
+
+!DefaultMap22Exit01 = $1D,$48,$02,$00,$04,$03,$00,$53
+!DefaultMap22Exit02 = $24,$F8,$00,$40,$00,$03,$00,$22
+!DefaultMap22Exit03 = $26,$B8,$01,$40,$00,$03,$00,$32
+
+!DefaultMap23Exit01 = $20,$38,$00,$90,$00,$03,$00,$22
+!DefaultMap23Exit02 = $21,$78,$00,$40,$00,$03,$00,$44
+!DefaultMap23Exit03 = $1D,$68,$00,$60,$03,$03,$00,$53
+
+!DefaultMap24Exit01 = $22,$E8,$01,$B0,$03,$00,$00,$44
+!DefaultMap24Exit02 = $1E,$A8,$03,$40,$00,$83&!MaybeRemoveRespawnPoint,$00,$24
+
+!DefaultMap25Exit01 = $1D,$E8,$01,$60,$00,$03,$00,$53
+!DefaultMap25Exit02 = $1D,$E8,$00,$A0,$00,$03,$00,$53
+!DefaultMap25Exit03 = $27,$D0,$03,$90,$01,$06,$00,$24
+
+!DefaultMap26Exit01 = $22,$78,$03,$40,$00,$03,$00,$44
+!DefaultMap26Exit02 = $1D,$88,$02,$E0,$02,$03,$00,$53
+
+!DefaultMap27Exit01 = $25,$20,$00,$90,$01,$07,$00,$23
+!DefaultMap27Exit02 = $1D,$48,$00,$40,$00,$03,$00,$53
+
+!DefaultMap28Exit01 = $1F,$28,$01,$90,$02,$00,$21,$32
+!DefaultMap28Exit02 = $1D,$48,$00,$60,$01,$03,$00,$63
+
+!DefaultMap29Exit01 = $1E,$68,$00,$00,$01,$03,$00,$24
+!DefaultMap29Exit02 = $29,$78,$00,$C0,$02,$00,$10,$31
+!DefaultMap29Exit03 = $29,$78,$00,$20,$00,$03,$00,$11
+!DefaultMap29Exit04 = $2C,$0d,$00,$40,$02,$03,$00,$33
+
+!DefaultMap2BExit01 = $2D,$20,$00,$A0,$00,$07,$00,$13
+
+!DefaultMap2CExit01 = $2E,$20,$00,$A0,$00,$07,$00,$13
+
+!DefaultMap2DExit01 = $2B,$E0,$01,$50,$02,$06,$00,$33
+
+!DefaultMap2EExit01 = $2C,$E0,$01,$50,$02,$06,$00,$33
+
+!DefaultMap30Exit01 = $31,$28,$00,$C0,$00,$00,$00,$11
+
+!DefaultMap31Exit01 = $30,$C0,$00,$90,$00,$03,$00,$21
+
+!DefaultMap32Exit01 = $33,$28,$00,$C0,$00,$00,$00,$11
+!DefaultMap32Exit02 = $34,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMap32Exit03 = $35,$18,$01,$C0,$00,$00,$00,$12
+!DefaultMap32Exit04 = $35,$E0,$00,$90,$00,$03,$00,$12
+!DefaultMap32Exit05 = $36,$A8,$00,$C0,$01,$00,$10,$21
+!DefaultMap32Exit06 = $37,$78,$00,$C0,$01,$00,$10,$21
+!DefaultMap32Exit07 = $37,$30,$00,$90,$00,$03,$00,$11
+!DefaultMap32Exit08 = $38,$B8,$00,$C0,$01,$00,$10,$21
+!DefaultMap32Exit09 = $39,$48,$00,$C0,$01,$00,$10,$22
+!DefaultMap32Exit0A = $3A,$38,$00,$C0,$00,$00,$00,$11
+!DefaultMap32Exit0B = $3A,$30,$00,$90,$00,$03,$00,$11
+!DefaultMap32Exit0C = $3B,$98,$00,$C0,$00,$00,$00,$11
+!DefaultMap32Exit0D = $3C,$78,$00,$C0,$00,$00,$00,$11
+
+!DefaultMap33Exit01 = $32,$40,$00,$E0,$00,$03,$00,$45
+
+!DefaultMap34Exit01 = $32,$90,$01,$E0,$00,$03,$00,$45
+
+!DefaultMap35Exit01 = $32,$F0,$02,$F0,$00,$03,$00,$45
+!DefaultMap35Exit02 = $32,$D0,$02,$50,$00,$00,$00,$45
+
+!DefaultMap36Exit01 = $32,$70,$00,$B0,$02,$03,$00,$45
+
+!DefaultMap37Exit01 = $32,$60,$01,$D0,$02,$03,$00,$45
+!DefaultMap37Exit02 = $32,$40,$01,$00,$02,$00,$00,$45
+
+!DefaultMap38Exit01 = $32,$10,$02,$B0,$02,$03,$00,$45
+
+!DefaultMap39Exit01 = $32,$70,$02,$30,$02,$03,$00,$45
+!DefaultMap39Exit02 = $39,$28,$02,$C0,$01,$00,$12,$23
+!DefaultMap39Exit03 = $39,$28,$02,$C0,$00,$00,$02,$13
+!DefaultMap39Exit04 = $39,$E0,$00,$B0,$00,$03,$00,$12
+!DefaultMap39Exit05 = $39,$90,$01,$B0,$00,$03,$00,$12
+
+!DefaultMap3AExit01 = $32,$C0,$02,$20,$02,$00,$00,$45
+!DefaultMap3AExit02 = $32,$F0,$02,$B0,$02,$03,$00,$45
+
+!DefaultMap3BExit01 = $32,$10,$04,$C0,$02,$03,$00,$45
+
+!DefaultMap3CExit01 = $32,$80,$04,$80,$00,$03,$00,$45
+
+!DefaultMap3DExit01 = $41,$A0,$03,$E0,$00,$03,$00,$34
+!DefaultMap3DExit02 = $42,$78,$02,$C0,$00,$00,$02,$13
+
+!DefaultMap3EExit01 = $3F,$A8,$00,$B0,$03,$00,$00,$44
+
+!DefaultMap3FExit01 = $3E,$50,$00,$40,$00,$03,$00,$42
+!DefaultMap3FExit02 = $40,$70,$00,$40,$00,$03,$00,$32
+!DefaultMap3FExit03 = $42,$48,$00,$40,$00,$03,$00,$21
+
+!DefaultMap40Exit01 = $3F,$08,$02,$C0,$01,$00,$00,$44
+!DefaultMap40Exit02 = $41,$A0,$02,$50,$02,$03,$00,$34
+
+!DefaultMap41Exit01 = $40,$68,$01,$70,$02,$00,$00,$32
+!DefaultMap41Exit02 = $42,$88,$02,$C0,$01,$00,$12,$23
+!DefaultMap41Exit03 = $3D,$78,$00,$D0,$05,$00,$00,$61
+
+!DefaultMap42Exit01 = $3F,$88,$01,$40,$03,$00,$00,$44
+!DefaultMap42Exit02 = $43,$E0,$05,$40,$03,$06,$00,$46
+!DefaultMap42Exit03 = $43,$10,$00,$80,$00,$07,$00,$46
+!DefaultMap42Exit04 = $44,$F0,$00,$60,$00,$03,$00,$22
+!DefaultMap42Exit05 = $3D,$58,$00,$30,$00,$03,$00,$61
+!DefaultMap42Exit06 = $41,$A0,$03,$40,$00,$03,$00,$34
+
+!DefaultMap43Exit01 = $42,$10,$00,$A0,$01,$07,$00,$21
+!DefaultMap43Exit02 = $42,$E0,$01,$60,$00,$06,$01,$22
+
+!DefaultMap44Exit01 = $42,$68,$01,$C0,$01,$00,$01,$22
+!DefaultMap44Exit02 = $45,$50,$01,$60,$00,$03,$00,$22
+!DefaultMap44Exit03 = $47,$70,$00,$40,$00,$03,$00,$31
+!DefaultMap44Exit04 = $46,$90,$00,$60,$00,$03,$00,$22
+
+!DefaultMap45Exit01 = $44,$58,$00,$30,$01,$00,$00,$22
+
+!DefaultMap46Exit01 = $44,$98,$01,$30,$01,$00,$00,$22
+
+!DefaultMap47Exit01 = $44,$F8,$00,$60,$01,$00,$00,$22
+
+!DefaultMap4CExit01 = $55,$70,$00,$E0,$01,$00,$00,$22
+!DefaultMap4CExit02 = $4D,$10,$00,$E8,$00,$87&!MaybeRemoveRespawnPoint,$00,$44
+!DefaultMap4CExit03 = $4F,$78,$00,$30,$00,$83&!MaybeRemoveRespawnPoint,$00,$44
+!DefaultMap4CExit04 = $53,$E0,$03,$68,$00,$86&!MaybeRemoveRespawnPoint,$00,$44
+!DefaultMap4CExit05 = $51,$78,$03,$30,$00,$83&!MaybeRemoveRespawnPoint,$00,$44
+
+!DefaultMap4DExit01 = $4C,$E0,$01,$D8,$00,$06,$00,$22
+!DefaultMap4DExit02 = $4E,$E8,$00,$80,$02,$00,$00,$44
+!DefaultMap4DExit03 = $4E,$98,$01,$C0,$03,$00,$00,$44
+!DefaultMap4DExit04 = $4E,$58,$03,$C0,$03,$00,$00,$44
+
+!DefaultMap4EExit01 = $4D,$08,$03,$90,$02,$00,$00,$44
+!DefaultMap4EExit02 = $4D,$58,$02,$D0,$03,$00,$00,$44
+!DefaultMap4EExit03 = $4D,$98,$00,$D0,$03,$00,$00,$44
+
+!DefaultMap4FExit01 = $4C,$68,$01,$D0,$01,$00,$00,$22
+!DefaultMap4FExit02 = $50,$B8,$00,$00,$01,$00,$00,$44
+!DefaultMap4FExit03 = $50,$98,$02,$E0,$00,$00,$00,$44
+!DefaultMap4FExit04 = $50,$F8,$01,$70,$02,$00,$00,$44
+!DefaultMap4FExit05 = $56,$A0,$00,$B0,$00,$00,$00,$11
+
+!DefaultMap50Exit01 = $4F,$38,$03,$10,$01,$00,$00,$44
+!DefaultMap50Exit02 = $4F,$58,$01,$F0,$00,$00,$00,$44
+!DefaultMap50Exit03 = $4F,$F8,$01,$80,$02,$00,$00,$44
+
+!DefaultMap51Exit01 = $4C,$88,$00,$D0,$01,$00,$00,$22
+!DefaultMap51Exit02 = $52,$48,$01,$30,$01,$03,$00,$44
+!DefaultMap51Exit03 = $52,$08,$03,$F0,$00,$03,$00,$44
+!DefaultMap51Exit04 = $52,$98,$00,$B0,$03,$03,$00,$44
+
+!DefaultMap52Exit01 = $51,$A8,$02,$40,$01,$03,$00,$44
+!DefaultMap52Exit02 = $51,$E8,$00,$00,$01,$03,$00,$44
+!DefaultMap52Exit03 = $51,$58,$03,$C0,$03,$03,$00,$44
+
+!DefaultMap53Exit01 = $4C,$10,$00,$D8,$00,$07,$00,$22
+!DefaultMap53Exit02 = $54,$E8,$01,$70,$02,$03,$00,$44
+!DefaultMap53Exit03 = $54,$88,$03,$D0,$03,$03,$00,$44
+!DefaultMap53Exit04 = $54,$08,$01,$F0,$02,$03,$00,$44
+!DefaultMap53Exit05 = $54,$48,$03,$F0,$00,$03,$00,$44
+
+!DefaultMap54Exit01 = $53,$08,$02,$90,$02,$03,$00,$44
+!DefaultMap54Exit02 = $53,$68,$00,$E0,$03,$03,$00,$44
+!DefaultMap54Exit03 = $53,$E8,$02,$E0,$02,$03,$00,$44
+!DefaultMap54Exit04 = $53,$A8,$00,$00,$01,$03,$00,$44
+
+!DefaultMap55Exit01 = $4C,$F8,$00,$30,$00,$03,$00,$22
+
+!DefaultMap56Exit01 = $4F,$E0,$02,$F0,$01,$03,$00,$44
+
+!DefaultMap5AExit01 = $5C,$80,$00,$70,$00,$03,$00,$24
+!DefaultMap5AExit02 = $5B,$30,$00,$90,$00,$07,$00,$11
+!DefaultMap5AExit03 = $5B,$C0,$00,$90,$01,$06,$10,$21
+!DefaultMap5AExit04 = $5B,$30,$00,$90,$03,$07,$30,$41
+!DefaultMap5AExit05 = $5E,$80,$03,$B0,$00,$00,$00,$14
+
+!DefaultMap5BExit01 = $5A,$C0,$03,$90,$00,$06,$00,$14
+!DefaultMap5BExit02 = $5A,$40,$00,$A0,$01,$07,$10,$24
+!DefaultMap5BExit03 = $5A,$C0,$03,$A0,$03,$06,$30,$44
+!DefaultMap5BExit04 = $5C,$30,$00,$A0,$03,$07,$30,$44
+
+!DefaultMap5CExit01 = $5A,$80,$00,$90,$05,$03,$50,$64
+!DefaultMap5CExit02 = $5D,$D0,$00,$00,$01,$03,$00,$23
+!DefaultMap5CExit03 = $5B,$C0,$00,$90,$02,$06,$20,$31
+
+!DefaultMap5DExit01 = $5C,$50,$03,$80,$03,$03,$30,$44
+
+!DefaultMap5EExit01 = $69,$a0,$02,$38,$00,$00,$00,$13
+!DefaultMap5EExit02 = $5F,$80,$00,$40,$00,$83,$00,$44
+!DefaultMap5EExit03 = $5a,$90,$00,$70,$00,$83&!MaybeRemoveRespawnPoint,$00,$14
+
+!DefaultMap5FExit01 = $5E,$60,$00,$B0,$00,$00,$00,$14
+!DefaultMap5FExit02 = $60,$10,$00,$90,$00,$07,$00,$44
+!DefaultMap5FExit03 = $62,$50,$01,$30,$00,$03,$00,$44
+!DefaultMap5FExit04 = $62,$38,$03,$40,$00,$03,$00,$44
+!DefaultMap5FExit05 = $63,$80,$01,$B0,$00,$00,$01,$12
+
+!DefaultMap60Exit01 = $5F,$E0,$03,$90,$00,$06,$00,$44
+!DefaultMap60Exit02 = $61,$40,$01,$30,$00,$03,$00,$44
+!DefaultMap60Exit03 = $61,$D0,$00,$30,$00,$03,$00,$44
+!DefaultMap60Exit04 = $61,$68,$00,$30,$00,$03,$00,$44
+
+!DefaultMap61Exit01 = $60,$40,$01,$E0,$03,$00,$00,$44
+!DefaultMap61Exit02 = $60,$D0,$00,$E0,$03,$00,$00,$44
+!DefaultMap61Exit03 = $60,$68,$00,$E0,$03,$00,$00,$44
+!DefaultMap61Exit04 = $62,$E0,$03,$A0,$03,$06,$00,$44
+!DefaultMap61Exit05 = $62,$E0,$03,$A8,$02,$06,$00,$44
+!DefaultMap61Exit06 = $62,$E0,$03,$20,$02,$06,$00,$44
+!DefaultMap61Exit07 = $63,$80,$00,$B0,$00,$00,$00,$11
+
+!DefaultMap62Exit01 = $5F,$50,$01,$E0,$03,$00,$00,$44
+!DefaultMap62Exit02 = $61,$10,$00,$A0,$03,$07,$00,$44
+!DefaultMap62Exit03 = $61,$10,$00,$A8,$02,$07,$00,$44
+!DefaultMap62Exit04 = $61,$10,$00,$20,$02,$07,$00,$44
+!DefaultMap62Exit05 = $5F,$38,$03,$D0,$03,$00,$00,$44
+!DefaultMap62Exit06 = $64,$90,$01,$30,$00,$03,$00,$42
+!DefaultMap62Exit07 = $64,$00,$01,$30,$00,$03,$00,$42
+!DefaultMap62Exit08 = $64,$60,$00,$30,$00,$03,$00,$42
+
+!DefaultMap63Exit01 = $61,$80,$02,$40,$00,$03,$00,$44
+!DefaultMap63Exit02 = $5F,$10,$03,$40,$00,$03,$00,$44
+
+!DefaultMap64Exit01 = $62,$90,$01,$E0,$03,$00,$00,$44
+!DefaultMap64Exit02 = $62,$00,$01,$E0,$03,$00,$00,$44
+!DefaultMap64Exit03 = $62,$60,$00,$E0,$03,$00,$00,$44
+!DefaultMap64Exit04 = $65,$10,$00,$A0,$02,$07,$00,$44
+!DefaultMap64Exit05 = $65,$10,$00,$40,$03,$07,$00,$44
+!DefaultMap64Exit06 = $65,$10,$00,$B0,$03,$07,$00,$44
+
+!DefaultMap65Exit01 = $64,$E0,$01,$A0,$02,$06,$00,$42
+!DefaultMap65Exit02 = $64,$E0,$01,$40,$03,$06,$00,$42
+!DefaultMap65Exit03 = $64,$E0,$01,$B0,$03,$06,$00,$42
+!DefaultMap65Exit04 = $66,$78,$02,$B0,$00,$00,$02,$13
+
+!DefaultMap66Exit01 = $65,$B8,$00,$80,$02,$03,$00,$44
+!DefaultMap66Exit02 = $65,$B8,$00,$80,$02,$03,$00,$44
+!DefaultMap66Exit03 = $5F,$80,$00,$50,$00,$03,$00,$44    ; Vamp exits changed for IOGR.
+
+!DefaultMap67Exit01 = $65,$B8,$00,$80,$02,$03,$00,$44    ; Vamp exits changed for IOGR.
+!DefaultMap67Exit02 = $67,$78,$00,$D0,$01,$00,$00,$21
+!DefaultMap67Exit03 = $67,$78,$01,$50,$00,$03,$01,$22
+
+!DefaultMap69Exit01 = $5E,$48,$00,$90,$00,$01,$00,$14    ; Angel Village to Mu Passage.
+!DefaultMap69Exit02 = $6B,$50,$00,$30,$00,$00,$00,$13
+
+!DefaultMap6AExit01 = $69,$A0,$02,$38,$00,$00,$00,$13
+
+!DefaultMap6BExit01 = $69,$70,$00,$78,$00,$00,$00,$13
+!DefaultMap6BExit02 = $6C,$A8,$00,$B0,$00,$00,$00,$11
+!DefaultMap6BExit03 = $6C,$28,$02,$C0,$00,$00,$02,$14
+!DefaultMap6BExit04 = $6C,$A8,$01,$B0,$00,$00,$01,$12
+!DefaultMap6BExit05 = $6C,$88,$01,$B0,$01,$00,$11,$22
+!DefaultMap6BExit06 = $6D,$78,$00,$70,$00,$83,$00,$14
+
+!DefaultMap6CExit01 = $6B,$10,$01,$90,$00,$03,$00,$13
+!DefaultMap6CExit02 = $6B,$90,$01,$70,$01,$03,$10,$24
+!DefaultMap6CExit03 = $6B,$50,$00,$80,$02,$03,$20,$34
+!DefaultMap6CExit04 = $6B,$30,$02,$60,$02,$03,$20,$34
+!DefaultMap6CExit05 = $6B,$90,$01,$70,$01,$03,$10,$24
+
+!DefaultMap6DExit01 = $6E,$60,$00,$70,$00,$03,$00,$14
+!DefaultMap6DExit02 = $6B,$A8,$03,$70,$02,$03,$20,$34
+
+!DefaultMap6EExit01 = $6D,$90,$03,$70,$02,$03,$20,$34
+!DefaultMap6EExit02 = $6F,$40,$00,$A0,$00,$03,$00,$13
+
+!DefaultMap6FExit01 = $6E,$90,$03,$80,$02,$03,$22,$34
+!DefaultMap6FExit02 = $70,$90,$00,$70,$00,$03,$00,$13
+
+!DefaultMap70Exit01 = $6F,$B0,$02,$A0,$00,$03,$00,$13
+!DefaultMap70Exit02 = $70,$A8,$00,$B0,$02,$00,$20,$31
+!DefaultMap70Exit03 = $70,$70,$02,$70,$01,$03,$10,$23
+!DefaultMap70Exit04 = $70,$80,$00,$C0,$01,$00,$10,$23
+!DefaultMap70Exit05 = $70,$70,$01,$80,$00,$03,$00,$13
+!DefaultMap70Exit06 = $71,$60,$00,$80,$00,$03,$00,$13
+
+!DefaultMap71Exit01 = $70,$A0,$02,$70,$01,$03,$10,$23
+!DefaultMap71Exit02 = $72,$70,$00,$C0,$00,$00,$00,$16
+
+!DefaultMap72Exit01 = $71,$90,$02,$70,$00,$03,$00,$13
+!DefaultMap72Exit02 = $73,$80,$00,$C0,$01,$00,$10,$24
+
+!DefaultMap73Exit01 = $72,$70,$05,$70,$00,$03,$00,$16
+!DefaultMap73Exit02 = $73,$D0,$00,$C0,$00,$00,$00,$14
+!DefaultMap73Exit03 = $73,$C0,$02,$70,$01,$03,$10,$24
+!DefaultMap73Exit04 = $74,$B0,$00,$B0,$00,$00,$00,$11
+!DefaultMap73Exit05 = $74,$B0,$01,$B0,$00,$00,$01,$12
+!DefaultMap73Exit06 = $74,$90,$02,$B0,$00,$00,$02,$13
+
+!DefaultMap74Exit01 = $73,$70,$02,$60,$00,$03,$00,$14
+!DefaultMap74Exit02 = $73,$E0,$02,$60,$00,$03,$00,$14
+!DefaultMap74Exit03 = $73,$50,$03,$60,$00,$03,$00,$14
+!DefaultMap74Exit04 = $75,$88,$00,$C0,$01,$00,$10,$27
+
+!DefaultMap75Exit01 = $75,$A8,$00,$C0,$00,$00,$00,$11
+!DefaultMap75Exit02 = $75,$A8,$01,$C0,$00,$00,$01,$12
+!DefaultMap75Exit03 = $75,$98,$02,$B0,$00,$00,$02,$13
+!DefaultMap75Exit04 = $75,$98,$03,$B0,$00,$00,$03,$14
+!DefaultMap75Exit05 = $75,$98,$04,$B0,$00,$00,$04,$15
+!DefaultMap75Exit06 = $75,$98,$05,$B0,$00,$00,$05,$16
+!DefaultMap75Exit07 = $75,$98,$06,$B0,$00,$00,$06,$17
+!DefaultMap75Exit08 = $75,$98,$07,$B0,$00,$00,$07,$18
+!DefaultMap75Exit09 = $75,$88,$00,$A0,$01,$03,$10,$27
+!DefaultMap75Exit0A = $75,$28,$01,$A0,$01,$03,$10,$27
+!DefaultMap75Exit0B = $75,$58,$02,$A0,$01,$03,$10,$27
+!DefaultMap75Exit0C = $75,$F8,$02,$A0,$01,$03,$10,$27
+!DefaultMap75Exit0D = $75,$28,$04,$A0,$01,$03,$10,$27
+!DefaultMap75Exit0E = $75,$C8,$04,$A0,$01,$03,$10,$27
+!DefaultMap75Exit0F = $75,$F8,$05,$A0,$01,$03,$10,$27
+!DefaultMap75Exit10 = $75,$98,$06,$A0,$01,$03,$10,$27
+!DefaultMap75Exit11 = $74,$A0,$02,$80,$00,$03,$02,$13
+
+!DefaultMap78Exit01 = $79,$80,$00,$B0,$00,$00,$00,$11
+!DefaultMap78Exit02 = $7A,$70,$00,$80,$00,$00,$00,$11
+!DefaultMap78Exit03 = $7B,$F8,$00,$C0,$00,$00,$00,$12
+!DefaultMap78Exit04 = $7C,$70,$00,$80,$00,$00,$00,$11
+!DefaultMap78Exit05 = $7D,$70,$00,$80,$00,$00,$00,$11
+!DefaultMap78Exit06 = $7E,$70,$00,$80,$00,$00,$00,$11
+
+!DefaultMap79Exit01 = $78,$50,$03,$E0,$00,$03,$00,$45
+
+!DefaultMap7AExit01 = $78,$90,$01,$E0,$00,$03,$00,$45
+
+!DefaultMap7BExit01 = $78,$E0,$03,$30,$03,$03,$00,$45
+
+!DefaultMap7CExit01 = $78,$90,$01,$70,$03,$03,$00,$45
+
+!DefaultMap7DExit01 = $78,$50,$02,$70,$02,$03,$00,$45
+
+!DefaultMap7EExit01 = $78,$C0,$03,$00,$02,$03,$00,$45
+
+!DefaultMap82Exit01 = $83,$20,$00,$90,$00,$07,$00,$84
+
+!DefaultMap83Exit01 = $82,$D0,$07,$90,$00,$06,$00,$18
+!DefaultMap83Exit02 = $85,$10,$00,$70,$00,$07,$00,$18
+
+!DefaultMap85Exit01 = $83,$E0,$03,$90,$00,$06,$00,$84
+!DefaultMap85Exit02 = $86,$10,$00,$90,$00,$07,$00,$63
+
+!DefaultMap86Exit01 = $85,$E0,$07,$B0,$00,$06,$00,$18
+!DefaultMap86Exit02 = $87,$10,$00,$90,$00,$07,$00,$14
+
+!DefaultMap87Exit01 = $86,$E0,$02,$90,$00,$06,$00,$63
+!DefaultMap87Exit02 = $88,$10,$00,$90,$00,$07,$00,$14
+
+!DefaultMap88Exit01 = $87,$E0,$03,$90,$00,$06,$00,$14
+!DefaultMap88Exit02 = $8A,$50,$00,$90,$00,$87,$00,$33
+
+!DefaultMap8AExit01 = $88,$E0,$03,$90,$00,$06,$00,$14
+!DefaultMap8AExit02 = $82,$10,$00,$90,$00,$07,$00,$18    ; Fanger's east exit returns to the start.
+
+!DefaultMap8BExit01 = $8A,$B0,$02,$90,$00,$06,$00,$33
+
+!DefaultMap91Exit01 = $92,$98,$00,$C0,$00,$00,$00,$11
+!DefaultMap91Exit02 = $93,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMap91Exit03 = $94,$78,$00,$C0,$01,$00,$10,$21
+!DefaultMap91Exit04 = $95,$98,$01,$C0,$01,$00,$10,$24
+!DefaultMap91Exit05 = $95,$28,$02,$C0,$01,$00,$10,$24
+!DefaultMap91Exit06 = $97,$68,$00,$C0,$00,$00,$00,$12
+!DefaultMap91Exit07 = $97,$68,$01,$C0,$00,$00,$00,$12
+!DefaultMap91Exit08 = $98,$98,$00,$C0,$00,$00,$00,$11
+!DefaultMap91Exit09 = $99,$78,$00,$C0,$01,$00,$10,$21
+!DefaultMap91Exit0A = $9A,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMap91Exit0B = $9B,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMap91Exit0C = $9C,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMap91Exit0D = $9D,$F8,$00,$C0,$00,$00,$00,$12
+
+!DefaultMap92Exit01 = $91,$40,$03,$10,$03,$03,$00,$54
+
+!DefaultMap93Exit01 = $91,$30,$03,$80,$01,$03,$00,$54
+
+!DefaultMap94Exit01 = $91,$60,$00,$00,$04,$03,$00,$54
+
+!DefaultMap95Exit01 = $91,$50,$01,$80,$00,$03,$00,$54
+!DefaultMap95Exit02 = $91,$A0,$01,$80,$00,$03,$00,$54
+!DefaultMap95Exit03 = $96,$A8,$00,$C0,$00,$00,$00,$11
+
+!DefaultMap96Exit01 = $95,$70,$03,$70,$01,$03,$10,$24
+
+!DefaultMap97Exit01 = $91,$C0,$02,$00,$04,$03,$00,$54
+
+!DefaultMap98Exit01 = $91,$D0,$00,$00,$04,$03,$00,$54
+
+!DefaultMap99Exit01 = $91,$30,$03,$00,$04,$03,$00,$54
+
+!DefaultMap9AExit01 = $91,$30,$02,$30,$02,$03,$00,$54
+
+!DefaultMap9BExit01 = $91,$90,$02,$30,$02,$03,$00,$54
+
+!DefaultMap9CExit01 = $91,$10,$03,$30,$02,$03,$00,$54
+
+!DefaultMap9DExit01 = $91,$90,$02,$70,$00,$03,$00,$54
+
+!DefaultMapA0Exit01 = $A1,$E0,$03,$30,$03,$06,$00,$44
+
+!DefaultMapA1Exit01 = $A0,$10,$00,$40,$00,$07,$00,$23
+!DefaultMapA1Exit02 = $A2,$68,$00,$E0,$03,$00,$00,$42
+!DefaultMapA1Exit03 = $A2,$C8,$00,$E0,$03,$00,$00,$42
+
+!DefaultMapA2Exit01 = $A1,$68,$00,$20,$00,$03,$00,$44
+!DefaultMapA2Exit02 = $A1,$C8,$00,$20,$00,$03,$00,$44
+!DefaultMapA2Exit03 = $A3,$10,$00,$A0,$01,$07,$00,$28
+!DefaultMapA2Exit04 = $A3,$10,$00,$80,$00,$07,$00,$28
+!DefaultMapA2Exit05 = $A4,$E0,$03,$90,$01,$06,$00,$44
+!DefaultMapA2Exit06 = $A5,$48,$00,$E0,$03,$00,$00,$44
+
+!DefaultMapA3Exit01 = $A2,$E0,$01,$A0,$03,$06,$00,$42
+!DefaultMapA3Exit02 = $A2,$E0,$01,$80,$02,$06,$00,$42
+
+!DefaultMapA4Exit01 = $A2,$10,$00,$90,$01,$07,$00,$42
+
+!DefaultMapA5Exit01 = $A2,$48,$00,$20,$00,$03,$00,$42
+!DefaultMapA5Exit02 = $A6,$10,$00,$60,$03,$07,$00,$44
+!DefaultMapA5Exit03 = $A7,$48,$03,$E0,$03,$00,$00,$48
+!DefaultMapA5Exit04 = $A8,$E0,$03,$60,$00,$06,$00,$24
+
+!DefaultMapA6Exit01 = $A5,$E0,$03,$60,$03,$06,$00,$44
+
+!DefaultMapA7Exit01 = $A5,$48,$03,$20,$00,$03,$00,$44
+
+!DefaultMapA8Exit01 = $A5,$10,$00,$60,$00,$07,$00,$44
+!DefaultMapA8Exit02 = $A9,$48,$00,$E0,$03,$00,$00,$42
+
+!DefaultMapA9Exit01 = $A8,$48,$00,$20,$00,$03,$00,$24
+
+!DefaultMapACExit01 = $AD,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMapACExit02 = $AE,$78,$00,$C0,$00,$00,$00,$11
+
+!DefaultMapADExit01 = $AC,$B0,$00,$A0,$00,$03,$00,$22
+
+!DefaultMapAEExit01 = $AC,$70,$01,$C0,$00,$03,$00,$22
+
+!DefaultMapB0Exit01 = $B1,$F8,$03,$C0,$01,$00,$00,$28
+
+!DefaultMapB1Exit01 = $B0,$F8,$01,$90,$00,$03,$00,$54
+!DefaultMapB1Exit02 = $B2,$78,$00,$C0,$07,$00,$00,$81
+!DefaultMapB1Exit03 = $B6,$F8,$02,$D0,$03,$80&!MaybeRemoveRespawnPoint,$00,$46
+!DefaultMapB1Exit04 = $B5,$78,$00,$C0,$07,$00,$00,$81
+
+!DefaultMapB2Exit01 = $B1,$78,$07,$30,$00,$03,$00,$28
+!DefaultMapB2Exit02 = $B3,$78,$07,$C0,$01,$00,$00,$28
+
+!DefaultMapB3Exit01 = $B2,$78,$00,$30,$00,$03,$00,$81
+!DefaultMapB3Exit02 = $B4,$70,$05,$00,$00,$03,$00,$26
+!DefaultMapB3Exit03 = $B4,$88,$00,$C0,$00,$03,$00,$26
+!DefaultMapB3Exit04 = $B5,$78,$00,$30,$00,$03,$00,$81
+
+!DefaultMapB4Exit01 = $B3,$88,$00,$A0,$00,$00,$00,$28
+
+!DefaultMapB5Exit01 = $B3,$78,$00,$C0,$01,$00,$00,$28
+!DefaultMapB5Exit02 = $B1,$78,$00,$30,$00,$03,$00,$28
+
+!DefaultMapB6Exit01 = $B1,$F8,$03,$30,$00,$03,$00,$28
+!DefaultMapB6Exit02 = $B7,$F8,$02,$C0,$01,$00,$00,$26
+
+!DefaultMapB7Exit01 = $B6,$F8,$02,$A8,$00,$03,$00,$46
+!DefaultMapB7Exit02 = $B9,$48,$00,$D0,$05,$00,$00,$61
+!DefaultMapB7Exit03 = $B9,$A8,$00,$D0,$05,$00,$00,$61
+!DefaultMapB7Exit04 = $B8,$78,$00,$D0,$05,$00,$00,$61
+!DefaultMapB7Exit05 = $BA,$F8,$01,$D0,$05,$80&!MaybeRemoveRespawnPoint,$00,$64
+
+!DefaultMapB8Exit01 = $B7,$68,$05,$30,$00,$03,$00,$26
+
+!DefaultMapB9Exit01 = $B7,$48,$00,$30,$00,$03,$00,$26
+!DefaultMapB9Exit02 = $B7,$A8,$00,$30,$00,$03,$00,$26
+
+!DefaultMapBAExit01 = $B7,$F8,$02,$30,$00,$03,$00,$26
+!DefaultMapBAExit02 = $BB,$78,$01,$C0,$02,$00,$00,$33
+!DefaultMapBAExit03 = $BB,$78,$02,$C0,$02,$00,$00,$33
+
+!DefaultMapBBExit01 = $BA,$F8,$01,$30,$00,$03,$00,$64
+!DefaultMapBBExit02 = $BA,$18,$03,$40,$00,$03,$00,$64
+!DefaultMapBBExit03 = $BC,$78,$01,$90,$00,$00,$00,$33
+
+!DefaultMapBCExit01 = $BB,$78,$01,$00,$01,$03,$00,$33
+!DefaultMapBCExit02 = $BB,$A0,$00,$20,$01,$03,$00,$33
+!DefaultMapBCExit03 = $BB,$10,$01,$20,$01,$03,$00,$33
+!DefaultMapBCExit04 = $BB,$80,$02,$A0,$01,$03,$00,$33
+!DefaultMapBCExit05 = $BB,$F0,$00,$10,$02,$03,$00,$33
+!DefaultMapBCExit06 = $BD,$78,$01,$00,$02,$00,$00,$33
+
+!DefaultMapBDExit01 = $BC,$78,$01,$80,$02,$03,$00,$33
+!DefaultMapBDExit02 = $BE,$78,$00,$80,$00,$00,$00,$33
+!DefaultMapBDExit03 = $BE,$78,$02,$80,$00,$00,$00,$33
+
+!DefaultMapBEExit01 = $BD,$78,$00,$C0,$00,$03,$00,$33
+!DefaultMapBEExit02 = $BD,$78,$02,$C0,$00,$03,$00,$33
+!DefaultMapBEExit03 = $BD,$48,$02,$F0,$01,$03,$00,$33
+!DefaultMapBEExit04 = $BF,$F8,$00,$70,$01,$00,$00,$22
+
+!DefaultMapBFExit01 = $BE,$78,$01,$00,$02,$03,$00,$33
+
+!DefaultMapC3Exit01 = $C4,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMapC3Exit02 = $C8,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMapC3Exit03 = $C6,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMapC3Exit04 = $C7,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMapC3Exit05 = $C5,$78,$00,$C0,$00,$00,$00,$11
+!DefaultMapC3Exit06 = $C9,$78,$00,$C0,$00,$00,$00,$11
+
+!DefaultMapC4Exit01 = $C3,$90,$00,$B0,$00,$03,$00,$23
+
+!DefaultMapC5Exit01 = $C3,$B0,$00,$B0,$01,$03,$00,$23
+
+!DefaultMapC6Exit01 = $C3,$80,$01,$C0,$00,$03,$00,$23
+
+!DefaultMapC7Exit01 = $C3,$40,$00,$A0,$01,$03,$00,$23
+
+!DefaultMapC8Exit01 = $C3,$F0,$00,$C0,$00,$03,$00,$23
+
+!DefaultMapC9Exit01 = $C3,$A0,$01,$A0,$01,$03,$00,$23
+
+!DefaultMapCCExit01 = $CD,$80,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$11
+!DefaultMapCCExit02 = $CE,$70,$05,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$46
+!DefaultMapCCExit03 = $D0,$70,$04,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit04 = $D6,$70,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit05 = $D8,$80,$04,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit06 = $D4,$70,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$55
+!DefaultMapCCExit07 = $D2,$70,$00,$C0,$00,$80&!MaybeRemoveRespawnPoint,$00,$46
+
+!DefaultMapCDExit01 = $CC,$F8,$01,$20,$01,$03,$00,$44
+
+!DefaultMapCEExit01 = $CC,$70,$00,$90,$03,$03,$00,$44
+!DefaultMapCEExit02 = $CF,$70,$05,$C0,$00,$00,$00,$46
+
+!DefaultMapCFExit01 = $CE,$C0,$00,$90,$03,$03,$00,$46
+!DefaultMapCFExit02 = $DA,$78,$00,$C0,$00,$00,$00,$11
+
+!DefaultMapD0Exit01 = $CC,$D0,$00,$90,$03,$03,$00,$44
+!DefaultMapD0Exit02 = $D1,$80,$00,$C0,$00,$00,$00,$64
+
+!DefaultMapD1Exit01 = $D0,$90,$01,$90,$04,$00,$00,$55
+!DefaultMapD1Exit02 = $DA,$78,$01,$C0,$00,$00,$01,$12
+
+!DefaultMapD2Exit01 = $CC,$80,$03,$90,$03,$03,$00,$44
+!DefaultMapD2Exit02 = $D3,$70,$00,$C0,$00,$00,$00,$38
+
+!DefaultMapD3Exit01 = $D2,$C0,$00,$90,$03,$03,$00,$46
+!DefaultMapD3Exit02 = $DA,$78,$05,$C0,$00,$00,$05,$16
+
+!DefaultMapD4Exit01 = $CC,$20,$03,$90,$03,$03,$00,$44
+!DefaultMapD4Exit02 = $D5,$70,$00,$C0,$00,$00,$00,$55
+
+!DefaultMapD5Exit01 = $D4,$60,$00,$90,$04,$03,$00,$55
+!DefaultMapD5Exit02 = $DA,$78,$04,$C0,$00,$00,$04,$15
+
+!DefaultMapD6Exit01 = $CC,$30,$01,$90,$03,$03,$00,$44
+!DefaultMapD6Exit02 = $D7,$70,$00,$C0,$01,$00,$00,$64
+
+!DefaultMapD7Exit01 = $D6,$80,$00,$90,$04,$03,$00,$55
+!DefaultMapD7Exit02 = $DA,$78,$02,$C0,$00,$00,$02,$13
+
+!DefaultMapD8Exit01 = $CC,$C0,$02,$90,$03,$03,$00,$44
+!DefaultMapD8Exit02 = $D9,$80,$00,$C0,$00,$00,$00,$38
+
+!DefaultMapD9Exit01 = $D8,$60,$00,$90,$04,$03,$00,$55
+!DefaultMapD9Exit02 = $DB,$28,$00,$B8,$00,$07,$00,$28
+
+!DefaultMapDAExit01 = $CF,$90,$00,$90,$03,$03,$00,$46
+!DefaultMapDAExit02 = $D1,$90,$03,$70,$04,$03,$00,$64
+!DefaultMapDAExit03 = $D3,$60,$07,$20,$02,$03,$00,$38
+!DefaultMapDAExit04 = $D5,$70,$00,$90,$04,$03,$00,$55
+!DefaultMapDAExit05 = $D7,$70,$03,$90,$04,$03,$00,$64
+!DefaultMapDAExit06 = $DB,$80,$07,$90,$00,$03,$00,$28
+
+!DefaultMapDBExit01 = $D9,$C8,$07,$B8,$00,$06,$00,$38
+!DefaultMapDBExit02 = $DA,$78,$03,$C0,$00,$00,$03,$14
+
+!DefaultMapDEExit01 = $DF,$78,$00,$C0,$01,$00,$00,$28
+!DefaultMapDEExit02 = $E3,$98,$00,$90,$00,$03,$00,$13
+
+!DefaultMapDFExit01 = $DE,$78,$00,$80,$00,$03,$00,$11
+!DefaultMapDFExit02 = $E0,$98,$00,$90,$03,$83,$30,$48
+
+!DefaultMapE0Exit01 = $DF,$98,$00,$90,$00,$03,$00,$18
+!DefaultMapE0Exit02 = $E1,$78,$00,$90,$07,$03,$00,$81
+!DefaultMapE0Exit03 = $E1,$78,$00,$90,$00,$03,$00,$81
+!DefaultMapE0Exit04 = $E2,$D0,$00,$E0,$06,$03,$00,$84
+!DefaultMapE0Exit05 = $F2,$78,$00,$B0,$00,$03,$00,$11
+!DefaultMapE0Exit06 = $F3,$00,$01,$80,$00,$03,$00,$12
+!DefaultMapE0Exit07 = $F4,$78,$00,$C0,$01,$03,$00,$21
+!DefaultMapE0Exit08 = $F5,$80,$01,$C0,$02,$03,$20,$33
+
+!DefaultMapE1Exit01 = $E0,$D8,$00,$90,$02,$03,$20,$38
+!DefaultMapE1Exit02 = $E0,$D8,$00,$90,$01,$83,$10,$26
+!DefaultMapE1Exit03 = $E3,$58,$01,$90,$02,$03,$20,$34
+!DefaultMapE1Exit04 = $E3,$78,$00,$90,$01,$03,$10,$23
+
+!DefaultMapE2Exit01 = $E0,$58,$01,$90,$00,$03,$00,$16
+!DefaultMapE2Exit02 = $E3,$D8,$00,$90,$03,$83,$30,$44
+
+!DefaultMapE3Exit01 = $E2,$D0,$00,$E0,$00,$03,$00,$84
+!DefaultMapE3Exit02 = $E1,$78,$01,$90,$07,$03,$01,$82
+!DefaultMapE3Exit03 = $E1,$78,$01,$90,$00,$03,$01,$82
+!DefaultMapE3Exit04 = $DE,$78,$01,$C0,$00,$80,$01,$12
+!DefaultMapE3Exit05 = $F6,$00,$01,$90,$01,$03,$00,$22
+
+!DefaultMapE9Exit01 = $EA,$78,$00,$C0,$00,$00,$00,$11
+
+
+
+
+
+; Assign non-shuffled and default exits.
+
+; Exits within Castoth's map and to/on ship
+!Map29Exit02 ?= !DefaultMap29Exit02
+!Map29Exit03 ?= !DefaultMap29Exit03
+!Map29Exit04 ?= !DefaultMap29Exit04
+!Map2BExit01 ?= !DefaultMap2BExit01
+!Map2CExit01 ?= !DefaultMap2CExit01
+!Map2DExit01 ?= !DefaultMap2DExit01
+!Map2EExit01 ?= !DefaultMap2EExit01
+
+; Mu tunnel and top of Sea Palace are connected
+!Map5AExit05 ?= !DefaultMap5AExit05
+
+; Mu NW/W slider hole is always normal
+!Map5FExit04 ?= !DefaultMap5FExit04
+!Map62Exit05 ?= !DefaultMap62Exit05
+
+; Vamp arena entrance/exit is normal
+!Map67Exit02 ?= !DefaultMap67Exit02
+!Map67Exit03 ?= !DefaultMap67Exit03
+
+; Exits within Ishtar's puzzle are normal
+!Map75Exit01 ?= !DefaultMap75Exit01
+!Map75Exit02 ?= !DefaultMap75Exit02
+!Map75Exit03 ?= !DefaultMap75Exit03
+!Map75Exit04 ?= !DefaultMap75Exit04
+!Map75Exit05 ?= !DefaultMap75Exit05
+!Map75Exit06 ?= !DefaultMap75Exit06
+!Map75Exit07 ?= !DefaultMap75Exit07
+!Map75Exit08 ?= !DefaultMap75Exit08
+!Map75Exit09 ?= !DefaultMap75Exit09
+!Map75Exit0A ?= !DefaultMap75Exit0A
+!Map75Exit0B ?= !DefaultMap75Exit0B
+!Map75Exit0C ?= !DefaultMap75Exit0C
+!Map75Exit0D ?= !DefaultMap75Exit0D
+!Map75Exit0E ?= !DefaultMap75Exit0E
+!Map75Exit0F ?= !DefaultMap75Exit0F
+!Map75Exit10 ?= !DefaultMap75Exit10
+
+; Pyramid hieroglyph room to/from are normal
+!MapCCExit01 ?= !DefaultMapCCExit01
+!MapCDExit01 ?= !DefaultMapCDExit01
+
+; Olman's room and top of Babel are normal
+!MapDEExit02 ?= !DefaultMapDEExit02
+!MapE3Exit04 ?= !DefaultMapE3Exit04
+
+; Babel connections to boss rooms are normal
+!MapE0Exit05 ?= !DefaultMapE0Exit05
+!MapE0Exit06 ?= !DefaultMapE0Exit06
+!MapE0Exit07 ?= !DefaultMapE0Exit07
+!MapE0Exit08 ?= !DefaultMapE0Exit08
+!MapE3Exit05 ?= !DefaultMapE3Exit05
+
+; Babel connections from entrance and elevator are normal
+!MapE1Exit03 ?= !DefaultMapE1Exit03
+!MapE1Exit04 ?= !DefaultMapE1Exit04
+!MapE3Exit02 ?= !DefaultMapE3Exit02
+!MapE3Exit03 ?= !DefaultMapE3Exit03
+
+
+; Assign default exits.
+
+!MapShipExitString ?= !DefaultMapShipExitString
+!MapViperExitString ?= !DefaultMapViperExitString
+!MapVampEntranceString ?= !DefaultMapVampEntranceString
+!MapMQEntranceString ?= !DefaultMapMQEntranceString
+!MapMQReturnString ?= !DefaultMapMQReturnString
+!MapMQExitString ?= !DefaultMapMQExitString
+!MapPrisonWarpString ?= !DefaultMapPrisonWarpString
+!MapMoonWarpString ?= !DefaultMapMoonWarpString
+!MapGardenEntranceString ?= !DefaultMapGardenEntranceString
+!MapGardenExitString ?= !DefaultMapGardenExitString
+!MapMansionEntranceString ?= !DefaultMapMansionEntranceString
+!MapMansionExitString ?= !DefaultMapMansionExitString
+!MapMansionBossDefeatedWarpString ?= !DefaultMapMansionBossDefeatedWarpString
+!MapSolidArmReturnString ?= !DefaultMapSolidArmReturnString
+!MapBabelDaoWarpString ?= !DefaultMapBabelDaoWarpString
+
+!Map01Exit01 ?= !DefaultMap01Exit01
+!Map01Exit02 ?= !DefaultMap01Exit02
+!Map01Exit03 ?= !DefaultMap01Exit03
+!Map01Exit04 ?= !DefaultMap01Exit04
+!Map01Exit05 ?= !DefaultMap01Exit05
+!Map01Exit06 ?= !DefaultMap01Exit06
+!Map01Exit07 ?= !DefaultMap01Exit07
+!Map01Exit08 ?= !DefaultMap01Exit08
+!Map01Exit09 ?= !DefaultMap01Exit09
+!Map01Exit0A ?= !DefaultMap01Exit0A
+
+!Map02Exit01 ?= !DefaultMap02Exit01
+
+!Map03Exit01 ?= !DefaultMap03Exit01
+
+!Map04Exit01 ?= !DefaultMap04Exit01
+!Map04Exit02 ?= !DefaultMap04Exit02
+
+!Map05Exit01 ?= !DefaultMap05Exit01
+
+!Map06Exit01 ?= !DefaultMap06Exit01
+
+!Map07Exit01 ?= !DefaultMap07Exit01
+
+!Map08Exit01 ?= !DefaultMap08Exit01
+!Map08Exit02 ?= !DefaultMap08Exit02
+
+!Map0AExit01 ?= !DefaultMap0AExit01
+
+!Map0BExit01 ?= !DefaultMap0BExit01
+
+!Map0CExit01 ?= !DefaultMap0CExit01
+!Map0CExit02 ?= !DefaultMap0CExit02
+
+!Map0DExit01 ?= !DefaultMap0DExit01
+!Map0DExit02 ?= !DefaultMap0DExit02
+
+!Map0EExit01 ?= !DefaultMap0EExit01
+!Map0EExit02 ?= !DefaultMap0EExit02
+
+!Map0FExit01 ?= !DefaultMap0FExit01
+!Map0FExit02 ?= !DefaultMap0FExit02
+!Map0FExit03 ?= !DefaultMap0FExit03
+
+!Map10Exit01 ?= !DefaultMap10Exit01
+
+!Map11Exit01 ?= !DefaultMap11Exit01
+!Map11Exit02 ?= !DefaultMap11Exit02
+
+!Map12Exit01 ?= !DefaultMap12Exit01
+!Map12Exit02 ?= !DefaultMap12Exit02
+
+!Map13Exit01 ?= !DefaultMap13Exit01
+!Map13Exit02 ?= !DefaultMap13Exit02
+
+!Map15Exit01 ?= !DefaultMap15Exit01
+!Map15Exit02 ?= !DefaultMap15Exit02
+!Map15Exit03 ?= !DefaultMap15Exit03
+!Map15Exit04 ?= !DefaultMap15Exit04
+!Map15Exit05 ?= !DefaultMap15Exit05
+
+!Map16Exit01 ?= !DefaultMap16Exit01
+
+!Map17Exit01 ?= !DefaultMap17Exit01
+!Map17Exit02 ?= !DefaultMap17Exit02
+
+!Map18Exit01 ?= !DefaultMap18Exit01
+
+!Map19Exit01 ?= !DefaultMap19Exit01
+!Map19Exit02 ?= !DefaultMap19Exit02
+!Map19Exit03 ?= !DefaultMap19Exit03
+
+!Map1AExit01 ?= !DefaultMap1AExit01
+!Map1AExit02 ?= !DefaultMap1AExit02
+
+!Map1BExit01 ?= !DefaultMap1BExit01
+
+!Map1CExit01 ?= !DefaultMap1CExit01
+
+!Map1DExit01 ?= !DefaultMap1DExit01
+!Map1DExit02 ?= !DefaultMap1DExit02
+!Map1DExit03 ?= !DefaultMap1DExit03
+!Map1DExit04 ?= !DefaultMap1DExit04
+!Map1DExit05 ?= !DefaultMap1DExit05
+!Map1DExit06 ?= !DefaultMap1DExit06
+!Map1DExit07 ?= !DefaultMap1DExit07
+!Map1DExit08 ?= !DefaultMap1DExit08
+!Map1DExit09 ?= !DefaultMap1DExit09
+!Map1DExit0A ?= !DefaultMap1DExit0A
+!Map1DExit0B ?= !DefaultMap1DExit0B
+
+!Map1EExit01 ?= !DefaultMap1EExit01
+!Map1EExit02 ?= !DefaultMap1EExit02
+
+!Map1FExit01 ?= !DefaultMap1FExit01
+!Map1FExit02 ?= !DefaultMap1FExit02
+!Map1FExit03 ?= !DefaultMap1FExit03
+!Map1FExit04 ?= !DefaultMap1FExit04
+
+!Map20Exit01 ?= !DefaultMap20Exit01
+!Map20Exit02 ?= !DefaultMap20Exit02
+
+!Map21Exit01 ?= !DefaultMap21Exit01
+!Map21Exit02 ?= !DefaultMap21Exit02
+
+!Map22Exit01 ?= !DefaultMap22Exit01
+!Map22Exit02 ?= !DefaultMap22Exit02
+!Map22Exit03 ?= !DefaultMap22Exit03
+
+!Map23Exit01 ?= !DefaultMap23Exit01
+!Map23Exit02 ?= !DefaultMap23Exit02
+!Map23Exit03 ?= !DefaultMap23Exit03
+
+!Map24Exit01 ?= !DefaultMap24Exit01
+!Map24Exit02 ?= !DefaultMap24Exit02
+
+!Map25Exit01 ?= !DefaultMap25Exit01
+!Map25Exit02 ?= !DefaultMap25Exit02
+!Map25Exit03 ?= !DefaultMap25Exit03
+
+!Map26Exit01 ?= !DefaultMap26Exit01
+!Map26Exit02 ?= !DefaultMap26Exit02
+
+!Map27Exit01 ?= !DefaultMap27Exit01
+!Map27Exit02 ?= !DefaultMap27Exit02
+
+!Map28Exit01 ?= !DefaultMap28Exit01
+!Map28Exit02 ?= !DefaultMap28Exit02
+
+!Map29Exit01 ?= !DefaultMap29Exit01
+!Map29Exit02 ?= !DefaultMap29Exit02
+!Map29Exit03 ?= !DefaultMap29Exit03
+!Map29Exit04 ?= !DefaultMap29Exit04
+
+!Map2BExit01 ?= !DefaultMap2BExit01
+
+!Map2CExit01 ?= !DefaultMap2CExit01
+
+!Map2DExit01 ?= !DefaultMap2DExit01
+
+!Map2EExit01 ?= !DefaultMap2EExit01
+
+!Map30Exit01 ?= !DefaultMap30Exit01
+
+!Map31Exit01 ?= !DefaultMap31Exit01
+
+!Map32Exit01 ?= !DefaultMap32Exit01
+!Map32Exit02 ?= !DefaultMap32Exit02
+!Map32Exit03 ?= !DefaultMap32Exit03
+!Map32Exit04 ?= !DefaultMap32Exit04
+!Map32Exit05 ?= !DefaultMap32Exit05
+!Map32Exit06 ?= !DefaultMap32Exit06
+!Map32Exit07 ?= !DefaultMap32Exit07
+!Map32Exit08 ?= !DefaultMap32Exit08
+!Map32Exit09 ?= !DefaultMap32Exit09
+!Map32Exit0A ?= !DefaultMap32Exit0A
+!Map32Exit0B ?= !DefaultMap32Exit0B
+!Map32Exit0C ?= !DefaultMap32Exit0C
+!Map32Exit0D ?= !DefaultMap32Exit0D
+
+!Map33Exit01 ?= !DefaultMap33Exit01
+
+!Map34Exit01 ?= !DefaultMap34Exit01
+
+!Map35Exit01 ?= !DefaultMap35Exit01
+!Map35Exit02 ?= !DefaultMap35Exit02
+
+!Map36Exit01 ?= !DefaultMap36Exit01
+
+!Map37Exit01 ?= !DefaultMap37Exit01
+!Map37Exit02 ?= !DefaultMap37Exit02
+
+!Map38Exit01 ?= !DefaultMap38Exit01
+
+!Map39Exit01 ?= !DefaultMap39Exit01
+!Map39Exit02 ?= !DefaultMap39Exit02
+!Map39Exit03 ?= !DefaultMap39Exit03
+!Map39Exit04 ?= !DefaultMap39Exit04
+!Map39Exit05 ?= !DefaultMap39Exit05
+
+!Map3AExit01 ?= !DefaultMap3AExit01
+!Map3AExit02 ?= !DefaultMap3AExit02
+
+!Map3BExit01 ?= !DefaultMap3BExit01
+
+!Map3CExit01 ?= !DefaultMap3CExit01
+
+!Map3DExit01 ?= !DefaultMap3DExit01
+!Map3DExit02 ?= !DefaultMap3DExit02
+
+!Map3EExit01 ?= !DefaultMap3EExit01
+
+!Map3FExit01 ?= !DefaultMap3FExit01
+!Map3FExit02 ?= !DefaultMap3FExit02
+!Map3FExit03 ?= !DefaultMap3FExit03
+
+!Map40Exit01 ?= !DefaultMap40Exit01
+!Map40Exit02 ?= !DefaultMap40Exit02
+
+!Map41Exit01 ?= !DefaultMap41Exit01
+!Map41Exit02 ?= !DefaultMap41Exit02
+!Map41Exit03 ?= !DefaultMap41Exit03
+
+!Map42Exit01 ?= !DefaultMap42Exit01
+!Map42Exit02 ?= !DefaultMap42Exit02
+!Map42Exit03 ?= !DefaultMap42Exit03
+!Map42Exit04 ?= !DefaultMap42Exit04
+!Map42Exit05 ?= !DefaultMap42Exit05
+!Map42Exit06 ?= !DefaultMap42Exit06
+
+!Map43Exit01 ?= !DefaultMap43Exit01
+!Map43Exit02 ?= !DefaultMap43Exit02
+
+!Map44Exit01 ?= !DefaultMap44Exit01
+!Map44Exit02 ?= !DefaultMap44Exit02
+!Map44Exit03 ?= !DefaultMap44Exit03
+!Map44Exit04 ?= !DefaultMap44Exit04
+
+!Map45Exit01 ?= !DefaultMap45Exit01
+
+!Map46Exit01 ?= !DefaultMap46Exit01
+
+!Map47Exit01 ?= !DefaultMap47Exit01
+
+!Map4CExit01 ?= !DefaultMap4CExit01
+!Map4CExit02 ?= !DefaultMap4CExit02
+!Map4CExit03 ?= !DefaultMap4CExit03
+!Map4CExit04 ?= !DefaultMap4CExit04
+!Map4CExit05 ?= !DefaultMap4CExit05
+
+!Map4DExit01 ?= !DefaultMap4DExit01
+!Map4DExit02 ?= !DefaultMap4DExit02
+!Map4DExit03 ?= !DefaultMap4DExit03
+!Map4DExit04 ?= !DefaultMap4DExit04
+
+!Map4EExit01 ?= !DefaultMap4EExit01
+!Map4EExit02 ?= !DefaultMap4EExit02
+!Map4EExit03 ?= !DefaultMap4EExit03
+
+!Map4FExit01 ?= !DefaultMap4FExit01
+!Map4FExit02 ?= !DefaultMap4FExit02
+!Map4FExit03 ?= !DefaultMap4FExit03
+!Map4FExit04 ?= !DefaultMap4FExit04
+!Map4FExit05 ?= !DefaultMap4FExit05
+
+!Map50Exit01 ?= !DefaultMap50Exit01
+!Map50Exit02 ?= !DefaultMap50Exit02
+!Map50Exit03 ?= !DefaultMap50Exit03
+
+!Map51Exit01 ?= !DefaultMap51Exit01
+!Map51Exit02 ?= !DefaultMap51Exit02
+!Map51Exit03 ?= !DefaultMap51Exit03
+!Map51Exit04 ?= !DefaultMap51Exit04
+
+!Map52Exit01 ?= !DefaultMap52Exit01
+!Map52Exit02 ?= !DefaultMap52Exit02
+!Map52Exit03 ?= !DefaultMap52Exit03
+
+!Map53Exit01 ?= !DefaultMap53Exit01
+!Map53Exit02 ?= !DefaultMap53Exit02
+!Map53Exit03 ?= !DefaultMap53Exit03
+!Map53Exit04 ?= !DefaultMap53Exit04
+!Map53Exit05 ?= !DefaultMap53Exit05
+
+!Map54Exit01 ?= !DefaultMap54Exit01
+!Map54Exit02 ?= !DefaultMap54Exit02
+!Map54Exit03 ?= !DefaultMap54Exit03
+!Map54Exit04 ?= !DefaultMap54Exit04
+
+!Map55Exit01 ?= !DefaultMap55Exit01
+
+!Map56Exit01 ?= !DefaultMap56Exit01
+
+!Map5AExit01 ?= !DefaultMap5AExit01
+!Map5AExit02 ?= !DefaultMap5AExit02
+!Map5AExit03 ?= !DefaultMap5AExit03
+!Map5AExit04 ?= !DefaultMap5AExit04
+!Map5AExit05 ?= !DefaultMap5AExit05
+
+!Map5BExit01 ?= !DefaultMap5BExit01
+!Map5BExit02 ?= !DefaultMap5BExit02
+!Map5BExit03 ?= !DefaultMap5BExit03
+!Map5BExit04 ?= !DefaultMap5BExit04
+
+!Map5CExit01 ?= !DefaultMap5CExit01
+!Map5CExit02 ?= !DefaultMap5CExit02
+!Map5CExit03 ?= !DefaultMap5CExit03
+
+!Map5DExit01 ?= !DefaultMap5DExit01
+
+!Map5EExit01 ?= !DefaultMap5EExit01
+!Map5EExit02 ?= !DefaultMap5EExit02
+!Map5EExit03 ?= !DefaultMap5EExit03
+
+!Map5FExit01 ?= !DefaultMap5FExit01
+!Map5FExit02 ?= !DefaultMap5FExit02
+!Map5FExit03 ?= !DefaultMap5FExit03
+!Map5FExit04 ?= !DefaultMap5FExit04
+!Map5FExit05 ?= !DefaultMap5FExit05
+
+!Map60Exit01 ?= !DefaultMap60Exit01
+!Map60Exit02 ?= !DefaultMap60Exit02
+!Map60Exit03 ?= !DefaultMap60Exit03
+!Map60Exit04 ?= !DefaultMap60Exit04
+
+!Map61Exit01 ?= !DefaultMap61Exit01
+!Map61Exit02 ?= !DefaultMap61Exit02
+!Map61Exit03 ?= !DefaultMap61Exit03
+!Map61Exit04 ?= !DefaultMap61Exit04
+!Map61Exit05 ?= !DefaultMap61Exit05
+!Map61Exit06 ?= !DefaultMap61Exit06
+!Map61Exit07 ?= !DefaultMap61Exit07
+
+!Map62Exit01 ?= !DefaultMap62Exit01
+!Map62Exit02 ?= !DefaultMap62Exit02
+!Map62Exit03 ?= !DefaultMap62Exit03
+!Map62Exit04 ?= !DefaultMap62Exit04
+!Map62Exit05 ?= !DefaultMap62Exit05
+!Map62Exit06 ?= !DefaultMap62Exit06
+!Map62Exit07 ?= !DefaultMap62Exit07
+!Map62Exit08 ?= !DefaultMap62Exit08
+
+!Map63Exit01 ?= !DefaultMap63Exit01
+!Map63Exit02 ?= !DefaultMap63Exit02
+
+!Map64Exit01 ?= !DefaultMap64Exit01
+!Map64Exit02 ?= !DefaultMap64Exit02
+!Map64Exit03 ?= !DefaultMap64Exit03
+!Map64Exit04 ?= !DefaultMap64Exit04
+!Map64Exit05 ?= !DefaultMap64Exit05
+!Map64Exit06 ?= !DefaultMap64Exit06
+
+!Map65Exit01 ?= !DefaultMap65Exit01
+!Map65Exit02 ?= !DefaultMap65Exit02
+!Map65Exit03 ?= !DefaultMap65Exit03
+!Map65Exit04 ?= !DefaultMap65Exit04
+
+; Map66Exit01 is defined with Map67.
+!Map66Exit02 ?= !DefaultMap66Exit02
+!Map66Exit03 ?= !DefaultMap66Exit03
+
+!Map67Exit01 ?= !DefaultMap67Exit01
+!Map66Exit01 ?= !Map67Exit01    ; The south exit from Rama's big room should mimic the south Vamp exit.
+!Map67Exit02 ?= !DefaultMap67Exit02
+!Map67Exit03 ?= !DefaultMap67Exit03
+
+!Map69Exit01 ?= !DefaultMap69Exit01
+!Map69Exit02 ?= !DefaultMap69Exit02
+
+!Map6AExit01 ?= !DefaultMap6AExit01
+
+!Map6BExit01 ?= !DefaultMap6BExit01
+!Map6BExit02 ?= !DefaultMap6BExit02
+!Map6BExit03 ?= !DefaultMap6BExit03
+!Map6BExit04 ?= !DefaultMap6BExit04
+!Map6BExit05 ?= !DefaultMap6BExit05
+!Map6BExit06 ?= !DefaultMap6BExit06
+
+!Map6CExit01 ?= !DefaultMap6CExit01
+!Map6CExit02 ?= !DefaultMap6CExit02
+!Map6CExit03 ?= !DefaultMap6CExit03
+!Map6CExit04 ?= !DefaultMap6CExit04
+!Map6CExit05 ?= !DefaultMap6CExit05
+
+!Map6DExit01 ?= !DefaultMap6DExit01
+!Map6DExit02 ?= !DefaultMap6DExit02
+
+!Map6EExit01 ?= !DefaultMap6EExit01
+!Map6EExit02 ?= !DefaultMap6EExit02
+
+!Map6FExit01 ?= !DefaultMap6FExit01
+!Map6FExit02 ?= !DefaultMap6FExit02
+
+!Map70Exit01 ?= !DefaultMap70Exit01
+!Map70Exit02 ?= !DefaultMap70Exit02
+!Map70Exit03 ?= !DefaultMap70Exit03
+!Map70Exit04 ?= !DefaultMap70Exit04
+!Map70Exit05 ?= !DefaultMap70Exit05
+!Map70Exit06 ?= !DefaultMap70Exit06
+
+!Map71Exit01 ?= !DefaultMap71Exit01
+!Map71Exit02 ?= !DefaultMap71Exit02
+
+!Map72Exit01 ?= !DefaultMap72Exit01
+!Map72Exit02 ?= !DefaultMap72Exit02
+
+!Map73Exit01 ?= !DefaultMap73Exit01
+!Map73Exit02 ?= !DefaultMap73Exit02
+!Map73Exit03 ?= !DefaultMap73Exit03
+!Map73Exit04 ?= !DefaultMap73Exit04
+!Map73Exit05 ?= !DefaultMap73Exit05
+!Map73Exit06 ?= !DefaultMap73Exit06
+
+!Map74Exit01 ?= !DefaultMap74Exit01
+!Map74Exit02 ?= !DefaultMap74Exit02
+!Map74Exit03 ?= !DefaultMap74Exit03
+!Map74Exit04 ?= !DefaultMap74Exit04
+
+!Map75Exit01 ?= !DefaultMap75Exit01
+!Map75Exit02 ?= !DefaultMap75Exit02
+!Map75Exit03 ?= !DefaultMap75Exit03
+!Map75Exit04 ?= !DefaultMap75Exit04
+!Map75Exit05 ?= !DefaultMap75Exit05
+!Map75Exit06 ?= !DefaultMap75Exit06
+!Map75Exit07 ?= !DefaultMap75Exit07
+!Map75Exit08 ?= !DefaultMap75Exit08
+!Map75Exit09 ?= !DefaultMap75Exit09
+!Map75Exit0A ?= !DefaultMap75Exit0A
+!Map75Exit0B ?= !DefaultMap75Exit0B
+!Map75Exit0C ?= !DefaultMap75Exit0C
+!Map75Exit0D ?= !DefaultMap75Exit0D
+!Map75Exit0E ?= !DefaultMap75Exit0E
+!Map75Exit0F ?= !DefaultMap75Exit0F
+!Map75Exit10 ?= !DefaultMap75Exit10
+!Map75Exit11 ?= !DefaultMap75Exit11
+
+!Map78Exit01 ?= !DefaultMap78Exit01
+!Map78Exit02 ?= !DefaultMap78Exit02
+!Map78Exit03 ?= !DefaultMap78Exit03
+!Map78Exit04 ?= !DefaultMap78Exit04
+!Map78Exit05 ?= !DefaultMap78Exit05
+!Map78Exit06 ?= !DefaultMap78Exit06
+
+!Map79Exit01 ?= !DefaultMap79Exit01
+
+!Map7AExit01 ?= !DefaultMap7AExit01
+
+!Map7BExit01 ?= !DefaultMap7BExit01
+
+!Map7CExit01 ?= !DefaultMap7CExit01
+
+!Map7DExit01 ?= !DefaultMap7DExit01
+
+!Map7EExit01 ?= !DefaultMap7EExit01
+
+!Map82Exit01 ?= !DefaultMap82Exit01
+
+!Map83Exit01 ?= !DefaultMap83Exit01
+!Map83Exit02 ?= !DefaultMap83Exit02
+
+!Map85Exit01 ?= !DefaultMap85Exit01
+!Map85Exit02 ?= !DefaultMap85Exit02
+
+!Map86Exit01 ?= !DefaultMap86Exit01
+!Map86Exit02 ?= !DefaultMap86Exit02
+
+!Map87Exit01 ?= !DefaultMap87Exit01
+!Map87Exit02 ?= !DefaultMap87Exit02
+
+!Map88Exit01 ?= !DefaultMap88Exit01
+!Map88Exit02 ?= !DefaultMap88Exit02
+
+!Map8AExit01 ?= !DefaultMap8AExit01
+!Map8AExit02 ?= !DefaultMap8AExit02
+
+!Map8BExit01 ?= !DefaultMap8BExit01
+
+!Map91Exit01 ?= !DefaultMap91Exit01
+!Map91Exit02 ?= !DefaultMap91Exit02
+!Map91Exit03 ?= !DefaultMap91Exit03
+!Map91Exit04 ?= !DefaultMap91Exit04
+!Map91Exit05 ?= !DefaultMap91Exit05
+!Map91Exit06 ?= !DefaultMap91Exit06
+!Map91Exit07 ?= !DefaultMap91Exit07
+!Map91Exit08 ?= !DefaultMap91Exit08
+!Map91Exit09 ?= !DefaultMap91Exit09
+!Map91Exit0A ?= !DefaultMap91Exit0A
+!Map91Exit0B ?= !DefaultMap91Exit0B
+!Map91Exit0C ?= !DefaultMap91Exit0C
+!Map91Exit0D ?= !DefaultMap91Exit0D
+
+!Map92Exit01 ?= !DefaultMap92Exit01
+
+!Map93Exit01 ?= !DefaultMap93Exit01
+
+!Map94Exit01 ?= !DefaultMap94Exit01
+
+!Map95Exit01 ?= !DefaultMap95Exit01
+!Map95Exit02 ?= !DefaultMap95Exit02
+!Map95Exit03 ?= !DefaultMap95Exit03
+
+!Map96Exit01 ?= !DefaultMap96Exit01
+
+!Map97Exit01 ?= !DefaultMap97Exit01
+
+!Map98Exit01 ?= !DefaultMap98Exit01
+
+!Map99Exit01 ?= !DefaultMap99Exit01
+
+!Map9AExit01 ?= !DefaultMap9AExit01
+
+!Map9BExit01 ?= !DefaultMap9BExit01
+
+!Map9CExit01 ?= !DefaultMap9CExit01
+
+!Map9DExit01 ?= !DefaultMap9DExit01
+
+!MapA0Exit01 ?= !DefaultMapA0Exit01
+
+!MapA1Exit01 ?= !DefaultMapA1Exit01
+!MapA1Exit02 ?= !DefaultMapA1Exit02
+!MapA1Exit03 ?= !DefaultMapA1Exit03
+
+!MapA2Exit01 ?= !DefaultMapA2Exit01
+!MapA2Exit02 ?= !DefaultMapA2Exit02
+!MapA2Exit03 ?= !DefaultMapA2Exit03
+!MapA2Exit04 ?= !DefaultMapA2Exit04
+!MapA2Exit05 ?= !DefaultMapA2Exit05
+!MapA2Exit06 ?= !DefaultMapA2Exit06
+
+!MapA3Exit01 ?= !DefaultMapA3Exit01
+!MapA3Exit02 ?= !DefaultMapA3Exit02
+
+!MapA4Exit01 ?= !DefaultMapA4Exit01
+
+!MapA5Exit01 ?= !DefaultMapA5Exit01
+!MapA5Exit02 ?= !DefaultMapA5Exit02
+!MapA5Exit03 ?= !DefaultMapA5Exit03
+!MapA5Exit04 ?= !DefaultMapA5Exit04
+
+!MapA6Exit01 ?= !DefaultMapA6Exit01
+
+!MapA7Exit01 ?= !DefaultMapA7Exit01
+
+!MapA8Exit01 ?= !DefaultMapA8Exit01
+!MapA8Exit02 ?= !DefaultMapA8Exit02
+
+!MapA9Exit01 ?= !DefaultMapA9Exit01
+
+!MapACExit01 ?= !DefaultMapACExit01
+!MapACExit02 ?= !DefaultMapACExit02
+
+!MapADExit01 ?= !DefaultMapADExit01
+
+!MapAEExit01 ?= !DefaultMapAEExit01
+
+!MapB0Exit01 ?= !DefaultMapB0Exit01
+
+!MapB1Exit01 ?= !DefaultMapB1Exit01
+!MapB1Exit02 ?= !DefaultMapB1Exit02
+!MapB1Exit03 ?= !DefaultMapB1Exit03
+!MapB1Exit04 ?= !DefaultMapB1Exit04
+
+!MapB2Exit01 ?= !DefaultMapB2Exit01
+!MapB2Exit02 ?= !DefaultMapB2Exit02
+
+!MapB3Exit01 ?= !DefaultMapB3Exit01
+!MapB3Exit02 ?= !DefaultMapB3Exit02
+!MapB3Exit03 ?= !DefaultMapB3Exit03
+!MapB3Exit04 ?= !DefaultMapB3Exit04
+
+!MapB4Exit01 ?= !DefaultMapB4Exit01
+
+!MapB5Exit01 ?= !DefaultMapB5Exit01
+!MapB5Exit02 ?= !DefaultMapB5Exit02
+
+!MapB6Exit01 ?= !DefaultMapB6Exit01
+!MapB6Exit02 ?= !DefaultMapB6Exit02
+
+!MapB7Exit01 ?= !DefaultMapB7Exit01
+!MapB7Exit02 ?= !DefaultMapB7Exit02
+!MapB7Exit03 ?= !DefaultMapB7Exit03
+!MapB7Exit04 ?= !DefaultMapB7Exit04
+!MapB7Exit05 ?= !DefaultMapB7Exit05
+
+!MapB8Exit01 ?= !DefaultMapB8Exit01
+
+!MapB9Exit01 ?= !DefaultMapB9Exit01
+!MapB9Exit02 ?= !DefaultMapB9Exit02
+
+!MapBAExit01 ?= !DefaultMapBAExit01
+!MapBAExit02 ?= !DefaultMapBAExit02
+!MapBAExit03 ?= !DefaultMapBAExit03
+
+!MapBBExit01 ?= !DefaultMapBBExit01
+!MapBBExit02 ?= !DefaultMapBBExit02
+!MapBBExit03 ?= !DefaultMapBBExit03
+
+!MapBCExit01 ?= !DefaultMapBCExit01
+!MapBCExit02 ?= !DefaultMapBCExit02
+!MapBCExit03 ?= !DefaultMapBCExit03
+!MapBCExit04 ?= !DefaultMapBCExit04
+!MapBCExit05 ?= !DefaultMapBCExit05
+!MapBCExit06 ?= !DefaultMapBCExit06
+
+!MapBDExit01 ?= !DefaultMapBDExit01
+!MapBDExit02 ?= !DefaultMapBDExit02
+!MapBDExit03 ?= !DefaultMapBDExit03
+
+!MapBEExit01 ?= !DefaultMapBEExit01
+!MapBEExit02 ?= !DefaultMapBEExit02
+!MapBEExit03 ?= !DefaultMapBEExit03
+!MapBEExit04 ?= !DefaultMapBEExit04
+
+!MapBFExit01 ?= !DefaultMapBFExit01
+
+!MapC3Exit01 ?= !DefaultMapC3Exit01
+!MapC3Exit02 ?= !DefaultMapC3Exit02
+!MapC3Exit03 ?= !DefaultMapC3Exit03
+!MapC3Exit04 ?= !DefaultMapC3Exit04
+!MapC3Exit05 ?= !DefaultMapC3Exit05
+!MapC3Exit06 ?= !DefaultMapC3Exit06
+
+!MapC4Exit01 ?= !DefaultMapC4Exit01
+
+!MapC5Exit01 ?= !DefaultMapC5Exit01
+
+!MapC6Exit01 ?= !DefaultMapC6Exit01
+
+!MapC7Exit01 ?= !DefaultMapC7Exit01
+
+!MapC8Exit01 ?= !DefaultMapC8Exit01
+
+!MapC9Exit01 ?= !DefaultMapC9Exit01
+
+!MapCCExit01 ?= !DefaultMapCCExit01
+!MapCCExit02 ?= !DefaultMapCCExit02
+!MapCCExit03 ?= !DefaultMapCCExit03
+!MapCCExit04 ?= !DefaultMapCCExit04
+!MapCCExit05 ?= !DefaultMapCCExit05
+!MapCCExit06 ?= !DefaultMapCCExit06
+!MapCCExit07 ?= !DefaultMapCCExit07
+
+!MapCDExit01 ?= !DefaultMapCDExit01
+
+!MapCEExit01 ?= !DefaultMapCEExit01
+!MapCEExit02 ?= !DefaultMapCEExit02
+
+!MapCFExit01 ?= !DefaultMapCFExit01
+!MapCFExit02 ?= !DefaultMapCFExit02
+
+!MapD0Exit01 ?= !DefaultMapD0Exit01
+!MapD0Exit02 ?= !DefaultMapD0Exit02
+
+!MapD1Exit01 ?= !DefaultMapD1Exit01
+!MapD1Exit02 ?= !DefaultMapD1Exit02
+
+!MapD2Exit01 ?= !DefaultMapD2Exit01
+!MapD2Exit02 ?= !DefaultMapD2Exit02
+
+!MapD3Exit01 ?= !DefaultMapD3Exit01
+!MapD3Exit02 ?= !DefaultMapD3Exit02
+
+!MapD4Exit01 ?= !DefaultMapD4Exit01
+!MapD4Exit02 ?= !DefaultMapD4Exit02
+
+!MapD5Exit01 ?= !DefaultMapD5Exit01
+!MapD5Exit02 ?= !DefaultMapD5Exit02
+
+!MapD6Exit01 ?= !DefaultMapD6Exit01
+!MapD6Exit02 ?= !DefaultMapD6Exit02
+
+!MapD7Exit01 ?= !DefaultMapD7Exit01
+!MapD7Exit02 ?= !DefaultMapD7Exit02
+
+!MapD8Exit01 ?= !DefaultMapD8Exit01
+!MapD8Exit02 ?= !DefaultMapD8Exit02
+
+!MapD9Exit01 ?= !DefaultMapD9Exit01
+!MapD9Exit02 ?= !DefaultMapD9Exit02
+
+!MapDAExit01 ?= !DefaultMapDAExit01
+!MapDAExit02 ?= !DefaultMapDAExit02
+!MapDAExit03 ?= !DefaultMapDAExit03
+!MapDAExit04 ?= !DefaultMapDAExit04
+!MapDAExit05 ?= !DefaultMapDAExit05
+!MapDAExit06 ?= !DefaultMapDAExit06
+
+!MapDBExit01 ?= !DefaultMapDBExit01
+!MapDBExit02 ?= !DefaultMapDBExit02
+
+!MapDEExit01 ?= !DefaultMapDEExit01
+!MapDEExit02 ?= !DefaultMapDEExit02
+
+!MapDFExit01 ?= !DefaultMapDFExit01
+!MapDFExit02 ?= !DefaultMapDFExit02
+
+!MapE0Exit01 ?= !DefaultMapE0Exit01
+!MapE0Exit02 ?= !DefaultMapE0Exit02
+!MapE0Exit03 ?= !DefaultMapE0Exit03
+!MapE0Exit04 ?= !DefaultMapE0Exit04
+!MapE0Exit05 ?= !DefaultMapE0Exit05
+!MapE0Exit06 ?= !DefaultMapE0Exit06
+!MapE0Exit07 ?= !DefaultMapE0Exit07
+!MapE0Exit08 ?= !DefaultMapE0Exit08
+
+!MapE1Exit01 ?= !DefaultMapE1Exit01
+!MapE1Exit02 ?= !DefaultMapE1Exit02
+!MapE1Exit03 ?= !DefaultMapE1Exit03
+!MapE1Exit04 ?= !DefaultMapE1Exit04
+
+!MapE2Exit01 ?= !DefaultMapE2Exit01
+!MapE2Exit02 ?= !DefaultMapE2Exit02
+
+!MapE3Exit01 ?= !DefaultMapE3Exit01
+!MapE3Exit02 ?= !DefaultMapE3Exit02
+!MapE3Exit03 ?= !DefaultMapE3Exit03
+!MapE3Exit04 ?= !DefaultMapE3Exit04
+!MapE3Exit05 ?= !DefaultMapE3Exit05
+
+!MapE9Exit01 ?= !DefaultMapE9Exit01

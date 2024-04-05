@@ -1,0 +1,2066 @@
+arch 65816
+hirom
+
+
+if 0
+EAG_H:
+db $00,$00,$00
+EAGInit:
+lda #$8011 : tsb $12
+lda $14 : sec : sbc #$0008 : sta $14
+lda $16                      ; Set InitialY to be 1 full screen below.
+clc : adc #$0100 : sta $16   ;   We'll scroll onto the screen later.
+stz $06BE : stz $06C2 : stz $06C0 : stz $06C4 ; Zero camera position.
+; Palette event -- Colors of the End
+cop #$9C : dl EAGBackgroundColors : dw $2300
+; Palette event -- Bubbles turn freaky colors.
+cop #$9C : dl EAGSpriteColors : dw $2300
+; Floor Beam Spawner, animation broken.
+;cop #$9C : db $47,$B7,$89,$00,$23
+; Apocalypse Brain. Scrolls us onto the screen and then hovers us.
+cop #$A1 : dl EAGScrollOn : dw $2000
+; Bits on the left and right sides.
+; When they die, they inform the Core by LSR'ing its $24.
+cop #$A4 : dl EAGBitP1_InitL : db $C8,$33,$11,$01
+cop #$A4 : dl EAGBitP1_InitR : db $38,$33,$11,$01
+; Launchers.
+cop #$A4 : dl EAGLauncher_InitL : db $BF,$0B,$01,$03
+cop #$A4 : dl EAGLauncher_InitR : db $41,$0B,$01,$03
+    ; Event order is now Brain->Core->LaunchR->LaunchL->BitR->BitL->Harass->Broken->Colors
+stz $24                      ; Zero internal variable.
+cop #$80 : db !AG_Spr_Core_P1_Idle   ; Sprite $00,
+cop #$89                     ;  animate until finished.
+.Sleep:
+cop #$C1                     ; Event pointer here.
+lda $24                      ; Sleep until $24 is nonzero.
+bne +$01                     ;<[$89AAE3] 
+ rtl                          
+endif
+
+; Apocalypse Core after the Brain sets $24 > 0
+;   (indicating that we've successfully scrolled onto the screen).
+; Main P1 routine is $ab02 - $ab6a.
+EAGCoreP1:
+cop #$CC : db $F4
+;lda #$0100 : trb $10   ; "Vanilla" enables collision with player,
+lda #$2310 : tsb $10    ; but I need to reduce processing costs.
+jsl LR_ClearPlayerImmuneAndFrozen
+;lda #$0003                   
+;sta $0000               ; Loop 4 times.
+;-:
+;ldy $06                 ; In "Vanilla" the Core clears flag #$0100
+;lda $0010,y             ;   in the Launchers and Bits
+;and #$FEFF              ;   to make them collide with the Player.
+;sta $0010,y             ; I'm disabling that, to save
+;lda $0006,y             ;   badly needed processing time.
+;tay                     
+;dec $0000                    
+;bpl -    ;(-$12)           ;<[$89AAF0] ; Loop end.
+-:
+ldy $06                    ; Loop start. Main P1 routine.
+lda.w #EAGLauncher_P1Fire  ; Set the Launcher
+ sta $0000,y                ;  event pointers to $89b58e.
+lda $0006,y : tay
+lda.w #EAGLauncher_P1Fire : sta $0000,y
+lda #$0130 : sta $7F0000,x ; And start a timer for #$021C frames.
+cop #$C1
+.Main:
+lda $24                    ; If something makes $24 zero again,
+ beq EAGCoreP2              ;<[$89AB6C] ; the Core branches to $ab6c.
+lda $7F0000,x              ; Otherwise it keeps counting down.
+ dec a : sta $7F0000,x      ; If the Core's timer hasn't run out,
+bmi +$01                     ;<[$89AB2D] ; the Core does nothing else.
+ rtl                         ; But if the Core's timer does run out...
+ldy $06                      ; (LauncherR)
+lda $0006,y : tay            ; (LauncherL)
+lda $0006,y : tay            ; (BitR)
+lda $0026,y                  ; If BitR.$26 == 0,
+bne +$06                     ;<[$89AB42] 
+ lda.w #EAGBitP1_RAttack     ; then
+ sta $0000,y                 ;   set its pointer to $89b37a.
+lda $0006,y : tay            ; (BitL)
+lda $0026,y                  ; If BitL.$26 == 0,
+bne +$06                     ;<[$89AB51] 
+ lda.w #EAGBitP1_LAttack      ; then
+ sta $0000,y                  ;   set its pointer to $89b31e.
+lda #$0070 : sta $7F0000,x ; Start a new timer for #$B4 frames.
+;cop #$C1
+lda.w #.Listen : sta $00 ;:lda #$0089 : sta $02   ; cheaper than cop #$C1...
+.Listen:
+lda $24                      ; Continue listening for $24 going back to 0,
+beq EAGCoreP2                ;<[$89AB6C] ; and branch to $ab6c if it does.
+lda $7F0000,x : dec a : sta $7F0000,x ; Otherwise just count down the timer
+bmi -   ;+$01             ;<[$89AB6A] ; and do nothing else.
+rtl                       ; When the timer does run out, go back
+;bra -  ;(-$6A)           ;<[$89AB02] ; to set the Launcher pointers again.
+; End P1 routine.
+
+; Apocalypse Core P2.
+; The Core branches here after the Bits die, indicated by $24
+;   being set to 0.
+EAGCoreP2:
+cop #$57 : dl .OnDeath
+lda #$AD44 : jsr SR_InitVitals
+cop #$A5             ; [Child: $89B9BE] ; Palette shift.
+  dl AGIntroPaletteShifter : db $00,$00,$00,$20
+lda #$2000 : trb $10  ; Become visible.
+cop #$A5 : dl EAGCoreP2_Sweeper : db $00,$00 : dw $2310
+cop #$8D : db !AG_Spr_Core_P2_Dmg
+cop #$89
+lda.w #EAGLauncher_P2FireAll : sta ($06)   ; Start Launcher rain of fire sequence
+cop #$80 : db !AG_Spr_Core_P2_Atk1
+cop #$89
+.Main:
+cop #$58 : dw EAGCoreP2_OnHit
+cop #$80 : db !AG_Spr_Core_P2_Atk1
+cop #$89
+cop #$A5 : dl EAGNukeFactory : db $00,$00 : dw $2310
+cop #$80 : db !AG_Spr_Core_P2_Atk2
+cop #$89
+cop #$80 : db !AG_Spr_Core_P2_Atk3
+cop #$89
+lda #$0110 : sta $7F0000,x
+cop #$C2
+lda $7F0000,x : dec : sta $7F0000,x
+beq ++
+; cmp #$0060 : bne +
+;  lda #$0010 : tsb $10         ; Become invulnerable.
+; +:
+ rtl
+++:
+lda #$23F0 : trb $10         ; Become vulnerable
+jsl EDarkGaia_SpawnLightning
+;ldy $06                      ; (LauncherR)
+;lda.w #EAGLauncher_P2FireAll
+;sta ($06)   ;$0000,y         ; Set LauncherR pointer to $89B5AD, Spawn Bubble.
+;lda $0006,y                  ; (LauncherL)
+;tay                          
+;lda.w #EAGLauncher_P2Fire
+;sta $0000,y                  ; Set LauncherL pointer to $89B5AD, Spawn Bubble.
+;ldy $06                      ; (LauncherR)
+;lda $0006,y                  ; (LauncherL)
+;tay                  ; [Already had LauncherL in .Y ...]
+;lda $0006,y                  ; (BitR)
+;tay                          
+;lda.w #EAGBitP2_DoFire       
+;sta $0000,y                  ; Set BitR pointer to $89B3EA, Rain of Fire sequence.
+;lda $0006,y                  ; (BitL)
+;tay                          
+;lda.w #EAGBitP2_DoFire       
+;sta $0000,y                  ; Set BitL pointer to $89B3EA, Rain of Fire sequence.
+lda #$00FF : sta $7F0000,x
+cop #$C2
+lda $7F0000,x : dec : sta $7F0000,x
+ beq +$01 : rtl
+bra .Main ;(-$78)            ;<[$89AB76] ; New palette shift and vulnerability loop.
+; End P2 main loop.
+
+; Apocalypse Core P2, damage pointer during the main loop.
+; If the Core P2 is hit in the animation sequence $01-$02-$19,
+;   then $03 is animated and the sequence resets.
+; How/whether this works in practice depends entirely on how long
+;   the animation sequences were meant to be...
+.OnHit:
+;lda #$0310 : tsb $10
+cop #$CA : db $03
+ jsl EDarkGaia_SpawnLightning
+ lda #$0E00 : tsb $0E ; Quick palette switch...
+ cop #$80 : db !AG_Spr_Core_P2_Dmg   ; Animate,
+ cop #$89                     ;   then return to top
+ cop #$DA : db $0B
+ cop #$80 : db !AG_Spr_Core_P2_Dmg
+ cop #$89
+ lda #$0E00 : trb $0E ; Quick palette unswitch...
+cop #$CB
+jsl EDarkGaia_SpawnLightning
+bra .Main ;(-$6A)             ;<[$89AB8B] ; of animation sequence.
+; End P2 damage pointer.
+
+; Apocalypse Core P2, death pointer.
+.OnDeath:
+lda.w #EAGLauncher_SleepBoth : sta ($06)  ; End Launcher attacks
+lda #$0E00 : trb $0E ; Quick palette unswitch...
+cop #$3C : dl TFade012WhiteToNormal
+cop #$80 : db !AG_Spr_Core_P2_Death
+jsl LR_SetPlayerImmuneAndFrozen
+cop #$89                     
+cop #$CC : db $F5            ; Set flag $F5, I guess.
+cop #$CC : db $06
+lda.w #EAGScrollOff : sta ($04)   ;$0000,y ; Set Brain's pointer to $89B6A6, downward scroll.
+lda #$0001 : sta $26         ; Set $26 to a nonzero value,
+cop #$C2                     ;   then set the event pointer here.
+jsl LR_SetPlayerImmuneAndFrozen
+lda $26                      ; The Brain will inform us that the scroll is complete
+beq +$01                     ;<[$89AC17] ; by setting $26 to 0.
+ rtl                          ;   Until then, we sleep.
+cop #$A5                     ; [Child: $89AC55] ; Create the Final Core.
+  dl EAGCoreP3 : db $00,$00,$12,$00
+jsl LR_ClearPlayerImmuneAndFrozen
+cop #$E0                     ; Die and kill Launchers, Bits, Harasser, and Palettes.
+; End Apocalypse Core P2 death pointer.
+} ; End of Apocalypse Core P1 and P2 code. Only the Final Core remains.
+
+EAGCoreP2_Sweeper:
+stz $26
+cop #$C2
+bit $09FF : bvs .Die
+sep #$20
+inc $26
+ldx $26
+ lda $C455,x
+  bpl +
+   eor #$FF : inc a : lsr : eor #$FF : inc a
+   bra ++
+  +:
+   lsr
+  ++:
+  adc #$80
+  ldx $24
+   sta $0014,x
+.Done:
+rep #$20
+rtl
+.Die:
+cop #$E0
+
+; Final Core.
+EAGCoreP3:
+stz $00F0
+stz $00F2        ; Track number of Minis.
+cop #$57                     ;<[Delayed: $89B1D5] Child ; Death pointer.
+  dl EAGCoreP3_OnDeath
+lda #$AD50 : jsr SR_InitVitals
+cop #$B6 : db $30            ; Set above all BGs. Then create Left and Right
+;cop #$A4                     ; [Child: $89ADB3] ; Helpers. (No sprites,
+;  dl EAGCoreP3_LeftHelperInit : db $00,$F8,$00,$23
+;cop #$A4                     ; [Child: $89ADEB] ;  so no mirrors.)
+;  dl EAGCoreP3_RightHelperInit : db $00,$F8,$00,$23
+cop #$A4 : dl EAGCoreP3_LeftGun : db $B0,$F8,$02,$02 ; !!! different from vanilla...
+cop #$A4 : dl EAGCoreP3_RightGun : db $50,$F8,$02,$02 ; !!! different from vanilla...
+cop #$80                     ; Sprite $1E and update.
+  db !AG_Spr_FCore_Move
+cop #$89
+lda #$0080 : sta $14 : sta $7F0018,x   ; Using COP #$52/#$53, so this moves to $80/$80
+sta $7F001A,x                ;   (middle of the screen) 
+cop #$52                     ;   with sprite $1E and "slow" speed.
+  db !AG_Spr_FCore_Move,$FF,$FF
+cop #$53                     
+cop #$84                     ; Then animate sprite $1E 4 times.
+  db !AG_Spr_FCore_Move,$04
+cop #$8A                     
+lda #$0001 : sta $00F0    ; Set game state = 1 to begin cannon attacks.
+ sta $2141   ; And pep that music up a little...
+.Idle_SetVul
+lda #$0310 : trb $10      ; Clear invincible flags.
+.Idle_NoSetVul
+cop #$58                     ;<[$89AD11] ; Damage pointer. Code resets to here after
+  dw EAGCoreP3_OnHit
+;cop #$C1                     ;   Left Helper Spawn's attack, and also this loop.
+if 0
+phx
+{
+lda $0036                    
+lsr a                        
+bcs +;   +$11             ;<[$89ACBF] ; Parity of frame determines next target.
+ lda $1014 : sta $0018     ; Even parity, player is target
+ lda $1016 : sta $001C     ;
+ bra ++    ;$0E            ;<[$89ACCD] 
++:
+.FlyToRandom:
+ lda.w #2*$73 : brk : sta $0018 ; If odd parity, random bytes
+ lda.w #2*$73 : brk : sta $001C
+++:
+lda.w #2*$73 : brk : and #$003F
+sbc #$001F : adc $0018      ; Then add rand(-$1F,+$1F) or so to Low$0018.
+}
+plx
+cmp #$0020                   ; If this target is within 2 tiles of the left wall,
+bcs +$01                     ;<[$89ACE0] ;   fail this check
+ rtl                          ;   and try again next frame.
+cmp #$00E0                   ; Likewise if it's within 2 tiles of the right wall,
+bcc +$01                     ;<[$89ACE6] ;   fail this check
+ rtl                          ;   and try again next frame.
+sta $7F0018,x                ; Got an x-target within $20,$E0.
+;lda $0413                    ; Do the same for the y-target, but this time...
+txy : lda.w #2*$73 : brk
+and #$003F                   
+sbc #$001F : adc $001C
+cmp #$0020                   ;   ...must be away from the top,
+bcs +$01                     ;<[$89ACFE] 
+ rtl                          
+cmp #$00E0                   ;   and away from the bottom.
+bcc +$01                     ;<[$89AD04] 
+ rtl                          
+sta $7F001A,x                ; We've found a suitable target.
+else
+jsr .SR_FindPlayerAvoidanceCoordinates
+endif
+cop #$52                     ; Lumber over there.
+  db !AG_Spr_FCore_Move,$FF,$FF
+cop #$53                     
+jmp .Idle_SetVul  ;(-$6F)    ;<[$89ACA2] ; Reset damage pointer, frame parity loop again.
+
+.SR_FindPlayerAvoidanceCoordinates:
+txy : lda.w #2*$73 : brk
+sep #$20
+pha
+and #$1F : adc #$1C
+bit $1014 : bmi +
+ adc #$70
++:
+bit $1014 : bvc +
+ adc #$40
++:
+sta $7F0018,x
+pla
+lsr : and #$3F : adc #$28
+ eor #$FF : adc $1016 : sta $7F001A,x
+rep #$20
+rts
+
+; Final Core damage pointer.
+.OnHit:
+sep #$20
+lda $7F0026,x : lsr : lsr : lsr
+ eor #$FF : clc : adc #$06
+bne +
+ inc a
++:
+sta $00F0 ; Mark self as damaged and update game state.
+ sta $2141  ; And music tempo!
+rep #$20
+lda #$0210 : tsb $10 ; Invulnerable.
+cop #$B7 : db $0E ; Palette.
+cop #$80 : db !AG_Spr_FCore_Dmg1
+cop #$89
+cop #$80 : db !AG_Spr_FCore_Dmg3
+cop #$89
+lda $1014 : sta $7F0018,x : lda $1016 : sta $7F001A,x
+ cop #$52 : db !AG_Spr_FCore_Move,$04,$FF ; Rush the player...
+ cop #$53
+txy : lda.w #2*$73 : brk
+jsl LR_TimesOnePointFive : lsr : adc #$0020 : sta $7F0018,x ; Cute way to get #$20 < .A < #$E0
+lda $0036 : and #$001F : adc #$0048 : sta $7F001A,x
+cop #$52 : db !AG_Spr_FCore_Dmg3,$03,$FF
+cop #$53
+lda $00F0 : cmp #$0006 : bcc +
+ lda #$0005
++
+sta $24
+stz $26
+-:
+cop #$A5 : dl EAGCoreP3_Mini : db $00,$00,$11,$02
+cop #$DA : db $20
+dec $24 : beq +
+cop #$A5 : dl EAGCoreP3_Mini_Shield : db $00,$00,$12,$02
+lda $0036 : and #$0007 : sta $08
+inc $26
+cop #$C2
+dec $24 : bne -
++:
+lda #$0310 : tsb $10 ; Won't take damage.
+..WhileMinis:
+;cop #$C1
+lda $00F2 : bne +
+ cop #$B7 : db $00
+ jmp EAGCoreP3_Idle_SetVul
++:
+;lda $00F2 : cmp $00F0 : bcs +
+; cop #$A5 : dl EAGCoreP3_Mini : db $00,$00,$11,$02
+;+:
+if 0
+lda $0036 : and #$000F : adc #$0030 : sta $7F001A,x
+txy : lda.w #2*$73 : brk
+ jsl LR_TimesOnePointFive : lsr : lsr
+ pha
+cop #$2A : dw $0020 ; Check if we're within $20px of player...
+ dw ..PlayerIsLeft,..PlayerIsBelow,..PlayerIsRight
+..PlayerIsBelow:
+pla
+lsr
+bit $13 : bmi ..RunLeftSide
+adc #$0040 : bra ..RunRightSide
+..PlayerIsLeft:
+pla
+bit $13 : bpl ..WalkRightSide ; hacky way to check side of screen
+bit $1013 : bpl ..WalkRightSide
+..RunLeftSide:
+adc #$0014
+bra ..DoRun
+..RunRightSide:
+adc #$0094
+..DoRun:
+sta $7F0018,x
+cop #$22 : db !AG_Spr_FCore_Dmg3,$02
+bra ..WaitAndContinue
+..WalkLeftSide:
+adc #$0014
+bra ..DoWalk
+..WalkRightSide:
+adc #$0094
+..DoWalk:
+sta $7F0018,x
+cop #$22 : db !AG_Spr_FCore_Dmg3,$01
+..WaitAndContinue:
+bra ..WhileMinis
+..PlayerIsRight:
+pla
+bit $13 : bmi ..WalkLeftSide
+bit $1013 : bmi ..WalkLeftSide
+bra ..RunRightSide
+else
+jsr .SR_FindPlayerAvoidanceCoordinates
+cop #$22 : db !AG_Spr_FCore_Dmg3,$01
+bra ..WhileMinis
+endif
+
+;cop #$80 : db !AG_Spr_FCore_Dmg4
+;cop #$89                 
+;stz $26                  ; Finally mark self as undamaged.
+;cop #$B7 : db $00
+;jmp EAGCoreP3_Idle_SetVul ;<[$89ACA2] ; And return to regular loop.
+
+; FCore idle animation triggered by Left Helper Spawn's DirToPlayer attack.
+;.Frozen:
+;cop #$80 : db !AG_Spr_FCore_Move
+;cop #$89
+;bra .Frozen
+
+; Final Core Minis, created by the Final Core when it's damaged.
+.Mini:
+inc $00F2
+cop #$B7 : db $08 ; Palette improvement
+cop #$57 : dl ..OnDeath_Mini      ;<[Delayed: $89ADA7] Child ; Death pointer. (Just an animation.)
+cop #$5B : dw $0080          ; Might mean "enable death & damage pointers".
+cop #$86                     ; Sprite $22, vertical movement $07, $10 times.
+  db !AG_Spr_Mini_Fall,$01,$06
+cop #$8A                     
+cop #$DA : db $0E            ; Wait $14 frames.
+cop #$8D : db !AG_Spr_Mini_Idle
+;cop #$89                     
+lda #$AD48 : jsr SR_InitVitals
+lda #$2310 : trb $10  ; make vulnerable and visible
+..Main:
+cop #$58 : dw ..OnHit       ;<[$89ADA0] ; Damage pointer. Loop start.
+lda $0036 : lsr : lsr : bcs ..FlyToPlayer
+..FlyToSide:
+lda.w #..FlyToSide : sta $00; : lda #$0089 : sta $02
+lda $0036 : and #$001F : adc #$0010
+bit $1013 : bmi + ; Hacktacular way to check whether player is on left or right side
+ adc #$00B0
++:
+sta $7F0018,x
+txy : lda.w #2*$73 : brk
+jsl LR_TimesOnePointFive : lsr : adc #$0020 : sta $7F001A,x ; Cute way to get #$20 < .A < #$E0
+cop #$52                     ; Got a target. Animate sprite $24, at 2 px/frame.
+  db !AG_Spr_Mini_Fly,$02,$FF
+bit $09FF : bmi ..OnDeath_Mini
+cop #$53
+bra ..Main ;(-$33)           ;<[$89AD6D] ; Then back to loop start.
+..FlyToPlayer:
+lda.w #..FlyToPlayer : sta $00; : lda #$0089 : sta $02
+cop #$80 : db !AG_Spr_Mini_Dmg
+cop #$89
+lda $1014 : sta $7F0018,x
+lda $1016 : sta $7F001A,x
+cop #$52 : db !AG_Spr_Mini_Dmg,$01,$FF
+bit $09FF : bmi ..OnDeath_Mini
+cop #$53
+bra ..Main
+
+; Final Core Minis' damage pointer.
+..OnHit:
+cop #$80                     ; Animate sprite $25.
+  db !AG_Spr_Mini_Dmg
+cop #$89                     
+bra ..FlyToSide ;(-$3A)           ;<[$89AD6D] ; Then back to loop start.
+
+; Final Core Minis' death pointer.
+;stz $24
+;bra +
+..OnDeath_Shield:
+ldy $24
+ lda $0026,y : dec : sta $0026,y
+;+:
+..OnDeath_Mini:
+cop #$80                     ;<--Delayed ; Animate sprite $26,
+  db !AG_Spr_Mini_Death1
+cop #$89
+cop #$80                     ; then sprite $27,
+  db !AG_Spr_Mini_Death2
+cop #$89
+;bit $24 : bne +
+ dec $00F2
+;+:
+cop #$E0                     ; then die.
+
+; Minis that shield the damaged Core.
+..Shield:
+inc $00F2
+lda $00F2 : dec : dec : bne +
+ lda #$0000
+ bra ++
++:
+dec : dec : bne +
+ lda #$0055
+ bra ++
++:
+ lda #$00AA
+++:
+sta $7F0010,x
+cop #$B7 : db $08 ; Palette improvement
+cop #$57 : dl ..OnDeath_Shield      ;<[Delayed: $89ADA7] Child ; Death pointer. (Just an animation.)
+cop #$5B : dw $0080          ; "Enable death & damage pointers".
+lda #$0010 : sta $7F0012,x   ; Initialize $7F:12 (2 * radius) to #$10.
+--:
+cop #$8D : db !AG_Spr_Mini_Fall
+-:
+cop #$8B
+lda $2A : beq --
+lda $08 : sta $26
+stz $08
+cop #$C1
+jsr SR_OrbitAt24
+sep #$21
+lda $7F0010,x : adc #$03 : sta $7F0010,x
+lda $7F0012,x : inc : sta $7F0012,x
+cmp #$40 : rep #$20 : bcs +
+ dec $26 : bmi -
+ rtl
++:
+lda #$2210 : trb $10
+lda #$AD48 : jsr SR_InitVitals
+lda #$0040 : sta $7F0012,x
+--:
+cop #$8D : db !AG_Spr_Mini_Fly
+-:
+cop #$8B
+lda $2A : beq --
+lda $08 : sta $26
+stz $08
+lda.w #...Here : sta $00
+...Here:
+jsr SR_OrbitAt24
+lda $7F0010,x : inc : and #$00FF : sta $7F0010,x
+;lda $0036 : asl : asl : tay
+; lda #$80 : clc : adc $C455,y
+; lsr : lsr : adc #$10 : sta $7F0012,x
+dec $26 : bmi -
+rtl
+
+; Helpers to the Final Core. (Arms, perhaps...)
+; Each Helper is an anchor point to the left or right of the Core.
+; Each Cannon should circle around its corresponding Helper.
+; Between the Cannon and the anchor point are five connectors with the same sprite
+;   that do nothing but evenly distribute themselves along the line between the two,
+;   but rendering them along with everything else causes lag, so... away they go.
+{
+; Left Helper to the Final Core.
+; Creates a Cannon and five body parts in a line to its left,
+;   then continues to common Helper code.
+.LeftHelperInit:
+cop #$A4                     ; [Child: $89AE52] Child ; Left Helper Cannon.
+  dl EAGCoreP3_LeftGun : db $B0,$00,$02,$02
+;cop #$A4                     ; [Child: $89B2AE] ; Tendon.
+;  dl EAGCoreP3_Tendon : db $C0,$00,$02,$23
+;cop #$A4                     ; [Child: $89B28D] ; Joint.
+;  dl EAGCoreP3_Joint : db $D0,$00,$02,$23
+;cop #$A4                     ; [Child: $89B28D] ; Joint.
+;  dl EAGCoreP3_Joint : db $E0,$00,$02,$23
+;cop #$A4                     ; [Child: $89B28D] ; Joint.
+;  dl EAGCoreP3_Joint : db $F0,$00,$02,$23
+;cop #$A4                     ; [Child: $89B29B] ; Root.
+;  dl EAGCoreP3_Root : db $00,$00,$02,$23
+bra EAGCoreP3_Helper                     ;<[$89AE21] 
+
+; Right Helper to the Final Core.
+; Creates a Cannon and five body parts in a line to its right (offset down by #$20 px),
+;   then continues to common Helper code.
+.RightHelperInit:
+cop #$A4                     ; [Child: $89B147] Child ; Right Helper Cannon.
+  dl EAGCoreP3_RightGun : db $50,$E0,$02,$02
+;cop #$A4                     ; [Child: $89B2AE] ; Tendon.
+;  dl EAGCoreP3_Tendon : db $40,$E0,$12,$23 ; Setting 1 here is a lazy way to signal "you're on the right" ...
+;cop #$A4                     ; [Child: $89B28D] ; Joint.
+;  dl EAGCoreP3_Joint : db $30,$E0,$12,$23
+;cop #$A4                     ; [Child: $89B28D] ; Joint.
+;  dl EAGCoreP3_Joint : db $20,$E0,$12,$23
+;cop #$A4                     ; [Child: $89B28D] ; Joint.
+;  dl EAGCoreP3_Joint : db $10,$E0,$12,$23
+;cop #$A4                     ; [Child: $89B29B] ; Root.
+;  dl EAGCoreP3_Root : db $00,$E0,$12,$23
+
+; Both Helpers then run this code.
+.Helper:
+lda $14                      
+ldy $24                      ; (FCore)
+sec : sbc $0014,y : sta $7F100C,x ; Store HelperX - FCoreX,
+lda $16                      
+;ldy $24                      
+sec : sbc $0016,y : sta $7F100E,x ;   likewise HelperY - FCoreY.
+cop #$C1                     ; Then set event pointer here.
+ldy $24                      ; This loop keeps the Helper at a fixed
+lda $0014,y                  ;   displacement from the FCore by setting
+clc : adc $7F100C,x : sta $14  ;   x = (initHelperX-initFCoreX) + currentFCoreX,
+lda $0016,y                  
+clc : adc $7F100E,x : sta $16  ;   and likewise for y.
+rtl                          ; Loop end; do it again next frame.
+} ; End of Helpers to the Final Core.
+
+; Cannon of Left Helper. Fires Bullets.
+{
+.LeftGun:
+cop #$8D                     ;<Child ; New sprite $29, and update properties.
+  db !AG_Spr_Cannon_Dir_4
+cop #$B7 : db $02
+lda #$0010 : sta $7F0010,x   ; Initialize $7F:10 (angle) to 0, south and increasing clockwise.
+lda #$0000 : sta $7F100E,x
+lda #$0060 : sta $7F0012,x   ; Initialize $7F:12 (2 * radius) to #$70.
+cop #$C1                     ; Then start the first main loop.
+;lda $7F001C,x                ; Loads parent, FCore (Helper is a sibling).
+;tay                          
+;lda $0010,y : bit #$0010    ; Check whether FCore is invulnerable.
+;beq .LeftGunIdle             ;<[$89AE76] ; If so,
+lda $00F0 : bne .LeftGunIdle
+ jsr SR_OrbitAt24         ;<[$89B255] ;   just spiral around the Helper,
+ rtl                          ;   then sleep for this frame. If vulnerable,
+.LeftGunIdle:
+cop #$C6                     ;<[$89AE76] ; Set Saved Jump Address here instead.
+  dw EAGCoreP3_LeftGunOrbit
+.LeftGunOrbit:
+jsr SR_OrbitAt24
+lda #$000A : sta $28     ;<[$89B274] ; Set sprite based on $7F:10.
+cop #$8D : db $FF            ; Reset sprite, needed since index just changed.
+cop #$C2                     ; Delay 1 frame.
+lda $7F100E,x
+bne ++
+cop #$C6 : dw ..AfterZeroTimerShot ; set saved jump address
+bra .CommonGun
+#..AfterZeroTimerShot:
+txy : lda.w #2*$73 : brk
+sep #$21
+and #$1F : adc #$2F ; .A is now in 48..79
+sbc $00F0 : sbc $00F0
+ sbc $00F0 : sbc $00F0 ; Counter will be in 48..79 minus 4*(GameState-1)
+bcs +
+  eor #$FF : inc
++:
+sta $7F100E,x
+++:
+sep #$20
+lda $7F100E,x : bmi ++
+  dec : sta $7F100E,x
+  lda $7F0010,x : inc : clc : adc $00F0
+  bra +++
+++:
+  inc : sta $7F100E,x
+  lda $7F0010,x : dec : sec : sbc $00F0
++++:
+sta $7F0010,x
+rep #$20
+jmp .LeftGunOrbit
+} ; End of Left Helper Cannon code.
+
+; Common code to both Helper Cannons.
+; The Left Cannon fires if it's directly across from the Player(?).
+; The Right Cannon has a chance of firing during every main loop.
+{
+.CommonGun:
+cop #$8D                     ;<--Branch 0 ; Sprite $2A and update.
+  db !AG_Spr_Cannon_Dir_0
+;jsr ..Freeze                 ;<[$89B084] ; Set new idle animation on FCore.
+cop #$CA : db $08
+jsr SR_OrbitAt24             ;<[$89B255] ; Do spiral around FCore.
+cop #$CB                     ; Loop end.
+cop #$2D                     ; Find direction to player (0=N, 1=NE, etc.)
+phx                          ; Push ThisID for storage.
+ and #$0007                   ; 
+ tax                          ; Set .X = DirToPlayer. It indexes an angle s.t. if
+ lda.l EAGCosineTable,x          ;   Player is SOUTH of us, Theta=$00, increasing CCW.
+plx                          ; Restore .X = ThisID.
+and #$00FF                   
+sbc $7F0010,x
+adc #$0090 : and #$00FF
+lsr a : lsr a : lsr a : lsr a : lsr a
+beq ..Dir0
+dec : beq ..Dir1
+dec : beq ..Dir2
+dec : beq ..Dir3
+dec : beq ..Dir4
+dec : beq ..Dir5
+dec : beq ..Dir6
+bra ..Dir7
+
+..Dir0:
+;cop #$8D                     ;<--Branch 0 ; Sprite $2A and update.
+;  db !AG_Spr_Cannon_Dir_0
+;jsr ..Freeze                 ;<[$89B084] ; Set new idle animation on FCore.
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255] ; Do spiral around FCore.
+;cop #$CB                     ; Loop end.
+cop #$A5                     ; [Child: $89B0A6] ; Fire Bullet $B0A6.
+  dl EAGCoreP3_Bullet_Dir0 : db $00,$F8,$02,$02
+bra ..DirFinalize
+
+..Dir1:
+;cop #$8D                     ;<--Branch 1 ; Sprite $2F and update.
+;  db !AG_Spr_Cannon_Dir_1
+;jsr ..Freeze                 ;<[$89B084]
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255] 
+;cop #$CB                     
+cop #$A5                     ; [Child: $89B0B8] ; Fire Bullet $B0B8.
+  dl EAGCoreP3_Bullet_Dir1 : db $08,$F8,$02,$02
+bra ..DirFinalize    
+
+..Dir2:
+;cop #$8D                     ;<--Branch 2 ; Sprite $2C and update.
+;  db !AG_Spr_Cannon_Dir_2
+;jsr ..Freeze                 ;<[$89B084]
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255]
+;cop #$CB                     
+cop #$A5                     ; [Child: $89B0CA] ; Fire Bullet $B0CA.
+  dl EAGCoreP3_Bullet_Dir2 : db $08,$00,$02,$02
+bra ..DirFinalize     
+
+..Dir3:
+;cop #$8D                     ;<--Branch 3 ; Sprite $30 and update.
+;  db !AG_Spr_Cannon_Dir_3
+;jsr ..Freeze                 ;<[$89B084]
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255]
+;cop #$CB                     
+cop #$A5                     ; [Child: $89B0DC] ; Fire Bullet $B0DC.
+  dl EAGCoreP3_Bullet_Dir3 : db $08,$08,$02,$02
+bra ..DirFinalize    
+
+..Dir4:
+;cop #$8D                     ;<--Branch 4 ; Sprite $29 and update.
+;  db !AG_Spr_Cannon_Dir_4
+;jsr ..Freeze                 ;<[$89B084]
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255]
+;cop #$CB
+cop #$A5                     ; [Child: $89B0EE] ; Fire Bullet $B0EE.
+  dl EAGCoreP3_Bullet_Dir4 : db $00,$08,$02,$02
+bra ..DirFinalize
+
+..Dir5:
+;cop #$8D                     ;<--Branch 5 ; Sprite $2D and update.
+;  db !AG_Spr_Cannon_Dir_5
+;jsr ..Freeze                 ;<[$89B084]
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255]
+;cop #$CB
+cop #$A5                     ; [Child: $89B0FF] ; Fire Bullet $B0FF.
+  dl EAGCoreP3_Bullet_Dir5 : db $F8,$08,$02,$02
+bra ..DirFinalize
+
+..Dir6:
+;cop #$8D                     ;<--Branch 6 ; Sprite $2B and update.
+;  db !AG_Spr_Cannon_Dir_6
+;jsr ..Freeze                 ;<[$89B084]
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255]
+;cop #$CB
+cop #$A5                     ; [Child: $89B110] ; Fire Bullet $B110.
+  dl EAGCoreP3_Bullet_Dir6 : db $F8,$00,$02,$02
+bra ..DirFinalize
+
+..Dir7:
+;cop #$8D                     ;<--Branch 7 ; Sprite $2E and update.
+;  db !AG_Spr_Cannon_Dir_7
+;jsr ..Freeze                 ;<[$89B084]
+;cop #$CA : db $08
+;jsr SR_OrbitAt24             ;<[$89B255]
+;cop #$CB
+cop #$A5                     ; [Child: $89B121] ; Fire Bullet $B121.
+  dl EAGCoreP3_Bullet_Dir7 : db $F8,$F8,$02,$02
+; fall through to DirFinalize
+
+..DirFinalize:
+cop #$07 : db $23
+cop #$CA : db $0A
+  jsr SR_OrbitAt24             ;<[$89B255]
+cop #$CB
+;jsr EAGCoreP3_CommonGun_Restore ;<[$89B062]
+cop #$C5
+
+if 0
+; SR called by Helper Cannons after their attacks.
+; Restores and restarts FCore's idle loop by
+;   changing its event pointer to $89ACA2.
+; (No comments because this is mostly identical to $B084 below it.)
+..Restore:
+lda $7F001C,x                ;<--SR
+tay
+lda $0026,y
+bne +                 ;<[$89B082]
+lda $0010,y
+bit #$0040
+bne +                  ;<[$89B082]
+lda.w #EAGCoreP3_Idle_SetVul
+bra ++
+-:
++:
+sec                          ;<--Branch
+rts
+; SR called by Helper Cannons when starting their attacks.
+; Sets a new idle animation on FCore by 
+;   changing its event pointer to $89AD38.
+..Freeze:
+lda $7F001C,x                ;<(FCore)
+tay                          
+lda $0026,y                  ; If FCore is in its damage animation, SEC and return.
+bne -   ;+$16                ;<[formerly $89B0A4] ; But if FCore is normal, continue.
+lda $0010,y                  
+bit #$0040                   ; If FCore is invulnerable, SEC and return.
+bne -   ;+$0E                ;<[formerly $89B0A4] ; If vulnerable, continue.
+lda.w #EAGCoreP3_Frozen ; Set FCore's event pointer to $89AD38
+++:
+sta $0000,y                  ;  (which just loops a new idle animation),
+lda #$0000                   ;  set FCore.$08 to 0 so it acts immediately,
+sta $0008,y                  ;  then CLC and return.
+clc                          
+rts                          ;<[$89AF4E] 
+;+
+;sec                          
+;rts                          ;<[$89AF48] 
+} ; End of Helper Cannon code.
+endif
+
+; Helper Cannon Bullets.
+; The Helper Cannons fire one of these based on DirToPlayer and
+;   some other variables too. There are eight possibilities, but only
+;   the sprites and initial move patterns differ between them.
+{
+.Bullet:
+..Dir0:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $33 and animate.
+  db !AG_Spr_FCBullet_Dir0_1
+cop #$89                     
+cop #$AC                     ; Current and saved x,y movement = $00,$08.
+  db $00,$06
+bra ..Common  ;<[$89B134]
+..Dir1:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $38 and animate.
+  db !AG_Spr_FCBullet_Dir1_1
+cop #$89                     
+cop #$AC                     ; 
+  db $03,$04
+bra ..Common  ;<[$89B134]
+..Dir2:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $35 and animate.
+  db !AG_Spr_FCBullet_Dir2_1
+cop #$89                     
+cop #$AC                     ; 
+  db $05,$00
+bra ..Common  ;<[$89B134]
+..Dir3:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $39 and animate.
+  db !AG_Spr_FCBullet_Dir3_1
+cop #$89                     
+cop #$AC                     ; 
+  db $03,$03
+bra ..Common  ;<[$89B134]
+..Dir4:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $32 and animate.
+  db !AG_Spr_FCBullet_Dir4_1
+cop #$89
+cop #$AC
+  db $00,$05
+bra ..Common  ;<[$89B134]
+..Dir5:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $36 and animate.
+  db !AG_Spr_FCBullet_Dir5_1
+cop #$89
+cop #$AC
+  db $04,$03
+bra ..Common  ;<[$89B134]
+..Dir6:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $34 and animate.
+  db !AG_Spr_FCBullet_Dir6_1
+cop #$89
+cop #$AC
+  db $06,$00
+bra ..Common  ;<[$89B134]
+..Dir7:
+cop #$B6 : db $32
+cop #$80                     ; Sprite $37 and animate.
+  db !AG_Spr_FCBullet_Dir7_1
+cop #$89
+cop #$8D : db !AG_Spr_FCBullet_Dir7_2
+cop #$AC
+  db $04,$04
+..Common:
+cop #$8D : db !AG_Spr_FCBullet_Dir7_2
+;lda #$AD84 : sta $7F0020,x
+bra ..CheckOffscreen  ;<[$89B134]
+..MoveLoop:
+cop #$B1                     ;<--Branch ; Load saved movement, i.e. move again.
+..CheckOffscreen:
+cop #$C1                     ; All Bullets converge here.
+cop #$89                     ; Do movement.
+bit $10 : bvc ..MoveLoop     ; Continue until off-screen.
+cop #$B1                     ; One more cycle of load movement,
+cop #$C1                     ;   set pointer,
+cop #$89                     ;   move. Ensures entire sprite is off-screen.
+cop #$E0                     ; Die.
+} ; End Helper Cannon Bullets.
+
+; Right Helper Cannon.
+{
+.RightGun:
+cop #$8D                     ;<--Child ; Sprite $29 and update.
+  db $0B ;!AG_Spr_Cannon_Dir_4
+lda #$00F0                   ; Similar boilerplate to Left Helper's Cannon:
+sta $7F0010,x                ;  | init position modifier (slightly broken),
+lda #$0060 : sta $7F0012,x   ;  | init spiral's 2 * radius to #$70,
+cop #$C1                     ;  |
+;lda $7F001C,x                ;  | check whether Final Core is invulnerable
+;tay                          ;  |
+;lda $0010,y : bit #$0010     ;  |
+;beq +$04                     ;<[$89B16B] ; |
+lda $00F0 : bne ..Idle
+ jsr SR_OrbitAt24         ;<[$89B255] ; and loop if so.
+ rtl                          ;  < Then boilerplate ends.
+..Idle:
+cop #$C6                     ;<[$89B16B] ; Set Saved Jump Address (loop start) here.
+  dw ..Idle
+cop #$8D : db $0B;!AG_Spr_Cannon_Dir_0
+cop #$07 : db $20
+cop #$A5 : dl ..Bullet : db $00,$F8 : dw $0202
+;txy : lda.w #2*$73 : brk
+;lsr a                        ; If low bit of random number is 1, continue here.
+;bcs +    ;$06                ;<[$89B17B] ; If 0, jump back to earlier Fire Bullet
+; jmp .CommonGun               ;<[$89AF02] ;   code (i.e. 50% chance of this per loop).
+; cop #$8D                     ;<--Branch ; Sprite $29 and update.
+;   db !AG_Spr_Cannon_Dir_4
+;+:
+;txy : lda.w #2*$73 : brk ; Re-seed RNG. (Start here in 50% of main loops.)
+lda $00F0 : asl : adc $00F0 : asl
+ eor #$FFFF ;: inc a
+ clc : adc #$004F : sta $7F100C,x   ; Wait timer to fire again ~= 80 - 6*GameState
+txy : lda.w #2*$73 : brk
+lsr a                        ; 50/50 branch on parity of random number.
+bcc ..Orbit2                 ;<[$89B1AE] ; If 0, branch; if 1, continue.
+..Orbit1:
+jsr SR_OrbitAt24
+lda #$000A : sta $28        ;<[$89B274] ; (like Left Helper's Cannon with Left Helper).
+cop #$8D : db $FF            ; Refresh sprite,
+cop #$C2                     ;   then set pointer here and delay 1 frame.
+lda $7F0010,x : inc a : and #$00FF : sta $7F0010,x ; Increment our modifier,
+lda $7F100C,x : dec a : sta $7F100C,x              ;   decrease our random number,
+bpl ..Orbit1 ;(-$25) ;<[$89B187] ; and keep spiraling until it goes negative.
+cop #$C5                     ; Once it's negative, restart loop, possibly fire Bullet.
+;ldy $24                      ; If a Bullet wasn't fired and the frame counter's
+;jsl $80F3C9                  ;<[$80F3C9] ; parity was 0, we do all of the same things
+..Orbit2:
+jsr SR_OrbitAt24
+lda #$000A : sta $28  ;<[$89B274] ; (spiral around Right Helper etc.).
+cop #$8D : db $FF
+cop #$C2
+lda $7F0010,x : dec a : and #$00FF : sta $7F0010,x ; The difference is we now decrement our angle modifier.
+lda $7F100C,x : dec a : sta $7F100C,x
+bpl ..Orbit2 ;(-$25) ;<[$89B1AE]
+cop #$C5
+
+..Bullet:
+cop #$5B : db $10,$00 ; Die on contact with player.
+lda #$00A0 : tsb $12
+lda #$0100 : trb $10
+;lda #$AD48 : sta $7F0020,x
+cop #$80 : db $0A
+cop #$89
+cop #$86 : db $0B,$03,$06
+cop #$8A
+lda #$0008 : sta $26
+cop #$C7 : dl EDGLightning_Chase_Immediate
+} ; End of Right Helper Cannon.
+
+; Final Core Death Pointer.
+.OnDeath:
+cop #$B7 : db $0E ; Palette.
+cop #$CC : db $07
+lda #$0001 : sta $26
+jsl LR_SetPlayerImmuneAndFrozen
+cop #$A5                     ; [Child: $89B1FA] ; Explosion spawner.
+  dl EDarkGaiaDeathExplosionSpawner : db $00,$00,$00,$20
+cop #$80 : db !AG_Spr_Core_P2_Death
+cop #$89
+cop #$A5                     ; [Child: $89BA38] ; Map changer (after a delay).
+  dl LoadCreditsMap : db $00,$00,$00,$20
+cop #$DA : db $1D
+cop #$E0                     
+
+;cop #$88                     ;<Child
+;  db $00,$E0,$8E
+;cop #$CA                     ; 
+;  db $0A
+;cop #$A5                     ; [Child: $89B21E] 
+;  db $1E,$B2,$89,$00,$C8,$02,$03
+;cop #$DA                     ; 
+;  db $01
+;cop #$A5                     ; [Child: $89B22B] 
+;  db $2B,$B2,$89,$00,$C8,$02,$03
+;cop #$DA                     ; 
+;  db $02
+;cop #$CB                     
+;cop #$E0                     
+
+;jsr $B238                    ;<[$89B238] Child
+;cop #$07                     ; 
+;  db $06
+;cop #$80                     ; 
+;  db !AG_Spr_Bit_P1_Atk2
+;cop #$89                     
+;cop #$E0                     
+
+;jsr $B238                    ;<[$89B238] Child
+;cop #$07
+;  db $06
+;cop #$80
+;  db !AG_Spr_Core_P2_Atk1
+;cop #$89
+;cop #$E0
+
+;cop #$23                     
+;and #$007F                   
+;sec                          
+;sbc #$003F                   
+;clc                          
+;adc $14                      
+;sta $14                      
+;cop #$23                     
+;and #$007F                   
+;sec                          
+;sbc #$003F                   
+;clc                          
+;adc $16                      
+;sta $16                      
+;rts                          ;<[$89B221] 
+
+; Used by Final Core Helpers while the Final Core is invulnerable.
+; Spirals them around the Final Core.
+SR_OrbitAt24:
+ldy $24                      ;<--SR ; Load Helper as center of spiral.
+jsl LR_OrbitAtY              ;<[$80F3C9] ; Do spiral motion.
+rts                          
+
+; Data tables used by several P3 events.
+#EAGCosineTable:
+db $80,$A0,$C0,$E0,$00,$20,$40,$60      ; Rough-grained 180-degree cosine table.
+#EAGCannonSprites:
+db !AG_Spr_Cannon_Dir_4,!AG_Spr_Cannon_Dir_3,\
+   !AG_Spr_Cannon_Dir_2,!AG_Spr_Cannon_Dir_1,\
+   !AG_Spr_Cannon_Dir_0,!AG_Spr_Cannon_Dir_7,\
+   !AG_Spr_Cannon_Dir_6,!AG_Spr_Cannon_Dir_5      ; Table of sprite indexes based on DirToPlayer.
+;#EAGCannonDirectionIndexes:
+;db $04,$03,$02,$01,$00,$07,$06,$05      ; Returns 4 - x mod 8.
+
+; SR used by P3 Left Cannon, which should update its sprite based on its angle modifier.
+;EAGCoreP3_UpdateGunSpriteOn7F10:
+;lda $7F0010,x                ;<--SR ; Read value from table of sprite
+;;lsr : lsr : lsr : lsr : lsr  ;   indexes based on DirToPlayer.
+;asl : asl : asl : xba
+;and #$0007                   ; Top 3 bits of $7F:10 determine
+;phx                          ;   which sprite index
+;tax                          ;   will be returned.
+;lda.l EAGCannonSprites,x     ; Table of sprite indexes.
+;plx                          
+;and #$00FF : sta $28         ; Store resultant in $28.
+;rts                          ; Then return.
+
+; Joints of P3 Helpers, which create three each.
+; A Joint is always at the midpoint of two other parts.
+EAGCoreP3_Joint:
+cop #$8D                     ;<--Child ; Sprite $28 and update.
+  db !AG_Spr_FCore_Joint
+stz $08                      ; Act immediately.
+jsr EAGCoreP3_JointRootInit ;<[$89B2B8] ; Initialization saves initial x and y.
+cop #$C1                     ; Loop body begins.
+jsr EAGCoreP3_JointRootMain  ;<[$89B2CD] ; Set at midpoint of next and previous parts.
+rtl                          ; Repeat next frame. No animations.
+
+; Roots of P3 Helpers.
+; The Root always has the same x-coordinate as the corresponding Helper.
+; It is raised and lowered in the y-coordinate by the next Joint.
+EAGCoreP3_Root:
+cop #$8D                     ;<--Child ; Sprite $28 and update.
+  db !AG_Spr_FCore_Joint
+stz $08                      ; Act immediately.
+jsr EAGCoreP3_JointRootInit ;<[$89B2B8] ; Initialization saves initial x and y.
+lda #$0005 : sta $26 ; We start ready to be drawn.
+cop #$C1                     ; Loop body begins.
+jsr EAGCoreP3_JointRootMain  ;<[$89B2CD] ; Set at midpoint of next and previous parts.
+lda $0014,y                  ; .Y should always be Helper here, so this should always
+sta $14                      ;   return Root to Helper's x-position.
+rtl                          
+
+; Helper Tendon, created by both Helpers.
+; A Tendon is always at the midpoint of the previous Joint and the
+;   Cannon, but it uses the Cannon's position in the previous frame,
+;   not the current one.
+EAGCoreP3_Tendon:
+cop #$8D                     ;<--Child ; Sprite $28 and update.
+  db !AG_Spr_FCore_Joint
+jsr EAGCoreP3_GetPiecePalette
+ldx $04 ; Joint 2
+ ldy $0004,x ; Joint 1
+   lda $0004,y ; Root
+    sta $24
+cop #$C1                     
+jsl LR_PlaceSelfBetween04And06     ;<[$8AA41C] ; Place at midpoint of Cannon and top Joint.
+ldy $24
+jsr EAGCoreP3_CheckVanishAndDrawNext
+rtl                          ; Do nothing else. (No animations, just movement.)
+
+; Initialization routine of P3 Helper Joints and Roots.
+; Saves two copies of initial x and y coordinates.
+EAGCoreP3_JointRootInit:
+lda $14 : sta $7F100C,x : sta $7F0010,x
+lda $16 : sta $7F100E,x : sta $7F0012,x ; Joints and Roots don't use this as a spiral radius.
+jsr EAGCoreP3_GetPiecePalette
+rts                          
+
+; Left and right pieces get different palettes.
+EAGCoreP3_GetPiecePalette:
+cop #$B7 : db $04 ; Assume left-arm palette
+lda $10 : bit #$0010 : beq +
+ cop #$B7 : db $08 ; Change to right-arm palette
++:
+lda #$FFFF : sta $26 ; Max invisibility timer, while we're at it
+rts
+
+; If $26 hits 0, it's time to disappear and draw the next piece.
+EAGCoreP3_CheckVanishAndDrawNext:
+dec $26
+ beq .VanishAndDrawNext
+ bmi .Continue
+  lda #$2000 : trb $10
+  bra .Continue
+.VanishAndDrawNext:
+ lda #$0008 : sta $0026,y
+ lda #$2000 : tsb $10
+.Continue:
+rts
+
+; Main loop of P3 Helper Joints and Roots.
+; Sets this Joint's position to the midpoint of the next and previous
+;   parts: either Tendon, other Joint, Root, or Helper.
+; Since the Next part hasn't updated yet in this frame, Next.$14 and Next.$16
+;   refer to last frame's x and y coordinates, but Prev.$14 and Prev.$16
+;   (if they were used) would refer to this frame's coordinates.
+;   So we maintain a copy of the last frame's Prev.$14 and Prev.$16
+;   and set our midpoint based on that "anchor point" instead.
+EAGCoreP3_JointRootMain:
+ldy $06                      ;<--SR ; $06 is always Tendon or other Joint.
+jsr EAGCoreP3_CheckVanishAndDrawNext
+lda $0014,y                  ; Looks a lot like $8AA41C from here on.
+clc : adc $7F100C,x
+clc : bpl +$01              ;<[$89B2DB] 
+ sec
+ror a : sta $14
+lda $0016,y : clc : adc $7F100E,x
+clc : bpl +$01               ;<[$89B2EA] 
+ sec
+ror a : sta $16
+lda $7F0010,x : sta $7F100C,x ; Update AnchorPointX = PrevLastX,
+lda $7F0012,x                ; [Joints and Roots don't use this as a spiral radius.]
+ sta $7F100E,x               ;   and AnchorPointY = PrevLastY.
+ldy $04                      ; $04 is Helper, Root, or other Joint.
+lda $0014,y : sta $7F0010,x  ; Update PrevLastX = $04.x,
+lda $0016,y : sta $7F0012,x  ;   and PrevLastY = $04.y.
+rts                          ; Then return.
+
+; Apocalypse Bits.
+; The Core changes the Bits' pointers for an Attack.
+{
+; Left Bit entry point.
+EAGBitP1:
+.InitL:
+jsr SR_AGBitInit              ;<[$89BA14] Child ; JSR init's properties etc.
+cop #$57                     ;<[Delayed: $89B3C6] ; Death pointer.
+  dl EAGBitP2_Spawn
+cop #$07 : db $0C
+cop #$B7 : db $0E
+cop #$80 : db !DG_Spr_Energy_Large_Anim
+cop #$89
+cop #$B7 : db $00
+cop #$07 : db $26
+cop #$80 : db !DG_Spr_Head_TopEnergyBeam
+cop #$89
+lda #$0100 : tsb $12         ; No more updating hitbox.
+.LSleep:
+cop #$80                     ;<--Branch
+  db !AG_Spr_Bit_P1_Idle
+cop #$89                     ; Idle sprite is $05.
+lda.w #..Here : sta $00
+;lda #$0089 : sta $02
+..Here:
+rtl                          
+
+; Left Bit pointer is set to here for a Bit Attack.
+.LAttack:
+ldy $24
+lda $0024,y                  ; This is 1 if at least one Bit is dead.
+cmp #$0001                   ; In that case, this Bit has to be the attacker.
+beq +$06                     ;<[$89B32E]
+ lda $0036                    ; If both Bits are alive, this one attacks first
+ lsr a                        ; on odd-numbered frames.
+ bcs +
+ cop #$DA : db $28
++:
+cop #$07 : db $21            ;<--Branch
+lda #$0210 : trb $10         ; then clear invulnerability flag
+cop #$80                     ; Animate sprite $06,
+  db !AG_Spr_Bit_P1_Atk1
+cop #$89
+cop #$80                     ; then $07;
+  db !AG_Spr_Bit_P1_Atk2
+cop #$89
+cop #$80                     ; and animate sprite $16.
+  db !AG_Spr_Bit_P1_Atk3
+cop #$89
+cop #$07 : db $15            ; The below creates the Bit Beam Launcher.
+cop #$A5                     ; [Child: $89B528]
+  dl .LBeam : db $00,$F0,$12,$22
+cop #$80                     ; Animate sprite $07 again.
+  db !AG_Spr_Bit_P1_Atk2
+cop #$89
+cop #$DA : db $77            ; Wait #$78 frames, then
+lda #$0310 : tsb $10         ; Then become invulnerable,
+cop #$80                     ; animate sprite $1B.
+  db !AG_Spr_Bit_P1_Atk5
+cop #$89
+cop #$80                     ; return to sprite $05,
+  db !AG_Spr_Bit_P1_Idle
+cop #$89                     ; and return to sleeping loop above.
+bra .LSleep ;(-$54)             ;<[$89B316]
+
+; Right Bit entry point.
+; Same as Left Bit, but with H-mirrors.
+.InitR:
+jsr SR_AGBitInit     ;<[$89BA14] Child
+cop #$57                     ;<[Delayed: $89B3C6]
+  dl EAGBitP2_Spawn
+cop #$DA : db $40
+lda #$2000 : trb $10
+cop #$07 : db $0C
+cop #$B7 : db $0E
+cop #$80 : db !DG_Spr_Energy_Large_Anim
+cop #$89
+cop #$B7 : db $00
+cop #$07 : db $26
+cop #$80 : db !DG_Spr_Head_TopEnergyBeam
+cop #$89
+lda #$0100 : tsb $12         ; No more updating hitbox.
+.RSleep:
+cop #$80                     ;<--Branch
+  db !AG_Spr_Bit_P1_Idle
+cop #$89
+lda.w #..Here : sta $00
+;lda #$0089 : sta $02
+..Here:
+rtl
+
+; Right Bit pointer is set here for a Bit Attack.
+; Same as Left Bit, but with H-mirrors.
+.RAttack:
+ldy $24                      
+lda $0024,y
+cmp #$0001
+beq +$06                   ;<[$89B38A]
+ lda $0036
+ lsr a
+ bcc +
+ cop #$DA : db $28
++:
+cop #$07 : db $21          ;<--Branch
+lda #$0210 : trb $10
+cop #$80 : db !AG_Spr_Bit_P1_Atk1
+cop #$89
+cop #$80 : db !AG_Spr_Bit_P1_Atk2
+cop #$89
+cop #$80 : db !AG_Spr_Bit_P1_Atk3
+cop #$89
+cop #$07 : db $15
+cop #$A5                     ; [Child: $89B4E7]
+  dl .RBeam : db $00,$F0,$12,$22
+cop #$80 : db !AG_Spr_Bit_P1_Atk2
+cop #$89
+cop #$DA : db $77
+lda #$0310 : tsb $10
+cop #$80 : db !AG_Spr_Bit_P1_Atk5
+cop #$89
+cop #$80 : db !AG_Spr_Bit_P1_Idle
+cop #$89
+bra .RSleep ;(-$54)             ;<[$89B372]
+
+; Apocalypse Bit P1 death pointer, same for both sides.
+; The Bit is needed in P2, so it doesn't really die, just creates
+;   a new event that generates explosions as it sinks into the ground.
+EAGBitP2:
+.Spawn:
+lda #$0001 : sta $26    ; [Delayed] Mark Bit as dead.
+ldy $24
+lda $0024,y : lsr a : sta $0024,y ; Inform Core that a Bit has died.
+cop #$A5                     ; [Child: $89B479] ; Create falling sprite.
+  dl EAGBitP2_DyingP1 : db $00,$00,$12,$03
+lda #$0182 : tsb $12
+.BothSleep:
+cop #$80                     ;<--Branch ; Animate $0B
+  db !AG_Spr_Bit_P2_Idle
+cop #$89                     ; to completion,
+lda.w #..Here : sta $00
+;lda #$0089 : sta $02
+..Here:
+rtl                          ; then sleep.
+; End of Apocalypse Bit P1 code.
+
+; Apocalypse Bit P2, routine to run
+;   after Core launches its Nuke.
+.DoFireBoth:
+lda.w #.DoFire : sta ($06)
+lda #$4000 : tsb $0E
+.DoFire:
+cop #$80                     ; Animate sprite $1C,
+  db !AG_Spr_Bit_P2_DoFire
+cop #$89
+cop #$07 : db $20            ;  play a sound,
+cop #$A5                     ; [Child: $89B3FD] ; create this,
+  dl EAGBitP2_FireStart : db $00,$00,$12,$03
+bra EAGBitP2_BothSleep ;(-$1B)      ;<[$89B3E2] ; animate $0B, and sleep.
+
+; Apocalypse Bit P2's converging energy animation.
+; Each Bit creates a projectile; they converge in the center of the screen,
+;   then one dies and the other changes to a new sprite and flies up.
+; Once off-screen, the "converged" projectile emits a rain of fire.
+.FireStart:
+lda #$0080 : sta $7F0018,x
+lda $16 : clc : adc #$0038 : sta $7F001A,x
+cop #$B6 : db $30            ; Priority: Over both BGs.
+cop #$22                     ; Move to #$80,y+#$10 with sprite $0C at 2px/frame.
+  db !AG_Spr_Fire_Start,$03
+cop #$80                     ; Animate sprite $0C again.
+  db !AG_Spr_Fire_Start
+cop #$89
+lda $0E
+bit #$C000 : beq ..QuickDie  ;<[$89B447] ; Kill the one that's not mirrored.
+cop #$07 : db $21            ; Continue with the mirrored one. Play a sound.
+cop #$80                     ; Animate sprite $0D.
+  db !AG_Spr_Fire_Wait
+cop #$89
+cop #$07 : db $1D
+cop #$86                     ; Vertical move, sprite $0E, $06 steps, script $0C.
+  db !AG_Spr_Fire_Rise,$02,$0C
+cop #$8A                     
+lda #$2300 : tsb $10         ; Exclude from physics and rendering engine.
+cop #$CA : db $14
+{
+bit $09FF : bvs ..QuickDie
+cop #$9C                     ; [Child: $89B449] ; Rain of fire.
+  dl EAGBitP2_FireObject : db $02,$02
+cop #$DA : db $11
+}
+cop #$CB                     ; End loop.
+#..QuickDie:
+cop #$E0                     ;<--Branch ; Die.
+
+; Apocalypse Bit P2's rain of fire.
+; The fire chooses a random x-position and one of two speeds.
+; For IOGR we force the slow speed always, for balance reasons.
+.FireObject:
+cop #$07 : db $23
+txy : lda.w #2*$73 : brk        ; Random number,
+sta $14                   ;   set as x position.
+;cop #$23                 ; Another random number;
+;lsr a                     ;   if the low bit is 0 continue here,
+;bcs +   ;+$12             ;<[$89B467] ; otherwise follow that branch.
+-:
+cop #$86                     ;<--Branch ; Low bit was 0. Vertical move,
+  db !AG_Spr_Fire_Rain,$14,$09
+cop #$8A                     ;   sprite $0F, $14 steps, script $03.
+bit $09FF : bvs .QuickDie
+lda $16                      ; Then check y. If it's off the top of the screen,
+bmi - ;(-$0B)              ;<[$89B455] ; do the move again.
+cmp #$0220                   ; If it's on-screen,
+bcc - ;(-$10)              ;<[$89B455] ; do the move again.
+.QuickDie:
+cop #$E0                     ; Once it's safely off-screen, it dies.
+;+:
+;-:
+;cop #$86                     ;<--Branch ; Low bit of random number was 1.
+;  db !AG_Spr_Fire_Rain,$14,$0D
+;cop #$8A                     ; Same as above, but vertical move $05.
+;bit $09FF : bvs .QuickDie
+;lda $16                      
+;bmi - ;(-$0B)             ;<[$89B467]
+;cmp #$0220
+;bcc - ;(-$10)             ;<[$89B467]
+;cop #$E0                     ; Once it's safely off-screen, it dies.
+
+; Apocalypse Bit P1's death animation event.
+; Not the Bit itself, but a new created sprite that falls into the ground
+;   and generates explosions on its way down.
+.DyingP1:
+cop #$B6 : db $30              ;<Child
+lda #$0182 : tsb $12
+-
+lda $0036                    
+lsr a                        
+bcs +  ;+$09                     ;<[$89B492] 
+cop #$9C                     ; [Child: $89B4C9] ; Explosion $07.
+  dl Explosion07 : db $02,$03
+bra ++   ;+$07                     ;<[$89B499] 
++
+cop #$9C                     ; [Child: $89B4D8] ; Explosion $01.
+  dl Explosion01 : db $02,$03
+++
+cop #$86                     ; Sprite $05 and move vertical.
+  db !AG_Spr_Bit_P1_Idle,$0C,$01
+cop #$8A                     
+bit $10 : bvc -    ;(-$46)   ;<[$89B481] 
+cop #$E0                     
+
+; Apocalypse Bit P1's death explosion, sprite $07.
+#Explosion07:
+jsr SR_ExplosionInit
+cop #$80 : db $07
+bra +
+;cop #$89                     
+;cop #$E0                     
+
+; Apocalypse Bit P1's death explosion, sprite $01.
+#Explosion01:
+jsr SR_ExplosionInit
+cop #$80 : db $01
++
+cop #$89                     
+cop #$E0                     
+
+#SR_ExplosionInit:
+lda #$0010
+jsl LR_SetRandomPosition
+cop #$88 : db $00,$E0,$8E
+cop #$07 : db $06
+rts
+
+; Right Bit Beam. Creates/becomes projectiles when BitR attacks.
+; Same as Left Bit Beam, below, but without the H-mirrors.
+EAGBitP1_RBeam:
+; Left Bit Beam. Creates/becomes projectiles when BitL attacks.
+EAGBitP1_LBeam:
+lda #$0004 : sta $26 ; Makes 5 of them plus the caller.
+cop #$9C                     ; [Child: $89B541] <--Branch
+  dl .Piece : dw $0212
+lda $26 : sta $0026,y
+dec a : sta $26
+cop #$DA : db $02
+-
+cop #$9C                     ; [Child: $89B541] <--Branch
+  dl .Piece : dw $0312
+lda $26 : sta $0026,y
+dec a : sta $26
+cop #$DA : db $02
+lda $26
+bne -   ; +$EF ;(-$11)             ;<[$89B530]
+lda #$2000 : trb $10
+; last loop falls through to .Piece
+.Piece:
+;cop #$5B : dw $0010           ;<--Child ; Die on collision with player.
+cop #$B6 : db $32
+lda $26                      ; $26 numbers the five projectiles.
+phx
+tax
+lda.l .BeamMoves,x      ; Load a move pattern for this projectile.
+and #$00FF
+plx
+sta $7F0018,x
+lda #$0006 : sta $7F001A,x   ; Other dim move pattern.
+cop #$B1                     ; Load move pattern into $7E bank.
+lda #$0100 : trb $12         ; Prepare for hitbox update upon sprite visible.
+cop #$84                     ; Animate sprite $11, H-mirror, $20 times.
+  db !AG_Spr_Bit_P1_Bullet,$06
+cop #$8A
+lda #$0100 : tsb $12         ; Disable hitbox update.
+.PieceChase:
+cop #$A2 : dl EChaser : dw $2312
+lda.w #$8000+!AG_Spr_Bit_P1_Bullet : sta $7f000a,x
+lda #$0004 : sta $7f0014,x
+lda #$1000 : sta $0024,y ; chase player
+phx : tyx : lda $26 : sta $7F000E,x : plx
+cop #$84 : db !AG_Spr_Bit_P1_Bullet,$1C
+cop #$8A
+cop #$A9
+tya : and #$00f0 : lsr : lsr : lsr : lsr : sta $08 : cop #$c2
+cop #$88 : dl $8ee000
+cop #$07 : db $06
+cop #$80 : db $07
+cop #$89
+cop #$E0
+
+.BeamMoves:
+db $03,$01,$00,$02,$04          ; Data table of moves for projectiles.
+;db $06,$02,$00,$04,$08
+} ; End Apocalypse Bits.
+
+
+; Apocalypse Launchers.
+{
+; Launcher graphics.
+EAGLauncher:
+.InitR:
+lda #$0182 : tsb $12         ; No-update-hitbox, full-sprite-hitbox, persistent-H-mirror.
+cop #$BB                     ; Set horizontal mirror flag.
+.InitL:
+.SleepBoth:
+cop #$80                     ;<Child ; Also returns here after a salvo.
+  db !AG_Spr_Launcher_Idle
+cop #$89                     ; Animate sprite $08 one full cycle,
+cop #$C1                     ;  then set event pointer here
+rtl                          ;  to sleep until something wakes us.
+
+; Launchers fire every ?? frames in P1,
+;   due to Core setting their event pointers here.
+.P1Fire:
+cop #$CA : db $04            ; Loop ? times.
+-
+cop #$80
+  db !AG_Spr_Launcher_Atk1
+cop #$89                     ; Animate sprite $09 one full cycle,
+cop #$80                     ;  then $0A one full cycle,
+  db !AG_Spr_Launcher_Atk2
+cop #$89                     ;  then spawn a Bubble,
+cop #$A5                     ; [Child: $89B7A8]
+  dl EAGBubble : dw $0000 : dw $0002
+cop #$80                     ;  then animate $1A one full cycle.
+  db !AG_Spr_Launcher_Atk3
+cop #$89
+cop #$DA : db $10
+cop #$CB                     ; Loop end.
+bra EAGLauncher_SleepBoth ;(-$27) ;<[$89B586] ; Return to animate $08 and sleep.
+
+; Launchers fire every ?? frames in P2, etc.
+;   The animation sequence and Bubble are the same as in P1,
+;   but only one Bubble is fired.
+.P2WaitThenFireAll:
+;cop #$80 : db !AG_Spr_Launcher_Idle
+;cop #$89
+cop #$DB : dw $023F
+.P2FireAll:
+cop #$C6 : dw .P2WaitThenFireAll
+lda.w #..TriggerBits : sta ($06)
+bra .P2Fire
+..TriggerBits:
+cop #$C6 : dw EAGLauncher_SleepBoth
+lda.w #EAGBitP2_DoFireBoth : sta ($06)
+.P2Fire:
+;cop #$80 : db !AG_Spr_Launcher_Atk1
+;cop #$89
+;cop #$80 : db !AG_Spr_Launcher_Atk2
+;cop #$89
+;cop #$A5 : dl EAGBubble : dw $0000,$0002
+;cop #$80 : db !AG_Spr_Launcher_Atk3
+;cop #$89
+cop #$C5
+} ; End Apocalypse Launchers.
+
+
+; Apocalypse Brain. Scrolls the camera and pieces on-screen initially,
+;   then informs the Core to start the fight,
+;   then hovers the camera and Core and some other pieces
+;   using some clever (if unoptimized) trigonometry.
+{
+EAGScrollOn:
+ldy $06                      ;<Child
+lda $0014,y : sta $20        ; $06 == Core, so now $20/$22 = CoreX/CoreY.
+lda $0016,y : sta $22
+lda #$0000 : sta $7F0010,x   ; Initialize:
+lda #$0010 : sta $7F0012,x   ;  $7F:12 = #$0010,
+lda $16 : sta $7F100C,x      ;  $26 = $16 - #$0100.
+   bra .Finalize ; mod for combining DG+AG
+if 0
+lda $16 : sec : sbc #$0100 : sta $26
+cop #$C1                     ; Then set event pointer here.
+lda $16                      ; If we haven't reached y=0, then...
+ beq .Finalize ; +$39  ;<[$89B62E] 
+sec : sbc #$0002 : sta $16   ;   Shift y up by 2,
+lda #$FFFE : sta $001C      ;   and set Low$0018/$001C = 0/-2
+stz $0018                    ;     so we can move our projectiles and camera.
+ldy $06                      ;   (Still $06 == Core.)
+clc : adc $0016,y            ;   (.A still contains #$FFFE.)
+sta $0016,y                  ;   Shift CoreY up by 2 as well.
+jsr SR_AGMoveChildrenAndCamera ;<[$89B9CC] ; Move Children and Camera.
+lda $16                      ;   $26 == InitialY - #$0100, so this means
+sec                          ;    return if InitialY - NewY <= #$0100
+sbc $26                      ;    (i.e. we've moved less than a screen).
+bmi +$01                     ;<[$89B618]
+ rtl
+eor #$FFFF                   ;   After we've moved a full screen, store the
+inc a                        ;    negative of the "overshoot" in Low$001C
+sta $001C                    ;    (probably 1 or 0, right?)
+stz $16                      ;    and zero our own y position.
+ldy $06
+clc : adc $0016,y : sta $0016,y ;   Correct CoreY by the amount of overshoot,
+jsr SR_AGMoveChildrenAndCamera ;<[$89B9CC] ; then children and camera as well.
+rtl                          ;   And we're done.
+endif
+.Finalize:
+ldy $24                      ; Our upward movement has reached y=0.
+lda #$0003                   ; Core created us, so $24 == Core; load that
+sta $0024,y                  ;   and write Core.$24 = #$03 to make it act.
+bra .Wave ; +$15 ;<[$89B64D] ; Then set event pointer at $b64d.
+.Hover:
+clc                        ;<Branch ; $7F:10 was #$40 or #$C0.
+adc #$0002                 ; That means we've hit the top or bottom of our
+sta $7F0010,x              ;  sine "wave" of movement, and should hover for
+;cop #$23                  ;  a brief (random) time.
+txy : lda.w #2*$73 : brk
+and #$003F : adc #$0028 : sta $08 ; Hover for #$28 + rand(0,#$3F) frames.
+cop #$C2                     ; Return to caller and come back here after that.
+.Wave:
+;cop #$C1                     ;<Branch ; Ptr sets here if we reach y=0.
+lda.w #.Wave : sta $00 ;: lda #$0089 : sta $02
+lda $7F0010,x                ; This initializes to 0.
+cmp #$0040                   ; If it reaches #$40 or #$C0,
+beq .Hover ;(-$20) ;<[$89B638] ; head up to
+cmp #$00C0                   ;   the $b638 branch.
+beq .Hover ;(-$25) ;<[$89B638] 
+clc : adc #$0002            ; If $7F:10 is not #$40 or #$C0,
+and #$00FF                   ;  add 2 (mod #$100).
+sta $7F0010,x                ; That's the input to $ba59,
+jsr SR_Sine7F10           ;<[$89BA59] ; Sine Function With Scale Factor.
+clc                          ; Now .A = sin($7F:10) * $7F:12 / #$0100.
+adc $7F100C,x                ; This initialized to InitialY,
+sta $16                      ;   so now NewY = InitialY + ScaledSine.
+ldy $06                      
+lda $20 : sec : sbc $14      ; CoreX minus ThisX, negative.
+ eor #$FFFF : inc a : sta $0018 ; So $0018 = ThisX - CoreX.
+clc : adc $0014,y : sta $0014,y ; Set CoreX = ThisX.
+lda $22 : sec : sbc $16
+ eor #$FFFF : inc a : sta $001C ; Likewise $001C = ThisY - CoreY,
+clc : adc $0016,y : sta $0016,y ; and set CoreY = ThisY.
+lda $14 : sta $20            ; Update stored variables:
+lda $16 : sta $22            ;  $20/$22 = ThisX/ThisY.
+jsr SR_AGMoveChildrenAndCamera ;<[$89B9CC] ; Finally update children and camera.
+rtl                          ; Then return.
+; End Apocalypse Brain P1 loop.
+
+; Apocalypse Brain, code to run after Core P2 dies.
+EAGScrollOff:
+cop #$07 : db $24
+lda.w #ECometBG_AGP3 : sta $0F00
+cop #$CA : db $80            ; Loop.
+{
+cop #$73 : and #$0007
+ sec : sbc #$0003 : sta $06BE
+lda $068E : dec : dec : sta $06C2
+lda $0036 : lsr : bcs +
+ lda $0690 : cmp #$0030 : beq +
+  inc : sta $06C4
++:
+ldy $0056
+.DownForEach:
+cpy $06 : beq .DownNext
+ lda $0016,y : dec : dec : sta $0016,y
+.DownNext:
+lda $0006,y : tay
+bne .DownForEach
+tdc : tay
+}
+cop #$CB                     ; End loop.
+;cop #$C1 ; Loop until BG2 is where we want it.
+;{
+;cop #$73 : and #$0003 : dec : sta $06BE
+;lda $068E : dec : dec : sta $06C2
+;ldy $0056
+;.UpForEach:
+;lda $0016,y : inc : sta $0016,y
+;.UpNext:
+;lda $0006,y : tay : bne .UpForEach
+;lda $0690 : inc : sta $06C4
+;cmp #$0030 : beq +$01
+; rtl
+;}
+ldy $06                      ; (Core)
+lda #$0000 : sta $0026,y     ; Set Core$26 to 0 to inform it that we're done.
+cop #$E0                     ; The Brain finally dies. Only the Core survives.
+; End Apocalypse Brain post-P2 screen scroll routine.
+} ; End Apocalypse Brain code.
+
+; Palette event. Turns the bubbles freaky colors.
+{
+EAGSpriteColors:
+;ldy $24                      ;<Child
+;lda $0026,y                  
+;bne +                        ;<[$89B70A] 
+cop #$37 : db $63
+cop #$39                     
+bra EAGSpriteColors ;(-$0E)  ;<[$89B6FC] 
+;+
+;cop #$C1                     
+;ldy $24                      
+;lda $0026,y                  
+;cmp #$0002                   
+;beq +$01                     ;<[$89B717] 
+;rtl                          
+;cop #$E0                     
+}
+
+; Palette Event -- Colors of the End
+{
+EAGBackgroundColors:
+cop #$37 : db $62            ;<Child
+cop #$39                     
+txy : lda.w #2*$73 : brk
+cmp #$00B0                   
+bcc +   ; +$19               ;<[$89B73E] 
+cop #$37 : db $66
+cop #$39                     
+lda $0036 ; mod to reduce CPU usage
+and #$0007                   
+clc : adc #$0004 : sta $08
+cop #$C2
+cop #$37 : db $66
+cop #$39                     
+txy : lda.w #2*$73 : brk
+lsr
++
+sta $08
+sta $072A                ; ???
+cop #$C2                 
+bit $09FF : bvc EAGBackgroundColors
+.Die:
+cop #$E0
+}
+
+; Bubble created by Launchers during P1 and P2.
+{
+EAGBubble:
+lda #$00A0 : tsb $12   ; Full-sprite-hitbox, no-show-damage.
+;cop #$07 : db $1E
+bit $0E
+bvc +
+ cop #$BC : db $04,$FA        ;   offset us by +$04/-$06, and
+ cop #$AC : db $01,$02        ;   set our x/y move patterns to $01/$02.
+ bra ++                       ;<[$89B7C9] ; If we're not H-mirrored,
++
+ cop #$BC : db $FC,$FA        ;   offset by -$04/-$06, with
+ cop #$AC : db $02,$02        ;   x/y move patterns $02/$02.
+++
+lda #$0000 : sta $7F0026,x    ; Zero HP.
+cop #$57 : dl .OnDeath        ;<[Delayed: $89B84F] ; Event pointer on death.
+cop #$B6 : db $30            ; Over both BGs.
+cop #$80                     ; Animate sprite $14 and follow prescribed
+  db !AG_Spr_Bubble_Spawn
+cop #$89                     ;   move pattern until anim frames run out.
+cop #$B1                     ; Load saved move pattern, then
+cop #$80                     ;   animate sprite $17 and follow that
+  db !AG_Spr_Bubble_Hold
+cop #$89                     ;   move pattern until anim frames run out.
+lda #$0100 : trb $12         ; Always-update-hitbox (needed for compat with spawner).
+.Main:
+cop #$CA : db $04
+lda.w #..Here : sta $00; : lda #$0089 : sta $02
+..Here:
+txy : lda.w #2*$73 : brk
+sbc #$007F : adc $1014
+bpl ++
+-:
+ adc #$0030 : bmi - : bra +
+++:
+cmp #$00E8 : bcc +
+ sbc #$0030 : cmp #$00E8 : bcc +
+  sbc #$0030
++:
+sta $7F0018,x
+;txy : lda.w #2*$73 : brk
+;lsr : sbc #$003F : adc $1016  ; Likewise for PlayerY.
+tdc : xba : adc $0036 : and #$003F : sbc #$001F : adc $1016
+cmp #$01DC  ; was #$00e8
+bcc +
+ sbc #$0030
++:
+sta $7F001A,x                ;   $7F:1A = PlayerY + rand($7F) - #$3F, ...
+cop #$22                     ; Animate sprite $18, moving 2px/frame,
+  db !AG_Spr_Bubble_Atk,$03
+;bit $10                      ;   toward PlayerX/Y +- RandX/RandY; then
+;asl;bit #$4000                   ;   if the Bubble has ended up off-screen,
+;bvs .QuickDie;bne .QuickDie    ;<[$89B87E] ; just die.
+bit $09FF : bvs .QuickDie ; Also die if it's time for P3.
+cop #$84                     ; Animate sprite $18 twice.
+  db !AG_Spr_Bubble_Atk,$02
+cop #$8A                     ; ^
+cop #$CB                     ; Chase the player again next frame, unless...
+
+.OnDeath:
+cop #$88 : dl $8ee000        ;<Delayed ; ...our timer(?) runs out or we're killed.
+;lda $16                      ; Either case means it's time to die,
+;sec                     ;   so we set our spriteset to the "Random stuff"
+;sbc #$0008 : sta $16     ;   page, and move our center up 8 pixels.
+;lda #$0003 : sta $24     ; Create four Debris using our new position.
+cop #$07 : db $1D
+;-
+;cop #$9C : dl .Debris : dw $0B12
+;lda $24 : sta $0024,y
+;dec $24
+;bpl -    ;(-$0B)             ;<[$89B861]
+;stz $24
+lda $16
+;clc
+adc #$0004 : sta $16       ; Move back down 4 more pixels,
+cop #$80 : db $02          ; then animate sprite $02,
+cop #$89
+.QuickDie:
+cop #$E0                     ; then die.
+}
+
+if 0
+; 4 Debris are created by Bubble
+;   as it's dying (due to time or being killed).
+{
+.Debris:
+lda $24 : lsr : inc : sta $7F0018,x
+ asl : tax : lda $80B086,x : sta $2C
+tdc : tax
+lda $24 : and #$0001 : inc : sta $7F001A,x
+ asl : tax : lda $80B086,x : sta $2E
+tdc : tax
+cop #$80 : db $07            ; The Debris animates sprite $07 with that
+cop #$89                     ;   move pattern until it runs out of anim
+cop #$E0                     ;   frames, then dies.
+} ; End Bubble Debris code.
+endif
+
+EAGNukeFactory:
+{
+cop #$73 : sta $26
+cop #$A5 : dl EAGNuke : db $00,$00 : dw $0202
+lda #$0000 : sta $0026,y
+lda $26 : and #$003F : sta $08
+cop #$C2
+cop #$A5 : dl EAGNuke : db $00,$00 : dw $0202
+lda $26 : lsr : lsr : sta $08
+ and #$0001 : inc a : sta $26 : sta $0026,y
+cop #$C2
+cop #$A5 : dl EAGNuke : db $00,$00 : dw $0202
+lda $26 : and #$0001 : inc a : sta $0026,y
+cop #$E0
+}
+
+; Apocalypse Core Nuke.
+; Spawned during the Core's P2 loop.
+{
+EAGNuke:
+cop #$B6 : db $34            ;<Child ;$04 = better palette
+cop #$07 : db $29
+cop #$73 : pha : and #$001F : adc #$01B0 : sta $7F001A,x
+lda $26 : beq .CenterFall
+dec : beq .LeftFall
+.RightFall:
+pla : adc #$01F0
+bra +
+.LeftFall:
+pla
++:
+adc #$0020 : lsr : lsr : sta $7F0018,x
+cop #$22 : db !AG_Spr_Nuke_Fall,$01
+bra .AfterFall
+.CenterFall:
+pla ; and throw it away
+lda #$0080 : sta $7F0018,x
+cop #$22 : db !AG_Spr_Nuke_Fall,$01
+cop #$A5                     ; [Child: $89B9C5] ; Nuke palette shift.
+  dl AGFlamePaletteShifter : db $00,$00,$00,$20
+.AfterFall:
+cop #$84                     ; animate another $02 times.
+  db !AG_Spr_Nuke_Fall,$01
+cop #$8A                     
+cop #$07 : db $1E            ; Sound.
+cop #$73                     ; RNG. Randomly selects initial angle.
+sta $26                      
+cop #$9C                     ; [Child: $89B8F3] ; Create one Nuke Piece.
+  dl EAGNuke_Piece : db $02,$02
+lda $26                      
+clc : adc #$0055             ; Advance its initial angle 120 degrees.
+and #$00FF : sta $0026,y
+cop #$9C                     ; [Child: $89B8F3] ; Create another Nuke Piece.
+  dl EAGNuke_Piece : db $02,$02
+lda $26                      
+clc : adc #$00AA             ; Advance its initial angle 240 degrees.
+and #$00FF : sta $0026,y
+.Piece:
+cop #$B7 : db $02
+lda $26                      ;<Child ; There are now three Nuke Pieces.
+sta $7F0010,x                ; Initial angle plus-or-minus 120 degrees.
+lda #$0000 : sta $7F0012,x   ; Initial distance from center.
+inc : sta $7F100E,x : sta $7F100C,x ; Unknown purpose.
+lda $14 : sta $7F0018,x      ; Center point x.
+lda $16 : sta $7F001A,x      ; Center point y.
+cop #$8D                     ; Animate sprite $13,
+  db !AG_Spr_Nuke_Piece
+.OrbitAnimFrame:
+cop #$8B                     ;  but continue this frame's code.
+lda $2A                      ; If there's no AnimFrame left,
+beq EAGNuke_OrbitAnimFrame ;(-$06) ;<[$89B91A] ; just start $13 over again,
+lda $08 : sta $26            ; but still move on in any case.
+stz $08                      ; Set $26 = next frame visible time,
+.OrbitWaitFrame:
+cop #$C2                     ; set pointer here, and delay 1 frame. Loop start.
+sep #$20                     
+lda $7F0010,x                ; Contains the spiral angle.
+inc : inc : sta $7F0010,x  ; Advance spiral angle by 2.
+lda $7F0012,x                ; Contains the distance from the spiral center.
+clc : adc #$06 : sta $7F0012,x  ; Advance radius by 6.
+rep #$20
+bcs EAGNuke_WrapAround       ;<[$89B970] ; Provided the result is <= #$FF,
+;rep #$20                     
+lda $14 : pha
+lda $16 : pha               ; push the current x and y
+lda $7F0018,x : sta $14
+lda $7F001A,x : sta $16      ; and restore the initial x and y.
+jsl LR_Orbit                 ;<[$80F3D3] ; This SR updates x and y based on
+pla                          ;   our position in the spiral; then
+sec : sbc $16 : sta $7F100E,x ;   store the delta between our old and new
+pla                          ;   x/y positions in $7F100C/E.
+sec : sbc $14 : sta $7F100C,x
+dec $26                      ; Repeat the above from $89b924 for every WaitFrame
+bpl EAGNuke_OrbitWaitFrame ;(-$48);<[$89B926] ; in this animation, then
+bra EAGNuke_OrbitAnimFrame ;(-$56) ;<[$89B91A] ; go on to the next AnimFrame.
+.WrapAround:
+lda #$6000 : trb $12         ; If $7F:12>#$FF, set EW&SN move conversion, then
+lda $7F100C,x : eor #$FFFF : inc a
+ sta $7F100C,x                ; negate our x delta
+lda $7F100E,x : eor #$FFFF : inc a
+ sta $7F100E,x                ; and y delta,
+bra +   ;+$0E                ;<[$89B99F] ; and jump ahead a little.
+.LinearAnimFrame:
+cop #$8B                     ;<--Branch ; From here on is a copy of
+lda $2A                      ; the above that skips the trigonometry
+beq EAGNuke_LinearAnimFrame ;(-$06);<[$89B991] ; and just moves the Nuke Pieces
+lda $08                      ; linearly each frame.
++
+stz $08                      ; We get here after advancing the radius past #$FF.
+sta $26                      
+.LinearWaitFrame:
+cop #$C2                     
+lda $7F100C,x : sta $7F002C,x ; Set $7F:2C/2E = -delta(X/Y),
+lda $7F100E,x : sta $7F002E,x ; so we have a linear move from now on.
+bit $10                      
+;bit #$4000                   ; If we're now off-screen,
+bvs +   ;+$06                ;<[$89B9BC] ; go ahead and die.
+dec $26                      ; Otherwise, keep animating as before, but
+bpl EAGNuke_LinearWaitFrame ;(-$1D) ;<[$89B99D] ; using the above linear move
+bra EAGNuke_LinearAnimFrame ;(-$2B) ;<[$89B991] ; updates based on sprite WaitFrames.
++
+cop #$E0                     
+} ; End Apocalypse Core Nuke.
+
+
+; P2 Intro Palette Shifter.
+AGIntroPaletteShifter:
+cop #$37 : db $6A            ;<Child
+cop #$39                     
+cop #$E0                     
+
+
+; P2 Nuke Launch and/or Death, Palette Shifter.
+AGFlamePaletteShifter:
+cop #$37 : db $69            ;<Child
+cop #$39
+bra AGIntroPaletteShifter
+;cop #$E0                     
+
+
+; Subroutine - Move Children and Camera
+; Called by (e.g.) Brain when it moves Gaia upward in P1.
+; Iterates through the .Next chain and moves all of its children by
+;   x/y = Low$0018/$001C, then moves the camera by the same amount.
+SR_AGMoveChildrenAndCamera:
+phx                          ;<SR
+phd : lda #$0000 : tcd
+ldx $06,y                  ; .X = Caller.Next.
+sty $00                    ; $0000 = Caller.
+-
+lda $00                    ; Loop start.
+cmp $7F001C,x                ; If Caller == Caller.Next.Parent...
+bne ++   ;+$1A               ;<[$89B9F6] 
+lda $14,x
+clc : adc $18 : sta $14,x ;   Shift Caller.Next.x by Low$0018,
+lda $16,x
+clc : adc $1C : sta $16,x ;   and Caller.Next.y by Low$001C.
+lda $06,x                  ;   Then re-call this loop using
+tax                          ;     .X = Caller.Next.Next.
+bra -    ;(-$23)             ;<[$89B9D3] 
+++     ; Reached an event that is not a child of Caller.
+ldx #$0600
+lda $18 : eor #$FFFF : inc a
+clc : adc $C0,x : sta $C0,x  ; Shift EffectLayerX by -Low$0018,
+;clc : adc $BE,x : sta $BE,x
+lda $1C : eor #$FFFF : inc a
+clc : adc $C4,x : sta $C4,x  ; and EffectLayerY by -Low$001C,
+;clc : adc $C2,x : sta $C2,x
+pld : plx
+rts                          ; and return.
+
+
+; Subroutine -- Initialize Apocalypse Bit
+; Sets properties of the Apocalypse Bits.
+SR_AGBitInit:
+lda #$8091 : tsb $12    ; Physics flags.
+;lda $7F002A,x : ora #$0080 ; Exclude from monster counter.
+; sta $7F002A,x                
+lda #$AD44 : jsr SR_InitVitals
+stz $26                 ; Zero internal variable.
+rts                     ;<[$89B311] 
+
+; Map changer. Places us on the Comet with Kara, credits roll, etc.
+LoadCreditsMap:
+lda #$8000 : tsb $065A
+cop #$DB : dw $0180
+stz $0AD4
+lda #$0405 : sta $064A
+lda #$0002 : sta $0648
+cop #$26 : db $E5,$00,$00,$00,$00,$00,$00,$11
+cop #$E0                     
+
+SR_InitVitals:
+sta $7F0020,x
+tay
+lda $0000,y : and #$00FF : sta $7F0026,x
+rts
+
+; Sine function with scale factor.
+; Sets .A = sin($7F:10 * 360/256 deg) * ($7F:12 / #$0100).
+; SR called e.g. by Brain after it's reached y=0 and entered a new loop.
+SR_Sine7F10:
+sep #$20
+lda $7F0012,x : sta $4202
+lda $7F0010,x : tay
+lda $C455,y : sta $4203
+bmi .NegativeSine
+lda #$00 : xba
+lda $4217
+rep #$20
+rts
+.NegativeSine:
+eor #$FF : inc a : sta $4203
+lda #$00 : xba : nop
+lda $4217
+rep #$20 : eor #$FFFF : inc a
+rts
+
+
+
+
+
+
