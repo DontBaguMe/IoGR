@@ -22,7 +22,7 @@ from .models.enums import *
 
 from . import asar
 
-VERSION = "4.7.2.1"
+VERSION = "4.7.2.2"
 MAX_RANDO_RETRIES = 50
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
 
