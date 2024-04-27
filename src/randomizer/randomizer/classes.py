@@ -4553,7 +4553,7 @@ class World:
             # Great Wall
             218: [0, 292, 293,     0, [[609, 1]], False],           # Drop room forward requires an attack for the button
             219: [0, 293, 291,     0, [[63, 1]], True],             # Map 131 (drop room) backwards w/ Spin Dash
-            220: [0, 296, 295 if settings.allow_glitches else 296, 0, [[604, 1]], False], # Map 133 E->C w/ glitches and Flute
+            220: [0, 294, 295 if settings.allow_glitches else 294, 0, [[604, 1]], False], # Map 133 W->C w/ glitches and Flute
             221: [0, 296, 295,     0, [[63, 1]], False],            # Map 133 E->C w/ Spin Dash
             222: [0, 296, 295,  0x06, [], False],                   # Map 133 E->C w/ Freedan or Shadow
             223: [0, 296, 294,     0, [[63, 1]], False],            # Map 133 C->W w/ Spin Dash
