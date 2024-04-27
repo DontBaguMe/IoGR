@@ -12,7 +12,7 @@ hirom
 ; $0bf8 = during DS warp, DS index of text lines and of selected DS
 ; $0bfa = used for text branches ("FORCE" text, inv page number, count spacing, Lance's letter, etc.)
 ; $0bfc = used during item pickup to write text slowly (for chests and Dark Spaces)
-; $0bfe = used during item pickup to flag a stat as maxed out
+; $0bfe = used by Z3 to flag a stat as maxed out
 ; $1ffc = Player X pos in debug mode
 ; $1ffe = Player Y pos in debug mode
 ; Reserved flags (in addition to base game):
@@ -173,7 +173,7 @@ endif
 ; Silently gives item A, stacking if appropriate.
 LR_GiveNormalItemA8OrSec:
 {
-stz $0bfe    ; Used by Z3 mode to flag whether we're capped on a stat.
+stz $0bfe   ; whether a Z3 stat is maxed out
 php
 sep #$20
 bit #$80 : bne .IsStatOrPickup
@@ -272,7 +272,7 @@ bcs +
 ..MaxStrByDifficulty:
 db 8,4,2,1
 +:
-lda #$01 : sta $0bfe
+lda #$01 : sta $0bfe   ; stat maxed out
 ++:
 else
 inc $0ADE
@@ -293,7 +293,7 @@ bcs +
 ..MaxDefByDifficulty:
 db 2,2,1,0
 +:
-lda #$01 : sta $0bfe
+lda #$01 : sta $0bfe   ; stat maxed out
 ++:
 else
 inc $0ADC
@@ -319,6 +319,7 @@ endif
 ldy #$FF1F
 .ClcAndReturn:
 plp
+jsr SR_SetDataForItem
 clc
 rtl
 .InvFull:
@@ -350,26 +351,23 @@ lda $01,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
 ..IsNotSpecial:
 lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
 ..GotItem:
-cop #$BF : dw ...Text
+jsr SR_SetTextForItem
+cop #$BF : dw .TextMaybeGotItem
 stz $0db8
 stz $0bfc
+stz $0bfe
 pla
 clc
 rtl
-...Text:
-db $cd : dl .TextItsAnItem
-db $c0
 ..InvFull:
-cop #$BF : dw ...Text
+lda #$0001 : sta $0bfa   ; your inv full
+cop #$BF : dw .TextMaybeGotItem
 stz $0db8
 stz $0bfc
+stz $0bfe
 pla
 sec
 rtl
-...Text:
-db $cd : dl .TextItsAnItem
-db "But your inventory's full!"
-db $c0
 ..IsSpecial:    ; Handling for upgrades, duplicate stat items, and Heart Pieces.
 lda $01,s : cmp #$008a : bcs ..IsNotStatUpgrade
 ..IsStatUpgrade:
@@ -435,15 +433,20 @@ rtl
 db $cd : dl .TextAbilityCanNowBeUsed
 db $ca   ; not $c0 here, because we're clumsily including a $c0 upstream
 
+.TextMaybeGotItem:
+db $cd : dl .TextItsAnItem
+db $cb
+db $cb
+db $c5 : dw TextItemGetExtraLine, $0bfa
+db $c0
+
 .TextItsAnItem:
 db $d3
 db $c5 : dw TextItemGetSpeeds, $0bfc
 db $d6,$1d    ; "It's "
 db $c5 : dw TextItemGetArticles, $0db8
 db $c5 : dw TextItemGetNames, $0db8
-db "!",$cb
-db $c5 : dw TextZ3UpgradeMaybeMaxedOut, $0bfe
-db $cb
+db "!"
 db $ca
 .TextItsADoor:
 db $d3
@@ -456,8 +459,30 @@ db $d3
 db $c5 : dw TextItemGetSpeeds, $0bfc
 db $cd : dl TextItemGetAbilityCanBeUsedIncl
 db $ca
+}
 
+; Set flags etc. as appropriate for the item. Hopefully move some of the above code into here later.
+SR_SetDataForItem:
+{
+lda $0db8 : cmp #$0024 : beq .GotAura
+rts
+.GotAura:
+cop #$CC : db $b4
+rts
+}
 
+; Text is separate from data, so we don't clobber $0bfa by e.g. receiving a MW item while opening Lance's letter.
+SR_SetTextForItem:
+{
+lda $0bfe : bne .GotMaxedOutZ3Stat
+lda $0db8 : cmp #$0024 : beq .GotAura
+rts
+.GotMaxedOutZ3Stat:
+lda #$0002 : sta $0bfa   ; ope, you get nothing
+rts
+.GotAura:
+lda #$0003 : sta $0bfa   ; congrats, you got shadow
+rts
 }
 
 TextItemGetNames:
@@ -1421,14 +1446,22 @@ db $ca
 db $d5,$09
 db $ca
 
-TextZ3UpgradeMaybeMaxedOut:
+TextItemGetExtraLine:
 .Pointers:
-dw .NotMaxedOut
-dw .IsMaxedOut
-.NotMaxedOut:
+dw .NoExtraLine
+dw .YourInvFull
+dw .Z3StatIsMaxedOut
+dw .ShadowsFormUnlocked
+.NoExtraLine:
 db $ca
-.IsMaxedOut:
+.YourInvFull:
+db "But your inventory's full!"
+db $ca
+.Z3StatIsMaxedOut:
 db "But you're maxed out!"
+db $ca
+.ShadowsFormUnlocked:
+db $cd : dl TextLongShadowsFormUnlocked
 db $ca
 
 TextJewelerInvLineBegin:
@@ -1489,6 +1522,7 @@ lda #$0002 : sta.l 6+SramTextBuffer
 rtl
 
 LR_SetupAndDrawJewelerInvLineA:   ; A = 1-7
+{
 pha
 jsl LR_PrepSramTextBufferForJewelerLineA
 pla : cmp #$0007 : bcs .IsLine7
@@ -1561,6 +1595,7 @@ db $ca
 .TextSpecialItem:
 db $cd : dl TextJewelerInvSpecialPaddedAssumingSram
 db $ca
+}
 
 macro MIncBcd8(addr)
 lda <addr> : clc : adc.b #1 : sta <addr>
@@ -1710,6 +1745,7 @@ rtl
 }
 
 LR_GetEmptyInvSlotInYOrSec:
+{
 php
 sep #$20
 ldy #$0000
@@ -1740,6 +1776,7 @@ rtl
 plp
 sec
 rtl
+}
 
 LR_WriteItemAToInvSlotY:
 php

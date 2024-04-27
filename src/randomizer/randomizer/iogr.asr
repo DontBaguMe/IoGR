@@ -4669,7 +4669,6 @@ db $c0
 
 org $839CDC    ; In SR_UseItemAura, this is the not-Shadow branch.
 cop #$BF : dw TextShadowsFormUnlocked
-cop #$CC : db $b4
 rts
 TextShadowsFormUnlocked:
 table "table_dialogue.txt",rtl
