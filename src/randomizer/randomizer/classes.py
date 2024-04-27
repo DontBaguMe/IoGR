@@ -89,10 +89,10 @@ class World:
     def fill_item(self, item, location=-1,test=False,override_restrictions=False):
         if location == -1:
             return False
-        elif self.item_locations[location][2]:
+        elif not test and self.item_locations[location][2]:
             self.verbose("Tried to place an item in a full location: "+str(self.item_pool[item][3])+" "+str(self.item_locations[location][6]))
             return False
-        elif item in self.item_locations[location][4] and not override_restrictions:
+        elif not test and item in self.item_locations[location][4] and not override_restrictions:
             self.verbose("Tried to place item in a restricted location: "+str(self.item_pool[item][3])+" "+str(self.item_locations[location][6]))
             return False
         elif test:
