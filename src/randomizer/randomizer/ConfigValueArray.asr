@@ -13,7 +13,7 @@ hirom
 namespace Config
 
 BankAnchor:
-dw $0001
+dw $0002
 
 macro MAddConfigAddr(ConfigName,DefaultValue)
 <ConfigName>:
@@ -76,37 +76,37 @@ endif
 %MAddConfigAddr("IncaTileX",2)   ; 12 wide, range [0,11]
 %MAddConfigAddr("IncaTileY",4)   ; 6 high, range [0,5]
 
-; The code assumes 8 bytes per room.
+; The code assumes 8 bytes per room. The order of elements is strange; callers shouldn't worry about it.
 ; DifferenceIndex1 is applied to the right room; 2 and 3 are applied to both.
 ; Room 3 automatically ignores Index1 if the chest contents are different.
 IshtarRoomDifferencesAnchor:
-IshtarRoom1DifferenceIndex1:
-dw !IshtarRoom1DifferenceIndex1
-IshtarRoom1DifferenceIndex2:
-dw !IshtarRoom1DifferenceIndex2
 IshtarRoom1DifferenceIndex3:
 dw !IshtarRoom1DifferenceIndex3
+IshtarRoom1DifferenceIndex2:
+dw !IshtarRoom1DifferenceIndex2
+IshtarRoom1DifferenceIndex1:
+dw !IshtarRoom1DifferenceIndex1
 dw $ffff
-IshtarRoom2DifferenceIndex1:
-dw !IshtarRoom2DifferenceIndex1
-IshtarRoom2DifferenceIndex2:
-dw !IshtarRoom2DifferenceIndex2
 IshtarRoom2DifferenceIndex3:
 dw !IshtarRoom2DifferenceIndex3
+IshtarRoom2DifferenceIndex2:
+dw !IshtarRoom2DifferenceIndex2
+IshtarRoom2DifferenceIndex1:
+dw !IshtarRoom2DifferenceIndex1
 dw $ffff
-IshtarRoom3DifferenceIndex1:
-dw !IshtarRoom3DifferenceIndex1
-IshtarRoom3DifferenceIndex2:
-dw !IshtarRoom3DifferenceIndex2
 IshtarRoom3DifferenceIndex3:
 dw !IshtarRoom3DifferenceIndex3
+IshtarRoom3DifferenceIndex2:
+dw !IshtarRoom3DifferenceIndex2
+IshtarRoom3DifferenceIndex1:
+dw !IshtarRoom3DifferenceIndex1
 dw $ffff
-IshtarRoom4DifferenceIndex1:
-dw !IshtarRoom4DifferenceIndex1
-IshtarRoom4DifferenceIndex2:
-dw !IshtarRoom4DifferenceIndex2
 IshtarRoom4DifferenceIndex3:
 dw !IshtarRoom4DifferenceIndex3
+IshtarRoom4DifferenceIndex2:
+dw !IshtarRoom4DifferenceIndex2
+IshtarRoom4DifferenceIndex1:
+dw !IshtarRoom4DifferenceIndex1
 dw $ffff
 
 HieroOrderAnchor:

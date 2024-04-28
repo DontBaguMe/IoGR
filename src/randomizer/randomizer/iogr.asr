@@ -7553,9 +7553,9 @@ SR_SecIfThisIshtarRoomHasWind:
 phx
 lda $1016 : cmp #$0100 : bcs .NoWind
 lda $1014 : jsr SR_GetIshtarRoomAddrOffsetForXPos : tax
-lda.l 0+Config_IshtarRoomDifferencesAnchor,x : beq .MaybeHasWind
+lda.l 4+Config_IshtarRoomDifferencesAnchor,x : beq .MaybeHasWind
 lda.l 2+Config_IshtarRoomDifferencesAnchor,x : beq .HasWind
-lda.l 4+Config_IshtarRoomDifferencesAnchor,x : beq .HasWind
+lda.l 0+Config_IshtarRoomDifferencesAnchor,x : beq .HasWind
 .NoWind:
 plx
 clc
@@ -7666,27 +7666,27 @@ cpx #$0600 : bcc -
 rep #$20
 ; Then draw indexed differences on the tilemaps
 lda #$0000 : tcd
-lda #$0000 : pha   ; $01,s = whether we've drawn Index1 for this room
-lda #$0000 : pha   ; $01,s = room index (0,1,2,3); $03,s = is this Index > 1
+lda #$0002 : pha   ; $01,s = difference index less 1 (=2,1,0; 0 = DifferenceIndex1 is drawn last to ensure its effect isn't overwritten)
+lda #$0000 : pha   ; $01,s = room index (0,1,2,3); $03,s = DifferenceIndex
 .DrawNextRoom:
 lda $01,s : asl : tax
-lda.l .TablePointers,x : pha   ; $01,s = #.TableRoomN; $03,s = room index; $05,s = is this difference index > 1
+lda.l .TablePointers,x : pha   ; $01,s = #.TableRoomN; $03,s = room index; $05,s = DifferenceIndex
 lda $03,s : asl : xba : clc : adc #$0080 : jsr SR_GetIshtarRoomAddrOffsetForXPos : tax
-phx   ; $01,s = base offset from DifferencesAnchor for this room; $03,s = #.TableRoomN; $05,s = room index; $07,s = is this difference index > 1
-.DrawNextDiff:   ; Here X = $01,s should be DifferenceIndexM - DifferencesAnchor; $03,s = #.TableRoomN; $05,s = room index; $07,s = is M>1.
-..CheckRoom3Special:
-lda $05,s : cmp #$0002 : bne ..CheckDifferenceIndex
-lda $07,s : bne ..CheckDifferenceIndex
-jsr SR_SecIfIshtarChestsAreDifferent : bcs ..SkipDifferenceIndex
-..CheckDifferenceIndex:
-lda.l Config_IshtarRoomDifferencesAnchor,x : bmi .PrepNextRoom
-  bne ..GotGoodDifferenceIndex
+phx   ; $01,s = base offset from DifferencesAnchor for this room; $03,s = #.TableRoomN; $05,s = room index; $07,s = DifferenceIndex
+.MaybeDrawNextDifferenceIndex:   ; Here X = $01,s should be DifferenceIndexM - DifferencesAnchor; $03,s = #.TableRoomN; $05,s = room index; $07,s = DifferenceIndex.
+lda $07,s : bpl +
+  jmp .PrepNextRoom              ; All DifferenceIndexes have been drawn or skipped
++:
+lda.l Config_IshtarRoomDifferencesAnchor,x
+  bmi ..SkipDifferenceIndex      ; $FFFF is skipped
+  beq ..SkipDifferenceIndex      ; Wind is skipped, being handled elsewhere because it's not a tile draw
+lda $05,s : cmp #$0002 : bne ..UseDifferenceIndex    ; Room 3 (only) skips index 1 (only), if the chests are different
+lda $07,s : bne ..UseDifferenceIndex
+jsr SR_SecIfIshtarChestsAreDifferent : bcc ..UseDifferenceIndex
 ..SkipDifferenceIndex:
-    inx : inx
-    lda #$0001 : sta $07,s
-    bra .DrawNextDiff   ; Skip the diff if it's 0 (wind, handled elsewhere), or if it's the first diff in room 3 and the difference is supposed to be chest contents
-..GotGoodDifferenceIndex:
-  asl : clc : adc $03,s : tax   ; X = #.TableRoomN + 2 * DifferenceIndex
+  jmp .PrepNextDiff
+..UseDifferenceIndex:
+lda.l Config_IshtarRoomDifferencesAnchor,x : asl : clc : adc $03,s : tax   ; X = #.TableRoomN + 2 * DifferenceIndex
 lda.l $ff0000&SR_DrawIshtarMapDifferences,x : tax   ; X = #.TableRoomN_IndexM
 ..DrawNextTile:
 lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : cmp #$00ff : beq .PrepNextDiff
@@ -7694,14 +7694,14 @@ lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : cmp #$00ff : beq .Pre
 inx
 lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : sta $1c
 inx
-lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : pha   ; note this pha temporarily shifts the stack
+lda.l $ff0000&SR_DrawIshtarMapDifferences,x : and #$00ff : pha   ; the stack shifts for a few lines here
 inx
 lda $07,s : asl : xba : lsr : lsr : lsr : lsr : clc : adc $18 : sta $18
 phx   ; X = addr of next line of #.TableRoomN_IndexM
 ldx #$0000
 jsl $82B0A3   ; = jsl LR_GetTileTableIndex82; returns index in X
 ply   ; Y = addr of next line of #.TableRoomN_IndexM
-pla   ; A = tile type to draw
+pla   ; A = tile type to draw; the stack is back to normal now
 sep #$20
   sta $7ea100,x   ; Update MapLayer
   phx
@@ -7710,24 +7710,24 @@ sep #$20
   plx
   sta $7fc100,x   ; Update CollisionLayer
   lda $07,s : beq +
-    lda $7ea100,x : sta $7ea000,x   ; DifferenceIndexes after 1 are drawn in both sides of the room
+    lda $7ea100,x : sta $7ea000,x   ; DifferenceIndexes above 1 are drawn in both sides of the room
     lda $7fc100,x : sta $7fc000,x
 +:
 rep #$20
 tyx
 bra ..DrawNextTile
 .PrepNextRoom:
-lda #$0000 : sta $07,s   ; Next DifferenceIndex will be 1
+lda #$0002 : sta $07,s   ; Next DifferenceIndex will be 3 again
 pla   ; Discard the DifferenceIndexM offset for this room
 pla   ; Discard #.TableRoomN
 pla : inc : cmp #$0004 : bcs .Done
   pha   ; Update room index
 jmp .DrawNextRoom
 .PrepNextDiff:
-lda #$0001 : sta $07,s   ; Next DifferenceIndex will be >1
-lda $01,s : inc : inc : sta $01,s   ; Advance to next difference for this room
+lda $01,s : inc : inc : sta $01,s   ; Advance the difference pointer
   tax
-jmp .DrawNextDiff
+lda $07,s : dec : sta $07,s   ; "Advance" the DifferenceIndex identifier
+jmp .MaybeDrawNextDifferenceIndex
 .Done:
 pla   ; Discard whether M>1
 plx   ; Restore ActorID
