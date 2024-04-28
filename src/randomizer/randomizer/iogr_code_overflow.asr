@@ -3,6 +3,8 @@ hirom
 
 ; Reserved RAM (in addition to base game):
 ; $0aaa = number of stacked herbs
+; $0b34 = DS visited flags
+; $0b36 = DS visited flags
 ; $0bec = number of stacked Hope Statues
 ; $0bee = number of stacked Rama Statues
 ; $0bf0 = number of stacked Mushroom Drops
@@ -20,6 +22,7 @@ hirom
 ; $0290 - $02af : Monster item flags $19 - $2A, and 13 extras
 ; $02b0 - $02b1 : Statue placed in the Left/Right Hope Room
 ; $02b2 - $02b7 : DS item-get flags
+; $09a0 - $09c4 : DS visited flags
 
 
 LR_SecOnAnyFlagA:
@@ -436,7 +439,6 @@ db $ca   ; not $c0 here, because we're clumsily including a $c0 upstream
 .TextMaybeGotItem:
 db $cd : dl .TextItsAnItem
 db $cb
-db $cb
 db $c5 : dw TextItemGetExtraLine, $0bfa
 db $c0
 
@@ -476,6 +478,7 @@ SR_SetTextForItem:
 {
 lda $0bfe : bne .GotMaxedOutZ3Stat
 lda $0db8 : cmp #$0024 : beq .GotAura
+stz $0bfa    ; No extra line if no special case is known
 rts
 .GotMaxedOutZ3Stat:
 lda #$0002 : sta $0bfa   ; ope, you get nothing
@@ -1461,7 +1464,7 @@ db $ca
 db "But you're maxed out!"
 db $ca
 .ShadowsFormUnlocked:
-db $cd : dl TextLongShadowsFormUnlocked
+db "Shadow's form unlocked!"
 db $ca
 
 TextJewelerInvLineBegin:

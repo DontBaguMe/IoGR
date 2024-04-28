@@ -4668,12 +4668,12 @@ db $c0
 
 
 org $839CDC    ; In SR_UseItemAura, this is the not-Shadow branch.
-cop #$BF : dw TextShadowsFormUnlocked
+cop #$BF : dw TextYouCantUseAura
 rts
-TextShadowsFormUnlocked:
+TextYouCantUseAura:
 table "table_dialogue.txt",rtl
 db $d3
-db $cd : dl TextLongShadowsFormUnlocked
+db $cd : dl TextLongYouCantUseAura
 db $c0
 
 warnpc $839d09
@@ -7175,25 +7175,27 @@ db $c0
 org $86dcd8
 ; Bank $86 free space begins here.
 
-TextItemCounterDisplay:
 ; Item collection tracker in map room.
 {
+TextItemCounterDisplay:
 table "table_dialogue.txt",rtl
 db $D3
-db "_Items Collected:_"
+db "__Item Checks:_"
 db $C6 : dw $0002, $00f0
 db "/"
 db $C6 : dw $0002, $00f2
 db $CB
 if !SettingOrbRando > 0
-db "__Orbs Collected:_"
+db "_Monster Orbs:_"
 db $C6 : dw $0002, $00f4
 db "/"
 db $C6 : dw $0002, $00f6
 db $CB
 endif
-db "_____Dark Spaces:_"
+db "__Dark Spaces:_"
 db $C6 : dw $0002, $00f8
+db "/"
+db $C6 : dw $0002, $00fa
 db $C0
 
 ; Format is:
@@ -7203,6 +7205,8 @@ db $C0
 ; db $ff
 ; db <monster orb numbers, $01 - $2A>
 ; db $ff
+; db <DS indices; at time of writing these are offsets from flag $09a0>
+db $ff
 Lut_TrackerItemFlagsByArea:
 .Pointers:
 {
@@ -7236,6 +7240,8 @@ db $ff
 db $80,$81
 db $ff
 db $ff
+db $00
+db $ff
 .EdDg:
 db $23,$46,$d8
 db $ff
@@ -7243,14 +7249,19 @@ db $01,$02,$03,$82
 db $ff
 db $01,$02,$03,$04,$05,$06,$07
 db $ff
+db $01,$02
+db $ff
 .Itry:
 db $2d
 db $ff
 db $83
 db $ff
 db $ff
+db $03
+db $ff
 .Moon:
 db $48
+db $ff
 db $ff
 db $ff
 db $ff
@@ -7261,9 +7272,12 @@ db $04,$05,$06,$07
 db $ff
 db $08,$09,$0a,$0b,$0c,$0d,$0e
 db $ff
+db $04,$05,$06
+db $ff
 .Coast:
 db $ff
 db $84
+db $ff
 db $ff
 db $ff
 .Frej:
@@ -7272,6 +7286,8 @@ db $ff
 db $85
 db $ff
 db $ff
+db $07
+db $ff
 .Mine:
 db $5d,$5e,$a2,$a3,$d9
 db $ff
@@ -7279,7 +7295,10 @@ db $09
 db $ff
 db $0f,$10,$11,$12,$13,$14
 db $ff
+db $08,$09,$0a
+db $ff
 .Neil:
+db $ff
 db $ff
 db $ff
 db $ff
@@ -7289,11 +7308,15 @@ db $0a,$0b,$0c,$0d,$0e,$0f,$10,$11
 db $ff
 db $15,$16,$17,$18,$19,$1a
 db $ff
+db $0b,$0c,$0d,$0e
+db $ff
 .SeaP:
 db $13,$85
 db $ff
 db $12,$13,$14
 db $ff
+db $ff
+db $0f
 db $ff
 .Mu:
 db $79,$7f
@@ -7302,16 +7325,22 @@ db $15,$16,$17,$18,$2e
 db $ff
 db $1b,$1c,$1d,$1e,$1f,$20
 db $ff
+db $10,$11
+db $ff
 .Angl:
 db $ff
 db $19,$1a,$1b,$1c,$86,$87
 db $ff
+db $ff
+db $12
 db $ff
 .Wtma:
 db $e2,$95
 db $ff
 db $88,$89
 db $ff
+db $ff
+db $13
 db $ff
 .GtWl:
 db $98,$99
@@ -7320,11 +7349,15 @@ db $1d,$1e
 db $ff
 db $21
 db $ff
+db $14,$15,$16
+db $ff
 .Euro:
 db $9a,$a6,$e5,$f0,$f1
 db $ff
 db $8a,$8b
 db $ff
+db $ff
+db $17
 db $ff
 .Kres:
 db $ff
@@ -7332,11 +7365,15 @@ db $1f,$20,$21,$22,$23
 db $ff
 db $23
 db $ff
+db $18,$19,$1a
+db $ff
 .NtVl:
 db $e6
 db $ff
 db $8c
 db $ff
+db $ff
+db $1b
 db $ff
 .Ankr:
 db $ba,$be
@@ -7345,11 +7382,15 @@ db $24,$25,$26,$27,$28
 db $ff
 db $24,$25,$27
 db $ff
+db $1c,$1d,$1e
+db $ff
 .Dao:
 db $b8,$b8,$e7
 db $ff
 db $8d
 db $ff
+db $ff
+db $1f
 db $ff
 .Pymd:
 db $bd,$c2,$c3,$c4,$c5,$c6,$c7
@@ -7358,38 +7399,16 @@ db $29,$2a,$2b,$2c,$8e
 db $ff
 db $28
 db $ff
+db $20,$21
+db $ff
 .Babl:
 db $dc
 db $ff
 db $8f
 db $ff
 db $ff
-}
-
-TblTrackerDarkSpaceCountsByArea:
-{
-db $01   ; South Cape
-db $02   ; Edward's
-db $01   ; Itory
-db $00   ; Moon Tribe
-db $03   ; Inca
-db $00   ; Coast
-db $01   ; Freejia
-db $03   ; Mine
-db $00   ; Neil's
-db $04   ; SkGn
-db $01   ; SeaP
-db $02   ; Mu
-db $01   ; Angl
-db $01   ; Wtma
-db $03   ; GtWl
-db $01   ; Euro
-db $03   ; Kres
-db $01   ; NtVl
-db $03   ; Ankr
-db $01   ; Dao
-db $02   ; Pymd
-db $02   ; Babl
+db $22,$23
+db $ff
 }
 
 db $00 : dw $3000
@@ -7445,14 +7464,13 @@ rtl
 .InSomeArea:
 cop #$D0 : db $02,$01 : dw .DoNothing
 cop #$CC : db $02
-stz $00f0
-stz $00f2
-stz $00f4
-stz $00f6
-stz $00f8
+stz $00f0   ; Collected items
+stz $00f2   ; Total items
+stz $00f4   ; Collected orbs
+stz $00f6   ; Total orbs
+stz $00f8   ; Visited Dark Spaces
+stz $00fa   ; Total Dark Spaces
 phx
-lda $26 : tax
-lda.l TblTrackerDarkSpaceCountsByArea,x : and #$00ff : sta $00f8
 lda $26 : asl : tax
 lda.l Lut_TrackerItemFlagsByArea,x : tax
 .CountNextLowFlag:
@@ -7467,7 +7485,7 @@ bra .CountNextLowFlag
 inx
 .CountNextHighFlag:
 lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : and #$00ff : cmp #$00ff : beq ..DoneCountingHighFlags
-lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : jsl LR_SecOnFlag20A : bcc ..PostCollectionCheck
+jsl LR_SecOnFlag20A : bcc ..PostCollectionCheck
   jsr SR_IncrementCollectedItems
 ..PostCollectionCheck:
 jsr SR_IncrementTotalItems
@@ -7488,6 +7506,20 @@ cld
 inx
 bra .CountNextOrbFlag
 ..DoneCountingOrbFlags:
+inx
+.CountNextDarkSpace:
+lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : and #$00ff : cmp #$00ff : beq ..DoneCountingDarkSpaces
+clc : adc #$09a0 : jsl LR_SecOnAnyFlagA : bcc ..PostCollectionCheck
+sed
+  lda $00f8 : clc : adc #$0001 : sta $00f8
+cld
+..PostCollectionCheck:
+sed
+  lda $00fa : clc : adc #$0001 : sta $00fa
+cld
+inx
+bra .CountNextDarkSpace
+..DoneCountingDarkSpaces:
 plx
 cop #$BF : dw TextItemCounterDisplay
 rtl

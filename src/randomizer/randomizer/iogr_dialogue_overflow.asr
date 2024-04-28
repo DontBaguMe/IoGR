@@ -257,8 +257,10 @@ db "Mummy Queen 2.0!",$ca
 db "Solid Arm!",$ca
 
 
-TextLongShadowsFormUnlocked:
-db "Shadow's form unlocked!"
+TextLongYouCantUseAura:
+db "Only Shadow can use",$cb
+db "this. You'll find him",$cb
+db "in Dark Spaces!"
 db $ca
 
 
