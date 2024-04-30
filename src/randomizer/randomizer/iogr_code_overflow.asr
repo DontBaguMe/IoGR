@@ -5,6 +5,7 @@ hirom
 ; $0aaa = number of stacked herbs
 ; $0b34 = DS visited flags
 ; $0b36 = DS visited flags
+; $0bea = press-X-to-run setting
 ; $0bec = number of stacked Hope Statues
 ; $0bee = number of stacked Rama Statues
 ; $0bf0 = number of stacked Mushroom Drops
@@ -2237,6 +2238,23 @@ if !SettingInfiniteInventory == 1
 jsl LR_GiveQueuedItems
 jsl LR_UpdateItemViewFull
 endif
+.SetupRng:
+lda $0644 : cmp #$008a : beq ..Fanger
+  cmp #$00dd : beq ..MummyQueen
+  cmp #$00e7 : beq ..FlightToComet
+bra ..Done
+..Fanger:
+lda #$0000
+bra ..DoSetRng
+..MummyQueen:
+lda #$0001
+bra ..DoSetRng
+..FlightToComet:
+lda #$0002
+;bra ..DoSetRng
+..DoSetRng:
+jsl LR_SetGameRngIndexA
+..Done:
 lda #$1000 : tsb $12
 rtl
 
@@ -3076,6 +3094,18 @@ db $ca
 }
 
 
+db $00 : dw $2000
+ESeaPalNpcFixer:
+cop #$D0 : db $70,$00 : dw .Die
+cop #$C2
+lda #$0101 : sta $7fc384
+  sta $7fc386
+  sta $7fc388
+  sta $7fc389
+rtl
+.Die:
+cop #$E0
+
 
 LR_DebugSubActor:
 {
@@ -3584,6 +3614,27 @@ lda #$0000
 plx
 sec
 rtl
+
+LR_SetGameRngIndexA:
+{
+; Seeds the RNG from the IOGR hash string, accepting A=0-5 for variations.
+; Unsure whether I want to round $0036 to a multiple of 2 as well.
+phx
+tax
+lda.l Config_RandoTitleScreenHashString-1,x
+ldy #$0000
+-:
+sta $0410,y
+iny : iny
+cpy #$0010 : bcc -
+;lda $0036 : lsr : bcc +
+;  inc $0036
+;+:
+plx
+rtl
+}
+
+
 
 
 

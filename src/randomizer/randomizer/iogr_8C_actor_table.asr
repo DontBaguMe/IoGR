@@ -1718,6 +1718,7 @@ db $2B,$3A,!Monster0190Param : dl !Monster0190Addr : db !Monster0190Stats,$00,!M
 db $30,$3A,!Monster0191Param : dl !Monster0191Addr : db !Monster0191Stats,$00,!Monster0191ItemFlag
 db $32,$3C,!Monster0192Param : dl !Monster0192Addr : db !Monster0192Stats,$00,!Monster0192ItemFlag
 db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
+db $00,$00,$00 : dl ESeaPalNpcFixer-3 : db $00
 db $FF,$CA 
 
 ActorList_Map5D:

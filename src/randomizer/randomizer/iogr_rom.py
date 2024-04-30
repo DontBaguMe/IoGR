@@ -275,7 +275,7 @@ class Randomizer:
         ##########################################################################
         #                          Randomize Snake Game
         ##########################################################################
-        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]         # By level
+        snakes_per_sec = [0.75, 0.85, 1.175, 1.50]         # By level
         if settings.flute.value >= 1:
             snakes_per_sec = [i/4.0 for i in snakes_per_sec]
         snake_adj = random.uniform(0.9, 1.1)               # Varies snakes per second by +/-10%
@@ -310,6 +310,7 @@ class Randomizer:
         #                    Randomize Jeweler Reward amounts
         ##########################################################################
         gem = []
+        gem_mod = settings.difficulty.value
         if settings.z3:
             gem.append(random.randint(1, 2))
             gem.append(random.randint(3, 4))
@@ -318,34 +319,18 @@ class Randomizer:
             gem.append(random.randint(12, 17))
             gem.append(random.randint(18, 23))
             gem.append(random.randint(24, 34))
-
             if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-                if settings.difficulty.value == 0:
-                    gem[6] = 24
-                elif settings.difficulty.value == 1:
-                    gem[6] = 28
-                elif settings.difficulty.value == 2:
-                    gem[6] = 31
-                elif settings.difficulty.value == 3:
-                    gem[6] = 34
+                gem[6] = [24, 28, 31, 34][gem_mod]
         else:
             gem.append(random.randint(1, 3))
             gem.append(random.randint(4, 6))
             gem.append(random.randint(7, 9))
             gem.append(random.randint(10, 14))
-            gem.append(random.randint(16, 24))
-            gem.append(random.randint(26, 34))
-            gem.append(random.randint(36, 50))
-
+            gem.append(random.randint(16, 21 + gem_mod))
+            gem.append(random.randint(23 + gem_mod, 28 + 2*gem_mod))
+            gem.append(random.randint(32 + 2*gem_mod, 38 + 4*gem_mod))
             if settings.goal.value == Goal.RED_JEWEL_HUNT.value:
-                if settings.difficulty.value == 0:
-                    gem[6] = 35
-                elif settings.difficulty.value == 1:
-                    gem[6] = 40
-                elif settings.difficulty.value == 2:
-                    gem[6] = 45
-                elif settings.difficulty.value == 3:
-                    gem[6] = 50
+                gem[6] = [35, 40, 45, 50][gem_mod]
 
         i = 1
         while i <= 7:

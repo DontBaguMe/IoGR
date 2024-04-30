@@ -2980,6 +2980,44 @@ org $82befa
 jsr SR_SetWillAbilitySpriteSetOnFlute
 org $82c0be
 jsr SR_SetWillAbilitySpriteSetOnFlute
+
+
+org $82c4dd
+EPlayer_ActPressDown:
+nop
+lda #$0000 : jsr SR_SecIfCanStartRunningInDirectionA : bcc $13
+;...
+org $82c514
+jsr SR_RunningConsiderReturnToActRepl
+
+
+org $82C524
+EPlayer_ActPressUp:
+nop : nop
+lda #$0001 : jsr SR_SecIfCanStartRunningInDirectionA : bcc $13
+;...
+org $82c55c
+jsr SR_RunningConsiderReturnToActRepl
+
+
+org $82C56C
+EPlayer_ActPressLeft:
+nop : nop : nop
+lda #$0002 : jsr SR_SecIfCanStartRunningInDirectionA : bcc $13
+;...
+org $82c5a5
+jsr SR_RunningConsiderReturnToActRepl
+
+
+org $82C5B5
+EPlayer_ActPressRight:
+nop : nop : nop : nop
+lda #$0003 : jsr SR_SecIfCanStartRunningInDirectionA : bcc $13
+;...
+org $82c5ef
+jsr SR_RunningConsiderReturnToActRepl
+
+
 org $82cc05
 jsr SR_SetWillAbilitySpriteSetOnFlute
 org $82cc58
@@ -4269,6 +4307,134 @@ SR_InvCleanupPointedItem:
 lda.l SramInvActivePageId : inc : sta $0bfa
 lda #$c040 : tsb $0658
 rts
+
+; In the base game, you run if you tap in the direction you're facing while $040c is non-negative.
+; $040c is non-negative only for ~12 frames after you tap any direction from a stationary position.
+; This routine extends the logic to allow running under some circumstances if the unused button is pressed.
+; Input is a proposed direction, 0/1/2/3 = S/N/W/E; player's facing direction should be in $24.
+SR_SecIfCanStartRunningInDirectionA:
+{
+sta $0000
+cmp $24 : beq .FacingInProposedDirection
+.NotFacingInProposedDirection:
+; If A-to-run is enabled, you can run in a non-blocked direction if you aren't pressing your facing direction.
+;lda $0bea : beq .ClcAndReturn
+lda $0656 : bit #$0080 : beq .ClcAndReturn
+lda $24 : beq ..FacingSouth
+  dec : beq ..FacingNorth
+  dec : beq ..FacingWest
+..FacingEast:
+lda #$0100
+bra ..CheckButtons
+..FacingSouth:
+lda #$0400
+bra ..CheckButtons
+..FacingNorth:
+lda #$0800
+bra ..CheckButtons
+..FacingWest:
+lda #$0200
+;bra ..CheckButtons
+..CheckButtons:
+bit $0656 : bne .ClcAndReturn
+lda $0000 : jsr .SR_SecIfDirectionAIsBlocked : bcs .ClcAndReturn
+bra .SecAndReturn
+.FacingInProposedDirection:
+lda $040c : bpl .SecAndReturn   ; Double-tapping a direction works.
+; If A-to-run is enabled, you can start running in the non-blocked direction you're facing.
+;lda $0bea : beq .ClcAndReturn
+lda $0656 : bit #$0080 : beq .ClcAndReturn
+lda $09ae : bit #$1000 : bne .ClcAndReturn   ; no running up ramps
+lda $24 : jsr .SR_SecIfDirectionAIsBlocked : bcs .ClcAndReturn
+;bra .SecAndReturn
+.SecAndReturn:
+sec
+rts
+.ClcAndReturn:
+clc
+rts
+.SR_SecIfDirectionAIsBlocked:
+pha
+lda $1014 : lsr : lsr : lsr : lsr : sta $0018
+lda $1016 : sec : sbc #$0008 : lsr : lsr : lsr : lsr : sta $001c
+pla : beq ..FacingSouth
+  dec : beq ..FacingNorth
+  dec : beq ..FacingWest
+..FacingEast:
+inc $0018
+bra ..CheckBlocked
+..FacingSouth:
+inc $001c
+bra ..CheckBlocked
+..FacingNorth:
+dec $001c
+bra ..CheckBlocked
+..FacingWest:
+dec $0018
+;bra ..CheckBlocked
+..CheckBlocked:
+phd
+lda #$0000 : tcd
+jsl $83d78a    ; = jsl LR_GetTileTableIndex83
+pld
+sep #$20
+phx
+  tyx
+  lda $7fc000,x
+plx
+  bit #$f0 : beq +
+    lsr : lsr : lsr : lsr   ; Use the current effective type, if any
++:
+  cmp #$02 : bcc ..NotBlocked  ; Nonsolid and semisolid never block.
+  cmp #$0e : bcs ..IsBlocked   ; Solids always block.
+  cmp #$0c : beq ...RampNorth
+  cmp #$0a : beq ...RampEast
+  cmp #$05 : beq ...RampWest
+  cmp #$03 : beq ...RampSouth
+  cmp #$02 : beq ..IsBlocked   ; Ladder
+  cmp #$07 : beq ..IsBlocked   ; Sideling wall
+  cmp #$08 : beq ..IsBlocked   ; Dropdown ledge
+bra ..NotBlocked
+...RampNorth:
+lda $24 : beq ..IsBlocked
+bra ..NotBlocked
+...RampEast:
+lda $24 : cmp #$02 : beq ..IsBlocked
+bra ..NotBlocked
+...RampWest:
+lda $24 : cmp #$03 : beq ..IsBlocked
+bra ..NotBlocked
+...RampSouth:
+lda $24 : dec : beq ..IsBlocked
+;bra ..NotBlocked
+..NotBlocked:
+rep #$20
+clc
+rts
+..IsBlocked:
+rep #$20
+sec
+rts
+}
+
+SR_RunningConsiderReturnToActRepl:
+cop #$40 : dw $8000, .DoReturn
+lda $09b2 : ora $09b4 : bne .DoReturn
+lda $0656 : bit #$0080 : beq .NoReturn
+lda $09ae : bit #$1000 : bne .NoReturn
+; With A-to-run and A pressed, should ParseAct occasionally to e.g. start running from a walk.
+lda $2a : cmp #$0004 : bcc .NoReturn
+lda $24 : cmp #$0002 : bcs .NoReturn
+bra .DoReturn
+.NoReturn:
+lda $09ae : bit #$1000
+rts
+.DoReturn:
+pla
+cop #$C5
+
+
+
 }
 
 
@@ -4387,7 +4553,15 @@ org $838BA4
 SR_UseItemLolasMelody:
 {
 jsr SR_SecIfCanPlayMusic : bcc .NoFlute
-lda $0644 : cmp #$0015 : bne .NothingHappened
+lda $0644 : cmp #$0015 : beq .InItory
+  cmp #$0011 : bne .NothingHappened
+.InEdwardsFlowerRoom:
+cop #$BF : dw ..Text
+rts
+..Text:
+db $d3
+db $cd : dl TextLongLolasMelodyInEdwards
+db $c0
 .InItory:
 cop #$D0 : db $40, $01 : dw .NothingHappened
 .DoPlaySong:
@@ -6001,12 +6175,20 @@ cop #$8A
 cop #$E0
 .TryLeaveItory:
 cop #$45 : db $2c,$36,$2f,$39 : dw ..DoNothing
+cop #$BF : dw ..TextYouNeedLolasMelody
 cop #$66 : dw $00c0,$02c0 : db !OverworldShuffleItryMenuId
 cop #$C1
 ..DoNothing:
 rtl
+..TextYouNeedLolasMelody:
+db $d3
+db "(Looks like you'll",$cb
+db "need to find and use",$cb
+db "a certain item to",$cb
+db "enter the town...)"
+db $c0
 }
-
+warnpc $84e5a1
 
 
 org $84e5a1
@@ -10194,10 +10376,21 @@ org $8be515
 jsl LR_WarpToStart
 jmp EIogrGameInitFlagSetter
 
-org $8be6a6
-nop : nop : nop : nop : nop : nop    ; Disable code that disables X button.
-org $8be6b3
-nop : nop : nop : nop : nop : nop    ; Disable other code that disables X button.
+; To support button mappings, IOG stores a dynamic bitmask for each SNES button, and the mask determines functionality;
+; so e.g. mask #$8000 represents the Attack button, and whichever SNES button sets that mask is thus the Attack button.
+; The "default" (actually Style 2) mappings are the same as the SNES hardware bitmasks, except that X is ignored.
+; Oddly, in Style 1 the "unused" button (A or Y) has the same bitmask as the hardware X button.
+; Here we remove the code that disables the X button, and fix the "unused" button mapping in Style 1.
+org $8be695
+#SR_SetControlStyle:
+lda $0B26 : bne .Style2
+.Style1:
+  lda #$8000 : sta $0DAC    ; Remap A ($0dac) to action of #$8000 = Attack
+  lda #$4000 : sta $0DAA    ; Remap B ($0daa) to action of #$4000 = Cancel
+  lda #$0080 : sta $0DAE    ; Remap Y ($0dae) to action of #$0080 = unused
+rts
+.Style2:
+rts
 
 ; 4 difficulty levels available on the other menu too
 org $8be7b5
@@ -10378,10 +10571,52 @@ org $8bf511
 db $ca
 endif
 
-org $8bf5d2
-db "Level"    ; Change "Sound" to "Level"
-org $8bf55a
-db "Level"    ; --- and on the other menu too
+org $8bf538
+Bg3_MenuChangeDiarySettings:
+db $C1 : db $06,$08
+db $C7 : db $0A,$08
+db $CC : db $02
+db "_____*Settings*",$cb
+db ">Done",$cb
+db "Level:",$cb
+db "Control Style:",$cb
+db $CC,$0d
+db "Attack/Talk",$cb
+db $CC,$0d
+db "Item/Cancel",$cb
+db $CC,$0d
+db "Item Screen",$cb
+db $CC,$0d
+db "Run"
+db $CA
+warnpc $8bf5ad
+org $8bf5ad
+Bg3_MenuNewDiarySettings:
+db $C1 : db $06,$08
+db $C7 : db $0A,$08
+db "____*Game Setup*",$cb
+db ">Start Game",$cb
+db "Level:",$cb
+db "Control Style:",$cb
+db $CC,$0d
+db "Attack/Talk",$cb
+db $CC,$0d
+db "Item/Cancel",$cb
+db $CC,$0d
+db "Item Screen",$cb
+db $CC,$0d
+db "Run"
+db $CA
+warnpc $8bf625
+
+org $8bf630
+Bg3_MenuBranchControlOptions:
+db $c1 : db $14,$0e
+db $d2 : db $00
+db $c5 : dw $f63b, $0d8e
+db $ca
+warnpc $8bf63b
+
 org $8bf667    ; Pointers to level name texts
 dw TextDifficultyLevel0
 dw TextDifficultyLevel1
@@ -11415,6 +11650,19 @@ db $01 : db $08,$00, $0C,$18 : dw $0161
 db $00 : db $04,$0E, $1B,$09 : dw $006E 
 db $00 : db $0A,$08, $1B,$09 : dw $006F 
 db $01 : db $03,$07, $1C,$00 : dw $000E 
+
+
+org $8fc000
+; AnimList for transformations.
+dw $c160   ; Replace W->S #1 (slow) with W->F #1 (fast)
+skip 2
+skip 2
+skip 2
+skip 2
+skip 2
+dw $c5e4   ; Replace F->W #1 (slow) with F->S #1 (fast)
+
+
 org $8fcf65   ; Overwriting an unused 8-tile metasprite
 MetaWillFlutelessFlute2:
 db $08,$10 : db $24,$08 

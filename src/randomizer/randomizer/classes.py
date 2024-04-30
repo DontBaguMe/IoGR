@@ -1940,7 +1940,27 @@ class World:
         for loc in self.item_locations:
             self.item_locations[loc][7] = self.get_pool_id(loc=loc)
         
-        # Save other "disallowed" items per location (ignored in Chaos logic):
+        # Save required items
+        if 1 in self.dungeons_req:
+            self.required_items += [3, 4, 7, 8]
+        if 2 in self.dungeons_req:
+            self.required_items += [14]
+        if 3 in self.dungeons_req:
+            self.required_items += [18, 19]
+        if 5 in self.dungeons_req:
+            self.required_items += [38, 30, 31, 32, 33, 34, 35]
+        if 6 in self.dungeons_req:
+            self.required_items += [39]
+        if self.kara == 1:
+            self.required_items += [2, 9, 23]
+        elif self.kara == 2:
+            self.required_items += [11, 12, 15]
+        elif self.kara == 4:
+            self.required_items += [26]
+        elif self.kara == 5:
+            self.required_items += [28, 66]
+        
+        # Save "disallowed" items per location (ignored in Chaos logic):
         # No non-W abilities in towns
         non_w_abilities = [item for item in self.form_items[1]+self.form_items[2] if self.item_pool[item][6] == 2]
         for loc in self.spawn_locations:
@@ -1953,6 +1973,10 @@ class World:
             for item in self.item_pool:
                 if self.item_pool[item][7] > 1+(2*jeweler_loc) and item not in self.item_locations[jeweler_loc][4]:
                     self.item_locations[jeweler_loc][4].append(item)
+        # Restrict bad item placement by difficulty
+        if self.difficulty == 0:
+            for awful_ds_loc in [31, 111, 146]:   # No abilities in awful Dark Spaces
+                self.item_locations[awful_ds_loc][4].extend([61,62,63,64,65,66])
         
         # Clamp item progression penalty
         for item in self.item_pool:
@@ -2003,6 +2027,44 @@ class World:
             if self.darkroom_cursed:
                 self.max_darkrooms *= 2
             self.dr_randomize()
+        
+        # Pyramid logic is complex; handling it here is "arguably" cleaner than database line items.
+        pyramid_portal_nodes = [413, 419, 423, 425, 428, 430, 437, 441, 450]
+        pyramid_corridor_exits = [637, 640, 643, 646, 649, 652, 655, 660, 663, 666, 669, 672]
+        boss_defeated_items = [503, 532, 531, 533, 534, 522, 523] # in order Castoth->SA
+        for node in pyramid_portal_nodes:
+            # Pyramid portals are free, except in dungeon shuffle where they require Aura but can be used formlessly
+            if not self.dungeon_shuffle:
+                self.graph[node][1].append(411)
+            else:
+                new_edge_id = 1+max(self.logic)
+                new_edge = [0, node, 411, 0x0f, [[36, 1]], False]
+                self.logic[new_edge_id] = new_edge
+        for exit in pyramid_corridor_exits:
+            # Pyramid corridors require the "Pyramid in logic" artificial item
+            new_edge_id = 1+max(self.exit_logic)
+            new_edge = [exit, [[802, 1]], 2, False]
+            self.exit_logic[new_edge_id] = new_edge
+        for item1 in boss_defeated_items:
+            for item2 in boss_defeated_items:
+                if item1 != item2:
+                    # K6 logical access requires access to any two dungeon bosses.
+                    new_edge_id = 1+max(self.logic)
+                    new_edge = [0, 0, 803, 0, [[item1, 1], [item2, 1]], False]
+                    self.logic[new_edge_id] = new_edge
+                    # On Easy difficulty, Pyramid logical access also requires this.
+                    if self.difficulty == 0:
+                        new_edge_id = 1+max(self.logic)
+                        new_edge = [0, 0, 802, 0, [[item1, 1], [item2, 1]], False]
+                        self.logic[new_edge_id] = new_edge
+            # On Normal difficulty, Pyramid logical access only requires any one boss.
+            if self.difficulty == 1:
+                new_edge_id = 1+max(self.logic)
+                new_edge = [0, 0, 802, 0, [[item1, 1]], False]
+                self.logic[new_edge_id] = new_edge
+        if self.difficulty >= 2:
+            # On difficulty H+, Pyramid is not logic-gated.
+            free_items.append(802)
         
         # Convert exits that have logic requirements into graph nodes with logic edges
         coupled_exit_logics = [edge for edge in self.exit_logic if self.exit_logic[edge][3]]
@@ -2074,26 +2136,6 @@ class World:
                 if self.flute == "Start" and orb in free_orbs:
                     free_items.append(orb)
                     unused_locs.append(loc)
-        
-        # Manage required items
-        if 1 in self.dungeons_req:
-            self.required_items += [3, 4, 7, 8]
-        if 2 in self.dungeons_req:
-            self.required_items += [14]
-        if 3 in self.dungeons_req:
-            self.required_items += [18, 19]
-        if 5 in self.dungeons_req:
-            self.required_items += [38, 30, 31, 32, 33, 34, 35]
-        if 6 in self.dungeons_req:
-            self.required_items += [39]
-        if self.kara == 1:
-            self.required_items += [2, 9, 23]
-        elif self.kara == 2:
-            self.required_items += [11, 12, 15]
-        elif self.kara == 4:
-            self.required_items += [26]
-        elif self.kara == 5:
-            self.required_items += [28, 66]
 
         # Various gameplay variants
         if self.firebird:
@@ -3420,11 +3462,11 @@ class World:
             # Abilities
             60: [0, 2, "", "Nothing", False, 3, 0, 0],
             61: [1, 2, 0x1100, "Psycho Dash", False, 1, 0, 0],
-            62: [1, 2, 0x1101, "Psycho Slider", False, 1, 0, 3],
-            63: [1, 2, 0x1102, "Spin Dash", False, 1, 0, 3],
-            64: [1, 2, 0x1103, "Dark Friar", False, 1, 0, 3],
+            62: [1, 2, 0x1101, "Psycho Slider", False, 1, 0, 2*self.difficulty],
+            63: [1, 2, 0x1102, "Spin Dash", False, 1, 0, 2*self.difficulty],
+            64: [1, 2, 0x1103, "Dark Friar", False, 1, 0, 2*self.difficulty],
             65: [1, 2, 0x1104, "Aura Barrier", False, 1, 0, 0],
-            66: [1, 2, 0x1105, "Earthquaker", False, 1, 0, 3],
+            66: [1, 2, 0x1105, "Earthquaker", False, 1, 0, 1],
             67: [1, 6, "", "Firebird", False, 3, 0, 0],
 
             # Mystic Statues
@@ -3462,13 +3504,15 @@ class World:
             522: [1, 4, "", "Babel: Mummy Queen Defeated", False, 1, 0, 0],
             523: [1, 4, "", "Mansion: Solid Arm Defeated", False, 1, 0, 0],
             524: [1, 4, "", "Inca: Diamond Block Placed", False, 1, 0, 0],
-            525: [1, 4, "", "Pyramid: Portals open", False, 1, 0, 0],
             526: [1, 4, "", "Mu: Access to Hope Room 1", False, 1, 0, 0],
             527: [1, 4, "", "Mu: Access to Hope Room 2", False, 1, 0, 0],
             528: [1, 4, "", "Mine: Blocked Tunnel Open", False, 1, 0, 0],
             529: [1, 4, "", "Underground Tunnel: Bridge Open", False, 1, 0, 0],
             530: [1, 4, "", "Inca: Slug Statue Broken", False, 1, 0, 0],
             531: [1, 4, "", "Mu: Beat Vampires", False, 1, 0, 0],
+            532: [1, 4, "", "Sky Garden: Beat Viper", False, 1, 0, 0],
+            533: [1, 4, "", "Great Wall: Beat Fanger", False, 1, 0, 0],
+            534: [1, 4, "", "Pyramid: Beat Mummy Queen", False, 1, 0, 0],
 
             # Misc. game states
             602: [1, 6, "", "Early Firebird enabled", False, 1, 0, 0],
@@ -3526,6 +3570,8 @@ class World:
             
             800: [1, 6, "", "Dungeon Shuffle artificial logic", False, 3, 0, 0],
             801: [0, 6, "", "Dungeon Shuffle artificial antilogic", False, 3, 0, 0],
+            802: [1, 6, "", "Pyramid in logic", False, 3, 0, 0],
+            803: [1, 6, "", "Killer 6 in logic", False, 3, 0, 0],
     
             900: [0, 1, 0x32, "Other World Item", False, 1, 0, 0]
         }
@@ -3813,11 +3859,11 @@ class World:
             741: [714, 5, False, 0, [], "MansionWestGateItem", "Jeweler's Mansion: Enemy for West Gate", 0, 0, [[609, 1]] ],
 
             # Mystic Statues
-            148: [101, 3, False, 0, [101, 102, 103, 104, 105], "", "Castoth Prize", 0, 0, [] ],
-            149: [198, 3, False, 0, [100, 102, 103, 104, 105], "", "Viper Prize", 0, 0, [] ],
+            148: [101, 3, False, 0, [101, 102, 103, 104, 105], "", "Castoth Prize", 0, 0, [] ],   # in node 101 (Gold Ship), not strictly Castoth's node
+            149: [198, 3, False, 0, [100, 102, 103, 104, 105], "", "Viper Prize", 0, 0, [[609, 1]] ],
             150: [244, 3, False, 0, [100, 101, 103, 104, 105], "", "Vampires Prize", 0, 0, [] ],
-            151: [302, 3, False, 0, [100, 101, 102, 104, 105], "", "Sand Fanger Prize", 0, 0, [] ],
-            152: [448, 3, False, 0, [100, 101, 102, 103, 105], "", "Mummy Queen Prize", 0, 0, [] ],
+            151: [302, 3, False, 0, [100, 101, 102, 104, 105], "", "Sand Fanger Prize", 0, 0, [[609, 1]] ],
+            152: [448, 3, False, 0, [100, 101, 102, 103, 105], "", "Mummy Queen Prize", 0, 0, [[36, 1]] ],
             153: [479, 3, False, 0, [100, 101, 102, 103, 104], "", "Babel Prize", 0, 0, [] ],
 
             # Event Switches
@@ -3843,16 +3889,18 @@ class World:
             519: [519, 4, True, 519, [], "", "Babel: Viper defeated", 0, 0, [] ],
             520: [520, 4, True, 520, [], "", "Babel: Vampires defeated", 0, 0, [] ],
             521: [521, 4, True, 521, [], "", "Babel: Sand Fanger defeated", 0, 0, [] ],
-            522: [522, 4, True, 522, [], "", "Babel: Mummy Queen defeated", 0, 0, [] ],
-            523: [523, 4, True, 523, [], "", "Mansion: Solid Arm defeated", 0, 0, [] ],
+            522: [478, 4, True, 522, [], "", "Babel: Mummy Queen defeated", 0, 0, [] ],  # No weapon required because Shadow is automatic
+            523: [482, 4, True, 523, [], "", "Mansion: Solid Arm defeated", 0, 0, [[609, 1]] ],
             524: [ 89, 4, True, 524, [], "", "Inca: Diamond Block Placed", 0, 0, [[7, 1]] ],
-            525: [525, 4, True, 525, [], "", "Pyramid: Portals open", 0, 0, [] ],
             526: [526, 4, True, 526, [], "", "Mu: Access to Hope Room 1", 0, 0, [] ],
             527: [527, 4, True, 527, [], "", "Mu: Access to Hope Room 2", 0, 0, [] ],
             528: [131, 4, True, 528, [], "", "Mine: Blocked Tunnel Open", 0, 0, [[608, 1]] ],
             529: [529, 4, True, 529, [], "", "Underground Tunnel: Bridge Open", 0, 0, [] ],
             530: [530, 4, True, 530, [], "", "Inca: Slug Statue Broken", 0, 0, [] ],
             531: [531, 4, True, 531, [], "", "Mu: Beat Vampires", 0, 0, [] ],
+            532: [198, 4, True, 532, [], "", "Sky Garden: Beat Viper", 0, 0, [[609, 1]] ],
+            533: [702, 4, True, 533, [], "", "Great Wall: Beat Fanger", 0, 0, [[609, 1]] ],
+            534: [448, 4, True, 534, [], "", "Pyramid: Beat Mummy Queen", 0, 0, [[36, 1]] ],
 
             # Misc
             #602: [0, 6, True, 602, [], "", "Early Firebird enabled", 0, 0, [] ],
@@ -3861,6 +3909,9 @@ class World:
             #608: [608, 6, True, 608, [], "", "Has Any Will Ability", 0, 0, [] ],
             #609: [609, 6, True, 609, [], "", "Has Any Attack", 0, 0, [] ],
             #610: [610, 6, True, 610, [], "", "Has Any Ranged Attack", 0, 0]
+            
+            802: [802, 6, True, 802, [], "", "Pyramid logical access", 0, 0, [] ],
+            803: [803, 6, True, 803, [], "", "Killer 6 logical access", 0, 0, [] ]
         }
 
         # Shell world graph. Nodes for exits are added during initialization.
@@ -4084,7 +4135,8 @@ class World:
             195: [False, [196],      2, [2,10,0,84], 0, "Sky Garden: NW Bot (84/$54) Main", [], False, [], [], [], [], [], [], [], []],
             196: [False, [],         2, [2,10,0,84], 0, "Sky Garden: NW Bot (84/$54) NE below ledge", [], False, [], [], [], [], [], [], [], []],
             197: [False, [],         2, [2,10,0,84], 0, "Sky Garden: NW Bot (84/$54) SE behind statue", [], False, [], [], [], [], [], [], [], []],
-            198: [False, [],         2, [2,10,0,85], 0, "Sky Garden: Viper (85/$55)", [], True, [], [], [], [], [], [], [], []],
+            198: [False, [],         2, [2,10,0,85], 0, "Sky Garden: Viper (85/$55)", [], False, [], [], [], [], [], [], [], []],
+            199: [False, [],         2, [2,10,0,85], 0, "Sky Garden: Past Viper", [], True, [], [], [], [], [], [], [], []],
 
             # Seaside Palace
             200: [False,    [], 1, [3,11,0,90], 0, "Seaside Palace: Area 1", [16], False, [], [], [], [], [], [], [], []],
@@ -4190,7 +4242,7 @@ class World:
             300: [False, [],    2, [3,15,0,136], 0, "Great Wall: Final Room (136/$88) W", [], False, [], [], [], [], [], [], [], []],
             301: [False, [],    2, [3,15,0,136], 0, "Great Wall: Final Room (136/$88) E", [], False, [], [], [], [], [], [], [], []],
             302: [False, [702], 2, [3,15,0,138], 0, "Great Wall: Fanger (138/$8a) Entrance", [], False, [], [], [], [], [], [], [], []],
-            702: [False, [303], 2, [3,15,0,138], 0, "Great Wall: Fanger (138/$8a) Fight", [], False, [], [], [], [], [], [], [], []],
+            702: [False, [],    2, [3,15,0,138], 0, "Great Wall: Fanger (138/$8a) Fight", [], False, [], [], [], [], [], [], [], []],
             303: [False, [],    2, [3,15,0,138], 0, "Great Wall: Fanger (138/$8a) Exit", [], False, [], [], [], [], [], [], [], []],
 
             # Euro
@@ -4321,9 +4373,10 @@ class World:
             445: [False, [],        2, [5,21,0,218], 0, "Pyramid: Hieroglyph 4", [], False, [], [], [], [], [], [], [], []],
             446: [False, [],        2, [5,21,0,218], 0, "Pyramid: Hieroglyph 5", [], False, [], [], [], [], [], [], [], []],
             447: [False, [],        2, [5,21,0,218], 0, "Pyramid: Hieroglyph 6", [], False, [], [], [], [], [], [], [], []],
-            448: [False, [],        2, [5,21,0,221], 0, "Pyramid: Boss Room", [], True, [], [], [], [], [], [], [], []],
+            448: [False, [],        2, [5,21,0,221], 0, "Pyramid: Boss Room", [], False, [], [], [], [], [], [], [], []],
             449: [False, [415,517], 0, [5,21,0,205], 0, "Pyramid: Hieroglyphs Placed", [], False, [], [], [], [], [], [], [], []],
             450: [False, [],        2, [5,21,0,215], 0, "Pyramid: 215 / 3-B / Friar-K6 (past K6)", [], False, [], [], [], [], [], [], [], []],
+            451: [False, [],        2, [5,21,0,215], 0, "Pyramid: Past Boss", [], True, [], [], [], [], [], [], [], []],
 
             # Babel
             460: [False, [],       2, [6,22,0,222], 0, "Babel: Foyer", [], False, [], [], [], [], [], [], [], []],
@@ -4337,7 +4390,7 @@ class World:
             468: [False, [],       2, [6,22,0,225], 0, "Babel: Map 225 (NE)", [], False, [], [], [], [], [], [], [], []],
             469: [False, [470],    2, [6,22,0,226], 0, "Babel: Map 226 (bottom)", [], False, [], [], [], [], [], [], [], []],
             470: [False, [],       2, [6,22,0,226], 0, "Babel: Map 226 (top)", [], False, [], [], [], [], [], [], [], []],
-            471: [False, [522],    2, [6,22,0,227], 0, "Babel: Map 227 (bottom)", [], False, [], [], [], [], [], [], [], []],
+            471: [False, [],       2, [6,22,0,227], 0, "Babel: Map 227 (bottom)", [], False, [], [], [], [], [], [], [], []],
             472: [False, [],       2, [6,22,0,227], 0, "Babel: Map 227 (top)", [], False, [], [], [], [], [], [], [], []],
             473: [False, [],       2, [6,22,0,222], 0, "Babel: Olman's Room", [], False, [], [], [], [], [], [], [], []],
             474: [False, [],       0, [6,22,0,242], 0, "Babel: Castoth", [], False, [], [], [], [], [], [], [], []],
@@ -4352,7 +4405,7 @@ class World:
             714: [False, [],    2, [6,23,0,233], 0, "Jeweler's Mansion: Between Gates", [], False, [], [], [], [], [], [], [], []],
             715: [False, [],    2, [6,23,0,233], 0, "Jeweler's Mansion: Main", [], False, [], [], [], [], [], [], [], []],
             481: [False, [],    2, [6,23,0,233], 0, "Jeweler's Mansion: Behind Psycho Slider", [], False, [], [], [], [], [], [], [], []],
-            482: [False, [523], 2, [6,23,0,234], 0, "Jeweler's Mansion: Solid Arm", [], False, [], [], [], [], [], [], [], []],
+            482: [False, [],    2, [6,23,0,234], 0, "Jeweler's Mansion: Solid Arm", [], False, [], [], [], [], [], [], [], []],
 
             # Game End
             490: [False, [500], 0, [0,0,0,0], 0, "Kara Released", [20], False, [], [], [], [], [], [], [], []],
@@ -4376,14 +4429,17 @@ class World:
             519: [False, [], 0, [0,0,0,243], 0, "Babel: Viper defeated", [], False, [], [], [], [], [], [], [], []],
             520: [False, [], 0, [0,0,0,244], 0, "Babel: Vampires defeated", [], False, [], [], [], [], [], [], [], []],
             521: [False, [], 0, [0,0,0,245], 0, "Babel: Sand Fanger defeated", [], False, [], [], [], [], [], [], [], []],
-            522: [False, [], 0, [0,0,0,246], 0, "Babel: Mummy Queen defeated", [], False, [], [], [], [], [], [], [], []],
-            523: [False, [], 0, [0,0,0,234], 0, "Mansion: Solid Arm defeated", [], False, [], [], [], [], [], [], [], []],
-            525: [False, [], 0, [0,0,0,0], 0, "Pyramid: Portals Open", [], False, [], [], [], [], [], [], [], []],
+            #522: [False, [], 0, [0,0,0,246], 0, "Babel: Mummy Queen defeated", [], False, [], [], [], [], [], [], [], []],
+            #523: [False, [], 0, [0,0,0,234], 0, "Mansion: Solid Arm defeated", [], False, [], [], [], [], [], [], [], []],
             526: [False, [], 0, [0,0,0,0], 0, "Mu: Access to Hope Room 1", [], False, [], [], [], [], [], [], [], []],
             527: [False, [], 0, [0,0,0,0], 0, "Mu: Access to Hope Room 2", [], False, [], [], [], [], [], [], [], []],
             529: [False, [], 0, [0,0,0,0], 0, "Underground Tunnel: Bridge Open", [], False, [], [], [], [], [], [], [], []],
             530: [False, [80, 81], 0, [0,0,0,0], 0, "Inca: Slug Statue Open", [], False, [], [], [], [], [], [], [], []],
-            531: [False, [], 0, [0,0,0,0], 0, "Mu: Beat Vampires", [], False, [], [], [], [], [], [], [], []]
+            531: [False, [], 0, [0,0,0,0], 0, "Mu: Beat Vampires", [], False, [], [], [], [], [], [], [], []],
+            
+            # Pyramid logical access is tuned during initialization
+            802: [False, [], 0, [0,0,0,0], 0, "Pyramid logical access", [], False, [], [], [], [], [], [], [], []],
+            803: [False, [], 0, [0,0,0,0], 0, "Killer 6 logical access", [], False, [], [], [], [], [], [], [], []]
 
         }
 
@@ -4480,7 +4536,7 @@ class World:
             98:  [0,  95,  96,     0, [[609, 1]], False],        # DS spike hall requires an attack to pass the 4-Way
             99:  [0,  97, 503,  0x06, [], False],                # Castoth as F/S
             100: [0,  97, 503,     0, [[604, 1]], False],        # Castoth with Flute
-            101: [0,  97,  98,     0, [[503, 1]], False],        # Pass Castoth; if you add the exit behind Castoth to exits, move this to exit_logic
+            101: [0,  97,  98,     0, [[503, 1]], False],        # Pass Castoth (the 97-98 exit is not in exits)
 
             # Diamond Mine
             712: [0, 130, 708,    0, [[715, 1]], True],            # Map 61 S fence progression via monster
@@ -4517,6 +4573,7 @@ class World:
             149: [0, 195, 509,     0, [[65, 1], [612, 1]], False],  # NW Bot (84) statue w/ Aura Barrier and telekinesis
             150: [0, 195, 197,     0, [[509, 1]], True],            # NW Bot (84) traversal with statue switch
             152: [0, 170,  16,     0, [[502, 1]], False],           # Moon Tribe passage w/ spirits healed
+            153: [0, 198, 199,     0, [[532, 1]], False],           # Pass Viper
 
             # Mu
             724: [0, 212, 722,  0, [[726, 1]], True],             # Mu entrance (95) gate via golem orb
@@ -4543,7 +4600,7 @@ class World:
             189: [0, 527, 512,  0, [[18, 2], [526, 1], [511, 1]], False],  # Water lowered 2 w/ Hope Statues, both rooms, and water lowered 1
             190: [0, 244, 531,0x6, [], False],                    # Vampires as F/S
             191: [0, 244, 531,  0, [[604 if self.difficulty < 3 else 609, 1]], False], # Vampires with Flute, or any attack if playing Extreme
-            192: [0, 244, 242,  0, [[531, 1]], False],            # Pass Vampires if defeated
+            192: [0, 244, 242,  0, [[531, 1]], False],            # Pass Vampires (the 244-242 exit is not in exits)
 
             # Angel Dungeon
             214: [0, 272, 273, 0, [[513, 1]], False],   # Ishtar's chest w/ puzzle complete
@@ -4561,6 +4618,7 @@ class World:
             227: [0, 298, 712,     0, [[610, 1]], False],           # Map 135 archer via ranged
             228: [0, 299, 712,     0, [[610, 1]], False],           # Map 135 archer via ranged
             229: [0, 300, 301,     0, [[63, 1]], True],             # Map 136 progression w/ Spin Dash
+            230: [0, 702, 303,     0, [[533, 1]], False],           # Pass Fanger
 
             # Mt. Temple
             240: [0, 331, 332, 0, [[63, 1]], True],              # Map 161 progression w/ Spin Dash
@@ -4613,31 +4671,22 @@ class World:
             307: [0, 431, 433,    0, [[64, 1]], False],             # Map 214 progression w/ Friar
             308: [0, 438, 439,    0, [[63, 1]], True],              # Map 217 progression w/ Spin Dash
             310: [0, 440, 441,    0, [[63, 1]], True],              # Map 219 progression w/ Spin Dash
-            309: [0, 435, 450,    0, [[63, 1]], True],              # Killer 6 w/ Spin Dash
-            312: [0, 435, 450,    0, [[6, 6], [50, 2], [51, 1], [52, 1]], True],  # Killer 6 w/ herbs and stats
-            313: [0, 435, 450,    0, [[64, 1], [54, 1]], True],     # Killer 6 w/ Friar II
+            309: [0, 435, 450,    0, [[803, 1], [63, 1]], True],    # Killer 6 w/ logical access and Spin Dash (so Will can pass in dungeon shuffle)
+            312: [0, 435, 450,    0, [[803, 1], [36, 1]], True],    # Killer 6 w/ logical access and Aura
+            313: [0, 435, 450,    0, [[803, 1], [64, 1], [54, 1]], True],  # Killer 6 w/ logical access and upgraded Friar
             314: [0, 411, 414,    0, [[517, 1]], False],            # Pyramid to boss w/hieroglyphs placed
-            516: [0, 413, 411,    0, [[525, 1]], False],            # Pyramid portal
-            517: [0, 419, 411,    0, [[525, 1]], False],            # Pyramid portal
-            518: [0, 423, 411,    0, [[525, 1]], False],            # Pyramid portal
-            519: [0, 425, 411,    0, [[525, 1]], False],            # Pyramid portal
-            520: [0, 428, 411,    0, [[525, 1]], False],            # Pyramid portal
-            521: [0, 430, 411,    0, [[525, 1]], False],            # Pyramid portal
-            522: [0, 437, 411,    0, [[525, 1]], False],            # Pyramid portal
-            523: [0, 441, 411,    0, [[525, 1]], False],            # Pyramid portal
-            524: [0, 450, 411,    0, [[525, 1]], False],            # Pyramid portal
-            525: [0,   0, 525, 0x0f, [] if not self.dungeon_shuffle else [[36, 1]], False], # Portals require Aura in dungeon shuffle
+            315: [0, 448, 451,    0, [[534, 1]], False],            # Pass Mummy Queen
 
             # Babel / Mansion items 740,741
             320: [0, 461, 462, 0x0f, [[36, 1], [39, 1]], False],    # Map 223 w/ Aura and Ring, any form
             321: [0, 473, 479,    0, [[522, 1]], False],            # Olman statue w/ Mummy Queen 2
-            322: [0, 473, 479,    0, [[523, 1]], False],            # Olman statue w/ Solid Arm
             732: [0, 480, 714,    0, [[740, 1]], True],             # Mansion east gate with monster orb
             734: [0, 714, 715,    0, [[741, 1]], True],             # Mansion west gate with monster orb
             323: [0, 715, 481,    0, [[62, 1]], True],              # Mansion progression w/ Slider
-            # Solid Arm always warps to top of Babel, but only Extreme difficulty has an edge to include the warp in logic;
-            # this prevents rare scenarios where the traverser would path through Solid Arm to warp to another continent.
-            324: [0, 482, 482 if self.difficulty < 3 else 472, 0, [], False],
+            # Solid Arm always warps to top of Babel, but only Extreme difficulty has edges to include SA;
+            # this prevents lower difficulties from requiring SA for either the statue or a continent warp.
+            324: [0, 482, 482 if self.difficulty < 3 else 472, 0, [[523, 1]], False],   # Warp
+            322: [0, 473, 473 if self.difficulty < 3 else 479, 0, [[523, 1]], False],   # Statue
 
             # Endgame / Misc
             400: [0, [49,150,270,345,391][self.kara - 1], 490, 0, [[20, 1]], False],   # Rescue Kara w/ Magic Dust
@@ -6604,7 +6653,7 @@ class World:
             
             4:  [ 5, 0, 0, 171, 198, "Map4CExit01", 0, True, 4, 0, "Viper entrance (in)" ],
             5:  [ 4, 0, 0,   0,   0, "Map55Exit01", 0, True, 4, 0, "Viper entrance (out)" ],
-            6:  [ 0, 0, 0, 198, 200, "MapViperExitString", 0, True, 4, 0, "Post-Boss Warp to Sea Palace" ],
+            6:  [ 0, 0, 0, 199, 200, "MapViperExitString", 0, True, 4, 0, "Post-Boss Warp to Sea Palace" ],
             
             7:  [ 8, 0, 0, 241, 243, "MapVampEntranceString", 0, True, 5, 0, "Vampires entrance (in)" ],
             8:  [ 7, 0, 0,   0,   0, "Map67Exit01", 0, True, 5, 0, "Vampires entrance (out)" ],
@@ -6616,7 +6665,7 @@ class World:
             
             13: [14, 0, 0, 414, 448, "MapMQEntranceString", 0, True, 10, 0, "Mummy Queen entrance (in)" ],
             14: [13, 0, 0,   0,   0, "MapMQReturnString", 0, True, 10, 0, "Mummy Queen entrance (out)" ],
-            15: [ 0, 0, 0, 448, 415, "MapMQExitString", 0, True, 10, 0, "Post-Boss Warp to Pyramid" ],
+            15: [ 0, 0, 0, 451, 415, "MapMQExitString", 0, True, 10, 0, "Post-Boss Warp to Pyramid" ],
 
             16: [17, 0, 0, 470, 471, "MapE2Exit02", 0, True, 11, 0, "Babel statue boss corridor entrance (in)" ],
             17: [16, 0, 0,   0,   0, "MapE3Exit01", 0, True, 11, 0, "Babel statue boss corridor entrance (out)" ],
@@ -6741,7 +6790,7 @@ class World:
             151: [150, 0, 0,  0,   0, "Map24Exit01", 0, False,  2, 2, "Inca: Golden Tile Room N exit (36->34)" ],
             152: [153, 0, 0, 87,  77, "Map24Exit02", 0, False,  2, 2, "Inca: Golden Tile Room S exit (36->30)" ],
             153: [152, 0, 0,  0,   0, "Map1EExit01", 0, False,  2, 2, "Inca: Outside Castoth, E exit (30->36)" ],
-            154: [  0, 0, 0, 98, 100, "", 0, False,  0, 0, "Gold Ship entrance" ],
+            154: [  0, 0, 0, 98, 100, "", 0, False,  0, 0, "Drop to Gold Ship from Castoth" ],
             
             # Gold Ship
             160: [161, 0, 0, 100, 101, "", 0, False, 0, 0, "Gold Ship Interior (in)" ],
@@ -7224,11 +7273,6 @@ class World:
             27: [ 414, [[62, 1]], 0, True ],     # Angl Ishtar slider
             28: [ 591, [] if settings.allow_glitches else [[28, 1]], 2, False],     # Wat bright room N
             30: [ 592, [] if settings.allow_glitches else [[28, 1]], 2, False],     # Wat bright room S
-            # Require an attack for bosses; Castoth and Vamps are special
-            # Rigorously we need a "defeated" flag item for each boss, but this suffices for now
-            101: [ 5, [[609, 1]], 2, False ],     # Viper
-            103: [ 11, [[609, 1]], 2, False ],    # Fanger
-            104: [ 14, [[36, 1]], 2, False ],     # MQ
-            106: [ 20, [[609, 1]], 2, False ]     # Solid Arm
+            31: [ 704, [[522, 1]], 0, False ],   # MQ2 upper door
         }
     

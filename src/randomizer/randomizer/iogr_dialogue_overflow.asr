@@ -188,6 +188,18 @@ db "SmashManiac I'm waiting",$cb
 db "for him..."
 db $ca
 
+TextLongLolasMelodyInEdwards:
+db "(You softly play",$cb
+db "Lola's Melody...)"
+db $cf
+db "(But nothing happens.)"
+db $cf
+db "(Seems like Lilly's",$cb
+db "not here. You'll have",$cb
+db "to go recruit her and",$cb
+db "come back here later.)"
+db $c0
+
 
 TextGiveLillyNecklace:
 db "Lilly: Oh, you found my",$cb

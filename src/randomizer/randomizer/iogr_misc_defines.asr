@@ -19,7 +19,6 @@ LR_ParseDialogueScriptAtY = $82f048
 LR_PlaceSelfBetween04And06 = $8aa41c
 }
 
-
 ; Dark rooms
 {
 !IsMap00Dark ?= 0
