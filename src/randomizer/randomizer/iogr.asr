@@ -8178,6 +8178,12 @@ db $d3
 db "!SpoilerTextKarasJournal"
 db $c0
 
+org $879fb9
+jsl LR_WatermiaLeafCheckPlayerPosition
+
+org $879fe9
+jsl LR_WatermiaLeafCheckPlayerPosition
+
 org $87a871
 db $e0,$6b    ; Disable Lilly in Watermia
 
@@ -8477,7 +8483,10 @@ Text_EuroSecretGotItemAlready:
 db $d3,$d6,$63,$86,$8e,$2a,$c0
 }
 
+
 org $87e927
+; Bank $87 free space begins here.
+
 SethWatermiaOnInteract:
 cop #$D0 : db $11,$01 : dw .CanTravel
 .NoTravel:
@@ -8502,6 +8511,23 @@ db "Oh, you know Bagu? Then",$cb
 db "I can help you cross.",$cb
 db "(And by Bagu I mean",$cb
 db "Morse Code.)",$c0
+
+
+; Replaces the routine at $87a018. Forces the leaf to always wait for the player.
+LR_WatermiaLeafCheckPlayerPosition:
+stz $0000
+lda $1016 : cmp #$0100 : rol $0000   ; Now $0000 is 1 if player is in the south part of the map.
+lda $16 : cmp #$0100 : rol : and #$0001 : cmp $0000 : bne .DoMoveNow
+.AwaitPlayer:
+lda $26 : cmp #$0002 : beq .DoMoveNow
+phb
+pla
+pla
+rtl
+.DoMoveNow:
+lda $26
+jmp $a020
+
 
 }
 

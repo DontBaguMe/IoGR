@@ -377,7 +377,6 @@ db $02
 ; BG2 unused tiles: $00-$B1,$B3-$B4,$B8-$BC,$C1-$C2,$C6,$E0-$E6
 ;   Unused in both: $23,$31,$5B,$7C,$8E,$B3,$B4,$BB,$BC,$C6,$E0-$E6
 ;
-org $87e9fc
 DataAGP1BG1: ; AG body P1 RAM tilemap
 db $00 
 DataAGP3BG2: ; BG2/comet tilemap for P3, makes the comet bigger
