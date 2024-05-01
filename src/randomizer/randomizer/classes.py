@@ -52,6 +52,8 @@ class World:
         val_success = True
         placed_item_counts = {}
         for loc in self.item_locations:
+            if self.item_locations[loc][1] not in [1,2,3,5]:
+                continue
             item = self.item_locations[loc][3]
             loc_pool = self.item_locations[loc][7]
             if item == 0 and self.item_locations[loc][1] == 2:
@@ -272,8 +274,7 @@ class World:
                 self.graph[x][9].clear()
                 self.graph[x][10] = self.graph[x][1][:]
         for x in self.logic:
-            if self.logic[x][0] == 1:
-                self.logic[x][0] = 0
+            self.logic[x][0] = 0
         return True
 
 
@@ -308,14 +309,17 @@ class World:
             if not self.graph[node][0]:
                 # Get the newly-accessible items and record open item/ability locations
                 new_items += self.visit_node(node,test)
-                # Queue up newly-accessible nodes to visit
+                # Queue a visit to any free nodes
                 for x in self.graph[node][1]:
                     if x != node and x not in to_visit+visited:
                         to_visit.insert(0,x)
                         self.verbose("  -Found node "+str(x)+" "+str(self.graph[x][5]))
             # Propagate form access
             if not test:
-                self.update_ds_access([node], self.graph[node][4], self.graph[node][9])
+                access_mode = self.graph[node][4]
+                if node in self.txform_nodes:
+                    access_mode |= (0x01|0x02|0x04)
+                self.update_ds_access([node], access_mode, self.graph[node][9])
             # If we've run out of nodes to visit, check if logic has opened up any new nodes
             if not to_visit:
                 open_edges = self.get_open_edges(visited,True)
@@ -664,7 +668,7 @@ class World:
     def get_maps(self):
         maps = [[], [], [], [], [], [], []]
         for map in self.maps:
-            if self.maps[map][0] >= 0 and (not self.dungeon_shuffle or not self.maps[map][8]):    # Jumbo maps don't get rewards in dungeon shuffles
+            if self.maps[map][0] >= 0 and not (self.maps[map][8] and (self.dungeon_shuffle or self.difficulty == 0)):    # Jumbo maps don't get rewards in dungeon shuffles or on Easy
                 boss = self.maps[map][1]
                 maps[boss].append(map)
         maps.pop(0)    # Non-dungeon maps aren't included
@@ -1083,36 +1087,18 @@ class World:
             return -1
         if self.exit_dungeon(exit1) != self.exit_dungeon(exit2):
             return False
-        #if self.dungeon_shuffle != "Chaos":   # Only link Mu rooms of the same water level
-        #    origin1 = self.exits[exit1][3]
-        #    origin2 = self.exits[exit2][3]
-        #    dest1 = self.exits[exit1][4]
-        #    dest2 = self.exits[exit2][4]
-        #    if self.graph[origin1][3][2] != self.graph[origin2][3][2] or self.graph[dest1][3][2] != self.graph[dest2][3][2]:
-        #        return False
         return True
 
-    # Returns -1 if the exit shouldn't be shuffled.
-    # Otherwise returns the (arbitrary) ID of the pool it should be shuffled with, based on self.exits:
-    # ER, no DS:  PoolType=1; one pool
-    # ER and DSB: PoolType>0; pool all having PoolType=1, then pool PoolType>1 by DungeonID
-    # ER and DSC: PoolType>0; pool by PoolType
-    # DSB, no ER: PoolType>1, DungeonID>0; pool by DungeonID
-    # DSC, no ER: PoolType>1, DungeonID>0; one pool
+    # Returns the (arbitrary) ID of the pool an exit should be shuffled in, or -1 if not shuffled.
     def get_exit_pool(self, exit):
-        if (exit not in self.exits) or not self.entrance_shuffle: # (self.entrance_shuffle == "None" and self.dungeon_shuffle == "None"):
+        if (exit not in self.exits) or not self.entrance_shuffle:
             return -1
         dungeon = self.exits[exit][8]
         pooltype = self.exits[exit][9]
-        ER = self.town_shuffle #(self.entrance_shuffle != "None")
-        DSB = False #(self.dungeon_shuffle == "Basic")
-        DSC = self.dungeon_shuffle #(self.dungeon_shuffle == "Chaos")
-        if ER and (pooltype == 1):
+        if self.town_shuffle and (pooltype == 1):
             return 1
-        if DSB and (pooltype > 1) and (dungeon > 0):
-            return 100+dungeon
-        if DSC and (pooltype > 1) and (dungeon > 0):
-            return 2#pooltype
+        if self.dungeon_shuffle and (pooltype > 1) and (dungeon > 0):
+            return 2
         return -1
     
     # Returns whether two exits are pooled for shuffling.
@@ -1123,11 +1109,12 @@ class World:
     def shuffle_chaos_dungeon(self):
         # Build dungeon node islands for the skeleton, assuming free and all-form movement
         self.reset_progress(True)
-        self.items_collected = [800]+self.list_typed_items(types=[1, 2, 4, 5], shuffled_only=False, incl_placed=True)
+        self.items_collected = [800,802,803]+self.list_typed_items(types=[1, 2, 4, 5], shuffled_only=False, incl_placed=True)
         for removed_orb in [707,708,709,735]:   # Due to awkward orb placement, treat Inca exterior and Wat Outer South as corridors
             if removed_orb in self.items_collected:
                 self.items_collected.remove(removed_orb)
         for node in self.graph:
+            self.graph[node][0] = True
             self.graph[node][4] = 0x37
         self.update_graph(True,False,True)
         island_result = self.build_islands()
@@ -1351,9 +1338,7 @@ class World:
             self.reset_progress(True)
             for n in self.graph:
                 self.graph[n][1] = graph_free_access[n][:]
-            self.items_collected = self.list_typed_items(types=[1, 2], shuffled_only=False, incl_placed=True)
-            if self.orb_rando != "None":
-                self.items_collected.extend(self.list_typed_items(types=[5], shuffled_only=False, incl_placed=True))
+            self.items_collected = [800,802,803]+self.list_typed_items(types=[1, 2, 4, 5], shuffled_only=False, incl_placed=True)
             for loc in self.spawn_locations:
                 if self.spawn_locations[loc][3] and loc in self.item_locations and self.item_locations[loc][1] == 2:
                     self.item_locations[loc][2] = True
@@ -1454,13 +1439,6 @@ class World:
                     self.join_exits(exitnum, self.exits[exitnum][0])
                 self.shuffle_chaos_dungeon()
             self.info("Dungeon shuffle complete")
-            #elif self.dungeon_shuffle == "Basic":
-            #    # Ensure DS access for the top of rooms 3A and 5A
-            #    db_exits_from_freedan_rooms = [649, 663]
-            #    db_exits_from_pymd_branch = [636, 642, 648, 654, 662, 668]
-            #    random.shuffle(db_exits_from_pymd_branch)
-            #    self.join_exits(db_exits_from_freedan_rooms[0], db_exits_from_pymd_branch[0])
-            #    self.join_exits(db_exits_from_freedan_rooms[1], db_exits_from_pymd_branch[1])
         # Clean up dungeon shuffle artificial edges
         self.delete_objects(items=[800],with_close=True)
         self.delete_objects(items=[801],with_close=False)
@@ -1657,33 +1635,8 @@ class World:
                 origin_exits.remove(self.exits[dest_exit][0])
                 dest_exits.remove(self.exits[origin_exit][0])
 
-        #self.reset_progress()
-        #self.update_graph(True,True,True)
         self.info("Entrance rando successful")
-        #self.print_exit_graph()
 
-        return True
-
-
-    def print_exit_graph_from_node(self, node, visited=[], known_exits=[]):
-        for exit in self.exits:
-            if self.exits[exit][1] > 0 and self.exits[exit][3] == node and exit not in known_exits:
-                known_exits.append(exit)
-                if self.coupled_exits:
-                    known_exits.append(self.exits[self.exits[exit][1]][0])
-                dest_node = self.exits[self.exits[exit][1]][4]
-                self.verbose(str(node)+" "+str(self.graph[node][5])+" -> "+str(exit)+" "+str(self.exits[exit][10])+" -> "+str(dest_node)+" "+str(self.graph[dest_node][5]))
-                if dest_node in visited:
-                    self.verbose("   Looped to "+str(dest_node)+" "+str(self.graph[dest_node][5]))
-                else:
-                    visited.append(dest_node)
-                    self.print_exit_graph_from_node(dest_node,visited,known_exits)
-        return True
-
-
-    def print_exit_graph(self):
-        for node in self.graph:
-            self.print_exit_graph_from_node(node,[node],[])
         return True
 
 
@@ -1695,9 +1648,8 @@ class World:
         # Find nodes that contain Dark Spaces, and of those, which allow transform and don't contain an ability
         self.ds_locations = [loc for loc in self.spawn_locations if loc in self.item_locations]
         self.ds_nodes = [self.item_locations[loc][0] for loc in self.ds_locations]
-        # Transform DSes are marked "filled" but with item 0
+        # Transform DSes are marked "filled" but contain item 0
         self.txform_locations = [loc for loc in self.ds_locations if self.spawn_locations[loc][3] and self.item_locations[loc][2] and not self.item_locations[loc][3]]
-        self.txform_locations.append(130)   # --but upper Pyramid is special because it's a type-1 loc
         self.txform_nodes = [self.item_locations[loc][0] for loc in self.txform_locations]
         return True
 
@@ -1757,14 +1709,17 @@ class World:
             # Clear and recalculate DS access for all nodes (recursively from DS nodes)
             self.initialize_ds()
             for node in self.ds_nodes:
-                self.update_ds_access([node],0x10,[])
                 for loc in self.graph[node][11]:
                     if loc in self.spawn_locations and self.spawn_locations[loc][3]:
-                        self.update_ds_access([node],0x20,[node])
-            for node in self.txform_nodes:
-                self.update_ds_access([node],(0x01|0x02|0x04),[])
-            for node in [0,10,11,12,13,14]:   # Will has access to overworld-connected nodes and the start node
-                self.update_ds_access([node],0x01,[])
+                        self.update_ds_access([node],0x20,[node])   # Propagate "reachable formlessly from a possibly-txform DS"
+                if self.graph[node][0]:   # Only actually-visited nodes count for these flags
+                    self.update_ds_access([node],0x10,[])   # Propagate "can traverse to a DS"
+                    if node in self.txform_nodes:
+                        self.update_ds_access([node],(0x01|0x02|0x04),[])   # Propagate form traversal
+            self.update_ds_access([0],0x01,[])   # Will has access to the start node
+            for node in [10,11,12,13,14]:   # Will has access to traversed overworld-connected nodes
+                if self.graph[node][0]:
+                    self.update_ds_access([node],0x01,[])
             self.verbose(" Graph DS access updated")
 
         # Update form-specific logic, repeatedly until access stops growing
@@ -1872,7 +1827,8 @@ class World:
         return result
 
 
-    # Check a logic edge to see if prerequisites have been met based on self.items_collected + items.
+    # Check whether edge requirements are met by self.items_collected + items.
+    # If update_graph, also connects the nodes in self.graph and propagates DS access.
     def check_edge(self, edge, items=[], update_graph=True, form=0xff):
         success = False
         if not (self.logic[edge][3] & form):
@@ -1887,7 +1843,7 @@ class World:
                 i += 1
         if self.is_sublist(self.items_collected+items, req_items) and (self.edge_formless(edge) or self.check_ds_access(self.logic[edge][1], self.logic[edge][3] & form, False, [])):
             success = True
-        if success and update_graph and not self.logic[edge][0]:
+        if success and update_graph and self.logic[edge][0] == 0:
             self.logic[edge][0] = 1
             self.new_connection(self.logic[edge][1],self.logic[edge][2],self.logic[edge][3] & form)
         return success
@@ -1908,20 +1864,6 @@ class World:
         return True
 
 
-    def restrict_edge(self, edge=-1):
-        try:
-            self.logic[edge][0] = -1
-            return True
-        except:
-            return False
-
-    def unrestrict_edge(self, edge=-1):
-        try:
-            self.logic[edge][0] = 0 if self.logic[edge][0] != 1 else self.logic[edge][0]
-            return True
-        except:
-            return False
-
     # Set up the databases as required by this seed.
     # Future writer: be sure the databases are in the state you expect at the line where you're adding code;
     # for example, exit_logic and artificial grouping items are unused after they're decomposed.
@@ -1936,9 +1878,11 @@ class World:
         
         # Save item shuffle pools in the database
         for item in self.item_pool:
-            self.item_pool[item][6] = self.get_pool_id(item=item)
+            if self.item_pool[item][6] == 0:
+                self.item_pool[item][6] = self.get_pool_id(item=item)
         for loc in self.item_locations:
-            self.item_locations[loc][7] = self.get_pool_id(loc=loc)
+            if self.item_locations[loc][7] == 0:
+                self.item_locations[loc][7] = self.get_pool_id(loc=loc)
         
         # Save required items
         if 1 in self.dungeons_req:
@@ -1975,8 +1919,13 @@ class World:
                     self.item_locations[jeweler_loc][4].append(item)
         # Restrict bad item placement by difficulty
         if self.difficulty == 0:
-            for awful_ds_loc in [31, 111, 146]:   # No abilities in awful Dark Spaces
+            for awful_ds_loc in [31, 111, 146]:   # No abilities in awful Dark Spaces (Castoth, Kress 3, Upper Babel)
                 self.item_locations[awful_ds_loc][4].extend([61,62,63,64,65,66])
+        if self.difficulty in [0,1]:
+            for awful_loc in [136, 147, 740, 741]:   # Killer 6, Jeweler's Mansion
+                self.item_locations[awful_loc][4].extend(self.required_items)
+            if 1 not in self.statues and self.statue_req != StatueReq.PLAYER_CHOICE.value:
+                self.item_locations[32][4].extend(self.required_items)   # Gold Ship restricted if Statue 1 isn't required
         
         # Clamp item progression penalty
         for item in self.item_pool:
@@ -2145,10 +2094,7 @@ class World:
         if "Z3 Mode" not in self.variant:
             unused_items.append(55)   # Heart pieces don't exist
         if "Open Mode" in self.variant:
-            # Set all travel item edges open (Letter, M.Melody, Teapot, Will, Roast)
-            for travel_edge in [30,31,32,33,36,38,39,40]:
-                self.logic[travel_edge][0] = 2
-            # Remove travel items from pool and add some replacements
+            # Replace travel items (Letter, M.Melody, Teapot, Will, Roast)
             free_items.extend([10,13,24,25,37])
             self.item_pool[6][0] += 4  # Herbs
             self.item_pool[0][0] += 1  # Nothing
@@ -2314,9 +2260,8 @@ class World:
         for x in self.item_locations:
             self.graph[self.item_locations[x][0]][11].append(x)
         for y in self.logic:
-            if self.logic[y][0] != -1:
-                self.graph[self.logic[y][1]][12].append(y)
-                self.graph[self.logic[y][2]][13].append(y)
+            self.graph[self.logic[y][1]][12].append(y)
+            self.graph[self.logic[y][2]][13].append(y)
         
         # Boss Shuffle -- boss_order[n] is the boss of dungeon n, 0<=n<=6, 1<=boss<=7
         if "Boss Shuffle" in self.variant:
@@ -2487,6 +2432,7 @@ class World:
                 for loc in self.spawn_locations:
                     if self.spawn_locations[loc][3] and loc in self.item_locations and self.item_locations[loc][1] == 2 and not self.item_locations[loc][3]:
                         self.item_locations[loc][2] = True
+                self.verbose("All remaining Dark Spaces are locked for transform")
                 self.update_graph(True,True,False)
                 if self.logic_mode != "Completable":
                     break    # Good enough: all DSes are populated and formful access isn't mandatory
@@ -2502,6 +2448,8 @@ class World:
                 f_nodes_under_ds_node = {}
                 for node in f_missing_nodes:
                     for ds_node in self.graph[node][9]:
+                        if not self.graph[ds_node][0]:
+                            continue
                         ds_loc = next(loc for loc in self.graph[ds_node][11] if self.item_locations[loc][1] == 2)
                         if self.graph[ds_node][0] and not self.item_locations[ds_loc][2]:
                             if ds_node not in f_nodes_under_ds_node:
@@ -2594,12 +2542,12 @@ class World:
                 self.error("Max cycles exceeded in item placement")
                 return False
             self.traverse()
-            # Good items resist being placed early; very good items can't be placed early at all
+            # Good items resist being placed early; if starting in a town with lots of checks available, very good items can't be placed early at all
             discovered_locs = [loc for loc in self.item_locations if self.graph[self.item_locations[loc][0]][0] and self.item_locations[loc][8] > cycle]
             for loc in discovered_locs:
                 self.item_locations[loc][8] = cycle
                 for item in high_penalty_items:
-                    if item not in self.item_locations[loc][4] and cycle < (self.item_pool[item][7] * 1.5 / PROGRESS_ADJ[self.difficulty]):
+                    if (item not in self.item_locations[loc][4]) and (cycle < (self.item_pool[item][7] * 1.5 / PROGRESS_ADJ[self.difficulty])) and (self.spawn_locations[self.start_loc][0] == "Safe"):
                         self.item_locations[loc][4].append(item)
             if len(self.get_inventory()) > MAX_INVENTORY:
                 goal = False
@@ -3305,7 +3253,7 @@ class World:
 
         self.firebird = settings.firebird
         self.start_loc = 10
-#        self.level = settings.level.value
+        #self.level = settings.level.value
         self.difficulty = settings.difficulty.value
         self.kara = kara
         self.gem = gem
@@ -3319,7 +3267,7 @@ class World:
         self.good_items = [10, 13, 24, 25, 37, 62, 63, 64]
         self.trolly_locations = [32, 45, 64, 65, 102, 108, 121, 128, 136, 147]
         self.free_locations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24, 33, 34, 35, 36, 37, 38, 39]
-        self.optional_nodes = [-2, -1, 491, 600, 601, 602, 604, 605, 606, 607]  # Artificial nodes, not required by competable logic
+        self.optional_nodes = [-2, -1, 491, 600, 601, 602, 604, 605, 606, 607, 800, 801, 802, 803]  # Artificial nodes, not required by competable logic
         self.map_patches = []
         self.visited = []
         self.items_collected = []
@@ -3355,7 +3303,7 @@ class World:
         self.spawn_locations = {
             -1:  ["",       0x08, 0x00, 0],  # School
             10:  ["Safe",   0x01, 0x00, 0],  # Cape exterior
-            14:  ["",       0x0b, 0x01, 0],  # Prison
+            14:  ["Unsafe" if self.entrance_shuffle else "", 0x0b, 0x01, 0],  # Prison
             19:  ["Unsafe", 0x12, 0x02, 1],  # EdDg final
             22:  ["Safe",   0x15, 0x03, 0],  # Itory
             29:  ["Unsafe", 0x28, 0x04, 1],  # Inca near melody
@@ -3364,7 +3312,7 @@ class World:
             39:  ["Safe",   0x34, 0x07, 0],  # Freejia
             46:  ["Unsafe", 0x40, 0x08, 1],  # Mine hidden
             47:  ["Unsafe", 0x3d, 0x09, 1],  # Mine near false wall
-            48:  ["",       0x42, 0x0a, 1],  # Mine behind false wall
+            48:  ["Unsafe" if self.dungeon_shuffle else "", 0x42, 0x0a, 1],  # Mine behind false wall
             57:  ["Safe",   0x4c, 0x0b, 0],  # SkGn foyer
             58:  ["Unsafe", 0x56, 0x0c, 1],  # SkGn blue room
             59:  ["",       0x51, 0x0d, 1],  # SkGn inside fence
@@ -3386,7 +3334,7 @@ class World:
             123: ["",       0xb8, 0x1d, 1],  # Ankr inner east
             124: ["Unsafe", 0xbb, 0x1e, 1],  # Ankr dropdown
             129: ["Safe",   0xc3, 0x1f, 0],  # Dao
-            130: ["",       0xcc, 0x20, 1],  # Pymd upper
+            154: ["",       0xcc, 0x20, 1],  # Pymd upper
             142: ["Unsafe", 0xcc, 0x21, 1],  # Pymd lower
             145: ["Forced Unsafe" if self.difficulty == 3 and self.flute == "Start" else "", 0xdf, 0x22, 0],  # Babel lower
             146: ["Safe",   0xe3, 0x23, 0]   # Babel upper
@@ -3415,11 +3363,11 @@ class World:
             7: [1, 1,  0x07, "Diamond Block", True and not settings.infinite_inventory, 1, 0, 6*settings.orb_rando],
             8: [1, 1,  0x08, "Wind Melody", True and not settings.infinite_inventory, 1, 0, 0],
             9: [1, 1,  0x09, "Lola's Melody", True and not settings.infinite_inventory, 1, 0, 0],
-            10: [1, 1, 0x0a, "Large Roast", True and not settings.infinite_inventory, 1, 0, 0],
+            10: [1, 1, 0x0a, "Large Roast", True and not settings.infinite_inventory, 1, 0, self.difficulty],
             11: [1, 1, 0x0b, "Mine Key A", True and not settings.infinite_inventory, 1, 0, 0],
             12: [1, 1, 0x0c, "Mine Key B", True and not settings.infinite_inventory, 2, 0, 0],
-            13: [1, 1, 0x0d, "Memory Melody", True and not settings.infinite_inventory, 1, 0, 0],
-            14: [4, 1, 0x0e, "Crystal Ball", True and not settings.infinite_inventory, 2, 0, 0],
+            13: [1, 1, 0x0d, "Memory Melody", True and not settings.infinite_inventory, 1, 0, self.difficulty],
+            14: [4, 1, 0x0e, "Crystal Ball", True and not settings.infinite_inventory, 2, 0, -1*self.difficulty],
             15: [1, 1, 0x0f, "Elevator Key", True and not settings.infinite_inventory, 1, 0, -1],
             16: [1, 1, 0x10, "Mu Palace Key", True and not settings.infinite_inventory, 1, 0, 0],
             17: [1, 1, 0x11, "Purity Stone", True and not settings.infinite_inventory, 1, 0, 0],
@@ -3429,8 +3377,8 @@ class World:
             21: [0, 1, 0x15, "Blue Journal", False, 3, 0, 0],
             22: [1, 1, 0x16, "Lance Letter", False, 3, 0, 0],
             23: [1, 1, 0x17, "Necklace", True and not settings.infinite_inventory, 1, 0, 0],
-            24: [1, 1, 0x18, "Will", True and not settings.infinite_inventory, 1, 0, 0],
-            25: [1, 1, 0x19, "Teapot", True and not settings.infinite_inventory, 1, 0, 0],
+            24: [1, 1, 0x18, "Will", True and not settings.infinite_inventory, 1, 0, self.difficulty],
+            25: [1, 1, 0x19, "Teapot", True and not settings.infinite_inventory, 1, 0, self.difficulty],
             26: [3, 1, 0x1a, "Mushroom Drops", True and not settings.infinite_inventory, 1, 0, -1],
             #27: [0, 1, 0x1b, "Bag of Gold", False, 3, 0, 0],  # Not implemented
             28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 3*self.difficulty if settings.darkrooms.value != 0 else 0],
@@ -3442,7 +3390,7 @@ class World:
             34: [1, 1, 0x22, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
             35: [1, 1, 0x23, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
             36: [1, 1, 0x24, "Aura", True and not settings.infinite_inventory, 1, 0, 2*self.difficulty*self.dungeon_shuffle],
-            37: [1, 1, 0x25, "Lola's Letter", False, 1, 0, 0],
+            37: [1, 1, 0x25, "Lola's Letter", False, 1, 0, self.difficulty],
             38: [1, 1, 0x26, "Journal", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
             39: [1, 1, 0x27, "Crystal Ring", False, 1, 0, 3*self.difficulty if settings.darkrooms.value != 0 else 0],
             40: [1, 1, 0x28, "Apple", True and not settings.infinite_inventory, 1, 0, 0],
@@ -3828,7 +3776,7 @@ class World:
             129: [400, 2, False, 0, [], "", "Dao: Dark Space", 0, 0, [] ],
 
             # Pyramid
-            130: [713, 1, False, 0, [], "PyramidGaiaItem", "Pyramid: Dark Space Top", 0, 0, [] ],
+            130: [713, 1, False, 0, [], "PyramidGaiaItem", "Pyramid: Gaia Item", 0, 0, [] ],
             131: [412, 1, False, 0, [], "PyramidFoyerItem", "Pyramid: Hidden Platform", 0, 0, [] ],
             132: [442, 1, False, 0, [], "PyramidHiero1Item", "Pyramid: Hieroglyph 1", 0, 0, [] ],
             133: [422, 1, False, 0, [], "PyramidRoom2ChestItem", "Pyramid: Room 2 Chest", 0, 0, [] ],
@@ -3841,7 +3789,8 @@ class World:
             140: [446, 1, False, 0, [], "PyramidHiero5Item", "Pyramid: Hieroglyph 5", 0, 0, [] ],
             141: [447, 1, False, 0, [], "PyramidHiero6Item", "Pyramid: Hieroglyph 6", 0, 0, [] ],
 
-            142: [413, 2, False, 0, [], "", "Pyramid: Dark Space Bottom", 0, 0, [] ],
+            154: [713, 2, True,  0, [61,62,63,64,65,66], "", "Pyramid: Upper Dark Space", -1, 0, [] ],
+            142: [413, 2, False, 0, [], "", "Pyramid: Lower Dark Space", 0, 0, [] ],
 
             739: [411, 5, False, 0, [], "PyramidEntranceOrbsItem", "Pyramid: Entrance Orbs for DS Gate", 0, 0, [[609, 1]] ],
 
