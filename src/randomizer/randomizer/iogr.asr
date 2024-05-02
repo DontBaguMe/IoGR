@@ -694,6 +694,7 @@ SR_RunIogrMapCode:
 lda #$09c4 : jsl LR_SecOnAnyFlagA : bcc .PostDsWarpCheck
   cop #$CF : dw $09c4
   cop #$9C : dl EDarkSpaceWarper : dw $2300
+  lda $0012,y : ora #$1000 : sta $0012,y   ; Make the warp ignore Earthquaker
   lda $0bf6 : sta $0026,y
 .PostDsWarpCheck:
 if !SettingDebug == 1
@@ -6064,7 +6065,7 @@ lda #$0800 : trb $10
 .DoorAlreadyOpen:
 cop #$D0 : db $23,$01 : dw .Die ; $d2d6
 .SpawnHamlet:
-cop #$C2
+cop #$DA : db $04
 lda #$1000 : tsb $10
 lda #$2000 : trb $10
 cop #$BF : dw $d4a5

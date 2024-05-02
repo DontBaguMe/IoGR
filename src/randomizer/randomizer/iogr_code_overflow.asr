@@ -2493,7 +2493,6 @@ rtl
 ; Spawn this and set its $26 to the target DS index from TableDsMapSpawnData.
 EDarkSpaceWarper:
 {
-lda #$1000 : tsb $12   ; Ignore Earthquaker
 lda #$fff0 : tsb $065a
 lda $1010 : ora #$2000 : sta $1010
 cop #$08 : db $0C, $0C
@@ -2776,6 +2775,7 @@ jmp EDsWarpMenuChoseGoodLoc
 EDsWarpMenuChoseGoodLoc:
 cop #$BF : dw TextDsWarpClearScreen
 cop #$9C : dl EDarkSpaceWarper : dw $2000
+lda $0012,y : ora #$1000 : sta $0012,y   ; Make the warp ignore Earthquaker
 lda $0bf8 : sta $0026,y
   sta $0bf6
 cop #$C1
