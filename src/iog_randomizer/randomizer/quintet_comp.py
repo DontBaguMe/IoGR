@@ -18,10 +18,8 @@
 # This code uses python-bitstring:
 # https://pypi.python.org/pypi/bitstring
 
-from __future__ import print_function
-from __future__ import division
-
 import sys
+
 import bitstring
 
 

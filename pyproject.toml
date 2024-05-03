@@ -8,11 +8,10 @@ authors = [
     { "name" = "bryon_w" },
     { "name" = "raeven0" }
 ]
-version = "4.7.2"
 description = "The Illusion of Gaia Randomizer"
 urls.Homepage = "https://iogr.app/"
 urls.Source = "https://github.com/dontbagume/iogr"
-dynamic = ["dependencies"]
+dynamic = ["dependencies", "version"]
 readme = { file = "README.md", content-type = "text/markdown" }
 
 [build-system]
@@ -30,3 +29,4 @@ include = ["iog_randomizer.*"]
 
 [tool.setuptools.dynamic]
 dependencies.file = "requirements.txt"
+version.attr = "iog_randomizer.randomizer.version"

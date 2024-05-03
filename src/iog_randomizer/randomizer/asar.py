@@ -10,7 +10,10 @@ functions to get info about the patch
 import ctypes
 import enum
 import sys
-from ctypes import c_int, c_char_p, POINTER
+from ctypes import POINTER
+from ctypes import c_char_p
+from ctypes import c_int
+
 c_int_ptr = POINTER(c_int)
 
 __all__ = ["errordata", "writtenblockdata", "mappertype", "version",
@@ -159,7 +162,7 @@ class _AsarDLL:
         api_ver = dll.asar_apiversion()
         if api_ver < _target_api_ver or \
                 (api_ver // 100) > (_target_api_ver // 100):
-            raise OSError("Asar DLL version "+str(api_ver)+" unsupported")
+            raise OSError("Asar DLL version " + str(api_ver) + " unsupported")
 
     def setup_func(self, name, argtypes, restype):
         """Setup argument and return types for a function.
@@ -250,9 +253,11 @@ def reset():
     return _asar.dll.asar_reset()
 
 
-def patch(patch_name, rom_data, includepaths=[], should_reset=True,
-          additional_defines={}, std_include_file=None, std_define_file=None,
-          warning_overrides={}, memory_files={}, override_checksum=None):
+def patch(
+    patch_name, rom_data, includepaths=[], should_reset=True,
+    additional_defines={}, std_include_file=None, std_define_file=None,
+    warning_overrides={}, memory_files={}, override_checksum=None
+    ):
     """Applies a patch.
 
     Returns (success, new_rom_data). If success is False you should call
@@ -292,7 +297,7 @@ def patch(patch_name, rom_data, includepaths=[], should_reset=True,
 
     # construct an array type of len(includepaths) elements and initialize
     # it with elements from includepaths
-    pp.includepaths = (c_char_p*len(includepaths))(*includepaths)
+    pp.includepaths = (c_char_p * len(includepaths))(*includepaths)
     pp.numincludepaths = len(includepaths)
 
     defines = (_definedata * len(additional_defines))()
@@ -410,6 +415,7 @@ def getwrittenblocks():
 def getmapper():
     """Get the ROM mapper currently used by Asar."""
     return mappertype(_asar.dll.asar_getmapper())
+
 
 def getsymbolsfile(fmt="wla"):
     """Generates the contents of a symbols file for in a specific format.

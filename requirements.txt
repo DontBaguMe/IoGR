@@ -1,2 +1,3 @@
 ips.py
 bsdiff4
+bitstring

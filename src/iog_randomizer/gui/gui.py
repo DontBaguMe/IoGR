@@ -7,8 +7,10 @@ import tkinter.messagebox
 import bsdiff4
 import ips
 
-from ..randomizer.errors import FileNotFoundError, OffsetError
-from ..randomizer.iogr_rom import Randomizer, VERSION
+from ..randomizer.errors import RomNotFoundError
+from ..randomizer.errors import OffsetError
+from ..randomizer.iogr_rom import Randomizer
+from ..randomizer.iogr_rom import VERSION
 from ..randomizer.iogr_rom import generate_filename
 from ..randomizer.models.enums import *
 from ..randomizer.models.randomizer_data import RandomizerData
@@ -371,7 +373,7 @@ def generate_ROM():
     except OffsetError:
         tkinter.messagebox.showerror("ERROR",
                                      "This randomizer is only compatible with the (US) version of Illusion of Gaia")
-    except FileNotFoundError:
+    except RomNotFoundError:
         tkinter.messagebox.showerror("ERROR", "ROM file does not exist")
     except Exception as e:
         tkinter.messagebox.showerror("ERROR", str(e))

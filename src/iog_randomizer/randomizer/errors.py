@@ -1,4 +1,4 @@
-class FileNotFoundError(Exception):
+class RomNotFoundError(Exception):
     """Raised when the ROM does not exist"""
     pass
 

@@ -6,6 +6,8 @@ releases/
 data/*.sfc
 data/output/**
 
+**/*.egg-info
+
 
 **/*.sfc
 **/*.pyc

@@ -1,16 +1,17 @@
+import argparse
 import json
 import os
-import sys
 import random
-import argparse
+import sys
 
+from ..randomizer.iogr_rom import Randomizer
+from ..randomizer.iogr_rom import generate_filename
 from ..randomizer.models.enums import Difficulty
 from ..randomizer.models.enums import Enemizer
 from ..randomizer.models.enums import Goal
 from ..randomizer.models.enums import Logic
 from ..randomizer.models.enums import StartLocation
 from ..randomizer.models.randomizer_data import RandomizerData
-from ..randomizer.iogr_rom import Randomizer, generate_filename
 
 parser = argparse.ArgumentParser(description="Generate a randomly seeded ROM")
 parser.add_argument('-p', '--path', dest="path", type=str, required=True, help="Path to the base ROM file")
@@ -28,7 +29,8 @@ parser.add_argument('--statues', dest="statues", type=str, required=False, defau
 parser.add_argument('--firebird', dest="firebird", type=bool, required=False, default=False)
 parser.add_argument('--allow-glitches', dest="allow_glitches", type=bool, required=False, default=False)
 parser.add_argument('--boss-shuffle', dest="boss_shuffle", type=bool, required=False, default=False,
-                    help="Randomizes where bosses are placed (this will most likely softlock your game, use at own risk)")
+                    help="Randomizes where bosses are placed "
+                         "(this will most likely softlock your game, use at own risk)")
 parser.add_argument('--overworld-shuffle', dest="overworld_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--dungeon-shuffle', dest="dungeon_shuffle", type=bool, required=False, default=False)
 parser.add_argument('--open-mode', dest="open_mode", type=bool, required=False, default=False)
