@@ -447,19 +447,8 @@ LR_PlaceSelfBetween04And06 = $8aa41c
 {
 !SettingInfiniteInventory ?= 0
 
-org $306002
-SramTextBuffer:    ; For drawing complex dynamic text
-skip 100
-
-SramDarkSpaceSeenFormFlags:   ; 2 "flags" per each of 36 DSes for if Will or not-Will has been seen nearby
-skip 9
-
-warnpc $306200
-
-org $306400
-SramStartPermanentData:   ; Data between here and End will be saved by Gaia and restored after a reset
-SramInvHoldingTank:   ; Items from other worlds; MW writing directly to the inventory is unsafe
-skip $100
+org $7e0dc0
+SramStartPermanentDataA:   ; Data between here and End will be saved by Gaia and restored after a reset
 SramInvActivePageId:  ; ID of the current active inventory page
 skip 2
 SramInvItems:         ; Aliased start of the item list, which begins immediately with the top line
@@ -470,11 +459,31 @@ skip 12
 skip 12
 skip 12
 SramInvEndOfList:     ; End of item list
+skip 2                ; Reserved for future use
+skip 2                ; Reserved for future use
+skip 2                ; Reserved for future use
+SramInvSmallHoldingTank:   ; Items from other worlds, small WRAM buffer
+skip 16
+SramEndPermanentDataA:   ; End of data that should be considered part of the game and saved/restored
+warnpc $7e0e00
 
-warnpc $3065fe
-org $3065fe
-SramEndPermanentData:   ; End of all data that should be considered part of the game and saved/restored
-skip 2                  ; The value here will be nonzero and non-#$FFFF if there's saved data
+
+org $306002
+SramTextBuffer:    ; For drawing complex dynamic text
+skip $100
+SramHardenedDataMarker:
+skip 2                  ; The value here will be nonzero and non-#$FFFF if there's hardened data
+warnpc $306200
+
+
+org $306400
+SramStartPermanentDataB:   ; Data between here and End will be saved by Gaia and restored after a reset
+SramInvHoldingTank:   ; Items from other worlds; MW writing directly to the inventory is unsafe
+skip $100
+SramEndPermanentDataB:   ; End of data that should be considered part of the game and saved/restored
+
+warnpc $306600
+org $306600
 SramHardened:    ; Contents of SRAM inventory at last save, for restoring from a reset or crash
 
 }

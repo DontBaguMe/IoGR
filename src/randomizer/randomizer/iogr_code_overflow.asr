@@ -3,9 +3,6 @@ hirom
 
 ; Reserved RAM (in addition to base game):
 ; $0aaa = number of stacked herbs
-; $0b34 = DS visited flags
-; $0b36 = DS visited flags
-; $0bea = press-X-to-run setting
 ; $0bec = number of stacked Hope Statues
 ; $0bee = number of stacked Rama Statues
 ; $0bf0 = number of stacked Mushroom Drops
@@ -16,14 +13,16 @@ hirom
 ; $0bfa = used for text branches ("FORCE" text, inv page number, count spacing, Lance's letter, etc.)
 ; $0bfc = used during item pickup to write text slowly (for chests and Dark Spaces)
 ; $0bfe = used by Z3 to flag a stat as maxed out
+; $0dc0-$0dff = used by infinite inventory
 ; $1ffc = Player X pos in debug mode
 ; $1ffe = Player Y pos in debug mode
 ; Reserved flags (in addition to base game):
-; $022f - $0247 : Monster item flags $01 - $18
-; $0290 - $02af : Monster item flags $19 - $2A, and 13 extras
+; $022f - $0247 : Monster item flags $01 - $19
+; $0290 - $02af : Monster item flags $1A - $2A, and some extras
 ; $02b0 - $02b1 : Statue placed in the Left/Right Hope Room
 ; $02b2 - $02b7 : DS item-get flags
 ; $09a0 - $09c4 : DS visited flags
+; $09d0         : infinite inventory setting is in use
 
 
 LR_SecOnAnyFlagA:
@@ -1898,45 +1897,59 @@ lda #$0000 : tax : tay
 pha
 .NextItem:
 lda.l SramInvHoldingTank,x : and #$00ff : beq ..Given
-  tay
+  phx
+    tay
+      lda $05,s : tax   ; i.e. restore .X = ActorID
+    tya
+    jsl LR_GiveNormalItemA8OrSec : bcs ..FailedToGiveItem
+  plx
   sep #$20
     lda #$00 : sta.l SramInvHoldingTank,x
   rep #$20
-  lda $03,s : tax
-  tya
-  jsl LR_GiveNormalItemA8OrSec
 ..Given:
 pla : inc : cmp #$0100 : bcs .Done
   tax
   pha
   bra .NextItem
+..FailedToGiveItem:   ; something's probably horribly wrong if we get here, but we can handle it
+plx
+pla
 .Done:
 plx
 rtl
 
-; Called during Gaia game save. After a reset, permanent SRAM will be restored as it is at this point.
+; Called during Gaia game save. After a reset, permanent "SRAM" will be restored as it is at this point.
 LR_HardenSram:
 phx
 ldx #$0000
 -:
-lda.l SramStartPermanentData,x : sta.l SramHardened,x
+lda.l SramStartPermanentDataA,x : sta.l SramHardened,x
 inx : inx
-cpx.w #(SramEndPermanentData-SramStartPermanentData) : bcc -
-lda #$0001 : sta.l SramHardened,x   ; Artificial, indicates that there's saved data here
+cpx.w #(SramEndPermanentDataA-SramStartPermanentDataA) : bcc -
+ldx #$0000
+-:
+lda.l SramStartPermanentDataB,x : sta.l SramHardened+(SramEndPermanentDataA-SramStartPermanentDataA),x
+inx : inx
+cpx.w #(SramEndPermanentDataB-SramStartPermanentDataB) : bcc -
+lda #$0001 : sta.l SramHardenedDataMarker   ; Artificial, indicates that there's saved data
 plx
 rtl
 
-; Restores the save file as usual, along with hardened SRAM.
+; Restores the save file as usual, along with hardened "SRAM".
 LR_RestoreSaveFileWithInfiniteInventoryOrSec:
 phx
 jsl $83D954 : bcs .SecAndReturn   ; Normal routine accepts save file ID in A; sets carry if file is blank.
-ldx.w #(SramEndPermanentData-SramStartPermanentData)
-lda.l SramHardened,x : cmp #$0001 : bne .ClcAndReturn
+lda.l SramHardenedDataMarker : cmp #$0001 : bne .ClcAndReturn
 ldx #$0000
 -:
-lda.l SramHardened,x : sta.l SramStartPermanentData,x
+lda.l SramHardened,x : sta.l SramStartPermanentDataA,x
 inx : inx
-cpx.w #2+SramEndPermanentData-SramStartPermanentData : bcc -
+cpx.w #(SramEndPermanentDataA-SramStartPermanentDataA) : bcc -
+ldx #$0000
+-:
+lda.l SramHardened+(SramEndPermanentDataA-SramStartPermanentDataA),x : sta.l SramStartPermanentDataB,x
+inx : inx
+cpx.w #(SramEndPermanentDataB-SramStartPermanentDataB) : bcc -
 .ClcAndReturn:
 plx
 jsl LR_UpdateItemViewFull

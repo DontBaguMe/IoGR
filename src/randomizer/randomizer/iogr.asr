@@ -697,6 +697,29 @@ lda #$09c4 : jsl LR_SecOnAnyFlagA : bcc .PostDsWarpCheck
   lda $0012,y : ora #$1000 : sta $0012,y   ; Make the warp ignore Earthquaker
   lda $0bf6 : sta $0026,y
 .PostDsWarpCheck:
+if !SettingInfiniteInventory == 1
+.StoreSmallInvTank:
+sep #$20
+phx
+ldx #$0000
+ldy #$0000
+..CheckSmallSlot:
+lda.w SramInvSmallHoldingTank,y : bne ..FindNextLargeSlot
+..NextSmallSlot:
+  iny : cpy #$0010 : bcc ..CheckSmallSlot
+    bra .DoneStoringSmallInvTank
+..FindNextLargeSlot:
+lda.l SramInvHoldingTank,x : beq ...GotSlot
+  inx : cpx #$0100 : bcs .DoneStoringSmallInvTank   ; if the big tank is full, I guess we have to give up
+  bra ..FindNextLargeSlot
+...GotSlot:
+lda.w SramInvSmallHoldingTank,y : sta.l SramInvHoldingTank,x
+lda #$00 : sta.w SramInvSmallHoldingTank,y
+bra ..NextSmallSlot
+.DoneStoringSmallInvTank:
+plx
+rep #$20
+endif
 if !SettingDebug == 1
 jsr SR_CameraUpdatesPositionHundreds
 endif
@@ -6120,8 +6143,20 @@ cop #$E0
 .PlayerInArea:
 cop #$C1
 cop #$D0 : db $40,$01 : dw .DoEnterItory
-cop #$40 : dw $0f01 : dw .TryLeaveItory
+cop #$45 : db $2d,$37,$2e,$38 : dw .DoNothing
+.LeaveItory:
+cop #$BF : dw .TextYouNeedLolasMelody
+cop #$66 : dw $00c0,$02c0 : db !OverworldShuffleItryMenuId
+cop #$C1
+.DoNothing:
 rtl
+.TextYouNeedLolasMelody:
+db $d3
+db "(Looks like you'll",$cb
+db "need to find and use",$cb
+db "a certain item to",$cb
+db "enter the town...)"
+db $c0
 .DoEnterItory:
 lda #$1000 : tsb $10
 lda #$eff0 : tsb $065a
@@ -6174,20 +6209,6 @@ cop #$8A
 cop #$86 : db $1f,$04,$12
 cop #$8A
 cop #$E0
-.TryLeaveItory:
-cop #$45 : db $2c,$36,$2f,$39 : dw ..DoNothing
-cop #$BF : dw ..TextYouNeedLolasMelody
-cop #$66 : dw $00c0,$02c0 : db !OverworldShuffleItryMenuId
-cop #$C1
-..DoNothing:
-rtl
-..TextYouNeedLolasMelody:
-db $d3
-db "(Looks like you'll",$cb
-db "need to find and use",$cb
-db "a certain item to",$cb
-db "enter the town...)"
-db $c0
 }
 warnpc $84e5a1
 
@@ -10783,6 +10804,7 @@ lda.l Config_SettingFluteOpt : bne +
   cop #$CC : db $13   ; Set "has Flute" flag if starting with flute
 +:
 if !SettingInfiniteInventory == 1
+cop #$CD : dw $09d0   ; tracker flag
 ldx #$0000
 lda #$0000
 -:
