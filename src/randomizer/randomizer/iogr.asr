@@ -9799,10 +9799,24 @@ cop #$CE : db $F4
 rtl
 
 ; Speed up Babel warp/elevator sequences
-org $8995a9
-db $01,$00
-org $8995b0
-db $01,$00
+org $8995a7
+cop #$DB : dw $0002
+cop #$CC : db $00
+cop #$DB : dw $0002
+cop #$CC : db $01
+if !SettingDungeonShuffle > 0
+cop #$9C : dl EPymdPortalToFoyer_EVanishingPlayerSprite : dw $1002
+else
+cop #$9C : dl $88B6F4 : dw $1002   ; This is the normal address for this object. Dungeon Shuffle moves it.
+endif
+
+org $8995f6
+if !SettingDungeonShuffle > 0
+cop #$9C : dl EPymdPortalToFoyer_EVanishingPlayerSprite : dw $1002
+else
+cop #$9C : dl $88B6F4 : dw $1002   ; This is the normal address for this object. Dungeon Shuffle moves it.
+endif
+
 org $8996ab
 db $03
 org $8996fd
