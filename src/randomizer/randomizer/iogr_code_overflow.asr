@@ -2253,7 +2253,9 @@ jsl LR_UpdateItemViewFull
 endif
 .SetupRng:
 lda $0644 : cmp #$008a : beq ..Fanger
+  cmp #$00f5 : beq ..Fanger
   cmp #$00dd : beq ..MummyQueen
+  cmp #$00f6 : beq ..MummyQueen
   cmp #$00e7 : beq ..FlightToComet
 bra ..Done
 ..Fanger:
