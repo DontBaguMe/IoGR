@@ -1,0 +1,7 @@
+global-include *.bin
+global-include *.asr
+global-include *.txt
+global-include asar*.*
+global-exclude *.bat
+global-exclude *.spec
+prune data logs screenshots
