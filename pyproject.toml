@@ -29,4 +29,4 @@ include = ["iog_randomizer.*"]
 
 [tool.setuptools.dynamic]
 dependencies.file = "requirements.txt"
-version.attr = "iog_randomizer.randomizer.version"
+version.attr = "iog_randomizer.randomizer.iogr_rom.VERSION"
