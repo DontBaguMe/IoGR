@@ -1,2 +1,3 @@
+from .iogr_rom import VERSION
 name = "iog_randomizer"
-version = "5.0.0"
+version = VERSION
