@@ -12,7 +12,7 @@ from .errors import OffsetError
 from .models.enums import *
 from .models.randomizer_data import RandomizerData
 
-VERSION = "5.0.0"
+VERSION = "5.0.1"
 MAX_RANDO_RETRIES = 50
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(
     __file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
@@ -262,7 +262,7 @@ class Randomizer:
         ##########################################################################
         #                          Randomize Snake Game
         ##########################################################################
-        snakes_per_sec = [0.85, 0.85, 1.175, 1.50]  # By level
+        snakes_per_sec = [0.75, 0.85, 1.175, 1.50]         # By level
         if settings.flute.value >= 1:
             snakes_per_sec = [i / 4.0 for i in snakes_per_sec]
         snake_adj = random.uniform(0.9, 1.1)  # Varies snakes per second by +/-10%

@@ -44,6 +44,8 @@ class World:
         val_success = True
         placed_item_counts = {}
         for loc in self.item_locations:
+            if self.item_locations[loc][1] not in [1,2,3,5]:
+                continue
             item = self.item_locations[loc][3]
             loc_pool = self.item_locations[loc][7]
             if item == 0 and self.item_locations[loc][1] == 2:
@@ -83,11 +85,11 @@ class World:
     def fill_item(self, item, location=-1, test=False, override_restrictions=False):
         if location == -1:
             return False
-        elif self.item_locations[location][2]:
+        elif not test and self.item_locations[location][2]:
             self.verbose("Tried to place an item in a full location: " + str(self.item_pool[item][3]) + " " + str(
                 self.item_locations[location][6]))
             return False
-        elif item in self.item_locations[location][4] and not override_restrictions:
+        elif not test and item in self.item_locations[location][4] and not override_restrictions:
             self.verbose("Tried to place item in a restricted location: " + str(self.item_pool[item][3]) + " " + str(
                 self.item_locations[location][6]))
             return False
@@ -265,7 +267,6 @@ class World:
                 self.graph[x][9].clear()
                 self.graph[x][10] = self.graph[x][1][:]
         for x in self.logic:
-            if self.logic[x][0] == 1:
                 self.logic[x][0] = 0
         return True
 
@@ -306,7 +307,10 @@ class World:
                         self.verbose("  -Found node " + str(x) + " " + str(self.graph[x][5]))
             # Propagate form access
             if not test:
-                self.update_ds_access([node], self.graph[node][4], self.graph[node][9])
+                access_mode = self.graph[node][4]
+                if node in self.txform_nodes:
+                    access_mode |= (0x01|0x02|0x04)
+                self.update_ds_access([node], access_mode, self.graph[node][9])
             # If we've run out of nodes to visit, check if logic has opened up any new nodes
             if not to_visit:
                 open_edges = self.get_open_edges(visited, True)
@@ -338,9 +342,7 @@ class World:
         for edge in test_edges:
             origin = self.logic[edge][1]
             dest = self.logic[edge][2]
-            if (self.logic[edge][0] >= 0) and (edge not in open_edges) and (
-                    not self.is_accessible(dest) or self.graph[origin][4] != self.graph[dest][
-                4] or include_redundant) and (dest not in nodes or self.logic[edge][0] == 0):
+            if (self.logic[edge][0] >= 0) and (edge not in open_edges) and (not self.is_accessible(dest) or self.graph[origin][4] != self.graph[dest][4] or include_redundant) and (dest not in nodes or self.logic[edge][0] == 0):
                 open_edges.append(edge)
         return open_edges
 
@@ -430,9 +432,7 @@ class World:
         to_fill = [[] for _ in range(self.item_pool_count)]
         loc_quarantine = [[] for _ in range(self.item_pool_count)]
         for pool in range(self.item_pool_count):
-            to_fill[pool] = [loc for loc in item_locations if
-                             self.item_locations[loc][7] == pool and not self.item_locations[loc][
-                                 2] and self.is_accessible(self.item_locations[loc][0])]
+            to_fill[pool] = [loc for loc in item_locations if self.item_locations[loc][7] == pool and not self.item_locations[loc][2] and self.is_accessible(self.item_locations[loc][0])]
             if impose_penalty:  # Later locations are preferred by more restrictive items
                 to_fill[pool].sort(key=lambda loc: -1 * self.item_locations[loc][8])
             else:
@@ -504,8 +504,7 @@ class World:
     def progression_list(self, open_edges=[], ignore_inv=False, penalty_threshold=MAX_CYCLES):
         if not open_edges:
             open_edges = self.get_open_edges()
-        all_items = [item for item in self.list_pooled_items(types=[], shuffled_only=True) if
-                     self.item_pool[item][7] <= penalty_threshold]
+        all_items = [item for item in self.list_pooled_items(types=[], shuffled_only=True) if self.item_pool[item][7] <= penalty_threshold]
         prereq_list = [[], [], []]  # [[available],[not enough room],[too many inventory items]]
         ds_list = []
 
@@ -657,8 +656,7 @@ class World:
     def get_maps(self):
         maps = [[], [], [], [], [], [], []]
         for map in self.maps:
-            if self.maps[map][0] >= 0 and (not self.dungeon_shuffle or not self.maps[map][
-                8]):  # Jumbo maps don't get rewards in dungeon shuffles
+            if self.maps[map][0] >= 0 and not (self.maps[map][8] and (self.dungeon_shuffle or self.difficulty == 0)):    # Jumbo maps don't get rewards in dungeon shuffles or on Easy
                 boss = self.maps[map][1]
                 maps[boss].append(map)
         maps.pop(0)  # Non-dungeon maps aren't included
@@ -1078,37 +1076,18 @@ class World:
             return -1
         if self.exit_dungeon(exit1) != self.exit_dungeon(exit2):
             return False
-        # if self.dungeon_shuffle != "Chaos":   # Only link Mu rooms of the same water level
-        #    origin1 = self.exits[exit1][3]
-        #    origin2 = self.exits[exit2][3]
-        #    dest1 = self.exits[exit1][4]
-        #    dest2 = self.exits[exit2][4]
-        #    if self.graph[origin1][3][2] != self.graph[origin2][3][2] or self.graph[dest1][3][2] != self.graph[dest2][3][2]:
-        #        return False
         return True
 
-    # Returns -1 if the exit shouldn't be shuffled.
-    # Otherwise returns the (arbitrary) ID of the pool it should be shuffled with, based on self.exits:
-    # ER, no DS:  PoolType=1; one pool
-    # ER and DSB: PoolType>0; pool all having PoolType=1, then pool PoolType>1 by DungeonID
-    # ER and DSC: PoolType>0; pool by PoolType
-    # DSB, no ER: PoolType>1, DungeonID>0; pool by DungeonID
-    # DSC, no ER: PoolType>1, DungeonID>0; one pool
+    # Returns the (arbitrary) ID of the pool an exit should be shuffled in, or -1 if not shuffled.
     def get_exit_pool(self, exit):
-        if (
-                exit not in self.exits) or not self.entrance_shuffle:  # (self.entrance_shuffle == "None" and self.dungeon_shuffle == "None"):
+        if (exit not in self.exits) or not self.entrance_shuffle:
             return -1
         dungeon = self.exits[exit][8]
         pooltype = self.exits[exit][9]
-        ER = self.town_shuffle  # (self.entrance_shuffle != "None")
-        DSB = False  # (self.dungeon_shuffle == "Basic")
-        DSC = self.dungeon_shuffle  # (self.dungeon_shuffle == "Chaos")
-        if ER and (pooltype == 1):
+        if self.town_shuffle and (pooltype == 1):
             return 1
-        if DSB and (pooltype > 1) and (dungeon > 0):
-            return 100 + dungeon
-        if DSC and (pooltype > 1) and (dungeon > 0):
-            return 2  # pooltype
+        if self.dungeon_shuffle and (pooltype > 1) and (dungeon > 0):
+            return 2
         return -1
 
     # Returns whether two exits are pooled for shuffling.
@@ -1118,12 +1097,12 @@ class World:
     def shuffle_chaos_dungeon(self):
         # Build dungeon node islands for the skeleton, assuming free and all-form movement
         self.reset_progress(True)
-        self.items_collected = [800] + self.list_typed_items(types=[1, 2, 4, 5], shuffled_only=False, incl_placed=True)
-        for removed_orb in [707, 708, 709,
-                            735]:  # Due to awkward orb placement, treat Inca exterior and Wat Outer South as corridors
+        self.items_collected = [800,802,803]+self.list_typed_items(types=[1, 2, 4, 5], shuffled_only=False, incl_placed=True)
+        for removed_orb in [707,708,709,735]:   # Due to awkward orb placement, treat Inca exterior and Wat Outer South as corridors
             if removed_orb in self.items_collected:
                 self.items_collected.remove(removed_orb)
         for node in self.graph:
+            self.graph[node][0] = True
             self.graph[node][4] = 0x37
         self.update_graph(True, False, True)
         island_result = self.build_islands()
@@ -1155,8 +1134,7 @@ class World:
                 if ds_node > 0:  # Island contains a DS node
                     ds_loc = next(loc for loc in self.graph[ds_node][11] if self.item_locations[loc][1] == 2)
                     if self.spawn_locations[ds_loc][3]:  # Island DS allows transform
-                        if all(self.edge_formless(e) for n in subisland[0] for e in
-                               self.graph[n][12]):  # Island is internally-formless
+                        if all(self.edge_formless(e) for n in subisland[0] for e in self.graph[n][12]):   # Island is internally-formless
                             is_free_ds_corridor = True
                 if is_free_ds_corridor:
                     free_ds_corridor_islands.append(subisland)
@@ -1174,9 +1152,7 @@ class World:
         for lower_i in deadend_islands:
             lower_n = lower_i[0][0]
             lower_map = self.graph[lower_n][3][3]  # One-way access must be within the same map
-            upper_i = next((i for i in all_islands if i != lower_i and any(
-                (lower_map == self.graph[upper_n][3][3]) and self.check_access(upper_n, lower_n, False) for upper_n in
-                i[0])), [])
+            upper_i = next((i for i in all_islands if i != lower_i and any((lower_map == self.graph[upper_n][3][3]) and self.check_access(upper_n,lower_n,False) for upper_n in i[0])), [])
             if upper_i:  # Merge the lower island into the upper one, and record the lower exit
                 upper_i[0].extend(lower_i[0][:])
                 upper_i[1].extend(lower_i[1][:])
@@ -1356,9 +1332,7 @@ class World:
             self.reset_progress(True)
             for n in self.graph:
                 self.graph[n][1] = graph_free_access[n][:]
-            self.items_collected = self.list_typed_items(types=[1, 2], shuffled_only=False, incl_placed=True)
-            if self.orb_rando != "None":
-                self.items_collected.extend(self.list_typed_items(types=[5], shuffled_only=False, incl_placed=True))
+            self.items_collected = [800,802,803]+self.list_typed_items(types=[1, 2, 4, 5], shuffled_only=False, incl_placed=True)
             for loc in self.spawn_locations:
                 if self.spawn_locations[loc][3] and loc in self.item_locations and self.item_locations[loc][1] == 2:
                     self.item_locations[loc][2] = True
@@ -1406,8 +1380,7 @@ class World:
         for n in self.graph:
             self.graph[n][1] = graph_free_access[n][:]
         for loc in self.spawn_locations:
-            if self.spawn_locations[loc][3] and loc in self.item_locations and self.item_locations[loc][1] == 2 and \
-                    self.item_locations[loc][3] == 0:
+            if self.spawn_locations[loc][3] and loc in self.item_locations and self.item_locations[loc][1] == 2 and self.item_locations[loc][3] == 0:
                 self.item_locations[loc][2] = False
 
     # Entrance randomizer
@@ -1467,13 +1440,6 @@ class World:
                     self.join_exits(exitnum, self.exits[exitnum][0])
                 self.shuffle_chaos_dungeon()
             self.info("Dungeon shuffle complete")
-            # elif self.dungeon_shuffle == "Basic":
-            #    # Ensure DS access for the top of rooms 3A and 5A
-            #    db_exits_from_freedan_rooms = [649, 663]
-            #    db_exits_from_pymd_branch = [636, 642, 648, 654, 662, 668]
-            #    random.shuffle(db_exits_from_pymd_branch)
-            #    self.join_exits(db_exits_from_freedan_rooms[0], db_exits_from_pymd_branch[0])
-            #    self.join_exits(db_exits_from_freedan_rooms[1], db_exits_from_pymd_branch[1])
         # Clean up dungeon shuffle artificial edges
         self.delete_objects(items=[800], with_close=True)
         self.delete_objects(items=[801], with_close=False)
@@ -1673,33 +1639,10 @@ class World:
                 origin_exits.remove(self.exits[dest_exit][0])
                 dest_exits.remove(self.exits[origin_exit][0])
 
-        # self.reset_progress()
-        # self.update_graph(True,True,True)
         self.info("Entrance rando successful")
-        # self.print_exit_graph()
 
         return True
 
-    def print_exit_graph_from_node(self, node, visited=[], known_exits=[]):
-        for exit in self.exits:
-            if self.exits[exit][1] > 0 and self.exits[exit][3] == node and exit not in known_exits:
-                known_exits.append(exit)
-                if self.coupled_exits:
-                    known_exits.append(self.exits[self.exits[exit][1]][0])
-                dest_node = self.exits[self.exits[exit][1]][4]
-                self.verbose(str(node) + " " + str(self.graph[node][5]) + " -> " + str(exit) + " " + str(
-                    self.exits[exit][10]) + " -> " + str(dest_node) + " " + str(self.graph[dest_node][5]))
-                if dest_node in visited:
-                    self.verbose("   Looped to " + str(dest_node) + " " + str(self.graph[dest_node][5]))
-                else:
-                    visited.append(dest_node)
-                    self.print_exit_graph_from_node(dest_node, visited, known_exits)
-        return True
-
-    def print_exit_graph(self):
-        for node in self.graph:
-            self.print_exit_graph_from_node(node, [node], [])
-        return True
 
     def initialize_ds(self):
         # Clear DS access data from graph
@@ -1709,11 +1652,8 @@ class World:
         # Find nodes that contain Dark Spaces, and of those, which allow transform and don't contain an ability
         self.ds_locations = [loc for loc in self.spawn_locations if loc in self.item_locations]
         self.ds_nodes = [self.item_locations[loc][0] for loc in self.ds_locations]
-        # Transform DSes are marked "filled" but with item 0
-        self.txform_locations = [loc for loc in self.ds_locations if
-                                 self.spawn_locations[loc][3] and self.item_locations[loc][2] and not
-                                 self.item_locations[loc][3]]
-        self.txform_locations.append(130)  # --but upper Pyramid is special because it's a type-1 loc
+        # Transform DSes are marked "filled" but contain item 0
+        self.txform_locations = [loc for loc in self.ds_locations if self.spawn_locations[loc][3] and self.item_locations[loc][2] and not self.item_locations[loc][3]]
         self.txform_nodes = [self.item_locations[loc][0] for loc in self.txform_locations]
         return True
 
@@ -1772,14 +1712,17 @@ class World:
             # Clear and recalculate DS access for all nodes (recursively from DS nodes)
             self.initialize_ds()
             for node in self.ds_nodes:
-                self.update_ds_access([node], 0x10, [])
                 for loc in self.graph[node][11]:
                     if loc in self.spawn_locations and self.spawn_locations[loc][3]:
-                        self.update_ds_access([node], 0x20, [node])
-            for node in self.txform_nodes:
-                self.update_ds_access([node], (0x01 | 0x02 | 0x04), [])
-            for node in [0, 10, 11, 12, 13, 14]:  # Will has access to overworld-connected nodes and the start node
-                self.update_ds_access([node], 0x01, [])
+                        self.update_ds_access([node],0x20,[node])   # Propagate "reachable formlessly from a possibly-txform DS"
+                if self.graph[node][0]:   # Only actually-visited nodes count for these flags
+                    self.update_ds_access([node],0x10,[])   # Propagate "can traverse to a DS"
+                    if node in self.txform_nodes:
+                        self.update_ds_access([node],(0x01|0x02|0x04),[])   # Propagate form traversal
+            self.update_ds_access([0],0x01,[])   # Will has access to the start node
+            for node in [10,11,12,13,14]:   # Will has access to traversed overworld-connected nodes
+                if self.graph[node][0]:
+                    self.update_ds_access([node], 0x01, [])
             self.verbose(" Graph DS access updated")
 
         # Update form-specific logic, repeatedly until access stops growing
@@ -1840,8 +1783,7 @@ class World:
         while to_visit:
             node = to_visit.pop(0)
             if node not in visited + [start_node] and self.check_ds_access(node, access_mode, do_recurse, visited):
-                self.verbose(
-                    "Node " + str(start_node) + " has form " + str(access_mode) + " access via node " + str(node))
+                self.verbose("Node "+str(start_node)+" has form "+str(access_mode)+" access via node "+str(node))
                 return True
             else:
                 if node not in visited:
@@ -1879,9 +1821,7 @@ class World:
                         visit_forward[idx].extend(
                             [n for n in self.graph[node][1] if self.consider_ds_node(n, flag, ds_nodes)])
                         for forward_edge in self.graph[node][12]:
-                            if self.check_edge(forward_edge, [], False, flag) and self.consider_ds_node(
-                                    self.logic[forward_edge][2], flag, ds_nodes) and self.logic[forward_edge][2] not in \
-                                    visit_forward[idx]:
+                            if self.check_edge(forward_edge,[],False,flag) and self.consider_ds_node(self.logic[forward_edge][2],flag,ds_nodes) and self.logic[forward_edge][2] not in visit_forward[idx]:
                                 visit_forward[idx].append(self.logic[forward_edge][2])
         result = self.update_ds_access(visit_reverse, 0x10, [])
         for idx, flag in [(0, 0x01), (1, 0x02), (2, 0x04)]:
@@ -1891,7 +1831,9 @@ class World:
             result |= self.update_ds_access(set(visit_forward[3]), 0x20, ds_nodes)
         return result
 
-    # Check a logic edge to see if prerequisites have been met based on self.items_collected + items.
+
+    # Check whether edge requirements are met by self.items_collected + items.
+    # If update_graph, also connects the nodes in self.graph and propagates DS access.
     def check_edge(self, edge, items=[], update_graph=True, form=0xff):
         success = False
         if not (self.logic[edge][3] & form):
@@ -1908,7 +1850,7 @@ class World:
                 self.edge_formless(edge) or self.check_ds_access(self.logic[edge][1], self.logic[edge][3] & form, False,
                                                                  [])):
             success = True
-        if success and update_graph and not self.logic[edge][0]:
+        if success and update_graph and self.logic[edge][0] == 0:
             self.logic[edge][0] = 1
             self.new_connection(self.logic[edge][1], self.logic[edge][2], self.logic[edge][3] & form)
         return success
@@ -1927,19 +1869,6 @@ class World:
                 self.update_ds_access([dest], flag, ds_nodes)  # dest now reachable from origin's DS nodes
         return True
 
-    def restrict_edge(self, edge=-1):
-        try:
-            self.logic[edge][0] = -1
-            return True
-        except:
-            return False
-
-    def unrestrict_edge(self, edge=-1):
-        try:
-            self.logic[edge][0] = 0 if self.logic[edge][0] != 1 else self.logic[edge][0]
-            return True
-        except:
-            return False
 
     # Set up the databases as required by this seed.
     # Future writer: be sure the databases are in the state you expect at the line where you're adding code;
@@ -1955,11 +1884,33 @@ class World:
 
         # Save item shuffle pools in the database
         for item in self.item_pool:
-            self.item_pool[item][6] = self.get_pool_id(item=item)
+            if self.item_pool[item][6] == 0:
+                self.item_pool[item][6] = self.get_pool_id(item=item)
         for loc in self.item_locations:
-            self.item_locations[loc][7] = self.get_pool_id(loc=loc)
+            if self.item_locations[loc][7] == 0:
+                self.item_locations[loc][7] = self.get_pool_id(loc=loc)
 
-        # Save other "disallowed" items per location (ignored in Chaos logic):
+        # Save required items
+        if 1 in self.dungeons_req:
+            self.required_items += [3, 4, 7, 8]
+        if 2 in self.dungeons_req:
+            self.required_items += [14]
+        if 3 in self.dungeons_req:
+            self.required_items += [18, 19]
+        if 5 in self.dungeons_req:
+            self.required_items += [38, 30, 31, 32, 33, 34, 35]
+        if 6 in self.dungeons_req:
+            self.required_items += [39]
+        if self.kara == 1:
+            self.required_items += [2, 9, 23]
+        elif self.kara == 2:
+            self.required_items += [11, 12, 15]
+        elif self.kara == 4:
+            self.required_items += [26]
+        elif self.kara == 5:
+            self.required_items += [28, 66]
+        
+        # Save "disallowed" items per location (ignored in Chaos logic):
         # No non-W abilities in towns
         non_w_abilities = [item for item in self.form_items[1] + self.form_items[2] if self.item_pool[item][6] == 2]
         for loc in self.spawn_locations:
@@ -1972,6 +1923,15 @@ class World:
             for item in self.item_pool:
                 if self.item_pool[item][7] > 1 + (2 * jeweler_loc) and item not in self.item_locations[jeweler_loc][4]:
                     self.item_locations[jeweler_loc][4].append(item)
+        # Restrict bad item placement by difficulty
+        if self.difficulty == 0:
+            for awful_ds_loc in [31, 111, 146]:   # No abilities in awful Dark Spaces (Castoth, Kress 3, Upper Babel)
+                self.item_locations[awful_ds_loc][4].extend([61,62,63,64,65,66])
+        if self.difficulty in [0,1]:
+            for awful_loc in [136, 147, 740, 741]:   # Killer 6, Jeweler's Mansion
+                self.item_locations[awful_loc][4].extend(self.required_items)
+            if 1 not in self.statues and self.statue_req != StatueReq.PLAYER_CHOICE.value:
+                self.item_locations[32][4].extend(self.required_items)   # Gold Ship restricted if Statue 1 isn't required
 
         # Clamp item progression penalty
         for item in self.item_pool:
@@ -2023,6 +1983,44 @@ class World:
                 self.max_darkrooms *= 2
             self.dr_randomize()
 
+        # Pyramid logic is complex; handling it here is "arguably" cleaner than database line items.
+        pyramid_portal_nodes = [413, 419, 423, 425, 428, 430, 437, 441, 450]
+        pyramid_corridor_exits = [637, 640, 643, 646, 649, 652, 655, 660, 663, 666, 669, 672]
+        boss_defeated_items = [503, 532, 531, 533, 534, 522, 523] # in order Castoth->SA
+        for node in pyramid_portal_nodes:
+            # Pyramid portals are free, except in dungeon shuffle where they require Aura but can be used formlessly
+            if not self.dungeon_shuffle:
+                self.graph[node][1].append(411)
+            else:
+                new_edge_id = 1+max(self.logic)
+                new_edge = [0, node, 411, 0x0f, [[36, 1]], False]
+                self.logic[new_edge_id] = new_edge
+        for exit in pyramid_corridor_exits:
+            # Pyramid corridors require the "Pyramid in logic" artificial item
+            new_edge_id = 1+max(self.exit_logic)
+            new_edge = [exit, [[802, 1]], 2, False]
+            self.exit_logic[new_edge_id] = new_edge
+        for item1 in boss_defeated_items:
+            for item2 in boss_defeated_items:
+                if item1 != item2:
+                    # K6 logical access requires access to any two dungeon bosses.
+                    new_edge_id = 1+max(self.logic)
+                    new_edge = [0, 0, 803, 0, [[item1, 1], [item2, 1]], False]
+                    self.logic[new_edge_id] = new_edge
+                    # On Easy difficulty, Pyramid logical access also requires this.
+                    if self.difficulty == 0:
+                        new_edge_id = 1+max(self.logic)
+                        new_edge = [0, 0, 802, 0, [[item1, 1], [item2, 1]], False]
+                        self.logic[new_edge_id] = new_edge
+            # On Normal difficulty, Pyramid logical access only requires any one boss.
+            if self.difficulty == 1:
+                new_edge_id = 1+max(self.logic)
+                new_edge = [0, 0, 802, 0, [[item1, 1]], False]
+                self.logic[new_edge_id] = new_edge
+        if self.difficulty >= 2:
+            # On difficulty H+, Pyramid is not logic-gated.
+            free_items.append(802)
+        
         # Convert exits that have logic requirements into graph nodes with logic edges
         coupled_exit_logics = [edge for edge in self.exit_logic if self.exit_logic[edge][3]]
         for edge in coupled_exit_logics:
@@ -2039,8 +2037,7 @@ class World:
             src_node_type = self.graph[src_node_id][2]
             src_node_info = self.graph[src_node_id][3]
             new_node_id = 1 + max(self.graph)
-            new_node = [False, [], src_node_type, src_node_info[:], 0, self.exits[exit][10], [], False, [], [], [], [],
-                        [], [], [], []]
+            new_node = [False, [], src_node_type, src_node_info[:], 0, self.exits[exit][10], [], False, [], [], [], [], [], [], [], []]
             self.graph[new_node_id] = new_node
             sister_exit = self.exits[exit][0]
             exit_edges = [e for e in self.exit_logic if self.exit_logic[e][0] == exit]
@@ -2053,14 +2050,12 @@ class World:
                 elif self.exit_logic[edge][2] == 1:  # Logic is for exit->room
                     new_edge = [0, new_node_id, src_node_id, 0, self.exit_logic[edge][1][:], False]
                     self.graph[src_node_id][1].append(new_node_id)  # Room->exit is free
-                    if sister_exit and self.exits[sister_exit][
-                        4] == src_node_id:  # Exit is from the room, sister_exit goes to the new exitnode
+                    if sister_exit and self.exits[sister_exit][4] == src_node_id:    # Exit is from the room, sister_exit goes to the new exitnode
                         self.exits[sister_exit][4] = new_node_id
                 elif self.exit_logic[edge][2] == 2:  # Logic blocks both room->exitnode and exitnode->room
                     new_edge = [0, new_node_id, src_node_id, 0, self.exit_logic[edge][1][:], True]
                     self.exits[exit][3] = new_node_id  # Exit is from its own node
-                    if sister_exit and self.exits[sister_exit][
-                        4] == src_node_id:  # Sister exit goes to the new exitnode
+                    if sister_exit and self.exits[sister_exit][4] == src_node_id:    # Sister exit goes to the new exitnode
                         self.exits[sister_exit][4] = new_node_id
                 else:  # Something's wrong
                     self.error("exit_logic contains invalid directionality")
@@ -2098,26 +2093,6 @@ class World:
                     free_items.append(orb)
                     unused_locs.append(loc)
 
-        # Manage required items
-        if 1 in self.dungeons_req:
-            self.required_items += [3, 4, 7, 8]
-        if 2 in self.dungeons_req:
-            self.required_items += [14]
-        if 3 in self.dungeons_req:
-            self.required_items += [18, 19]
-        if 5 in self.dungeons_req:
-            self.required_items += [38, 30, 31, 32, 33, 34, 35]
-        if 6 in self.dungeons_req:
-            self.required_items += [39]
-        if self.kara == 1:
-            self.required_items += [2, 9, 23]
-        elif self.kara == 2:
-            self.required_items += [11, 12, 15]
-        elif self.kara == 4:
-            self.required_items += [26]
-        elif self.kara == 5:
-            self.required_items += [28, 66]
-
         # Various gameplay variants
         if self.firebird:
             free_items.append(602)
@@ -2126,10 +2101,7 @@ class World:
         if "Z3 Mode" not in self.variant:
             unused_items.append(55)  # Heart pieces don't exist
         if "Open Mode" in self.variant:
-            # Set all travel item edges open (Letter, M.Melody, Teapot, Will, Roast)
-            for travel_edge in [30, 31, 32, 33, 36, 38, 39, 40]:
-                self.logic[travel_edge][0] = 2
-            # Remove travel items from pool and add some replacements
+            # Replace travel items (Letter, M.Melody, Teapot, Will, Roast)
             free_items.extend([10, 13, 24, 25, 37])
             self.item_pool[6][0] += 4  # Herbs
             self.item_pool[0][0] += 1  # Nothing
@@ -2485,6 +2457,7 @@ class World:
                     if self.spawn_locations[loc][3] and loc in self.item_locations and self.item_locations[loc][
                         1] == 2 and not self.item_locations[loc][3]:
                         self.item_locations[loc][2] = True
+                self.verbose("All remaining Dark Spaces are locked for transform")
                 self.update_graph(True, True, False)
                 if self.logic_mode != "Completable":
                     break  # Good enough: all DSes are populated and formful access isn't mandatory
@@ -2502,6 +2475,8 @@ class World:
                 f_nodes_under_ds_node = {}
                 for node in f_missing_nodes:
                     for ds_node in self.graph[node][9]:
+                        if not self.graph[ds_node][0]:
+                            continue
                         ds_loc = next(loc for loc in self.graph[ds_node][11] if self.item_locations[loc][1] == 2)
                         if self.graph[ds_node][0] and not self.item_locations[ds_loc][2]:
                             if ds_node not in f_nodes_under_ds_node:
@@ -2598,14 +2573,12 @@ class World:
                 self.error("Max cycles exceeded in item placement")
                 return False
             self.traverse()
-            # Good items resist being placed early; very good items can't be placed early at all
-            discovered_locs = [loc for loc in self.item_locations if
-                               self.graph[self.item_locations[loc][0]][0] and self.item_locations[loc][8] > cycle]
+            # Good items resist being placed early; if starting in a town with lots of checks available, very good items can't be placed early at all
+            discovered_locs = [loc for loc in self.item_locations if self.graph[self.item_locations[loc][0]][0] and self.item_locations[loc][8] > cycle]
             for loc in discovered_locs:
                 self.item_locations[loc][8] = cycle
                 for item in high_penalty_items:
-                    if item not in self.item_locations[loc][4] and cycle < (
-                            self.item_pool[item][7] * 1.5 / PROGRESS_ADJ[self.difficulty]):
+                    if (item not in self.item_locations[loc][4]) and (cycle < (self.item_pool[item][7] * 1.5 / PROGRESS_ADJ[self.difficulty])) and (self.spawn_locations[self.start_loc][0] == "Safe"):
                         self.item_locations[loc][4].append(item)
             if len(self.get_inventory()) > MAX_INVENTORY:
                 goal = False
@@ -3336,8 +3309,7 @@ class World:
         self.good_items = [10, 13, 24, 25, 37, 62, 63, 64]
         self.trolly_locations = [32, 45, 64, 65, 102, 108, 121, 128, 136, 147]
         self.free_locations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24, 33, 34, 35, 36, 37, 38, 39]
-        self.optional_nodes = [-2, -1, 491, 600, 601, 602, 604, 605, 606,
-                               607]  # Artificial nodes, not required by competable logic
+        self.optional_nodes = [-2, -1, 491, 600, 601, 602, 604, 605, 606, 607, 800, 801, 802, 803]  # Artificial nodes, not required by competable logic
         self.map_patches = []
         self.visited = []
         self.items_collected = []
@@ -3373,7 +3345,7 @@ class World:
         self.spawn_locations = {
             -1: ["", 0x08, 0x00, 0],  # School
             10: ["Safe", 0x01, 0x00, 0],  # Cape exterior
-            14: ["", 0x0b, 0x01, 0],  # Prison
+            14:  ["Unsafe" if self.entrance_shuffle else "", 0x0b, 0x01, 0],  # Prison
             19: ["Unsafe", 0x12, 0x02, 1],  # EdDg final
             22: ["Safe", 0x15, 0x03, 0],  # Itory
             29: ["Unsafe", 0x28, 0x04, 1],  # Inca near melody
@@ -3382,7 +3354,7 @@ class World:
             39: ["Safe", 0x34, 0x07, 0],  # Freejia
             46: ["Unsafe", 0x40, 0x08, 1],  # Mine hidden
             47: ["Unsafe", 0x3d, 0x09, 1],  # Mine near false wall
-            48: ["", 0x42, 0x0a, 1],  # Mine behind false wall
+            48:  ["Unsafe" if self.dungeon_shuffle else "", 0x42, 0x0a, 1],  # Mine behind false wall
             57: ["Safe", 0x4c, 0x0b, 0],  # SkGn foyer
             58: ["Unsafe", 0x56, 0x0c, 1],  # SkGn blue room
             59: ["", 0x51, 0x0d, 1],  # SkGn inside fence
@@ -3404,7 +3376,7 @@ class World:
             123: ["", 0xb8, 0x1d, 1],  # Ankr inner east
             124: ["Unsafe", 0xbb, 0x1e, 1],  # Ankr dropdown
             129: ["Safe", 0xc3, 0x1f, 0],  # Dao
-            130: ["", 0xcc, 0x20, 1],  # Pymd upper
+            154: ["",       0xcc, 0x20, 1],  # Pymd upper
             142: ["Unsafe", 0xcc, 0x21, 1],  # Pymd lower
             145: ["Forced Unsafe" if self.difficulty == 3 and self.flute == "Start" else "", 0xdf, 0x22, 0],
             # Babel lower
@@ -3434,11 +3406,11 @@ class World:
             7: [1, 1, 0x07, "Diamond Block", True and not settings.infinite_inventory, 1, 0, 6 * settings.orb_rando],
             8: [1, 1, 0x08, "Wind Melody", True and not settings.infinite_inventory, 1, 0, 0],
             9: [1, 1, 0x09, "Lola's Melody", True and not settings.infinite_inventory, 1, 0, 0],
-            10: [1, 1, 0x0a, "Large Roast", True and not settings.infinite_inventory, 1, 0, 0],
+            10: [1, 1, 0x0a, "Large Roast", True and not settings.infinite_inventory, 1, 0, self.difficulty],
             11: [1, 1, 0x0b, "Mine Key A", True and not settings.infinite_inventory, 1, 0, 0],
             12: [1, 1, 0x0c, "Mine Key B", True and not settings.infinite_inventory, 2, 0, 0],
-            13: [1, 1, 0x0d, "Memory Melody", True and not settings.infinite_inventory, 1, 0, 0],
-            14: [4, 1, 0x0e, "Crystal Ball", True and not settings.infinite_inventory, 2, 0, 0],
+            13: [1, 1, 0x0d, "Memory Melody", True and not settings.infinite_inventory, 1, 0, self.difficulty],
+            14: [4, 1, 0x0e, "Crystal Ball", True and not settings.infinite_inventory, 2, 0, -1*self.difficulty],
             15: [1, 1, 0x0f, "Elevator Key", True and not settings.infinite_inventory, 1, 0, -1],
             16: [1, 1, 0x10, "Mu Palace Key", True and not settings.infinite_inventory, 1, 0, 0],
             17: [1, 1, 0x11, "Purity Stone", True and not settings.infinite_inventory, 1, 0, 0],
@@ -3450,29 +3422,21 @@ class World:
             21: [0, 1, 0x15, "Blue Journal", False, 3, 0, 0],
             22: [1, 1, 0x16, "Lance Letter", False, 3, 0, 0],
             23: [1, 1, 0x17, "Necklace", True and not settings.infinite_inventory, 1, 0, 0],
-            24: [1, 1, 0x18, "Will", True and not settings.infinite_inventory, 1, 0, 0],
-            25: [1, 1, 0x19, "Teapot", True and not settings.infinite_inventory, 1, 0, 0],
+            24: [1, 1, 0x18, "Will", True and not settings.infinite_inventory, 1, 0, self.difficulty],
+            25: [1, 1, 0x19, "Teapot", True and not settings.infinite_inventory, 1, 0, self.difficulty],
             26: [3, 1, 0x1a, "Mushroom Drops", True and not settings.infinite_inventory, 1, 0, -1],
             # 27: [0, 1, 0x1b, "Bag of Gold", False, 3, 0, 0],  # Not implemented
             28: [1, 1, 0x1c, "Black Glasses", False, 1, 0, 3 * self.difficulty if settings.darkrooms.value != 0 else 0],
             29: [1, 1, 0x1d, "Gorgon Flower", True and not settings.infinite_inventory, 1, 0, 0],
-            30: [1, 1, 0x1e, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2,
-                 0, 0],
-            31: [1, 1, 0x1f, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2,
-                 0, 0],
-            32: [1, 1, 0x20, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2,
-                 0, 0],
-            33: [1, 1, 0x21, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2,
-                 0, 0],
-            34: [1, 1, 0x22, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2,
-                 0, 0],
-            35: [1, 1, 0x23, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2,
-                 0, 0],
-            36: [1, 1, 0x24, "Aura", True and not settings.infinite_inventory, 1, 0,
-                 2 * self.difficulty * self.dungeon_shuffle],
-            37: [1, 1, 0x25, "Lola's Letter", False, 1, 0, 0],
-            38: [1, 1, 0x26, "Journal", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0,
-                 0],
+            30: [1, 1, 0x1e, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            31: [1, 1, 0x1f, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            32: [1, 1, 0x20, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            33: [1, 1, 0x21, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            34: [1, 1, 0x22, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            35: [1, 1, 0x23, "Hieroglyph", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
+            36: [1, 1, 0x24, "Aura", True and not settings.infinite_inventory, 1, 0, 2*self.difficulty*self.dungeon_shuffle],
+            37: [1, 1, 0x25, "Lola's Letter", False, 1, 0, self.difficulty],
+            38: [1, 1, 0x26, "Journal", bool(5 in dungeon_keys_nondroppable) and not settings.infinite_inventory, 2, 0, 0],
             39: [1, 1, 0x27, "Crystal Ring", False, 1, 0, 3 * self.difficulty if settings.darkrooms.value != 0 else 0],
             40: [1, 1, 0x28, "Apple", True and not settings.infinite_inventory, 1, 0, 0],
             41: [1, 1, 0x2e, "2 Red Jewels", False, 1, 0, -2],
@@ -3491,11 +3455,11 @@ class World:
             # Abilities
             60: [0, 2, "", "Nothing", False, 3, 0, 0],
             61: [1, 2, 0x1100, "Psycho Dash", False, 1, 0, 0],
-            62: [1, 2, 0x1101, "Psycho Slider", False, 1, 0, 3],
-            63: [1, 2, 0x1102, "Spin Dash", False, 1, 0, 3],
-            64: [1, 2, 0x1103, "Dark Friar", False, 1, 0, 3],
+            62: [1, 2, 0x1101, "Psycho Slider", False, 1, 0, 2*self.difficulty],
+            63: [1, 2, 0x1102, "Spin Dash", False, 1, 0, 2*self.difficulty],
+            64: [1, 2, 0x1103, "Dark Friar", False, 1, 0, 2*self.difficulty],
             65: [1, 2, 0x1104, "Aura Barrier", False, 1, 0, 0],
-            66: [1, 2, 0x1105, "Earthquaker", False, 1, 0, 3],
+            66: [1, 2, 0x1105, "Earthquaker", False, 1, 0, 1],
             67: [1, 6, "", "Firebird", False, 3, 0, 0],
 
             # Mystic Statues
@@ -3533,13 +3497,15 @@ class World:
             522: [1, 4, "", "Babel: Mummy Queen Defeated", False, 1, 0, 0],
             523: [1, 4, "", "Mansion: Solid Arm Defeated", False, 1, 0, 0],
             524: [1, 4, "", "Inca: Diamond Block Placed", False, 1, 0, 0],
-            525: [1, 4, "", "Pyramid: Portals open", False, 1, 0, 0],
             526: [1, 4, "", "Mu: Access to Hope Room 1", False, 1, 0, 0],
             527: [1, 4, "", "Mu: Access to Hope Room 2", False, 1, 0, 0],
             528: [1, 4, "", "Mine: Blocked Tunnel Open", False, 1, 0, 0],
             529: [1, 4, "", "Underground Tunnel: Bridge Open", False, 1, 0, 0],
             530: [1, 4, "", "Inca: Slug Statue Broken", False, 1, 0, 0],
             531: [1, 4, "", "Mu: Beat Vampires", False, 1, 0, 0],
+            532: [1, 4, "", "Sky Garden: Beat Viper", False, 1, 0, 0],
+            533: [1, 4, "", "Great Wall: Beat Fanger", False, 1, 0, 0],
+            534: [1, 4, "", "Pyramid: Beat Mummy Queen", False, 1, 0, 0],
 
             # Misc. game states
             602: [1, 6, "", "Early Firebird enabled", False, 1, 0, 0],
@@ -3598,6 +3564,8 @@ class World:
 
             800: [1, 6, "", "Dungeon Shuffle artificial logic", False, 3, 0, 0],
             801: [0, 6, "", "Dungeon Shuffle artificial antilogic", False, 3, 0, 0],
+            802: [1, 6, "", "Pyramid in logic", False, 3, 0, 0],
+            803: [1, 6, "", "Killer 6 in logic", False, 3, 0, 0],
 
             900: [0, 1, 0x32, "Other World Item", False, 1, 0, 0]
         }
@@ -3877,7 +3845,7 @@ class World:
             129: [400, 2, False, 0, [], "", "Dao: Dark Space", 0, 0, []],
 
             # Pyramid
-            130: [713, 1, False, 0, [], "PyramidGaiaItem", "Pyramid: Dark Space Top", 0, 0, []],
+            130: [713, 1, False, 0, [], "PyramidGaiaItem", "Pyramid: Gaia Item", 0, 0, [] ],
             131: [412, 1, False, 0, [], "PyramidFoyerItem", "Pyramid: Hidden Platform", 0, 0, []],
             132: [442, 1, False, 0, [], "PyramidHiero1Item", "Pyramid: Hieroglyph 1", 0, 0, []],
             133: [422, 1, False, 0, [], "PyramidRoom2ChestItem", "Pyramid: Room 2 Chest", 0, 0, []],
@@ -3890,7 +3858,8 @@ class World:
             140: [446, 1, False, 0, [], "PyramidHiero5Item", "Pyramid: Hieroglyph 5", 0, 0, []],
             141: [447, 1, False, 0, [], "PyramidHiero6Item", "Pyramid: Hieroglyph 6", 0, 0, []],
 
-            142: [413, 2, False, 0, [], "", "Pyramid: Dark Space Bottom", 0, 0, []],
+            154: [713, 2, True,  0, [61,62,63,64,65,66], "", "Pyramid: Upper Dark Space", -1, 0, [] ],
+            142: [413, 2, False, 0, [], "", "Pyramid: Lower Dark Space", 0, 0, [] ],
 
             739: [411, 5, False, 0, [], "PyramidEntranceOrbsItem", "Pyramid: Entrance Orbs for DS Gate", 0, 0,
                   [[609, 1]]],
@@ -3911,11 +3880,11 @@ class World:
                   [[609, 1]]],
 
             # Mystic Statues
-            148: [101, 3, False, 0, [101, 102, 103, 104, 105], "", "Castoth Prize", 0, 0, []],
-            149: [198, 3, False, 0, [100, 102, 103, 104, 105], "", "Viper Prize", 0, 0, []],
+            148: [101, 3, False, 0, [101, 102, 103, 104, 105], "", "Castoth Prize", 0, 0, [] ],   # in node 101 (Gold Ship), not strictly Castoth's node
+            149: [198, 3, False, 0, [100, 102, 103, 104, 105], "", "Viper Prize", 0, 0, [[609, 1]] ],
             150: [244, 3, False, 0, [100, 101, 103, 104, 105], "", "Vampires Prize", 0, 0, []],
-            151: [302, 3, False, 0, [100, 101, 102, 104, 105], "", "Sand Fanger Prize", 0, 0, []],
-            152: [448, 3, False, 0, [100, 101, 102, 103, 105], "", "Mummy Queen Prize", 0, 0, []],
+            151: [302, 3, False, 0, [100, 101, 102, 104, 105], "", "Sand Fanger Prize", 0, 0, [[609, 1]] ],
+            152: [448, 3, False, 0, [100, 101, 102, 103, 105], "", "Mummy Queen Prize", 0, 0, [[36, 1]] ],
             153: [479, 3, False, 0, [100, 101, 102, 103, 104], "", "Babel Prize", 0, 0, []],
 
             # Event Switches
@@ -3941,16 +3910,18 @@ class World:
             519: [519, 4, True, 519, [], "", "Babel: Viper defeated", 0, 0, []],
             520: [520, 4, True, 520, [], "", "Babel: Vampires defeated", 0, 0, []],
             521: [521, 4, True, 521, [], "", "Babel: Sand Fanger defeated", 0, 0, []],
-            522: [522, 4, True, 522, [], "", "Babel: Mummy Queen defeated", 0, 0, []],
-            523: [523, 4, True, 523, [], "", "Mansion: Solid Arm defeated", 0, 0, []],
+            522: [478, 4, True, 522, [], "", "Babel: Mummy Queen defeated", 0, 0, [] ],  # No weapon required because Shadow is automatic
+            523: [482, 4, True, 523, [], "", "Mansion: Solid Arm defeated", 0, 0, [[609, 1]] ],
             524: [89, 4, True, 524, [], "", "Inca: Diamond Block Placed", 0, 0, [[7, 1]]],
-            525: [525, 4, True, 525, [], "", "Pyramid: Portals open", 0, 0, []],
             526: [526, 4, True, 526, [], "", "Mu: Access to Hope Room 1", 0, 0, []],
             527: [527, 4, True, 527, [], "", "Mu: Access to Hope Room 2", 0, 0, []],
             528: [131, 4, True, 528, [], "", "Mine: Blocked Tunnel Open", 0, 0, [[608, 1]]],
             529: [529, 4, True, 529, [], "", "Underground Tunnel: Bridge Open", 0, 0, []],
             530: [530, 4, True, 530, [], "", "Inca: Slug Statue Broken", 0, 0, []],
             531: [531, 4, True, 531, [], "", "Mu: Beat Vampires", 0, 0, []],
+            532: [198, 4, True, 532, [], "", "Sky Garden: Beat Viper", 0, 0, [[609, 1]] ],
+            533: [702, 4, True, 533, [], "", "Great Wall: Beat Fanger", 0, 0, [[609, 1]] ],
+            534: [448, 4, True, 534, [], "", "Pyramid: Beat Mummy Queen", 0, 0, [[36, 1]] ],
 
             # Misc
             # 602: [0, 6, True, 602, [], "", "Early Firebird enabled", 0, 0, [] ],
@@ -3959,6 +3930,9 @@ class World:
             # 608: [608, 6, True, 608, [], "", "Has Any Will Ability", 0, 0, [] ],
             # 609: [609, 6, True, 609, [], "", "Has Any Attack", 0, 0, [] ],
             # 610: [610, 6, True, 610, [], "", "Has Any Ranged Attack", 0, 0]
+            
+            802: [802, 6, True, 802, [], "", "Pyramid logical access", 0, 0, [] ],
+            803: [803, 6, True, 803, [], "", "Killer 6 logical access", 0, 0, [] ]
         }
 
         # Shell world graph. Nodes for exits are added during initialization.
@@ -4039,30 +4013,18 @@ class World:
 
             # Underground Tunnel
             40: [False, [], 2, [1, 2, 0, 12], 0, "U.Tunnel: Entry (12/$0c)", [], False, [], [], [], [], [], [], [], []],
-            41: [False, [], 2, [1, 2, 0, 13], 0, "U.Tunnel: East Room (13/$0d)", [], False, [], [], [], [], [], [], [],
-                 []],
-            38: [False, [], 2, [1, 2, 0, 14], 0, "U.Tunnel: South Room (14/$0e) NE before statues", [], False, [], [],
-                 [], [], [], [], [], []],
-            39: [False, [], 2, [1, 2, 0, 14], 0, "U.Tunnel: South Room (14/$0e) past spikes", [], False, [], [], [], [],
-                 [], [], [], []],
-            42: [False, [], 2, [1, 2, 0, 14], 0, "U.Tunnel: South Room (14/$0e) past statues", [], False, [], [], [],
-                 [], [], [], [], []],
-            43: [False, [], 2, [1, 2, 0, 15], 0, "U.Tunnel: West Room (15/$0f)", [], False, [], [], [], [], [], [], [],
-                 []],
-            44: [False, [], 2, [1, 2, 0, 16], 0, "U.Tunnel: Chest Room (16/$10)", [], False, [], [], [], [], [], [], [],
-                 []],
-            45: [False, [], 2, [1, 2, 0, 17], 0, "U.Tunnel: Flower Room (17/$11)", [], False, [], [], [], [], [], [],
-                 [], []],
-            47: [False, [], 2, [1, 2, 0, 18], 0, "U.Tunnel: Big Room (18/$12) Entrance", [], False, [], [], [], [], [],
-                 [], [], []],
-            720: [False, [], 2, [1, 2, 0, 18], 0, "U.Tunnel: Big Room (18/$12) Dark Space", [], False, [], [], [], [],
-                  [], [], [], []],
-            704: [False, [], 2, [1, 2, 0, 18], 0, "U.Tunnel: Big Room (18/$12) Skeleton 1 area", [], False, [], [], [],
-                  [], [], [], [], []],
-            705: [False, [], 2, [1, 2, 0, 18], 0, "U.Tunnel: Big Room (18/$12) Skeleton 2 area", [], False, [], [], [],
-                  [], [], [], [], []],
-            706: [False, [], 2, [1, 2, 0, 18], 0, "U.Tunnel: Big Room (18/$12) Ending area", [], False, [], [], [], [],
-                  [], [], [], []],
+            41: [False, [],   2, [1,2,0,13], 0, "U.Tunnel: East Room (13/$0d)", [], False, [], [], [], [], [], [], [], []],
+            38: [False, [],   2, [1,2,0,14], 0, "U.Tunnel: South Room (14/$0e) NE before statues", [], False, [], [], [], [], [], [], [], []],
+            39: [False, [],   2, [1,2,0,14], 0, "U.Tunnel: South Room (14/$0e) past spikes", [], False, [], [], [], [], [], [], [], []],
+            42: [False, [],   2, [1,2,0,14], 0, "U.Tunnel: South Room (14/$0e) past statues", [], False, [], [], [], [], [], [], [], []],
+            43: [False, [],   2, [1,2,0,15], 0, "U.Tunnel: West Room (15/$0f)", [], False, [], [], [], [], [], [], [], []],
+            44: [False, [],   2, [1,2,0,16], 0, "U.Tunnel: Chest Room (16/$10)", [], False, [], [], [], [], [], [], [], []],
+            45: [False, [],   2, [1,2,0,17], 0, "U.Tunnel: Flower Room (17/$11)", [], False, [], [], [], [], [], [], [], []],
+            47: [False, [],   2, [1,2,0,18], 0, "U.Tunnel: Big Room (18/$12) Entrance", [], False, [], [], [], [], [], [], [], []],
+            720: [False, [],  2, [1,2,0,18], 0, "U.Tunnel: Big Room (18/$12) Dark Space", [], False, [], [], [], [], [], [], [], []],
+            704: [False, [],  2, [1,2,0,18], 0, "U.Tunnel: Big Room (18/$12) Skeleton 1 area", [], False, [], [], [], [], [], [], [], []],
+            705: [False, [],  2, [1,2,0,18], 0, "U.Tunnel: Big Room (18/$12) Skeleton 2 area", [], False, [], [], [], [], [], [], [], []],
+            706: [False, [],  2, [1,2,0,18], 0, "U.Tunnel: Big Room (18/$12) Ending area", [], False, [], [], [], [], [], [], [], []],
             49: [False, [], 2, [1, 2, 0, 19], 0, "U.Tunnel: Exit (19/$13)", [], True, [], [], [], [], [], [], [], []],
 
             # Itory
@@ -4087,61 +4049,34 @@ class World:
                  [], []],
 
             # Inca Ruins
-            70: [False, [], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) NE", [], False, [], [], [], [], [], [], [],
-                 []],
-            71: [False, [], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) NW", [], False, [], [], [], [], [], [], [],
-                 []],
-            72: [False, [73], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) N", [], False, [], [], [], [], [], [], [],
-                 []],
-            73: [False, [], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) Center", [], False, [], [], [], [], [], [],
-                 [], []],
-            74: [False, [700], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) W", [], False, [], [], [], [], [], [], [],
-                 []],
-            700: [False, [], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) W 4-Way with orb", [], False, [], [], [], [],
-                  [], [], [], []],
-            75: [False, [99], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) S", [], False, [], [], [], [], [], [], [],
-                 []],
-            76: [False, [], 2, [1, 5, 0, 29], 0, "Inca: Exterior (29/$1d) statue head", [], False, [], [], [], [], [],
-                 [], [], []],
-            77: [False, [], 2, [1, 5, 0, 30], 0, "Inca: Outside Castoth (30/$1e) E", [3, 4], False, [], [], [], [], [],
-                 [], [], []],
-            78: [False, [77], 2, [1, 5, 0, 30], 0, "Inca: Outside Castoth (30/$1e) W", [], False, [], [], [], [], [],
-                 [], [], []],
-            79: [False, [], 2, [1, 5, 0, 31], 0, "Inca: Statue Puzzle (31/$1f) Main", [], False, [], [], [], [], [], [],
-                 [], []],
-            69: [False, [], 2, [1, 5, 0, 31], 0, "Inca: Statue Puzzle (31/$1f) U-turn", [], False, [], [], [], [], [],
-                 [], [], []],
-            80: [False, [], 2, [1, 5, 0, 32], 0, "Inca: Will Slugs (32/$20) S", [], False, [], [], [], [], [], [], [],
-                 []],
-            81: [False, [], 2, [1, 5, 0, 32], 0, "Inca: Will Slugs (32/$20) N", [], False, [], [], [], [], [], [], [],
-                 []],
-            82: [False, [], 2, [1, 5, 0, 33], 0, "Inca: Water Room (33/$21) N", [], False, [], [], [], [], [], [], [],
-                 []],
-            83: [False, [82], 2, [1, 5, 0, 33], 0, "Inca: Water Room (33/$21) S", [], False, [], [], [], [], [], [], [],
-                 []],
+            70: [False, [],       2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) NE", [], False, [], [], [], [], [], [], [], []],
+            71: [False, [],       2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) NW", [], False, [], [], [], [], [], [], [], []],
+            72: [False, [73],     2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) N", [], False, [], [], [], [], [], [], [], []],
+            73: [False, [],       2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) Center", [], False, [], [], [], [], [], [], [], []],
+            74: [False, [700],    2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) W", [], False, [], [], [], [], [], [], [], []],
+            700: [False, [],      2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) W 4-Way with orb", [], False, [], [], [], [], [], [], [], []],
+            75: [False, [99],     2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) S", [], False, [], [], [], [], [], [], [], []],
+            76: [False, [],       2, [1,5,0,29], 0, "Inca: Exterior (29/$1d) statue head", [], False, [], [], [], [], [], [], [], []],
+            77: [False, [],       2, [1,5,0,30], 0, "Inca: Outside Castoth (30/$1e) E", [3, 4], False, [], [], [], [], [], [], [], []],
+            78: [False, [77],     2, [1,5,0,30], 0, "Inca: Outside Castoth (30/$1e) W", [], False, [], [], [], [], [], [], [], []],
+            79: [False, [],       2, [1,5,0,31], 0, "Inca: Statue Puzzle (31/$1f) Main", [], False, [], [], [], [], [], [], [], []],
+            69: [False, [],       2, [1,5,0,31], 0, "Inca: Statue Puzzle (31/$1f) U-turn", [], False, [], [], [], [], [], [], [], []],
+            80: [False, [],       2, [1,5,0,32], 0, "Inca: Will Slugs (32/$20) S", [], False, [], [], [], [], [], [], [], []],
+            81: [False, [],       2, [1,5,0,32], 0, "Inca: Will Slugs (32/$20) N", [], False, [], [], [], [], [], [], [], []],
+            82: [False, [],       2, [1,5,0,33], 0, "Inca: Water Room (33/$21) N", [], False, [], [], [], [], [], [], [], []],
+            83: [False, [82],     2, [1,5,0,33], 0, "Inca: Water Room (33/$21) S", [], False, [], [], [], [], [], [], [], []],
             84: [False, [], 2, [1, 5, 0, 34], 0, "Inca: Big Room (34/$22)", [], False, [], [], [], [], [], [], [], []],
-            85: [False, [], 2, [1, 5, 0, 35], 0, "Inca: E/W Freedan (35/$23) E", [], False, [], [], [], [], [], [], [],
-                 []],
-            707: [False, [], 2, [1, 5, 0, 35], 0, "Inca: E/W Freedan (35/$23) Whirligig", [], False, [], [], [], [], [],
-                  [], [], []],
-            86: [False, [85], 2, [1, 5, 0, 35], 0, "Inca: E/W Freedan (35/$23) W", [], False, [], [], [], [], [], [],
-                 [], []],
-            87: [False, [], 2, [1, 5, 0, 36], 0, "Inca: Golden Tile room (36/$24)", [8], False, [], [], [], [], [], [],
-                 [], []],
-            89: [False, [], 2, [1, 5, 0, 37], 0, "Inca: Diamond Block room (37/$25)", [7], False, [], [], [], [], [],
-                 [], [], []],
-            91: [False, [], 2, [1, 5, 0, 38], 0, "Inca: Divided Room (38/$26) S", [], False, [], [], [], [], [], [], [],
-                 []],
-            92: [False, [91], 2, [1, 5, 0, 38], 0, "Inca: Divided Room (38/$26) S Chest", [], False, [], [], [], [], [],
-                 [], [], []],
-            93: [False, [], 2, [1, 5, 0, 38], 0, "Inca: Divided Room (38/$26) N", [], False, [], [], [], [], [], [], [],
-                 []],
-            94: [False, [], 2, [1, 5, 0, 39], 0, "Inca: West of DBlock (39/$27)", [], False, [], [], [], [], [], [], [],
-                 []],
-            95: [False, [], 2, [1, 5, 0, 40], 0, "Inca: DS Spike Hall (40/$28) E", [], False, [], [], [], [], [], [],
-                 [], []],
-            96: [False, [], 2, [1, 5, 0, 40], 0, "Inca: DS Spike Hall (40/$28) SW", [], False, [], [], [], [], [], [],
-                 [], []],
+            85: [False, [],       2, [1,5,0,35], 0, "Inca: E/W Freedan (35/$23) E", [], False, [], [], [], [], [], [], [], []],
+            707: [False, [],      2, [1,5,0,35], 0, "Inca: E/W Freedan (35/$23) Whirligig", [], False, [], [], [], [], [], [], [], []],
+            86: [False, [85],     2, [1,5,0,35], 0, "Inca: E/W Freedan (35/$23) W", [], False, [], [], [], [], [], [], [], []],
+            87: [False, [],       2, [1,5,0,36], 0, "Inca: Golden Tile room (36/$24)", [8], False, [], [], [], [], [], [], [], []],
+            89: [False, [],       2, [1,5,0,37], 0, "Inca: Diamond Block room (37/$25)", [7], False, [], [], [], [], [], [], [], []],
+            91: [False, [],       2, [1,5,0,38], 0, "Inca: Divided Room (38/$26) S", [], False, [], [], [], [], [], [], [], []],
+            92: [False, [91],     2, [1,5,0,38], 0, "Inca: Divided Room (38/$26) S Chest", [], False, [], [], [], [], [], [], [], []],
+            93: [False, [],       2, [1,5,0,38], 0, "Inca: Divided Room (38/$26) N", [], False, [], [], [], [], [], [], [], []],
+            94: [False, [],       2, [1,5,0,39], 0, "Inca: West of DBlock (39/$27)", [], False, [], [], [], [], [], [], [], []],
+            95: [False, [],       2, [1,5,0,40], 0, "Inca: DS Spike Hall (40/$28) E", [], False, [], [], [], [], [], [], [], []],
+            96: [False, [],       2, [1,5,0,40], 0, "Inca: DS Spike Hall (40/$28) SW", [], False, [], [], [], [], [], [], [], []],
             97: [False, [], 2, [1, 5, 0, 41], 0, "Inca: Boss Room", [], False, [], [], [], [], [], [], [], []],
             98: [False, [97], 2, [1, 5, 0, 41], 0, "Inca: Behind Boss Room", [], True, [], [], [], [], [], [], [], []],
             99: [False, [], 2, [1, 5, 0, 29], 0, "Inca: (29/$1d) SE door", [], False, [], [], [], [], [], [], [], []],
@@ -4184,48 +4119,27 @@ class World:
             127: [False, [], 2, [2, 7, 0, 60], 0, "Freejia: Labor Market", [], False, [], [], [], [], [], [], [], []],
 
             # Diamond Mine
-            130: [False, [], 2, [2, 8, 0, 61], 0, "D.Mine: Tunnel (61/$3d) S", [], False, [], [], [], [], [], [], [],
-                  []],
-            708: [False, [701], 2, [2, 8, 0, 61], 0, "D.Mine: Tunnel (61/$3d) Between Fences 1/2", [], False, [], [],
-                  [], [], [], [], [], []],
-            701: [False, [], 2, [2, 8, 0, 61], 0, "D.Mine: Tunnel (61/$3d) Lizard with orb", [], False, [], [], [], [],
-                  [], [], [], []],
-            709: [False, [], 2, [2, 8, 0, 61], 0, "D.Mine: Tunnel (61/$3d) Between Fences 2/3", [], False, [], [], [],
-                  [], [], [], [], []],
-            131: [False, [], 2, [2, 8, 0, 61], 0, "D.Mine: Tunnel (61/$3d) N", [], False, [], [], [], [], [], [], [],
-                  []],
-            133: [False, [11], 2, [2, 8, 0, 62], 0, "D.Mine: Entrance (62/$3e)", [], False, [], [], [], [], [], [], [],
-                  []],
-            134: [False, [], 2, [2, 8, 0, 63], 0, "D.Mine: Big Room (63/$3f)", [], False, [], [], [], [], [], [], [],
-                  []],
-            136: [False, [], 2, [2, 8, 0, 64], 0, "D.Mine: Cave-In Room (64/$40) Main", [], False, [], [], [], [], [],
-                  [], [], []],
-            721: [False, [], 2, [2, 8, 0, 64], 0, "D.Mine: Cave-In Room (64/$40) Dark Space", [], False, [], [], [], [],
-                  [], [], [], []],
-            138: [False, [], 2, [2, 8, 0, 65], 0, "D.Mine: Friar Worm Room (65/$41) Main", [], False, [], [], [], [],
-                  [], [], [], []],
-            710: [False, [], 2, [2, 8, 0, 65], 0, "D.Mine: Friar Worm Room (65/$41) Worm", [], False, [], [], [], [],
-                  [], [], [], []],
-            139: [False, [138, 710], 2, [2, 8, 0, 65], 0, "D.Mine: Friar Worm Room (65/$41) Above Ramp", [], False, [],
-                  [], [], [], [], [], [], []],
-            140: [False, [], 2, [2, 8, 0, 66], 0, "D.Mine: Caverns (66/$42) Elevator 1", [], False, [], [], [], [], [],
-                  [], [], []],
-            141: [False, [], 2, [2, 8, 0, 66], 0, "D.Mine: Caverns (66/$42) Elevator 2", [], False, [], [], [], [], [],
-                  [], [], []],
-            142: [False, [], 2, [2, 8, 0, 66], 0, "D.Mine: Caverns (66/$42) Dark Space", [], False, [], [], [], [], [],
-                  [], [], []],
-            143: [False, [], 2, [2, 8, 0, 66], 0, "D.Mine: Caverns (66/$42) Slave", [], False, [], [], [], [], [], [],
-                  [], []],
-            144: [False, [145], 2, [2, 8, 0, 67], 0, "D.Mine: Chairlift (67/$43) E", [], False, [], [], [], [], [], [],
-                  [], []],
-            145: [False, [144], 2, [2, 8, 0, 67], 0, "D.Mine: Chairlift (67/$43) W", [], False, [], [], [], [], [], [],
-                  [], []],
-            146: [False, [], 2, [2, 8, 0, 68], 0, "D.Mine: End Branch (68/$44)", [], False, [], [], [], [], [], [], [],
-                  []],
-            148: [False, [], 2, [2, 8, 0, 69], 0, "D.Mine: End Morgue (69/$45)", [], False, [], [], [], [], [], [], [],
-                  []],
-            149: [False, [], 2, [2, 8, 0, 70], 0, "D.Mine: End East Room (70/$46)", [], False, [], [], [], [], [], [],
-                  [], []],
+            130: [False, [],    2,     [2,8,0,61], 0, "D.Mine: Tunnel (61/$3d) S", [], False, [], [], [], [], [], [], [], []],
+            708: [False, [701], 2,     [2,8,0,61], 0, "D.Mine: Tunnel (61/$3d) Between Fences 1/2", [], False, [], [], [], [], [], [], [], []],
+            701: [False, [],    2,     [2,8,0,61], 0, "D.Mine: Tunnel (61/$3d) Lizard with orb", [], False, [], [], [], [], [], [], [], []],
+            709: [False, [],    2,     [2,8,0,61], 0, "D.Mine: Tunnel (61/$3d) Between Fences 2/3", [], False, [], [], [], [], [], [], [], []],
+            131: [False, [],    2,     [2,8,0,61], 0, "D.Mine: Tunnel (61/$3d) N", [], False, [], [], [], [], [], [], [], []],
+            133: [False, [11],  2,     [2,8,0,62], 0, "D.Mine: Entrance (62/$3e)", [], False, [], [], [], [], [], [], [], []],
+            134: [False, [],    2,     [2,8,0,63], 0, "D.Mine: Big Room (63/$3f)", [], False, [], [], [], [], [], [], [], []],
+            136: [False, [],    2,     [2,8,0,64], 0, "D.Mine: Cave-In Room (64/$40) Main", [], False, [], [], [], [], [], [], [], []],
+            721: [False, [],    2,     [2,8,0,64], 0, "D.Mine: Cave-In Room (64/$40) Dark Space", [], False, [], [], [], [], [], [], [], []],
+            138: [False, [],    2,     [2,8,0,65], 0, "D.Mine: Friar Worm Room (65/$41) Main", [], False, [], [], [], [], [], [], [], []],
+            710: [False, [],    2,     [2,8,0,65], 0, "D.Mine: Friar Worm Room (65/$41) Worm", [], False, [], [], [], [], [], [], [], []],
+            139: [False, [138,710], 2, [2,8,0,65], 0, "D.Mine: Friar Worm Room (65/$41) Above Ramp", [], False, [], [], [], [], [], [], [], []],
+            140: [False, [],    2,     [2,8,0,66], 0, "D.Mine: Caverns (66/$42) Elevator 1", [], False, [], [], [], [], [], [], [], []],
+            141: [False, [],    2,     [2,8,0,66], 0, "D.Mine: Caverns (66/$42) Elevator 2", [], False, [], [], [], [], [], [], [], []],
+            142: [False, [],    2,     [2,8,0,66], 0, "D.Mine: Caverns (66/$42) Dark Space", [], False, [], [], [], [], [], [], [], []],
+            143: [False, [],    2,     [2,8,0,66], 0, "D.Mine: Caverns (66/$42) Slave", [], False, [], [], [], [], [], [], [], []],
+            144: [False, [145], 2,     [2,8,0,67], 0, "D.Mine: Chairlift (67/$43) E", [], False, [], [], [], [], [], [], [], []],
+            145: [False, [144], 2,     [2,8,0,67], 0, "D.Mine: Chairlift (67/$43) W", [], False, [], [], [], [], [], [], [], []],
+            146: [False, [],    2,     [2,8,0,68], 0, "D.Mine: End Branch (68/$44)", [], False, [], [], [], [], [], [], [], []],
+            148: [False, [],    2,     [2,8,0,69], 0, "D.Mine: End Morgue (69/$45)", [], False, [], [], [], [], [], [], [], []],
+            149: [False, [],    2,     [2,8,0,70], 0, "D.Mine: End East Room (70/$46)", [], False, [], [], [], [], [], [], [], []],
             150: [False, [], 2, [2, 8, 0, 71], 0, "D.Mine: Sam (71/$47)", [], False, [], [], [], [], [], [], [], []],
 
             # Neil's Cottage / Nazca
@@ -4235,74 +4149,41 @@ class World:
             162: [False, [11], 1, [2, 10, 0, 75], 0, "Nazca Plain", [], False, [], [], [], [], [], [], [], []],
 
             # Sky Garden
-            167: [False, [], 2, [2, 10, 0, 83], 0, "Sky Garden: NW Top (83/$53) SE below chests", [], False, [], [], [],
-                  [], [], [], [], []],
-            168: [False, [], 2, [2, 10, 0, 81], 0, "Sky Garden: SW Top (81/$51) N of pegs", [], False, [], [], [], [],
-                  [], [], [], []],
-            169: [False, [], 2, [2, 10, 0, 86], 0, "Sky Garden: DS room (86/$56)", [], False, [], [], [], [], [], [],
-                  [], []],
-            170: [False, [], 1, [2, 10, 0, 76], 0, "Sky Garden: Foyer (76/$4c) Main", [14, 14, 14, 14], False, [], [],
-                  [], [], [], [], [], []],
-            171: [False, [], 1, [2, 10, 0, 76], 0, "Sky Garden: Foyer (76/$4c) Boss Door", [], False, [], [], [], [],
-                  [], [], [], []],
-            172: [False, [], 2, [2, 10, 0, 77], 0, "Sky Garden: NE Top (77/$4d) Main", [], False, [], [], [], [], [],
-                  [], [], []],
-            173: [False, [], 2, [2, 10, 0, 77], 0, "Sky Garden: NE Top (77/$4d) SW Chest", [], False, [], [], [], [],
-                  [], [], [], []],
-            174: [False, [], 2, [2, 10, 0, 77], 0, "Sky Garden: NE Top (77/$4d) SE Chest", [], False, [], [], [], [],
-                  [], [], [], []],
-            175: [False, [], 2, [2, 10, 0, 78], 0, "Sky Garden: NE Bot (78/$4e)", [], False, [], [], [], [], [], [], [],
-                  []],
-            176: [False, [], 2, [2, 10, 0, 79], 0, "Sky Garden: SE Top (79/$4f) Main", [], False, [], [], [], [], [],
-                  [], [], []],
-            177: [False, [], 2, [2, 10, 0, 79], 0, "Sky Garden: SE Top (79/$4f) N before robot", [], False, [], [], [],
-                  [], [], [], [], []],
-            711: [False, [], 2, [2, 10, 0, 79], 0, "Sky Garden: SE Top (79/$4f) Robot for barrier", [], False, [], [],
-                  [], [], [], [], [], []],
-            178: [False, [], 2, [2, 10, 0, 79], 0, "Sky Garden: SE Top (79/$4f) Behind barrier", [], False, [], [], [],
-                  [], [], [], [], []],
-            179: [False, [], 2, [2, 10, 0, 80], 0, "Sky Garden: SE Bot (80/$50) N corridor", [], False, [], [], [], [],
-                  [], [], [], []],
-            180: [False, [], 2, [2, 10, 0, 80], 0, "Sky Garden: SE Bot (80/$50) S main", [], False, [], [], [], [], [],
-                  [], [], []],
-            716: [False, [], 2, [2, 10, 0, 80], 0, "Sky Garden: SE Bot (80/$50) S chest behind barrier", [], False, [],
-                  [], [], [], [], [], [], []],
-            181: [False, [], 2, [2, 10, 0, 81], 0, "Sky Garden: SW Top (81/$51) Main", [], False, [], [], [], [], [],
-                  [], [], []],
-            182: [False, [181], 2, [2, 10, 0, 81], 0, "Sky Garden: SW Top (81/$51) West", [], False, [], [], [], [], [],
-                  [], [], []],
-            183: [False, [], 2, [2, 10, 0, 81], 0, "Sky Garden: SW Top (81/$51) Dark Space cage", [], False, [], [], [],
-                  [], [], [], [], []],
-            184: [False, [182], 2, [2, 10, 0, 81], 0, "Sky Garden: SW Top (81/$51) SE platform", [], False, [], [], [],
-                  [], [], [], [], []],
-            185: [False, [182], 2, [2, 10, 0, 81], 0, "Sky Garden: SW Top (81/$51) SW chest", [], False, [], [], [], [],
-                  [], [], [], []],
-            186: [False, [], 2, [2, 10, 0, 82], 0, "Sky Garden: SW Bot (82/$52) N with chest", [], False, [], [], [],
-                  [], [], [], [], []],
-            187: [False, [], 2, [2, 10, 0, 82], 0, "Sky Garden: SW Bot (82/$52) S before statue", [], False, [], [], [],
-                  [], [], [], [], []],
-            188: [False, [], 2, [2, 10, 0, 82], 0, "Sky Garden: SW Bot (82/$52) NE before switch", [], False, [], [],
-                  [], [], [], [], [], []],
-            189: [False, [188], 2, [2, 10, 0, 82], 0, "Sky Garden: SW Bot (82/$52) NE switch in cage", [], False, [],
-                  [], [], [], [], [], [], []],
-            190: [False, [191], 2, [2, 10, 0, 83], 0, "Sky Garden: NW Top (83/$53) NE side", [], False, [], [], [], [],
-                  [], [], [], []],
-            191: [False, [190, 192], 2, [2, 10, 0, 83], 0, "Sky Garden: NW Top (83/$53) NW side", [], False, [], [], [],
-                  [], [], [], [], []],
-            192: [False, [], 2, [2, 10, 0, 83], 0, "Sky Garden: NW Top (83/$53) C with ramp", [], False, [], [], [], [],
-                  [], [], [], []],
-            193: [False, [194], 2, [2, 10, 0, 83], 0, "Sky Garden: NW Top (83/$53) SW before chests", [], False, [], [],
-                  [], [], [], [], [], []],
-            194: [False, [167], 2, [2, 10, 0, 83], 0, "Sky Garden: NW Top (83/$53) Chests", [], False, [], [], [], [],
-                  [], [], [], []],
-            195: [False, [196], 2, [2, 10, 0, 84], 0, "Sky Garden: NW Bot (84/$54) Main", [], False, [], [], [], [], [],
-                  [], [], []],
-            196: [False, [], 2, [2, 10, 0, 84], 0, "Sky Garden: NW Bot (84/$54) NE below ledge", [], False, [], [], [],
-                  [], [], [], [], []],
-            197: [False, [], 2, [2, 10, 0, 84], 0, "Sky Garden: NW Bot (84/$54) SE behind statue", [], False, [], [],
-                  [], [], [], [], [], []],
-            198: [False, [], 2, [2, 10, 0, 85], 0, "Sky Garden: Viper (85/$55)", [], True, [], [], [], [], [], [], [],
-                  []],
+            167: [False, [],         2, [2,10,0,83], 0, "Sky Garden: NW Top (83/$53) SE below chests", [], False, [], [], [], [], [], [], [], []],
+            168: [False, [],         2, [2,10,0,81], 0, "Sky Garden: SW Top (81/$51) N of pegs", [], False, [], [], [], [], [], [], [], []],
+            169: [False, [],         2, [2,10,0,86], 0, "Sky Garden: DS room (86/$56)", [], False, [], [], [], [], [], [], [], []],
+            170: [False, [],         1, [2,10,0,76], 0, "Sky Garden: Foyer (76/$4c) Main", [14, 14, 14, 14], False, [], [], [], [], [], [], [], []],
+            171: [False, [],         1, [2,10,0,76], 0, "Sky Garden: Foyer (76/$4c) Boss Door", [], False, [], [], [], [], [], [], [], []],
+            172: [False, [],         2, [2,10,0,77], 0, "Sky Garden: NE Top (77/$4d) Main", [], False, [], [], [], [], [], [], [], []],
+            173: [False, [],         2, [2,10,0,77], 0, "Sky Garden: NE Top (77/$4d) SW Chest", [], False, [], [], [], [], [], [], [], []],
+            174: [False, [],         2, [2,10,0,77], 0, "Sky Garden: NE Top (77/$4d) SE Chest", [], False, [], [], [], [], [], [], [], []],
+            175: [False, [],         2, [2,10,0,78], 0, "Sky Garden: NE Bot (78/$4e)", [], False, [], [], [], [], [], [], [], []],
+            176: [False, [],         2, [2,10,0,79], 0, "Sky Garden: SE Top (79/$4f) Main", [], False, [], [], [], [], [], [], [], []],
+            177: [False, [],         2, [2,10,0,79], 0, "Sky Garden: SE Top (79/$4f) N before robot", [], False, [], [], [], [], [], [], [], []],
+            711: [False, [],         2, [2,10,0,79], 0, "Sky Garden: SE Top (79/$4f) Robot for barrier", [], False, [], [], [], [], [], [], [], []],
+            178: [False, [],         2, [2,10,0,79], 0, "Sky Garden: SE Top (79/$4f) Behind barrier", [], False, [], [], [], [], [], [], [], []],
+            179: [False, [],         2, [2,10,0,80], 0, "Sky Garden: SE Bot (80/$50) N corridor", [], False, [], [], [], [], [], [], [], []],
+            180: [False, [],         2, [2,10,0,80], 0, "Sky Garden: SE Bot (80/$50) S main", [], False, [], [], [], [], [], [], [], []],
+            716: [False, [],         2, [2,10,0,80], 0, "Sky Garden: SE Bot (80/$50) S chest behind barrier", [], False, [], [], [], [], [], [], [], []],
+            181: [False, [],         2, [2,10,0,81], 0, "Sky Garden: SW Top (81/$51) Main", [], False, [], [], [], [], [], [], [], []],
+            182: [False, [181],      2, [2,10,0,81], 0, "Sky Garden: SW Top (81/$51) West", [], False, [], [], [], [], [], [], [], []],
+            183: [False, [],         2, [2,10,0,81], 0, "Sky Garden: SW Top (81/$51) Dark Space cage", [], False, [], [], [], [], [], [], [], []],
+            184: [False, [182],      2, [2,10,0,81], 0, "Sky Garden: SW Top (81/$51) SE platform", [], False, [], [], [], [], [], [], [], []],
+            185: [False, [182],      2, [2,10,0,81], 0, "Sky Garden: SW Top (81/$51) SW chest", [], False, [], [], [], [], [], [], [], []],
+            186: [False, [],         2, [2,10,0,82], 0, "Sky Garden: SW Bot (82/$52) N with chest", [], False, [], [], [], [], [], [], [], []],
+            187: [False, [],         2, [2,10,0,82], 0, "Sky Garden: SW Bot (82/$52) S before statue", [], False, [], [], [], [], [], [], [], []],
+            188: [False, [],         2, [2,10,0,82], 0, "Sky Garden: SW Bot (82/$52) NE before switch", [], False, [], [], [], [], [], [], [], []],
+            189: [False, [188],      2, [2,10,0,82], 0, "Sky Garden: SW Bot (82/$52) NE switch in cage", [], False, [], [], [], [], [], [], [], []],
+            190: [False, [191],      2, [2,10,0,83], 0, "Sky Garden: NW Top (83/$53) NE side", [], False, [], [], [], [], [], [], [], []],
+            191: [False, [190,192],  2, [2,10,0,83], 0, "Sky Garden: NW Top (83/$53) NW side", [], False, [], [], [], [], [], [], [], []],
+            192: [False, [],         2, [2,10,0,83], 0, "Sky Garden: NW Top (83/$53) C with ramp", [], False, [], [], [], [], [], [], [], []],
+            193: [False, [194],      2, [2,10,0,83], 0, "Sky Garden: NW Top (83/$53) SW before chests", [], False, [], [], [], [], [], [], [], []],
+            194: [False, [167],      2, [2,10,0,83], 0, "Sky Garden: NW Top (83/$53) Chests", [], False, [], [], [], [], [], [], [], []],
+            195: [False, [196],      2, [2,10,0,84], 0, "Sky Garden: NW Bot (84/$54) Main", [], False, [], [], [], [], [], [], [], []],
+            196: [False, [],         2, [2,10,0,84], 0, "Sky Garden: NW Bot (84/$54) NE below ledge", [], False, [], [], [], [], [], [], [], []],
+            197: [False, [],         2, [2,10,0,84], 0, "Sky Garden: NW Bot (84/$54) SE behind statue", [], False, [], [], [], [], [], [], [], []],
+            198: [False, [],         2, [2,10,0,85], 0, "Sky Garden: Viper (85/$55)", [], False, [], [], [], [], [], [], [], []],
+            199: [False, [],         2, [2,10,0,85], 0, "Sky Garden: Past Viper", [], True, [], [], [], [], [], [], [], []],
 
             # Seaside Palace
             200: [False, [], 1, [3, 11, 0, 90], 0, "Seaside Palace: Area 1", [16], False, [], [], [], [], [], [], [],
@@ -4395,40 +4276,23 @@ class World:
                   []],
 
             # Angel Dungeon
-            260: [False, [], 2, [3, 13, 0, 109], 0, "Angel Dungeon: Entrance (109/$6d)", [], False, [], [], [], [], [],
-                  [], [], []],
-            261: [False, [], 2, [3, 13, 0, 110], 0, "Angel Dungeon: Maze (110/$6e) Main", [], False, [], [], [], [], [],
-                  [], [], []],
-            278: [False, [], 2, [3, 13, 0, 110], 0, "Angel Dungeon: Maze (110/$6e) Behind Draco", [], False, [], [], [],
-                  [], [], [], [], []],
-            262: [False, [], 2, [3, 13, 0, 111], 0, "Angel Dungeon: Dark room (111/$6f)", [], False, [], [], [], [], [],
-                  [], [], []],
-            259: [False, [], 2, [3, 13, 0, 112], 0, "Angel Dungeon: Water room (112/$70) Entrance before false wall",
-                  [], False, [], [], [], [], [], [], [], []],
-            263: [False, [], 2, [3, 13, 0, 112], 0, "Angel Dungeon: Water room (112/$70) Main", [], False, [], [], [],
-                  [], [], [], [], []],
-            279: [False, [], 2, [3, 13, 0, 112], 0, "Angel Dungeon: Water room (112/$70) Behind Draco", [], False, [],
-                  [], [], [], [], [], [], []],
-            265: [False, [], 2, [3, 13, 0, 112], 0, "Angel Dungeon: Water room (112/$70) Alcove", [], False, [], [], [],
-                  [], [], [], [], []],
-            266: [False, [], 2, [3, 13, 0, 113], 0, "Angel Dungeon: Wind Tunnel (113/$71)", [], False, [], [], [], [],
-                  [], [], [], []],
-            267: [False, [], 2, [3, 13, 0, 114], 0, "Angel Dungeon: Long Room (114/$72)", [], False, [], [], [], [], [],
-                  [], [], []],
-            277: [False, [], 2, [3, 13, 0, 115], 0, "Angel Dungeon: Ishtar's hall (115/$73) Foyer with slider", [],
-                  False, [], [], [], [], [], [], [], []],
-            269: [False, [], 2, [3, 13, 0, 115], 0, "Angel Dungeon: Ishtar's hall (115/$73) Main with waterfalls", [],
-                  False, [], [], [], [], [], [], [], []],
-            270: [False, [], 2, [3, 13, 0, 116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Kara", [], False, [], [],
-                  [], [], [], [], [], []],
-            271: [False, [], 2, [3, 13, 0, 116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Middle room", [], False,
-                  [], [], [], [], [], [], [], []],
-            272: [False, [], 2, [3, 13, 0, 116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Ishtar's room", [], False,
-                  [], [], [], [], [], [], [], []],
-            273: [False, [], 2, [3, 13, 0, 116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Ishtar chest", [], False,
-                  [], [], [], [], [], [], [], []],
-            274: [False, [], 2, [3, 13, 0, 117], 0, "Angel Dungeon: Puzzle Rooms", [], False, [], [], [], [], [], [],
-                  [], []],
+            260: [False,    [], 2, [3,13,0,109], 0, "Angel Dungeon: Entrance (109/$6d)", [], False, [], [], [], [], [], [], [], []],
+            261: [False,    [], 2, [3,13,0,110], 0, "Angel Dungeon: Maze (110/$6e) Main", [], False, [], [], [], [], [], [], [], []],
+            278: [False,    [], 2, [3,13,0,110], 0, "Angel Dungeon: Maze (110/$6e) Behind Draco", [], False, [], [], [], [], [], [], [], []],
+            262: [False,    [], 2, [3,13,0,111], 0, "Angel Dungeon: Dark room (111/$6f)", [], False, [], [], [], [], [], [], [], []],
+            259: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Entrance before false wall", [], False, [], [], [], [], [], [], [], []],
+            263: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Main", [], False, [], [], [], [], [], [], [], []],
+            279: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Behind Draco", [], False, [], [], [], [], [], [], [], []],
+            265: [False,    [], 2, [3,13,0,112], 0, "Angel Dungeon: Water room (112/$70) Alcove", [], False, [], [], [], [], [], [], [], []],
+            266: [False,    [], 2, [3,13,0,113], 0, "Angel Dungeon: Wind Tunnel (113/$71)", [], False, [], [], [], [], [], [], [], []],
+            267: [False,    [], 2, [3,13,0,114], 0, "Angel Dungeon: Long Room (114/$72)", [], False, [], [], [], [], [], [], [], []],
+            277: [False,    [], 2, [3,13,0,115], 0, "Angel Dungeon: Ishtar's hall (115/$73) Foyer with slider", [], False, [], [], [], [], [], [], [], []],
+            269: [False,    [], 2, [3,13,0,115], 0, "Angel Dungeon: Ishtar's hall (115/$73) Main with waterfalls", [], False, [], [], [], [], [], [], [], []],
+            270: [False,    [], 2, [3,13,0,116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Kara", [], False, [], [], [], [], [], [], [], []],
+            271: [False,    [], 2, [3,13,0,116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Middle room", [], False, [], [], [], [], [], [], [], []],
+            272: [False,    [], 2, [3,13,0,116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Ishtar's room", [], False, [], [], [], [], [], [], [], []],
+            273: [False,    [], 2, [3,13,0,116], 0, "Angel Dungeon: Portrait Rooms (116/$74) Ishtar chest", [], False, [], [], [], [], [], [], [], []],
+            274: [False,    [], 2, [3,13,0,117], 0, "Angel Dungeon: Puzzle Rooms", [], False, [], [], [], [], [], [], [], []],
 
             # Watermia
             280: [False, [12], 1, [3, 14, 0, 120], 0, "Watermia: Main Area", [24], False, [], [], [], [], [], [], [],
@@ -4446,38 +4310,22 @@ class World:
                   []],
 
             # Great Wall
-            290: [False, [12], 2, [3, 15, 0, 130], 0, "Great Wall: Entrance (130/$82)", [], False, [], [], [], [], [],
-                  [], [], []],
-            291: [False, [292], 2, [3, 15, 0, 131], 0, "Great Wall: Long Drop (131/$83) NW", [], False, [], [], [], [],
-                  [], [], [], []],
-            292: [False, [], 2, [3, 15, 0, 131], 0, "Great Wall: Long Drop (131/$83) Lower", [], False, [], [], [], [],
-                  [], [], [], []],
-            293: [False, [], 2, [3, 15, 0, 131], 0, "Great Wall: Long Drop (131/$83) NE", [], False, [], [], [], [], [],
-                  [], [], []],
-            294: [False, [296], 2, [3, 15, 0, 133], 0, "Great Wall: Ramps (133/$85) W", [], False, [], [], [], [], [],
-                  [], [], []],
-            295: [False, [296], 2, [3, 15, 0, 133], 0, "Great Wall: Ramps (133/$85) Center", [], False, [], [], [], [],
-                  [], [], [], []],
-            296: [False, [], 2, [3, 15, 0, 133], 0, "Great Wall: Ramps (133/$85) E", [], False, [], [], [], [], [], [],
-                  [], []],
-            297: [False, [], 2, [3, 15, 0, 134], 0, "Great Wall: Platforms (134/$86)", [], False, [], [], [], [], [],
-                  [], [], []],
-            298: [False, [], 2, [3, 15, 0, 135], 0, "Great Wall: Friar Room (135/$87) W", [], False, [], [], [], [], [],
-                  [], [], []],
-            712: [False, [], 2, [3, 15, 0, 135], 0, "Great Wall: Friar Room (135/$87) Archer", [], False, [], [], [],
-                  [], [], [], [], []],
-            299: [False, [], 2, [3, 15, 0, 135], 0, "Great Wall: Friar Room (135/$87) E", [], False, [], [], [], [], [],
-                  [], [], []],
-            300: [False, [], 2, [3, 15, 0, 136], 0, "Great Wall: Final Room (136/$88) W", [], False, [], [], [], [], [],
-                  [], [], []],
-            301: [False, [], 2, [3, 15, 0, 136], 0, "Great Wall: Final Room (136/$88) E", [], False, [], [], [], [], [],
-                  [], [], []],
-            302: [False, [702], 2, [3, 15, 0, 138], 0, "Great Wall: Fanger (138/$8a) Entrance", [], False, [], [], [],
-                  [], [], [], [], []],
-            702: [False, [303], 2, [3, 15, 0, 138], 0, "Great Wall: Fanger (138/$8a) Fight", [], False, [], [], [], [],
-                  [], [], [], []],
-            303: [False, [], 2, [3, 15, 0, 138], 0, "Great Wall: Fanger (138/$8a) Exit", [], False, [], [], [], [], [],
-                  [], [], []],
+            290: [False, [12],  2, [3,15,0,130], 0, "Great Wall: Entrance (130/$82)", [], False, [], [], [], [], [], [], [], []],
+            291: [False, [292], 2, [3,15,0,131], 0, "Great Wall: Long Drop (131/$83) NW", [], False, [], [], [], [], [], [], [], []],
+            292: [False, [],    2, [3,15,0,131], 0, "Great Wall: Long Drop (131/$83) Lower", [], False, [], [], [], [], [], [], [], []],
+            293: [False, [],    2, [3,15,0,131], 0, "Great Wall: Long Drop (131/$83) NE", [], False, [], [], [], [], [], [], [], []],
+            294: [False, [296], 2, [3,15,0,133], 0, "Great Wall: Ramps (133/$85) W", [], False, [], [], [], [], [], [], [], []],
+            295: [False, [296], 2, [3,15,0,133], 0, "Great Wall: Ramps (133/$85) Center", [], False, [], [], [], [], [], [], [], []],
+            296: [False, [],    2, [3,15,0,133], 0, "Great Wall: Ramps (133/$85) E", [], False, [], [], [], [], [], [], [], []],
+            297: [False, [],    2, [3,15,0,134], 0, "Great Wall: Platforms (134/$86)", [], False, [], [], [], [], [], [], [], []],
+            298: [False, [],    2, [3,15,0,135], 0, "Great Wall: Friar Room (135/$87) W", [], False, [], [], [], [], [], [], [], []],
+            712: [False, [],    2, [3,15,0,135], 0, "Great Wall: Friar Room (135/$87) Archer", [], False, [], [], [], [], [], [], [], []],
+            299: [False, [],    2, [3,15,0,135], 0, "Great Wall: Friar Room (135/$87) E", [], False, [], [], [], [], [], [], [], []],
+            300: [False, [],    2, [3,15,0,136], 0, "Great Wall: Final Room (136/$88) W", [], False, [], [], [], [], [], [], [], []],
+            301: [False, [],    2, [3,15,0,136], 0, "Great Wall: Final Room (136/$88) E", [], False, [], [], [], [], [], [], [], []],
+            302: [False, [702], 2, [3,15,0,138], 0, "Great Wall: Fanger (138/$8a) Entrance", [], False, [], [], [], [], [], [], [], []],
+            702: [False, [],    2, [3,15,0,138], 0, "Great Wall: Fanger (138/$8a) Fight", [], False, [], [], [], [], [], [], [], []],
+            303: [False, [],    2, [3,15,0,138], 0, "Great Wall: Fanger (138/$8a) Exit", [], False, [], [], [], [], [], [], [], []],
 
             # Euro
             310: [False, [13], 1, [4, 16, 0, 145], 0, "Euro: Main Area", [24], False, [], [], [], [], [], [], [], []],
@@ -4500,38 +4348,22 @@ class World:
                   []],
 
             # Mt. Kress
-            330: [False, [13], 2, [4, 17, 0, 160], 0, "Kress: Entrance (160/$A0)", [], False, [], [], [], [], [], [],
-                  [], []],
-            331: [False, [], 2, [4, 17, 0, 161], 0, "Kress: DS1 Room (161/$A1) E", [], False, [], [], [], [], [], [],
-                  [], []],
-            332: [False, [], 2, [4, 17, 0, 161], 0, "Kress: DS1 Room (161/$A1) W", [], False, [], [], [], [], [], [],
-                  [], []],
-            333: [False, [], 2, [4, 17, 0, 162], 0, "Kress: First Vine Room (162/$A2) Main", [26], False, [], [], [],
-                  [], [], [], [], []],
-            334: [False, [333], 2, [4, 17, 0, 162], 0, "Kress: First Vine Room (162/$A2) S before jump", [], False, [],
-                  [], [], [], [], [], [], []],
-            335: [False, [], 2, [4, 17, 0, 162], 0, "Kress: First Vine Room (162/$A2) NW past drops", [], False, [], [],
-                  [], [], [], [], [], []],
-            336: [False, [], 2, [4, 17, 0, 162], 0, "Kress: First Vine Room (162/$A2) SE chest", [], False, [], [], [],
-                  [], [], [], [], []],
-            337: [False, [], 2, [4, 17, 0, 163], 0, "Kress: DS2 Corridor (163/$A3)", [], False, [], [], [], [], [], [],
-                  [], []],
-            338: [False, [], 2, [4, 17, 0, 164], 0, "Kress: West Chest Room (164/$A4)", [], False, [], [], [], [], [],
-                  [], [], []],
-            339: [False, [], 2, [4, 17, 0, 165], 0, "Kress: Second Vine Room (165/$A5) S", [26], False, [], [], [], [],
-                  [], [], [], []],
-            340: [False, [], 2, [4, 17, 0, 165], 0, "Kress: Second Vine Room (165/$A5) NE", [26], False, [], [], [], [],
-                  [], [], [], []],
-            341: [False, [339], 2, [4, 17, 0, 165], 0, "Kress: Second Vine Room (165/$A5) NW", [], False, [], [], [],
-                  [], [], [], [], []],
-            342: [False, [], 2, [4, 17, 0, 166], 0, "Kress: Mushroom Arena (166/$A6)", [], False, [], [], [], [], [],
-                  [], [], []],
-            343: [False, [], 2, [4, 17, 0, 167], 0, "Kress: Final DS Room (167/$A7)", [], False, [], [], [], [], [], [],
-                  [], []],
-            344: [False, [], 2, [4, 17, 0, 168], 0, "Kress: Final Combat Corridor (168/$A8)", [], False, [], [], [], [],
-                  [], [], [], []],
-            345: [False, [], 2, [4, 17, 0, 169], 0, "Kress: End with Chest (169/$A9)", [], False, [], [], [], [], [],
-                  [], [], []],
+            330: [False, [13],        2, [4,17,0,160], 0, "Kress: Entrance (160/$A0)", [], False, [], [], [], [], [], [], [], []],
+            331: [False, [],          2, [4,17,0,161], 0, "Kress: DS1 Room (161/$A1) E", [], False, [], [], [], [], [], [], [], []],
+            332: [False, [],          2, [4,17,0,161], 0, "Kress: DS1 Room (161/$A1) W", [], False, [], [], [], [], [], [], [], []],
+            333: [False, [],          2, [4,17,0,162], 0, "Kress: First Vine Room (162/$A2) Main", [26], False, [], [], [], [], [], [], [], []],
+            334: [False, [333],       2, [4,17,0,162], 0, "Kress: First Vine Room (162/$A2) S before jump", [], False, [], [], [], [], [], [], [], []],
+            335: [False, [],          2, [4,17,0,162], 0, "Kress: First Vine Room (162/$A2) NW past drops", [], False, [], [], [], [], [], [], [], []],
+            336: [False, [],          2, [4,17,0,162], 0, "Kress: First Vine Room (162/$A2) SE chest", [], False, [], [], [], [], [], [], [], []],
+            337: [False, [],          2, [4,17,0,163], 0, "Kress: DS2 Corridor (163/$A3)", [], False, [], [], [], [], [], [], [], []],
+            338: [False, [],          2, [4,17,0,164], 0, "Kress: West Chest Room (164/$A4)", [], False, [], [], [], [], [], [], [], []],
+            339: [False, [],          2, [4,17,0,165], 0, "Kress: Second Vine Room (165/$A5) S", [26], False, [], [], [], [], [], [], [], []],
+            340: [False, [],          2, [4,17,0,165], 0, "Kress: Second Vine Room (165/$A5) NE", [26], False, [], [], [], [], [], [], [], []],
+            341: [False, [339],       2, [4,17,0,165], 0, "Kress: Second Vine Room (165/$A5) NW", [], False, [], [], [], [], [], [], [], []],
+            342: [False, [],          2, [4,17,0,166], 0, "Kress: Mushroom Arena (166/$A6)", [], False, [], [], [], [], [], [], [], []],
+            343: [False, [],          2, [4,17,0,167], 0, "Kress: Final DS Room (167/$A7)", [], False, [], [], [], [], [], [], [], []],
+            344: [False, [],          2, [4,17,0,168], 0, "Kress: Final Combat Corridor (168/$A8)", [], False, [], [], [], [], [], [], [], []],
+            345: [False, [],          2, [4,17,0,169], 0, "Kress: End with Chest (169/$A9)", [], False, [], [], [], [], [], [], [], []],
 
             # Natives' Village
             350: [False, [13], 1, [4, 18, 0, 172], 0, "Natives' Village: Main Area", [10], False, [], [], [], [], [],
@@ -4546,76 +4378,41 @@ class World:
                   [], [], []],
 
             # Ankor Wat
-            360: [False, [13], 2, [4, 19, 0, 176], 0, "Ankor Wat: Exterior (176/$B0)", [], False, [], [], [], [], [],
-                  [], [], []],
-            361: [False, [], 2, [4, 19, 0, 177], 0, "Ankor Wat: Outer-S (177/$B1) E", [], False, [], [], [], [], [], [],
-                  [], []],
-            362: [False, [739], 2, [4, 19, 0, 177], 0, "Ankor Wat: Outer-S (177/$B1) W", [], False, [], [], [], [], [],
-                  [], [], []],
-            739: [False, [], 2, [4, 19, 0, 177], 0, "Ankor Wat: Outer-S (177/$B1) scarab with orb", [], False, [], [],
-                  [], [], [], [], [], []],
-            363: [False, [], 2, [4, 19, 0, 178], 0, "Ankor Wat: Outer-E (178/$B2) S", [], False, [], [], [], [], [], [],
-                  [], []],
-            364: [False, [363], 2, [4, 19, 0, 178], 0, "Ankor Wat: Outer-E (178/$B2) center", [], False, [], [], [], [],
-                  [], [], [], []],
-            365: [False, [], 2, [4, 19, 0, 178], 0, "Ankor Wat: Outer-E (178/$B2) N", [], False, [], [], [], [], [], [],
-                  [], []],
-            366: [False, [], 2, [4, 19, 0, 179], 0, "Ankor Wat: Outer-N (179/$B3) E", [], False, [], [], [], [], [], [],
-                  [], []],
-            367: [False, [], 2, [4, 19, 0, 179], 0, "Ankor Wat: Outer-N (179/$B3) W", [], False, [], [], [], [], [], [],
-                  [], []],
-            368: [False, [703], 2, [4, 19, 0, 180], 0, "Ankor Wat: Outer Pit (180/$B4)", [], False, [], [], [], [], [],
-                  [], [], []],
-            703: [False, [368], 2, [4, 19, 0, 180], 0, "Ankor Wat: Outer Pit (180/$B4) scarab with orb", [], False, [],
-                  [], [], [], [], [], [], []],
-            369: [False, [], 2, [4, 19, 0, 181], 0, "Ankor Wat: Outer-W (181/$B5) N", [], False, [], [], [], [], [], [],
-                  [], []],
-            370: [False, [], 2, [4, 19, 0, 181], 0, "Ankor Wat: Outer-W (181/$B5) center", [], False, [], [], [], [],
-                  [], [], [], []],
-            371: [False, [], 2, [4, 19, 0, 181], 0, "Ankor Wat: Outer-W (181/$B5) S", [], False, [], [], [], [], [], [],
-                  [], []],
-            372: [False, [], 2, [4, 19, 0, 182], 0, "Ankor Wat: Garden (182/$B6)", [], False, [], [], [], [], [], [],
-                  [], []],
-            373: [False, [], 2, [4, 19, 0, 183], 0, "Ankor Wat: Inner-S (183/$B7) S", [], False, [], [], [], [], [], [],
-                  [], []],
-            374: [False, [373], 2, [4, 19, 0, 183], 0, "Ankor Wat: Inner-S (183/$B7) NW", [], False, [], [], [], [], [],
-                  [], [], []],
-            375: [False, [], 2, [4, 19, 0, 183], 0, "Ankor Wat: Inner-S (183/$B7) N", [], False, [], [], [], [], [], [],
-                  [], []],
-            376: [False, [], 2, [4, 19, 0, 184], 0, "Ankor Wat: Inner-E (184/$B8) S", [], False, [], [], [], [], [], [],
-                  [], []],
-            727: [False, [], 2, [4, 19, 0, 184], 0, "Ankor Wat: Inner-E (184/$B8) wall skull", [], False, [], [], [],
-                  [], [], [], [], []],
-            377: [False, [], 2, [4, 19, 0, 184], 0, "Ankor Wat: Inner-E (184/$B8) N", [], False, [], [], [], [], [], [],
-                  [], []],
-            378: [False, [], 2, [4, 19, 0, 185], 0, "Ankor Wat: Inner-W (185/$B9)", [], False, [], [], [], [], [], [],
-                  [], []],
-            379: [False, [], 2, [4, 19, 0, 186], 0, "Ankor Wat: Road to MH (186/$BA) main", [], False, [], [], [], [],
-                  [], [], [], []],
-            380: [False, [], 2, [4, 19, 0, 186], 0, "Ankor Wat: Road to MH (186/$BA) NE", [], False, [], [], [], [], [],
-                  [], [], []],
-            381: [False, [], 2, [4, 19, 0, 187], 0, "Ankor Wat: Main-1 (187/$BB) main", [], False, [], [], [], [], [],
-                  [], [], []],
-            382: [False, [381], 2, [4, 19, 0, 187], 0, "Ankor Wat: Main-1 (187/$BB) chest", [], False, [], [], [], [],
-                  [], [], [], []],
-            383: [False, [381], 2, [4, 19, 0, 187], 0, "Ankor Wat: Main-1 (187/$BB) Dark Space", [], False, [], [], [],
-                  [], [], [], [], []],
-            384: [False, [], 2, [4, 19, 0, 188], 0, "Ankor Wat: Main-2 (188/$BC) N", [], False, [], [], [], [], [], [],
-                  [], []],
-            385: [False, [], 2, [4, 19, 0, 188], 0, "Ankor Wat: Main-2 (188/$BC) S", [], False, [], [], [], [], [], [],
-                  [], []],
-            386: [False, [], 2, [4, 19, 0, 189], 0, "Ankor Wat: Main-3 (189/$BD) floor S", [], False, [], [], [], [],
-                  [], [], [], []],
-            387: [False, [], 2, [4, 19, 0, 189], 0, "Ankor Wat: Main-3 (189/$BD) floor N", [], False, [], [], [], [],
-                  [], [], [], []],
-            388: [False, [386], 2, [4, 19, 0, 189], 0, "Ankor Wat: Main-3 (189/$BD) platform", [], False, [], [], [],
-                  [], [], [], [], []],
-            389: [False, [], 2, [4, 19, 0, 190], 0, "Ankor Wat: Main-4 (190/$BE) SE", [], False, [], [], [], [], [], [],
-                  [], []],
-            390: [False, [], 2, [4, 19, 0, 190], 0, "Ankor Wat: Main-4 (190/$BE) N", [], False, [], [], [], [], [], [],
-                  [], []],
-            391: [False, [], 2, [4, 19, 0, 191], 0, "Ankor Wat: End (191/$BF)", [], False, [], [], [], [], [], [], [],
-                  []],
+            360: [False, [13],  2, [4,19,0,176], 0, "Ankor Wat: Exterior (176/$B0)", [], False, [], [], [], [], [], [], [], []],
+            361: [False, [],    2, [4,19,0,177], 0, "Ankor Wat: Outer-S (177/$B1) E", [], False, [], [], [], [], [], [], [], []],
+            362: [False, [739], 2, [4,19,0,177], 0, "Ankor Wat: Outer-S (177/$B1) W", [], False, [], [], [], [], [], [], [], []],
+            739: [False, [],    2, [4,19,0,177], 0, "Ankor Wat: Outer-S (177/$B1) scarab with orb", [], False, [], [], [], [], [], [], [], []],
+            363: [False, [],    2, [4,19,0,178], 0, "Ankor Wat: Outer-E (178/$B2) S", [], False, [], [], [], [], [], [], [], []],
+            364: [False, [363], 2, [4,19,0,178], 0, "Ankor Wat: Outer-E (178/$B2) center", [], False, [], [], [], [], [], [], [], []],
+            365: [False, [],    2, [4,19,0,178], 0, "Ankor Wat: Outer-E (178/$B2) N", [], False, [], [], [], [], [], [], [], []],
+            366: [False, [],    2, [4,19,0,179], 0, "Ankor Wat: Outer-N (179/$B3) E", [], False, [], [], [], [], [], [], [], []],
+            367: [False, [],    2, [4,19,0,179], 0, "Ankor Wat: Outer-N (179/$B3) W", [], False, [], [], [], [], [], [], [], []],
+            368: [False, [703], 2, [4,19,0,180], 0, "Ankor Wat: Outer Pit (180/$B4)", [], False, [], [], [], [], [], [], [], []],
+            703: [False, [368], 2, [4,19,0,180], 0, "Ankor Wat: Outer Pit (180/$B4) scarab with orb", [], False, [], [], [], [], [], [], [], []],
+            369: [False, [],    2, [4,19,0,181], 0, "Ankor Wat: Outer-W (181/$B5) N", [], False, [], [], [], [], [], [], [], []],
+            370: [False, [],    2, [4,19,0,181], 0, "Ankor Wat: Outer-W (181/$B5) center", [], False, [], [], [], [], [], [], [], []],
+            371: [False, [],    2, [4,19,0,181], 0, "Ankor Wat: Outer-W (181/$B5) S", [], False, [], [], [], [], [], [], [], []],
+            372: [False, [],    2, [4,19,0,182], 0, "Ankor Wat: Garden (182/$B6)", [], False, [], [], [], [], [], [], [], []],
+            373: [False, [],    2, [4,19,0,183], 0, "Ankor Wat: Inner-S (183/$B7) S", [], False, [], [], [], [], [], [], [], []],
+            374: [False, [373], 2, [4,19,0,183], 0, "Ankor Wat: Inner-S (183/$B7) NW", [], False, [], [], [], [], [], [], [], []],
+            375: [False, [],    2, [4,19,0,183], 0, "Ankor Wat: Inner-S (183/$B7) N", [], False, [], [], [], [], [], [], [], []],
+            376: [False, [],    2, [4,19,0,184], 0, "Ankor Wat: Inner-E (184/$B8) S", [], False, [], [], [], [], [], [], [], []],
+            727: [False, [],    2, [4,19,0,184], 0, "Ankor Wat: Inner-E (184/$B8) wall skull", [], False, [], [], [], [], [], [], [], []],
+            377: [False, [],    2, [4,19,0,184], 0, "Ankor Wat: Inner-E (184/$B8) N", [], False, [], [], [], [], [], [], [], []],
+            378: [False, [],    2, [4,19,0,185], 0, "Ankor Wat: Inner-W (185/$B9)", [], False, [], [], [], [], [], [], [], []],
+            379: [False, [],    2, [4,19,0,186], 0, "Ankor Wat: Road to MH (186/$BA) main", [], False, [], [], [], [], [], [], [], []],
+            380: [False, [],    2, [4,19,0,186], 0, "Ankor Wat: Road to MH (186/$BA) NE", [], False, [], [], [], [], [], [], [], []],
+            381: [False, [],    2, [4,19,0,187], 0, "Ankor Wat: Main-1 (187/$BB) main", [], False, [], [], [], [], [], [], [], []],
+            382: [False, [381], 2, [4,19,0,187], 0, "Ankor Wat: Main-1 (187/$BB) chest", [], False, [], [], [], [], [], [], [], []],
+            383: [False, [381], 2, [4,19,0,187], 0, "Ankor Wat: Main-1 (187/$BB) Dark Space", [], False, [], [], [], [], [], [], [], []],
+            384: [False, [],    2, [4,19,0,188], 0, "Ankor Wat: Main-2 (188/$BC) N", [], False, [], [], [], [], [], [], [], []],
+            385: [False, [],    2, [4,19,0,188], 0, "Ankor Wat: Main-2 (188/$BC) S", [], False, [], [], [], [], [], [], [], []],
+            386: [False, [],    2, [4,19,0,189], 0, "Ankor Wat: Main-3 (189/$BD) floor S", [], False, [], [], [], [], [], [], [], []],
+            387: [False, [],    2, [4,19,0,189], 0, "Ankor Wat: Main-3 (189/$BD) floor N", [], False, [], [], [], [], [], [], [], []],
+            388: [False, [386], 2, [4,19,0,189], 0, "Ankor Wat: Main-3 (189/$BD) platform", [], False, [], [], [], [], [], [], [], []],
+            389: [False, [],    2, [4,19,0,190], 0, "Ankor Wat: Main-4 (190/$BE) SE", [], False, [], [], [], [], [], [], [], []],
+            390: [False, [],    2, [4,19,0,190], 0, "Ankor Wat: Main-4 (190/$BE) N", [], False, [], [], [], [], [], [], [], []],
+            391: [False, [],    2, [4,19,0,191], 0, "Ankor Wat: End (191/$BF)", [], False, [], [], [], [], [], [], [], []],
 
             # Dao
             400: [False, [1, 14], 1, [5, 20, 0, 195], 0, "Dao: Main Area", [], False, [], [], [], [], [], [], [], []],
@@ -4627,83 +4424,49 @@ class World:
             406: [False, [], 2, [5, 20, 0, 201], 0, "Dao: SE House", [], False, [], [], [], [], [], [], [], []],
 
             # Pyramid
-            410: [False, [14], 2, [5, 21, 0, 204], 0, "Pyramid: Entrance (main)", [], False, [], [], [], [], [], [], [],
-                  []],
-            713: [False, [], 2, [5, 21, 0, 204], 0, "Pyramid: Entrance (top Dark Space)", [], False, [], [], [], [], [],
-                  [], [], []],
-            411: [False, [], 2, [5, 21, 0, 204], 0, "Pyramid: Entrance (behind orbs)", [], False, [], [], [], [], [],
-                  [], [], []],
-            412: [False, [413], 2, [5, 21, 0, 204], 0, "Pyramid: Entrance (hidden platform)", [], False, [], [], [], [],
-                  [], [], [], []],
-            413: [False, [], 2, [5, 21, 0, 204], 0, "Pyramid: Entrance (bottom)", [], False, [], [], [], [], [], [], [],
-                  []],
-            414: [False, [], 2, [5, 21, 0, 204], 0, "Pyramid: Entrance (boss entrance)", [], False, [], [], [], [], [],
-                  [], [], []],
-            415: [False, [], 2, [5, 21, 0, 205], 0, "Pyramid: Hieroglyph room", [30, 31, 32, 33, 34, 35, 38], False, [],
-                  [], [], [], [], [], [], []],
-            416: [False, [], 2, [5, 21, 0, 206], 0, "Pyramid: 206 / 1-A / Will ramps (E)", [], False, [], [], [], [],
-                  [], [], [], []],
-            417: [False, [], 2, [5, 21, 0, 206], 0, "Pyramid: 206 / 1-A / Will ramps (W)", [], False, [], [], [], [],
-                  [], [], [], []],
-            418: [False, [], 2, [5, 21, 0, 207], 0, "Pyramid: 207 / 1-B / Will ramps (NE)", [], False, [], [], [], [],
-                  [], [], [], []],
-            419: [False, [], 2, [5, 21, 0, 207], 0, "Pyramid: 207 / 1-B / Will ramps (SW)", [], False, [], [], [], [],
-                  [], [], [], []],
-            420: [False, [421], 2, [5, 21, 0, 208], 0, "Pyramid: 208 / 2-A / Breakable floors (N)", [], False, [], [],
-                  [], [], [], [], [], []],
-            421: [False, [420], 2, [5, 21, 0, 208], 0, "Pyramid: 208 / 2-A / Breakable floors (S)", [], False, [], [],
-                  [], [], [], [], [], []],
-            422: [False, [423], 2, [5, 21, 0, 209], 0, "Pyramid: 209 / 2-B / Breakable floors (W)", [], False, [], [],
-                  [], [], [], [], [], []],
-            423: [False, [422], 2, [5, 21, 0, 209], 0, "Pyramid: 209 / 2-B / Breakable floors (E)", [], False, [], [],
-                  [], [], [], [], [], []],
-            424: [False, [], 2, [5, 21, 0, 210], 0, "Pyramid: 210 / 6-A / Mummies", [], False, [], [], [], [], [], [],
-                  [], []],
-            425: [False, [], 2, [5, 21, 0, 211], 0, "Pyramid: 211 / 6-B / Mummies", [], False, [], [], [], [], [], [],
-                  [], []],
-            426: [False, [], 2, [5, 21, 0, 212], 0, "Pyramid: 212 / 5-A / Quake-Aura (N)", [], False, [], [], [], [],
-                  [], [], [], []],
-            427: [False, [], 2, [5, 21, 0, 212], 0, "Pyramid: 212 / 5-A / Quake-Aura (center)", [], False, [], [], [],
-                  [], [], [], [], []],
-            428: [False, [], 2, [5, 21, 0, 212], 0, "Pyramid: 212 / 5-A / Quake-Aura (SE chest)", [], False, [], [], [],
-                  [], [], [], [], []],
-            429: [False, [], 2, [5, 21, 0, 212], 0, "Pyramid: 212 / 5-A / Quake-Aura (SW exit)", [], False, [], [], [],
-                  [], [], [], [], []],
-            430: [False, [], 2, [5, 21, 0, 213], 0, "Pyramid: 213 / 5-B / Quake-Aura", [], False, [], [], [], [], [],
-                  [], [], []],
-            431: [False, [], 2, [5, 21, 0, 214], 0, "Pyramid: 214 / 3-A / Friar-K6 (Upper)", [], False, [], [], [], [],
-                  [], [], [], []],
-            432: [False, [], 2, [5, 21, 0, 214], 0, "Pyramid: 214 / 3-A / Friar-K6 (NE chest)", [], False, [], [], [],
-                  [], [], [], [], []],
-            433: [False, [431, 434], 2, [5, 21, 0, 214], 0, "Pyramid: 214 / 3-A / Friar-K6 (E platform)", [], False, [],
-                  [], [], [], [], [], [], []],
-            434: [False, [433], 2, [5, 21, 0, 214], 0, "Pyramid: 214 / 3-A / Friar-K6 (Lower)", [], False, [], [], [],
-                  [], [], [], [], []],
-            435: [False, [], 2, [5, 21, 0, 215], 0, "Pyramid: 215 / 3-B / Friar-K6 (main)", [], False, [], [], [], [],
-                  [], [], [], []],
-            436: [False, [437], 2, [5, 21, 0, 216], 0, "Pyramid: 216 / 4-A / Crushers (N)", [], False, [], [], [], [],
-                  [], [], [], []],
-            437: [False, [], 2, [5, 21, 0, 216], 0, "Pyramid: 216 / 4-A / Crushers (S)", [], False, [], [], [], [], [],
-                  [], [], []],
-            438: [False, [], 2, [5, 21, 0, 217], 0, "Pyramid: 217 / 4-B / Crushers (W)", [], False, [], [], [], [], [],
-                  [], [], []],
-            439: [False, [], 2, [5, 21, 0, 217], 0, "Pyramid: 217 / 4-B / Crushers (E)", [], False, [], [], [], [], [],
-                  [], [], []],
-            440: [False, [], 2, [5, 21, 0, 219], 0, "Pyramid: 219 / 4-C / Crushers (W)", [], False, [], [], [], [], [],
-                  [], [], []],
-            441: [False, [], 2, [5, 21, 0, 219], 0, "Pyramid: 219 / 4-C / Crushers (E)", [], False, [], [], [], [], [],
-                  [], [], []],
+            410: [False, [14],      2, [5,21,0,204], 0, "Pyramid: Entrance (main)", [], False, [], [], [], [], [], [], [], []],
+            713: [False, [],        2, [5,21,0,204], 0, "Pyramid: Entrance (top Dark Space)", [], False, [], [], [], [], [], [], [], []],
+            411: [False, [],        2, [5,21,0,204], 0, "Pyramid: Entrance (behind orbs)", [], False, [], [], [], [], [], [], [], []],
+            412: [False, [413],     2, [5,21,0,204], 0, "Pyramid: Entrance (hidden platform)", [], False, [], [], [], [], [], [], [], []],
+            413: [False, [],        2, [5,21,0,204], 0, "Pyramid: Entrance (bottom)", [], False, [], [], [], [], [], [], [], []],
+            414: [False, [],        2, [5,21,0,204], 0, "Pyramid: Entrance (boss entrance)", [], False, [], [], [], [], [], [], [], []],
+            415: [False, [],        2, [5,21,0,205], 0, "Pyramid: Hieroglyph room", [30, 31, 32, 33, 34, 35, 38], False, [], [], [], [], [], [], [], []],
+            416: [False, [],        2, [5,21,0,206], 0, "Pyramid: 206 / 1-A / Will ramps (E)", [], False, [], [], [], [], [], [], [], []],
+            417: [False, [],        2, [5,21,0,206], 0, "Pyramid: 206 / 1-A / Will ramps (W)", [], False, [], [], [], [], [], [], [], []],
+            418: [False, [],        2, [5,21,0,207], 0, "Pyramid: 207 / 1-B / Will ramps (NE)", [], False, [], [], [], [], [], [], [], []],
+            419: [False, [],        2, [5,21,0,207], 0, "Pyramid: 207 / 1-B / Will ramps (SW)", [], False, [], [], [], [], [], [], [], []],
+            420: [False, [421],     2, [5,21,0,208], 0, "Pyramid: 208 / 2-A / Breakable floors (N)", [], False, [], [], [], [], [], [], [], []],
+            421: [False, [420],     2, [5,21,0,208], 0, "Pyramid: 208 / 2-A / Breakable floors (S)", [], False, [], [], [], [], [], [], [], []],
+            422: [False, [423],     2, [5,21,0,209], 0, "Pyramid: 209 / 2-B / Breakable floors (W)", [], False, [], [], [], [], [], [], [], []],
+            423: [False, [422],     2, [5,21,0,209], 0, "Pyramid: 209 / 2-B / Breakable floors (E)", [], False, [], [], [], [], [], [], [], []],
+            424: [False, [],        2, [5,21,0,210], 0, "Pyramid: 210 / 6-A / Mummies", [], False, [], [], [], [], [], [], [], []],
+            425: [False, [],        2, [5,21,0,211], 0, "Pyramid: 211 / 6-B / Mummies", [], False, [], [], [], [], [], [], [], []],
+            426: [False, [],        2, [5,21,0,212], 0, "Pyramid: 212 / 5-A / Quake-Aura (N)", [], False, [], [], [], [], [], [], [], []],
+            427: [False, [],        2, [5,21,0,212], 0, "Pyramid: 212 / 5-A / Quake-Aura (center)", [], False, [], [], [], [], [], [], [], []],
+            428: [False, [],        2, [5,21,0,212], 0, "Pyramid: 212 / 5-A / Quake-Aura (SE chest)", [], False, [], [], [], [], [], [], [], []],
+            429: [False, [],        2, [5,21,0,212], 0, "Pyramid: 212 / 5-A / Quake-Aura (SW exit)", [], False, [], [], [], [], [], [], [], []],
+            430: [False, [],        2, [5,21,0,213], 0, "Pyramid: 213 / 5-B / Quake-Aura", [], False, [], [], [], [], [], [], [], []],
+            431: [False, [],        2, [5,21,0,214], 0, "Pyramid: 214 / 3-A / Friar-K6 (Upper)", [], False, [], [], [], [], [], [], [], []],
+            432: [False, [],        2, [5,21,0,214], 0, "Pyramid: 214 / 3-A / Friar-K6 (NE chest)", [], False, [], [], [], [], [], [], [], []],
+            433: [False, [431,434], 2, [5,21,0,214], 0, "Pyramid: 214 / 3-A / Friar-K6 (E platform)", [], False, [], [], [], [], [], [], [], []],
+            434: [False, [433],     2, [5,21,0,214], 0, "Pyramid: 214 / 3-A / Friar-K6 (Lower)", [], False, [], [], [], [], [], [], [], []],
+            435: [False, [],        2, [5,21,0,215], 0, "Pyramid: 215 / 3-B / Friar-K6 (main)", [], False, [], [], [], [], [], [], [], []],
+            436: [False, [437],     2, [5,21,0,216], 0, "Pyramid: 216 / 4-A / Crushers (N)", [], False, [], [], [], [], [], [], [], []],
+            437: [False, [],        2, [5,21,0,216], 0, "Pyramid: 216 / 4-A / Crushers (S)", [], False, [], [], [], [], [], [], [], []],
+            438: [False, [],        2, [5,21,0,217], 0, "Pyramid: 217 / 4-B / Crushers (W)", [], False, [], [], [], [], [], [], [], []],
+            439: [False, [],        2, [5,21,0,217], 0, "Pyramid: 217 / 4-B / Crushers (E)", [], False, [], [], [], [], [], [], [], []],
+            440: [False, [],        2, [5,21,0,219], 0, "Pyramid: 219 / 4-C / Crushers (W)", [], False, [], [], [], [], [], [], [], []],
+            441: [False, [],        2, [5,21,0,219], 0, "Pyramid: 219 / 4-C / Crushers (E)", [], False, [], [], [], [], [], [], [], []],
             442: [False, [], 2, [5, 21, 0, 218], 0, "Pyramid: Hieroglyph 1", [], False, [], [], [], [], [], [], [], []],
             443: [False, [], 2, [5, 21, 0, 218], 0, "Pyramid: Hieroglyph 2", [], False, [], [], [], [], [], [], [], []],
             444: [False, [], 2, [5, 21, 0, 218], 0, "Pyramid: Hieroglyph 3", [], False, [], [], [], [], [], [], [], []],
             445: [False, [], 2, [5, 21, 0, 218], 0, "Pyramid: Hieroglyph 4", [], False, [], [], [], [], [], [], [], []],
             446: [False, [], 2, [5, 21, 0, 218], 0, "Pyramid: Hieroglyph 5", [], False, [], [], [], [], [], [], [], []],
             447: [False, [], 2, [5, 21, 0, 218], 0, "Pyramid: Hieroglyph 6", [], False, [], [], [], [], [], [], [], []],
-            448: [False, [], 2, [5, 21, 0, 221], 0, "Pyramid: Boss Room", [], True, [], [], [], [], [], [], [], []],
-            449: [False, [415, 517], 0, [5, 21, 0, 205], 0, "Pyramid: Hieroglyphs Placed", [], False, [], [], [], [],
-                  [], [], [], []],
-            450: [False, [], 2, [5, 21, 0, 215], 0, "Pyramid: 215 / 3-B / Friar-K6 (past K6)", [], False, [], [], [],
-                  [], [], [], [], []],
+            448: [False, [],        2, [5,21,0,221], 0, "Pyramid: Boss Room", [], False, [], [], [], [], [], [], [], []],
+            449: [False, [415,517], 0, [5,21,0,205], 0, "Pyramid: Hieroglyphs Placed", [], False, [], [], [], [], [], [], [], []],
+            450: [False, [],        2, [5,21,0,215], 0, "Pyramid: 215 / 3-B / Friar-K6 (past K6)", [], False, [], [], [], [], [], [], [], []],
+            451: [False, [],        2, [5,21,0,215], 0, "Pyramid: Past Boss", [], True, [], [], [], [], [], [], [], []],
 
             # Babel
             460: [False, [], 2, [6, 22, 0, 222], 0, "Babel: Foyer", [], False, [], [], [], [], [], [], [], []],
@@ -4724,8 +4487,7 @@ class World:
             469: [False, [470], 2, [6, 22, 0, 226], 0, "Babel: Map 226 (bottom)", [], False, [], [], [], [], [], [], [],
                   []],
             470: [False, [], 2, [6, 22, 0, 226], 0, "Babel: Map 226 (top)", [], False, [], [], [], [], [], [], [], []],
-            471: [False, [522], 2, [6, 22, 0, 227], 0, "Babel: Map 227 (bottom)", [], False, [], [], [], [], [], [], [],
-                  []],
+            471: [False, [],       2, [6,22,0,227], 0, "Babel: Map 227 (bottom)", [], False, [], [], [], [], [], [], [], []],
             472: [False, [], 2, [6, 22, 0, 227], 0, "Babel: Map 227 (top)", [], False, [], [], [], [], [], [], [], []],
             473: [False, [], 2, [6, 22, 0, 222], 0, "Babel: Olman's Room", [], False, [], [], [], [], [], [], [], []],
             474: [False, [], 0, [6, 22, 0, 242], 0, "Babel: Castoth", [], False, [], [], [], [], [], [], [], []],
@@ -4736,16 +4498,11 @@ class World:
             479: [False, [473], 0, [6, 22, 0, 246], 0, "Babel: Statue Get", [], False, [], [], [], [], [], [], [], []],
 
             # Jeweler's Mansion
-            480: [False, [], 2, [6, 23, 0, 233], 0, "Jeweler's Mansion: Entrance", [], False, [], [], [], [], [], [],
-                  [], []],
-            714: [False, [], 2, [6, 23, 0, 233], 0, "Jeweler's Mansion: Between Gates", [], False, [], [], [], [], [],
-                  [], [], []],
-            715: [False, [], 2, [6, 23, 0, 233], 0, "Jeweler's Mansion: Main", [], False, [], [], [], [], [], [], [],
-                  []],
-            481: [False, [], 2, [6, 23, 0, 233], 0, "Jeweler's Mansion: Behind Psycho Slider", [], False, [], [], [],
-                  [], [], [], [], []],
-            482: [False, [523], 2, [6, 23, 0, 234], 0, "Jeweler's Mansion: Solid Arm", [], False, [], [], [], [], [],
-                  [], [], []],
+            480: [False, [],    2, [6,23,0,233], 0, "Jeweler's Mansion: Entrance", [], False, [], [], [], [], [], [], [], []],
+            714: [False, [],    2, [6,23,0,233], 0, "Jeweler's Mansion: Between Gates", [], False, [], [], [], [], [], [], [], []],
+            715: [False, [],    2, [6,23,0,233], 0, "Jeweler's Mansion: Main", [], False, [], [], [], [], [], [], [], []],
+            481: [False, [],    2, [6,23,0,233], 0, "Jeweler's Mansion: Behind Psycho Slider", [], False, [], [], [], [], [], [], [], []],
+            482: [False, [],    2, [6,23,0,234], 0, "Jeweler's Mansion: Solid Arm", [], False, [], [], [], [], [], [], [], []],
 
             # Game End
             490: [False, [500], 0, [0, 0, 0, 0], 0, "Kara Released", [20], False, [], [], [], [], [], [], [], []],
@@ -4772,24 +4529,19 @@ class World:
             518: [False, [], 0, [0, 0, 0, 242], 0, "Babel: Castoth defeated", [], False, [], [], [], [], [], [], [],
                   []],
             519: [False, [], 0, [0, 0, 0, 243], 0, "Babel: Viper defeated", [], False, [], [], [], [], [], [], [], []],
-            520: [False, [], 0, [0, 0, 0, 244], 0, "Babel: Vampires defeated", [], False, [], [], [], [], [], [], [],
-                  []],
-            521: [False, [], 0, [0, 0, 0, 245], 0, "Babel: Sand Fanger defeated", [], False, [], [], [], [], [], [], [],
-                  []],
-            522: [False, [], 0, [0, 0, 0, 246], 0, "Babel: Mummy Queen defeated", [], False, [], [], [], [], [], [], [],
-                  []],
-            523: [False, [], 0, [0, 0, 0, 234], 0, "Mansion: Solid Arm defeated", [], False, [], [], [], [], [], [], [],
-                  []],
-            525: [False, [], 0, [0, 0, 0, 0], 0, "Pyramid: Portals Open", [], False, [], [], [], [], [], [], [], []],
-            526: [False, [], 0, [0, 0, 0, 0], 0, "Mu: Access to Hope Room 1", [], False, [], [], [], [], [], [], [],
-                  []],
-            527: [False, [], 0, [0, 0, 0, 0], 0, "Mu: Access to Hope Room 2", [], False, [], [], [], [], [], [], [],
-                  []],
-            529: [False, [], 0, [0, 0, 0, 0], 0, "Underground Tunnel: Bridge Open", [], False, [], [], [], [], [], [],
-                  [], []],
-            530: [False, [80, 81], 0, [0, 0, 0, 0], 0, "Inca: Slug Statue Open", [], False, [], [], [], [], [], [], [],
-                  []],
-            531: [False, [], 0, [0, 0, 0, 0], 0, "Mu: Beat Vampires", [], False, [], [], [], [], [], [], [], []]
+            520: [False, [], 0, [0,0,0,244], 0, "Babel: Vampires defeated", [], False, [], [], [], [], [], [], [], []],
+            521: [False, [], 0, [0,0,0,245], 0, "Babel: Sand Fanger defeated", [], False, [], [], [], [], [], [], [], []],
+            #522: [False, [], 0, [0,0,0,246], 0, "Babel: Mummy Queen defeated", [], False, [], [], [], [], [], [], [], []],
+            #523: [False, [], 0, [0,0,0,234], 0, "Mansion: Solid Arm defeated", [], False, [], [], [], [], [], [], [], []],
+            526: [False, [], 0, [0,0,0,0], 0, "Mu: Access to Hope Room 1", [], False, [], [], [], [], [], [], [], []],
+            527: [False, [], 0, [0,0,0,0], 0, "Mu: Access to Hope Room 2", [], False, [], [], [], [], [], [], [], []],
+            529: [False, [], 0, [0,0,0,0], 0, "Underground Tunnel: Bridge Open", [], False, [], [], [], [], [], [], [], []],
+            530: [False, [80, 81], 0, [0,0,0,0], 0, "Inca: Slug Statue Open", [], False, [], [], [], [], [], [], [], []],
+            531: [False, [], 0, [0,0,0,0], 0, "Mu: Beat Vampires", [], False, [], [], [], [], [], [], [], []],
+            
+            # Pyramid logical access is tuned during initialization
+            802: [False, [], 0, [0,0,0,0], 0, "Pyramid logical access", [], False, [], [], [], [], [], [], [], []],
+            803: [False, [], 0, [0,0,0,0], 0, "Killer 6 logical access", [], False, [], [], [], [], [], [], [], []]
 
         }
 
@@ -4891,8 +4643,7 @@ class World:
             98: [0, 95, 96, 0, [[609, 1]], False],  # DS spike hall requires an attack to pass the 4-Way
             99: [0, 97, 503, 0x06, [], False],  # Castoth as F/S
             100: [0, 97, 503, 0, [[604, 1]], False],  # Castoth with Flute
-            101: [0, 97, 98, 0, [[503, 1]], False],
-            # Pass Castoth; if you add the exit behind Castoth to exits, move this to exit_logic
+            101: [0,  97,  98,     0, [[503, 1]], False],        # Pass Castoth (the 97-98 exit is not in exits)
 
             # Diamond Mine
             712: [0, 130, 708, 0, [[715, 1]], True],  # Map 61 S fence progression via monster
@@ -4931,6 +4682,7 @@ class World:
             149: [0, 195, 509, 0, [[65, 1], [612, 1]], False],  # NW Bot (84) statue w/ Aura Barrier and telekinesis
             150: [0, 195, 197, 0, [[509, 1]], True],  # NW Bot (84) traversal with statue switch
             152: [0, 170, 16, 0, [[502, 1]], False],  # Moon Tribe passage w/ spirits healed
+            153: [0, 198, 199,     0, [[532, 1]], False],           # Pass Viper
 
             # Mu
             724: [0, 212, 722, 0, [[726, 1]], True],  # Mu entrance (95) gate via golem orb
@@ -4959,9 +4711,8 @@ class World:
             189: [0, 527, 512, 0, [[18, 2], [526, 1], [511, 1]], False],
             # Water lowered 2 w/ Hope Statues, both rooms, and water lowered 1
             190: [0, 244, 531, 0x6, [], False],  # Vampires as F/S
-            191: [0, 244, 531, 0, [[604 if self.difficulty < 3 else 609, 1]], False],
-            # Vampires with Flute, or any attack if playing Extreme
-            192: [0, 244, 242, 0, [[531, 1]], False],  # Pass Vampires if defeated
+            191: [0, 244, 531,  0, [[604 if self.difficulty < 3 else 609, 1]], False], # Vampires with Flute, or any attack if playing Extreme
+            192: [0, 244, 242,  0, [[531, 1]], False],            # Pass Vampires (the 244-242 exit is not in exits)
 
             # Angel Dungeon
             214: [0, 272, 273, 0, [[513, 1]], False],  # Ishtar's chest w/ puzzle complete
@@ -4971,8 +4722,7 @@ class World:
             # Great Wall
             218: [0, 292, 293, 0, [[609, 1]], False],  # Drop room forward requires an attack for the button
             219: [0, 293, 291, 0, [[63, 1]], True],  # Map 131 (drop room) backwards w/ Spin Dash
-            220: [0, 296, 295 if settings.allow_glitches else 296, 0, [[604, 1]], False],
-            # Map 133 E->C w/ glitches and Flute
+            220: [0, 294, 295 if settings.allow_glitches else 294, 0, [[604, 1]], False], # Map 133 W->C w/ glitches and Flute
             221: [0, 296, 295, 0, [[63, 1]], False],  # Map 133 E->C w/ Spin Dash
             222: [0, 296, 295, 0x06, [], False],  # Map 133 E->C w/ Freedan or Shadow
             223: [0, 296, 294, 0, [[63, 1]], False],  # Map 133 C->W w/ Spin Dash
@@ -4980,6 +4730,7 @@ class World:
             227: [0, 298, 712, 0, [[610, 1]], False],  # Map 135 archer via ranged
             228: [0, 299, 712, 0, [[610, 1]], False],  # Map 135 archer via ranged
             229: [0, 300, 301, 0, [[63, 1]], True],  # Map 136 progression w/ Spin Dash
+            230: [0, 702, 303,     0, [[533, 1]], False],           # Pass Fanger
 
             # Mt. Temple
             240: [0, 331, 332, 0, [[63, 1]], True],  # Map 161 progression w/ Spin Dash
@@ -5036,32 +4787,22 @@ class World:
             307: [0, 431, 433, 0, [[64, 1]], False],  # Map 214 progression w/ Friar
             308: [0, 438, 439, 0, [[63, 1]], True],  # Map 217 progression w/ Spin Dash
             310: [0, 440, 441, 0, [[63, 1]], True],  # Map 219 progression w/ Spin Dash
-            309: [0, 435, 450, 0, [[63, 1]], True],  # Killer 6 w/ Spin Dash
-            312: [0, 435, 450, 0, [[6, 6], [50, 2], [51, 1], [52, 1]], True],  # Killer 6 w/ herbs and stats
-            313: [0, 435, 450, 0, [[64, 1], [54, 1]], True],  # Killer 6 w/ Friar II
+            309: [0, 435, 450,    0, [[803, 1], [63, 1]], True],    # Killer 6 w/ logical access and Spin Dash (so Will can pass in dungeon shuffle)
+            312: [0, 435, 450,    0, [[803, 1], [36, 1]], True],    # Killer 6 w/ logical access and Aura
+            313: [0, 435, 450,    0, [[803, 1], [64, 1], [54, 1]], True],  # Killer 6 w/ logical access and upgraded Friar
             314: [0, 411, 414, 0, [[517, 1]], False],  # Pyramid to boss w/hieroglyphs placed
-            516: [0, 413, 411, 0, [[525, 1]], False],  # Pyramid portal
-            517: [0, 419, 411, 0, [[525, 1]], False],  # Pyramid portal
-            518: [0, 423, 411, 0, [[525, 1]], False],  # Pyramid portal
-            519: [0, 425, 411, 0, [[525, 1]], False],  # Pyramid portal
-            520: [0, 428, 411, 0, [[525, 1]], False],  # Pyramid portal
-            521: [0, 430, 411, 0, [[525, 1]], False],  # Pyramid portal
-            522: [0, 437, 411, 0, [[525, 1]], False],  # Pyramid portal
-            523: [0, 441, 411, 0, [[525, 1]], False],  # Pyramid portal
-            524: [0, 450, 411, 0, [[525, 1]], False],  # Pyramid portal
-            525: [0, 0, 525, 0x0f, [] if not self.dungeon_shuffle else [[36, 1]], False],
-            # Portals require Aura in dungeon shuffle
+            315: [0, 448, 451,    0, [[534, 1]], False],            # Pass Mummy Queen
 
             # Babel / Mansion items 740,741
             320: [0, 461, 462, 0x0f, [[36, 1], [39, 1]], False],  # Map 223 w/ Aura and Ring, any form
             321: [0, 473, 479, 0, [[522, 1]], False],  # Olman statue w/ Mummy Queen 2
-            322: [0, 473, 479, 0, [[523, 1]], False],  # Olman statue w/ Solid Arm
             732: [0, 480, 714, 0, [[740, 1]], True],  # Mansion east gate with monster orb
             734: [0, 714, 715, 0, [[741, 1]], True],  # Mansion west gate with monster orb
             323: [0, 715, 481, 0, [[62, 1]], True],  # Mansion progression w/ Slider
-            # Solid Arm always warps to top of Babel, but only Extreme difficulty has an edge to include the warp in logic;
-            # this prevents rare scenarios where the traverser would path through Solid Arm to warp to another continent.
-            324: [0, 482, 482 if self.difficulty < 3 else 472, 0, [], False],
+            # Solid Arm always warps to top of Babel, but only Extreme difficulty has edges to include SA;
+            # this prevents lower difficulties from requiring SA for either the statue or a continent warp.
+            324: [0, 482, 482 if self.difficulty < 3 else 472, 0, [[523, 1]], False],   # Warp
+            322: [0, 473, 473 if self.difficulty < 3 else 479, 0, [[523, 1]], False],   # Statue
 
             # Endgame / Misc
             400: [0, [49, 150, 270, 345, 391][self.kara - 1], 490, 0, [[20, 1]], False],  # Rescue Kara w/ Magic Dust
@@ -7046,7 +6787,7 @@ class World:
 
             4: [5, 0, 0, 171, 198, "Map4CExit01", 0, True, 4, 0, "Viper entrance (in)"],
             5: [4, 0, 0, 0, 0, "Map55Exit01", 0, True, 4, 0, "Viper entrance (out)"],
-            6: [0, 0, 0, 198, 200, "MapViperExitString", 0, True, 4, 0, "Post-Boss Warp to Sea Palace"],
+            6:  [ 0, 0, 0, 199, 200, "MapViperExitString", 0, True, 4, 0, "Post-Boss Warp to Sea Palace" ],
 
             7: [8, 0, 0, 241, 243, "MapVampEntranceString", 0, True, 5, 0, "Vampires entrance (in)"],
             8: [7, 0, 0, 0, 0, "Map67Exit01", 0, True, 5, 0, "Vampires entrance (out)"],
@@ -7059,7 +6800,7 @@ class World:
 
             13: [14, 0, 0, 414, 448, "MapMQEntranceString", 0, True, 10, 0, "Mummy Queen entrance (in)"],
             14: [13, 0, 0, 0, 0, "MapMQReturnString", 0, True, 10, 0, "Mummy Queen entrance (out)"],
-            15: [0, 0, 0, 448, 415, "MapMQExitString", 0, True, 10, 0, "Post-Boss Warp to Pyramid"],
+            15: [ 0, 0, 0, 451, 415, "MapMQExitString", 0, True, 10, 0, "Post-Boss Warp to Pyramid" ],
 
             16: [17, 0, 0, 470, 471, "MapE2Exit02", 0, True, 11, 0, "Babel statue boss corridor entrance (in)"],
             17: [16, 0, 0, 0, 0, "MapE3Exit01", 0, True, 11, 0, "Babel statue boss corridor entrance (out)"],
@@ -7188,7 +6929,7 @@ class World:
             151: [150, 0, 0, 0, 0, "Map24Exit01", 0, False, 2, 2, "Inca: Golden Tile Room N exit (36->34)"],
             152: [153, 0, 0, 87, 77, "Map24Exit02", 0, False, 2, 2, "Inca: Golden Tile Room S exit (36->30)"],
             153: [152, 0, 0, 0, 0, "Map1EExit01", 0, False, 2, 2, "Inca: Outside Castoth, E exit (30->36)"],
-            154: [0, 0, 0, 98, 100, "", 0, False, 0, 0, "Gold Ship entrance"],
+            154: [  0, 0, 0, 98, 100, "", 0, False,  0, 0, "Drop to Gold Ship from Castoth" ],
 
             # Gold Ship
             160: [161, 0, 0, 100, 101, "", 0, False, 0, 0, "Gold Ship Interior (in)"],
@@ -7760,10 +7501,5 @@ class World:
             27: [414, [[62, 1]], 0, True],  # Angl Ishtar slider
             28: [591, [] if settings.allow_glitches else [[28, 1]], 2, False],  # Wat bright room N
             30: [592, [] if settings.allow_glitches else [[28, 1]], 2, False],  # Wat bright room S
-            # Require an attack for bosses; Castoth and Vamps are special
-            # Rigorously we need a "defeated" flag item for each boss, but this suffices for now
-            101: [5, [[609, 1]], 2, False],  # Viper
-            103: [11, [[609, 1]], 2, False],  # Fanger
-            104: [14, [[36, 1]], 2, False],  # MQ
-            106: [20, [[609, 1]], 2, False]  # Solid Arm
+            31: [ 704, [[522, 1]], 0, False ],   # MQ2 upper door
         }
