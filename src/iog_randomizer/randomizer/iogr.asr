@@ -8505,6 +8505,41 @@ Text_EuroSecretGotItemAlready:
 db $d3,$d6,$63,$86,$8e,$2a,$c0
 }
 
+; Refactored to be permanent. Otherwise, in IOGR,
+; the statue reappears if you open the inventory, because Euro's overlapping
+; VRAM asset cards (required by ER) force a reload of the tilemap.
+org $87e570
+EEuroChurchStatue:
+cop #$C0 : dw .OnInteract
+cop #$C1
+cop #$D0 : db $01, $01 : dw .DoOpenWall
+cop #$45 : db $0f,$07, $10,$09 : dw .WithWind
+.NoWind:
+cop #$CE : db $00
+rtl
+.WithWind:
+cop #$CC : db $00
+rtl
+.OnInteract:
+cop #$D3 : dw $0169 : db $00   ; No interaction if the statue's open.
+cop #$BF : dw $e5be
+cop #$BE : db 2,1 : dw ..Options
+..Options:
+dw ..ChooseNo
+dw ..ChooseYes, ..ChooseNo
+..ChooseYes:
+cop #$CC : db $01
+..ChooseNo:
+cop #$BF : dw $e602
+rtl
+.DoOpenWall:
+cop #$08 : db $01,$01
+cop #$32 : db $69
+cop #$33
+cop #$CD : dw $0169
+cop #$CE : db $01
+rtl
+warnpc $87e5be   ; Start of text.
 
 org $87e927
 ; Bank $87 free space begins here.
