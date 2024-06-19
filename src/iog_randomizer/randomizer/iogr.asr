@@ -9428,7 +9428,7 @@ EGaia_OfferSave:
 cop #$BF : dw EGaia_TextOfferSave
 cop #$BE : db $02,$02 : dw .Options
 .Options:
-  dw .SayYes
+  dw EGaia_OfferWarp
   dw .SayYes, EGaia_OfferWarp
 .SayYes:
 lda $0D8C    ; Save file index.
