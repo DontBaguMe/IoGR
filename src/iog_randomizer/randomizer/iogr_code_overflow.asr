@@ -2576,10 +2576,10 @@ plx
 rtl
 
 LR_WarpToDsIndexA:
-clc
-jsr SR_WarpToDsIndexA
-rtl
-
+;clc
+;jsr SR_WarpToDsIndexA
+;rtl
+;
 LR_WarpToDsIndexAWithForceSetDeathWarp:
 sec
 jsr SR_WarpToDsIndexA
