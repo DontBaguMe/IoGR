@@ -2301,7 +2301,7 @@ db $30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$3A,$3B,$3C,$49   ; Freejia, Neil's
 db $5a,$5b,$5c,$5d,$5e,$63   ; Sea Palace, Hope Room
 db $67,$f4   ; Vamps due to lightning orb
 db $69,$6A,$6B,$6C   ; Angel Village
-;db $75   ; Angel Dungeon puzzle rooms
+db $75   ; Angel Dungeon puzzle rooms
 db $78,$79,$7A,$7B,$7C,$7D,$7E,$7F   ; Watermia
 db $91,$92,$93,$94,$95,$96,$97,$98,$99,$9a,$9b,$9c,$9d   ; Euro
 db $ac,$ad,$ae   ; Natives'
