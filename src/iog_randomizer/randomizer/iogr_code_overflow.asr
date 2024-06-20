@@ -2609,7 +2609,7 @@ lda.w #BankOf(TableDsMapSpawnData) : sta $0af2
 bra .Done
 
 LR_WarpToStart:
-if !StartAtWarpLocation == 1
+if !StartAtWarpLocation == 1 || !SettingDsWarp == 0
 lda.w #!StartDsIndex : sta $0bf6
   jsl LR_WarpToDsIndexAWithForceSetDeathWarp
 else
@@ -2701,7 +2701,6 @@ db !DkSpPyramidBotType
 db !DkSpBabelBotType
 db !DkSpBabelTopType
 }
-
 
 
 macro MDsWarpTextRedIfNotVisited(DsIndex)

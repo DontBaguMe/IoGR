@@ -9443,16 +9443,18 @@ lda #$FFF0 : trb $065A
 stz $0bfc   ; Restore default fast item-get text speed after the save routine uses this.
 cop #$BF : dw EGaia_TextFinishedRecording
 EGaia_OfferWarp:
+lda.w #!StartDsIndex : sta $0bfa
 cop #$BF : dw EGaia_TextOfferWarp
 cop #$BE : db $02,$01 : dw .Options
 .Options:
   dw .SayNo, .SayNo, .SayYes
 .SayYes:
-;stz $0ad4
-;jsl LR_ClearMonsterKilledFlags
-;cop #$26 : db !StartWarpString
-;cop #$C5
+if !SettingDsWarp == 1
 jml EGaia_DsWarpMainMenu
+else
+jsl LR_WarpToStart
+cop #$C5
+endif
 .SayNo:
 EGaia_ThenGo:
 cop #$BF : dw EGaia_TextThenGo
@@ -9481,10 +9483,13 @@ db $CF
 db $CA
 EGaia_TextOfferWarp:
 db $CE
+if !SettingDsWarp == 1
 db "Warp to a Dark Space?",$cb
-;db "Return to "
-;db "!StartLocationName"
-;db "?",$CB    ; "?"
+else
+db "Return to "
+db $04 : dl TextStartDsNameInclude : dw $0bfa
+endif
+db "?",$CB
 db "_No",$CB
 db "_Yes"
 db $CA

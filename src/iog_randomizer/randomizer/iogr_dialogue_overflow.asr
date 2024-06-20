@@ -720,7 +720,102 @@ db $00
 
 table "table_dialogue.txt",rtl
 
-
+TextStartDsNameInclude:
+{
+.Pointers:
+dw .Cape
+dw .Prison
+dw .EdDgFinal
+dw .Itory
+dw .Inca1
+dw .Inca2
+dw .Inca3
+dw .Frej
+dw .Mine1
+dw .Mine2
+dw .Mine3
+dw .SkGn1
+dw .SkGn2
+dw .SkGn3
+dw .SkGn4
+dw .SeaPal
+dw .MuNE
+dw .MuW
+dw .Angl
+dw .Wtrm
+dw .GtWl1
+dw .GtWl2
+dw .GtWl3
+dw .Euro
+dw .Kress1
+dw .Kress2
+dw .Kress3
+dw .NtVl
+dw .Ankr1
+dw .Ankr2
+dw .Ankr3
+dw .Dao
+dw .PymdUpper
+dw .PymdLower
+dw .BabelLower
+dw .BabelUpper
+.Cape:
+db "South Cape",$ca
+.Prison:
+db "Edward's Prison",$ca
+.EdDgFinal:
+db "Edward's Tunnel",$ca
+.Itory:
+db "Itory",$ca
+.Inca1:
+.Inca2:
+.Inca3:
+db "Inca",$ca
+.Frej
+db "Freejia",$ca
+.Mine1:
+.Mine2:
+.Mine3:
+db "Diamond Mine",$ca
+.SkGn1:
+.SkGn2:
+.SkGn3:
+.SkGn4:
+db "Sky Garden",$ca
+.SeaPal:
+db "Sea Palace",$ca
+.MuNE:
+.MuW:
+db "Mu",$ca
+.Angl:
+db "Angel Village",$ca
+.Wtrm:
+db "Watermia",$ca
+.GtWl1:
+.GtWl2:
+.GtWl3:
+db "Great Wall",$ca
+.Euro:
+db "Euro",$ca
+.Kress1:
+.Kress2:
+.Kress3:
+db "Mt. Kress",$ca
+.NtVl:
+db "Native Village",$ca
+.Ankr1:
+.Ankr2:
+.Ankr3:
+db "Ankor Wat",$ca
+.Dao:
+db "Dao",$ca
+.PymdUpper:
+.PymdLower:
+db "Pyramid",$ca
+.BabelLower:
+.BabelUpper:
+db "Babel",$ca
+}
 
 TextDebugItemListPageOne:
 db $c1 : db $02,$06
