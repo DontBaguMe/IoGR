@@ -16,7 +16,7 @@ macro MTryGiveItemAndFlag(LocationDefName,Flag)
 endmacro
 
 macro MClzIfHasFlute()
-  lda $0a02 : bit #$0008
+  lda $0a03 : bit #$0001   ; = flag $18
 endmacro
 
 incsrc "iogr_exit_ledger.asr"
@@ -6976,8 +6976,8 @@ cop #$CD : dw $013B
 cop #$DA : db $3B
 lda #$00A0 : sta $16
 lda #$2000 : trb $10
-%MTryGiveItemAndFlag("SeaPalCoffinItem", $18)    ; Surrogate flag $18 for this item.
-cop #$D0 : db $18,$00 : dw .CancelItemGet
+%MTryGiveItemAndFlag("SeaPalCoffinItem", $13)    ; Surrogate flag $13 for this item.
+cop #$D0 : db $13,$00 : dw .CancelItemGet
 cop #$DA : db $03
 lda #$CFF0 : tsb $065A
 cop #$84 : db $33, $04
@@ -10855,7 +10855,7 @@ stz $0bfc   ; Default to fast item-get text speed.
 lda #$2800 : trb $09ae
 jsl LR_MarkRoomRewardsObtainedByDifficulty
 lda.l Config_SettingFluteOpt : bne +
-  cop #$CC : db $13   ; Set "has Flute" flag if starting with flute
+  cop #$CC : db $18   ; Set "has Flute" flag if starting with flute
 +:
 if !SettingInfiniteInventory == 1
 cop #$CD : dw $09d0   ; tracker flag
