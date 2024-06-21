@@ -8383,6 +8383,15 @@ org $87c860
 db $cd : dl TextEuroNobodyExpects
 db $c0
 
+org $87c9ff
+; so5z commemorative tourney winner quote
+db $d3
+db "I'm telling you, man,",$cb
+db "one-Shroom-Drop Kress",$cb
+db "always works, I swear."
+db $c0
+warnpc $87ca65
+
 
 
 org $87CB95
