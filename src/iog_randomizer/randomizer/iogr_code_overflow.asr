@@ -55,124 +55,6 @@ jsr SR_MapMonsterItemFlagA
 jsl $80b4c8    ; i.e. 3+LR_ClearFlagA
 rtl
 
-if 0
-LR_GiveItemForFlagA:
-phx
-pha
-ldx #$0000
-.CheckNext:
-lda.l .LutAddrByFlag,x : cmp #$ffff : beq .DoneAllChecks
-  cmp $01,s : bne ..DoneThisCheck
-..TryGiveItem:
-    phx
-      lda.l 2+.LutAddrByFlag,x : tax
-      lda.l Config_BankAnchor&$ff0000,x : jsl LR_GiveAnyItemA16OrSec
-    plx
-    bcs .DoneAllChecks
-..DoneThisCheck:
-inx : inx : inx : inx : inx
-bra .CheckNext
-.DoneAllChecks:
-pla
-plx
-rtl
-.LutAddrByFlag:
-dw $00d7 : dl Config_CapeFisherItem
-dw $0035 : dl Config_CapeLolaItem
-dw $00d8 : dl Config_ECHiddenGuardItem
-dw $0046 : dl Config_ECBasementItem
-dw $0023 : dl Config_EDHamletItem
-dw $002d : dl Config_ItoryCaveItem
-dw $0048 : dl Config_MoonTribeCaveItem
-dw $00e0 : dl Config_IncaGoldShipItem
-dw $00e1 : dl Config_FrejEastSlaverItem
-dw $005a : dl Config_FrejSnitchItem
-dw $0053 : dl Config_FrejBin2Item
-dw $0054 : dl Config_FrejBin1Item
-dw $005e : dl Config_MineSamItem
-dw $005d : dl Config_MineMorgueItem
-dw $00d9 : dl Config_MineWallSlaveItem
-dw $0085 : dl Config_SeaPalBuffyItem
-dw $0013 : dl Config_SeaPalCoffinItem
-dw $0079 : dl Config_MuHopeStatue1Item
-dw $007f : dl Config_MuHopeStatue2Item
-dw $0095 : dl Config_WtrmRussianGlassItem
-dw $00e2 : dl Config_WtrmLanceItem
-dw $0098 : dl Config_GtWlNecklace1Item
-dw $0099 : dl Config_GtWlNecklace2Item
-dw $009a : dl Config_EuroAppleVendorItem
-dw $00f0 : dl Config_EuroShop1Item
-dw $00f1 : dl Config_EuroShop2Item
-dw $00e5 : dl Config_EuroAnnItem
-dw $00a6 : dl Config_EuroHiddenHouseItem
-dw $00e6 : dl Config_NativesGirlItem
-dw $00be : dl Config_WatSpiritItem
-dw $00ba : dl Config_WatGlassesItem
-dw $00e7 : dl Config_DaoSnakeGameItem
-dw $00b8 : dl Config_DaoEntrance1Item
-dw $00b8 : dl Config_DaoEntrance2Item
-dw $00c2 : dl Config_PyramidHiero1Item
-dw $00c3 : dl Config_PyramidHiero2Item
-dw $00c4 : dl Config_PyramidHiero3Item
-dw $00c5 : dl Config_PyramidHiero4Item
-dw $00c6 : dl Config_PyramidHiero5Item
-dw $00c7 : dl Config_PyramidHiero6Item
-dw $00e9 : dl Config_Jeweler1Item
-dw $00ea : dl Config_Jeweler2Item
-dw $00eb : dl Config_Jeweler3Item
-dw $00ec : dl Config_Jeweler4Item
-dw $00ed : dl Config_Jeweler5Item
-dw $00ee : dl Config_Jeweler6Item
-dw $00bd : dl Config_PyramidGaiaItem
-dw $00dc : dl Config_BabelForceFieldItem
-dw $0032 : dl Config_IncaCliffItem
-dw $00a2 : dl Config_MineCombatSlaveItem
-dw $00a3 : dl Config_MineRampSlaveItem
-dw $022f : dl Config_EDCageWormItem
-dw $0230 : dl Config_EDSoutheastWormItem
-dw $0231 : dl Config_EDSouthwestWormItem
-dw $0232 : dl Config_EDDoorBatItem
-dw $0233 : dl Config_EDDarkSpaceWormItem
-dw $0234 : dl Config_EDSkeleton1Item
-dw $0235 : dl Config_EDSkeleton2Item
-dw $0236 : dl Config_IncaWestLadderItem
-dw $0237 : dl Config_IncaSoutheastLadderItem
-dw $0238 : dl Config_IncaNortheastLadderItem
-dw $0239 : dl Config_IncaNSRampItem
-dw $023a : dl Config_IncaEWRampItem
-dw $023b : dl Config_IncaDBlockMonsterItem
-dw $023c : dl Config_IncaWMelodyMonsterItem
-dw $023d : dl Config_MineMidFenceItem
-dw $023e : dl Config_MineNorthFenceItem
-dw $023f : dl Config_MineSouthFenceItem
-dw $0240 : dl Config_MineWormCageItem
-dw $0241 : dl Config_MineWormDarkSpaceItem
-dw $0242 : dl Config_MineFriarFenceItem
-dw $0243 : dl Config_SGSETopBarrierItem
-dw $0244 : dl Config_SGSEBotBarrierItem
-dw $0245 : dl Config_SGSWTopPegGateItem
-dw $0246 : dl Config_SGSWTopRobotRampItem
-dw $0247 : dl Config_SGSWTopWormGateItem
-dw $0290 : dl Config_SGSWBotFireCageItem
-dw $0291 : dl Config_MuEntranceGolemItem
-dw $0292 : dl Config_MuDroplet1Item
-dw $0293 : dl Config_MuDroplet2Item
-dw $0294 : dl Config_MuSlimeCageItem
-dw $0295 : dl Config_MuEastFacingHeadGolemItem
-dw $0296 : dl Config_MuSouthFacingHeadGolemItem
-dw $0297 : dl Config_GtWlArcherItem
-dw $0298 : dl Config_GtWlFangerItem
-dw $0299 : dl Config_KressSkullShortcutItem
-dw $029a : dl Config_WatSouthScarabItem
-dw $029b : dl Config_WatEastSliderHoleItem
-dw $029c : dl Config_WatPitExitItem
-dw $029d : dl Config_WatDarkSpaceHallItem
-dw $029e : dl Config_PyramidEntranceOrbsItem
-dw $029f : dl Config_MansionEastGateItem
-dw $02a0 : dl Config_MansionWestGateItem
-dw $ffff
-endif
-
 ; Silently gives item A, stacking if appropriate.
 LR_GiveNormalItemA8OrSec:
 {
@@ -381,7 +263,7 @@ cmp #$008a : beq ...LightUpgrade
 cmp #$008b : beq ...DarkUpgrade
 cmp #$008e : beq ...HeartPiece
 ...Flute:
-cop #$CC : db $13
+cop #$CC : db $18
 jmp ..GotItem
 ...HeartPiece:
 php
