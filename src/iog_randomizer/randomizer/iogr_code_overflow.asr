@@ -3,6 +3,7 @@ hirom
 
 ; Reserved RAM (in addition to base game):
 ; $0aaa = number of stacked herbs
+; $0bea = number of deaths
 ; $0bec = number of stacked Hope Statues
 ; $0bee = number of stacked Rama Statues
 ; $0bf0 = number of stacked Mushroom Drops

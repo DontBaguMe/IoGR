@@ -5,14 +5,17 @@ bank noassume
 
 function BankOf(label) = label>>16
 
+!CrcItemAddrCount = 0
 macro MTryGiveItemAndFlag(LocationDefName,Flag)
   db $a9   ; = lda #
+#CrcItemAddr!{CrcItemAddrCount}:
 #Config_<LocationDefName>:
   dw !{<LocationDefName>}
   jsl LR_GiveAnyItemA16OrSec
   bcs $03
     cop #$CC
     db <Flag>
+!CrcItemAddrCount #= 1+!CrcItemAddrCount
 endmacro
 
 macro MClzIfHasFlute()
@@ -48,6 +51,12 @@ org $808244
 if !SettingDebug
 jmp $825c    ; Update HUD every frame.
 endif
+
+org $808286
+cop #$BD : dl Bg3_StatusEnemyHp    ; Needed because Bg3_StatusEnemyHp moved.
+
+org $8082af
+cop #$BD : dl Bg3_StatusEnemyHp    ; Needed because Bg3_StatusEnemyHp moved.
 
 ; Two bytes are optimized out of this routine, to align CopHandler_Pointers at $808485.
 org $808438
@@ -2596,26 +2605,41 @@ db $00
 warnpc $81e5ec
 
 org $81e7f6    ; HUD structure.
+Bg3_StatusBase:
 if !SettingDebug == 1
 db $01 : dw $0046
 db $03 : db $14
 db $02 : dl Bg3_DebugPositionTracker    ; Ref. x/y tracker.
+else
+db $01 : dw $0048 
+db $03 : db $14
+db $0c : db $01,02,$03,$04,$05 : db $ff 
+endif
 db $01 : dw $0084 
-db $03 : db $08 
+db $03 : db $08
 db $0A 
+db $03 : db $14
+db $01 : dw $006c
+db $0C : db $08,$09,$0A,$0B,$0C : db $FF   ; "ENEMY" moved here from below, to make HUDless maps work
 db $01 : dw $009C 
-db $03 : db $14 
 db $05 : db $01 : dw $0AD8 
 db $01 : dw $00A2 
 db $0e : dw $0AD6 
 db $00 
-endif
-warnpc $81e818
+
+Bg3_StatusEnemyHp:
+db $03 : db $04 
+db $01 : dw $00a8
+db $0B 
+db $00 
+warnpc $81e82b
 
 ; Updates to inv menus
 org $81e905
+if !SettingDsWarp == 1
 db "Warp"
 db $00
+endif
 
 org $81e919
 if !SettingInfiniteInventory == 1
@@ -2632,13 +2656,16 @@ endif
 warnpc $81e94c
 
 org $81ea39
+if !SettingDsWarp == 1
 db $03 : db $00 
 db $01 : dw $0584 
 db "Cond;",$0d
 db "Warp"
 db $00 
+endif
 
 org $81EA70
+if !SettingDsWarp == 1
 db $03 : db $00 
 db $01 : dw $0596 
 db "Your condition."
@@ -2647,6 +2674,7 @@ db "Press Attack to"
 db $0d 
 db "warp to Dark Space."
 db $00 
+endif
 warnpc $81eab4
 
 org $81ead1
@@ -3114,6 +3142,7 @@ nop : nop : nop : nop : nop : nop
 
 org $82e719
 EInvScreenManager_CondMenu:
+if !SettingDsWarp == 1
 jsr SR_SecIfCanDsWarpFromMenu : bcs +
   cop #$06 : db $12
   jmp $e40c   ; Return to main menu loop
@@ -3141,9 +3170,11 @@ jmp $e40c
 cop #$CF : dw $09c4
 jmp $e40c
 warnpc $82e7a3
+endif
 
 org $82e816
 EInvScreenManager_HoverCondLine:
+if !SettingDsWarp == 1
 jsr $EB45
 jsr $EB0B
 cop #$BD : dl $81E912   ; Clear the lower-right box
@@ -3151,6 +3182,7 @@ cop #$BD : dl $81E870   ; Draw the upper-left box
 jsr SR_DrawInvScreenTextForDsWarpState
 nop : nop
 ; The rest of this code goes as usual.
+endif
 
 
 if !SettingInfiniteInventory == 1
@@ -3188,6 +3220,15 @@ lda $0a1f : and #$7f : sta $0a1f
 bra $06
 endif
 
+org $82ee61
+; Fix a base-game bug where the inv screen clobbers $09ec.
+sep #$20
+jsl $8283e7   ; This loads map assets, which alters $09ec; thus restoring $09ec needs to come after it.
+plx : stx $09ec
+plx : stx $06e4
+
+org $82eeae
+cop #$BD : dl Bg3_StatusEnemyHp    ; Needed because Bg3_StatusEnemyHp moved.
 
 
 org $82f08c
@@ -5747,6 +5788,7 @@ db $10   ; Seth's house flag
 org $848a8c
 db $35 : dw $1000
 ECapeTeacher:
+lda #$4000 : tsb $09ec
 lda #$0200 : tsb $12
 cop #$C0 : dw .OnInteract
 cop #$0B
@@ -7692,8 +7734,13 @@ stz $00f4   ; Collected orbs
 stz $00f6   ; Total orbs
 stz $00f8   ; Visited Dark Spaces
 stz $00fa   ; Total Dark Spaces
+lda $26 : jsl LR_AddCollectionForAreaA
+cop #$BF : dw TextItemCounterDisplay
+rtl
+
+LR_AddCollectionForAreaA:
 phx
-lda $26 : asl : tax
+asl : tax
 lda.l Lut_TrackerItemFlagsByArea,x : tax
 .CountNextLowFlag:
 lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : and #$00ff : cmp #$00ff : beq ..DoneCountingLowFlags
@@ -7743,7 +7790,6 @@ inx
 bra .CountNextDarkSpace
 ..DoneCountingDarkSpaces:
 plx
-cop #$BF : dw TextItemCounterDisplay
 rtl
 
 SR_IncrementCollectedItems:
@@ -9511,7 +9557,7 @@ db $CA
 EGaia_TextOfferWarp:
 db $CE
 if !SettingDsWarp == 1
-db "Warp to a Dark Space?",$cb
+db "Warp to a Dark Space"
 else
 db "Return to "
 db $04 : dl TextStartDsNameInclude : dw $0bfa
@@ -10471,7 +10517,7 @@ db $c8
 db $ca
 }
 
-if !SettingInfiniteInventory == 1
+
 ; Main menu has 3 options (no Copy)
 org $8be2ff
 lda #$0002
@@ -10490,6 +10536,7 @@ rtl
 org $8be3b1   ; Ignore down input
 rtl
 
+if !SettingInfiniteInventory == 1
 org $8be3fe
 jsl LR_RestoreSaveFileWithInfiniteInventoryOrSec   ; replaces jsl $83d954
 endif
@@ -10527,7 +10574,6 @@ db $03
 org $8be855
 db $04
 
-if !SettingInfiniteInventory == 1
 org $8be905   ; Ignore up input on erase/option/copy file selects
 rtl
 org $8be91e   ; Ignore down input on erase/option/copy file selects
@@ -10536,7 +10582,7 @@ org $8bea86   ; Ignore up input on erase/option/copy file selects
 rtl
 org $8bea9f   ; Ignore down input on erase/option/copy file selects
 rtl
-endif
+
 
 org $8bee20
 EDebugWarper:
@@ -10663,7 +10709,6 @@ warnpc $8bf178
 
 
 table "table_dialogue.txt",rtl
-if !SettingInfiniteInventory == 1
 org $8bf3f4
 ; Main menu: no Copy option because there's only one save file
 db $C1 : db $06,$0A
@@ -10698,7 +10743,6 @@ db $ca
 org $8bf511
 ; No text for third save file (unnecessary?)
 db $ca
-endif
 
 org $8bf538
 Bg3_MenuChangeDiarySettings:
@@ -10886,13 +10930,13 @@ lda.l Config_SettingFluteOpt : bne +
 +:
 if !SettingInfiniteInventory == 1
 cop #$CD : dw $09d0   ; tracker flag
+endif
 ldx #$0000
 lda #$0000
 -:
 sta $306400,x
 inx : inx : cpx #$0400 : bcc -
 tdc : tax
-endif
 if !SettingDebug == 1
 lda #$0015 : sta $0ac6
   jsl LR_GiveNormalItemA8OrSec
