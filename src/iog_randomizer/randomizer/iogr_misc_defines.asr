@@ -473,6 +473,16 @@ SramTextBuffer:    ; For drawing complex dynamic text
 skip $100
 SramHardenedDataMarker:
 skip 2                  ; The value here will be nonzero and non-#$FFFF if there's hardened data
+SramIrqCounter:
+skip 1
+SramFrameCounter:    ; Counts all frames except title screens, resetting to 0 on new-game
+skip 3
+SramMainGoalFrame:   ; Nonzero and non-#$FFFF if the main goal (generally Dark Gaia) is achieved
+skip 3
+SramOtherGoalFrame:  ; Nonzero and non-#$FFFF if the alt goal (generally AG) is achieved
+skip 3
+SramKeyItemTimes:    ; Format: db ItemId : dw FrameHighWord, so may undercount up to 255 frames
+skip 3*16
 warnpc $306200
 
 

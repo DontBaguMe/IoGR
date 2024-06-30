@@ -86,43 +86,53 @@ lda #$f5ef : sta $1000
 lda #$008c : sta $1002
 stz $1008
 cop #$D0 : db $F4,$00 : dw .Return    ; Do nothing else if we're not starting in P3.
-lda $0aac : sta $0aaa   ; Restore herb stack (for herb-stacking variants).
-lda #$0000
 sep #$20
 stz $2141    ; Don't use crazy-fast music in P3.
-lda $0AAE : tax : beq .Return
-ldy #$000F
-.TryReduceHerbCounter:
-lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
-  dex : beq .Return
-..NotAnHerb:
-dey : bpl .TryReduceHerbCounter
-ldy #$000F
-.TryAddAnotherHerb:
-lda $0AB4,y : bne ..NotEmpty
-  lda #$06 : sta $0AB4,y
-  dex : beq .Return
-..NotEmpty:
-dey : bpl .TryAddAnotherHerb
+rep #$20
+; Restore the herb count, giving an herb item if needed.
+lda $0be8 : beq .Return
+lda $0aaa : bne +
+  lda #$0006 : jsl LR_GiveNormalItemA8OrSec
++:
+lda $0be8 : sta $0aaa
+;lda #$0000
+;sep #$20
+;stz $2141    ; Don't use crazy-fast music in P3.
+;lda $0AAE : tax : beq .Return
+;;;Herb stacking is standard now. Individually counting herbs is no longer needed.
+;ldy #$000F
+;.TryReduceHerbCounter:
+;lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
+;  dex : beq .Return
+;..NotAnHerb:
+;dey : bpl .TryReduceHerbCounter
+;ldy #$000F
+;.TryAddAnotherHerb:
+;lda $0AB4,y : bne ..NotEmpty
+;  lda #$06 : sta $0AB4,y
+;  dex : beq .Return
+;..NotEmpty:
+;dey : bpl .TryAddAnotherHerb
 .Return:
 rep #$20
 plx
 rtl
 
+; Herb-stacking is standard now. Counting herbs is no longer needed.
 LR_StorePlayerHerbCount:
-lda $0aaa : sta $0aac   ; Save herb stack (for herb-stacking variants).
-phx
-sep #$20
-ldx #$0000
-ldy #$000F
-.TryCountAnotherHerb:
-lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
-  inx
-..NotAnHerb:
-dey : bpl .TryCountAnotherHerb
-txa : sta $0AAE
-rep #$20
-plx
+lda $0aaa : sta $0be8
+;phx
+;sep #$20
+;ldx #$0000
+;ldy #$000F
+;.TryCountAnotherHerb:
+;lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
+;  inx
+;..NotAnHerb:
+;dey : bpl .TryCountAnotherHerb
+;txa : sta $0AAE
+;rep #$20
+;plx
 rtl
 
 ; Custom LongRoutine --> "Set Position Randomly in +/-.A"

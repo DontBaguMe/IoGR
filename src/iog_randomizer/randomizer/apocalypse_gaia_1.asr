@@ -988,6 +988,8 @@ cop #$C7 : dl EDGLightning_Chase_Immediate
 
 ; Final Core Death Pointer.
 .OnDeath:
+lda.l SramFrameCounter : sta.l SramOtherGoalFrame
+lda.l 1+SramFrameCounter : sta.l 1+SramOtherGoalFrame
 cop #$B7 : db $0E ; Palette.
 cop #$CC : db $07
 lda #$0001 : sta $26
