@@ -5,18 +5,21 @@ bank noassume
 
 function BankOf(label) = label>>16
 
+!CrcItemAddrCount = 0
 macro MTryGiveItemAndFlag(LocationDefName,Flag)
   db $a9   ; = lda #
+#CrcItemAddr!{CrcItemAddrCount}:
 #Config_<LocationDefName>:
   dw !{<LocationDefName>}
   jsl LR_GiveAnyItemA16OrSec
   bcs $03
     cop #$CC
     db <Flag>
+!CrcItemAddrCount #= 1+!CrcItemAddrCount
 endmacro
 
 macro MClzIfHasFlute()
-  lda $0a02 : bit #$0008
+  lda $0a03 : bit #$0001   ; = flag $18
 endmacro
 
 incsrc "iogr_exit_ledger.asr"
@@ -48,6 +51,33 @@ org $808244
 if !SettingDebug
 jmp $825c    ; Update HUD every frame.
 endif
+
+org $808286
+cop #$BD : dl Bg3_StatusEnemyHp    ; Needed because Bg3_StatusEnemyHp moved.
+
+org $8082af
+cop #$BD : dl Bg3_StatusEnemyHp    ; Needed because Bg3_StatusEnemyHp moved.
+
+; Now ticks the master frame counter by 1 + the number of IRQs since the last NMI.
+org $8082f8
+NmiHandler:
+phb
+rep #$20
+pha
+phx
+phy
+jsr SR_NmiSetDbrAndMasterFrameCounter
+inc $36
+sep #$20
+nop
+; then stz $420c as normal and the rest of the routine;
+; then at the end, don't inc $36 nor plp
+org $80837f
+ply
+plx
+pla
+plb
+rti
 
 ; Two bytes are optimized out of this routine, to align CopHandler_Pointers at $808485.
 org $808438
@@ -602,8 +632,51 @@ jmp $cdbb   ; i.e. jmp EStatueGetCutsceneStatue_CheckIsThisStatue
 warnpc $80ce93
 
 
-org $80d69d
-nop    ; There's no reason respawning with >100 DP should halve your health...
+; In EPlayer_Die, space optimizations to tick the death counter.
+org $80d68b
+phb
+sed
+  lda $0bea : clc : adc #$0001 : cmp #$0999 : bcc +
+    lda #$0999
++:
+  sta $0bea
+cld
+lda $0aca : sta $0ace    ; Always restore full HP (there's no reason to punish a 100-DP death)
+lda $0ad6 : sec : sbc.w #100 : bcc +
+  ; Died with 100 DP
+  sta $0ad6
+  ldy $0af4
+  lda $0af6
+  bra ++
++:    ; Died with less than 100 DP
+stz $0ad6
+stz $0ad4
+lda $0644 : cmp #$00e8 : bne +
+  lda #$0002 : sta $0ad4
++:
+lda #$0000 : tay
+-:
+sta $0a80,y
+iny : iny : cpy #$0020 : bne -
+ldy $0af0
+lda $0af2
+++:   ; = EPlayer_Die_ParseRespawnData
+sep #$20
+pha : plb
+lda $0000,y : sta $0642
+lda $0005,y : and #$7F : sta $0650
+rep #$20
+lda $0001,y : sta $064C
+lda $0003,y : sta $064E
+lda $0006,y : sta $0652
+plb
+lda #$0404 : sta $064A
+inc $0AF8
+stz $0654
+cop #$C1
+rtl
+warnpc $80d718
+
 
 org $80d796
 ERespawnMessage:
@@ -1052,10 +1125,39 @@ bra -
 lda #$1000
 rts
 
+IrqVector:
+jml IrqHandler
+IrqHandler:
+sep #$20
+pha
+lda $804211
+lda.l SramIrqCounter : inc : sta.l SramIrqCounter
+pla
+rti
+
+SR_NmiSetDbrAndMasterFrameCounter:
+{
+pea.w $8130
+plb
+sep #$20
+lda.w SramIrqCounter : inc : clc : adc.w SramFrameCounter : sta.w SramFrameCounter
+stz.w SramIrqCounter
+rep #$20
+lda.w 1+SramFrameCounter : adc #$0000 : bcc +
+  lda #$ffff
++:
+sta.w 1+SramFrameCounter
+plb
+rts
+}
+
 
 warnpc $80FFB0
-org $80ffd1
-db $52,$41,$4E,$44,$4F    ; Append "Rando" to ROM title
+org $80ffc0
+db "IOG Randomizer       "   ; "ILLUSION OF GAIA RANDO" is 1 letter too long
+
+org $80ffee
+dw IrqVector
 
 
 } ; end bank $80
@@ -2596,26 +2698,41 @@ db $00
 warnpc $81e5ec
 
 org $81e7f6    ; HUD structure.
+Bg3_StatusBase:
 if !SettingDebug == 1
 db $01 : dw $0046
 db $03 : db $14
 db $02 : dl Bg3_DebugPositionTracker    ; Ref. x/y tracker.
+else
+db $01 : dw $0048 
+db $03 : db $14
+db $0c : db $01,02,$03,$04,$05 : db $ff 
+endif
 db $01 : dw $0084 
-db $03 : db $08 
+db $03 : db $08
 db $0A 
+db $03 : db $14
+db $01 : dw $006c
+db $0C : db $08,$09,$0A,$0B,$0C : db $FF   ; "ENEMY" moved here from below, to make HUDless maps work
 db $01 : dw $009C 
-db $03 : db $14 
 db $05 : db $01 : dw $0AD8 
 db $01 : dw $00A2 
 db $0e : dw $0AD6 
 db $00 
-endif
-warnpc $81e818
+
+Bg3_StatusEnemyHp:
+db $03 : db $04 
+db $01 : dw $00a8
+db $0B 
+db $00 
+warnpc $81e82b
 
 ; Updates to inv menus
 org $81e905
+if !SettingDsWarp == 1
 db "Warp"
 db $00
+endif
 
 org $81e919
 if !SettingInfiniteInventory == 1
@@ -2632,13 +2749,16 @@ endif
 warnpc $81e94c
 
 org $81ea39
+if !SettingDsWarp == 1
 db $03 : db $00 
 db $01 : dw $0584 
 db "Cond;",$0d
 db "Warp"
 db $00 
+endif
 
 org $81EA70
+if !SettingDsWarp == 1
 db $03 : db $00 
 db $01 : dw $0596 
 db "Your condition."
@@ -2647,6 +2767,7 @@ db "Press Attack to"
 db $0d 
 db "warp to Dark Space."
 db $00 
+endif
 warnpc $81eab4
 
 org $81ead1
@@ -2706,6 +2827,9 @@ db $00
 ; Bank $82
 {
 
+org $8281a6
+lda #$31 : sta $804200   ; When disabling NMI, enable IRQs, so we can count frames
+
 
 ; Reduce cost of multiplication and division.
 org $8281D1
@@ -2735,6 +2859,12 @@ nop : nop : nop : nop ; filler
 }
 warnpc $8281FE
 
+org $82a02f
+; Default MMIO values; we set the frame-counting IRQ near the middle of line 224.
+dw $4207 : db 180
+dw $4208 : db 0
+dw $4209 : db 224
+dw $420a : db 0
 
 ; Removes 5 pointless nops.
 org $82a5e8
@@ -3114,6 +3244,7 @@ nop : nop : nop : nop : nop : nop
 
 org $82e719
 EInvScreenManager_CondMenu:
+if !SettingDsWarp == 1
 jsr SR_SecIfCanDsWarpFromMenu : bcs +
   cop #$06 : db $12
   jmp $e40c   ; Return to main menu loop
@@ -3141,9 +3272,11 @@ jmp $e40c
 cop #$CF : dw $09c4
 jmp $e40c
 warnpc $82e7a3
+endif
 
 org $82e816
 EInvScreenManager_HoverCondLine:
+if !SettingDsWarp == 1
 jsr $EB45
 jsr $EB0B
 cop #$BD : dl $81E912   ; Clear the lower-right box
@@ -3151,6 +3284,7 @@ cop #$BD : dl $81E870   ; Draw the upper-left box
 jsr SR_DrawInvScreenTextForDsWarpState
 nop : nop
 ; The rest of this code goes as usual.
+endif
 
 
 if !SettingInfiniteInventory == 1
@@ -3188,6 +3322,15 @@ lda $0a1f : and #$7f : sta $0a1f
 bra $06
 endif
 
+org $82ee61
+; Fix a base-game bug where the inv screen clobbers $09ec.
+sep #$20
+jsl $8283e7   ; This loads map assets, which alters $09ec; thus restoring $09ec needs to come after it.
+plx : stx $09ec
+plx : stx $06e4
+
+org $82eeae
+cop #$BD : dl Bg3_StatusEnemyHp    ; Needed because Bg3_StatusEnemyHp moved.
 
 
 org $82f08c
@@ -5211,6 +5354,33 @@ jsr SR_HalveAPerDef    ; Instead of sbc $0adc, halves damage per DEF instead of 
 endif
 
 
+; SetSpriteOrder and RenderActors read/write 512 bytes by setting S and running pla/pha respectively;
+; so effectively there's no stack, and we need to disable IRQs by cutting bytes to fit in a sei.
+org $83c69b   ; This is LR_SetSpriteOrder_AllActorsChecked, just before the stack games start.
+lda #$ffff : sta $0c00,y
+inc : tcd   ; reprobate's shortening of lda #$0000 : tcd
+nop
+sei
+; A cli isn't needed because the routine preserves P (via php - code - plp - rtl).
+
+org $83c736   ; This is near the top of LR_RenderActors, going into the stack games.
+{
+lda #$0004 : sta $0e
+sei
+tsc : sta $00
+lda #$0622 : sta $06
+dec : tcs   ; the above were all rearranged to make this 'dec' possible, freeing 2 bytes
+ldx #$0010
+lda #$E080
+-:
+pha : pha : pha : pha : pha : pha : pha : pha
+pha : pha : pha : pha : pha : pha : pha : pha
+dex : bne -
+lda $00 : tcs
+cli   ; Could leave sei, or pull the original i, but cli is probably best
+}
+warnpc $83c763
+
 
 org $83c849
 LR_WriteSpriteIfVisible:
@@ -5341,6 +5511,13 @@ rtl
 }
 warnpc $83CAF5
 
+
+org $83cffb
+jsr SR_MapVitalOffsetByDifficulty    ; Another monster stat lookup.
+
+org $83d003
+jsr SR_GetMonsterHpAtStatAddrY    ; jsr to lookup for new stat blocks
+
 org $83d0db
 ; Extensive modifications to this routine.
 SR_FixMapAndSecIfMonDead:
@@ -5390,13 +5567,6 @@ db $01,$02,$04,$08,$10,$20,$40,$80
 }
 warnpc $83d12d
 
-
-org $83cffb
-jsr SR_MapVitalOffsetByDifficulty    ; Another monster stat lookup.
-
-
-org $83d003
-jsr SR_GetMonsterHpAtStatAddrY    ; jsr to lookup for new stat blocks
 
 
 org $83e03a
@@ -5506,6 +5676,42 @@ if !SettingDebug == 1
 db $80   ; bcs -> bra in bg3 number draw, to not hide 10s in numbers
 endif
 
+; Fix BG3 script card $05 to draw hex digits A-F correctly
+org $83ed90
+lda $0000,y : clc : jsr SR_GetBg3CharForNibble
+org $83eda6
+lda $0000,y : sec : jsr SR_GetBg3CharForNibble : iny : nop : nop : nop : nop
+
+org $83edce
+lda #$30   ; In BG3 script card $05, draw leading zeroes as zeroes instead of dots
+
+org $83ef3e
+; Change BG3 card $09 to act like $0e (2-digit decimal number draw) but showing leading zeroes.
+SR_Bg3ScriptCard09:
+{
+phy
+lda $05,s : tax    ; DestTile.
+lda $099E : ora #$0030 : sta $0004    ; Tile mask, with base char ID of $30 = number 0.
+lda $0000,y : tay    ; y=ArgAddr -> y=Arg
+lda $0000,y          ; y=Arg -> y=(Arg)
+sec
+.RemoveHundreds:
+sbc.w #100 : bcs .RemoveHundreds
+adc.w #100
+stz $0000   ; Tens-counter.
+.CollectTens:
+inc $0000
+sec : sbc.w #10 : bcs .CollectTens
+.DrawOnesAndTens:
+adc.w #10 : ora $0004 : sta $7F0202,x
+lda $0000 : dec : ora $0004 : sta $7F0200,x
+.Done:
+inx : inx : inx : inx : txa : sta $05,s
+ply
+iny : iny
+rts
+}
+warnpc $83ef97
 
 org $83ef97
 LR_GiveItemAnchor:   ; Utility for cop #$D4 and other callers. Redirects to my custom handler.
@@ -5724,6 +5930,18 @@ dey : bne -
 .Done:
 ply
 iny
+rts
+
+; Used by BG3 script card $05 to fix drawing A-F.
+; Input byte in A; clc for low nibble, sec for high nibble.
+SR_GetBg3CharForNibble:
+bcc .LowNibble
+.HighNibble:
+lsr : lsr : lsr : lsr
+.LowNibble:
+and #$0f : ora #$30 : cmp #$3a : bcc .Done
+  clc : adc #$07
+.Done:
 rts
 }
 
@@ -6976,8 +7194,8 @@ cop #$CD : dw $013B
 cop #$DA : db $3B
 lda #$00A0 : sta $16
 lda #$2000 : trb $10
-%MTryGiveItemAndFlag("SeaPalCoffinItem", $18)    ; Surrogate flag $18 for this item.
-cop #$D0 : db $18,$00 : dw .CancelItemGet
+%MTryGiveItemAndFlag("SeaPalCoffinItem", $13)    ; Surrogate flag $13 for this item.
+cop #$D0 : db $13,$00 : dw .CancelItemGet
 cop #$DA : db $03
 lda #$CFF0 : tsb $065A
 cop #$84 : db $33, $04
@@ -7410,7 +7628,7 @@ db $C0
 ; db <monster orb numbers, $01 - $2A>
 ; db $ff
 ; db <DS indices; at time of writing these are offsets from flag $09a0>
-db $ff
+; db $ff
 Lut_TrackerItemFlagsByArea:
 .Pointers:
 {
@@ -7436,6 +7654,9 @@ dw .Ankr
 dw .Dao
 dw .Pymd
 dw .Babl
+dw .Mnsn
+dw .Jwlr   ; Artificial
+dw $ffff
 }
 {
 .Cape:
@@ -7613,6 +7834,19 @@ db $ff
 db $ff
 db $22,$23
 db $ff
+.Mnsn:
+db $ff
+db $2d
+db $ff
+db $29,$2a
+db $ff
+db $ff
+.Jwlr:
+db $e9,$ea,$eb,$ec,$ed,$ee
+db $ff
+db $ff
+db $ff
+db $ff
 }
 
 db $00 : dw $3000
@@ -7661,6 +7895,8 @@ inc $26
 cop #$45 : db $06,$0A,$08,$0C : dw .InSomeArea
 inc $26
 cop #$45 : db $1F,$1F,$21,$21 : dw .InSomeArea
+inc $26
+cop #$45 : db 26,4, 28,6 : dw .InSomeArea   ; Jeweler's Mansion
 .OutsideAreasClearFlags:
 cop #$CE : db $02
 .DoNothing:
@@ -7674,8 +7910,13 @@ stz $00f4   ; Collected orbs
 stz $00f6   ; Total orbs
 stz $00f8   ; Visited Dark Spaces
 stz $00fa   ; Total Dark Spaces
+lda $26 : jsl LR_AddCollectionForAreaA
+cop #$BF : dw TextItemCounterDisplay
+rtl
+
+LR_AddCollectionForAreaA:
 phx
-lda $26 : asl : tax
+asl : tax
 lda.l Lut_TrackerItemFlagsByArea,x : tax
 .CountNextLowFlag:
 lda.l Lut_TrackerItemFlagsByArea&$ff0000,x : and #$00ff : cmp #$00ff : beq ..DoneCountingLowFlags
@@ -7725,7 +7966,6 @@ inx
 bra .CountNextDarkSpace
 ..DoneCountingDarkSpaces:
 plx
-cop #$BF : dw TextItemCounterDisplay
 rtl
 
 SR_IncrementCollectedItems:
@@ -8365,6 +8605,15 @@ org $87c860
 db $cd : dl TextEuroNobodyExpects
 db $c0
 
+org $87c9ff
+; so5z commemorative tourney winner quote
+db $d3
+db "I'm telling you, man,",$cb
+db "one-Shroom-Drop Kress",$cb
+db "always works, I swear."
+db $c0
+warnpc $87ca65
+
 
 
 org $87CB95
@@ -8505,6 +8754,41 @@ Text_EuroSecretGotItemAlready:
 db $d3,$d6,$63,$86,$8e,$2a,$c0
 }
 
+; Refactored to be permanent. Otherwise, in IOGR,
+; the statue reappears if you open the inventory, because Euro's overlapping
+; VRAM asset cards (required by ER) force a reload of the tilemap.
+org $87e570
+EEuroChurchStatue:
+cop #$C0 : dw .OnInteract
+cop #$C1
+cop #$D0 : db $01, $01 : dw .DoOpenWall
+cop #$45 : db $0f,$07, $10,$09 : dw .WithWind
+.NoWind:
+cop #$CE : db $00
+rtl
+.WithWind:
+cop #$CC : db $00
+rtl
+.OnInteract:
+cop #$D3 : dw $0169 : db $00   ; No interaction if the statue's open.
+cop #$BF : dw $e5be
+cop #$BE : db 2,1 : dw ..Options
+..Options:
+dw ..ChooseNo
+dw ..ChooseYes, ..ChooseNo
+..ChooseYes:
+cop #$CC : db $01
+..ChooseNo:
+cop #$BF : dw $e602
+rtl
+.DoOpenWall:
+cop #$08 : db $01,$01
+cop #$32 : db $69
+cop #$33
+cop #$CD : dw $0169
+cop #$CE : db $01
+rtl
+warnpc $87e5be   ; Start of text.
 
 org $87e927
 ; Bank $87 free space begins here.
@@ -9393,7 +9677,7 @@ EGaia_OfferSave:
 cop #$BF : dw EGaia_TextOfferSave
 cop #$BE : db $02,$02 : dw .Options
 .Options:
-  dw .SayYes
+  dw EGaia_OfferWarp
   dw .SayYes, EGaia_OfferWarp
 .SayYes:
 lda $0D8C    ; Save file index.
@@ -9408,16 +9692,18 @@ lda #$FFF0 : trb $065A
 stz $0bfc   ; Restore default fast item-get text speed after the save routine uses this.
 cop #$BF : dw EGaia_TextFinishedRecording
 EGaia_OfferWarp:
+lda.w #!StartDsIndex : sta $0bfa
 cop #$BF : dw EGaia_TextOfferWarp
 cop #$BE : db $02,$01 : dw .Options
 .Options:
   dw .SayNo, .SayNo, .SayYes
 .SayYes:
-;stz $0ad4
-;jsl LR_ClearMonsterKilledFlags
-;cop #$26 : db !StartWarpString
-;cop #$C5
+if !SettingDsWarp == 1
 jml EGaia_DsWarpMainMenu
+else
+jsl LR_WarpToStart
+cop #$C5
+endif
 .SayNo:
 EGaia_ThenGo:
 cop #$BF : dw EGaia_TextThenGo
@@ -9446,10 +9732,13 @@ db $CF
 db $CA
 EGaia_TextOfferWarp:
 db $CE
-db "Warp to a Dark Space?",$cb
-;db "Return to "
-;db "!StartLocationName"
-;db "?",$CB    ; "?"
+if !SettingDsWarp == 1
+db "Warp to a Dark Space"
+else
+db "Return to "
+db $04 : dl TextStartDsNameInclude : dw $0bfa
+endif
+db "?",$CB
 db "_No",$CB
 db "_Yes"
 db $CA
@@ -10370,31 +10659,114 @@ nop : jsr SR_OverrideEndgameWithZeroHp   ; replacing cop #$BF : $d558
 
 ; Extensive text modifications to credits.
 {
-org $8bd566
-db $CB,$AC,$AC,$AC,$AC,$64,$87,$80,$8D,$8A,$A3,$AC,$80,$AC,$8C,$88,$8B,$8B,$88,$8E,$8D,$2A,$C9,$B4,$C8,$CA
+org $8bd558
+; Part 1 box 1 (player thanks)
+db $c1 : db 3,7
+db $c7 : db 13,2
+db $c2 : db $13
+db $d2 : db $00
+db $d5 : db 6
+db $AC,$AC,$AC,$AC,$64,$87,$80,$8D,$8A,$A3,$AC,$80,$AC,$8C,$88,$8B,$8B,$88,$8E,$8D,$2A,$C9,$B4,$C8,$CA
+warnpc $8bd5a0
+org $8bd5a0
+; Part 1 box 2 (GTC)
+db $c1 : db 3,7
+db $c7 : db 13,2
+db $c2 : db $15
+db $d2 : db $00
+db $d5 : db 6
+db $AC,$44,$A8,$A4,$A2,$80,$AC,$A3,$A0,$84,$82,$88,$80,$8B,$AC,$A4,$87,$80,$8D,$8A,$A3,$AC,$A4,$8E,$CB
+db $AC,$AC,$AC,$AC,$AC,$AC,$AC,$8C,$80,$8D,$80,$85,$A2,$84,$80,$8A,$C9,$78
+db $CE
+db $AC,$D6,$4E,$A0,$A2,$8E,$89,$84,$82,$A4,$AC,$D6,$F3,$8D,$8E,$A4,$CB
+db $AC,$AC,$84,$A8,$88,$A3,$A4,$AC,$D6,$F8,$87,$88,$A3,$AC,$A7,$8E,$A2,$8A,$2A,$C9,$78
+db $CE
+db $AC,$AC,$AC,$AC,$AC,$86,$80,$88,$80,$A4,$87,$84,$82,$A2,$84,$80,$A4,$8E,$A2,$CB
+db $AC,$AC,$AC,$AC,$AC,$AC,$2A,$81,$8B,$8E,$86,$A3,$A0,$8E,$A4,$2A,$82,$8E,$8C
+db $C9,$B4
+db $C8
+db $CA
+warnpc $8bd70e
+org $8bd70e
+; Part 1 box 3 (created by)
+db $c1 : db 3,7
+db $c7 : db 13,2
+db $c2 : db $14
+db $d2 : db $00
+db $d5 : db 6
+db $AC,$AC,$AC,$AC,$42,$A2,$84,$80,$A4,$84,$83,$AC,$81,$A9,$CB
+db $AC,$AC,$AC,$AC,$AC,$AC,$AC,$43,$8E,$8D,$A4,$41,$80,$86,$A5,$4C,$84
+db $C9,$B4
+db $C8
+db $CA
+warnpc $8bd740
+org $8bd740
+; Part 1 box 4 (devs + thanks playtesters)
+db $c1 : db 3,7
+db $c7 : db 13,3
+db $c2 : db $12
+db $ce
+db $d2 : db $00
+db $d5 : db 6
+db $AC,$43,$84,$A6,$A3,$2F,$AC,$62,$80,$84,$A6,$84,$8D,$20,$AB,$AC,$41,$A2,$A9,$8E,$8D,$AC,$67,$CB,$AC,$AC,$AC,$AC,$80,$8D,$83,$AC,$4D,$84,$8E,$8C,$80,$A4,$80,$8C,$A5,$8D,$84,$CB,$AC,$44,$8C,$8E,$64,$A2,$80,$82,$8A,$84,$A2,$AC,$81,$A9,$AC,$40,$A0,$8E,$8A,$80,$8B,$A9,$A3,$8C,$84,$C9,$78,$CE,$CB,$AC,$AC,$AC,$64,$87,$80,$8D,$8A,$A3,$AC,$A4,$8E,$AC,$80,$8B,$8B,$AC,$A4,$87,$84,$CB,$AC,$AC,$80,$8C,$80,$AA,$88,$8D,$86,$AC,$A0,$8B,$80,$A9,$A4,$84,$A3,$A4,$84,$A2,$A3,$4F,$C9,$B4,$C8,$CA
 
-org $8bd5ac
-db $CB,$AC,$44,$A8,$A4,$A2,$80,$AC,$A3,$A0,$84,$82,$88,$80,$8B,$AC,$A4,$87,$80,$8D,$8A,$A3,$AC,$A4,$8E,$CB,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$8C,$80,$8D,$80,$85,$A2,$84,$80,$8A,$C9,$78,$CE,$CB,$AC,$D6,$4E,$A0,$A2,$8E,$89,$84,$82,$A4,$AC,$D6,$F3,$8D,$8E,$A4,$CB,$AC,$AC,$84,$A8,$88,$A3,$A4,$AC,$D6,$F8,$87,$88,$A3,$AC,$A7,$8E,$A2,$8A,$2A,$C9,$78,$CE,$CB,$AC,$AC,$AC,$AC,$AC,$86,$80,$88,$80,$A4,$87,$84,$82,$A2,$84,$80,$A4,$8E,$A2,$CB,$AC,$AC,$AC,$AC,$AC,$AC,$2A,$81,$8B,$8E,$86,$A3,$A0,$8E,$A4,$2A,$82,$8E,$8C,$C9,$B4,$C8,$CA
+org $8bd9fa
+; Part 2 box 1 (player thanks)
+db $c1 : db 3,7
+db $c7 : db 13,1
+db $ce
+db $c2 : db $12
+db $d2 : db $00
+db $d5 : db 6
+db $AC,$AC,$AC,$64,$87,$80,$8D,$8A,$A3,$AC,$85,$8E,$A2,$AC,$A0,$8B,$80,$A9,$88,$8D,$86,$4F,$C9,$B4,$C8,$CA
 
-org $8bd71c
-db $AC,$AC,$AC,$AC,$42,$A2,$84,$80,$A4,$84,$83,$AC,$81,$A9,$CB,$AC,$AC,$AC,$AC,$AC,$AC,$AC,$43,$8E,$8D,$A4,$41,$80,$86,$A5,$4C,$84,$C9,$B4,$C8,$CA,$C1,$03,$04,$C7,$0D,$03,$D2,$00,$D5,$06,$CE,$C2,$12,$D2,$00,$AC,$43,$84,$A6,$A3,$2F,$AC,$62,$80,$84,$A6,$84,$8D,$20,$AB,$AC,$41,$A2,$A9,$8E,$8D,$AC,$67,$CB,$AC,$AC,$AC,$AC,$80,$8D,$83,$AC,$4D,$84,$8E,$8C,$80,$A4,$80,$8C,$A5,$8D,$84,$CB,$AC,$44,$8C,$8E,$64,$A2,$80,$82,$8A,$84,$A2,$AC,$81,$A9,$AC,$40,$A0,$8E,$8A,$80,$8B,$A9,$A3,$8C,$84,$C9,$78,$CE,$CB,$AC,$AC,$AC,$64,$87,$80,$8D,$8A,$A3,$AC,$A4,$8E,$AC,$80,$8B,$8B,$AC,$A4,$87,$84,$CB,$AC,$AC,$80,$8C,$80,$AA,$88,$8D,$86,$AC,$A0,$8B,$80,$A9,$A4,$84,$A3,$A4,$84,$A2,$A3,$4F,$C9,$B4,$C8,$CA
-
-org $8bda09
-db $CB,$AC,$AC,$AC,$64,$87,$80,$8D,$8A,$A3,$AC,$85,$8E,$A2,$AC,$A0,$8B,$80,$A9,$88,$8D,$86,$4F,$C9,$B4,$C8,$CA
-
-org $8bdca5
+org $8bdc95
+; Part 2 box 2 (hamlet)
+db $c1 : db 3,7
+db $c7 : db 13,3
+db $c2 : db $13
+db $d2 : db $00
+db $d5 : db 6
+db $d6 : db $25    ; "Kara: "
 db $D7,$42,$80,$AC,$8C,$88,$8D,$A5,$A4,$84,$2A,$2A,$2A,$CB,$D6,$F7,$D6,$9D,$A4,$8E,$AC,$47,$80,$8C,$8B,$84,$A4,$0D,$C9,$B4,$C8,$CA
-
-org $8bdd48
+warnpc $8bdd34
+org $8bdd34
+; Part 2 box 3 (hamlet response)
+db $c1 : db 3,7
+db $c7 : db 13,3
+db $c2 : db $12
+db $d2 : db $00
+db $d5 : db 6
+db "Will: "
 db $65,$8C,$2A,$2A,$2A,$CB,$48,$AC,$D6,$FB,$A7,$8E,$A2,$A2,$A9,$AC,$80,$81,$8E,$A5,$A4,$CB,$D6,$D7,$A4,$8E,$8E,$AC,$8C,$A5,$82,$87,$2A,$2A,$2A,$C9,$B4,$C8,$CA
-
-org $8bddf6
+warnpc $8bdde5
+org $8bdde5
+; Part 2 box 4 (hamlet 3)
+db $c1 : db 3,7
+db $c7 : db 13,3
+db $c2 : db $13
+db $d2 : db $00
+db $d5 : db 6
+db $d6 : db $25    ; "Kara: "
+db $cb
 db $D6,$63,$81,$A5,$A4,$2A,$2A,$2A,$C9,$B4,$C8,$CA
-
-org $8bde16
-db $63,$87,$87,$2A,$2A,$2A,$AC,$87,$84,$A2,$84,$AB,$CB,$D6,$98,$D6,$D0,$81,$80,$82,$8E,$8D,$2A,$C9,$B4,$C8,$CA
+warnpc $8bde02
+org $8bde02
+; Part 2 box 5 (bacon)
+db $c1 : db 3,7
+db $c7 : db 13,2
+db $c2 : db $12
+db $d2 : db $00
+db $d5 : db 6
+db "Will: "
+db $63,$87,$87,$2A,$2A,$2A,$AC,$87,$84,$A2,$84,$AB,$CB
+db $D6,$98,$D6,$D0,$81,$80,$82,$8E,$8D,$2A
+db $C9,$B4
+db $C8
+db $CA
 
 org $8bdee2
+; changing-world screen dialogue
 db $CB,$AC,$D6,$53,$88,$A4,$AB,$AC,$A3,$87,$8E,$A7,$0E,$A3,$AC,$8E,$A6,$84,$A2,$2A,$C9,$B4,$C8,$CA
 
 org $8be075
@@ -10404,7 +10776,7 @@ db $c8
 db $ca
 }
 
-if !SettingInfiniteInventory == 1
+
 ; Main menu has 3 options (no Copy)
 org $8be2ff
 lda #$0002
@@ -10423,9 +10795,14 @@ rtl
 org $8be3b1   ; Ignore down input
 rtl
 
+if !SettingInfiniteInventory == 1
 org $8be3fe
 jsl LR_RestoreSaveFileWithInfiniteInventoryOrSec   ; replaces jsl $83d954
 endif
+
+org $8be42b
+; Replacing lda #$2800 : trb $09ae when resuming a saved game
+jsr SR_SetGameStartCliAndEngineFlags : nop : nop : nop
 
 ; Replace sound type selection with difficulty selection.
 org $8be43f
@@ -10460,7 +10837,6 @@ db $03
 org $8be855
 db $04
 
-if !SettingInfiniteInventory == 1
 org $8be905   ; Ignore up input on erase/option/copy file selects
 rtl
 org $8be91e   ; Ignore down input on erase/option/copy file selects
@@ -10469,7 +10845,7 @@ org $8bea86   ; Ignore up input on erase/option/copy file selects
 rtl
 org $8bea9f   ; Ignore down input on erase/option/copy file selects
 rtl
-endif
+
 
 org $8bee20
 EDebugWarper:
@@ -10596,7 +10972,6 @@ warnpc $8bf178
 
 
 table "table_dialogue.txt",rtl
-if !SettingInfiniteInventory == 1
 org $8bf3f4
 ; Main menu: no Copy option because there's only one save file
 db $C1 : db $06,$0A
@@ -10631,7 +11006,6 @@ db $ca
 org $8bf511
 ; No text for third save file (unnecessary?)
 db $ca
-endif
 
 org $8bf538
 Bg3_MenuChangeDiarySettings:
@@ -10712,8 +11086,9 @@ TextDifficultyLevel3:
 db "Expert______",$ca
 
 ; Game flag initialization.
-{
 EIogrGameInitFlagSetter:
+{
+jsr SR_SetGameStartCliAndEngineFlags
 ; Copy game settings into RAM for the autotracker.
 sep #$20
 lda.l Config_HieroOrder1 : sta $0a58
@@ -10812,20 +11187,19 @@ lda.l Config_KaraLocation : cmp #$0002 : bne +
   cop #$CC : db $F4
 +:
 stz $0bfc   ; Default to fast item-get text speed.
-lda #$2800 : trb $09ae
 jsl LR_MarkRoomRewardsObtainedByDifficulty
 lda.l Config_SettingFluteOpt : bne +
-  cop #$CC : db $13   ; Set "has Flute" flag if starting with flute
+  cop #$CC : db $18   ; Set "has Flute" flag if starting with flute
 +:
 if !SettingInfiniteInventory == 1
 cop #$CD : dw $09d0   ; tracker flag
-ldx #$0000
+endif
+ldx #$0002
 lda #$0000
 -:
-sta $306400,x
-inx : inx : cpx #$0400 : bcc -
+sta $306000,x
+inx : inx : cpx #$0800 : bcc -
 tdc : tax
-endif
 if !SettingDebug == 1
 lda #$0015 : sta $0ac6
   jsl LR_GiveNormalItemA8OrSec
@@ -10842,9 +11216,10 @@ pla
 cop #$BF : dw .TextForWinning
 cop #$C1
 rtl
-.TextForWinning:    ; this was encoded by hand and I think I'll leave it that way
-db $C1 : db $03,$04
-db $C7 : db $0D,$03
+.TextForWinning:
+{
+db $C1 : db 3,7
+db $C7 : db 13,3
 db $C2 : db $13
 db $D2 : db $00
 db $D5 : db $06
@@ -10910,6 +11285,18 @@ db $69,$84,$A3,$2A,$AC,$69,$84,$A3,$AC,$48,$AC,$83,$88,$83,$2A
 db $C9 : db $B4
 db $C8
 db $CA
+}
+
+SR_SetGameStartCliAndEngineFlags:
+{
+php
+sep #$20
+lda $01fc : and #%11111011 : sta $01fc   ; i.e. cli in the top-level stored P flags
+rep #$20
+lda #$2800 : trb $09ae   ; run when starting or resuming a game
+plp
+rts
+}
 
 }
 
@@ -11036,12 +11423,12 @@ rtl
 }
 
 ; In final death.
-; This places a colorful tinge over all BGs including BG3.
+; This places a colorful tinge over BG1+BG2.
 .DGDead:
 {
 jsl LR_ClearCache
 lda #$0017 : sta $212C ; enable obj,BG1-3 on main; nothing on sub
-lda #$3F80 : sta $2130 ; cmath=fixed,everywhere,zeroed first in window; cmath=add, all layers
+lda #$3b80 : sta $2130 ; cmath=fixed,all-but-BG3,zeroed first in window; cmath=add, all layers
 sep #$20
 stz $2125 ; disable windows all layers
 lda #$18 : sta $2108 ; BG2 tilemap addr
@@ -11190,6 +11577,7 @@ cop #$CB
 cop #$E0
 
 ECometDeath:
+cop #$9C : dl EGameStatsDisplay : dw $2000
 cop #$CC : db $03
 lda #$2300 : tsb $10
 phx
@@ -11311,7 +11699,7 @@ cop #$DB : dw $012B
 jmp EDarkGaia_Main
 
 .OnDeath:
-lda #$0030 : tsb $0A00
+jsr SR_LogDarkGaiaCompletionTimeAndTempFlags
 jsl LR_SetPlayerImmuneAndFrozen
 jsl LR_StorePlayerHerbCount
 cop #$A0 : dl EDarkGaiaDeathExplosionSpawner : dw $0080,$0170,$2300
@@ -11335,7 +11723,6 @@ cop #$DA : db $FF
 lda #$0018 : trb $0A00
 cop #$07 : db $0C
 cop #$80 : db $1F
-
 cop #$9C : dl EAGBackgroundColors : dw $2300
 cop #$9C : dl EAGSpriteColors : dw $2300
 cop #$A1 : dl EAGScrollOn : dw $2300
@@ -11686,6 +12073,21 @@ cop #$E0
 endif
 warnpc $8cf5ef
 
+; Just one change to EDarkGaia_OnDeath if it's a normal DG
+if !ApocalypseGaia == 0
+org $8cf154
+jsr SR_LogDarkGaiaCompletionTimeAndTempFlags
+endif
+
+org $8cf61f
+SR_LogDarkGaiaCompletionTimeAndTempFlags:
+lda.l SramFrameCounter : sta.l SramMainGoalFrame
+lda.l 1+SramFrameCounter : sta.l 1+SramMainGoalFrame
+cop #$CC : db $04
+cop #$CC : db $05
+rts
+
+
 }
 
 
@@ -11776,6 +12178,11 @@ db $01,$03,$00,$03,$00,$02,$0C
 db $01,$00,$00,$00,$00,$02,$0C
 
 
+; Bank $93 / $D3
+org $d35e19
+db 4,4
+incbin "ATlMpWorldMap_Tilemap1_comp.bin"   ; Add Mansion to world map for in-game collection tracker
+warnpc $D36808
 
 
 ; Bank $9A / $DA 

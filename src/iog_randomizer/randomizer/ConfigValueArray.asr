@@ -135,6 +135,8 @@ dw $0000, $0000
 %MAddConfigAddr("SettingBossShuffle",0)
 %MAddConfigAddr("SettingDungeonShuffle",0)
 
+EndAnchor:
+
 namespace off
 
 

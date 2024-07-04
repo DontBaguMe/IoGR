@@ -406,9 +406,7 @@ db $05,$0B,$02 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $11,$11,$00 : dl $80EA96 : db $00
 db $08,$08,$00 : dl $848A8C : db $00
-;db $07,$0B,$00 : dl $848D21 : db $00    ; School friends
-;db $0B,$0B,$00 : dl $848D6E : db $00    ; School friends
-;db $09,$0B,$00 : dl $848D95 : db $00    ; School friends
+db $00,$00,$00 : dl EGameStatsDisplay-3 : db $00
 db $00,$00,$00 : dl EMonsterRespawner-3 : db $00
 db $FF,$63,$82,$87,$8E,$8E,$8B,$CA 
 
@@ -2615,11 +2613,13 @@ ActorList_Map8C:
 db $00,$01,$00 : dl $8BCA02 : db $00
 db $00,$01,$00 : dl $8BCE79 : db $00
 db $00,$01,$00 : dl $8BC9BD : db $00
+db $00,$00,$00 : dl EInGameTimeStopper-3 : db $00
 db $FF,$CA 
 
 ActorList_Map8D:
 db $00,$01,$00 : dl $8BCB4E : db $00
 db $00,$01,$00 : dl $8BC9BD : db $00
+db $00,$00,$00 : dl EInGameTimeStopper-3 : db $00
 db $FF,$CA 
 
 ActorList_Map8E:
@@ -2628,11 +2628,13 @@ db $00,$00,$00 : dl $80EAED : db $00
 db $00,$12,$00 : dl $80EA96 : db $00
 db $00,$01,$00 : dl $8BCD4B : db $00
 db $00,$01,$00 : dl $8BC9BD : db $00
+db $00,$00,$00 : dl EInGameTimeStopper-3 : db $00
 db $FF,$CA 
 
 ActorList_Map8F:
 db $00,$01,$00 : dl $8BCE33 : db $00
 db $00,$01,$00 : dl $8BC9BD : db $00
+db $00,$00,$00 : dl EInGameTimeStopper-3 : db $00
 db $FF,$CA 
 
 ActorList_Map90:
@@ -3989,6 +3991,7 @@ ActorList_MapE5:
 db $09,$0B,$32 : dl $82C38C : db $00
 db $00,$00,$00 : dl $80EAED : db $00
 db $07,$0B,$30 : dl $8BD306 : db $00
+db $00,$00,$00 : dl EGameStatsDisplay-3 : db $00
 db $FF,$CA 
 
 ActorList_MapF7:
@@ -4155,15 +4158,18 @@ db $FF,$CA
 
 ActorList_MapFA:
 db $00,$01,$00 : dl $8be237 : db $00
+db $00,$00,$00 : dl EInGameTimeStopper-3 : db $00
 db $FF,$CA 
 
 ActorList_MapFB:
 db $07,$08,$01 : dl $8BC8BA : db $00
+db $00,$00,$00 : dl EInGameTimeStopper-3 : db $00
 db $FF,$CA 
 
 ActorList_MapFC:
 db $00,$01,$00 : dl $8BC924 : db $00
 db $00,$01,$00 : dl $8BC9AE : db $00
+db $00,$00,$00 : dl EInGameTimeStopper-3 : db $00
 db $FF,$CA 
 
 ActorList_MapFD:

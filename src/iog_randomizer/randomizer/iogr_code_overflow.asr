@@ -3,6 +3,8 @@ hirom
 
 ; Reserved RAM (in addition to base game):
 ; $0aaa = number of stacked herbs
+; $0be8 = stored herb count for AG
+; $0bea = number of deaths (BCD)
 ; $0bec = number of stacked Hope Statues
 ; $0bee = number of stacked Rama Statues
 ; $0bf0 = number of stacked Mushroom Drops
@@ -55,124 +57,6 @@ jsr SR_MapMonsterItemFlagA
 jsl $80b4c8    ; i.e. 3+LR_ClearFlagA
 rtl
 
-if 0
-LR_GiveItemForFlagA:
-phx
-pha
-ldx #$0000
-.CheckNext:
-lda.l .LutAddrByFlag,x : cmp #$ffff : beq .DoneAllChecks
-  cmp $01,s : bne ..DoneThisCheck
-..TryGiveItem:
-    phx
-      lda.l 2+.LutAddrByFlag,x : tax
-      lda.l Config_BankAnchor&$ff0000,x : jsl LR_GiveAnyItemA16OrSec
-    plx
-    bcs .DoneAllChecks
-..DoneThisCheck:
-inx : inx : inx : inx : inx
-bra .CheckNext
-.DoneAllChecks:
-pla
-plx
-rtl
-.LutAddrByFlag:
-dw $00d7 : dl Config_CapeFisherItem
-dw $0035 : dl Config_CapeLolaItem
-dw $00d8 : dl Config_ECHiddenGuardItem
-dw $0046 : dl Config_ECBasementItem
-dw $0023 : dl Config_EDHamletItem
-dw $002d : dl Config_ItoryCaveItem
-dw $0048 : dl Config_MoonTribeCaveItem
-dw $00e0 : dl Config_IncaGoldShipItem
-dw $00e1 : dl Config_FrejEastSlaverItem
-dw $005a : dl Config_FrejSnitchItem
-dw $0053 : dl Config_FrejBin2Item
-dw $0054 : dl Config_FrejBin1Item
-dw $005e : dl Config_MineSamItem
-dw $005d : dl Config_MineMorgueItem
-dw $00d9 : dl Config_MineWallSlaveItem
-dw $0085 : dl Config_SeaPalBuffyItem
-dw $0013 : dl Config_SeaPalCoffinItem
-dw $0079 : dl Config_MuHopeStatue1Item
-dw $007f : dl Config_MuHopeStatue2Item
-dw $0095 : dl Config_WtrmRussianGlassItem
-dw $00e2 : dl Config_WtrmLanceItem
-dw $0098 : dl Config_GtWlNecklace1Item
-dw $0099 : dl Config_GtWlNecklace2Item
-dw $009a : dl Config_EuroAppleVendorItem
-dw $00f0 : dl Config_EuroShop1Item
-dw $00f1 : dl Config_EuroShop2Item
-dw $00e5 : dl Config_EuroAnnItem
-dw $00a6 : dl Config_EuroHiddenHouseItem
-dw $00e6 : dl Config_NativesGirlItem
-dw $00be : dl Config_WatSpiritItem
-dw $00ba : dl Config_WatGlassesItem
-dw $00e7 : dl Config_DaoSnakeGameItem
-dw $00b8 : dl Config_DaoEntrance1Item
-dw $00b8 : dl Config_DaoEntrance2Item
-dw $00c2 : dl Config_PyramidHiero1Item
-dw $00c3 : dl Config_PyramidHiero2Item
-dw $00c4 : dl Config_PyramidHiero3Item
-dw $00c5 : dl Config_PyramidHiero4Item
-dw $00c6 : dl Config_PyramidHiero5Item
-dw $00c7 : dl Config_PyramidHiero6Item
-dw $00e9 : dl Config_Jeweler1Item
-dw $00ea : dl Config_Jeweler2Item
-dw $00eb : dl Config_Jeweler3Item
-dw $00ec : dl Config_Jeweler4Item
-dw $00ed : dl Config_Jeweler5Item
-dw $00ee : dl Config_Jeweler6Item
-dw $00bd : dl Config_PyramidGaiaItem
-dw $00dc : dl Config_BabelForceFieldItem
-dw $0032 : dl Config_IncaCliffItem
-dw $00a2 : dl Config_MineCombatSlaveItem
-dw $00a3 : dl Config_MineRampSlaveItem
-dw $022f : dl Config_EDCageWormItem
-dw $0230 : dl Config_EDSoutheastWormItem
-dw $0231 : dl Config_EDSouthwestWormItem
-dw $0232 : dl Config_EDDoorBatItem
-dw $0233 : dl Config_EDDarkSpaceWormItem
-dw $0234 : dl Config_EDSkeleton1Item
-dw $0235 : dl Config_EDSkeleton2Item
-dw $0236 : dl Config_IncaWestLadderItem
-dw $0237 : dl Config_IncaSoutheastLadderItem
-dw $0238 : dl Config_IncaNortheastLadderItem
-dw $0239 : dl Config_IncaNSRampItem
-dw $023a : dl Config_IncaEWRampItem
-dw $023b : dl Config_IncaDBlockMonsterItem
-dw $023c : dl Config_IncaWMelodyMonsterItem
-dw $023d : dl Config_MineMidFenceItem
-dw $023e : dl Config_MineNorthFenceItem
-dw $023f : dl Config_MineSouthFenceItem
-dw $0240 : dl Config_MineWormCageItem
-dw $0241 : dl Config_MineWormDarkSpaceItem
-dw $0242 : dl Config_MineFriarFenceItem
-dw $0243 : dl Config_SGSETopBarrierItem
-dw $0244 : dl Config_SGSEBotBarrierItem
-dw $0245 : dl Config_SGSWTopPegGateItem
-dw $0246 : dl Config_SGSWTopRobotRampItem
-dw $0247 : dl Config_SGSWTopWormGateItem
-dw $0290 : dl Config_SGSWBotFireCageItem
-dw $0291 : dl Config_MuEntranceGolemItem
-dw $0292 : dl Config_MuDroplet1Item
-dw $0293 : dl Config_MuDroplet2Item
-dw $0294 : dl Config_MuSlimeCageItem
-dw $0295 : dl Config_MuEastFacingHeadGolemItem
-dw $0296 : dl Config_MuSouthFacingHeadGolemItem
-dw $0297 : dl Config_GtWlArcherItem
-dw $0298 : dl Config_GtWlFangerItem
-dw $0299 : dl Config_KressSkullShortcutItem
-dw $029a : dl Config_WatSouthScarabItem
-dw $029b : dl Config_WatEastSliderHoleItem
-dw $029c : dl Config_WatPitExitItem
-dw $029d : dl Config_WatDarkSpaceHallItem
-dw $029e : dl Config_PyramidEntranceOrbsItem
-dw $029f : dl Config_MansionEastGateItem
-dw $02a0 : dl Config_MansionWestGateItem
-dw $ffff
-endif
-
 ; Silently gives item A, stacking if appropriate.
 LR_GiveNormalItemA8OrSec:
 {
@@ -202,6 +86,8 @@ ldy #$FF1F
 jmp .ClcAndReturn
 
 .IsStatOrPickup:
+sta $0db8
+stz $0db9
 sec : sbc #$80 : bne +
     jmp .IsHpJewel   ; $80
 +:
@@ -349,11 +235,15 @@ lda $01,s : and #$00ff : cmp #$0080 : bcc +
   sec : sbc #$0087
   clc : adc #$0029
 +:
-sta $0db8
-lda $01,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
+pha ;sta $0db8
+lda $03,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
 ..IsNotSpecial:
-lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
+lda $03,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
+bra ..GotItemSkipTiming   ; the 8-bit item giver will handle timing if needed
 ..GotItem:
+lda $03,s : jsr SR_MaybeLogTimeOfItemGet
+..GotItemSkipTiming:
+pla : sta $0db8
 jsr SR_SetTextForItem
 cop #$BF : dw .TextMaybeGotItem
 stz $0db8
@@ -364,6 +254,7 @@ clc
 rtl
 ..InvFull:
 lda #$0001 : sta $0bfa   ; your inv full
+pla : sta $0db8
 cop #$BF : dw .TextMaybeGotItem
 stz $0db8
 stz $0bfc
@@ -372,16 +263,16 @@ pla
 sec
 rtl
 ..IsSpecial:    ; Handling for upgrades, duplicate stat items, and Heart Pieces.
-lda $01,s : cmp #$008a : bcs ..IsNotStatUpgrade
+lda $03,s : cmp #$008a : bcs ..IsNotStatUpgrade
 ..IsStatUpgrade:
 jsl LR_GiveNormalItemA8OrSec
-bra ..GotItem
+bra ..GotItemSkipTiming
 ..IsNotStatUpgrade:
 cmp #$008a : beq ...LightUpgrade
 cmp #$008b : beq ...DarkUpgrade
 cmp #$008e : beq ...HeartPiece
 ...Flute:
-cop #$CC : db $13
+cop #$CC : db $18
 jmp ..GotItem
 ...HeartPiece:
 php
@@ -395,7 +286,7 @@ eor #$80 : sta $0a1e
 ....DoGiveHp:
 plp
 lda #$0080 : jsl LR_GiveNormalItemA8OrSec
-jmp ..GotItem
+jmp ..GotItemSkipTiming
 ....NoGiveHp:
 plp
 jmp ..GotItem
@@ -407,8 +298,7 @@ inc $0b1c
 jmp ..GotItem
 
 .GiveUnlockedDoor:
-pla : and #$00ff
-pha
+lda $01,s : and #$00ff : pha
 jsl $80b4e0    ; jsl LR_SetFlag10A
 lda $01,s : asl : asl : asl : tay
 lda $d3ce,y : and #$00ff : cmp $0644 : bne ..PostThisMapCheck
@@ -417,24 +307,28 @@ lda $d3ce,y : and #$00ff : cmp $0644 : bne ..PostThisMapCheck
 ..PostThisMapCheck:
 pla : sta $0db8
 cop #$BF : dw ..Text
-clc
-rtl
+bra .GaveItemConsiderLoggingTime
 ..Text:
 db $cd : dl .TextItsADoor
 db $c0
 
 .GiveAbility:   ; Flags $0510-2 for Will, $0514-6 for Freedan
-pla : and #$00ff : sta $0db8
+lda $01,s : and #$00ff : sta $0db8
 cmp #$0003 : bcc +
   inc   ; So "items" 3-5 map to flags ..4-6
 +:
 clc : adc #$0510 : jsl LR_SetAnyFlagA
 cop #$BF : dw ..Text
-clc
-rtl
+bra .GaveItemConsiderLoggingTime
 ..Text:
 db $cd : dl .TextAbilityCanNowBeUsed
 db $ca   ; not $c0 here, because we're clumsily including a $c0 upstream
+
+.GaveItemConsiderLoggingTime:
+pla : jsr SR_MaybeLogTimeOfItemGet
+.ClcAndReturn:
+clc
+rtl
 
 .TextMaybeGotItem:
 db $cd : dl .TextItsAnItem
@@ -466,6 +360,7 @@ db $ca
 ; Set flags etc. as appropriate for the item. Hopefully move some of the above code into here later.
 SR_SetDataForItem:
 {
+lda $0db8 : jsr SR_MaybeLogTimeOfItemGet
 lda $0db8 : cmp #$0024 : beq .GotAura
 rts
 .GotAura:
@@ -2301,7 +2196,7 @@ db $30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$3A,$3B,$3C,$49   ; Freejia, Neil's
 db $5a,$5b,$5c,$5d,$5e,$63   ; Sea Palace, Hope Room
 db $67,$f4   ; Vamps due to lightning orb
 db $69,$6A,$6B,$6C   ; Angel Village
-;db $75   ; Angel Dungeon puzzle rooms
+db $75   ; Angel Dungeon puzzle rooms
 db $78,$79,$7A,$7B,$7C,$7D,$7E,$7F   ; Watermia
 db $91,$92,$93,$94,$95,$96,$97,$98,$99,$9a,$9b,$9c,$9d   ; Euro
 db $ac,$ad,$ae   ; Natives'
@@ -2576,10 +2471,10 @@ plx
 rtl
 
 LR_WarpToDsIndexA:
-clc
-jsr SR_WarpToDsIndexA
-rtl
-
+;clc
+;jsr SR_WarpToDsIndexA
+;rtl
+;
 LR_WarpToDsIndexAWithForceSetDeathWarp:
 sec
 jsr SR_WarpToDsIndexA
@@ -2609,7 +2504,7 @@ lda.w #BankOf(TableDsMapSpawnData) : sta $0af2
 bra .Done
 
 LR_WarpToStart:
-if !StartAtWarpLocation == 1
+if !StartAtWarpLocation == 1 || !SettingDsWarp == 0
 lda.w #!StartDsIndex : sta $0bf6
   jsl LR_WarpToDsIndexAWithForceSetDeathWarp
 else
@@ -2701,7 +2596,6 @@ db !DkSpPyramidBotType
 db !DkSpBabelBotType
 db !DkSpBabelTopType
 }
-
 
 
 macro MDsWarpTextRedIfNotVisited(DsIndex)
@@ -3649,7 +3543,395 @@ plx
 rtl
 }
 
+; Input the 16-bit item ID in A.
+SR_MaybeLogTimeOfItemGet:
+{
+phx
+pha
+; Check whether we log this item, adapting the item ID if appropriate.
+ldx #$0000
+cmp #$1101 : beq .AdjustAbilityId   ; Slider
+cmp #$1102 : beq .AdjustAbilityId   ; SpinDash
+cmp #$1103 : beq .AdjustAbilityId   ; Friar
+cmp #$0026 : bcs .Done   ; No higher items are logged
+bra .CheckItemName
+.AdjustAbilityId:
+pla : and #$00ff : clc : adc #$0025 : pha
+.CheckItemName:
+asl : tax
+lda.l TextBg3ItemAbbreviationsForTiming,x : tax
+lda.l $ff0000&TextBg3ItemAbbreviationsForTiming,x : and #$00ff : beq .Done   ; No item name = not logged
+; Get the next open time slot.
+ldx #$0000
+sep #$20
+-:
+lda.l SramKeyItemTimes,x : bmi +
+  beq +
+inx : inx : inx : cpx.w #3*15 : bcc -
+bra .Done    ; No time slots left to log in
++:
+; Log the adjusted 8-bit item ID and the current time.
+lda $01,s : sta.l SramKeyItemTimes,x
+rep #$20
+lda.l 1+SramFrameCounter : sta.l 1+SramKeyItemTimes,x
+.Done:
+rep #$20
+pla
+plx
+rts
+}
 
+; Mostly halts IGT from progressing. For use on the title, attract, and menu screens.
+db $00 : dw $2800
+EInGameTimeStopper:
+sep #$20
+lda #$00 : sta.l SramIrqCounter
+rep #$20
+cop #$C2   ; Need to let one NMI run to advance IGT before we counteract it
+lda.l SramFrameCounter : beq +   ; If the low 16 bits happen to be 0, we'll just accept the frame
+  dec : sta.l SramFrameCounter
++:
+rtl
+
+db $00 : dw $2000
+EGameStatsDisplay:
+jsr .SR_SaveDarkTextPalette
+lda $0644 : cmp #$00e8 : bne +
+    jmp .DarkGaiaMap
++:
+  cmp #$00e5 : beq .PostFinalBossCometMap
+  cmp #$0008 : beq .SchoolMap
+cop #$E0
+.SchoolMap:
+jsr .SR_SaveLightTextPalette
+lda #$4000 : tsb $09ec
+lda.l 1+SramMainGoalFrame : beq ..GameNotWon
+..GameWon:
+jsr .SR_CalculateAndDisplayAllLines
+if !ApocalypseGaia == 1
+lda.l 1+SramOtherGoalFrame : beq +
+  and #$ff00 : xba : tay
+lda.l 0+SramOtherGoalFrame
+jsl LR_SaveTimeFromFrameCount
+lda $0004 : cmp #$0009 : bcc +
+  lda #$0009
++:
+sta $0aa6
+lda $0002 : sta $0aa8
+lda $0000 : sta $0aac
+cop #$BD : dl TextBg3EndGameStatsOtherGoalAddendum
++:
+endif
+bra +
+..GameNotWon:
+jsr .SR_CalculateAndDisplayMainStats
+cop #$BD : dl TextBg3EndGameStatsSchoolAddendum
+;bra +
++:
+cop #$C2
+lda $7f0244 : beq .SchoolMap   ; A clumsy way to check whether we've closed the inv and BG3 is clear
+lda.l 1+SramMainGoalFrame : beq +
+  lda $7f0746 : beq .SchoolMap
++:
+rtl
+.PostFinalBossCometMap:
+if !SettingRedJewelHunt == 1
+; Reaching this map is the completion criterion
+lda.l SramFrameCounter : sta.l SramMainGoalFrame
+lda.l 1+SramFrameCounter : sta.l 1+SramMainGoalFrame
+endif
+lda #$4000 : tsb $09ec
+jsr .SR_CalculateAndDisplayAllLines
+if !ApocalypseGaia == 1
+lda.l 1+SramOtherGoalFrame : beq +
+  and #$ff00 : xba : tay
+lda.l 0+SramOtherGoalFrame
+jsl LR_SaveTimeFromFrameCount
+lda $0004 : cmp #$0009 : bcc ++
+  lda #$0009
+++:
+sta $0aa6
+lda $0002 : sta $0aa8
+lda $0000 : sta $0aac
+cop #$BD : dl TextBg3EndGameStatsOtherGoalAddendum
++:
+endif
+cop #$E0
+.DarkGaiaMap:
+if !ApocalypseGaia == 0
+cop #$E0
+endif
+cop #$D0 : db $F4,$01 : dw .RespawnedAtAG
+cop #$C1
+cop #$D2 : db $04,$01
+.RespawnedAtAG:
+cop #$DA : db $80
+lda #$4000 : tsb $09ec
+jsl $82f076   ; = jsl LR_ClearBg3All
+jsr .SR_CalculateAndDisplayAllLines
+cop #$DB : dw $0140
+lda #$4000 : trb $09ec
+jsl $82f076   ; = jsl LR_ClearBg3All
+phx
+  jsl $83ded5   ; draw main HUD
+plx
+cop #$BD : dl Bg3_StatusBase
+cop #$E0
+.SR_CalculateAndDisplayAllLines:
+cop #$BD : dl TextBg3EndGameStatsItemLinesHeader
+jsl LR_DrawEndGameStatsItemLines
+lda.l 2+SramMainGoalFrame : and #$00ff : tay
+lda.l 0+SramMainGoalFrame
+jsl LR_SaveTimeFromFrameCount
+lda $0004 : cmp #$0009 : bcc +
+  lda #$0009
++:
+sta $0aa6
+lda $0002 : sta $0aa8
+lda $0000 : sta $0aac
+cop #$BD : dl TextBg3EndGameStatsCompletionTime
+jsl LR_BuildCrc : sta $0aa4
+cop #$BD : dl TextBg3EndGameHashCodes
+; and fall through to show main collection stats
+.SR_CalculateAndDisplayMainStats:
+jsl LR_GenerateEndgameCollectionStatsValues
+cop #$BD : dl TextBg3EndGameStatsBasic
+rts
+.SR_SaveDarkTextPalette:
+lda #$0c3a : sta $7f0a32
+lda #$0000 : sta $7f0a34
+lda #$4b18 : sta $7f0a36
+rts
+.SR_SaveLightTextPalette:
+lda #$7fff : sta $7f0a32
+lda #$7a94 : sta $7f0a34
+lda #$0000 : sta $7f0a36
+rts
+
+
+
+LR_DrawEndGameStatsItemLines:
+{
+phx
+lda #$0001 : pha   ; Current line number.
+.PrepNextLine:
+sep #$20
+ldy #$0000   ; Number of items on this line.
+; Item IDs for items 1/2/3 on this line are at 9*(N-1)+0/3/6 = 9*N-9+0/3/6.
+lda $01,s : asl : asl : asl : clc : adc $01,s : sec : sbc.b #9 : tax   ; = 9*N-9
+lda.l 0+SramKeyItemTimes,x : beq +
+  iny
++:
+lda.l 3+SramKeyItemTimes,x : beq +
+  iny
++:
+lda.l 6+SramKeyItemTimes,x : beq +
+  iny
++:
+cpy #$0000 : beq .Done   ; No items left.
+sty $0aac
+lda $01,s : sta $0aa8
+stz $0aa9
+; Convert Y=3/2/1 items to an initial write offset of 0/2/4.
+tya : dec : dec : dec : eor #$ff : inc : asl : tay
+-:
+lda.l SramKeyItemTimes,x
+rep #$20
+sta $00f2,y   ; Item ID
+phy
+lda.l 1+SramKeyItemTimes,x : and #$ff00 : xba : tay
+lda.l 1+SramKeyItemTimes,x : and #$00ff : xba
+jsl LR_SaveTimeFromFrameCount
+lda $01,s : tay
+lda $0002 : sta $00fa,y   ; Minute count
+lda $01,s : lsr : tay
+lda $0004 : cmp #$0009 : bcc +
+  lda #$0009
++:
+sep #$20
+sta $0aa5,y   ; Hour count
+ply
+inx : inx : inx
+iny : iny
+cpy #$0006 : bcc -
+.DonePreppingThisLine:
+rep #$20
+lda $03,s : tax
+cop #$BD : dl TextBg3EndGameStatsItemLinesOuter
+pla : inc : pha
+cmp #$0006 : bcs .Done
+jmp .PrepNextLine
+.Done:
+rep #$20
+pla
+plx
+rtl
+}
+
+; Writes collected+total items/orbs/DSes to $00f0/4/8 in BCD
+LR_GenerateEndgameCollectionStatsValues:
+phx
+ldy #$0000
+stz $00f0   ; Collected items
+stz $00f2   ; Total items
+stz $00f4   ; Collected orbs
+stz $00f6   ; Total orbs
+stz $00f8   ; Visited Dark Spaces
+stz $00fa   ; Total Dark Spaces
+-:
+tya : asl : tax
+lda.l Lut_TrackerItemFlagsByArea_Pointers,x : cmp #$ffff : beq +
+phy
+tya : jsl LR_AddCollectionForAreaA
+ply
+iny
+bra -
++:
+if 0
+; Statues collected
+ldx #$0000   ; Addr offset
+ldy #$0000   ; Statue to check
+sep #$20
+lda $0a1f : and #$3f : bne +
+  ; No statues collected
+  db $a9, "N" : sta.l SramTextBuffer,x
+  inx
+  db $a9, "o" : sta.l SramTextBuffer,x
+  inx
+  db $a9, "n" : sta.l SramTextBuffer,x
+  inx
+  db $a9, "e" : sta.l SramTextBuffer,x
+  inx
+  bra ++
++:
+-:
+iny : cpy #$0007 : bcs ++
+lsr : bcc -
+pha
+tya : clc : adc #$30 : sta.l SramTextBuffer,x
+inx
+lda #$2c : sta.l SramTextBuffer,x   ; = ','
+inx
+pla
+bra -
+dex   ; To conceal the terminal ','
+++:
+lda #$00 : sta.l SramTextBuffer,x
+endif
+rep #$20
+plx
+rtl
+
+
+; Given a 24-bit frame count where Y contains the high 8 and A contains the low 16,
+; converts the frame count to hr:min:sec in $0004,$0002,$0000.
+; 60 fr/sec = 3600 fr/min = 216000 fr/hr
+; = $3c fr/sec = $0E10 fr/min = $034bc0 fr/hr = $10*$E1 fr/min = $10*$34bc fr/hr
+; Thus the low 6 bits don't affect the hour, the low 4 bits the minute, nor the low 2 bits the second.
+; Since the hour divisor spans 12 bits ($34bc0 = $40 * $0d2f), we count hours by repeated
+; subtraction instead of adapting SNES 16/8 division to a 12-bit divisor.
+LR_SaveTimeFromFrameCount:
+{
+sta $0006    ; Working frame count for time accumulation
+sty $0008
+phd
+lda #$0000 : tcd
+stz $00   ; Second counter
+stz $02   ; Minute counter
+stz $04   ; Hour counter
+.CollectHour:   ; If the high byte is >=4, there's an hour to collect
+lda $08 : cmp #$0004 : bcc .TryCollectFinalHour
+lda $06 : sec : sbc #$4bc0 : sta $06
+lda $08 : sbc #$0003 : sta $08
+inc $04
+bra .CollectHour
+.TryCollectFinalHour:   ; i.e. if the high byte is 3 and the low word is >=$4bc0
+lda $08 : cmp #$0003 : bcc .CollectMinutes
+lda $06 : sec : sbc #$4bc0 : bcc .CollectMinutes
+sta $06
+stz $08
+inc $04
+; Now count <= $034bc0 <= 20 bits, low 4 don't matter, and $0E10 is 8 bits wide, so 16/8 div. works
+.CollectMinutes:
+lda $06 : lsr : lsr : lsr : lsr : pha
+lda $08 : xba : asl : asl : asl : asl
+  clc : adc $01,s : sta $01,s
+pla : tay
+sep #$20
+lda #$e1 : jsl $8281E8   ; = jsl LR_DivideY16ByA8
+sta $02   ; = int( (count/$10) / ($0e10/$10) ) = int(count/$0e10) = whole minutes in count
+rep #$20
+xba : and #$00ff   ; = remainder; *=$10 to convert back to extra non-whole-minute frames
+  asl : asl : asl : asl : pha
+lda $06 : and #$000f   ; extra frames that weren't in the minute divisor
+  clc : adc $01,s : sta $01,s
+pla : tay
+sep #$20
+lda #$3c : jsl $8281E8   ; = jsl LR_DivideY16ByA8
+sta $00   ; = whole seconds in count
+rep #$20
+pld
+rtl
+}
+
+; Adapted from code by Greg Cook on 6502.org
+; Call with sep #$20, DP=0, CRC in $00, new byte in A, high byte of A = 0
+; Clobbers AXY
+SR_AddToCrc:
+eor $01 : sta $01
+lsr : lsr : lsr : lsr : tax
+asl : eor $00 : sta $00
+txa : eor $01 : sta $01
+asl : asl : asl : tax
+asl : asl : eor $01 : tay
+txa : rol : eor $00 : sta $01
+tya : sta $00
+rts
+
+; Calculates the seed CRC and returns it in A
+LR_BuildCrc:
+phd
+phx
+lda #$0000 : tcd
+lda #$ffff : sta $00
+; Add ConfigValueArray to the CRC
+ldx #$0000
+sep #$20
+-:
+phx
+  lda.l Config_BankAnchor,x : jsr SR_AddToCrc
+plx
+inx : cpx.w #Config_EndAnchor-Config_BankAnchor : bcc -
+rep #$20
+; Add configs that aren't in ConfigValueArray
+ldx #$0000
+-:
+lda.l TableUniqueConfigAddrs,x : cmp #$ffff : beq +
+  sta $02
+lda.l 2+TableUniqueConfigAddrs,x : and #$00ff : sta $04
+phx
+  lda [$02] : pha
+  lda #$0000
+  sep #$20
+    pla : jsr SR_AddToCrc
+    pla : jsr SR_AddToCrc
+  rep #$20
+plx
+inx : inx : inx
+bra -
++:
+plx
+pld
+lda $0000
+rtl
+
+TableUniqueConfigAddrs:
+!ThisCrcItemAddrIdx = 0
+while !ThisCrcItemAddrIdx < !CrcItemAddrCount
+dl CrcItemAddr!{ThisCrcItemAddrIdx}
+!ThisCrcItemAddrIdx #= 1+!ThisCrcItemAddrIdx
+endif
+dl $ffffff
 
 
 

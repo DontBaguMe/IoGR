@@ -7,7 +7,7 @@ table "table_dialogue.txt",rtl
 ; db $C1 : db PosX, PosY    ; box position, minimum 1,1
 ; db $C2 : db TemplateId    ; includes the referenced template from pointers at $81CA95
 ; db $C3 : db NewPal        ; changes the text palette
-; db $C4    ; hangs the game. In the J version this scrolled the text forward.
+; db $C4 : db Col    ; custom, move cursor forward to screen column
 ; db $C5 : dw AddrOfPtrList, AddrOfIndex    ; indexed include, addrs in the same bank as the text
 ; db $C6 : dw NumDigits, AddrOfNumber    ; draws a bytewise little-endian number
 ; db $C7 : db SizeX, SizeY    ; sets box size; SizeY is measured in lines of text
@@ -168,8 +168,8 @@ db $ca
 
 TextErikOfferTravel:
 db "Where'd you like to go?",$cb
-db "_Quit________Diamond Coast",$cb
-db "_Watermia____South Cape"
+db " Quit        Diamond Coast",$cb
+db " Watermia    South Cape"
 db $ca
 
 
@@ -198,7 +198,7 @@ db "(Seems like Lilly's",$cb
 db "not here. You'll have",$cb
 db "to go recruit her and",$cb
 db "come back here later.)"
-db $c0
+db $ca
 
 
 TextGiveLillyNecklace:
@@ -718,9 +718,344 @@ db "s"
 db " "
 db $00
 
+TextBg3ItemAbbreviationsForTiming:
+.Pointers:
+{
+dw .Null
+dw .Null
+dw .PrisonKey
+dw .Null   ; Inca statues
+dw .Null
+dw .Null
+dw .Null   ; Herb
+dw .DiamondBlock
+dw .WindMelody
+dw .LolasMelody
+dw .Meat
+dw .Null   ; Mine Keys
+dw .Null
+dw .MemoryMelody
+dw .Null   ; Crystal Balls
+dw .MineElevatorKey
+dw .Null   ; Mu Palace Key
+dw .Null   ; Purification Stone
+dw .Null   ; Hope Statues
+dw .Null   ; Rama Statues
+dw .MagicPowder
+dw .Null
+dw .Null   ; Lance's Letter
+dw .Null   ; Necklace
+dw .RussianGlassWill
+dw .Teapot
+dw .Null   ; Kress, Wat, Gold items
+dw .Null
+dw .Null
+dw .Null
+dw .Null   ; Hieros
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Null
+dw .Aura
+dw .LolasLetter
+; Later items aren't tracked; switch to non-items
+dw .Slider       ; Index $26
+dw .SpinDash     ; Index $27
+dw .Friar        ; Index $28
+}
+{
+.Null:
+db $00
+.LolasLetter:
+db "LL",$00
+.LolasMelody:
+db "LM",$00
+.PrisonKey:
+db "PK",$00
+.DiamondBlock:
+db "DB",$00
+.WindMelody:
+db "WM",$00
+.Meat:
+db "LR",$00
+.MemoryMelody:
+db "MM",$00
+.MineElevatorKey:
+db "EK",$00
+.MagicPowder:
+db "MD",$00
+.RussianGlassWill:
+db "Wl",$00
+.Teapot:
+db "TP",$00
+.Aura:
+db "Ar",$00
+.Slider:
+db "Sl",$00
+.SpinDash:
+db "SD",$00
+.Friar:
+db "Fr",$00
+}
+
+; State tracking $0aa4 - $0aad (except herb counts $0aaa/$0aae) are used, since they're not needed at this point
+TextBg3EndGameStatsBasic:
+{
+db $03 : db $00
+db $01 : dw $0044
+db "Items "
+db $05 : db 3 : dw $00f0
+db "/"
+db $05 : db 3 : dw $00f2
+db "     Orbs "
+db $05 : db 2 : dw $00f4
+db "/"
+db $05 : db 2 : dw $00f6
+db $11
+db "Deaths "
+db $05 : db 2 : dw $0bea
+db "         DSes "
+db $05 : db 2 : dw $00f8
+db "/"
+db $05 : db 2 : dw $00fa
+db $00
+}
+
+TextBg3EndGameHashCodes:
+db $03 : db $00
+db $01 : dw $00c4
+db "   "
+db "Rando Hash "
+db $03 : db $00
+db $05 : db 4 : dw $0aa4   ; $0aa4/5 for CRC
+db $03 : db $00
+db "-"
+db "!RandoTitleScreenHashString"
+db $11
+db $00
+
+TextBg3EndGameStatsCompletionTime:
+db $03 : db $00
+db $01 : dw $0104
+db "   "
+; If an AG seed, clarify that this is the DG time, not the AG time
+if !ApocalypseGaia == 1
+db "Dark Gaia "
+else 
+db "Completed "
+endif
+db "Time "
+db $05 : db 1 : dw $0aa6   ; $0aa6 for hours of game time
+db ":"
+db $09 : dw $0aa8   ; Minute counter, leading 0 required
+db ":"
+db $09 : dw $0aac   ; Second counter, leading 0 required
+db $00
+
+TextBg3EndGameStatsOtherGoalAddendum:
+db $03 : db $00
+db $01 : dw $0144
+db "   "
+db "Completed Time "
+db $05 : db 1 : dw $0aa6   ; Hours
+db ":"
+db $09 : dw $0aa8   ; Minutes
+db ":"
+db $09 : dw $0aac   ; Seconds
+db $00
+
+TextBg3EndGameStatsSchoolAddendum:
+db $03 : db $00
+db $01 : dw $00c4
+db "  Your time will be saved",$11
+db "  when you beat the game."
+db $00
+
+; Write the line number (starting at 1) to $0aa8, and the number of items on the line to $0aac.
+; With three items, store their IDs in collection order at $00f0/2/4,
+; respectively hh at $00a4/5/6, and mm at $00f8/a/c.
+; With fewer items, start 1 index later for each item slot to skip.
+TextBg3EndGameStatsItemLineIncl:
+{
+.Pointers:
+dw .BlankLine
+dw .OneItem
+dw .TwoItems
+dw .ThreeItems
+dw .FourItems
+.FourItems:
+db $04 : dl TextBg3ItemAbbreviationsForTiming : dw $00f0
+db "-"
+db $05 : db 1 : dw $0aa4   ; Hour
+db ":"
+db $09 : dw $00f8   ; Minute
+db "  "
+.ThreeItems:
+db $04 : dl TextBg3ItemAbbreviationsForTiming : dw $00f2
+db "-"
+db $05 : db 1 : dw $0aa5   ; Hour
+db ":"
+db $09 : dw $00fa   ; Minute
+db "  "
+.TwoItems:
+db $04 : dl TextBg3ItemAbbreviationsForTiming : dw $00f4
+db "-"
+db $05 : db 1 : dw $0aa6   ; Hour
+db ":"
+db $09 : dw $00fc   ; Minute
+db "  "
+.OneItem:
+db $04 : dl TextBg3ItemAbbreviationsForTiming : dw $00f6
+db "-"
+db $05 : db 1 : dw $0aa7   ; Hour
+db ":"
+db $09 : dw $00fe   ; Minute
+.BlankLine:
+db $00
+}
+
+TextBg3EndGameStatsItemLineBranch:
+{
+.Pointers:
+dw .NoLine
+dw .Line1
+dw .Line2
+dw .Line3
+dw .Line4
+dw .Line5
+.Line1:
+db $01 : dw 0*$40+$0588
+db $04 : dl TextBg3EndGameStatsItemLineIncl : dw $0aac
+db $00
+.Line2:
+db $01 : dw 1*$40+$0588
+db $04 : dl TextBg3EndGameStatsItemLineIncl : dw $0aac
+db $00
+.Line3:
+db $01 : dw 2*$40+$0588
+db $04 : dl TextBg3EndGameStatsItemLineIncl : dw $0aac
+db $00
+.Line4:
+db $01 : dw 3*$40+$0588
+db $04 : dl TextBg3EndGameStatsItemLineIncl : dw $0aac
+db $00
+.Line5:
+db $01 : dw 4*$40+$0588
+db $04 : dl TextBg3EndGameStatsItemLineIncl : dw $0aac
+.NoLine:
+db $00
+}
+
+TextBg3EndGameStatsItemLinesOuter:
+db $03 : db $18
+db $04 : dl TextBg3EndGameStatsItemLineBranch : dw $0aa8
+db $00
+
+TextBg3EndGameStatsItemLinesHeader:
+db $03 : db $18
+db $01 : dw $0542
+db "Key Items:"
+db $00
+
 table "table_dialogue.txt",rtl
 
-
+TextStartDsNameInclude:
+{
+.Pointers:
+dw .Cape
+dw .Prison
+dw .EdDgFinal
+dw .Itory
+dw .Inca1
+dw .Inca2
+dw .Inca3
+dw .Frej
+dw .Mine1
+dw .Mine2
+dw .Mine3
+dw .SkGn1
+dw .SkGn2
+dw .SkGn3
+dw .SkGn4
+dw .SeaPal
+dw .MuNE
+dw .MuW
+dw .Angl
+dw .Wtrm
+dw .GtWl1
+dw .GtWl2
+dw .GtWl3
+dw .Euro
+dw .Kress1
+dw .Kress2
+dw .Kress3
+dw .NtVl
+dw .Ankr1
+dw .Ankr2
+dw .Ankr3
+dw .Dao
+dw .PymdUpper
+dw .PymdLower
+dw .BabelLower
+dw .BabelUpper
+.Cape:
+db "South Cape",$ca
+.Prison:
+db "Edward's Prison",$ca
+.EdDgFinal:
+db "Edward's Tunnel",$ca
+.Itory:
+db "Itory",$ca
+.Inca1:
+.Inca2:
+.Inca3:
+db "Inca",$ca
+.Frej
+db "Freejia",$ca
+.Mine1:
+.Mine2:
+.Mine3:
+db "Diamond Mine",$ca
+.SkGn1:
+.SkGn2:
+.SkGn3:
+.SkGn4:
+db "Sky Garden",$ca
+.SeaPal:
+db "Sea Palace",$ca
+.MuNE:
+.MuW:
+db "Mu",$ca
+.Angl:
+db "Angel Village",$ca
+.Wtrm:
+db "Watermia",$ca
+.GtWl1:
+.GtWl2:
+.GtWl3:
+db "Great Wall",$ca
+.Euro:
+db "Euro",$ca
+.Kress1:
+.Kress2:
+.Kress3:
+db "Mt. Kress",$ca
+.NtVl:
+db "Native Village",$ca
+.Ankr1:
+.Ankr2:
+.Ankr3:
+db "Ankor Wat",$ca
+.Dao:
+db "Dao",$ca
+.PymdUpper:
+.PymdLower:
+db "Pyramid",$ca
+.BabelLower:
+.BabelUpper:
+db "Babel",$ca
+}
 
 TextDebugItemListPageOne:
 db $c1 : db $02,$06

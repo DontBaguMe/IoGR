@@ -12,7 +12,7 @@ from .errors import OffsetError
 from .models.enums import *
 from .models.randomizer_data import RandomizerData
 
-VERSION = "5.0.1"
+VERSION = "5.1.0"
 MAX_RANDO_RETRIES = 50
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(
     __file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
@@ -736,7 +736,7 @@ class Randomizer:
         self.asar_defines["SettingInfiniteInventory"] = 1 if settings.infinite_inventory else 0
         self.asar_defines["SettingEarlyFirebird"] = 1 if settings.firebird else 0
         self.asar_defines["SettingRedJewelHunt"] = 1 if settings.goal.value is Goal.RED_JEWEL_HUNT.value else 0
-        self.asar_defines["SettingRedJewelMadness"] = 1 if settings.red_jewel_madness else 0
+        self.asar_defines["SettingRedJewelMadness"] = 1 if settings.red_jewel_madness and not settings.infinite_inventory else 0
         self.asar_defines["SettingOpenMode"] = 1 if settings.open_mode else 0
         self.asar_defines["SettingOHKO"] = 1 if settings.ohko else 0
         self.asar_defines["SettingZ3"] = 1 if settings.z3 else 0
@@ -747,6 +747,7 @@ class Randomizer:
         self.asar_defines["SettingOrbRando"] = 1 if settings.orb_rando else 0
         self.asar_defines["SettingDarkRoomsLevel"] = abs(settings.darkrooms.value)
         self.asar_defines["SettingDebug"] = 1 if settings.ingame_debug else 0
+        self.asar_defines["SettingDsWarp"] = 1 if settings.ds_warp else 0
         if settings.red_jewel_madness:
             self.asar_defines["InitialHp"] = 40
         elif settings.ohko:
