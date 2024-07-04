@@ -235,14 +235,15 @@ lda $01,s : and #$00ff : cmp #$0080 : bcc +
   sec : sbc #$0087
   clc : adc #$0029
 +:
-sta $0db8
-lda $01,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
+pha ;sta $0db8
+lda $03,s : and #$00ff : cmp #$0087 : bcs ..IsSpecial
 ..IsNotSpecial:
-lda $01,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
+lda $03,s : and #$00ff : jsl LR_GiveNormalItemA8OrSec : bcs ..InvFull
 bra ..GotItemSkipTiming   ; the 8-bit item giver will handle timing if needed
 ..GotItem:
-lda $01,s : jsr SR_MaybeLogTimeOfItemGet
+lda $03,s : jsr SR_MaybeLogTimeOfItemGet
 ..GotItemSkipTiming:
+pla : sta $0db8
 jsr SR_SetTextForItem
 cop #$BF : dw .TextMaybeGotItem
 stz $0db8
@@ -253,6 +254,7 @@ clc
 rtl
 ..InvFull:
 lda #$0001 : sta $0bfa   ; your inv full
+pla : sta $0db8
 cop #$BF : dw .TextMaybeGotItem
 stz $0db8
 stz $0bfc
@@ -261,7 +263,7 @@ pla
 sec
 rtl
 ..IsSpecial:    ; Handling for upgrades, duplicate stat items, and Heart Pieces.
-lda $01,s : cmp #$008a : bcs ..IsNotStatUpgrade
+lda $03,s : cmp #$008a : bcs ..IsNotStatUpgrade
 ..IsStatUpgrade:
 jsl LR_GiveNormalItemA8OrSec
 bra ..GotItemSkipTiming
@@ -3578,6 +3580,18 @@ pla
 plx
 rts
 }
+
+; Mostly halts IGT from progressing. For use on the title, attract, and menu screens.
+db $00 : dw $2800
+EInGameTimeStopper:
+sep #$20
+lda #$00 : sta.l SramIrqCounter
+rep #$20
+cop #$C2   ; Need to let one NMI run to advance IGT before we counteract it
+lda.l SramFrameCounter : beq +   ; If the low 16 bits happen to be 0, we'll just accept the frame
+  dec : sta.l SramFrameCounter
++:
+rtl
 
 db $00 : dw $2000
 EGameStatsDisplay:

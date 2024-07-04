@@ -32,9 +32,6 @@ incsrc "iogr_misc_defines.asr"
 ; Bank $80
 {
 
-org $808000
-cli
-
 ; BRK/COP handler optimization
 org $808007
 VectorCop:
@@ -10803,6 +10800,10 @@ org $8be3fe
 jsl LR_RestoreSaveFileWithInfiniteInventoryOrSec   ; replaces jsl $83d954
 endif
 
+org $8be42b
+; Replacing lda #$2800 : trb $09ae when resuming a saved game
+jsr SR_SetGameStartCliAndEngineFlags : nop : nop : nop
+
 ; Replace sound type selection with difficulty selection.
 org $8be43f
 lda #$0001 : sta $0d90    ; Default is Intermediate
@@ -11085,8 +11086,9 @@ TextDifficultyLevel3:
 db "Expert______",$ca
 
 ; Game flag initialization.
-{
 EIogrGameInitFlagSetter:
+{
+jsr SR_SetGameStartCliAndEngineFlags
 ; Copy game settings into RAM for the autotracker.
 sep #$20
 lda.l Config_HieroOrder1 : sta $0a58
@@ -11185,7 +11187,6 @@ lda.l Config_KaraLocation : cmp #$0002 : bne +
   cop #$CC : db $F4
 +:
 stz $0bfc   ; Default to fast item-get text speed.
-lda #$2800 : trb $09ae
 jsl LR_MarkRoomRewardsObtainedByDifficulty
 lda.l Config_SettingFluteOpt : bne +
   cop #$CC : db $18   ; Set "has Flute" flag if starting with flute
@@ -11215,9 +11216,10 @@ pla
 cop #$BF : dw .TextForWinning
 cop #$C1
 rtl
-.TextForWinning:    ; this was encoded by hand and I think I'll leave it that way
-db $C1 : db $03,$04
-db $C7 : db $0D,$03
+.TextForWinning:
+{
+db $C1 : db 3,7
+db $C7 : db 13,3
 db $C2 : db $13
 db $D2 : db $00
 db $D5 : db $06
@@ -11283,6 +11285,18 @@ db $69,$84,$A3,$2A,$AC,$69,$84,$A3,$AC,$48,$AC,$83,$88,$83,$2A
 db $C9 : db $B4
 db $C8
 db $CA
+}
+
+SR_SetGameStartCliAndEngineFlags:
+{
+php
+sep #$20
+lda $01fc : and #%11111011 : sta $01fc   ; i.e. cli in the top-level stored P flags
+rep #$20
+lda #$2800 : trb $09ae   ; run when starting or resuming a game
+plp
+rts
+}
 
 }
 
