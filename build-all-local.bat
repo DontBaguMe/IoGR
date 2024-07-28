@@ -1,2 +1,2 @@
 pip install .
-python src/iog_randomizer/gui/gui.py
+python -m iog_randomizer.gui.gui

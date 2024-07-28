@@ -6809,7 +6809,7 @@ class World:
 
             19: [20, 0, 0, 481, 482, "MapE9Exit01", 0, True, 12, 0, "Solid Arm entrance (in)"],
             20: [19, 0, 0, 0, 0, "MapSolidArmReturnString", 0, True, 12, 0, "Solid Arm entrance (out)"],
-            21: [0, 0, 0, 400, 400, "MapMansionBossDefeatedWarpString", 0, True, 12, 0, "Post-Mansion Warp to Dao"],
+            21: [0, 0, 0, -1, 400, "MapMansionBossDefeatedWarpString", 0, True, 12, 0, "Post-Mansion Warp to Dao"],
             # Used if the Mansion boss isn't MQ2 or SA
 
             # Passage Menus
