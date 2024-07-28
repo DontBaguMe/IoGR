@@ -12,7 +12,7 @@ from .errors import OffsetError
 from .models.enums import *
 from .models.randomizer_data import RandomizerData
 
-VERSION = "5.1.0"
+VERSION = "5.1.1"
 MAX_RANDO_RETRIES = 50
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(
     __file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep
@@ -689,7 +689,7 @@ class Randomizer:
         #                          Have fun with final text
         ##########################################################################
         superhero_list = []
-        superhero_list.append("I must go, my people need me!")
+        superhero_list.append("I must go,]my people need me!")
         superhero_list.append("_____Up, up, and away!")
         superhero_list.append("_______Up and atom!")
         superhero_list.append("__It's clobberin' time!")
@@ -714,7 +714,7 @@ class Randomizer:
         superhero_list.append("_____Bite me, fanboy.")
         superhero_list.append("__Hi-yo Silver... away!")
         superhero_list.append("Here I come to save the day!")
-        superhero_list.append("By the hoary hosts of Hoggoth!")
+        superhero_list.append("By the hoary hosts]of Hoggoth!")
         superhero_list.append("____Teen Titans, Go!")
         superhero_list.append("_______Cowabunga!")
         superhero_list.append("_______SPOOOOON!!")

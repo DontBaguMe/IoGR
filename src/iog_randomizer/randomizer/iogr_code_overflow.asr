@@ -334,6 +334,7 @@ rtl
 db $cd : dl .TextItsAnItem
 db $cb
 db $c5 : dw TextItemGetExtraLine, $0bfa
+db $c9 : db 10   ; Delay for viewers to glimpse the text
 db $c0
 
 .TextItsAnItem:
