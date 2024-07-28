@@ -11200,6 +11200,12 @@ lda #$0000
 sta $306000,x
 inx : inx : cpx #$0800 : bcc -
 tdc : tax
+; DMA clears this RAM elsewhere, but in one reported instance, a platform didn't emulate the DMA correctly
+ldy #$0000
+lda #$0000
+-:
+sta $0dc0,y
+iny : iny : cpy #$0040 : bcc -
 if !SettingDebug == 1
 lda #$0015 : sta $0ac6
   jsl LR_GiveNormalItemA8OrSec
