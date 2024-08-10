@@ -382,10 +382,10 @@ class Randomizer:
         if settings.boss_shuffle:
             non_will_bosses = [5]  # Never forced to play Mummy Queen as Will
             if settings.flute.value == FluteOpt.FLUTELESS.value:
-                non_will_bosses.append(
-                    1)  # Can't beat Castoth as Will without Flute (or generous ability shuffle and lots of patience)
+                # Can't beat Castoth as Will without Flute (or generous ability shuffle and lots of patience)
+                non_will_bosses.append(1)
             if settings.difficulty.value < 3:  # For non-Extreme seeds:
-                boss_order.remove(7)  # - Don't shuffle Solid Arm;
+                boss_order.remove(7)  # - Don't shuffle Solid Arm at all;
                 if settings.flute.value == FluteOpt.FLUTELESS.value:
                     non_will_bosses.append(3)  # - Don't require fluteless Vamps.
             if settings.difficulty.value < 2:  # Also, in Easy/Normal, can't be forced to play Vampires as Will
@@ -393,11 +393,13 @@ class Randomizer:
                     non_will_bosses.append(3)
             random.shuffle(non_will_bosses)
 
-            # Determine statue order for shuffle
+            # Determine statue order, ensuring that non-Will bosses aren't in Will-only rooms
+            # (GtWl and Mansion force Will at the boss door, so can't have a non-Will boss)
             for x in non_will_bosses:
                 boss_order.remove(x)
             random.shuffle(boss_order)
-            non_will_dungeons = [0, 1, 2, 4]  # i.e., the dungeons that don't force Will at the boss door
+            non_will_dungeons = [0, 1, 2, 4]  # i.e. dungeons that can have a non-Will boss
+            # Assign non_will_bosses to the required number of random non_will_dungeons
             random.shuffle(non_will_dungeons)
             non_will_dungeons = non_will_dungeons[:len(non_will_bosses)]
             non_will_dungeons.sort()
@@ -408,15 +410,17 @@ class Randomizer:
             if 7 not in boss_order:
                 boss_order.append(7)
 
-            boss_music_card_labels = ["Inca", "SkGn", "Mu", "GtWl", "Pymd", "Mansion", "MinorDungeon"]
-            # Patch music headers into new dungeons (beginner and intermediate modes)
+            # Patch music headers into new dungeons (beginner and intermediate modes);
+            # dungeon 5 (Babel) music is not changed, but is referenced as MinorDungeon by MQ2
+            boss_music_card_labels = ["Inca", "SkGn", "Mu", "GtWl", "Pymd", "MinorDungeon", "Mansion"]
             if settings.difficulty.value <= 1:
                 i = 0
-                while i < 6:
-                    boss = boss_order[i]
-                    this_dungeon_card = "Map" + boss_music_card_labels[i] + "CardMusic"
-                    replacement_card = "DefaultMap" + boss_music_card_labels[boss - 1] + "CardMusic"
-                    self.asar_defines[this_dungeon_card] = "!" + replacement_card
+                while i < 7:
+                    if i != 5:
+                        boss = boss_order[i]
+                        this_dungeon_card = "Map" + boss_music_card_labels[i] + "CardMusic"
+                        replacement_card = "DefaultMap" + boss_music_card_labels[boss - 1] + "CardMusic"
+                        self.asar_defines[this_dungeon_card] = "!" + replacement_card
                     i += 1
         # Set up assembly defines for boss order
         i = 1
