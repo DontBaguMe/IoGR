@@ -2505,13 +2505,13 @@ lda.w #BankOf(TableDsMapSpawnData) : sta $0af2
 bra .Done
 
 LR_WarpToStart:
-if !StartAtWarpLocation == 1 || !SettingDsWarp == 0
 lda.w #!StartDsIndex : sta $0bf6
-  jsl LR_WarpToDsIndexAWithForceSetDeathWarp
-else
+jsl LR_WarpToDsIndexAWithForceSetDeathWarp
+rtl
+
+LR_WarpToSchool:
 stz $0bf6
 cop #$26 : db $08 : dw $0050, $00a0 : db $80, $00, $12
-endif
 rtl
 
 

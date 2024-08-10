@@ -207,7 +207,8 @@ def generate_ROM():
             break_on_error=break_on_error.get(),
             break_on_init=break_on_init.get(),
             ingame_debug=ingame_debug.get(),
-            infinite_inventory=infinite_inventory.get()
+            infinite_inventory=infinite_inventory.get(),
+            ds_warp=ds_warp.get()
         )
 
         base_filename = generate_filename(settings, "")
@@ -675,6 +676,8 @@ gen_patches_toggle = tkinter.BooleanVar(root)
 gen_patches_toggle.set(False)
 do_tests_toggle = tkinter.BooleanVar(root)
 do_tests_toggle.set(False)
+ds_warp = tkinter.BooleanVar(root)
+ds_warp.set(False)
 
 ROM = tkinter.Entry(mainframe, width=40)
 ROM.grid(row=0, column=1)
@@ -861,6 +864,11 @@ tkinter.Label(devtools_frame,
 tkinter.Checkbutton(devtools_frame,
                     variable=do_tests_toggle,
                     command=checkbox_clear_profile).grid(row=3, column=4)
+
+tkinter.Label(devtools_frame,
+              text="DS Warp:").grid(row=4, column=0, sticky=tkinter.E)
+tkinter.Checkbutton(devtools_frame,
+                    variable=ds_warp).grid(row=4, column=1)
 
 tkinter.Button(mainframe, text='Browse...', command=find_ROM).grid(row=0, column=2)
 tkinter.Button(seed_frame, text='Random Seed', command=generate_seed).pack(side='left')

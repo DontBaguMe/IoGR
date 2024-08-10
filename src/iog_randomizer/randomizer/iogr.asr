@@ -9736,7 +9736,7 @@ if !SettingDsWarp == 1
 db "Warp to a Dark Space"
 else
 db "Return to "
-db $04 : dl TextStartDsNameInclude : dw $0bfa
+db $CD : dl TextStartDsNameInclude
 endif
 db "?",$CB
 db "_No",$CB
@@ -10812,7 +10812,11 @@ db $03    ; 4 difficulty levels available
 
 ; Upon starting a new game, set IOGR flags.
 org $8be515
+if !StartAtWarpLocation == 1
 jsl LR_WarpToStart
+else
+jsl LR_WarpToSchool
+endif
 jmp EIogrGameInitFlagSetter
 
 ; To support button mappings, IOG stores a dynamic bitmask for each SNES button, and the mask determines functionality;

@@ -961,8 +961,10 @@ db $00
 table "table_dialogue.txt",rtl
 
 TextStartDsNameInclude:
-{
+db $C5 : dw .Pointers, $0bfa
+db $ca
 .Pointers:
+{
 dw .Cape
 dw .Prison
 dw .EdDgFinal
