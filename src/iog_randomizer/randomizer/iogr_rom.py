@@ -12,7 +12,7 @@ from .errors import OffsetError
 from .models.enums import *
 from .models.randomizer_data import RandomizerData
 
-VERSION = "5.1.2"
+VERSION = "5.1.3"
 MAX_RANDO_RETRIES = 50
 OUTPUT_FOLDER: str = os.path.dirname(os.path.realpath(
     __file__)) + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "data" + os.path.sep + "output" + os.path.sep

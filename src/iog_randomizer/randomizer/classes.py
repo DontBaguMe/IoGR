@@ -3678,7 +3678,7 @@ class World:
             42: [143, 1, False, 0, [], "MineRampSlaveItem", "Diamond Mine: Laborer w/Elevator Key", 0, 0, [[609, 1]]],
             43: [148, 1, False, 0, [], "MineMorgueItem", "Diamond Mine: Morgue", 0, 0, []],
             44: [149, 1, False, 0, [], "MineCombatSlaveItem", "Diamond Mine: Laborer w/Mine Key", 0, 0, [[609, 1]]],
-            45: [150, 1, False, 0, [], "MineSamItem", "Diamond Mine: Sam", 0, 0, []],
+            45: [150, 1, False, 0, [], "MineSamItem", "Diamond Mine: Sam", 0, 0, [[609, 1]]],
 
             46: [721, 2, False, 0, [], "", "Diamond Mine: Appearing Dark Space", 0, 0, []],
             47: [131, 2, False, 0, [], "", "Diamond Mine: Dark Space at Wall", 0, 0, []],
@@ -4488,7 +4488,7 @@ class World:
                   []],
             470: [False, [], 2, [6, 22, 0, 226], 0, "Babel: Map 226 (top)", [], False, [], [], [], [], [], [], [], []],
             471: [False, [],       2, [6,22,0,227], 0, "Babel: Map 227 (bottom)", [], False, [], [], [], [], [], [], [], []],
-            472: [False, [], 2, [6, 22, 0, 227], 0, "Babel: Map 227 (top)", [], False, [], [], [], [], [], [], [], []],
+            472: [False, [], 2, [6, 22, 0, 227], 0, "Babel: Map 227 (top)", [], True, [], [], [], [], [], [], [], []],
             473: [False, [], 2, [6, 22, 0, 222], 0, "Babel: Olman's Room", [], False, [], [], [], [], [], [], [], []],
             474: [False, [], 0, [6, 22, 0, 242], 0, "Babel: Castoth", [], False, [], [], [], [], [], [], [], []],
             475: [False, [], 0, [6, 22, 0, 243], 0, "Babel: Viper", [], False, [], [], [], [], [], [], [], []],

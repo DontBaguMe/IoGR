@@ -3637,9 +3637,11 @@ lda.l 1+SramMainGoalFrame : beq +
 rtl
 .PostFinalBossCometMap:
 if !SettingRedJewelHunt == 1
-; Reaching this map is the completion criterion
-lda.l SramFrameCounter : sta.l SramMainGoalFrame
-lda.l 1+SramFrameCounter : sta.l 1+SramMainGoalFrame
+; Reaching this map the first time is the completion criterion
+lda.l 1+SramMainGoalFrame : bne +
+  lda.l SramFrameCounter : sta.l SramMainGoalFrame
+  lda.l 1+SramFrameCounter : sta.l 1+SramMainGoalFrame
++:
 endif
 lda #$4000 : tsb $09ec
 jsr .SR_CalculateAndDisplayAllLines
