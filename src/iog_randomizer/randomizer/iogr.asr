@@ -9079,11 +9079,30 @@ db $C0
 org $88b16d
 jmp DaoOfferTravelToNatives
 
-org $88b1ae   ; Inventory freespace check is handled by NPC's code earlier.
+
+; Item-give code for the Dao entrance NPC. Has a unique inventory space check because it
+; gives two items, and the check code is refactored here due to limited code space.
+org $88b18b
+if !SettingInfiniteInventory == 0
+stz $0000
+sep #$20
+ldy #$0000
+-:
+lda $0ab4,y : bne +
+  inc $0000
++:
+iny : cpy #$0010 : bne -
+rep #$20
+lda $0000 : cmp #$0002 : bcc ++
+endif
 %MTryGiveItemAndFlag("DaoEntrance1Item", $b8)
 %MTryGiveItemAndFlag("DaoEntrance2Item", $b8)
 cop #$BF : dw DaoOfferTravelToNatives_TextPostGiveItem
 rtl
+warnpc $88b1c8
+org $88b1c8
+++:
+; The base game "your inv full" code and all of the NPC's text follow from here.
 
 
 org $88b592
