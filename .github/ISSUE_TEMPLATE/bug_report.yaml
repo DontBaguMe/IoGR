@@ -1,0 +1,81 @@
+name: Bug report
+description: Report a bug found in the randomizer
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reaching out to us about a bug on the randomizer, please take a few moment to give us as many information as you can.
+  - type: dropdown
+    id: discord-presence
+    attributes:
+      label: Are you part of the discord of the randomizer ?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: input
+    id: discord-id
+    attributes:
+      label: If you are, please put your username so that we can contact you there if more information is needed
+  - type: markdown
+    attributes:
+      value: |
+        We will now begin with some information on which version of the game you played
+  - type: dropdown
+    id: source
+    attributes:
+      label: Which version of the randomizer did you use ?
+      options:
+        - the main site iogr.app
+        - the dev site dev.iogr.app
+        - directly from sources
+        - I don't know
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: seed-permalink
+    attributes:
+      label: If you have a permalink to a seed please add it here
+      placeholder: https://iogr.app/permalink/xxxxxxxxx
+  - type: textarea
+    id: settings-description
+    attributes:
+      label: Could you give us a list of settings you used ?
+      placeholder: |
+        I played X statues game choice, with Open world and some enemizer, ...
+  - type: markdown
+    attributes:
+      value: |
+        Thanks, now lets walk through your issue.
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Which type of bug did you encounter ?
+      options:
+        - The game crashed
+        - The seed was unbeatable
+        - When I tried to use an item it did not work as intended
+        - I had an other issue
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Now please describe your issue
+      placeholder: When I was doing ....
+    validations:
+      required: true
+  - type: textarea
+    id: issue-reproduction
+    attributes:
+      label: How can we reproduce the issue ?
+      placeholder: |
+        Please describe the list of action that reproduce your issue if you can.
+        You can add a link to a video recording of the issue for use to get a better idea of what happened
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting this issue, we will look at it and get back to you.
+        Have a nice day.
