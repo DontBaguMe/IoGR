@@ -1,0 +1,42 @@
+name: Question
+description: |
+  You have a question and don't know what to do of it ? 
+  Post it here.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # IoGR questions
+        
+        You have some question for us ? Thanks for reaching out, please take a few moment to give us as many information as you can.
+        
+        ## Important
+        
+        The team is actually made of a few person mostly working on the project during our free time, we may take some time to answer here, but feel free to join the discord if you want a faster answer
+        
+        ## Contact
+        
+        Most of the team work through discord join us there so that we may help you and more ! 
+        [![Discord](https://img.shields.io/discord/558423526772834329?style=for-the-badge&logo=discord&logoColor=white&label=Illusion%20of%20Gaia%20Randomizer&labelColor=%235865F2)](https://discord.gg/TQEyBvu)
+
+  - type: input
+    id: discord-id
+    attributes:
+      label: Please put your discord username here so that we can contact you.
+  - type: markdown
+    attributes:
+      value: |
+        ## Question
+  - type: textarea
+    id: question
+    attributes:
+      label: What is your question.
+      placeholder: |
+        Please write your question here...
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your question, we will look at it and answer you as soon as possible.
+        Have a nice day.

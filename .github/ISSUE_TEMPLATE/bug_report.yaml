@@ -1,7 +1,9 @@
 name: Bug report
-description: Report a bug found in the randomizer
+description: |
+  Found a bug, an issue, something completely broken ?
+  Don't worry, tell us and we will look at it.
 title: "[Bug]: "
-labels: ["bug", "triage"]
+labels: ["bug"]
 body:
   - type: markdown
     attributes:
@@ -79,6 +81,7 @@ body:
         - Glitched graphics / Something wrong appear on my screen
         - Sound issues / Some sounds should or should not play
         - QoL not working / Things does not work as intended
+        - Website does not work
         - Other
       default: 6
   - type: textarea

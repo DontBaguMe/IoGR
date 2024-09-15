@@ -1,0 +1,43 @@
+name: Suggestion
+description: |
+  You have a super idea that should be part of the randomizer ?
+  Feel free to tell us more about it here.
+title: "[Suggestion]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # IoGR Suggestions
+        
+        Thank you for reaching out to us about your idea for the randomizer, please take a few moment to give us as many information as you can.
+        
+        ## Important
+        
+        The team is actually made of a few person mostly working on the project during our free time, depending on your idea we may not get to work on it before a long time.
+        But don't despair we will keep it in our mind when looking for ideas for future updates and maybe it will be part of this project someday.
+        
+        ## Contact
+        
+        Most of the team work through discord join us there so that we may help you and more ! 
+        [![Discord](https://img.shields.io/discord/558423526772834329?style=for-the-badge&logo=discord&logoColor=white&label=Illusion%20of%20Gaia%20Randomizer&labelColor=%235865F2)](https://discord.gg/TQEyBvu)
+
+  - type: input
+    id: discord-id
+    attributes:
+      label: Please put your discord username here so that we can contact you.
+  - type: markdown
+    attributes:
+      value: |
+        ## Suggestion
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: So... Tell us about your idea now.
+      placeholder: |
+        Please describe your idea using your words, you can add links to videos or images to help us visualize what you want to explain.
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your idea, we will look at it and get back to you.
+        Have a nice day.
