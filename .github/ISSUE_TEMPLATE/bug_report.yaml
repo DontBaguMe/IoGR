@@ -6,36 +6,52 @@ body:
   - type: markdown
     attributes:
       value: |
+        # IoGR Bug Report
+        
         Thank you for reaching out to us about a bug on the randomizer, please take a few moment to give us as many information as you can.
-  - type: dropdown
-    id: discord-presence
-    attributes:
-      label: Are you part of the discord of the randomizer ?
-      options:
-        - "Yes"
-        - "No"
-    validations:
-      required: true
+        
+        ## Important
+        
+        Before anything if what your describe ends up being a vanilla game bug, we will just close the issue. We only tackle randomizer based bugs.
+        
+        ## Contact
+        
+        Most of the team work through discord join us there so that we may help you and more ! 
+        [![Discord](https://img.shields.io/discord/558423526772834329?style=for-the-badge&logo=discord&logoColor=white&label=Illusion%20of%20Gaia%20Randomizer&labelColor=%235865F2)](https://discord.gg/TQEyBvu)
+
   - type: input
     id: discord-id
     attributes:
-      label: If you are, please put your username so that we can contact you there if more information is needed
+      label: Please put your discord username here so that we can contact you.
   - type: markdown
     attributes:
       value: |
+        ## Randomizer information
         We will now begin with some information on which version of the game you played
   - type: dropdown
     id: source
     attributes:
       label: Which version of the randomizer did you use ?
       options:
-        - the main site iogr.app
-        - the dev site dev.iogr.app
-        - directly from sources
+        - From the main site iogr.app
+        - From the dev site dev.iogr.app
+        - Directly from sources
         - I don't know
       default: 0
     validations:
       required: true
+  - type: input
+    id: source-version
+    attributes:
+      label: Which numeral version of the randomizer did you use ? (Client version on the website, tag / commit from source)
+      placeholder: v4.3.0
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Thanks, now lets walk through your issue.
+        ## Settings
   - type: input
     id: seed-permalink
     attributes:
@@ -51,15 +67,20 @@ body:
     attributes:
       value: |
         Thanks, now lets walk through your issue.
+        ## Issue description
   - type: dropdown
     id: issue-type
     attributes:
-      label: Which type of bug did you encounter ?
+      label: Which type of issue did you encounter ?
       options:
-        - The game crashed
-        - The seed was unbeatable
-        - When I tried to use an item it did not work as intended
-        - I had an other issue
+        - General gameplay softlock / I can't finish my seed
+        - Game state corruption / Something broke in the game and I can't play
+        - Seed generation failure / I can't get the settings I chose to work together
+        - Glitched graphics / Something wrong appear on my screen
+        - Sound issues / Some sounds should or should not play
+        - QoL not working / Things does not work as intended
+        - Other
+      default: 6
   - type: textarea
     id: issue-description
     attributes:
