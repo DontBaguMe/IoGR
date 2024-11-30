@@ -1,0 +1,149 @@
+arch 65816
+hirom
+
+; The randomizer API will write all game parameters to ROM in this table.
+; The ROM address for each parameter should be read from the base patch symbol file.
+; All parameters are 2 bytes wide.
+; The base patch will read parameters from here via calls like lda.l Config_<ParamName>.
+; To add a parameter, call the macro as %MAddConfigAddr("ParamName",DefaultValue),
+; and pass the assembler a define called ParamName.
+; The value at BankAnchor can be used as a version check;
+; increment it if you add or change parameter.
+
+namespace Config
+
+BankAnchor:
+dw $0002
+
+macro MAddConfigAddr(ConfigName,DefaultValue)
+<ConfigName>:
+if defined("<ConfigName>")
+dw !{<ConfigName>}
+else
+!<ConfigName> = <DefaultValue>
+dw <DefaultValue>
+endif
+endmacro
+
+
+%MAddConfigAddr("KaraLocation",1)   ; 1/2/3/4/5 = EdDg/Mine/Angl/Kres/Ankr
+
+%MAddConfigAddr("SettingStatuesPlayerChoice",0)
+%MAddConfigAddr("StatuesRequiredCount",0)
+StatuesRequiredAnchor:
+%MAddConfigAddr("Statue1Required",0)
+%MAddConfigAddr("Statue2Required",0)
+%MAddConfigAddr("Statue3Required",0)
+%MAddConfigAddr("Statue4Required",0)
+%MAddConfigAddr("Statue5Required",0)
+%MAddConfigAddr("Statue6Required",0)
+%MAddConfigAddr("Boss1Id",1)   ; MW: unsupported
+%MAddConfigAddr("Boss2Id",2)   ; MW: unsupported
+%MAddConfigAddr("Boss3Id",3)   ; MW: unsupported
+%MAddConfigAddr("Boss4Id",4)   ; MW: unsupported
+%MAddConfigAddr("Boss5Id",5)   ; MW: unsupported
+%MAddConfigAddr("Boss6Id",6)   ; MW: unsupported
+%MAddConfigAddr("Boss7Id",7)   ; MW: unsupported
+%MAddConfigAddr("AutotrackerLogicAndKaraVal",0)
+JewelerCostsAnchor:
+%MAddConfigAddr("Jeweler1Cost",1)
+%MAddConfigAddr("Jeweler2Cost",4)
+%MAddConfigAddr("Jeweler3Cost",7)
+%MAddConfigAddr("Jeweler4Cost",10)
+%MAddConfigAddr("Jeweler5Cost",20)
+%MAddConfigAddr("Jeweler6Cost",30)
+%MAddConfigAddr("Jeweler7Cost",40)
+
+macro MAddDungeonRequired(Id)
+!ThisDungeonStatue #= min(6, !{Boss<Id>Id})
+Dungeon<Id>Required:
+dw !{Statue!{ThisDungeonStatue}Required}
+endmacro
+!BossIdIterator = 1
+while !BossIdIterator < 8
+%MAddDungeonRequired(!BossIdIterator)
+!BossIdIterator #= 1+!BossIdIterator
+endif
+
+%MAddConfigAddr("InitialHp",8)
+
+%MAddConfigAddr("SettingZ3",0)    ; MW: unsupported
+
+%MAddConfigAddr("SettingEarlyFirebird",0)    ; 0=No, 1=Yes
+
+%MAddConfigAddr("SettingFluteOpt",0)    ; 0=Start, 1=Shuffle, 2=Fluteless
+
+%MAddConfigAddr("IncaTileX",2)   ; 12 wide, range [0,11]
+%MAddConfigAddr("IncaTileY",4)   ; 6 high, range [0,5]
+
+; The code assumes 8 bytes per room. The order of elements is strange; callers shouldn't worry about it.
+; DifferenceIndex1 is applied to the right room; 2 and 3 are applied to both.
+; Room 3 automatically ignores Index1 if the chest contents are different.
+IshtarRoomDifferencesAnchor:
+IshtarRoom1DifferenceIndex3:
+dw !IshtarRoom1DifferenceIndex3
+IshtarRoom1DifferenceIndex2:
+dw !IshtarRoom1DifferenceIndex2
+IshtarRoom1DifferenceIndex1:
+dw !IshtarRoom1DifferenceIndex1
+dw $ffff
+IshtarRoom2DifferenceIndex3:
+dw !IshtarRoom2DifferenceIndex3
+IshtarRoom2DifferenceIndex2:
+dw !IshtarRoom2DifferenceIndex2
+IshtarRoom2DifferenceIndex1:
+dw !IshtarRoom2DifferenceIndex1
+dw $ffff
+IshtarRoom3DifferenceIndex3:
+dw !IshtarRoom3DifferenceIndex3
+IshtarRoom3DifferenceIndex2:
+dw !IshtarRoom3DifferenceIndex2
+IshtarRoom3DifferenceIndex1:
+dw !IshtarRoom3DifferenceIndex1
+dw $ffff
+IshtarRoom4DifferenceIndex3:
+dw !IshtarRoom4DifferenceIndex3
+IshtarRoom4DifferenceIndex2:
+dw !IshtarRoom4DifferenceIndex2
+IshtarRoom4DifferenceIndex1:
+dw !IshtarRoom4DifferenceIndex1
+dw $ffff
+
+HieroOrderAnchor:
+%MAddConfigAddr("HieroOrder1",1)
+%MAddConfigAddr("HieroOrder2",2)
+%MAddConfigAddr("HieroOrder3",3)
+%MAddConfigAddr("HieroOrder4",4)
+%MAddConfigAddr("HieroOrder5",5)
+%MAddConfigAddr("HieroOrder6",6)
+
+DarkSpaceItemAnchor:
+%MAddConfigAddr("DarkSpaceItem1Map",$15)
+%MAddConfigAddr("DarkSpaceItem1Item",$1100)
+%MAddConfigAddr("DarkSpaceItem2Map",$62)
+%MAddConfigAddr("DarkSpaceItem2Item",$1101)
+%MAddConfigAddr("DarkSpaceItem3Map",$86)
+%MAddConfigAddr("DarkSpaceItem3Item",$1102)
+%MAddConfigAddr("DarkSpaceItem4Map",$42)
+%MAddConfigAddr("DarkSpaceItem4Item",$1103)
+%MAddConfigAddr("DarkSpaceItem5Map",$a7)
+%MAddConfigAddr("DarkSpaceItem5Item",$1104)
+%MAddConfigAddr("DarkSpaceItem6Map",$b8)
+%MAddConfigAddr("DarkSpaceItem6Item",$1105)
+dw $0000, $0000
+
+%MAddConfigAddr("SettingBossShuffle",0)
+%MAddConfigAddr("SettingDungeonShuffle",0)
+
+EndAnchor:
+
+namespace off
+
+
+
+
+
+
+
+
+

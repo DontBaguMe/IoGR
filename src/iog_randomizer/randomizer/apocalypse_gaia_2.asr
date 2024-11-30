@@ -1,0 +1,508 @@
+arch 65816
+hirom
+
+
+DataAGP3VRAMPixels: ; $1C segments of $20 bytes each. Put at word $3400, char $140.
+db $FE,$FF,$F3,$FF,$7F,$FF,$A7,$FF,$43,$FF,$80,$FF,$80,$FF,$00,$FF
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $FF,$FF,$6F,$FF,$DF,$FF,$DB,$FF,$AF,$FF,$98,$FF,$00,$FF,$14,$FF
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $01,$FF,$30,$FF,$00,$FF,$04,$FB,$C0,$3F,$0C,$F3,$21,$DE,$50,$AF
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $41,$FF,$00,$FF,$00,$FF,$04,$FB,$C0,$3F,$06,$F9,$30,$CF,$8B,$74
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $00,$FF,$40,$BF,$10,$EF,$10,$EF,$00,$FF,$49,$B6,$86,$79,$A6,$59
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $00,$FF,$00,$FF,$4C,$B3,$80,$7F,$02,$FD,$11,$EE,$01,$FE,$AF,$50
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $E6,$19,$7F,$80,$CB,$34,$FF,$00,$DD,$22,$B7,$00,$F9,$00,$5B,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $77,$88,$D8,$27,$7F,$80,$CD,$32,$FF,$00,$EF,$00,$FF,$00,$50,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $F0,$00,$FC,$00,$89,$00,$C0,$00,$29,$00,$2A,$00,$11,$00,$11,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $EF,$00,$F7,$00,$03,$00,$B4,$00,$23,$00,$14,$00,$22,$00,$12,$00
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+db $62,$00,$81,$00,$00,$00,$40,$40,$E0,$E0,$11,$11,$4B,$4B,$B5,$B5
+db $FF,$FF,$FF,$FF,$FF,$FF,$BF,$FF,$1F,$FF,$EE,$FF,$B4,$FF,$4A,$FF
+db $0B,$00,$13,$00,$01,$00,$00,$00,$03,$03,$09,$09,$5D,$5D,$6F,$6F
+db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FC,$FF,$F6,$FF,$A2,$FF,$90,$FF
+db $FF,$FF,$FF,$FF,$3F,$FF,$C0,$FF,$EE,$FF,$A9,$FF,$40,$FF,$00,$FF
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $9F,$9F,$FF,$FF,$FC,$FF,$EE,$FF,$E6,$FF,$BB,$FF,$34,$FF,$00,$FF
+db $60,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $00,$FF,$0C,$F3,$DD,$22,$FF,$00,$FF,$00,$FF,$00,$BF,$00,$83,$00
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $00,$FF,$06,$F9,$9D,$62,$FF,$00,$FF,$00,$FF,$00,$EE,$00,$14,$00
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF
+db $0C,$00,$96,$00,$10,$00,$00,$00,$00,$00,$C2,$C2,$AF,$AF,$74,$74
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$C2,$3D,$AF,$50,$74,$8B
+db $E8,$00,$76,$00,$88,$00,$00,$00,$00,$00,$11,$11,$3C,$3C,$4D,$4D
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$11,$EE,$3C,$C3,$4D,$B2
+db $BF,$BF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$B4,$FF,$63,$FF,$1C,$FF
+db $BF,$40,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $FE,$FE,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$7F,$FF,$28,$FF,$47,$FF
+db $FE,$01,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $00,$FF,$00,$FF,$00,$FF,$08,$F7,$B6,$49,$F1,$0E,$C7,$38,$FF,$00
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $00,$FF,$00,$FF,$00,$FF,$00,$FF,$40,$BF,$71,$8E,$CB,$34,$FD,$02
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $FF,$00,$FF,$00,$FF,$00,$EB,$00,$F3,$00,$AC,$00,$82,$00,$00,$00
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $FE,$01,$FF,$00,$FF,$00,$BD,$00,$32,$00,$48,$00,$07,$00,$00,$00
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00,$FF,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$04,$04,$7B,$7B,$F2,$F2,$FE,$FE
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$FB,$00,$84,$00,$0D,$00,$01,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$C6,$C6,$38,$38,$D6,$D6,$FE,$FE
+db $FF,$00,$FF,$00,$FF,$00,$FF,$00,$39,$00,$C7,$00,$29,$00,$01,$00
+db $FF,$FF,$BF,$FF,$9F,$FF,$8C,$FF,$14,$FF,$08,$FF,$00,$FF,$00,$FF
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $FF,$FF,$FF,$FF,$EC,$FF,$C3,$FF,$48,$FF,$00,$FF,$00,$FF,$00,$FF
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+DataAGP3VRAMTilemapTop: ; $20 words to be written at $1AA0.
+dw $0DF0,$0DF1,$0DF2,$0DF3,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$0D40,$0D41,$4DF3,$4DF2,$4DF1,$4DF0
+DataAGP3VRAMTilemap: ; $0A segments, $04 bytes each, written $10 times each starting at $1AC0.
+dw $0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43,$0D42,$0D43
+dw $0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45,$0D44,$0D45
+dw $0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47,$0D46,$0D47
+dw $0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49,$0D48,$0D49
+dw $0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B,$0D4A,$0D4B
+dw $0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D,$0D4C,$0D4D
+dw $0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F,$0D4E,$0D4F
+dw $0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51,$0D50,$0D51
+dw $0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53,$0D52,$0D53
+dw $0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55,$0D54,$0D55
+dw $0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57,$0D56,$0D57
+; Then the Comet's base. One word written $40 times.
+dw $0DFD
+
+; Initialize player and camera.
+; Includes feature to preserve player's herbs if they die in AGP3-5.
+LR_SetupPlayerForComet:
+stz $06be : stz $06c0 : stz $06c2 : stz $06c4
+lda $0aca : sta $0ace    ; Fully restore health.
+phx
+lda #$f5ef : sta $1000
+lda #$008c : sta $1002
+stz $1008
+cop #$D0 : db $F4,$00 : dw .Return    ; Do nothing else if we're not starting in P3.
+sep #$20
+stz $2141    ; Don't use crazy-fast music in P3.
+rep #$20
+; Restore the herb count, giving an herb item if needed.
+lda $0be8 : beq .Return
+lda $0aaa : bne +
+  lda #$0006 : jsl LR_GiveNormalItemA8OrSec
++:
+lda $0be8 : sta $0aaa
+;lda #$0000
+;sep #$20
+;stz $2141    ; Don't use crazy-fast music in P3.
+;lda $0AAE : tax : beq .Return
+;;;Herb stacking is standard now. Individually counting herbs is no longer needed.
+;ldy #$000F
+;.TryReduceHerbCounter:
+;lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
+;  dex : beq .Return
+;..NotAnHerb:
+;dey : bpl .TryReduceHerbCounter
+;ldy #$000F
+;.TryAddAnotherHerb:
+;lda $0AB4,y : bne ..NotEmpty
+;  lda #$06 : sta $0AB4,y
+;  dex : beq .Return
+;..NotEmpty:
+;dey : bpl .TryAddAnotherHerb
+.Return:
+rep #$20
+plx
+rtl
+
+; Herb-stacking is standard now. Counting herbs is no longer needed.
+LR_StorePlayerHerbCount:
+lda $0aaa : sta $0be8
+;phx
+;sep #$20
+;ldx #$0000
+;ldy #$000F
+;.TryCountAnotherHerb:
+;lda $0AB4,y : cmp #$06 : bne ..NotAnHerb
+;  inx
+;..NotAnHerb:
+;dey : bpl .TryCountAnotherHerb
+;txa : sta $0AAE
+;rep #$20
+;plx
+rtl
+
+; Custom LongRoutine --> "Set Position Randomly in +/-.A"
+LR_SetRandomPosition:
+{
+phx
+dec a : sta $4378
+asl a : inc a : sta $437A
+lda.w #2*$73 : brk
+and $437A
+sec : sbc $4378
+clc : adc $14
+sta $14
+lda.w #2*$73 : brk
+and $437A
+sec : sbc $4378
+clc : adc $16
+sta $16
+plx
+rtl
+}
+; Custom LongRoutine, "Mass STZ", zeroes .A bytes at $7E/F + .X
+LR_MassSTZ:
+{
+sep #$20
+rol $2183 ; only the LSB matters, so carry can distinguish $7E/F
+stx $2181
+tax ; 16-bit transfer b/c .X is 16 bits
+; Improve performance by unrolling to 4xSTZ
+and #$03 : beq .StzLoop_Push4
+dec : beq .StzLoop_Push1
+dec : beq .StzLoop_Push2
+bra .StzLoop_Push3
+.StzLoop:
+..Push4:
+stz $2180 : dex
+..Push3:
+stz $2180 : dex
+..Push2:
+stz $2180 : dex
+..Push1:
+stz $2180 : dex
+bne .StzLoop
+.Return:
+rep #$20
+rtl
+}
+; Custom LongRoutines, including "Clear Player Immune", opposite to $8AA36E
+LR_ClearPlayerImmune:
+{
+lda #$0200 : trb $1010
+rtl
+}
+LR_SetPlayerImmuneAndFrozen:
+{
+lda #$0200 : tsb $1010
+lda #$FFF0 : tsb $065A
+rtl
+}
+LR_ClearPlayerImmuneAndFrozen:
+{
+lda #$0200 : trb $1010
+lda #$FFF0 : trb $065A
+rtl
+}
+LR_TimesOnePointFive:
+{
+sta $0000
+lsr : clc : adc $0000
+rtl
+}
+
+LR_PushAndUpdateAGBody:
+; DMA method:
+;   VRAM target word -> $2116/7
+;   Write new data to $2118/9
+phd
+lda #$4300 : tcd
+sep #$21
+lda #$80 : sta $2115 ; "normal" VRAM word writing mode
+rol : sta $00 ; write word-size data into word-size registers
+lda #$18 : sta $01 ; write to VRAM, $(21)18
+; Row 1
+ldx #$2860 : stx $2116 ; Target word
+ldx.w #DataAGP1BodyModsA : stx $02 ; Source address
+lda.b #BankOf(DataAGP1BodyModsA) : sta $04 ; Source bank
+ldx #$00C0 : stx $05 ; Transfer size
+lda #$01 : sta $420B ; make it so
+; Row 2
+stx $05
+ldx #$2960 : stx $2116 ; Target word
+;ldx.w #DataAGP1BodyModsB : stx $02 ; Source address
+;lda.b #BankOf(DataAGP1BodyModsB) : sta $04 ; Source bank
+;ldx #$00C0 : stx $05 ; Transfer size
+sta $420B ; make it so
+; Row 3
+ldx #$2A50 : stx $2116 ; Target word
+;ldx.w #DataAGP1BodyModsC : stx $02 ; Source address
+;lda.b #BankOf(DataAGP1BodyModsC) : sta $04 ; Source bank
+ldx #$00E0 : stx $05 ; Transfer size
+sta $420B ; make it so
+; Row 4
+stx $05
+ldx #$2B50 : stx $2116 ; Target word
+;ldx.w #DataAGP1BodyModsD : stx $02 ; Source address
+;lda.b #BankOf(DataAGP1BodyModsD) : sta $04 ; Source bank
+;ldx #$00E0 : stx $05 ; Transfer size
+sta $420B ; make it so
+; Zero current body tilemap in VRAM
+lda #$09 : sta $00 ; Write one word repeatedly to a word-size register
+rep #$21
+lda #$1088 : sta $2116 ; Initial target word
+-:
+ldx #$0020 : stx $05 ; Transfer size
+ldx #$0100 : stx $420A ; trickery to write $01 to $420B
+adc #$0020 : sta $2116 ; advance target by one row
+cmp #$11C8
+bne -
+sep #$20
+; Body's RAM tilemap, and clear Comet too: DMA lots of zeroes into WRAM
+ldx.w #$A070 : stx $2181 : stz $2183 ; Write at $7EA070 to catch the Comet's face
+lda #$08 : sta $00 ; Repeatedly write 1 byte to a byte-size register
+lda #$80 : sta $01 ; Write to WRAM, $(21)80
+ldx.w #DataAGP1BG1 : stx $02 ; Source address
+lda.b #BankOf(DataAGP1BG1) : sta $04 ; Source bank
+ldx #$0100 : stx $05 ; Transfer size
+lda #$01 : sta $420B ; make it so
+; Done with DMA.
+pld
+; Small tilemap changes:
+phb
+lda #$7E : pha : plb
+rep #$20
+;;; Replace tentacles overwritten by WRAM DMA above
+lda #$2221 : sta $A161
+lda #$7E7D : sta $A16D
+;;; Remove some leftover hair tiles
+stz $2168 : stz $216A : stz $216C
+stz $2170
+stz $240A
+stz $2410 : stz $2412 : stz $2416
+; Palette
+lda #$0444 : sta $7f0a98 ; Make empty Core red
+lda #$084c : sta $7f0a9a ; Make empty Core red
+; All done.
+plb
+jsl LR_UpdateFlameSpriteset
+jsr SR_ClearCache
+rtl
+
+LR_PushAndUpdateCometBG:
+; DMA method:
+;   VRAM target word -> $2116/7
+;   Write new data to $2118/9
+phd
+lda #$4300 : tcd
+sep #$21
+lda #$80 : sta $2115 ; "normal" VRAM word writing mode
+rol : sta $00 ; write word-size data into word-size registers
+lda #$18 : sta $01 ; write to VRAM, $(21)18
+; Pixels for new Comet.
+ldx #$3400 : stx $2116 ; Target word
+ldx.w #DataAGP3VRAMPixels : stx $02 ; Source address
+lda.b #BankOf(DataAGP3VRAMPixels) : sta $04 ; Source bank
+ldx #$0380 : stx $05 ; Transfer size
+lda #$01 : sta $420B ; make it so
+; Tilemap for new Comet.
+ldx #$1AA0 : stx $2116 ; Target word
+ldx #$0300 : stx $05 ; Transfer size
+sta $420B ; make it so
+; Base of Comet is currently off-screen, so don't write it to VRAM.
+;lda #$09 : sta $2115 ; Repeatedly write one word into a word-size register
+;ldx #$0080 : stx $05 ; Transfer size
+;lda #$01 : sta $420B ; make it so
+; Update tilemaps and staging data in RAM.
+;;; BG2 to $7EC050
+ldx #$C050 : stx $2181 : stz $2183
+stz $00 ; Byte data to byte register
+lda #$80 : sta $01 ; Write to $21(80)
+ldx.w #DataAGP3BG2 : stx $02
+lda.b #BankOf(DataAGP3BG2) : sta $04
+ldx #$00E0 : stx $05 ; transfer size
+lda #$01 : sta $420b ; make it so
+;;; Duplicate above to $7EA050?
+;ldx #$A050 : stx $2181
+;ldx.w #DataAGP3BG2 : stx $02
+;ldx #$00E0 : stx $05 ; transfer size
+;lda #$01 : sta $420b ; make it so
+;;; BG1 RAM/VRAM 8->16 mapping
+ldx.w #$2000+(8*$E1) : stx $2181
+ldx.w #DataAGP3Tiles_E1 : stx $02
+ldx #$0030 : stx $05
+sta $420b ; make it so
+;;; BG2 RAM/VRAM 8->16 mapping
+ldx.w #$2800+(8*$E1) : stx $2181
+ldx.w #DataAGP3Tiles_E1 : stx $02
+ldx #$0030 : stx $05
+sta $420b ; make it so
+;;; CollisionLayer to $7F0C000
+ldx #$C000 : stx $2181 : sta $2183
+ldx.w #DataAGP3BGS : stx $02
+ldx #$0100 : stx $05
+sta $420b
+; All done...
+rep #$20
+pld
+jsl LR_UpdateFlameSpriteset
+jsr SR_ClearCache
+rtl 
+
+LR_UpdateFlameSpriteset:
+phd
+lda #$4300 : tcd
+sep #$21
+stz $00 ; write byte-size data into byte-size register
+lda #$80 : sta $01 ; write to $2180
+ldx.w #DataAGP3FlameSpriteset : stx $02
+lda.b #BankOf(DataAGP3FlameSpriteset) : sta $04
+ldx #$4210 : stx $2181 : stz $2183
+-:
+lda #$0F : sta $05 ; Transfer size
+lda #$01 : sta $420B ; make it so
+txa
+clc : adc #$30 : sta $2181
+tax
+cmp #$D0 : bne -
+lda #$02 : sta $7E42D0
+ sta $7E42F2 : sta $7E431B
+rep #$20
+pld
+rtl
+
+LR_ClearCache:
+jsr SR_ClearCache
+rtl
+
+SR_ClearCache:
+stz $0678 : stz $067B : stz $067E : stz $0681
+rts
+
+DataAGP3FlameSpriteset:
+db $02,$01,$09,$07,$0c,$06,$a0,$0b,$01,$0d,$03,$03,$0f,$80,$0b
+db $02,$01,$09,$07,$0b,$07,$a2,$0b,$01,$06,$0a,$04,$0e,$81,$0b
+db $02,$01,$09,$07,$0e,$08,$a4,$0b,$01,$0e,$02,$00,$16,$80,$0b
+db $02,$01,$09,$07,$11,$07,$e0,$0b,$00,$0e,$0a,$00,$20,$80,$0b
+db $02
+
+
+; BG1&2 share a VRAM tilemap, but have separate (identical) RAM staging tilemaps.
+;   So we can handle them separately if we want.
+; BG1 unused tiles: $23,$31,$5B,$7C,$8E,$B3-$B7,$BB-$C0,$C3+
+; BG2 unused tiles: $00-$B1,$B3-$B4,$B8-$BC,$C1-$C2,$C6,$E0-$E6
+;   Unused in both: $23,$31,$5B,$7C,$8E,$B3,$B4,$BB,$BC,$C6,$E0-$E6
+;
+DataAGP1BG1: ; AG body P1 RAM tilemap
+db $00 
+DataAGP3BG2: ; BG2/comet tilemap for P3, makes the comet bigger
+db $c3,$c4,$be,$be,$c3,$c5,$be,$be,$bd,$be,$be,$be,$b5,$b6,$be,$be
+db $b5,$b6,$be,$be,$b5,$b6,$be,$be,$be,$c3,$c4,$c3,$bd,$be,$be,$be
+db $bd,$be,$be,$be,$bd,$be,$be,$c3,$c4,$be,$be,$be,$c5,$be,$b5,$b6
+db $e8,$e9,$ea,$eb,$ec,$ed,$ee,$ef,$c8,$c9,$ca,$cb,$cc,$cd,$ce,$cf ; \
+db $f0,$f1,$f2,$f3,$f4,$f5,$f6,$f7,$d0,$d1,$d2,$d3,$d4,$d5,$d6,$d7 ;  = top of comet
+db $f8,$f9,$fa,$fb,$fc,$fd,$fe,$ff,$d8,$d9,$da,$db,$dc,$dd,$de,$df ; /
+db $e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3,$e3 ; \
+db $e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2,$e2 ; |
+db $e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5,$e5 ; |
+db $e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4,$e4 ;  = comet
+db $e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1,$e1 ; |
+db $e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6,$e6 ; |
+;db $c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7,$c7 ; /
+db $b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2 ; overscan
+db $b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2,$b2 ; overscan
+
+DataAGP3Tiles_E1:
+dw $0D52,$0D53,$0D54,$0D55
+DataAGP3Tiles_E2:
+dw $0D46,$0D47,$0D48,$0D49
+DataAGP3Tiles_E3:
+dw $0D42,$0D43,$0D44,$0D45
+DataAGP3Tiles_E4:
+dw $0D4E,$0D4F,$0D50,$0D51
+DataAGP3Tiles_E5:
+dw $0D4A,$0D4B,$0D4C,$0D4D
+DataAGP3Tiles_E6:
+dw $0D56,$0D57,$0D58,$0D59
+
+DataAGP3BGS: ; Solidity tilemap for P3, makes the comet bigger
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+db $0e,$06,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$09,$0e
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+db $0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
+
+DataAGP1BodyModsA:
+; Put these $C0 bytes at (word) $2860.
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$01,$00,$0E,$01,$1D,$0E,$20,$13
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$00,$03,$00,$1C,$00
+db $00,$00,$00,$00,$00,$00,$3F,$00,$EF,$17,$80,$1F,$1F,$E0,$FE,$DB
+db $00,$00,$00,$00,$00,$00,$00,$00,$38,$00,$E0,$00,$00,$00,$DB,$DB
+db $00,$00,$00,$00,$FF,$00,$37,$08,$F0,$3F,$0F,$F0,$FF,$00,$7F,$80
+db $00,$00,$00,$00,$00,$00,$FF,$00,$C0,$00,$00,$00,$00,$00,$80,$80
+DataAGP1BodyModsB:
+; Put these $C0 bytes at $2960.
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$00,$07,$00,$0D,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$E0,$00,$B1,$A0,$E9,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$40,$00,$F0,$00
+db $33,$0C,$7F,$14,$7B,$06,$4D,$26,$ED,$26,$FE,$03,$EE,$B3,$76,$43
+db $10,$00,$24,$04,$26,$06,$36,$06,$36,$06,$33,$03,$13,$03,$9B,$03
+db $B7,$6C,$DB,$36,$ED,$33,$ED,$33,$EE,$3B,$F6,$19,$F6,$19,$F6,$19
+db $6C,$6C,$36,$36,$33,$33,$33,$33,$3B,$3B,$19,$19,$19,$19,$19,$19
+db $BF,$C0,$DF,$60,$DF,$60,$EF,$70,$EF,$30,$F7,$98,$F7,$98,$F7,$9C
+db $C0,$C0,$60,$60,$60,$60,$70,$70,$30,$30,$98,$98,$98,$98,$9C,$9C
+DataAGP1BodyModsC:
+; Put these $E0 bytes at $2A50.
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+db $00,$00,$00,$00,$01,$00,$03,$01,$06,$03,$02,$09,$04,$13,$0B,$27
+db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$06,$00,$0E,$00,$1E,$00
+db $36,$00,$7B,$00,$5F,$A0,$3F,$C0,$7E,$43,$B9,$0E,$77,$88,$3F,$D0
+db $0F,$00,$3C,$00,$70,$00,$60,$00,$C3,$03,$8E,$4E,$88,$48,$90,$50
+db $F5,$10,$FF,$0D,$FF,$05,$FE,$01,$0F,$FC,$FE,$00,$FE,$02,$8F,$7B
+db $08,$00,$00,$00,$01,$00,$01,$00,$FD,$FC,$01,$00,$01,$00,$78,$78
+db $AF,$01,$3F,$91,$7B,$E1,$97,$01,$5B,$0C,$BF,$50,$A9,$C0,$4F,$E4
+db $D9,$01,$C9,$01,$8D,$01,$ED,$01,$E4,$00,$E4,$00,$F6,$00,$F2,$00
+db $77,$9D,$7B,$8D,$7B,$8D,$7B,$8C,$BB,$CC,$BB,$CC,$BF,$C4,$BF,$C4
+db $9D,$9D,$8D,$8D,$8D,$8D,$8C,$8C,$CC,$CC,$CC,$CC,$C4,$C4,$C4,$C4
+db $FB,$0E,$BB,$4E,$FB,$4E,$9B,$0E,$5F,$A6,$BF,$E2,$5F,$72,$BF,$48
+db $0E,$0E,$0E,$0E,$0E,$0E,$6E,$0E,$66,$06,$62,$02,$E2,$02,$F0,$00
+DataAGP1BodyModsD:
+; Put these $E0 bytes at $2B50.
+db $00,$00,$00,$00,$02,$02,$05,$0C,$F5,$13,$D5,$4C,$AA,$19,$DA,$96
+db $00,$00,$00,$00,$01,$00,$03,$00,$0F,$00,$3C,$03,$F8,$07,$EE,$01
+db $55,$4D,$AB,$99,$AC,$60,$56,$CA,$4B,$36,$21,$C4,$BF,$28,$4B,$6C
+db $3C,$02,$78,$06,$E1,$1E,$C3,$3C,$03,$FC,$01,$FE,$39,$C6,$79,$86
+db $BE,$41,$3C,$63,$DB,$87,$FB,$84,$9F,$A4,$BF,$A0,$DC,$D3,$CF,$C4
+db $81,$41,$83,$43,$27,$47,$24,$44,$24,$44,$20,$40,$43,$23,$54,$24
+db $7C,$C0,$FB,$00,$F8,$03,$FE,$0B,$F5,$03,$EA,$49,$DD,$84,$F4,$18
+db $C3,$C0,$07,$00,$07,$00,$07,$00,$0F,$00,$57,$40,$BB,$80,$3F,$00
+db $0D,$6A,$CF,$88,$B4,$B0,$37,$02,$A6,$F5,$D3,$E0,$56,$24,$B3,$B1
+db $F2,$00,$72,$00,$4B,$00,$F9,$00,$79,$00,$7D,$00,$F9,$00,$4C,$00
+db $DF,$65,$DF,$60,$DE,$61,$DE,$63,$FF,$20,$FE,$22,$7D,$02,$FB,$04
+db $64,$64,$61,$60,$61,$60,$61,$60,$23,$20,$23,$20,$86,$00,$86,$00
+db $4D,$96,$BF,$20,$7F,$00,$FF,$80,$FF,$00,$FF,$02,$FF,$0E,$F7,$3E
+db $F8,$00,$C0,$00,$83,$03,$0F,$0F,$1F,$1F,$3F,$3F,$7F,$7F,$FF,$FF
+; Spare byte $00 for tilemap push
+db $00
+
+
+
+
+
+
+
