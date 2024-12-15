@@ -7104,7 +7104,9 @@ db $00 : dw $3002
 ESeaPLillyAtRightCoffin:   ; Had to rewrite this to make the spoiler re-readable.
 {
 cop #$BC : db $08, $00
+lda #$0200 : tsb $12
 cop #$C0 : dw .OnInteract
+.AwaitInteract:
 cop #$D2 : db $01, $01
 lda #$CFF0 : tsb $065A
 lda #$2000 : trb $10
@@ -7137,7 +7139,7 @@ lda #$2000 : tsb $10
 lda #$CFF0 : trb $065A
 cop #$CE : db $01
 cop #$25 : db $2f,$0a
-rtl
+jmp .AwaitInteract
 .OnInteract:
 cop #$D1 : dw $013a : db $01 : dw ..CoffinAlreadyOpen
 cop #$D0 : db $6f, $01 : dw ..WithLilly
@@ -7170,6 +7172,7 @@ db $00 : dw $3002
 ESeaPLillyAtLeftCoffin:    ; Had to rewrite this to handle two-byte item IDs.
 {
 cop #$D1 : dw $013B : db $01 : dw .CoffinOpenDoDie
+lda #$0200 : tsb $12
 cop #$BC : db $08, $00
 cop #$C0 : dw .OnInteract
 .AwaitInteractWithLilly:
