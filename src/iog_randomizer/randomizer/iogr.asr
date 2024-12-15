@@ -10312,11 +10312,12 @@ EGoldenTileListener:
 lda #$0000 : sta $7ec384   ; Remove the Golden Tile from the EffectLayer tilemap
   sta $7ec394
 phx
-; Drawing the tile in 1 pass is safe only because no possible position crosses a screen boundary
+; Drawing the tile in 1 pass is safe only because no possible position crosses a screen boundary.
+; Also, put this actor on the tile so we can use cop #$44 instead of cop #$45.
 lda.l Config_IncaTileX : asl : clc : adc #$0004 : sta $0018
-  sta $14   ; Not our final X, but we need the initial calculation later, anyway
+  inc : asl : asl : asl : asl : sta $14
 lda.l Config_IncaTileY : asl : clc : adc #$0010 : sta $001c
-  sta $16   ; Not our final Y, but we need the initial calculation later, anyway
+  inc : asl : asl : asl : asl : inc : inc : inc : inc : sta $16
 lda #$0000 : tcd
 ldx #$0000
 jsl $82B0A3   ; = jsl LR_GetTileTableIndex82; returns index in X
@@ -10324,15 +10325,12 @@ lda #$4140 : sta $7ec000,x
 lda #$4342 : sta $7ec010,x
 plx
 txa : tcd
-; Put this actor on the tile so we can use cop #$21 instead of cop #$45
-lda $14 : inc : asl : asl : asl : asl : sta $14
-lda $16 : inc : asl : asl : asl : asl : inc : inc : inc : inc : sta $16
 ; Mostly-normal code resumes here
 cop #$D1 : dw $0112 : db $01 : dw .Die
 .WaitLoop:
 lda #$0258 : sta $7f0010,x
 cop #$C1
-cop #$21 : db $01 : dw .DecCounter
+cop #$44 : db -1, -1, 2, 2 : dw .DecCounter
 cop #$C4 : dl .WaitLoop
 .DecCounter:
 lda $7f0010,x : dec : beq .OpenDoor
