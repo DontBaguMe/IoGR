@@ -3734,13 +3734,13 @@ class World:
             66: [200, 2, False, 0, [], "", "Seaside Palace: Dark Space", 0, 0, []],
 
             # Mu
-            67: [217, 1, False, 0, [], "MuEmptyChest1Item", "Mu: Empty Chest 1", 0, 0, []],
+            67: [217, 1, False, 0, [], "MuEmptyChest1Item", "Mu: Empty Chest 1", 0, 0, [[609, 1]]],
             68: [220, 1, False, 0, [], "MuEmptyChest2Item", "Mu: Empty Chest 2", 0, 0, []],
             69: [225, 1, False, 0, [], "MuHopeStatue1Item", "Mu: Hope Statue 1", 0, 0, []],
             70: [236, 1, False, 0, [], "MuHopeStatue2Item", "Mu: Hope Statue 2", 0, 0, []],
             71: [215, 1, False, 0, [], "MuHopeRoomChestItem", "Mu: Chest s/o Hope Room 2", 0, 0, []],
             72: [214, 1, False, 0, [], "MuRamaChestNItem", "Mu: Rama Chest N", 0, 0, []],
-            73: [219, 1, False, 0, [], "MuRamaChestEItem", "Mu: Rama Chest E", 0, 0, []],
+            73: [219, 1, False, 0, [], "MuRamaChestEItem", "Mu: Rama Chest E", 0, 0, [[609, 1]]],
 
             74: [218, 2, False, 0, [], "", "Mu: Northeast Dark Space", 0, 0, []],
             75: [228, 2, False, 0, [], "", "Mu: Slider Dark Space", 0, 0, []],
@@ -7500,6 +7500,8 @@ class World:
             26: [408, [[62, 1]], 0, True],  # Angl chest slider
             27: [414, [[62, 1]], 0, True],  # Angl Ishtar slider
             28: [591, [] if settings.allow_glitches else [[28, 1]], 2, False],  # Wat bright room N
+            29: [575, [[609, 1]], 2, False],  # Garden S requires a weapon to pass the bushes
+            32: [576, [[609, 1]], 2, False],  # Garden N requires a weapon to pass the bushes
             30: [592, [] if settings.allow_glitches else [[28, 1]], 2, False],  # Wat bright room S
             31: [ 704, [[522, 1]], 0, False ],   # MQ2 upper door
         }

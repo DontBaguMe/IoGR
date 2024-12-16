@@ -7104,7 +7104,9 @@ db $00 : dw $3002
 ESeaPLillyAtRightCoffin:   ; Had to rewrite this to make the spoiler re-readable.
 {
 cop #$BC : db $08, $00
+lda #$0200 : tsb $12
 cop #$C0 : dw .OnInteract
+.AwaitInteract:
 cop #$D2 : db $01, $01
 lda #$CFF0 : tsb $065A
 lda #$2000 : trb $10
@@ -7137,7 +7139,7 @@ lda #$2000 : tsb $10
 lda #$CFF0 : trb $065A
 cop #$CE : db $01
 cop #$25 : db $2f,$0a
-rtl
+jmp .AwaitInteract
 .OnInteract:
 cop #$D1 : dw $013a : db $01 : dw ..CoffinAlreadyOpen
 cop #$D0 : db $6f, $01 : dw ..WithLilly
@@ -7170,6 +7172,7 @@ db $00 : dw $3002
 ESeaPLillyAtLeftCoffin:    ; Had to rewrite this to handle two-byte item IDs.
 {
 cop #$D1 : dw $013B : db $01 : dw .CoffinOpenDoDie
+lda #$0200 : tsb $12
 cop #$BC : db $08, $00
 cop #$C0 : dw .OnInteract
 .AwaitInteractWithLilly:
@@ -10312,11 +10315,12 @@ EGoldenTileListener:
 lda #$0000 : sta $7ec384   ; Remove the Golden Tile from the EffectLayer tilemap
   sta $7ec394
 phx
-; Drawing the tile in 1 pass is safe only because no possible position crosses a screen boundary
+; Drawing the tile in 1 pass is safe only because no possible position crosses a screen boundary.
+; Also, put this actor on the tile so we can use cop #$44 instead of cop #$45.
 lda.l Config_IncaTileX : asl : clc : adc #$0004 : sta $0018
-  sta $14   ; Not our final X, but we need the initial calculation later, anyway
+  inc : asl : asl : asl : asl : sta $14
 lda.l Config_IncaTileY : asl : clc : adc #$0010 : sta $001c
-  sta $16   ; Not our final Y, but we need the initial calculation later, anyway
+  inc : asl : asl : asl : asl : inc : inc : inc : inc : sta $16
 lda #$0000 : tcd
 ldx #$0000
 jsl $82B0A3   ; = jsl LR_GetTileTableIndex82; returns index in X
@@ -10324,15 +10328,12 @@ lda #$4140 : sta $7ec000,x
 lda #$4342 : sta $7ec010,x
 plx
 txa : tcd
-; Put this actor on the tile so we can use cop #$21 instead of cop #$45
-lda $14 : inc : asl : asl : asl : asl : sta $14
-lda $16 : inc : asl : asl : asl : asl : inc : inc : inc : inc : sta $16
 ; Mostly-normal code resumes here
 cop #$D1 : dw $0112 : db $01 : dw .Die
 .WaitLoop:
 lda #$0258 : sta $7f0010,x
 cop #$C1
-cop #$21 : db $01 : dw .DecCounter
+cop #$44 : db -1, -1, 2, 2 : dw .DecCounter
 cop #$C4 : dl .WaitLoop
 .DecCounter:
 lda $7f0010,x : dec : beq .OpenDoor
