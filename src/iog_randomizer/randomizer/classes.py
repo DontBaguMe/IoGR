@@ -7501,6 +7501,7 @@ class World:
             27: [414, [[62, 1]], 0, True],  # Angl Ishtar slider
             28: [591, [] if settings.allow_glitches else [[28, 1]], 2, False],  # Wat bright room N
             29: [575, [[609, 1]], 2, False],  # Garden S requires a weapon to pass the bushes
+            32: [576, [[609, 1]], 2, False],  # Garden N requires a weapon to pass the bushes
             30: [592, [] if settings.allow_glitches else [[28, 1]], 2, False],  # Wat bright room S
             31: [ 704, [[522, 1]], 0, False ],   # MQ2 upper door
         }
